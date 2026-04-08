@@ -1,0 +1,54 @@
+name: Code Quality
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - "**"
+  merge_group:
+    types: [ checks_requested ]
+  workflow_dispatch: { }
+
+env:
+  SCCACHE_GHA_ENABLED: "true"
+  RUSTC_WRAPPER: "sccache"
+  UV_VERSION: "0.11.7"
+
+jobs:
+  check:
+    name: Check Python (${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    env:
+      PYTHON_VERSION: ${{ matrix.python-version }}
+
+    strategy:
+      matrix:
+        python-version: [ "3.13", "3.14" ]
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.9
+      - name: Install rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --frozen --python ${{ env.PYTHON_VERSION }}
+
+      - name: Check formatting with ruff
+        run: |
+          uv run ruff --version
+          uv run ruff format --check
+
+      - name: Lint with ruff
+        run: |
+          uv run ruff --version
+          uv run ruff check

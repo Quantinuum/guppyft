@@ -1,0 +1,15 @@
+[package]
+name = "encoder"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lints.rust]
+missing_docs = "warn"
+
+[dependencies]
+tket = { workspace = true }
+hugr = { workspace = true }
+hugr-core = { workspace = true }
+itertools = { workspace = true }
+derive_more = { workspace = true }
