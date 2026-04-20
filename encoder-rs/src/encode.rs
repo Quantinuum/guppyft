@@ -1,33 +1,33 @@
 #![allow(missing_docs)]
 
 use hugr::{
-    Hugr, HugrView, Node,
-    builder::{BuildError, Dataflow, DataflowSubContainer, HugrBuilder, ModuleBuilder},
-    extension::{
-        SignatureError,
+    builder::{BuildError, Dataflow, DataflowSubContainer, HugrBuilder, ModuleBuilder}, extension::{
         prelude::{bool_t, qb_t},
-    },
-    hugr::{ValidationError, hugrmut::HugrMut},
+        SignatureError,
+    }, hugr::{hugrmut::HugrMut, ValidationError},
     ops::ExtensionOp,
-    ops::{DataflowOpTrait, OpType, handle::NodeHandle as _},
+    ops::{handle::NodeHandle as _, DataflowOpTrait, OpType},
     std_extensions::arithmetic::int_types::INT_TYPES,
     types::{PolyFuncType, Signature, Transformable, Type, TypeRV},
+    Hugr,
+    HugrView,
+    Node,
 };
 use hugr_core::builder::Container;
 use hugr_core::hugr::internal::HugrMutInternals;
 use hugr_core::hugr::linking::NodeLinkingError;
-use hugr_core::ops::{Call, handle::FuncID};
+use hugr_core::ops::{handle::FuncID, Call, OpName};
 use hugr_core::types::TypeArg;
 use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::{BTreeMap, HashMap};
 use tket::{
-    TketOp,
-    extension::bool::{BoolOpBuilder, bool_type},
+    extension::bool::{bool_type, BoolOpBuilder},
     passes::{
-        ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes, WithScope,
-        replace_types::ReplaceTypesError,
+        replace_types::ReplaceTypesError, ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes,
+        WithScope,
     },
+    TketOp,
 };
 
 #[derive(derive_more::Error, Debug, derive_more::Display, derive_more::From)]
@@ -40,14 +40,14 @@ pub enum RewriteQuantumPassError {
     #[from(SignatureError, BuildError)]
     BuildError(BuildError),
     #[display(
-        "Existing function '{name}' node {node} does not have the expected signature for op '{ext_op:?}'. Expected: {expected}. Found {found}"
+        "Existing function '{name}' node {node} does not have the expected signature for op '{op_id}'. Expected: {expected}. Found {found}"
     )]
     ExistingFunctionSignatureMismatch {
-        ext_op: ExtensionOp,
+        op_id: OpName,
         node: Node,
         name: String,
-        expected: PolyFuncType,
-        found: PolyFuncType,
+        expected: Box<PolyFuncType>,
+        found: Box<PolyFuncType>,
     },
     #[from]
     RemoveDeadFuncsError(RemoveDeadFuncsError),
@@ -64,9 +64,10 @@ pub struct RewriteQuantumPass {
 
 impl RewriteQuantumPass {
     pub fn new(rewrite_ops: BTreeMap<(String, String), Hugr>) -> Self {
-        let mut pass = Self::default();
-        pass.rewrite_ops = rewrite_ops;
-        pass
+        Self {
+            rewrite_ops,
+            ..Self::default()
+        }
     }
 }
 
@@ -97,14 +98,14 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for RewriteQuantumPass {
             .rewrite_ops
             .iter()
             .map(|((ext_name, op_name), func_hugr)| {
-                let Some(ext) = hugr.extensions().get(&ext_name) else {
+                let Some(ext) = hugr.extensions().get(ext_name) else {
                     panic!(
                         "Extension '{ext_name}' not found in HUGR when looking for op '{op_name}' to rewrite! Available extensions: {:?}",
                         hugr.extensions().ids().collect_vec()
                     );
                 };
 
-                let op_def = ext.get_op(&op_name).unwrap().clone();
+                let op_def = ext.get_op(op_name).unwrap().clone();
                 // We cannot handle ops with custom instantiations at the moment
                 assert_eq!(op_def.params().unwrap().len(), 0);
                 (op_def, func_hugr.clone())
@@ -205,11 +206,11 @@ impl<'a, H: HugrMut<Node = Node>> RewriteQuantumState<'a, H> {
         };
         if func_sig != &expected_func_sig {
             return Err(RewriteQuantumPassError::ExistingFunctionSignatureMismatch {
-                ext_op,
+                op_id: ext_op.qualified_id(),
                 node: func_node,
                 name: func_name.to_string(),
-                expected: expected_func_sig,
-                found: func_sig.clone(),
+                expected: Box::new(expected_func_sig),
+                found: Box::new(func_sig.clone()),
             });
         };
 
