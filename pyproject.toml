@@ -39,7 +39,7 @@ requires = ["maturin>=1.4,<2.0"]
 build-backend = "maturin"
 
 [tool.uv.sources]
-tket = { git = "https://github.com/quantinuum/tket2", branch = "mr/feat/globals-extension", subdirectory = "tket-py" }
+# Needs the latest Guppy release with hugr/tket upgrade, as well as Guppy libraries
 guppylang = { git = "https://github.com/quantinuum/guppylang", branch = "main", subdirectory = "guppylang" }
 guppylang-internals = { git = "https://github.com/quantinuum/guppylang", branch = "main", subdirectory = "guppylang-internals" }
 
