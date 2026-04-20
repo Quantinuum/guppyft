@@ -12,7 +12,6 @@ missing_docs = "warn"
 [lib]
 name = "rust"
 crate-type = ["cdylib", "rlib"]
-path = "rust/lib.rs"
 # This library requires a Python runtime to be tested, and no tests currently exist
 doc = false
 test = false

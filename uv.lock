@@ -6,12 +6,6 @@ resolution-markers = [
     "platform_machine != 'x86_64' or sys_platform != 'darwin'",
 ]
 
-[manifest]
-members = [
-    "guppy-ft",
-    "guppy-ft-encoder",
-]
-
 [[package]]
 name = "annotated-types"
 version = "0.7.0"
@@ -44,7 +38,6 @@ name = "guppy-ft"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "guppy-ft-encoder" },
     { name = "guppylang" },
     { name = "guppylang-internals" },
     { name = "hugr" },
@@ -66,7 +59,6 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "guppy-ft-encoder", editable = "encoder" },
     { name = "guppylang", git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang&branch=main" },
     { name = "guppylang-internals", git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang-internals&branch=main" },
     { name = "hugr", specifier = ">=0.16.0" },
@@ -81,21 +73,6 @@ dev = [
 ]
 lint = [{ name = "ruff", specifier = ">=0.15.11" }]
 test = [{ name = "pytest", specifier = ">=9.0.3" }]
-
-[[package]]
-name = "guppy-ft-encoder"
-version = "0.1.0"
-source = { editable = "encoder" }
-dependencies = [
-    { name = "hugr" },
-    { name = "maturin" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "hugr", specifier = ">=0.16.0" },
-    { name = "maturin", specifier = ">=1.12.6" },
-]
 
 [[package]]
 name = "guppylang"

@@ -8,7 +8,6 @@ dependencies = [
     "guppylang-internals>=0.32.0",
     "hugr>=0.16.0",
     "tket>=0.13.0",
-    "guppy-ft-encoder",
 ]
 classifiers = [
     "Programming Language :: Python :: 3.13",
@@ -36,29 +35,18 @@ test = [
 ]
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/guppyft"]
+requires = ["maturin>=1.4,<2.0"]
+build-backend = "maturin"
 
 [tool.uv.sources]
-guppy-ft-encoder = { workspace = true }
 tket = { git = "https://github.com/quantinuum/tket2", branch = "mr/feat/globals-extension", subdirectory = "tket-py" }
 guppylang = { git = "https://github.com/quantinuum/guppylang", branch = "main", subdirectory = "guppylang" }
 guppylang-internals = { git = "https://github.com/quantinuum/guppylang", branch = "main", subdirectory = "guppylang-internals" }
 
-[tool.uv.workspace]
-members = [
-    "encoder",
-]
 
 [tool.maturin]
-# Maturin is not the build system for the workspace (it is only used for `encoder`).
-# We mirror the `encoder/pyproject.toml` config here so `maturin develop` still works
-# from the root of the workspace.
-module-name = "guppy_ft_encoder._bindings"
-python-source = "encoder/src/"
-manifest-path = "encoder/Cargo.toml"
+module-name = "guppyft._bindings"
+python-source = "src/"
+manifest-path = "encoder-bindings/Cargo.toml"
 features = ["pyo3/extension-module"] # skips linking against libpython.so
-profile = "release-py" # See Cargo.toml
+profile = "release-py" # See root Cargo.toml

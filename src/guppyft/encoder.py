@@ -1,4 +1,3 @@
-from guppy_ft_encoder import replace_ops
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang_internals.definition.function import ParsedFunctionDef
@@ -6,7 +5,24 @@ from guppylang_internals.engine import ENGINE
 from hugr.package import Package
 from tket.passes import NormalizeGuppy
 
+from guppyft._bindings import RsHugr, _replace_ops
 from guppyft.definition import CodeDefinition
+
+
+def replace_ops(
+    hugr: Package,
+    ops: dict[tuple[str, str], GuppyFunctionDefinition],
+) -> Package:
+    rs_hugr = RsHugr.from_bytes(hugr.modules[0].to_bytes())
+
+    rs_ops = {
+        key: RsHugr.from_bytes(val.compile_function().modules[0].to_bytes())
+        for key, val in ops.items()
+    }
+
+    _replace_ops(rs_hugr, rs_ops)
+
+    return Package.from_bytes(rs_hugr.to_bytes())
 
 
 def auto_encode(
