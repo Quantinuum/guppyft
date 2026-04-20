@@ -6,11 +6,11 @@ use std::num::NonZeroU8;
 
 use pyo3::exceptions::{PyAttributeError, PyValueError};
 use pyo3::types::PyAnyMethods;
-use pyo3::{pyclass, pymethods, Bound, PyAny, PyErr, PyResult};
-use tket::hugr::envelope::{EnvelopeFormat, ZstdConfig};
-use tket::hugr::HugrView;
-use tket::serialize::EnvelopeConfig;
+use pyo3::{Bound, PyAny, PyErr, PyResult, pyclass, pymethods};
 use tket::Hugr;
+use tket::hugr::HugrView;
+use tket::hugr::envelope::{EnvelopeFormat, ZstdConfig};
+use tket::serialize::EnvelopeConfig;
 
 /// A python object backed by rust `Hugr`.
 #[pyclass(from_py_object)]

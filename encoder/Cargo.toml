@@ -1,6 +1,6 @@
 [package]
 name = "encoder-py"
-description = "TODO"
+description = "Python bindings for the Guppy FT auto-encoder pass"
 version = "0.1.0"
 publish = false
 edition = "2024"
