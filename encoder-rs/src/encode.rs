@@ -1,33 +1,33 @@
 #![allow(missing_docs)]
 
 use hugr::{
-    builder::{BuildError, Dataflow, DataflowSubContainer, HugrBuilder, ModuleBuilder}, extension::{
-        prelude::{bool_t, qb_t},
+    Hugr, HugrView, Node,
+    builder::{BuildError, Dataflow, DataflowSubContainer, HugrBuilder, ModuleBuilder},
+    extension::{
         SignatureError,
-    }, hugr::{hugrmut::HugrMut, ValidationError},
+        prelude::{bool_t, qb_t},
+    },
+    hugr::{ValidationError, hugrmut::HugrMut},
     ops::ExtensionOp,
-    ops::{handle::NodeHandle as _, DataflowOpTrait, OpType},
+    ops::{DataflowOpTrait, OpType, handle::NodeHandle as _},
     std_extensions::arithmetic::int_types::INT_TYPES,
     types::{PolyFuncType, Signature, Transformable, Type, TypeRV},
-    Hugr,
-    HugrView,
-    Node,
 };
 use hugr_core::builder::Container;
 use hugr_core::hugr::internal::HugrMutInternals;
 use hugr_core::hugr::linking::NodeLinkingError;
-use hugr_core::ops::{handle::FuncID, Call, OpName};
+use hugr_core::ops::{Call, OpName, handle::FuncID};
 use hugr_core::types::TypeArg;
 use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::{BTreeMap, HashMap};
 use tket::{
-    extension::bool::{bool_type, BoolOpBuilder},
-    passes::{
-        replace_types::ReplaceTypesError, ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes,
-        WithScope,
-    },
     TketOp,
+    extension::bool::{BoolOpBuilder, bool_type},
+    passes::{
+        ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes, WithScope,
+        replace_types::ReplaceTypesError,
+    },
 };
 
 #[derive(derive_more::Error, Debug, derive_more::Display, derive_more::From)]
