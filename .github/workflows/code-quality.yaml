@@ -17,7 +17,7 @@ env:
   UV_VERSION: "0.11.7"
 
 jobs:
-  check:
+  check-py:
     name: Check Python (${{ matrix.python-version }})
     runs-on: ubuntu-latest
     env:
@@ -29,9 +29,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-      - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.9
-      - name: Install rust toolchain
+      - uses: mozilla-actions/sccache-action@v0.0.9
+      - name: Install stable Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
       - name: Set up uv
@@ -52,3 +51,25 @@ jobs:
         run: |
           uv run ruff --version
           uv run ruff check
+  
+
+  check-rs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: mozilla-actions/sccache-action@v0.0.9
+      - name: Install stable rust toolchain with fmt and clippy
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Check formatting
+        run: cargo fmt -- --check
+
+      - name: Run clippy
+        run: cargo clippy --all-targets --all-features --workspace -- -D warnings
+
+      - name: Build docs
+        run: cargo doc --no-deps --all-features --workspace
+        env:
+          RUSTDOCFLAGS: "-Dwarnings"
