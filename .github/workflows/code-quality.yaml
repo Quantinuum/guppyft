@@ -18,7 +18,7 @@ env:
 
 jobs:
   check-py:
-    name: Check Python (${{ matrix.python-version }})
+    name: 🐍 Check Python code (${{ matrix.python-version }})
     runs-on: ubuntu-latest
     env:
       PYTHON_VERSION: ${{ matrix.python-version }}
@@ -54,6 +54,7 @@ jobs:
   
 
   check-rs:
+    name: 🦀 Check Rust code
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
