@@ -5,6 +5,7 @@ from hugr.qsystem.result import QsysShot
 from selene_sim import Stim, build
 
 from guppyft.encoder import auto_encode
+
 from .utils.identity_code import identity_code_gen
 
 
