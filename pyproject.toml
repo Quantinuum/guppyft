@@ -23,7 +23,6 @@ classifiers = [
 
 [dependency-groups]
 dev = [
-    "conan>=2.27.1",
     "maturin>=1.7.0,<2",
     { include-group = "lint" },
     { include-group = "test" },
