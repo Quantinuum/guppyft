@@ -60,7 +60,6 @@ jobs:
       - name: Install conan
         run: |
           uv tool install conan
-          uv sync
           uvx conan profile detect
 
       - name: Install dependencies
