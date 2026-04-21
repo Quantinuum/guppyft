@@ -41,9 +41,9 @@ jobs:
       - name: Install stable Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install LLVM 21.1
+      - name: Install LLVM 21
         run: |
-          sudo apt install llvm-21.1
+          sudo apt install llvm-21
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
