@@ -21,6 +21,7 @@ env:
   SCCACHE_GHA_ENABLED: "true"
   RUSTC_WRAPPER: "sccache"
   UV_VERSION: "0.11.7"
+  LLVM_SYS_211_PREFIX: ${{ github.workspace }}/llvm
 
 jobs:
   check-py:
@@ -39,6 +40,13 @@ jobs:
       - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Install stable Rust toolchain
         uses: dtolnay/rust-toolchain@stable
+
+      # adapted from https://github.com/TheDan64/inkwell/blob/master/.github/workflows/test.yml
+      - name: Install LLVM 21
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 21
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
