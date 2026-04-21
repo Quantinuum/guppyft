@@ -32,6 +32,8 @@ lint = [
 ]
 test = [
     "pytest>=9.0.3",
+    "selene-hugr-qis-compiler>=0.2.10",
+    "selene-sim>=0.2.13",
 ]
 
 [build-system]
@@ -42,7 +44,9 @@ build-backend = "maturin"
 # Needs the latest Guppy release with hugr/tket upgrade, as well as Guppy libraries
 guppylang = { git = "https://github.com/quantinuum/guppylang", branch = "main", subdirectory = "guppylang" }
 guppylang-internals = { git = "https://github.com/quantinuum/guppylang", branch = "main", subdirectory = "guppylang-internals" }
-
+# Needs tket branch for globals extension
+tket = { git = "https://github.com/quantinuum/tket2", branch = "mr/feat/globals-extension", subdirectory = "tket-py" }
+selene-hugr-qis-compiler = { git = "https://github.com/quantinuum/tket2", branch = "mr/feat/globals-extension", subdirectory = "qis-compiler" }
 
 [tool.maturin]
 module-name = "guppyft._bindings"
