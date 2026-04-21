@@ -51,17 +51,17 @@ jobs:
           sudo apt install --no-install-recommends -y libllvm21 llvm-21 llvm-21-dev llvm-21-runtime libpolly-21-dev
           sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-21 10
 
-      - name: Install conan
-        run: |
-          uv tool install conan
-          uv sync
-          uvx conan profile detect
-
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
+
+      - name: Install conan
+        run: |
+          uv tool install conan
+          uv sync
+          uvx conan profile detect
 
       - name: Install dependencies
         run: uv sync --frozen --python ${{ env.PYTHON_VERSION }}
