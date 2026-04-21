@@ -39,6 +39,7 @@ dev = [
     { include-group = "test" },
 ]
 lint = [
+    "pre-commit>=3.6.0,<5",
     "ruff>=0.15.11",
 ]
 test = [
