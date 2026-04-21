@@ -21,7 +21,6 @@ env:
   SCCACHE_GHA_ENABLED: "true"
   RUSTC_WRAPPER: "sccache"
   UV_VERSION: "0.11.7"
-  LLVM_SYS_211_PREFIX: ${{ github.workspace }}/llvm
 
 jobs:
   check-py:
@@ -29,6 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PYTHON_VERSION: ${{ matrix.python-version }}
+      LLVM_SYS_211_PREFIX: /usr/lib/llvm-21
 
     strategy:
       matrix:
