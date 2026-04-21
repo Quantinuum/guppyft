@@ -52,7 +52,10 @@ jobs:
           sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-21 10
 
       - name: Install conan
-        run: pip install conan
+        run: |
+          uv tool install conan
+          uv sync
+          uvx conan profile detect
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
