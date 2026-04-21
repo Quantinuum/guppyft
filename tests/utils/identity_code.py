@@ -1,11 +1,12 @@
 from guppylang import guppy
 from guppylang.std.builtins import array, comptime, exit, owned
 from guppylang.std.collections import Stack
-from guppylang.std.option import Option, some, nothing
-from guppylang.std.quantum import qubit, measure, x, cx, project_z, discard
+from guppylang.std.option import Option, nothing, some
+from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
 
 from guppyft.definition import CodeDefinition
-from .global_swap import swap_global_state_generic, GLOBALS_EXTENSION
+
+from .global_swap import GLOBALS_EXTENSION, swap_global_state_generic
 
 
 def identity_code_gen(

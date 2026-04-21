@@ -1,11 +1,11 @@
 from guppylang import guppy
 from guppylang.std.builtins import result
-from guppylang.std.quantum import qubit, measure, x
+from guppylang.std.quantum import measure, qubit, x
 from hugr.qsystem.result import QsysShot
-from selene_sim import build, Stim
+from selene_sim import Stim, build
+from utils.identity_code import identity_code_gen
 
 from guppyft.encoder import auto_encode
-from utils.identity_code import identity_code_gen
 
 
 def test_x():
