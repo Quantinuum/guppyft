@@ -1,4 +1,4 @@
-from typing import no_type_check
+from typing import Any, no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -14,7 +14,7 @@ from guppyft.definition import CodeDefinition
 
 def _replace_ops(
     hugr: Package,
-    ops: dict[tuple[str, str], GuppyFunctionDefinition],
+    ops: dict[tuple[str, str], GuppyFunctionDefinition[Any, Any]],
 ) -> Package:
     rs_hugr = RsHugr.from_bytes(hugr.modules[0].to_bytes())
 
@@ -29,7 +29,7 @@ def _replace_ops(
 
 
 def encode(
-    comp_func_defn: GuppyFunctionDefinition,
+    comp_func_defn: GuppyFunctionDefinition[[], None],
     definition: CodeDefinition,
 ) -> Package:
     # Compile computational program with entrypoint since NormalizeGuppy needs it
@@ -69,5 +69,6 @@ def encode(
     pkg: Package = main_wrapper.compile()
     pkg.extensions.extend(definition.wrapper_extensions)
     pkg = pkg.link(comp_pkg, *definition.libs)
+    assert isinstance(pkg, Package)  # Assert type for type checker
 
     return pkg

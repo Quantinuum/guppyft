@@ -47,6 +47,10 @@ test = [
     "pytest>=9.0.3",
 ]
 
+[tool.mypy]
+strict = true
+allow_redefinition = true
+
 [build-system]
 requires = ["maturin>=1.4,<2.0"]
 build-backend = "maturin"
