@@ -1,4 +1,4 @@
-//! Auto-encoder for HUGRs
+//! Encoder for HUGRs
 
-/// Main module containing the auto-encoding pass
+/// Main module containing the encoding pass
 pub mod encode;
