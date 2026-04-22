@@ -5,11 +5,12 @@ from guppylang_internals.engine import ENGINE
 from hugr.package import Package
 from tket.passes import NormalizeGuppy
 
-from guppyft._bindings import RsHugr, _replace_ops
+from guppyft._bindings import RsHugr
+from guppyft._bindings import _replace_ops as _replace_ops_binding
 from guppyft.definition import CodeDefinition
 
 
-def replace_ops(
+def _replace_ops(
     hugr: Package,
     ops: dict[tuple[str, str], GuppyFunctionDefinition],
 ) -> Package:
@@ -20,12 +21,12 @@ def replace_ops(
         for key, val in ops.items()
     }
 
-    _replace_ops(rs_hugr, rs_ops)
+    _replace_ops_binding(rs_hugr, rs_ops)
 
     return Package.from_bytes(rs_hugr.to_bytes())
 
 
-def auto_encode(
+def encode(
     comp_func_defn: GuppyFunctionDefinition,
     definition: CodeDefinition,
 ) -> Package:
@@ -41,7 +42,7 @@ def auto_encode(
     # Reset entrypoint to mark module as non-executable to avoid conflicts
     comp_pkg.modules[0].entrypoint = comp_pkg.modules[0].module_root
     # Run rewrite, replacing ops with function calls to the functions in`logical_ops`
-    comp_pkg = replace_ops(comp_pkg, definition.logical_ops)
+    comp_pkg = _replace_ops(comp_pkg, definition.logical_ops)
 
     # Build wrapper program
     parsed_comp_def = ENGINE.get_parsed(comp_func_defn.id)
