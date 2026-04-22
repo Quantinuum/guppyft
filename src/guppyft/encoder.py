@@ -1,3 +1,5 @@
+from typing import no_type_check
+
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang_internals.definition.function import ParsedFunctionDef
@@ -51,6 +53,7 @@ def encode(
 
     # Placeholder computational program
     @guppy.declare(link_name=comp_func_name)
+    @no_type_check
     def comp_prog_decl() -> None: ...
 
     setup_func = definition.setup
