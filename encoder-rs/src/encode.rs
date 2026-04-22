@@ -1,38 +1,38 @@
 #![allow(missing_docs)]
 
 use hugr::{
-    Hugr, HugrView, Node,
-    builder::{BuildError, Dataflow, DataflowSubContainer, HugrBuilder, ModuleBuilder},
-    extension::{
-        SignatureError,
+    builder::{BuildError, Dataflow, DataflowSubContainer, HugrBuilder, ModuleBuilder}, extension::{
         prelude::{bool_t, qb_t},
-    },
-    hugr::{ValidationError, hugrmut::HugrMut},
+        SignatureError,
+    }, hugr::{hugrmut::HugrMut, ValidationError},
     ops::ExtensionOp,
-    ops::{DataflowOpTrait, OpType, handle::NodeHandle as _},
+    ops::{handle::NodeHandle as _, DataflowOpTrait, OpType},
     std_extensions::arithmetic::int_types::INT_TYPES,
     types::{PolyFuncType, Signature, Transformable, Type, TypeRV},
+    Hugr,
+    HugrView,
+    Node,
 };
 use hugr_core::builder::Container;
 use hugr_core::hugr::internal::HugrMutInternals;
 use hugr_core::hugr::linking::NodeLinkingError;
-use hugr_core::ops::{Call, OpName, handle::FuncID};
+use hugr_core::ops::{handle::FuncID, Call, OpName};
 use hugr_core::types::TypeArg;
 use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::{BTreeMap, HashMap};
 use tket::{
-    TketOp,
-    extension::bool::{BoolOpBuilder, bool_type},
+    extension::bool::{bool_type, BoolOpBuilder},
     passes::{
-        ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes, WithScope,
-        replace_types::ReplaceTypesError,
+        replace_types::ReplaceTypesError, ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes,
+        WithScope,
     },
+    TketOp,
 };
 
 #[derive(derive_more::Error, Debug, derive_more::Display, derive_more::From)]
 #[non_exhaustive]
-pub enum RewriteQuantumPassError {
+pub enum EncoderPassError {
     #[from]
     ReplaceTypesError(ReplaceTypesError),
     #[from]
@@ -56,13 +56,13 @@ pub enum RewriteQuantumPassError {
 }
 
 #[derive(Debug, Clone)]
-pub struct RewriteQuantumPass {
+pub struct EncoderPass {
     scope: PassScope,
     qubit_to_ty: Type,
     pub rewrite_ops: BTreeMap<(String, String), Hugr>,
 }
 
-impl RewriteQuantumPass {
+impl EncoderPass {
     pub fn new(rewrite_ops: BTreeMap<(String, String), Hugr>) -> Self {
         Self {
             rewrite_ops,
@@ -71,7 +71,7 @@ impl RewriteQuantumPass {
     }
 }
 
-impl Default for RewriteQuantumPass {
+impl Default for EncoderPass {
     fn default() -> Self {
         let int: TypeRV = INT_TYPES[6].clone().into();
         Self {
@@ -82,15 +82,15 @@ impl Default for RewriteQuantumPass {
     }
 }
 
-impl WithScope for RewriteQuantumPass {
+impl WithScope for EncoderPass {
     fn with_scope(mut self, scope: impl Into<PassScope>) -> Self {
         self.scope = scope.into();
         self
     }
 }
 
-impl<H: HugrMut<Node = Node>> ComposablePass<H> for RewriteQuantumPass {
-    type Error = RewriteQuantumPassError;
+impl<H: HugrMut<Node = Node>> ComposablePass<H> for EncoderPass {
+    type Error = EncoderPassError;
     type Result = ();
 
     fn run(&self, hugr: &mut H) -> Result<Self::Result, Self::Error> {
@@ -157,11 +157,7 @@ impl<'a, H: HugrMut<Node = Node>> RewriteQuantumState<'a, H> {
         }
     }
 
-    pub fn op(
-        &mut self,
-        ext_op: ExtensionOp,
-        mut func_hugr: Hugr,
-    ) -> Result<(), RewriteQuantumPassError> {
+    pub fn op(&mut self, ext_op: ExtensionOp, mut func_hugr: Hugr) -> Result<(), EncoderPassError> {
         // Replace hugr-bool with tket-bool in function signature
         let expected_func_sig: PolyFuncType = {
             let mut sig = ext_op.signature().into_owned();
@@ -205,7 +201,7 @@ impl<'a, H: HugrMut<Node = Node>> RewriteQuantumState<'a, H> {
             _ => unreachable!(),
         };
         if func_sig != &expected_func_sig {
-            return Err(RewriteQuantumPassError::ExistingFunctionSignatureMismatch {
+            return Err(EncoderPassError::ExistingFunctionSignatureMismatch {
                 op_id: ext_op.qualified_id(),
                 node: func_node,
                 name: func_name.to_string(),
@@ -235,7 +231,7 @@ impl<'a, H: HugrMut<Node = Node>> RewriteQuantumState<'a, H> {
         Ok(())
     }
 
-    pub fn finish(mut self) -> Result<(), RewriteQuantumPassError> {
+    pub fn finish(mut self) -> Result<(), EncoderPassError> {
         // In an optimal scenario we would use the type replacer to insert the function alongside
         // a call. However, since there is no way to stop the type replacer from recursively
         // processing the RHS at the moment, we have to resort to this hacky approach of manually

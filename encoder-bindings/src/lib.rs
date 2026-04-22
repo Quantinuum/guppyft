@@ -29,7 +29,7 @@ mod _bindings {
             .map(|(k, rs_hugr)| (k, rs_hugr.hugr))
             .collect();
 
-        let pass = encode::RewriteQuantumPass::new(new_ops);
+        let pass = encode::EncoderPass::new(new_ops);
         pass.run(hugr).map_err(|e| panic!("{:?}", e)).unwrap();
 
         Ok(())
