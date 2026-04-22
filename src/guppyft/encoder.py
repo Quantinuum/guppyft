@@ -2,6 +2,7 @@ from typing import Any, no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
+from guppylang_internals.definition.declaration import CheckedFunctionDecl
 from guppylang_internals.definition.function import ParsedFunctionDef
 from guppylang_internals.engine import ENGINE
 from hugr.package import Package
@@ -14,18 +15,28 @@ from guppyft.definition import CodeDefinition
 
 def _replace_ops(
     hugr: Package,
-    ops: dict[tuple[str, str], GuppyFunctionDefinition[Any, Any]],
+    ops: dict[tuple[str, str], tuple[GuppyFunctionDefinition[Any, Any], str]],
 ) -> Package:
     rs_hugr = RsHugr.from_bytes(hugr.modules[0].to_bytes())
 
     rs_ops = {
-        key: RsHugr.from_bytes(val.compile_function().modules[0].to_bytes())
-        for key, val in ops.items()
+        key: (RsHugr.from_bytes(val.compile_function().modules[0].to_bytes()), name)
+        for key, (val, name) in ops.items()
     }
 
     _replace_ops_binding(rs_hugr, rs_ops)
 
     return Package.from_bytes(rs_hugr.to_bytes())
+
+
+def determine_link_name(func: GuppyFunctionDefinition[Any, Any]) -> str:
+    match ENGINE.get_parsed(func.id):
+        case ParsedFunctionDef(link_name=link_name):
+            return link_name
+        case CheckedFunctionDecl(link_name=link_name):
+            return link_name
+        case _:
+            raise ValueError(f"Unknown link name for function with ID {func.id}")
 
 
 def encode(
@@ -44,15 +55,14 @@ def encode(
     # Reset entrypoint to mark module as non-executable to avoid conflicts
     comp_pkg.modules[0].entrypoint = comp_pkg.modules[0].module_root
     # Run rewrite, replacing ops with function calls to the functions in`logical_ops`
-    comp_pkg = _replace_ops(comp_pkg, definition.logical_ops)
+    identified_logical_ops = {
+        key: (func, determine_link_name(func))
+        for key, func in definition.logical_ops.items()
+    }
+    comp_pkg = _replace_ops(comp_pkg, identified_logical_ops)
 
     # Build wrapper program
-    parsed_comp_def = ENGINE.get_parsed(comp_func_defn.id)
-    assert isinstance(parsed_comp_def, ParsedFunctionDef)
-    comp_func_name = parsed_comp_def.link_name
-
-    # Placeholder computational program
-    @guppy.declare(link_name=comp_func_name)
+    @guppy.declare(link_name=determine_link_name(comp_func_defn))
     @no_type_check
     def comp_prog_decl() -> None: ...
 

@@ -20,13 +20,13 @@ mod _bindings {
     #[pyo3(signature = (rs_hugr, rewrite_ops))]
     fn _replace_ops(
         rs_hugr: &mut RsHugr,
-        rewrite_ops: BTreeMap<(String, String), RsHugr>,
+        rewrite_ops: BTreeMap<(String, String), (RsHugr, String)>,
     ) -> PyResult<()> {
         let hugr = &mut rs_hugr.hugr;
 
         let new_ops = rewrite_ops
             .into_iter()
-            .map(|(k, rs_hugr)| (k, rs_hugr.hugr))
+            .map(|(k, (rs_hugr, func_name))| (k, (rs_hugr.hugr, func_name)))
             .collect();
 
         let pass = encode::EncoderPass::new(new_ops);
