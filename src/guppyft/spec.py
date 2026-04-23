@@ -18,7 +18,7 @@ class EncoderSpec:
     """Called after the computational program."""
     tket_passes: list[ComposablePass]
     """Additional tket passes to run on the computational program."""
-    wrapper_extensions: list[Extension] = field(default_factory=list)
+    lifecycle_extensions: list[Extension] = field(default_factory=list)
     """Extensions required to (de)serialize programs using setup/teardown."""
     libs: list[Package] = field(default_factory=list)
     """Additional libraries required to run the encoded program."""

@@ -76,7 +76,7 @@ def encode(
 
     # Compile to HUGR
     pkg: Package = main_wrapper.compile()
-    pkg.extensions.extend(spec.wrapper_extensions)
+    pkg.extensions.extend(spec.lifecycle_extensions)
     pkg = pkg.link(comp_pkg, *spec.libs)
     assert isinstance(pkg, Package)  # Assert type for type checker
 
