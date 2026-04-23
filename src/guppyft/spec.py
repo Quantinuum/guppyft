@@ -9,15 +9,15 @@ from hugr.passes.composable import ComposablePass
 
 @dataclass(frozen=True, kw_only=True)
 class EncoderSpec:
-    logical_ops: dict[tuple[str, str], GuppyFunctionDefinition[Any, Any]]
+    ops: dict[tuple[str, str], GuppyFunctionDefinition[Any, Any]]
     """The operations to encode / replace with the given functions. Keys are tuples
     (namespace, name) for the operation to replace."""
     setup: GuppyFunctionDefinition[[], None]
-    """Called before the computational program."""
+    """Called before the unencoded program."""
     teardown: GuppyFunctionDefinition[[], None]
-    """Called after the computational program."""
+    """Called after the unencoded program."""
     tket_passes: list[ComposablePass]
-    """Additional tket passes to run on the computational program."""
+    """Additional tket passes to run on the unencoded program."""
     lifecycle_extensions: list[Extension] = field(default_factory=list)
     """Extensions required to (de)serialize programs using setup/teardown."""
     libs: list[Package] = field(default_factory=list)

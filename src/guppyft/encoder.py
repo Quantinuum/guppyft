@@ -56,7 +56,7 @@ def encode(
     comp_pkg.modules[0].entrypoint = comp_pkg.modules[0].module_root
     # Run rewrite, replacing ops with function calls to the functions in`logical_ops`
     identified_logical_ops = {
-        key: (func, _link_name(func)) for key, func in spec.logical_ops.items()
+        key: (func, _link_name(func)) for key, func in spec.ops.items()
     }
     comp_pkg = _replace_ops(comp_pkg, identified_logical_ops)
 
