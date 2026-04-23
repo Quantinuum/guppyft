@@ -39,31 +39,26 @@ def _link_name(func: GuppyFunctionDefinition[Any, Any]) -> str:
             raise ValueError(f"Unknown link name for function with ID {func.id}")
 
 
-def encode(
-    comp_func_defn: GuppyFunctionDefinition[[], None],
-    spec: EncoderSpec,
-) -> Package:
-    # Compile computational program with entrypoint since NormalizeGuppy needs it
-    comp_pkg: Package = comp_func_defn.compile_function()
+def encode(func: GuppyFunctionDefinition[[], None], spec: EncoderSpec) -> Package:
+    # Compile unencoded program with entrypoint since NormalizeGuppy needs it
+    func_pkg: Package = func.compile_function()
 
     # Run normalise and all optimisation passes
     normalize_pass = NormalizeGuppy()
-    comp_pkg.modules[0] = normalize_pass(comp_pkg.modules[0], inplace=False)
+    func_pkg.modules[0] = normalize_pass(func_pkg.modules[0], inplace=False)
     for optimisation in spec.tket_passes:
-        comp_pkg.modules[0] = optimisation(comp_pkg.modules[0], inplace=False)
+        func_pkg.modules[0] = optimisation(func_pkg.modules[0], inplace=False)
 
     # Reset entrypoint to mark module as non-executable to avoid conflicts
-    comp_pkg.modules[0].entrypoint = comp_pkg.modules[0].module_root
-    # Run rewrite, replacing ops with function calls to the functions in`logical_ops`
-    identified_logical_ops = {
-        key: (func, _link_name(func)) for key, func in spec.ops.items()
-    }
-    comp_pkg = _replace_ops(comp_pkg, identified_logical_ops)
+    func_pkg.modules[0].entrypoint = func_pkg.modules[0].module_root
+    # Run rewrite, replacing ops with function calls to the functions in `spec.ops`
+    identified_ops = {key: (func, _link_name(func)) for key, func in spec.ops.items()}
+    func_pkg = _replace_ops(func_pkg, identified_ops)
 
     # Build wrapper program
-    @guppy.declare(link_name=_link_name(comp_func_defn))
+    @guppy.declare(link_name=_link_name(func))
     @no_type_check
-    def comp_prog_decl() -> None: ...
+    def func_decl() -> None: ...
 
     setup_func = spec.setup
     teardown_func = spec.teardown
@@ -71,13 +66,12 @@ def encode(
     @guppy
     def main_wrapper() -> None:
         setup_func()
-        comp_prog_decl()
+        func_decl()
         teardown_func()
 
-    # Compile to HUGR
     pkg: Package = main_wrapper.compile()
     pkg.extensions.extend(spec.lifecycle_extensions)
-    pkg = pkg.link(comp_pkg, *spec.libs)
+    pkg = pkg.link(func_pkg, *spec.libs)
     assert isinstance(pkg, Package)  # Assert type for type checker
 
     return pkg
