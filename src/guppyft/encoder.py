@@ -10,7 +10,7 @@ from tket.passes import NormalizeGuppy
 
 from guppyft._bindings import RsHugr
 from guppyft._bindings import _replace_ops as _replace_ops_binding
-from guppyft.definition import CodeDefinition
+from guppyft.spec import EncoderSpec
 
 
 def _replace_ops(
@@ -41,7 +41,7 @@ def determine_link_name(func: GuppyFunctionDefinition[Any, Any]) -> str:
 
 def encode(
     comp_func_defn: GuppyFunctionDefinition[[], None],
-    definition: CodeDefinition,
+    spec: EncoderSpec,
 ) -> Package:
     # Compile computational program with entrypoint since NormalizeGuppy needs it
     comp_pkg: Package = comp_func_defn.compile_function()
@@ -49,15 +49,14 @@ def encode(
     # Run normalise and all optimisation passes
     normalize_pass = NormalizeGuppy()
     comp_pkg.modules[0] = normalize_pass(comp_pkg.modules[0], inplace=False)
-    for optimisation in definition.tket_passes:
+    for optimisation in spec.tket_passes:
         comp_pkg.modules[0] = optimisation(comp_pkg.modules[0], inplace=False)
 
     # Reset entrypoint to mark module as non-executable to avoid conflicts
     comp_pkg.modules[0].entrypoint = comp_pkg.modules[0].module_root
     # Run rewrite, replacing ops with function calls to the functions in`logical_ops`
     identified_logical_ops = {
-        key: (func, determine_link_name(func))
-        for key, func in definition.logical_ops.items()
+        key: (func, determine_link_name(func)) for key, func in spec.logical_ops.items()
     }
     comp_pkg = _replace_ops(comp_pkg, identified_logical_ops)
 
@@ -66,8 +65,8 @@ def encode(
     @no_type_check
     def comp_prog_decl() -> None: ...
 
-    setup_func = definition.setup
-    teardown_func = definition.teardown
+    setup_func = spec.setup
+    teardown_func = spec.teardown
 
     @guppy
     def main_wrapper() -> None:
@@ -77,8 +76,8 @@ def encode(
 
     # Compile to HUGR
     pkg: Package = main_wrapper.compile()
-    pkg.extensions.extend(definition.wrapper_extensions)
-    pkg = pkg.link(comp_pkg, *definition.libs)
+    pkg.extensions.extend(spec.wrapper_extensions)
+    pkg = pkg.link(comp_pkg, *spec.libs)
     assert isinstance(pkg, Package)  # Assert type for type checker
 
     return pkg

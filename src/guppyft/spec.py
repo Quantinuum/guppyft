@@ -8,7 +8,7 @@ from hugr.passes.composable import ComposablePass
 
 
 @dataclass(frozen=True, kw_only=True)
-class CodeDefinition:
+class EncoderSpec:
     logical_ops: dict[tuple[str, str], GuppyFunctionDefinition[Any, Any]]
     setup: GuppyFunctionDefinition[[], None]
     teardown: GuppyFunctionDefinition[[], None]
