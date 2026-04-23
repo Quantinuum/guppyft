@@ -70,7 +70,6 @@ def encode(func: GuppyFunctionDefinition[[], None], spec: EncoderSpec) -> Packag
         teardown_func()
 
     pkg: Package = main_wrapper.compile()
-    pkg.extensions.extend(spec.lifecycle_extensions)
     pkg = pkg.link(func_pkg, *spec.libs)
     assert isinstance(pkg, Package)  # Assert type for type checker
 
