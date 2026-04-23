@@ -32,7 +32,7 @@ use tket::{
 
 #[derive(derive_more::Error, Debug, derive_more::Display, derive_more::From)]
 #[non_exhaustive]
-pub enum RewriteQuantumPassError {
+pub enum EncoderPassError {
     #[from]
     ReplaceTypesError(ReplaceTypesError),
     #[from]
@@ -56,14 +56,14 @@ pub enum RewriteQuantumPassError {
 }
 
 #[derive(Debug, Clone)]
-pub struct RewriteQuantumPass {
+pub struct EncoderPass {
     scope: PassScope,
     qubit_to_ty: Type,
-    pub rewrite_ops: BTreeMap<(String, String), Hugr>,
+    pub rewrite_ops: BTreeMap<(String, String), (Hugr, String)>,
 }
 
-impl RewriteQuantumPass {
-    pub fn new(rewrite_ops: BTreeMap<(String, String), Hugr>) -> Self {
+impl EncoderPass {
+    pub fn new(rewrite_ops: BTreeMap<(String, String), (Hugr, String)>) -> Self {
         Self {
             rewrite_ops,
             ..Self::default()
@@ -71,7 +71,7 @@ impl RewriteQuantumPass {
     }
 }
 
-impl Default for RewriteQuantumPass {
+impl Default for EncoderPass {
     fn default() -> Self {
         let int: TypeRV = INT_TYPES[6].clone().into();
         Self {
@@ -82,22 +82,22 @@ impl Default for RewriteQuantumPass {
     }
 }
 
-impl WithScope for RewriteQuantumPass {
+impl WithScope for EncoderPass {
     fn with_scope(mut self, scope: impl Into<PassScope>) -> Self {
         self.scope = scope.into();
         self
     }
 }
 
-impl<H: HugrMut<Node = Node>> ComposablePass<H> for RewriteQuantumPass {
-    type Error = RewriteQuantumPassError;
+impl<H: HugrMut<Node = Node>> ComposablePass<H> for EncoderPass {
+    type Error = EncoderPassError;
     type Result = ();
 
     fn run(&self, hugr: &mut H) -> Result<Self::Result, Self::Error> {
         let op_funcs = self
             .rewrite_ops
             .iter()
-            .map(|((ext_name, op_name), func_hugr)| {
+            .map(|((ext_name, op_name), (func_hugr, func_name))| {
                 let Some(ext) = hugr.extensions().get(ext_name) else {
                     panic!(
                         "Extension '{ext_name}' not found in HUGR when looking for op '{op_name}' to rewrite! Available extensions: {:?}",
@@ -108,13 +108,13 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for RewriteQuantumPass {
                 let op_def = ext.get_op(op_name).unwrap().clone();
                 // We cannot handle ops with custom instantiations at the moment
                 assert_eq!(op_def.params().unwrap().len(), 0);
-                (op_def, func_hugr.clone())
+                (op_def, func_hugr.clone(), func_name)
             })
             .collect_vec();
 
         let mut state = RewriteQuantumState::new(hugr, &self.qubit_to_ty);
-        for (op, func_hugr) in op_funcs {
-            state.op(ExtensionOp::new(op, [])?, func_hugr)?;
+        for (op_def, func_hugr, func_name) in op_funcs {
+            state.op(ExtensionOp::new(op_def, [])?, func_hugr, func_name)?;
         }
         state.finish()?;
         hugr.validate()?;
@@ -161,7 +161,8 @@ impl<'a, H: HugrMut<Node = Node>> RewriteQuantumState<'a, H> {
         &mut self,
         ext_op: ExtensionOp,
         mut func_hugr: Hugr,
-    ) -> Result<(), RewriteQuantumPassError> {
+        func_name: &str,
+    ) -> Result<(), EncoderPassError> {
         // Replace hugr-bool with tket-bool in function signature
         let expected_func_sig: PolyFuncType = {
             let mut sig = ext_op.signature().into_owned();
@@ -180,8 +181,7 @@ impl<'a, H: HugrMut<Node = Node>> RewriteQuantumState<'a, H> {
         };
 
         // Extract target function
-        let func_name = ext_op.qualified_id();
-        let Some(func_node) = func_hugr.nodes().find(|node| {
+        let Some(func_node) = func_hugr.children(func_hugr.module_root()).find(|node| {
             if let Some(name) = match &func_hugr.get_optype(*node) {
                 OpType::FuncDecl(decl) => Some(decl.func_name().to_owned()),
                 OpType::FuncDefn(defn) => Some(defn.func_name().to_owned()),
@@ -193,7 +193,7 @@ impl<'a, H: HugrMut<Node = Node>> RewriteQuantumState<'a, H> {
             }
         }) else {
             panic!(
-                "Expected function whose name matches the qualified op name ({}) but it was not found!",
+                "Expected hugr containing a function with name '{}' but it was not found!",
                 func_name
             );
         };
@@ -205,7 +205,7 @@ impl<'a, H: HugrMut<Node = Node>> RewriteQuantumState<'a, H> {
             _ => unreachable!(),
         };
         if func_sig != &expected_func_sig {
-            return Err(RewriteQuantumPassError::ExistingFunctionSignatureMismatch {
+            return Err(EncoderPassError::ExistingFunctionSignatureMismatch {
                 op_id: ext_op.qualified_id(),
                 node: func_node,
                 name: func_name.to_string(),
@@ -216,7 +216,7 @@ impl<'a, H: HugrMut<Node = Node>> RewriteQuantumState<'a, H> {
 
         let wrapped_func_hugr = {
             if matches!(ext_op.cast::<TketOp>(), Some(TketOp::Measure)) {
-                wrap_measure_declaration(func_hugr, self.qubit_to_ty, &func_name, func_node.into())?
+                wrap_measure_declaration(func_hugr, self.qubit_to_ty, func_name, func_node.into())?
             } else {
                 func_hugr.set_entrypoint(func_node);
                 func_hugr
@@ -235,7 +235,7 @@ impl<'a, H: HugrMut<Node = Node>> RewriteQuantumState<'a, H> {
         Ok(())
     }
 
-    pub fn finish(mut self) -> Result<(), RewriteQuantumPassError> {
+    pub fn finish(mut self) -> Result<(), EncoderPassError> {
         // In an optimal scenario we would use the type replacer to insert the function alongside
         // a call. However, since there is no way to stop the type replacer from recursively
         // processing the RHS at the moment, we have to resort to this hacky approach of manually

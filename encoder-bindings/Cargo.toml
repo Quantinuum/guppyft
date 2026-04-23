@@ -1,6 +1,6 @@
 [package]
 name = "encoder-py"
-description = "Python bindings for the Guppy FT auto-encoder pass"
+description = "Python bindings for the Guppy FT encoder pass"
 version = "0.1.0"
 publish = false
 edition = "2024"

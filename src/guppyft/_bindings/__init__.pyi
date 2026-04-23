@@ -21,7 +21,7 @@ class RsHugr:
     def mermaid_string(self) -> str:
         """Render the Hugr as a Mermaid string."""
 
-def _replace_ops(rs_hugr: RsHugr, ops: dict[tuple[str, str], RsHugr]) -> None:
+def _replace_ops(rs_hugr: RsHugr, ops: dict[tuple[str, str], tuple[RsHugr, str]]) -> None:
     """
     TODO
     """
