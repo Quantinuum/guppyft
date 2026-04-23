@@ -29,7 +29,7 @@ def _replace_ops(
     return Package.from_bytes(rs_hugr.to_bytes())
 
 
-def determine_link_name(func: GuppyFunctionDefinition[Any, Any]) -> str:
+def _link_name(func: GuppyFunctionDefinition[Any, Any]) -> str:
     match ENGINE.get_parsed(func.id):
         case ParsedFunctionDef(link_name=link_name):
             return link_name
@@ -56,12 +56,12 @@ def encode(
     comp_pkg.modules[0].entrypoint = comp_pkg.modules[0].module_root
     # Run rewrite, replacing ops with function calls to the functions in`logical_ops`
     identified_logical_ops = {
-        key: (func, determine_link_name(func)) for key, func in spec.logical_ops.items()
+        key: (func, _link_name(func)) for key, func in spec.logical_ops.items()
     }
     comp_pkg = _replace_ops(comp_pkg, identified_logical_ops)
 
     # Build wrapper program
-    @guppy.declare(link_name=determine_link_name(comp_func_defn))
+    @guppy.declare(link_name=_link_name(comp_func_defn))
     @no_type_check
     def comp_prog_decl() -> None: ...
 
