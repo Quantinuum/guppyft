@@ -45,9 +45,9 @@ def encode(func: GuppyFunctionDefinition[[], None], spec: EncoderSpec) -> Packag
 
     # Run normalise and all optimisation passes
     normalize_pass = NormalizeGuppy()
-    func_pkg.modules[0] = normalize_pass(func_pkg.modules[0], inplace=False)
-    for optimisation in spec.tket_passes:
-        func_pkg.modules[0] = optimisation(func_pkg.modules[0], inplace=False)
+    normalize_pass(func_pkg.modules[0])
+    for tket_pass in spec.tket_passes:
+        tket_pass(func_pkg.modules[0])
 
     # Reset entrypoint to mark module as non-executable to avoid conflicts
     func_pkg.modules[0].entrypoint = func_pkg.modules[0].module_root
