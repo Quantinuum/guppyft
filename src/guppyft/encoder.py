@@ -55,21 +55,13 @@ def encode(func: GuppyFunctionDefinition[[], None], spec: EncoderSpec) -> Packag
     identified_ops = {key: (func, _link_name(func)) for key, func in spec.ops.items()}
     func_pkg = _replace_ops(func_pkg, identified_ops)
 
-    # Build wrapper program
+    # Build, compile, and link wrapper program
     @guppy.declare(link_name=_link_name(func))
     @no_type_check
     def func_decl() -> None: ...
 
-    setup_func = spec.setup
-    teardown_func = spec.teardown
-
-    @guppy
-    def main_wrapper() -> None:
-        setup_func()
-        func_decl()
-        teardown_func()
-
-    pkg: Package = main_wrapper.compile()
+    wrapper = spec.build_wrapper(func_decl)
+    pkg: Package = wrapper.compile()
     pkg = pkg.link(func_pkg, *spec.libs)
     assert isinstance(pkg, Package)  # Assert type for type checker
 
