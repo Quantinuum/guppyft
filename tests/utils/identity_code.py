@@ -4,14 +4,14 @@ from guppylang.std.collections import Stack
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
 
-from guppyft.definition import CodeDefinition
+from guppyft.spec import EncoderSpec
 
-from .global_swap import GLOBALS_EXTENSION, swap_global_state_generic
+from .global_swap import swap_global_state_generic
 
 
 def identity_code_gen(
     n_qubits: int,
-) -> CodeDefinition:
+) -> EncoderSpec:
     @guppy
     def swap_global_state(
         new_value: Option["GLOBAL_STATE"] @ owned,
@@ -170,10 +170,9 @@ def identity_code_gen(
     def teardown() -> None:
         swap_global_state(nothing()).unwrap().discard()
 
-    return CodeDefinition(
-        logical_ops=logical_ops,
+    return EncoderSpec(
+        ops=logical_ops,
         setup=setup,
         teardown=teardown,
         tket_passes=[],
-        wrapper_extensions=[GLOBALS_EXTENSION],
     )

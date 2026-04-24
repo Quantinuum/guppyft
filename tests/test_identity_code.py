@@ -1,10 +1,10 @@
 from guppylang import guppy
 from guppylang.std.builtins import array, result
-from guppylang.std.quantum import discard, measure, measure_array, qubit, x
+from guppylang.std.quantum import cx, discard, measure, measure_array, qubit, x
 from hugr.qsystem.result import QsysShot
 from selene_sim import Stim, build
 
-from guppyft.encoder import auto_encode
+from guppyft.encoder import encode
 
 from .utils.identity_code import identity_code_gen
 
@@ -18,11 +18,31 @@ def test_x():
 
     id_code = identity_code_gen(n_qubits=1)
 
-    prog_bytes = auto_encode(main, id_code).to_bytes()
+    prog_bytes = encode(main, id_code).to_bytes()
 
     runner = build(prog_bytes)
 
     assert QsysShot(runner.run(simulator=Stim(), n_qubits=1)).entries == [("q", 1)]
+
+
+def test_cx():
+    @guppy
+    def main() -> None:
+        ctl, tgt = qubit(), qubit()
+        cx(ctl, tgt)
+        result("ctl", measure(ctl))
+        result("tgt", measure(tgt))
+
+    id_code = identity_code_gen(n_qubits=2)
+
+    prog_bytes = encode(main, id_code).to_bytes()
+
+    runner = build(prog_bytes)
+
+    assert QsysShot(runner.run(simulator=Stim(), n_qubits=2)).entries == [
+        ("ctl", 0),
+        ("tgt", 0),
+    ]
 
 
 def test_qubit_array():
@@ -33,7 +53,7 @@ def test_qubit_array():
 
     id_code = identity_code_gen(n_qubits=2)
 
-    prog_bytes = auto_encode(main, id_code).to_bytes()
+    prog_bytes = encode(main, id_code).to_bytes()
 
     runner = build(prog_bytes)
 
@@ -52,7 +72,7 @@ def test_out_of_logical_qubits():
 
     id_code = identity_code_gen(n_qubits=1)
 
-    prog_bytes = auto_encode(main, id_code).to_bytes()
+    prog_bytes = encode(main, id_code).to_bytes()
 
     runner = build(prog_bytes)
 
@@ -71,7 +91,7 @@ def test_qubit_reuse():
 
     id_code = identity_code_gen(n_qubits=1)
 
-    prog_bytes = auto_encode(main, id_code).to_bytes()
+    prog_bytes = encode(main, id_code).to_bytes()
 
     runner = build(prog_bytes)
 
