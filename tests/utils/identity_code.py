@@ -1,14 +1,14 @@
-from typing import no_type_check
+from typing import no_type_check, Callable
 
 from guppylang import guppy
+from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.builtins import array, comptime, exit, owned
 from guppylang.std.collections import Stack
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
 
-from guppyft.spec import EncoderSpec
-
-from .global_swap import swap_global_state_generic
+from guppyft.spec import EncoderSpec, OpReplacements
+from .global_swap import swap_global_state_generic, with_global_state_generic
 
 
 def identity_code_gen(
@@ -160,6 +160,8 @@ def identity_code_gen(
         ("tket.quantum", "CX"): _CX,
     }
 
+    op_replacements = OpReplacements().with_funcs(logical_ops)
+
     @guppy
     @no_type_check
     def global_state_gen() -> GLOBAL_STATE:
@@ -184,9 +186,17 @@ def identity_code_gen(
     def teardown() -> None:
         swap_global_state(nothing()).unwrap().discard()
 
+    def build_wrapper(func: GuppyFunctionDefinition[[], None]) -> Callable[[], None]:
+
+        @guppy
+        def wrapper() -> None:
+            state = global_state_gen()
+            state = with_global_state_generic(state, func)
+            state.discard()
+
+        return wrapper
+
     return EncoderSpec(
-        ops=logical_ops,
-        setup=setup,
-        teardown=teardown,
-        tket_passes=[],
+        ops=op_replacements,
+        build_wrapper=build_wrapper,
     )
