@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.std.builtins import owned
@@ -32,4 +33,5 @@ T = guppy.type_var("T", copyable=False, droppable=False)
 
 # TODO MOVE INTO CODES (maybe a default renaming)
 @hugr_op(swap_op_for_global_var("GLOBAL_STATE"))
+@no_type_check
 def swap_global_state_generic(new_value: Option[T] @ owned) -> Option[T]: ...

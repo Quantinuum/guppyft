@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from guppylang.defs import GuppyFunctionDefinition
-from hugr.ext import Extension
 from hugr.package import Package
 from hugr.passes.composable import ComposablePass
 
@@ -18,7 +17,5 @@ class EncoderSpec:
     """Called after the unencoded program."""
     tket_passes: list[ComposablePass]
     """Additional tket passes to run on the unencoded program."""
-    lifecycle_extensions: list[Extension] = field(default_factory=list)
-    """Extensions required to (de)serialize programs using setup/teardown."""
     libs: list[Package] = field(default_factory=list)
     """Additional libraries required to run the encoded program."""
