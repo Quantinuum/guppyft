@@ -18,7 +18,7 @@ GLOBALS_EXTENSION = globals()
 
 # TODO MOVE TO TKET
 def swap_op_for_global_var(
-        var_name: str,
+    var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     op_def = GLOBALS_EXTENSION.get_op("swap")
 
@@ -39,16 +39,17 @@ def swap_global_state_generic(new_value: Option[T] @ owned) -> Option[T]: ...
 
 
 def with_op_for_global_var(
-        var_name: str,
+    var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     op_def = GLOBALS_EXTENSION.get_op("with")
 
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
         return op_def.instantiate(
-            [ht.StringArg(var_name)] + [arg.to_hugr(ctx) for arg in args] +
-            [ListArg([])] +
-            [ListArg([])],
-            concrete
+            [ht.StringArg(var_name)]
+            + [arg.to_hugr(ctx) for arg in args]
+            + [ListArg([])]
+            + [ListArg([])],
+            concrete,
         )
 
     return op
@@ -59,16 +60,16 @@ def with_global_state_generic(new_value: T @ owned, func: Callable[[], None]) ->
 
 
 def map_op_for_global_var(
-        var_name: str,
+    var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
         op_def = GLOBALS_EXTENSION.get_op("map")
         return op_def.instantiate(
-            [ht.StringArg(var_name)] +
-            [TypeTypeArg(qubit_ty().to_hugr(ctx))] +
-            [ListArg([])] +
-            [ListArg([TypeTypeArg(int_type().to_hugr(ctx))])],
-            concrete
+            [ht.StringArg(var_name)]
+            + [TypeTypeArg(qubit_ty().to_hugr(ctx))]
+            + [ListArg([])]
+            + [ListArg([TypeTypeArg(int_type().to_hugr(ctx))])],
+            concrete,
         )
 
     return op

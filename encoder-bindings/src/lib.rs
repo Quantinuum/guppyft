@@ -12,6 +12,7 @@ mod _bindings {
     #[pymodule_export]
     use crate::hugr::RsHugr;
     use encoder::encode;
+    use pyo3::exceptions::PyValueError;
     use pyo3::prelude::*;
     use std::collections::BTreeMap;
     use tket::passes::ComposablePass;
@@ -31,6 +32,8 @@ mod _bindings {
 
         let pass = encode::EncoderPass::new(new_ops);
         pass.run(hugr).map_err(|e| panic!("{:?}", e)).unwrap();
+        pass.run(hugr)
+            .map_err(|e| PyValueError::new_err(format!("Error replacing operations: {e}")))?;
 
         Ok(())
     }
