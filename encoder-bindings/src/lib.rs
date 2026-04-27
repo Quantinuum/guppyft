@@ -18,7 +18,6 @@ mod _bindings {
     use tket::passes::ComposablePass;
 
     #[pyfunction]
-    #[pyo3(signature = (rs_hugr, rewrite_ops))]
     fn _replace_ops(
         rs_hugr: &mut RsHugr,
         rewrite_ops: BTreeMap<(String, String), (RsHugr, String)>,
@@ -31,7 +30,6 @@ mod _bindings {
             .collect();
 
         let pass = encode::EncoderPass::new(new_ops);
-        pass.run(hugr).map_err(|e| panic!("{:?}", e)).unwrap();
         pass.run(hugr)
             .map_err(|e| PyValueError::new_err(format!("Error replacing operations: {e}")))?;
 

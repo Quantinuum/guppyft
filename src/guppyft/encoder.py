@@ -44,7 +44,7 @@ def encode(func: GuppyFunctionDefinition[[], None], spec: EncoderSpec) -> Packag
     func_pkg: Package = func.compile_function()
 
     # Run normalise and all optimisation passes
-    normalize_pass = NormalizeGuppy()
+    normalize_pass = NormalizeGuppy(remove_tuple_untuple=False, constant_folding=False)
     normalize_pass(func_pkg.modules[0])
     for tket_pass in spec.tket_passes:
         tket_pass(func_pkg.modules[0])

@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.std.builtins import owned
@@ -36,6 +37,7 @@ O = guppy.type_var("O")
 
 # TODO MOVE INTO CODES (maybe a default renaming)
 @hugr_op(swap_op_for_global_var("GLOBAL_STATE"))
+@no_type_check
 def swap_global_state_generic(new_value: Option[T] @ owned) -> Option[T]: ...
 
 
@@ -57,6 +59,7 @@ def with_op_for_global_var(
 
 
 @hugr_op(with_op_for_global_var("GLOBAL_STATE"))
+@no_type_check
 def with_global_state_generic(new_value: T @ owned, func: Callable[[], None]) -> T: ...
 
 
@@ -66,10 +69,12 @@ def map_op_for_global_var(
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
         op_def = GLOBALS_EXTENSION.get_op("map")
         return op_def.instantiate(
-            [ht.StringArg(var_name)]
-            + [args[0].to_hugr(ctx)]
-            + [args[1].to_hugr(ctx)]
-            + [args[2].to_hugr(ctx)],
+            [
+                ht.StringArg(var_name),
+                args[0].to_hugr(ctx),
+                args[1].to_hugr(ctx),
+                args[2].to_hugr(ctx),
+            ],
             concrete,
         )
 
@@ -77,4 +82,5 @@ def map_op_for_global_var(
 
 
 @hugr_op(map_op_for_global_var("GLOBAL_STATE"))
+@no_type_check
 def map_global_state_generic(func: Callable[[T, I], O], inputs: I) -> O: ...
