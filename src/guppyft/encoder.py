@@ -59,7 +59,7 @@ def encode(
     """
 
     # Compile unencoded program with entrypoint since NormalizeGuppy needs it
-    func_pkg: Package = func.compile_entrypoint()
+    func_pkg: Package = func.compile()
 
     # Run all tket passes
     if passes is None:
