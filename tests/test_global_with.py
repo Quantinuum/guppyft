@@ -1,12 +1,11 @@
 from guppylang import guppy
 from guppylang.std.builtins import result
-from guppylang.std.quantum import discard, qubit, measure, x
-from hugr.qsystem.result import QsysShot
+from guppylang.std.quantum import discard, measure, qubit, x
 
 from .utils.global_swap import map_global_state_generic, with_global_state_generic
 
 
-def test_with():
+def test_with() -> None:
     @guppy
     def foo(qb: qubit) -> int:
         x(qb)
@@ -24,7 +23,10 @@ def test_with():
         qb = with_global_state_generic(qb, my_prog)
         result("qb_main", measure(qb))
 
-    res = QsysShot(main.emulator(n_qubits=2).run())
-
-    assert res.entries[0][0] == ("my_prog", 0)
-    assert res.entries[0][1] == ("qb_main", 1)
+    res = main.emulator(n_qubits=2).run().collated_shots()
+    assert res == [
+        {
+            "qb_main": [1],
+            "my_prog": [0],
+        }
+    ]

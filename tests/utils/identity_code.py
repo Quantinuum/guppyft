@@ -1,3 +1,5 @@
+from typing import no_type_check
+
 from guppylang import guppy
 from guppylang.std.builtins import array, comptime, exit, owned
 from guppylang.std.collections import Stack
@@ -13,6 +15,7 @@ def identity_code_gen(
     n_qubits: int,
 ) -> EncoderSpec:
     @guppy
+    @no_type_check
     def swap_global_state(
         new_value: Option["GLOBAL_STATE"] @ owned,
     ) -> Option["GLOBAL_STATE"]:
@@ -20,10 +23,11 @@ def identity_code_gen(
 
     @guppy.struct
     class GLOBAL_STATE:
-        blocks: array[Option[qubit], comptime(n_qubits)]
-        addr_stack: Option[Stack[tuple[int, int], comptime(n_qubits)]]
+        blocks: array[Option[qubit], comptime(n_qubits)]  # type: ignore[type-arg,valid-type]
+        addr_stack: Option[Stack[tuple[int, int], comptime(n_qubits)]]  # type: ignore[type-arg,valid-type]
 
         @guppy
+        @no_type_check
         def get_next_addr(
             self: "GLOBAL_STATE",
         ) -> tuple[int, int]:
@@ -36,6 +40,7 @@ def identity_code_gen(
             return next_addr
 
         @guppy
+        @no_type_check
         def discard(self: "GLOBAL_STATE" @ owned) -> None:
             for qb in self.blocks:
                 if qb.is_some():
@@ -44,6 +49,7 @@ def identity_code_gen(
                     qb.unwrap_nothing()
 
     @guppy(link_name="tket.quantum.QAlloc")
+    @no_type_check
     def _QAlloc() -> tuple[tuple[int, int]]:
         global_state = swap_global_state(nothing()).unwrap()
 
@@ -59,6 +65,7 @@ def identity_code_gen(
 
     # MeasureFree is compiled from `guppylang.std.quantum.measure`
     @guppy(link_name="tket.quantum.MeasureFree")
+    @no_type_check
     def _MeasureFree(q: tuple[int, int]) -> bool:
         blk_id, qb_id = q
         global_state = swap_global_state(nothing()).unwrap()
@@ -77,6 +84,7 @@ def identity_code_gen(
 
     # Measure is compiled from `guppylang.std.quantum.project_z`
     @guppy(link_name="tket.quantum.Measure")
+    @no_type_check
     def _Measure(q: tuple[int, int]) -> tuple[tuple[int, int], bool]:
         blk_id, qb_id = q
         global_state = swap_global_state(nothing()).unwrap()
@@ -92,6 +100,7 @@ def identity_code_gen(
 
     # QFree is compiled from `guppylang.std.quantum.discard`
     @guppy(link_name="tket.quantum.QFree")
+    @no_type_check
     def _QFree(q: tuple[int, int]) -> None:
         blk_id, qb_id = q
         global_state = swap_global_state(nothing()).unwrap()
@@ -108,6 +117,7 @@ def identity_code_gen(
         swap_global_state(some(global_state)).unwrap_nothing()
 
     @guppy(link_name="tket.quantum.X")
+    @no_type_check
     def _X(q: tuple[int, int]) -> tuple[tuple[int, int]]:
         blk_id, qb_id = q
         global_state = swap_global_state(nothing()).unwrap()
@@ -123,6 +133,7 @@ def identity_code_gen(
         return ((blk_id, qb_id),)
 
     @guppy(link_name="tket.quantum.CX")
+    @no_type_check
     def _CX(
         ctl: tuple[int, int], tgt: tuple[int, int]
     ) -> tuple[tuple[int, int], tuple[int, int]]:
@@ -150,6 +161,7 @@ def identity_code_gen(
     }
 
     @guppy
+    @no_type_check
     def global_state_gen() -> GLOBAL_STATE:
         return GLOBAL_STATE(
             array(nothing[qubit]() for _ in range(comptime(n_qubits))),
@@ -162,11 +174,13 @@ def identity_code_gen(
         )
 
     @guppy
+    @no_type_check
     def setup() -> None:
         global_state = global_state_gen()
         swap_global_state(some(global_state)).unwrap_nothing()
 
     @guppy
+    @no_type_check
     def teardown() -> None:
         swap_global_state(nothing()).unwrap().discard()
 
