@@ -1,12 +1,13 @@
 from typing import no_type_check
 
 from guppylang import guppy
+from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.builtins import array, comptime, exit, owned
 from guppylang.std.collections import Stack
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
 
-from guppyft.spec import EncoderSpec
+from guppyft.spec import EncoderSpec, OpReplacements
 
 from .global_swap import swap_global_state_generic
 
@@ -151,14 +152,17 @@ def identity_code_gen(
 
         return ctl, tgt
 
-    logical_ops = {
-        ("tket.quantum", "QAlloc"): _QAlloc,
-        ("tket.quantum", "MeasureFree"): _MeasureFree,
-        ("tket.quantum", "Measure"): _Measure,
-        ("tket.quantum", "QFree"): _QFree,
-        ("tket.quantum", "X"): _X,
-        ("tket.quantum", "CX"): _CX,
-    }
+    ops = OpReplacements()
+    ops.with_funcs(
+        {
+            ("tket.quantum", "QAlloc"): _QAlloc,
+            ("tket.quantum", "MeasureFree"): _MeasureFree,
+            ("tket.quantum", "Measure"): _Measure,
+            ("tket.quantum", "QFree"): _QFree,
+            ("tket.quantum", "X"): _X,
+            ("tket.quantum", "CX"): _CX,
+        }
+    )
 
     @guppy
     @no_type_check
@@ -173,20 +177,17 @@ def identity_code_gen(
             ),
         )
 
-    @guppy
-    @no_type_check
-    def setup() -> None:
-        global_state = global_state_gen()
-        swap_global_state(some(global_state)).unwrap_nothing()
+    def build_wrapper(
+        func: GuppyFunctionDefinition[[], None],
+    ) -> GuppyFunctionDefinition[[], None]:
+        @guppy
+        @no_type_check
+        def wrapper() -> None:
+            global_state = global_state_gen()
+            swap_global_state(some(global_state)).unwrap_nothing()
+            func()
+            swap_global_state(nothing()).unwrap().discard()
 
-    @guppy
-    @no_type_check
-    def teardown() -> None:
-        swap_global_state(nothing()).unwrap().discard()
+        return wrapper  # type: ignore[no-any-return]
 
-    return EncoderSpec(
-        ops=logical_ops,
-        setup=setup,
-        teardown=teardown,
-        tket_passes=[],
-    )
+    return EncoderSpec(ops=ops, build_wrapper=build_wrapper)
