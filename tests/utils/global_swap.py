@@ -72,8 +72,8 @@ def map_op_for_global_var(
             [
                 ht.StringArg(var_name),
                 args[0].to_hugr(ctx),
-                args[1].to_hugr(ctx),
-                args[2].to_hugr(ctx),
+                ListArg([args[1].to_hugr(ctx)]),
+                ListArg([args[2].to_hugr(ctx)]),
             ],
             concrete,
         )
