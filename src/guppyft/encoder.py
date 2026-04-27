@@ -1,8 +1,10 @@
+import itertools
 from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from hugr.package import Package
+from hugr.passes.composable import ComposablePass
 from tket.passes import NormalizeGuppy
 
 from guppyft._bindings import RsHugr
@@ -29,14 +31,29 @@ def _replace_ops(hugr: Package, ops: OpReplacements) -> Package:
     return Package.from_bytes(rs_hugr.to_bytes())
 
 
-def encode(func: GuppyFunctionDefinition[[], None], spec: EncoderSpec) -> Package:
-    # Compile unencoded program with entrypoint since NormalizeGuppy needs it
-    func_pkg: Package = func.compile_function()
+def encode(
+    func: GuppyFunctionDefinition[[], None],
+    spec: EncoderSpec,
+    *,
+    passes: list[ComposablePass] | None = None,
+) -> Package:
+    """
+    Encodes the given function using the given spec by replacing all operations in the
+    program with function calls to the functions in `spec.ops`.
 
-    # Run normalise and all optimisation passes
-    normalize_pass = NormalizeGuppy()
-    normalize_pass(func_pkg.modules[0])
-    for tket_pass in spec.tket_passes:
+    :param func: The function to encode. Must take no arguments and return `None`.
+    :param spec: The spec for the encoding. See `EncoderSpec` for details.
+    :param passes: Tket passes to run on the unencoded program, before passes from the
+        spec. The default is a single run of `tket.passes.NormalizeGuppy`.
+    :return: The compiled, encoded function as an executable HUGR package.
+    """
+    # Compile unencoded program with entrypoint since NormalizeGuppy needs it
+    func_pkg: Package = func.compile()
+
+    # Run all tket passes
+    if passes is None:
+        passes = [NormalizeGuppy()]
+    for tket_pass in itertools.chain(passes, spec.tket_passes):
         tket_pass(func_pkg.modules[0])
 
     # Reset entrypoint to mark module as non-executable to avoid conflicts
