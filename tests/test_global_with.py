@@ -8,14 +8,14 @@ from .utils.global_swap import map_global_state_generic, with_global_state_gener
 
 def test_with():
     @guppy
-    def foo(qb: qubit) -> int:
+    def foo(qb: qubit, i: tuple[int, int]) -> int:
         x(qb)
-        return 0
+        return i[0] + i[1]
 
     @guppy
     def my_prog() -> None:
         discard(qubit())
-        i = map_global_state_generic(foo)
+        i = map_global_state_generic(foo, (9, 10))
         result("my_prog", i)
 
     @guppy
@@ -26,5 +26,5 @@ def test_with():
 
     res = QsysShot(main.emulator(n_qubits=2).run())
 
-    assert res.entries[0][0] == ("my_prog", 0)
+    assert res.entries[0][0] == ("my_prog", 19)
     assert res.entries[0][1] == ("qb_main", 1)

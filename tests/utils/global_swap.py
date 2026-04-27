@@ -4,13 +4,11 @@ from guppylang import guppy
 from guppylang.std.builtins import owned
 from guppylang.std.option import Option
 from guppylang_internals.decorator import hugr_op
-from guppylang_internals.tys.builtin import int_type
 from guppylang_internals.tys.common import ToHugrContext
-from guppylang_internals.tys.qubit import qubit_ty
 from guppylang_internals.tys.subst import Inst
 from hugr import ops
 from hugr import tys as ht
-from hugr.tys import ListArg, TypeTypeArg
+from hugr.tys import ListArg
 from tket_exts import globals
 
 GLOBALS_EXTENSION = globals()
@@ -31,6 +29,9 @@ def swap_op_for_global_var(
 
 
 T = guppy.type_var("T", copyable=False, droppable=False)
+
+I = guppy.type_var("I")
+O = guppy.type_var("O")
 
 
 # TODO MOVE INTO CODES (maybe a default renaming)
@@ -66,9 +67,9 @@ def map_op_for_global_var(
         op_def = GLOBALS_EXTENSION.get_op("map")
         return op_def.instantiate(
             [ht.StringArg(var_name)]
-            + [TypeTypeArg(qubit_ty().to_hugr(ctx))]
-            + [ListArg([])]
-            + [ListArg([TypeTypeArg(int_type().to_hugr(ctx))])],
+            + [args[0].to_hugr(ctx)]
+            + [args[1].to_hugr(ctx)]
+            + [args[2].to_hugr(ctx)],
             concrete,
         )
 
@@ -76,4 +77,4 @@ def map_op_for_global_var(
 
 
 @hugr_op(map_op_for_global_var("GLOBAL_STATE"))
-def map_global_state_generic(func: Callable[[T], int]) -> int: ...
+def map_global_state_generic(func: Callable[[T, I], O], inputs: I) -> O: ...
