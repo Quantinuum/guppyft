@@ -12,12 +12,12 @@ from .global_swap import swap_global_state_generic, with_global_state_generic
 
 
 def identity_code_gen(
-    n_qubits: int,
+        n_qubits: int,
 ) -> EncoderSpec:
     @guppy
     @no_type_check
     def swap_global_state(
-        new_value: Option["GLOBAL_STATE"] @ owned,
+            new_value: Option["GLOBAL_STATE"] @ owned,
     ) -> Option["GLOBAL_STATE"]:
         return swap_global_state_generic(new_value)
 
@@ -29,7 +29,7 @@ def identity_code_gen(
         @guppy
         @no_type_check
         def get_next_addr(
-            self: "GLOBAL_STATE",
+                self: "GLOBAL_STATE",
         ) -> tuple[int, int]:
             stack = self.addr_stack.take().unwrap()
             if stack.end == 0:
@@ -135,7 +135,7 @@ def identity_code_gen(
     @guppy(link_name="tket.quantum.CX")
     @no_type_check
     def _CX(
-        ctl: tuple[int, int], tgt: tuple[int, int]
+            ctl: tuple[int, int], tgt: tuple[int, int]
     ) -> tuple[tuple[int, int], tuple[int, int]]:
         global_state = swap_global_state(nothing()).unwrap()
 
@@ -174,17 +174,6 @@ def identity_code_gen(
                 )
             ),
         )
-
-    @guppy
-    @no_type_check
-    def setup() -> None:
-        global_state = global_state_gen()
-        swap_global_state(some(global_state)).unwrap_nothing()
-
-    @guppy
-    @no_type_check
-    def teardown() -> None:
-        swap_global_state(nothing()).unwrap().discard()
 
     def build_wrapper(func: GuppyFunctionDefinition[[], None]) -> Callable[[], None]:
 
