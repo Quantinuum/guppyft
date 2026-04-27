@@ -20,13 +20,13 @@ mod _bindings {
     #[pyfunction]
     fn _replace_ops(
         rs_hugr: &mut RsHugr,
-        rewrite_ops: BTreeMap<(String, String), (RsHugr, String)>,
+        rewrite_ops: BTreeMap<(String, String), (Option<RsHugr>, String)>,
     ) -> PyResult<()> {
         let hugr = &mut rs_hugr.hugr;
 
         let new_ops = rewrite_ops
             .into_iter()
-            .map(|(k, (rs_hugr, func_name))| (k, (rs_hugr.hugr, func_name)))
+            .map(|(k, (rs_hugr, func_name))| (k, (rs_hugr.map(|x| x.hugr), func_name)))
             .collect();
 
         let pass = encode::EncoderPass::new(new_ops);
