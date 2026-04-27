@@ -59,11 +59,11 @@ pub enum EncoderPassError {
 pub struct EncoderPass {
     scope: PassScope,
     qubit_to_ty: Type,
-    pub rewrite_ops: BTreeMap<(String, String), (Hugr, String)>,
+    pub rewrite_ops: BTreeMap<(String, String), (Option<Hugr>, String)>,
 }
 
 impl EncoderPass {
-    pub fn new(rewrite_ops: BTreeMap<(String, String), (Hugr, String)>) -> Self {
+    pub fn new(rewrite_ops: BTreeMap<(String, String), (Option<Hugr>, String)>) -> Self {
         Self {
             rewrite_ops,
             ..Self::default()
@@ -157,29 +157,13 @@ impl<'a, H: HugrMut<Node = Node>> RewriteQuantumState<'a, H> {
         }
     }
 
-    pub fn op(
-        &mut self,
-        ext_op: ExtensionOp,
-        mut func_hugr: Hugr,
+    fn extract_func(
+        &self,
+        op_id: OpName,
+        expected_sig: PolyFuncType,
+        func_hugr: &Hugr,
         func_name: &str,
-    ) -> Result<(), EncoderPassError> {
-        // Replace hugr-bool with tket-bool in function signature
-        let expected_func_sig: PolyFuncType = {
-            let mut sig = ext_op.signature().into_owned();
-            sig.transform(&self.type_replacer)?;
-            // bool_t is a sum type, not a CustomType, so ReplaceTypes doesn't handle it.
-            // Replace it manually at the top level (original behaviour).
-            sig.input
-                .iter_mut()
-                .chain(sig.output.iter_mut())
-                .for_each(|ty| {
-                    if ty == &bool_t() {
-                        *ty = bool_type();
-                    }
-                });
-            sig.into()
-        };
-
+    ) -> Result<Node, EncoderPassError> {
         // Extract target function
         let Some(func_node) = func_hugr.children(func_hugr.module_root()).find(|node| {
             if let Some(name) = match &func_hugr.get_optype(*node) {
@@ -204,14 +188,50 @@ impl<'a, H: HugrMut<Node = Node>> RewriteQuantumState<'a, H> {
             OpType::FuncDefn(defn) => defn.signature(),
             _ => unreachable!(),
         };
-        if func_sig != &expected_func_sig {
+        if func_sig != &expected_sig {
             return Err(EncoderPassError::ExistingFunctionSignatureMismatch {
-                op_id: ext_op.qualified_id(),
+                op_id,
                 node: func_node,
                 name: func_name.to_string(),
-                expected: Box::new(expected_func_sig),
+                expected: Box::new(expected_sig),
                 found: Box::new(func_sig.clone()),
             });
+        };
+
+        Ok(func_node)
+    }
+
+    pub fn op(
+        &mut self,
+        ext_op: ExtensionOp,
+        func_hugr_opt: Option<Hugr>,
+        func_name: &str,
+    ) -> Result<(), EncoderPassError> {
+        // Replace hugr-bool with tket-bool in function signature
+        let op_sig: PolyFuncType = {
+            let mut sig = ext_op.signature().into_owned();
+            sig.transform(&self.type_replacer)?;
+            // bool_t is a sum type, not a CustomType, so ReplaceTypes doesn't handle it.
+            // Replace it manually at the top level (original behaviour).
+            sig.input
+                .iter_mut()
+                .chain(sig.output.iter_mut())
+                .for_each(|ty| {
+                    if ty == &bool_t() {
+                        *ty = bool_type();
+                    }
+                });
+            sig.into()
+        };
+
+        // Extract function if given, otherwise generate a declaration with the expected signature.
+        let (mut func_hugr, func_node) = if let Some(hugr) = func_hugr_opt {
+            let node = self.extract_func(ext_op.qualified_id(), op_sig, &hugr, func_name)?;
+            (hugr, node)
+        } else {
+            let mut module_builder = ModuleBuilder::new();
+            let decl = module_builder.declare(func_name, op_sig)?;
+            (module_builder.finish_hugr()?, decl.node())
         };
 
         let wrapped_func_hugr = {
