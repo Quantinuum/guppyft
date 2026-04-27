@@ -99,7 +99,7 @@ requires-dist = [
     { name = "guppylang", specifier = ">=0.21.13" },
     { name = "guppylang-internals", specifier = ">=0.34.0" },
     { name = "hugr", specifier = ">=0.16.0" },
-    { name = "tket", git = "https://github.com/quantinuum/tket2?subdirectory=tket-py&branch=mr%2Ffeat%2Fglobals-extension" },
+    { name = "tket", git = "https://github.com/quantinuum/tket2?subdirectory=tket-py&branch=hs%2Ffeat%2Fglobals-with-map" },
 ]
 
 [package.metadata.requires-dev]
@@ -109,7 +109,7 @@ dev = [
     { name = "pre-commit", specifier = ">=3.6.0,<5" },
     { name = "pytest", specifier = ">=9.0.3" },
     { name = "ruff", specifier = ">=0.15.11" },
-    { name = "selene-hugr-qis-compiler", git = "https://github.com/quantinuum/tket2?subdirectory=qis-compiler&branch=mr%2Ffeat%2Fglobals-extension" },
+    { name = "selene-hugr-qis-compiler", git = "https://github.com/quantinuum/tket2?subdirectory=qis-compiler&branch=hs%2Ffeat%2Fglobals-with-map" },
     { name = "selene-sim", specifier = ">=0.2.13" },
 ]
 lint = [
@@ -119,7 +119,7 @@ lint = [
 ]
 test = [
     { name = "pytest", specifier = ">=9.0.3" },
-    { name = "selene-hugr-qis-compiler", git = "https://github.com/quantinuum/tket2?subdirectory=qis-compiler&branch=mr%2Ffeat%2Fglobals-extension" },
+    { name = "selene-hugr-qis-compiler", git = "https://github.com/quantinuum/tket2?subdirectory=qis-compiler&branch=hs%2Ffeat%2Fglobals-with-map" },
     { name = "selene-sim", specifier = ">=0.2.13" },
 ]
 
@@ -926,7 +926,7 @@ wheels = [
 [[package]]
 name = "selene-hugr-qis-compiler"
 version = "0.2.10"
-source = { git = "https://github.com/quantinuum/tket2?subdirectory=qis-compiler&branch=mr%2Ffeat%2Fglobals-extension#b91e27fc55ff4507b64b97585987382e51e3f458" }
+source = { git = "https://github.com/quantinuum/tket2?subdirectory=qis-compiler&branch=hs%2Ffeat%2Fglobals-with-map#df2691f3e053c26b59292841070f956f0fa75db0" }
 
 [[package]]
 name = "selene-sim"
@@ -980,7 +980,7 @@ wheels = [
 [[package]]
 name = "tket"
 version = "0.13.0"
-source = { git = "https://github.com/quantinuum/tket2?subdirectory=tket-py&branch=mr%2Ffeat%2Fglobals-extension#b91e27fc55ff4507b64b97585987382e51e3f458" }
+source = { git = "https://github.com/quantinuum/tket2?subdirectory=tket-py&branch=hs%2Ffeat%2Fglobals-with-map#df2691f3e053c26b59292841070f956f0fa75db0" }
 dependencies = [
     { name = "hugr" },
     { name = "pytket" },
@@ -991,12 +991,12 @@ dependencies = [
 [[package]]
 name = "tket-eccs"
 version = "0.5.1"
-source = { git = "https://github.com/quantinuum/tket2?subdirectory=tket-eccs&branch=mr%2Ffeat%2Fglobals-extension#b91e27fc55ff4507b64b97585987382e51e3f458" }
+source = { git = "https://github.com/quantinuum/tket2?subdirectory=tket-eccs&branch=hs%2Ffeat%2Fglobals-with-map#df2691f3e053c26b59292841070f956f0fa75db0" }
 
 [[package]]
 name = "tket-exts"
 version = "0.12.3"
-source = { git = "https://github.com/quantinuum/tket2?subdirectory=tket-exts&branch=mr%2Ffeat%2Fglobals-extension#b91e27fc55ff4507b64b97585987382e51e3f458" }
+source = { git = "https://github.com/quantinuum/tket2?subdirectory=tket-exts&branch=hs%2Ffeat%2Fglobals-with-map#df2691f3e053c26b59292841070f956f0fa75db0" }
 dependencies = [
     { name = "hugr" },
 ]
