@@ -2,30 +2,21 @@ from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
-from guppylang.std.builtins import array, comptime, owned, panic
+from guppylang.std.builtins import array, comptime, owned, panic, result
 from guppylang.std.collections import Stack
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
 
 from guppyft.spec import EncoderSpec, OpReplacements
-
 from .global_swap import (
     map_global_state_generic,
-    swap_global_state_generic,
     with_global_state_generic,
 )
 
 
 def identity_code_gen(
-        n_qubits: int,
+    n_qubits: int,
 ) -> EncoderSpec:
-    @guppy
-    @no_type_check
-    def swap_global_state(
-            new_value: Option["GLOBAL_STATE"] @ owned,
-    ) -> Option["GLOBAL_STATE"]:
-        return swap_global_state_generic(new_value)
-
     @guppy.struct
     class GLOBAL_STATE:
         blocks: array[Option[qubit], comptime(n_qubits)]  # type: ignore[type-arg,valid-type]
@@ -41,7 +32,7 @@ def identity_code_gen(
         @guppy
         @no_type_check
         def get_next_addr(
-                self: "GLOBAL_STATE",
+            self: "GLOBAL_STATE",
         ) -> tuple[int, int]:
             stack = self.addr_stack.take().unwrap()
             if stack.end == 0:
@@ -73,68 +64,80 @@ def identity_code_gen(
     @guppy(link_name="link.QAlloc")
     @no_type_check
     def _QAlloc() -> tuple[tuple[int, int]]:
-        global_state = swap_global_state(nothing())
-        if global_state.is_nothing():
-            panic("CRINGE")
-        global_state = global_state.unwrap()
 
-        blk_id, qb_id = global_state.get_next_addr()
+        @guppy
+        def _impl(state: GLOBAL_STATE, input: None) -> tuple[tuple[int, int]]:
+            result("_QAlloc", 0)
+            blk_id, qb_id = state.get_next_addr()
 
-        blk = qubit()
+            blk = qubit()
+            state.blocks[blk_id].swap(some(blk)).unwrap_nothing()
 
-        global_state.blocks[blk_id].swap(some(blk)).unwrap_nothing()
+            return ((blk_id, qb_id),)
 
-        swap_global_state(some(global_state)).unwrap_nothing()
-
-        return ((blk_id, qb_id),)
+        return map_global_state_generic(_impl, None)
 
     # MeasureFree is compiled from `guppylang.std.quantum.measure`
     @guppy(link_name="link.MeasureFree")
     @no_type_check
     def _MeasureFree(q: tuple[int, int]) -> bool:
-        blk_id, qb_id = q
-        global_state = swap_global_state(nothing()).unwrap()
+        @guppy
+        def _impl(state: GLOBAL_STATE, q: tuple[int, int]) -> bool:
+            result("_MeasureFree", 0)
+            blk_id, qb_id = q
 
-        blk: qubit = global_state.blocks[blk_id].take().unwrap()
+            blk: qubit = state.blocks[blk_id].take().unwrap()
+            res = measure(blk)
 
-        res = measure(blk)
+            state.free_addr((blk_id, qb_id))
 
-        global_state.free_addr((blk_id, qb_id))
+            return res
 
-        swap_global_state(some(global_state)).unwrap_nothing()
-
-        return res
+        return map_global_state_generic(_impl, q)
 
     # Measure is compiled from `guppylang.std.quantum.project_z`
     @guppy(link_name="link.Measure")
     @no_type_check
     def _Measure(q: tuple[int, int]) -> tuple[tuple[int, int], bool]:
-        blk_id, qb_id = q
-        global_state = swap_global_state(nothing()).unwrap()
 
-        # Get qubit from global state, project_z and return
-        blk: qubit = global_state.blocks[blk_id].take().unwrap()
-        res = project_z(blk)
-        global_state.blocks[blk_id].swap(some(blk)).unwrap_nothing()
+        @guppy
+        def _impl(
+            state: GLOBAL_STATE, q: tuple[int, int]
+        ) -> tuple[tuple[int, int], bool]:
+            result("_Measure", 0)
+            blk_id, qb_id = q
 
-        swap_global_state(some(global_state)).unwrap_nothing()
+            # Get qubit from global state, project_z and return
+            blk: qubit = state.blocks[blk_id].take().unwrap()
+            res = project_z(blk)
+            state.blocks[blk_id].swap(some(blk)).unwrap_nothing()
 
-        return (blk_id, qb_id), res
+            return (blk_id, qb_id), res
+
+        return map_global_state_generic(_impl, q)
 
     # QFree is compiled from `guppylang.std.quantum.discard`
     @guppy(link_name="link.QFree")
     @no_type_check
     def _QFree(q: tuple[int, int]) -> None:
-        blk_id, qb_id = q
-        global_state = swap_global_state(nothing()).unwrap()
+        # `_impl` requires a return type otherwise it will not be called.
+        @guppy
+        def _impl(state: GLOBAL_STATE, q: tuple[int, int]) -> tuple[int, int]:
+            result("_QFree", 0)
+            blk_id, qb_id = q
 
-        # Get qubit and discard
-        blk: qubit = global_state.blocks[blk_id].take().unwrap()
-        discard(blk)
+            # Get qubit and discard
+            blk: qubit = state.blocks[blk_id].take().unwrap()
+            discard(blk)
 
-        global_state.free_addr((blk_id, qb_id))
+            state.free_addr((blk_id, qb_id))
 
-        swap_global_state(some(global_state)).unwrap_nothing()
+            return q
+
+        # The return must be used otherwise the function is not called.
+        res = map_global_state_generic(_impl, q)
+        if res[0] < 0:
+            panic("Invalid `blk_id`!")
 
     @guppy(link_name="link.X")
     @no_type_check
@@ -142,6 +145,7 @@ def identity_code_gen(
         @guppy
         @no_type_check
         def _impl(state: GLOBAL_STATE, q: tuple[int, int]) -> tuple[int, int]:
+            result("_X", 0)
             blk_id, qb_id = q
             blk = state.take_block(blk_id)
             x(blk)
@@ -153,21 +157,25 @@ def identity_code_gen(
     @guppy(link_name="link.CX")
     @no_type_check
     def _CX(
-            ctl: tuple[int, int], tgt: tuple[int, int]
+        ctl: tuple[int, int], tgt: tuple[int, int]
     ) -> tuple[tuple[int, int], tuple[int, int]]:
-        global_state = swap_global_state(nothing()).unwrap()
+        @guppy
+        def _impl(
+            state: GLOBAL_STATE, input: tuple[tuple[int, int], tuple[int, int]]
+        ) -> tuple[tuple[int, int], tuple[int, int]]:
+            result("_CX", 0)
+            ctl, tgt = input
+            ctl_blk = state.blocks[ctl[0]].take().unwrap()
+            tgt_blk = state.blocks[tgt[0]].take().unwrap()
 
-        ctl_blk = global_state.blocks[ctl[0]].take().unwrap()
-        tgt_blk = global_state.blocks[tgt[0]].take().unwrap()
+            cx(ctl_blk, tgt_blk)
 
-        cx(ctl_blk, tgt_blk)
+            state.blocks[ctl[0]].swap(some(ctl_blk)).unwrap_nothing()
+            state.blocks[tgt[0]].swap(some(tgt_blk)).unwrap_nothing()
 
-        global_state.blocks[ctl[0]].swap(some(ctl_blk)).unwrap_nothing()
-        global_state.blocks[tgt[0]].swap(some(tgt_blk)).unwrap_nothing()
+            return ctl, tgt
 
-        swap_global_state(some(global_state)).unwrap_nothing()
-
-        return ctl, tgt
+        return map_global_state_generic(_impl, (ctl, tgt))
 
     ops = OpReplacements()
     ops.with_funcs(
