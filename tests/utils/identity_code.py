@@ -148,9 +148,7 @@ def identity_code_gen(
             state.put_block(blk_id, blk)
             return blk_id, qb_id
 
-        alloc = map_global_state_generic(_impl, q)
-
-        return (alloc,)
+        return (map_global_state_generic(_impl, q),)
 
     @guppy(link_name="link.CX")
     @no_type_check
