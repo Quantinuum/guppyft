@@ -1,0 +1,4 @@
+[patch.crates-io]
+hugr = { path = "../hugr/hugr" }
+tket = { path = "../tket2/tket" }
+hugr-core = { path = "../hugr/hugr-core" }

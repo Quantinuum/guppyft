@@ -27,6 +27,7 @@ dependencies = [
     "guppylang>=0.21.13",
     "guppylang-internals>=0.34.0",
     "hugr>=0.16.0",
+    "ipykernel>=7.2.0",
     "tket>=0.13.0",
 ]
 
@@ -57,7 +58,10 @@ build-backend = "maturin"
 
 [tool.uv.sources]
 # Needs tket branch for globals extension
+guppylang = { git = "https://github.com/quantinuum/guppylang", branch = "main", subdirectory = "guppylang" }
+guppylang-internals = { git = "https://github.com/quantinuum/guppylang", branch = "main", subdirectory = "guppylang-internals" }
 tket = { git = "https://github.com/quantinuum/tket2", branch = "hs/feat/globals-with-map", subdirectory = "tket-py" }
+tket-exts = { git = "https://github.com/quantinuum/tket2", branch = "hs/feat/globals-with-map", subdirectory = "tket-exts" }
 #tket = { path = "../../Quantinuum/tket2/tket-py" }
 selene-hugr-qis-compiler = { git = "https://github.com/quantinuum/tket2", branch = "hs/feat/globals-with-map", subdirectory = "qis-compiler" }
 #selene-hugr-qis-compiler = { path = "../../Quantinuum/tket2/qis-compiler" }
@@ -67,4 +71,4 @@ module-name = "guppyft._bindings"
 python-source = "src/"
 manifest-path = "encoder-bindings/Cargo.toml"
 features = ["pyo3/extension-module"] # skips linking against libpython.so
-profile = "release-py" # See root Cargo.toml
+profile = "dev-py" # See root Cargo.toml
