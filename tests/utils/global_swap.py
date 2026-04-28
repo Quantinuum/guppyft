@@ -15,17 +15,13 @@ from hugr import tys as ht
 from hugr.tys import ListArg, TypeArg
 from tket_exts import globals
 
-GLOBALS_EXTENSION = globals()
-
 
 # TODO MOVE TO TKET
 def swap_op_for_global_var(
     var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
-    op_def = GLOBALS_EXTENSION.get_op("swap")
-
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
-        return op_def.instantiate(
+        return globals.swap_def.instantiate(
             [ht.StringArg(var_name)] + [arg.to_hugr(ctx) for arg in args], concrete
         )
 
@@ -47,10 +43,8 @@ def swap_global_state_generic(new_value: Option[T] @ owned) -> Option[T]: ...
 def with_op_for_global_var(
     var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
-    op_def = GLOBALS_EXTENSION.get_op("with")
-
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
-        return op_def.instantiate(
+        return globals.with_def.instantiate(
             [ht.StringArg(var_name)]
             + [arg.to_hugr(ctx) for arg in args]
             + [ListArg([])]
@@ -84,19 +78,16 @@ def _map_op_for_global_var(
     var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
-        op_def = GLOBALS_EXTENSION.get_op("map")
-
         # TODO COMMENT LOTS
+        global_arg = args[0].to_hugr(ctx)
         if len(args) == 2:
-            global_arg = args[0].to_hugr(ctx)
             input_args = ListArg([])
             output_args = ListArg(_unpack_tuple_arg(args[1], ctx))
         else:
-            global_arg = args[0].to_hugr(ctx)
             input_args = ListArg([args[1].to_hugr(ctx)])
             output_args = ListArg(_unpack_tuple_arg(args[2], ctx))
 
-        return op_def.instantiate(
+        return globals.map_def.instantiate(
             [
                 ht.StringArg(var_name),
                 global_arg,
