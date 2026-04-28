@@ -8,14 +8,14 @@ help:
 check:
     uv run pre-commit run --all-files
 
-# Run the tests.
+# Run the Python tests.
 test *PYTEST_FLAGS:
     uv run pytest {{ PYTEST_FLAGS }}
 
-# Auto-fix all clippy warnings.
+# Auto-fix lint issues that Ruff can safely rewrite.
 fix:
     uv run ruff check --fix
 
-# Format the code.
+# Format the Python code with Ruff.
 format:
     uv run ruff format

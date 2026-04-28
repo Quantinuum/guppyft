@@ -27,7 +27,6 @@ dependencies = [
     "guppylang>=0.21.13",
     "guppylang-internals>=0.34.0",
     "hugr>=0.16.0",
-    "ipykernel>=7.2.0",
     "tket>=0.13.0",
 ]
 
@@ -57,8 +56,9 @@ requires = ["maturin>=1.4,<2.0"]
 build-backend = "maturin"
 
 [tool.uv.sources]
-guppylang = { git = "https://github.com/quantinuum/guppylang", branch = "main", subdirectory = "guppylang" }
-guppylang-internals = { git = "https://github.com/quantinuum/guppylang", branch = "main", subdirectory = "guppylang-internals" }
+# Waiting for release
+guppylang = { git = "https://github.com/quantinuum/guppylang", rev = "561882f760d48be0327d8785b7b82085ea657957", subdirectory = "guppylang" }
+guppylang-internals = { git = "https://github.com/quantinuum/guppylang", rev = "561882f760d48be0327d8785b7b82085ea657957", subdirectory = "guppylang-internals" }
 # Needs tket branch for globals extension
 tket = { git = "https://github.com/quantinuum/tket2", branch = "hs/feat/globals-with-map", subdirectory = "tket-py" }
 selene-hugr-qis-compiler = { git = "https://github.com/quantinuum/tket2", branch = "hs/feat/globals-with-map", subdirectory = "qis-compiler" }

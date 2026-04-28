@@ -3,7 +3,6 @@ from typing import Any, no_type_check
 
 from guppylang import guppy
 from guppylang.std.builtins import owned
-from guppylang.std.option import Option
 from guppylang_internals.decorator import hugr_op
 from guppylang_internals.tys.arg import Argument
 from guppylang_internals.tys.arg import TypeArg as GuppyTypeArg
@@ -15,29 +14,10 @@ from hugr import tys as ht
 from hugr.tys import ListArg, TypeArg
 from tket_exts import globals
 
-
-# TODO MOVE TO TKET
-def swap_op_for_global_var(
-    var_name: str,
-) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
-    def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
-        return globals.swap_def.instantiate(
-            [ht.StringArg(var_name)] + [arg.to_hugr(ctx) for arg in args], concrete
-        )
-
-    return op
-
-
 T = guppy.type_var("T", copyable=False, droppable=False)
 
 IN = guppy.type_var("IN")
 OUT = guppy.type_var("OUT")
-
-
-# TODO MOVE INTO CODES (maybe a default renaming)
-@hugr_op(swap_op_for_global_var("GLOBAL_STATE"))
-@no_type_check
-def swap_global_state_generic(new_value: Option[T] @ owned) -> Option[T]: ...
 
 
 def with_op_for_global_var(
@@ -78,10 +58,13 @@ def _map_op_for_global_var(
     var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
-        # TODO COMMENT LOTS
         global_arg = args[0].to_hugr(ctx)
         if len(args) == 2:
             input_args = ListArg([])
+            # There is a mismatch in function signatures between the Guppy compiler
+            # and the HUGR Op instantiation. The Guppy compile unpacks tuples at
+            # the output of functions while HUGR does not. It is necessary for us
+            # to manually unpack the tuple type here for the signatures to match.
             output_args = ListArg(_unpack_tuple_arg(args[1], ctx))
         else:
             input_args = ListArg([args[1].to_hugr(ctx)])

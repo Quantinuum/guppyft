@@ -52,7 +52,7 @@ def encode(
 
     # Run all tket passes
     if passes is None:
-        passes = [NormalizeGuppy(remove_tuple_untuple=False, constant_folding=False)]
+        passes = [NormalizeGuppy()]
     for tket_pass in itertools.chain(passes, spec.tket_passes):
         tket_pass(func_pkg.modules[0])
 
