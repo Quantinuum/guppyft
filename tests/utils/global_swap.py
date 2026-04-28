@@ -9,7 +9,7 @@ from guppylang_internals.tys.arg import Argument
 from guppylang_internals.tys.arg import TypeArg as GuppyTypeArg
 from guppylang_internals.tys.common import ToHugrContext
 from guppylang_internals.tys.subst import Inst
-from guppylang_internals.tys.ty import TupleType
+from guppylang_internals.tys.ty import NoneType, TupleType
 from hugr import ops
 from hugr import tys as ht
 from hugr.tys import ListArg, TypeArg
@@ -68,10 +68,16 @@ def with_global_state_generic(new_value: T @ owned, func: Callable[[], None]) ->
 
 def _unpack_tuple_arg(arg: Argument, ctx: ToHugrContext) -> list[TypeArg]:
     match arg:
-        case GuppyTypeArg(ty=TupleType(args=elems)):
-            return [ty.to_hugr(ctx) for ty in elems]
+        case GuppyTypeArg(ty=gty):
+            match gty:
+                case TupleType(args=elems):
+                    return [ty.to_hugr(ctx) for ty in elems]
+                case NoneType():
+                    return []
+                case _:
+                    return [arg.to_hugr(ctx)]
         case _:
-            raise TypeError(arg)
+            return [arg.to_hugr(ctx)]
 
 
 def _map_op_for_global_var(
