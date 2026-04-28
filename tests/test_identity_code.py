@@ -9,6 +9,20 @@ from guppyft.encoder import encode
 from .utils.identity_code import identity_code_gen
 
 
+def test_qalloc_measure() -> None:
+    @guppy
+    def main() -> None:
+        q = qubit()
+        result("q", measure(q))
+
+    id_code = identity_code_gen(n_qubits=1)
+
+    encoded_pkg = encode(main, id_code)
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+
+    assert runner.run().collated_shots() == [{"q": [0]}]
+
+
 def test_x() -> None:
     @guppy
     def main() -> None:
