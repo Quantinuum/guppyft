@@ -1,7 +1,8 @@
 import re
+from typing import no_type_check
 
 import pytest
-from guppylang import guppy, array
+from guppylang import array, guppy
 from guppylang.emulator import EmulatorError
 from guppylang.std.builtins import result
 from guppylang.std.quantum import measure, qubit, x
@@ -133,6 +134,7 @@ def test_map_without_with() -> None:
 
 def test_nested_with() -> None:
     @guppy
+    @no_type_check
     def foo(i: array[int, 1], j: int) -> int:
         i[0] = i[0] + j
         return i[0] + j
@@ -169,6 +171,7 @@ def test_nested_with() -> None:
 
 def test_mismatch_type() -> None:
     @guppy
+    @no_type_check
     def foo(arr: array[int, 1]) -> int:
         return arr[0]
 
@@ -184,9 +187,30 @@ def test_mismatch_type() -> None:
         result("main", measure(qb))
 
     with pytest.raises(
-            RuntimeError,
-            match=re.escape(
-                "Failed to emit LLVM for function tests.test_global_with.test_mismatch_type.<locals>.my_prog at node Node(17)"
-            ),
+        RuntimeError,
+        match=re.escape(
+            "Failed to emit LLVM for function tests.test_global_with."
+            "test_mismatch_type.<locals>.my_prog at node Node(17)"
+        ),
     ) as _:
         main.emulator(n_qubits=1).run().collated_shots()
+
+
+@pytest.mark.xfail
+def test_non_linear_global() -> None:
+    @guppy
+    def foo(i: int) -> int:
+        i = i + 1
+        return i
+
+    @guppy
+    def my_prog() -> None:
+        i = map_global_state(foo)
+        result("my_prog", i)
+
+    @guppy
+    def main() -> None:
+        i = with_global_state(0, my_prog)
+        result("main", i)
+
+    main.emulator(n_qubits=1).run().collated_shots()
