@@ -7,9 +7,8 @@ from guppylang.std.collections import Stack
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
 
+from guppyft.globals import map_global_state, with_global_state
 from guppyft.spec import EncoderSpec, OpReplacements
-
-from .global_swap import map_global_state, with_global_state
 
 
 def identity_code_gen(n_qubits: int) -> EncoderSpec:

@@ -83,12 +83,12 @@ def _map_op_for_global_var(
     return op
 
 
-@hugr_op(_map_op_for_global_var("GLOBAL_STATE"))
+@hugr_op(_map_op_for_global_var("GUPPY_FT"))
 @no_type_check
 def map_global_state_input(func: Callable[[T, IN], OUT], inputs: IN) -> OUT: ...
 
 
-@hugr_op(_map_op_for_global_var("GLOBAL_STATE"))
+@hugr_op(_map_op_for_global_var("GUPPY_FT"))
 @no_type_check
 def map_global_state_no_input(func: Callable[[T], OUT]) -> OUT: ...
 

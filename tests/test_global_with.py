@@ -4,7 +4,7 @@ from guppylang.emulator import EmulatorError
 from guppylang.std.builtins import result
 from guppylang.std.quantum import measure, qubit, x
 
-from .utils.global_swap import map_global_state, with_global_state
+from guppyft.globals import map_global_state, with_global_state
 
 
 def test_with() -> None:
