@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import no_type_check
+from typing import Any, no_type_check
 
 from guppylang import guppy
 from guppylang.std.builtins import owned
@@ -63,7 +63,7 @@ def with_op_for_global_var(
 
 @hugr_op(with_op_for_global_var("GLOBAL_STATE"))
 @no_type_check
-def with_global_state_generic(new_value: T @ owned, func: Callable[[], None]) -> T: ...
+def with_global_state(new_value: T @ owned, func: Callable[[], None]) -> T: ...
 
 
 def _unpack_tuple_arg(arg: Argument, ctx: ToHugrContext) -> list[TypeArg]:
@@ -85,12 +85,23 @@ def _map_op_for_global_var(
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
         op_def = GLOBALS_EXTENSION.get_op("map")
+
+        # TODO COMMENT LOTS
+        if len(args) == 2:
+            global_arg = args[0].to_hugr(ctx)
+            input_args = ListArg([])
+            output_args = ListArg(_unpack_tuple_arg(args[1], ctx))
+        else:
+            global_arg = args[0].to_hugr(ctx)
+            input_args = ListArg([args[1].to_hugr(ctx)])
+            output_args = ListArg(_unpack_tuple_arg(args[2], ctx))
+
         return op_def.instantiate(
             [
                 ht.StringArg(var_name),
-                args[0].to_hugr(ctx),
-                ListArg([args[1].to_hugr(ctx)]),
-                ListArg(_unpack_tuple_arg(args[2], ctx)),  # TODO COMMENT LOTS
+                global_arg,
+                input_args,
+                output_args,
             ],
             concrete,
         )
@@ -100,4 +111,13 @@ def _map_op_for_global_var(
 
 @hugr_op(_map_op_for_global_var("GLOBAL_STATE"))
 @no_type_check
-def map_global_state_generic(func: Callable[[T, IN], OUT], inputs: IN) -> OUT: ...
+def map_global_state_input(func: Callable[[T, IN], OUT], inputs: IN) -> OUT: ...
+
+
+@hugr_op(_map_op_for_global_var("GLOBAL_STATE"))
+@no_type_check
+def map_global_state_no_input(func: Callable[[T], OUT]) -> OUT: ...
+
+
+@guppy.overload(map_global_state_input, map_global_state_no_input)
+def map_global_state(*args: Any) -> Any: ...
