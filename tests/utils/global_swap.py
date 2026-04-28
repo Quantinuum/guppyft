@@ -5,11 +5,14 @@ from guppylang import guppy
 from guppylang.std.builtins import owned
 from guppylang.std.option import Option
 from guppylang_internals.decorator import hugr_op
+from guppylang_internals.tys.arg import Argument
+from guppylang_internals.tys.arg import TypeArg as GuppyTypeArg
 from guppylang_internals.tys.common import ToHugrContext
 from guppylang_internals.tys.subst import Inst
+from guppylang_internals.tys.ty import NoneType, TupleType
 from hugr import ops
 from hugr import tys as ht
-from hugr.tys import ListArg
+from hugr.tys import ListArg, TypeArg
 from tket_exts import globals
 
 GLOBALS_EXTENSION = globals()
@@ -31,8 +34,8 @@ def swap_op_for_global_var(
 
 T = guppy.type_var("T", copyable=False, droppable=False)
 
-I = guppy.type_var("I")
-O = guppy.type_var("O")
+IN = guppy.type_var("IN")
+OUT = guppy.type_var("OUT")
 
 
 # TODO MOVE INTO CODES (maybe a default renaming)
@@ -63,7 +66,21 @@ def with_op_for_global_var(
 def with_global_state_generic(new_value: T @ owned, func: Callable[[], None]) -> T: ...
 
 
-def map_op_for_global_var(
+def _unpack_tuple_arg(arg: Argument, ctx: ToHugrContext) -> list[TypeArg]:
+    match arg:
+        case GuppyTypeArg(ty=gty):
+            match gty:
+                case TupleType(args=elems):
+                    return [ty.to_hugr(ctx) for ty in elems]
+                case NoneType():
+                    return []
+                case _:
+                    return [arg.to_hugr(ctx)]
+        case _:
+            return [arg.to_hugr(ctx)]
+
+
+def _map_op_for_global_var(
     var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
@@ -73,7 +90,7 @@ def map_op_for_global_var(
                 ht.StringArg(var_name),
                 args[0].to_hugr(ctx),
                 ListArg([args[1].to_hugr(ctx)]),
-                ListArg([args[2].to_hugr(ctx)]),
+                ListArg(_unpack_tuple_arg(args[2], ctx)),  # TODO COMMENT LOTS
             ],
             concrete,
         )
@@ -81,6 +98,6 @@ def map_op_for_global_var(
     return op
 
 
-@hugr_op(map_op_for_global_var("GLOBAL_STATE"))
+@hugr_op(_map_op_for_global_var("GLOBAL_STATE"))
 @no_type_check
-def map_global_state_generic(func: Callable[[T, I], O], inputs: I) -> O: ...
+def map_global_state_generic(func: Callable[[T, IN], OUT], inputs: IN) -> OUT: ...

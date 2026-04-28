@@ -5,6 +5,7 @@ from guppylang.std.quantum import cx, discard, measure, measure_array, qubit, x
 from selene_sim.backends.bundled_simulators import Stim
 
 from guppyft.encoder import encode
+
 from .utils.identity_code import identity_code_gen
 
 
