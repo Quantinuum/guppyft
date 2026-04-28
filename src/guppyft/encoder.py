@@ -1,12 +1,10 @@
 import itertools
-from typing import Any, no_type_check
+from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
-from hugr.hugr.render import RenderConfig
 from hugr.package import Package
 from hugr.passes.composable import ComposablePass
-from selene_hugr_qis_compiler import check_hugr
 from tket.passes import NormalizeGuppy
 
 from guppyft._bindings import RsHugr
@@ -18,20 +16,11 @@ from guppyft.spec import EncoderSpec, OpReplacements
 def _replace_ops(hugr: Package, ops: OpReplacements) -> Package:
     rs_hugr = RsHugr.from_bytes(hugr.modules[0].to_bytes())
 
-    def compl_repl(func_opt: GuppyFunctionDefinition[Any, Any]) -> RsHugr:
-        pkg = func_opt.compile_function()
-        return RsHugr.from_bytes(pkg.modules[0].to_bytes())
-        NormalizeGuppy()(pkg.modules[0])
-        conf = RenderConfig(
-            display_node_id=True, max_node_label_length=None, max_edge_label_length=None
-        )
-        pkg.modules[0].render_dot(conf).view()
-        check_hugr(pkg.to_bytes())
-        return RsHugr.from_bytes(pkg.modules[0].to_bytes())
-
     rs_ops = {
         key: (
-            func_opt if func_opt is None else compl_repl(func_opt),
+            func_opt
+            if func_opt is None
+            else RsHugr.from_bytes(func_opt.compile_function().modules[0].to_bytes()),
             name,
         )
         for key, (func_opt, name) in ops
