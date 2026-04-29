@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Any, no_type_check
+from typing import Any, cast, no_type_check
 
 from guppylang import guppy
 from guppylang.std.builtins import owned
@@ -12,7 +12,7 @@ from guppylang_internals.tys.subst import Inst
 from guppylang_internals.tys.ty import NoneType, TupleType
 from hugr import ops
 from hugr import tys as ht
-from hugr.tys import ListArg, TypeArg
+from hugr.tys import ListArg, TypeArg, TypeBound, TypeTypeArg
 from tket_exts import globals
 
 T = guppy.type_var("T", copyable=False, droppable=False)
@@ -28,14 +28,16 @@ EXTENSION_OPS_WITH_SIDE_EFFECTS.append("tket.globals.map")
 
 
 def with_op_for_global_var(
-        var_name: str,
+    var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
+        global_arg = cast("TypeTypeArg", args[0].to_hugr(ctx))
+
+        if global_arg.ty.type_bound() != TypeBound.Linear:
+            raise TypeError(f"Global arg must be linear. Found {global_arg.ty}.")
+
         return globals.with_def.instantiate(
-            [ht.StringArg(var_name)]
-            + [arg.to_hugr(ctx) for arg in args]
-            + [ListArg([])]
-            + [ListArg([])],
+            [ht.StringArg(var_name), global_arg, ListArg([]), ListArg([])],
             concrete,
         )
 
@@ -62,7 +64,7 @@ def _unpack_tuple_arg(arg: Argument, ctx: ToHugrContext) -> list[TypeArg]:
 
 
 def _map_op_for_global_var(
-        var_name: str,
+    var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
         global_arg = args[0].to_hugr(ctx)

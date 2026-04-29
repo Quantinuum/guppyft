@@ -27,7 +27,7 @@ def identity_code_gen(n_qubits: int) -> EncoderSpec:
         @guppy
         @no_type_check
         def get_next_addr(
-                self: "GLOBAL_STATE",
+            self: "GLOBAL_STATE",
         ) -> tuple[int, int]:
             stack = self.addr_stack.take().unwrap()
             if stack.end == 0:
@@ -91,7 +91,7 @@ def identity_code_gen(n_qubits: int) -> EncoderSpec:
     def _Measure(q: tuple[int, int]) -> tuple[tuple[int, int], bool]:
         @guppy
         def _impl(
-                state: GLOBAL_STATE, q: tuple[int, int]
+            state: GLOBAL_STATE, q: tuple[int, int]
         ) -> tuple[tuple[int, int], bool]:
             result("_Measure", 0)
             blk_id, qb_id = q
@@ -141,11 +141,11 @@ def identity_code_gen(n_qubits: int) -> EncoderSpec:
     @guppy(link_name="link.CX")
     @no_type_check
     def _CX(
-            ctl: tuple[int, int], tgt: tuple[int, int]
+        ctl: tuple[int, int], tgt: tuple[int, int]
     ) -> tuple[tuple[int, int], tuple[int, int]]:
         @guppy
         def _impl(
-                state: GLOBAL_STATE, input: tuple[tuple[int, int], tuple[int, int]]
+            state: GLOBAL_STATE, input: tuple[tuple[int, int], tuple[int, int]]
         ) -> tuple[tuple[int, int], tuple[int, int]]:
             result("_CX", 0)
             ctl, tgt = input
@@ -184,7 +184,7 @@ def identity_code_gen(n_qubits: int) -> EncoderSpec:
         )
 
     def build_wrapper(
-            func: GuppyFunctionDefinition[[], None],
+        func: GuppyFunctionDefinition[[], None],
     ) -> GuppyFunctionDefinition[[], None]:
         @guppy
         @no_type_check

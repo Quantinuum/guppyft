@@ -183,16 +183,15 @@ def test_mismatch_type() -> None:
         result("main", measure(qb))
 
     with pytest.raises(
-            RuntimeError,
-            match=re.escape(
-                "Failed to emit LLVM for function tests.test_global_with."
-                "test_mismatch_type.<locals>.my_prog at node Node(17)"
-            ),
+        RuntimeError,
+        match=re.escape(
+            "Failed to emit LLVM for function tests.test_global_with."
+            "test_mismatch_type.<locals>.my_prog at node Node(17)"
+        ),
     ) as _:
         main.emulator(n_qubits=1).run().collated_shots()
 
 
-@pytest.mark.xfail
 def test_non_linear_global() -> None:
     @guppy
     def foo(i: int) -> int:
@@ -209,4 +208,7 @@ def test_non_linear_global() -> None:
         i = with_global_state(0, my_prog)
         result("main", i)
 
-    main.emulator(n_qubits=1).run().collated_shots()
+    with pytest.raises(
+        TypeError, match=r"Global arg must be linear. Found int<6>."
+    ) as _:
+        main.emulator(n_qubits=1).run().collated_shots()
