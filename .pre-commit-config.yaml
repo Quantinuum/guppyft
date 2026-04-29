@@ -59,10 +59,10 @@ repos:
         language: system
         files: \.py$
         pass_filenames: false
-      - id: mypy-check
-        name: mypy
-        description: Check python code with `mypy`.
-        entry: uv run mypy .
+      - id: ty-check
+        name: ty
+        description: Check python code with `ty`.
+        entry: uvx ty check .
         language: system
         files: \.py$
         pass_filenames: false

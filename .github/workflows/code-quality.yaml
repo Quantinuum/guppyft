@@ -75,8 +75,8 @@ jobs:
           uv run ruff --version
           uv run ruff check
 
-      - name: Type check with mypy
-        run: uv run mypy .
+      - name: Type check with ty
+        run: uv run ty .
 
   check-rs:
     name: 🦀 Check Rust code
