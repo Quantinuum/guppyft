@@ -43,6 +43,8 @@ lint = [
 ]
 test = [
     "pytest>=9.0.3",
+    "selene-hugr-qis-compiler>=0.2.10",
+    "selene-sim>=0.2.13",
 ]
 
 [tool.mypy]
@@ -53,9 +55,17 @@ allow_redefinition = true
 requires = ["maturin>=1.4,<2.0"]
 build-backend = "maturin"
 
+[tool.uv.sources]
+# Waiting for release
+guppylang = { git = "https://github.com/quantinuum/guppylang", rev = "561882f760d48be0327d8785b7b82085ea657957", subdirectory = "guppylang" }
+guppylang-internals = { git = "https://github.com/quantinuum/guppylang", rev = "561882f760d48be0327d8785b7b82085ea657957", subdirectory = "guppylang-internals" }
+# Needs tket branch for globals extension
+tket = { git = "https://github.com/quantinuum/tket2", branch = "hs/feat/globals-with-map", subdirectory = "tket-py" }
+selene-hugr-qis-compiler = { git = "https://github.com/quantinuum/tket2", branch = "hs/feat/globals-with-map", subdirectory = "qis-compiler" }
+
 [tool.maturin]
 module-name = "guppyft._bindings"
 python-source = "src/"
 manifest-path = "encoder-bindings/Cargo.toml"
 features = ["pyo3/extension-module"] # skips linking against libpython.so
-profile = "release-py" # See root Cargo.toml
+profile = "dev-py" # See root Cargo.toml

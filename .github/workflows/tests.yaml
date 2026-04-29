@@ -1,4 +1,4 @@
-name: Code Quality
+name: Tests
 
 on:
   push:
@@ -24,7 +24,7 @@ env:
 
 jobs:
   check-py:
-    name: 🐍 Check Python code (${{ matrix.python-version }})
+    name: 🐍 Test Python code (${{ matrix.python-version }})
     runs-on: ubuntu-latest
     env:
       PYTHON_VERSION: ${{ matrix.python-version }}
@@ -65,37 +65,5 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen --python ${{ env.PYTHON_VERSION }}
 
-      - name: Check formatting with ruff
-        run: |
-          uv run ruff --version
-          uv run ruff format --check
-
-      - name: Lint with ruff
-        run: |
-          uv run ruff --version
-          uv run ruff check
-
-      - name: Type check with mypy
-        run: uv run mypy .
-
-  check-rs:
-    name: 🦀 Check Rust code
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: mozilla-actions/sccache-action@v0.0.9
-      - name: Install stable rust toolchain with fmt and clippy
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt, clippy
-
-      - name: Check formatting
-        run: cargo fmt -- --check
-
-      - name: Run clippy
-        run: cargo clippy --all-targets --all-features --workspace -- -D warnings
-
-      - name: Build docs
-        run: cargo doc --no-deps --all-features --workspace
-        env:
-          RUSTDOCFLAGS: "-Dwarnings"
+      - name: Run tests
+        run: uv run pytest
