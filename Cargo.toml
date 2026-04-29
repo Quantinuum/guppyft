@@ -12,6 +12,9 @@ hugr-core = "0.27.0"
 itertools = "0.14.0"
 derive_more = { version = "2", features = ["display", "from"] }
 
+[profile.dev-py]
+inherits = "dev"
+
 [profile.release-py]
 inherits = "release"
 lto = "fat"
