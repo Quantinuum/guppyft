@@ -62,10 +62,6 @@ def test_map_no_input() -> None:
     ]
 
 
-# This will fail as order edges are not added to the map function call with return
-# type None. Tracking issue:
-# https://github.com/Quantinuum/guppylang/issues/1624
-@pytest.mark.xfail
 def test_map_return_none() -> None:
     @guppy
     def foo(qb: qubit) -> None:
@@ -187,11 +183,11 @@ def test_mismatch_type() -> None:
         result("main", measure(qb))
 
     with pytest.raises(
-        RuntimeError,
-        match=re.escape(
-            "Failed to emit LLVM for function tests.test_global_with."
-            "test_mismatch_type.<locals>.my_prog at node Node(17)"
-        ),
+            RuntimeError,
+            match=re.escape(
+                "Failed to emit LLVM for function tests.test_global_with."
+                "test_mismatch_type.<locals>.my_prog at node Node(17)"
+            ),
     ) as _:
         main.emulator(n_qubits=1).run().collated_shots()
 

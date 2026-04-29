@@ -3,6 +3,7 @@ from typing import Any, no_type_check
 
 from guppylang import guppy
 from guppylang.std.builtins import owned
+from guppylang_internals.compiler.core import EXTENSION_OPS_WITH_SIDE_EFFECTS
 from guppylang_internals.decorator import hugr_op
 from guppylang_internals.tys.arg import Argument
 from guppylang_internals.tys.arg import TypeArg as GuppyTypeArg
@@ -19,9 +20,15 @@ T = guppy.type_var("T", copyable=False, droppable=False)
 IN = guppy.type_var("IN")
 OUT = guppy.type_var("OUT")
 
+# Mark ops as having side effects to add order edges in the HUGR
+# when calls return None.
+# https://github.com/Quantinuum/guppylang/issues/1698
+EXTENSION_OPS_WITH_SIDE_EFFECTS.append("tket.globals.with")
+EXTENSION_OPS_WITH_SIDE_EFFECTS.append("tket.globals.map")
+
 
 def with_op_for_global_var(
-    var_name: str,
+        var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
         return globals.with_def.instantiate(
@@ -55,7 +62,7 @@ def _unpack_tuple_arg(arg: Argument, ctx: ToHugrContext) -> list[TypeArg]:
 
 
 def _map_op_for_global_var(
-    var_name: str,
+        var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
         global_arg = args[0].to_hugr(ctx)

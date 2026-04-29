@@ -2,7 +2,7 @@ from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
-from guppylang.std.builtins import array, comptime, owned, panic, result
+from guppylang.std.builtins import array, comptime, owned, result
 from guppylang.std.collections import Stack
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
@@ -27,7 +27,7 @@ def identity_code_gen(n_qubits: int) -> EncoderSpec:
         @guppy
         @no_type_check
         def get_next_addr(
-            self: "GLOBAL_STATE",
+                self: "GLOBAL_STATE",
         ) -> tuple[int, int]:
             stack = self.addr_stack.take().unwrap()
             if stack.end == 0:
@@ -91,7 +91,7 @@ def identity_code_gen(n_qubits: int) -> EncoderSpec:
     def _Measure(q: tuple[int, int]) -> tuple[tuple[int, int], bool]:
         @guppy
         def _impl(
-            state: GLOBAL_STATE, q: tuple[int, int]
+                state: GLOBAL_STATE, q: tuple[int, int]
         ) -> tuple[tuple[int, int], bool]:
             result("_Measure", 0)
             blk_id, qb_id = q
@@ -110,7 +110,7 @@ def identity_code_gen(n_qubits: int) -> EncoderSpec:
     def _QFree(q: tuple[int, int]) -> None:
         # `_impl` requires a return type otherwise it will not be called.
         @guppy
-        def _impl(state: GLOBAL_STATE, q: tuple[int, int]) -> tuple[int, int]:
+        def _impl(state: GLOBAL_STATE, q: tuple[int, int]) -> None:
             result("_QFree", 0)
             blk_id, _ = q
             blk = state.take_block(blk_id)
@@ -118,12 +118,9 @@ def identity_code_gen(n_qubits: int) -> EncoderSpec:
             discard(blk)
 
             state.free_addr(q)
-            return q
 
         # The return must be used otherwise the function is not called.
-        res = map_global_state(_impl, q)
-        if res[0] < 0:
-            panic("Invalid `blk_id`!")
+        return map_global_state(_impl, q)
 
     @guppy(link_name="link.X")
     @no_type_check
@@ -144,11 +141,11 @@ def identity_code_gen(n_qubits: int) -> EncoderSpec:
     @guppy(link_name="link.CX")
     @no_type_check
     def _CX(
-        ctl: tuple[int, int], tgt: tuple[int, int]
+            ctl: tuple[int, int], tgt: tuple[int, int]
     ) -> tuple[tuple[int, int], tuple[int, int]]:
         @guppy
         def _impl(
-            state: GLOBAL_STATE, input: tuple[tuple[int, int], tuple[int, int]]
+                state: GLOBAL_STATE, input: tuple[tuple[int, int], tuple[int, int]]
         ) -> tuple[tuple[int, int], tuple[int, int]]:
             result("_CX", 0)
             ctl, tgt = input
@@ -187,7 +184,7 @@ def identity_code_gen(n_qubits: int) -> EncoderSpec:
         )
 
     def build_wrapper(
-        func: GuppyFunctionDefinition[[], None],
+            func: GuppyFunctionDefinition[[], None],
     ) -> GuppyFunctionDefinition[[], None]:
         @guppy
         @no_type_check
