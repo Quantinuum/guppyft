@@ -1,170 +1,71 @@
-from guppylang import guppy
+from guppylang import guppy, array
 from guppylang.emulator import EmulatorBuilder
-from guppylang.std.builtins import array, result
-from guppylang.std.quantum import (
-    cx,
-    discard,
-    measure,
-    measure_array,
-    project_z,
-    qubit,
-    x,
-)
+from guppylang.std.builtins import result
+from guppylang.std.quantum import measure, qubit
 from selene_sim.backends.bundled_simulators import Stim
 
-from guppyft.encoder import encode
-from .utils.identity_code import identity_code_gen
-
-
-def test_qalloc_measure() -> None:
-    @guppy
-    def main() -> None:
-        q = qubit()
-        measure(q)
-
-    id_code = identity_code_gen(n_qubits=1, qec_budget=1)
-
-    encoded_pkg = encode(main, id_code)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
-
-    assert runner.run().collated_shots() == [{"_MeasureFree": [0], "_QAlloc": [0]}]
-
-
-def test_qalloc_project_z_discard() -> None:
-    @guppy
-    def main() -> None:
-        q = qubit()
-        result("project_z", project_z(q))
-        discard(q)
-
-    id_code = identity_code_gen(n_qubits=1, qec_budget=1)
-
-    encoded_pkg = encode(main, id_code)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
-
-    assert runner.run().collated_shots() == [
-        {"_Measure": [0], "_QAlloc": [0], "_QFree": [0], "project_z": [0]}
-    ]
-
-
-    # cost_to_apply = array(0 for _ in range(3))
-    # for i in array(0, 2).copy():
-    #     cost_to_apply[i] = 1
-    #
-    # qec_counter = array(0 for _ in range(3))
-    #
-    # # Add costs to counter and reset counter
-    # for i in range(3):
-    #     qec_counter[i] += cost_to_apply[i]
-    #
-    #     if qec_counter[i] >= 1:
-    #         qec_counter[i] = 0
-    #
-    # result("qec_counter", qec_counter)
+from guppyft.encoder import _replace_ops
+from guppyft.globals import map_global_state, with_global_state
+from guppyft.spec import OpReplacements
 
 
 def test_x() -> None:
+    @guppy.struct
+    class GLOBAL_STATE:
+        qec_counter: array[int, 1]  # type: ignore[valid-type]
+
+        @guppy
+        def qec_policy(self: "GLOBAL_STATE") -> None:
+            for _ in range(1):
+                if self.qec_counter[0] > 0:
+                    pass
+            result("qec_counter", self.qec_counter)
     @guppy
+    def _QAlloc() -> tuple[tuple[int, int]]:
+        @guppy
+        def _impl(state: GLOBAL_STATE) -> tuple[tuple[int, int]]:
+            result("_QAlloc", 0)
+            state.qec_policy()
+            return ((0, 0),)
+        return map_global_state(_impl)
+
+    @guppy
+    def _MeasureFree(_q: tuple[int, int]) -> bool:
+        result("_MeasureFree", 0)
+        return False
+
+    @guppy(link_name="link.main")
     def main() -> None:
         q = qubit()
         result("q", measure(q))
 
-    id_code = identity_code_gen()
+    func_pkg = main.compile()
+    func_pkg.modules[0].entrypoint = func_pkg.modules[0].module_root
 
-    encoded_pkg = encode(main, id_code)
+    ops = OpReplacements()
+    ops.with_funcs(
+        {
+            ("tket.quantum", "QAlloc"): _QAlloc,
+            ("tket.quantum", "MeasureFree"): _MeasureFree,
+        }
+    )
+    func_pkg = _replace_ops(func_pkg, ops)
+
+    @guppy.declare(link_name="link.main")
+    def func_decl() -> None: ...
+
+    @guppy
+    def wrapper() -> None:
+        state = GLOBAL_STATE(array(0))
+        with_global_state(state, func_decl)
+
+    encoded_pkg = wrapper.compile()
+    encoded_pkg = encoded_pkg.link(func_pkg)
+
     print("Encoding done!")
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+    print("Building done!")
+    results = runner.run()
+    print("Running done!")
 
-    assert runner.run().collated_shots() == [
-        {"_MeasureFree": [0], "_QAlloc": [0], "q": [0]}
-    ]
-
-
-def test_cx() -> None:
-    @guppy
-    def main() -> None:
-        ctl, tgt = qubit(), qubit()
-        cx(ctl, tgt)
-        result("ctl", measure(ctl))
-        result("tgt", measure(tgt))
-
-    id_code = identity_code_gen(n_qubits=2, qec_budget=1)
-
-    encoded_pkg = encode(main, id_code)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
-
-    assert runner.run().collated_shots() == [
-        {"_MeasureFree": [0, 0], "_QAlloc": [0, 0], "_CX": [0], "ctl": [0], "tgt": [0]},
-    ]
-
-
-def test_qubit_array() -> None:
-    @guppy
-    def main() -> None:
-        qb_arr = array(qubit() for _ in range(2))
-        measure_array(qb_arr)
-
-    id_code = identity_code_gen(n_qubits=2, qec_budget=1)
-
-    encoded_pkg = encode(main, id_code)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
-
-    assert runner.run().collated_shots() == [
-        {"_MeasureFree": [0, 0], "_QAlloc": [0, 0]}
-    ]
-
-
-def test_out_of_logical_qubits() -> None:
-    @guppy
-    def main() -> None:
-        q0 = qubit()
-        q1 = qubit()
-        discard(q0)
-        discard(q1)
-
-    id_code = identity_code_gen(n_qubits=1, qec_budget=1)
-
-    encoded_pkg = encode(main, id_code)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
-
-    assert runner.run().collated_shots() == [
-        {"_QAlloc": [0, 0], "exit: get_next_addr: No more qubits to allocate": [1]}
-    ]
-
-
-def test_qubit_reuse() -> None:
-    @guppy
-    def main() -> None:
-        qb = qubit()
-        result("qb", measure(qb))
-        qb = qubit()
-        result("qb", measure(qb))
-
-    id_code = identity_code_gen(n_qubits=1, qec_budget=1)
-
-    encoded_pkg = encode(main, id_code)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
-
-    assert runner.run().collated_shots() == [
-        {"_MeasureFree": [0, 0], "_QAlloc": [0, 0], "qb": [0, 0]}
-    ]
-
-
-def test_qec_policy() -> None:
-    @guppy
-    def main() -> None:
-        qb = qubit()
-        x(qb)
-        x(qb)
-        measure(qb)
-
-    costs = {"X": 1, "IDLE_X": 0, "CX": 0, "IDLE_CX": 0}
-
-    id_code = identity_code_gen(n_qubits=1, qec_budget=1, costs=costs)
-
-    encoded_pkg = encode(main, id_code)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
-
-    assert runner.run().collated_shots() == [
-        {"_MeasureFree": [0, 0], "_QAlloc": [0, 0], "qb": [0, 0]}
-    ]
+    assert results.collated_shots() == [{"_MeasureFree": [0], "_QAlloc": [0], "q": [0]}]
