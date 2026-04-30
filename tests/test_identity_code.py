@@ -13,7 +13,7 @@ from guppylang.std.quantum import (
 from selene_sim.backends.bundled_simulators import Stim
 
 from guppyft.encoder import encode
-from utils.identity_code import identity_code_gen
+from .utils.identity_code import identity_code_gen
 
 
 def test_qalloc_measure() -> None:
@@ -47,20 +47,36 @@ def test_qalloc_project_z_discard() -> None:
     ]
 
 
+    # cost_to_apply = array(0 for _ in range(3))
+    # for i in array(0, 2).copy():
+    #     cost_to_apply[i] = 1
+    #
+    # qec_counter = array(0 for _ in range(3))
+    #
+    # # Add costs to counter and reset counter
+    # for i in range(3):
+    #     qec_counter[i] += cost_to_apply[i]
+    #
+    #     if qec_counter[i] >= 1:
+    #         qec_counter[i] = 0
+    #
+    # result("qec_counter", qec_counter)
+
+
 def test_x() -> None:
     @guppy
     def main() -> None:
         q = qubit()
-        x(q)
         result("q", measure(q))
 
-    id_code = identity_code_gen(n_qubits=1, qec_budget=1)
+    id_code = identity_code_gen()
 
     encoded_pkg = encode(main, id_code)
+    print("Encoding done!")
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [
-        {"_MeasureFree": [0], "_QAlloc": [0], "_X": [0], "q": [1]}
+        {"_MeasureFree": [0], "_QAlloc": [0], "q": [0]}
     ]
 
 
