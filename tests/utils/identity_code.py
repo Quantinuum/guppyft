@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import no_type_check
 
 from guppylang import guppy
@@ -10,12 +11,20 @@ from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
 from guppyft.globals import map_global_state, with_global_state
 from guppyft.spec import EncoderSpec, OpReplacements
 
+N = guppy.nat_var("N")
 
-def identity_code_gen(n_qubits: int) -> EncoderSpec:
+
+def identity_code_gen(
+        n_qubits: int,
+        qec_budget: int,
+        costs: dict[str, int] = defaultdict(int),
+) -> EncoderSpec:
     @guppy.struct
     class GLOBAL_STATE:
         blocks: array[Option[qubit], comptime(n_qubits)]  # type: ignore[type-arg,valid-type]
         addr_stack: Option[Stack[tuple[int, int], comptime(n_qubits)]]  # type: ignore[type-arg,valid-type]
+
+        qec_counter: array[int, comptime(n_qubits)]  # type: ignore[valid-type]
 
         @guppy
         @no_type_check
@@ -27,7 +36,7 @@ def identity_code_gen(n_qubits: int) -> EncoderSpec:
         @guppy
         @no_type_check
         def get_next_addr(
-            self: "GLOBAL_STATE",
+                self: "GLOBAL_STATE",
         ) -> tuple[int, int]:
             stack = self.addr_stack.take().unwrap()
             if stack.end == 0:
@@ -55,6 +64,26 @@ def identity_code_gen(n_qubits: int) -> EncoderSpec:
         @no_type_check
         def put_block(self, blk_id: int, blk: qubit @ owned) -> None:
             self.blocks[blk_id].swap(some(blk)).unwrap_nothing()
+
+        @guppy
+        def qec_policy(
+                self: "GLOBAL_STATE", blk_ids: array[int, N], cost_op: int, cost_idle: int
+        ) -> None:
+            # Array of idle costs
+            cost_to_apply = array(cost_idle for _ in range(comptime(n_qubits)))
+
+            # Replace with op noise for necessary blocks
+            for i in blk_ids.copy():
+                cost_to_apply[i] = cost_op
+
+            # Add costs to counter and reset counter
+            for i in range(comptime(n_qubits)):
+                self.qec_counter[i] += cost_to_apply[i]
+
+                if self.qec_counter[i] >= comptime(qec_budget):
+                    self.qec_counter[i] = 0
+
+            result("qec_counter", self.qec_counter)
 
     @guppy(link_name="link.QAlloc")
     @no_type_check
@@ -91,7 +120,7 @@ def identity_code_gen(n_qubits: int) -> EncoderSpec:
     def _Measure(q: tuple[int, int]) -> tuple[tuple[int, int], bool]:
         @guppy
         def _impl(
-            state: GLOBAL_STATE, q: tuple[int, int]
+                state: GLOBAL_STATE, q: tuple[int, int]
         ) -> tuple[tuple[int, int], bool]:
             result("_Measure", 0)
             blk_id, qb_id = q
@@ -134,6 +163,11 @@ def identity_code_gen(n_qubits: int) -> EncoderSpec:
             x(blk)
 
             state.put_block(blk_id, blk)
+
+            state.qec_policy(
+                array(blk_id), comptime(costs["X"]), comptime(costs["IDLE_X"])
+            )
+
             return ((blk_id, qb_id),)
 
         return map_global_state(_impl, q)
@@ -141,11 +175,11 @@ def identity_code_gen(n_qubits: int) -> EncoderSpec:
     @guppy(link_name="link.CX")
     @no_type_check
     def _CX(
-        ctl: tuple[int, int], tgt: tuple[int, int]
+            ctl: tuple[int, int], tgt: tuple[int, int]
     ) -> tuple[tuple[int, int], tuple[int, int]]:
         @guppy
         def _impl(
-            state: GLOBAL_STATE, input: tuple[tuple[int, int], tuple[int, int]]
+                state: GLOBAL_STATE, input: tuple[tuple[int, int], tuple[int, int]]
         ) -> tuple[tuple[int, int], tuple[int, int]]:
             result("_CX", 0)
             ctl, tgt = input
@@ -154,6 +188,10 @@ def identity_code_gen(n_qubits: int) -> EncoderSpec:
             cx(ctl_blk, tgt_blk)
 
             state.put_block(ctl[0], ctl_blk), state.put_block(tgt[0], tgt_blk)
+
+            state.qec_policy(
+                array(ctl[0], tgt[0]), comptime(costs["CX"]), comptime(costs["IDLE_CX"])
+            )
             return ctl, tgt
 
         return map_global_state(_impl, (ctl, tgt))
@@ -181,10 +219,11 @@ def identity_code_gen(n_qubits: int) -> EncoderSpec:
                     comptime(n_qubits),
                 )
             ),
+            array(0 for _ in range(comptime(n_qubits))),
         )
 
     def build_wrapper(
-        func: GuppyFunctionDefinition[[], None],
+            func: GuppyFunctionDefinition[[], None],
     ) -> GuppyFunctionDefinition[[], None]:
         @guppy
         @no_type_check
