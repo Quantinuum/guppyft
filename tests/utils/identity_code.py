@@ -15,25 +15,21 @@ def identity_code_gen(n_qubits: int) -> EncoderSpec:
     @guppy.struct
     class GLOBAL_STATE:
         blocks: array[Option[qubit], comptime(n_qubits)]  # type: ignore[type-arg,valid-type]
-        addr_stack: Option[Stack[tuple[int, int], comptime(n_qubits)]]  # type: ignore[type-arg,valid-type]
+        addr_stack: Stack[tuple[int, int], comptime(n_qubits)]  # type: ignore[type-arg,valid-type]
 
         @guppy
         @no_type_check
         def free_addr(self, addr: tuple[int, int]) -> None:
-            stack = self.addr_stack.take().unwrap()
-            stack = stack.push(addr)
-            self.addr_stack.swap(some(stack)).unwrap_nothing()
+            self.addr_stack = self.addr_stack.push(addr)
 
         @guppy
         @no_type_check
         def get_next_addr(
             self: "GLOBAL_STATE",
         ) -> tuple[int, int]:
-            stack = self.addr_stack.take().unwrap()
-            if stack.end == 0:
+            if self.addr_stack.end == 0:
                 exit("get_next_addr: No more qubits to allocate")
-            next_addr, stack = stack.pop()
-            self.addr_stack.swap(some(stack)).unwrap_nothing()
+            next_addr, self.addr_stack = self.addr_stack.pop()
 
             return next_addr
 
@@ -175,11 +171,9 @@ def identity_code_gen(n_qubits: int) -> EncoderSpec:
     def global_state_gen() -> GLOBAL_STATE:
         return GLOBAL_STATE(
             array(nothing[qubit]() for _ in range(comptime(n_qubits))),
-            some(
-                Stack(
-                    array(some((blk, 1)) for blk in range(comptime(n_qubits))),
-                    comptime(n_qubits),
-                )
+            Stack(
+                array(some((blk, 1)) for blk in range(comptime(n_qubits))),
+                comptime(n_qubits),
             ),
         )
 
