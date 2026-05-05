@@ -15,9 +15,9 @@ N = guppy.nat_var("N")
 
 
 def identity_code_gen(
-        n_qubits: int,
-        qec_budget: int,
-        costs: dict[str, int] = defaultdict(int),
+    n_qubits: int,
+    qec_budget: int = 1,
+    costs: dict[str, int] = defaultdict(int),
 ) -> EncoderSpec:
     @guppy.struct
     class GLOBAL_STATE:
@@ -36,7 +36,7 @@ def identity_code_gen(
         @guppy
         @no_type_check
         def get_next_addr(
-                self: "GLOBAL_STATE",
+            self: "GLOBAL_STATE",
         ) -> tuple[int, int]:
             stack = self.addr_stack.take().unwrap()
             if stack.end == 0:
@@ -66,8 +66,12 @@ def identity_code_gen(
             self.blocks[blk_id].swap(some(blk)).unwrap_nothing()
 
         @guppy
+        @no_type_check
         def qec_policy(
-                self: "GLOBAL_STATE", blk_ids: array[int, N], cost_op: int, cost_idle: int
+            self: "GLOBAL_STATE",
+            blk_ids: array[int, N],
+            cost_op: int,
+            cost_idle: int,
         ) -> None:
             # Array of idle costs
             cost_to_apply = array(cost_idle for _ in range(comptime(n_qubits)))
@@ -81,9 +85,8 @@ def identity_code_gen(
                 self.qec_counter[i] += cost_to_apply[i]
 
                 if self.qec_counter[i] >= comptime(qec_budget):
+                    result("qec_counter", self.qec_counter)
                     self.qec_counter[i] = 0
-
-            result("qec_counter", self.qec_counter)
 
     @guppy(link_name="link.QAlloc")
     @no_type_check
@@ -120,7 +123,7 @@ def identity_code_gen(
     def _Measure(q: tuple[int, int]) -> tuple[tuple[int, int], bool]:
         @guppy
         def _impl(
-                state: GLOBAL_STATE, q: tuple[int, int]
+            state: GLOBAL_STATE, q: tuple[int, int]
         ) -> tuple[tuple[int, int], bool]:
             result("_Measure", 0)
             blk_id, qb_id = q
@@ -175,11 +178,11 @@ def identity_code_gen(
     @guppy(link_name="link.CX")
     @no_type_check
     def _CX(
-            ctl: tuple[int, int], tgt: tuple[int, int]
+        ctl: tuple[int, int], tgt: tuple[int, int]
     ) -> tuple[tuple[int, int], tuple[int, int]]:
         @guppy
         def _impl(
-                state: GLOBAL_STATE, input: tuple[tuple[int, int], tuple[int, int]]
+            state: GLOBAL_STATE, input: tuple[tuple[int, int], tuple[int, int]]
         ) -> tuple[tuple[int, int], tuple[int, int]]:
             result("_CX", 0)
             ctl, tgt = input
@@ -223,7 +226,7 @@ def identity_code_gen(
         )
 
     def build_wrapper(
-            func: GuppyFunctionDefinition[[], None],
+        func: GuppyFunctionDefinition[[], None],
     ) -> GuppyFunctionDefinition[[], None]:
         @guppy
         @no_type_check
