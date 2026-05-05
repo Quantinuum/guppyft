@@ -1,59 +1,154 @@
-from guppylang import array, guppy
-from guppylang.std.builtins import result
-from guppylang.std.option import Option, nothing, some
-from hugr.package import Package
-from selene_helios_qis_plugin import HeliosInterface, LogLevel
-from selene_sim.backends.bundled_simulators import Coinflip
-from selene_sim.build import build
+from guppylang import guppy
+from guppylang.emulator import EmulatorBuilder
+from guppylang.std.builtins import array, result
+from guppylang.std.quantum import (
+    cx,
+    discard,
+    measure,
+    measure_array,
+    project_z,
+    qubit,
+    x,
+)
+from selene_sim.backends.bundled_simulators import Stim
 
-from guppyft.globals import map_global_state, with_global_state
+from guppyft.encoder import encode
+from utils.identity_code import identity_code_gen
 
 
-@guppy.struct
-class Range:
-    next: int
-    stop: int
-
+def test_qalloc_measure() -> None:
     @guppy
-    def __iter__(self: "Range") -> "Range":
-        return self
+    def main() -> None:
+        q = qubit()
+        measure(q)
 
+    id_code = identity_code_gen(n_qubits=1, qec_budget=1)
+
+    encoded_pkg = encode(main, id_code)
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+
+    assert runner.run().collated_shots() == [{"_MeasureFree": [0], "_QAlloc": [0]}]
+
+
+def test_qalloc_project_z_discard() -> None:
     @guppy
-    def __next__(self: "Range") -> Option[tuple[int, "Range"]]:
-        if self.next >= self.stop:
-            return nothing()
-        return some((self.next, Range(self.next + 1, self.stop)))
+    def main() -> None:
+        q = qubit()
+        result("project_z", project_z(q))
+        discard(q)
+
+    id_code = identity_code_gen(n_qubits=1, qec_budget=1)
+
+    encoded_pkg = encode(main, id_code)
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+
+    assert runner.run().collated_shots() == [
+        {"_Measure": [0], "_QAlloc": [0], "_QFree": [0], "project_z": [0]}
+    ]
+
 
 def test_x() -> None:
-    @guppy.struct
-    class STATE:
-        counter: array[int, 1]  # type: ignore[valid-type]
-
-    @guppy(link_name="breakit")
-    def break_it(state: STATE) -> None:
-        for i in Range(0, 1):
-            result("iloop", i)
-            if state.counter[0] > 0:
-                pass
-        result("break_it", 0)
-
-    @guppy(link_name="main")
+    @guppy
     def main() -> None:
-        map_global_state(break_it)
-        result("main", 0)
+        q = qubit()
+        x(q)
+        result("q", measure(q))
 
-    @guppy(link_name="wrapper")
-    def wrapper() -> None:
-        state = STATE(array(0))
-        with_global_state(state, main)
+    id_code = identity_code_gen(n_qubits=1, qec_budget=1)
 
-    pkg: Package = wrapper.compile()
-    with open("my-hugr.hugr", "wb") as f:
-        f.write(pkg.to_bytes())
-    # pkg.modules[0].render_dot(RenderConfig(display_node_id=True, max_node_label_length=None)).view()
+    encoded_pkg = encode(main, id_code)
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
 
-    instance = build(pkg, build_dir="selene-build", interface=HeliosInterface(log_level=LogLevel.DIAGNOSTIC))
-    print("Building done!")
-    return
-    results = list(instance.run(simulator=Coinflip(), n_qubits=0))
-    assert results == [('break_it', 0), ('main', 0)]
+    assert runner.run().collated_shots() == [
+        {"_MeasureFree": [0], "_QAlloc": [0], "_X": [0], "q": [1]}
+    ]
+
+
+def test_cx() -> None:
+    @guppy
+    def main() -> None:
+        ctl, tgt = qubit(), qubit()
+        cx(ctl, tgt)
+        result("ctl", measure(ctl))
+        result("tgt", measure(tgt))
+
+    id_code = identity_code_gen(n_qubits=2, qec_budget=1)
+
+    encoded_pkg = encode(main, id_code)
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
+
+    assert runner.run().collated_shots() == [
+        {"_MeasureFree": [0, 0], "_QAlloc": [0, 0], "_CX": [0], "ctl": [0], "tgt": [0]},
+    ]
+
+
+def test_qubit_array() -> None:
+    @guppy
+    def main() -> None:
+        qb_arr = array(qubit() for _ in range(2))
+        measure_array(qb_arr)
+
+    id_code = identity_code_gen(n_qubits=2, qec_budget=1)
+
+    encoded_pkg = encode(main, id_code)
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
+
+    assert runner.run().collated_shots() == [
+        {"_MeasureFree": [0, 0], "_QAlloc": [0, 0]}
+    ]
+
+
+def test_out_of_logical_qubits() -> None:
+    @guppy
+    def main() -> None:
+        q0 = qubit()
+        q1 = qubit()
+        discard(q0)
+        discard(q1)
+
+    id_code = identity_code_gen(n_qubits=1, qec_budget=1)
+
+    encoded_pkg = encode(main, id_code)
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+
+    assert runner.run().collated_shots() == [
+        {"_QAlloc": [0, 0], "exit: get_next_addr: No more qubits to allocate": [1]}
+    ]
+
+
+def test_qubit_reuse() -> None:
+    @guppy
+    def main() -> None:
+        qb = qubit()
+        result("qb", measure(qb))
+        qb = qubit()
+        result("qb", measure(qb))
+
+    id_code = identity_code_gen(n_qubits=1, qec_budget=1)
+
+    encoded_pkg = encode(main, id_code)
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+
+    assert runner.run().collated_shots() == [
+        {"_MeasureFree": [0, 0], "_QAlloc": [0, 0], "qb": [0, 0]}
+    ]
+
+
+def test_qec_policy() -> None:
+    @guppy
+    def main() -> None:
+        qb = qubit()
+        x(qb)
+        x(qb)
+        measure(qb)
+
+    costs = {"X": 1, "IDLE_X": 0, "CX": 0, "IDLE_CX": 0}
+
+    id_code = identity_code_gen(n_qubits=1, qec_budget=1, costs=costs)
+
+    encoded_pkg = encode(main, id_code)
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+
+    assert runner.run().collated_shots() == [
+        {"_MeasureFree": [0, 0], "_QAlloc": [0, 0], "qb": [0, 0]}
+    ]
