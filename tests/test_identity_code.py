@@ -133,3 +133,27 @@ def test_qubit_reuse() -> None:
     assert runner.run().collated_shots() == [
         {"_MeasureFree": [0, 0], "_QAlloc": [0, 0], "qb": [0, 0]}
     ]
+
+
+def test_qec_policy() -> None:
+    @guppy
+    def main() -> None:
+        qb = qubit()
+        x(qb)
+        measure(qb)
+
+    costs = {"X": 1, "IDLE_X": 0, "CX": 0, "IDLE_CX": 0}
+
+    id_code = identity_code_gen(n_qubits=1, qec_budget=1, costs=costs)
+
+    encoded_pkg = encode(main, id_code)
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+
+    assert runner.run().collated_shots() == [
+        {
+            "_MeasureFree": [0],
+            "_QAlloc": [0],
+            "_X": [0],
+            "qec_counter": [[1]],
+        }
+    ]
