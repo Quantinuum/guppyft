@@ -17,8 +17,12 @@ N = guppy.nat_var("N")
 def identity_code_gen(
     n_qubits: int,
     qec_budget: int = 1,
-    costs: dict[str, int] = defaultdict(int),
+    costs: dict[str, int] | None = None,
 ) -> EncoderSpec:
+
+    if costs is None:
+        costs = defaultdict(int)
+
     @guppy.struct
     class GLOBAL_STATE:
         blocks: array[Option[qubit], comptime(n_qubits)]  # type: ignore[type-arg,valid-type]
