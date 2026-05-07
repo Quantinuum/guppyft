@@ -3,9 +3,11 @@ from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
+from guppylang.std.angles import pi
 from guppylang.std.builtins import array, comptime, owned, result
 from guppylang.std.collections import Stack
 from guppylang.std.option import Option, nothing, some
+from guppylang.std.qsystem import zz_phase
 from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
 
 from guppyft.globals import map_global_state, with_global_state
@@ -199,6 +201,33 @@ def identity_code_gen(
 
         return map_global_state(_impl, (ctl, tgt))
 
+    @guppy(link_name="link.ZZPhase")
+    @no_type_check
+    def _ZZPhase(
+        q0: tuple[int, int], q1: tuple[int, int], theta: float
+    ) -> tuple[tuple[int, int], tuple[int, int]]:
+        @guppy
+        def _impl(
+            state: GLOBAL_STATE, input: tuple[tuple[int, int], tuple[int, int], float]
+        ) -> tuple[tuple[int, int], tuple[int, int]]:
+            result("_ZZPhase", 0)
+            q0, q1, theta = input
+            ctl_blk, tgt_blk = state.take_block(q0[0]), state.take_block(q1[0])
+
+            zz_phase(ctl_blk, tgt_blk, theta / pi)
+
+            state.put_block(q0[0], ctl_blk)
+            state.put_block(q1[0], tgt_blk)
+
+            state.qec_policy(
+                array(q0[0], q1[0]),
+                comptime(costs["ZZPhase"]),
+                comptime(costs["IDLE_ZZPhase"]),
+            )
+            return q0, q1
+
+        return map_global_state(_impl, (q0, q1, theta))
+
     ops = OpReplacements()
     ops.with_funcs(
         {
@@ -208,6 +237,7 @@ def identity_code_gen(
             ("tket.quantum", "QFree"): _QFree,
             ("tket.quantum", "X"): _X,
             ("tket.quantum", "CX"): _CX,
+            ("tket.qsystem", "ZZPhase"): _ZZPhase,
         }
     )
 

@@ -1,6 +1,8 @@
 from guppylang import guppy
 from guppylang.emulator import EmulatorBuilder
+from guppylang.std.angles import angle
 from guppylang.std.builtins import array, result
+from guppylang.std.qsystem import zz_phase
 from guppylang.std.quantum import (
     cx,
     discard,
@@ -156,4 +158,28 @@ def test_qec_policy() -> None:
             "_X": [0],
             "qec_counter": [[1]],
         }
+    ]
+
+
+def test_zz_phase() -> None:
+    @guppy
+    def main() -> None:
+        q0, q1 = qubit(), qubit()
+        zz_phase(q0, q1, angle(0.0))
+        result("ctl", measure(q0))
+        result("tgt", measure(q1))
+
+    id_code = identity_code_gen(n_qubits=2)
+
+    encoded_pkg = encode(main, id_code)
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
+
+    assert runner.run().collated_shots() == [
+        {
+            "_MeasureFree": [0, 0],
+            "_QAlloc": [0, 0],
+            "_ZZPhase": [0],
+            "ctl": [0],
+            "tgt": [0],
+        },
     ]
