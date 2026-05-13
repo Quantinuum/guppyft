@@ -1,15 +1,20 @@
+import pytest
 from guppylang import guppy
 from guppylang.emulator import EmulatorBuilder
+from guppylang.std.angles import angle
 from guppylang.std.builtins import array, result
+from guppylang.std.qsystem import zz_phase
 from guppylang.std.quantum import (
     cx,
     discard,
+    discard_array,
     measure,
     measure_array,
     project_z,
     qubit,
     x,
 )
+from mypy.checkexpr import defaultdict
 from selene_sim.backends.bundled_simulators import Stim
 
 from guppyft.encoder import encode
@@ -83,6 +88,30 @@ def test_cx() -> None:
     ]
 
 
+def test_zz_phase() -> None:
+    @guppy
+    def main() -> None:
+        ctl, tgt = qubit(), qubit()
+        zz_phase(ctl, tgt, angle(0.0))
+        result("ctl", measure(ctl))
+        result("tgt", measure(tgt))
+
+    id_code = identity_code_gen(n_qubits=2)
+
+    encoded_pkg = encode(main, id_code)
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
+
+    assert runner.run().collated_shots() == [
+        {
+            "_MeasureFree": [0, 0],
+            "_QAlloc": [0, 0],
+            "_ZZPhase": [0],
+            "ctl": [0],
+            "tgt": [0],
+        },
+    ]
+
+
 def test_qubit_array() -> None:
     @guppy
     def main() -> None:
@@ -142,7 +171,8 @@ def test_qec_policy() -> None:
         x(qb)
         measure(qb)
 
-    costs = {"X": 1, "IDLE_X": 0, "CX": 0, "IDLE_CX": 0}
+    costs = defaultdict(int)
+    costs = costs | {"X": 1, "IDLE_X": 0, "CX": 0, "IDLE_CX": 0}
 
     id_code = identity_code_gen(n_qubits=1, qec_budget=1, costs=costs)
 

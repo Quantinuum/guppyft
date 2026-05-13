@@ -3,9 +3,11 @@ from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
+from guppylang.std.angles import angle
 from guppylang.std.builtins import array, comptime, owned, result
 from guppylang.std.collections import Stack
 from guppylang.std.option import Option, nothing, some
+from guppylang.std.qsystem import zz_phase
 from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
 
 from guppyft.globals import map_global_state, with_global_state
@@ -24,7 +26,7 @@ def identity_code_gen(
         costs = defaultdict(int)
 
     @guppy.struct
-    class GLOBAL_STATE:
+    class STATE:
         blocks: array[Option[qubit], comptime(n_qubits)]  # type: ignore[type-arg,valid-type]
         addr_stack: Stack[tuple[int, int], comptime(n_qubits)]  # type: ignore[type-arg,valid-type]
 
@@ -38,7 +40,7 @@ def identity_code_gen(
         @guppy
         @no_type_check
         def get_next_addr(
-            self: "GLOBAL_STATE",
+            self: "STATE",
         ) -> tuple[int, int]:
             if self.addr_stack.end == 0:
                 exit("get_next_addr: No more qubits to allocate")
@@ -48,7 +50,7 @@ def identity_code_gen(
 
         @guppy
         @no_type_check
-        def discard(self: "GLOBAL_STATE" @ owned) -> None:
+        def discard(self: "STATE" @ owned) -> None:
             for qb in self.blocks:
                 if qb.is_some():
                     qb.unwrap().discard()
@@ -68,7 +70,7 @@ def identity_code_gen(
         @guppy
         @no_type_check
         def qec_policy(
-            self: "GLOBAL_STATE",
+            self: "STATE",
             blk_ids: array[int, N],
             cost_op: int,
             cost_idle: int,
@@ -88,11 +90,11 @@ def identity_code_gen(
                     result("qec_counter", self.qec_counter)
                     self.qec_counter[i] = 0
 
-    @guppy(link_name="link.QAlloc")
+    @guppy(link_name="link.identity.QAlloc")
     @no_type_check
     def _QAlloc() -> tuple[tuple[int, int]]:
         @guppy
-        def _impl(state: GLOBAL_STATE) -> tuple[tuple[int, int]]:
+        def _impl(state: STATE) -> tuple[tuple[int, int]]:
             result("_QAlloc", 0)
             blk_id, qb_id = state.get_next_addr()
             state.put_block(blk_id, qubit())
@@ -101,11 +103,11 @@ def identity_code_gen(
         return map_global_state(_impl)
 
     # MeasureFree is compiled from `guppylang.std.quantum.measure`
-    @guppy(link_name="link.MeasureFree")
+    @guppy(link_name="link.identity.MeasureFree")
     @no_type_check
     def _MeasureFree(q: tuple[int, int]) -> bool:
         @guppy
-        def _impl(state: GLOBAL_STATE, q: tuple[int, int]) -> bool:
+        def _impl(state: STATE, q: tuple[int, int]) -> bool:
             result("_MeasureFree", 0)
             blk_id, _ = q
             blk = state.take_block(blk_id)
@@ -118,13 +120,11 @@ def identity_code_gen(
         return map_global_state(_impl, q)
 
     # Measure is compiled from `guppylang.std.quantum.project_z`
-    @guppy(link_name="link.Measure")
+    @guppy(link_name="link.identity.Measure")
     @no_type_check
     def _Measure(q: tuple[int, int]) -> tuple[tuple[int, int], bool]:
         @guppy
-        def _impl(
-            state: GLOBAL_STATE, q: tuple[int, int]
-        ) -> tuple[tuple[int, int], bool]:
+        def _impl(state: STATE, q: tuple[int, int]) -> tuple[tuple[int, int], bool]:
             result("_Measure", 0)
             blk_id, qb_id = q
             blk = state.take_block(blk_id)
@@ -137,12 +137,12 @@ def identity_code_gen(
         return map_global_state(_impl, q)
 
     # QFree is compiled from `guppylang.std.quantum.discard`
-    @guppy(link_name="link.QFree")
+    @guppy(link_name="link.identity.QFree")
     @no_type_check
     def _QFree(q: tuple[int, int]) -> None:
         # `_impl` requires a return type otherwise it will not be called.
         @guppy
-        def _impl(state: GLOBAL_STATE, q: tuple[int, int]) -> None:
+        def _impl(state: STATE, q: tuple[int, int]) -> None:
             result("_QFree", 0)
             blk_id, _ = q
             blk = state.take_block(blk_id)
@@ -154,11 +154,11 @@ def identity_code_gen(
         # The return must be used otherwise the function is not called.
         return map_global_state(_impl, q)
 
-    @guppy(link_name="link.X")
+    @guppy(link_name="link.identity.X")
     @no_type_check
     def _X(q: tuple[int, int]) -> tuple[tuple[int, int]]:
         @guppy
-        def _impl(state: GLOBAL_STATE, q: tuple[int, int]) -> tuple[tuple[int, int]]:
+        def _impl(state: STATE, q: tuple[int, int]) -> tuple[tuple[int, int]]:
             result("_X", 0)
             blk_id, qb_id = q
             blk = state.take_block(blk_id)
@@ -175,14 +175,14 @@ def identity_code_gen(
 
         return map_global_state(_impl, q)
 
-    @guppy(link_name="link.CX")
+    @guppy(link_name="link.identity.CX")
     @no_type_check
     def _CX(
         ctl: tuple[int, int], tgt: tuple[int, int]
     ) -> tuple[tuple[int, int], tuple[int, int]]:
         @guppy
         def _impl(
-            state: GLOBAL_STATE, input: tuple[tuple[int, int], tuple[int, int]]
+            state: STATE, input: tuple[tuple[int, int], tuple[int, int]]
         ) -> tuple[tuple[int, int], tuple[int, int]]:
             result("_CX", 0)
             ctl, tgt = input
@@ -199,6 +199,32 @@ def identity_code_gen(
 
         return map_global_state(_impl, (ctl, tgt))
 
+    @guppy(link_name="link.identity.ZZPhase")
+    @no_type_check
+    def _ZZPhase(
+        ctl: tuple[int, int], tgt: tuple[int, int], phase: float
+    ) -> tuple[tuple[int, int], tuple[int, int]]:
+        @guppy
+        def _impl(
+            state: STATE, input: tuple[tuple[int, int], tuple[int, int], float]
+        ) -> tuple[tuple[int, int], tuple[int, int]]:
+            result("_ZZPhase", 0)
+            ctl, tgt, theta = input
+            ctl_blk, tgt_blk = state.take_block(ctl[0]), state.take_block(tgt[0])
+
+            zz_phase(ctl_blk, tgt_blk, angle(theta))
+
+            state.put_block(ctl[0], ctl_blk), state.put_block(tgt[0], tgt_blk)
+
+            state.qec_policy(
+                array(ctl[0], tgt[0]),
+                comptime(costs["ZZPhase"]),
+                comptime(costs["IDLE_ZZPhase"]),
+            )
+            return ctl, tgt
+
+        return map_global_state(_impl, (ctl, tgt, phase))
+
     ops = OpReplacements()
     ops.with_funcs(
         {
@@ -208,13 +234,14 @@ def identity_code_gen(
             ("tket.quantum", "QFree"): _QFree,
             ("tket.quantum", "X"): _X,
             ("tket.quantum", "CX"): _CX,
+            ("tket.qsystem", "ZZPhase"): _ZZPhase,
         }
     )
 
     @guppy
     @no_type_check
-    def global_state_gen() -> GLOBAL_STATE:
-        return GLOBAL_STATE(
+    def global_state_gen() -> STATE:
+        return STATE(
             array(nothing[qubit]() for _ in range(comptime(n_qubits))),
             Stack(
                 array(some((blk, 1)) for blk in range(comptime(n_qubits))),
