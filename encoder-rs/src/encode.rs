@@ -107,8 +107,8 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for EncoderPass {
                     .contains_key(&(ext_name.clone(), op_name.clone()));
                 let in_extensions = hugr.extensions().get(&ext_name).is_some();
                 assert!(
-                    in_rewrite_ops || in_extensions,
-                    "Extension op '{ext_name}.{op_name}' not found in `rewrite_ops` or hugr extension registry"
+                    !in_rewrite_ops || in_extensions,
+                    "Extension op '{ext_name}.{op_name}' found in `rewrite_ops` but not in hugr extension registry."
                 );
             }
         }
