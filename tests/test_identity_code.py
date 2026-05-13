@@ -1,4 +1,6 @@
-import pytest
+from collections import defaultdict
+from typing import no_type_check
+
 from guppylang import guppy
 from guppylang.emulator import EmulatorBuilder
 from guppylang.std.angles import angle
@@ -7,14 +9,12 @@ from guppylang.std.qsystem import zz_phase
 from guppylang.std.quantum import (
     cx,
     discard,
-    discard_array,
     measure,
     measure_array,
     project_z,
     qubit,
     x,
 )
-from mypy.checkexpr import defaultdict
 from selene_sim.backends.bundled_simulators import Stim
 
 from guppyft.encoder import encode
@@ -90,6 +90,7 @@ def test_cx() -> None:
 
 def test_zz_phase() -> None:
     @guppy
+    @no_type_check
     def main() -> None:
         ctl, tgt = qubit(), qubit()
         zz_phase(ctl, tgt, angle(0.0))
@@ -171,7 +172,7 @@ def test_qec_policy() -> None:
         x(qb)
         measure(qb)
 
-    costs = defaultdict(int)
+    costs: dict[str, int] = defaultdict(int)
     costs = costs | {"X": 1, "IDLE_X": 0, "CX": 0, "IDLE_CX": 0}
 
     id_code = identity_code_gen(n_qubits=1, qec_budget=1, costs=costs)
