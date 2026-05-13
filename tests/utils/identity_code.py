@@ -234,6 +234,9 @@ def identity_code_gen(
             ("tket.quantum", "QFree"): _QFree,
             ("tket.quantum", "X"): _X,
             ("tket.quantum", "CX"): _CX,
+            # `tket.qsystem` extension may not be loaded in programs that only use
+            # `guppyland.std.quantum` operations. `ZZPhase` is included to test
+            # missing extension behaviour during encoding.
             ("tket.qsystem", "ZZPhase"): _ZZPhase,
         }
     )

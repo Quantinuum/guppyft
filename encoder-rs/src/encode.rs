@@ -94,6 +94,25 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for EncoderPass {
     type Result = ();
 
     fn run(&self, hugr: &mut H) -> Result<Self::Result, Self::Error> {
+        #[cfg(debug_assertions)]
+        {
+            for ext_op in hugr
+                .nodes()
+                .filter_map(|n| hugr.get_optype(n).as_extension_op())
+            {
+                let ext_name = ext_op.def().extension_id().to_string();
+                let op_name = ext_op.def().name().to_string();
+                let in_rewrite_ops = self
+                    .rewrite_ops
+                    .contains_key(&(ext_name.clone(), op_name.clone()));
+                let in_extensions = hugr.extensions().get(&ext_name).is_some();
+                assert!(
+                    in_rewrite_ops || in_extensions,
+                    "Extension op '{ext_name}.{op_name}' not found in `rewrite_ops` or hugr extension registry"
+                );
+            }
+        }
+
         let op_funcs = self
             .rewrite_ops
             .iter()
