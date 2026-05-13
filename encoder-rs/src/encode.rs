@@ -94,21 +94,35 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for EncoderPass {
     type Result = ();
 
     fn run(&self, hugr: &mut H) -> Result<Self::Result, Self::Error> {
+        #[cfg(debug_assertions)]
+        {
+            for ext_op in hugr
+                .nodes()
+                .filter_map(|n| hugr.get_optype(n).as_extension_op())
+            {
+                let ext_name = ext_op.def().extension_id().to_string();
+                let op_name = ext_op.def().name().to_string();
+                let in_rewrite_ops = self
+                    .rewrite_ops
+                    .contains_key(&(ext_name.clone(), op_name.clone()));
+                let in_extensions = hugr.extensions().get(&ext_name).is_some();
+                assert!(
+                    !in_rewrite_ops || in_extensions,
+                    "Extension op '{ext_name}.{op_name}' found in `rewrite_ops` but not in hugr extension registry."
+                );
+            }
+        }
+
         let op_funcs = self
             .rewrite_ops
             .iter()
-            .map(|((ext_name, op_name), (func_hugr, func_name))| {
-                let Some(ext) = hugr.extensions().get(ext_name) else {
-                    panic!(
-                        "Extension '{ext_name}' not found in HUGR when looking for op '{op_name}' to rewrite! Available extensions: {:?}",
-                        hugr.extensions().ids().collect_vec()
-                    );
-                };
+            .filter_map(|((ext_name, op_name), (func_hugr, func_name))| {
+                let ext = hugr.extensions().get(ext_name)?;
 
                 let op_def = ext.get_op(op_name).unwrap().clone();
                 // We cannot handle ops with custom instantiations at the moment
                 assert_eq!(op_def.params().unwrap().len(), 0);
-                (op_def, func_hugr.clone(), func_name)
+                Some((op_def, func_hugr.clone(), func_name))
             })
             .collect_vec();
 
