@@ -78,7 +78,13 @@ def _map_op_for_global_var(
             output_args = ListArg(_unpack_tuple_arg(args[1], ctx))
         else:
             input_args = ListArg([args[1].to_hugr(ctx)])
-            output_args = ListArg(_unpack_tuple_arg(args[2], ctx))
+
+            if args[1].ty.copyable:
+                output_args = ListArg(_unpack_tuple_arg(args[2], ctx))
+            else:
+                output_args = ListArg(
+                    [*_unpack_tuple_arg(args[2], ctx), args[1].to_hugr(ctx)]
+                )
 
         return globals.map_def.instantiate(
             [
@@ -95,22 +101,22 @@ def _map_op_for_global_var(
 
 @hugr_op(_map_op_for_global_var("GUPPY_FT_GLOBAL"))
 @no_type_check
-def map_global_state_input(func: Callable[[T, IN], OUT], inputs: IN) -> OUT: ...
+def _map_global_state_input(func: Callable[[T, IN], OUT], inputs: IN) -> OUT: ...
 
 
 @hugr_op(_map_op_for_global_var("GUPPY_FT_GLOBAL"))
 @no_type_check
-def map_global_state_linear_input(
+def _map_global_state_linear_input(
     func: Callable[[T, L_IN], OUT], inputs: L_IN
 ) -> OUT: ...
 
 
 @hugr_op(_map_op_for_global_var("GUPPY_FT_GLOBAL"))
 @no_type_check
-def map_global_state_no_input(func: Callable[[T], OUT]) -> OUT: ...
+def _map_global_state_no_input(func: Callable[[T], OUT]) -> OUT: ...
 
 
 @guppy.overload(
-    map_global_state_input, map_global_state_linear_input, map_global_state_no_input
+    _map_global_state_input, _map_global_state_linear_input, _map_global_state_no_input
 )
-def map_global_state(*args: Any) -> Any: ...
+def map_global_state(state: T, args: Any = None) -> Any | None: ...  # type: ignore[valid-type]

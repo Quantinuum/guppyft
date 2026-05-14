@@ -202,6 +202,7 @@ def test_non_linear_global() -> None:
 
 def test_linear_input_arg() -> None:
     @guppy
+    @no_type_check
     def foo(qb: qubit, arr: array[int, 2]) -> None:
         result("foo", arr)
         x(qb)
