@@ -1,0 +1,4 @@
+[rules]
+# Ignore "too-many-positional-arguments" that is triggered by all
+# uses of `qubit()`.
+too-many-positional-arguments = "ignore"
