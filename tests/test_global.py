@@ -198,3 +198,22 @@ def test_non_linear_global() -> None:
         TypeError, match=r"Global arg must be linear. Found int<6>."
     ) as _:
         main.emulator(n_qubits=1).run().collated_shots()
+
+
+def test_linear_input_arg() -> None:
+    @guppy
+    def foo(qb: qubit, arr: array[int, 2]) -> None:
+        result("foo", arr)
+        x(qb)
+
+    @guppy
+    def my_prog() -> None:
+        map_global_state(foo, array(0, 1))
+
+    @guppy
+    def main() -> None:
+        qb = qubit()
+        qb = with_global_state(qb, my_prog)
+        discard(qb)
+
+    main.emulator(n_qubits=1).run()
