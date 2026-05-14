@@ -27,10 +27,10 @@ def identity_code_gen(
 
     @guppy.struct
     class STATE:
-        blocks: array[Option[qubit], comptime(n_qubits)]  # type: ignore[type-arg,valid-type]
-        addr_stack: Stack[tuple[int, int], comptime(n_qubits)]  # type: ignore[type-arg,valid-type]
+        blocks: array[Option[qubit], comptime(n_qubits)]  # ty: ignore[invalid-type-form]
+        addr_stack: Stack[tuple[int, int], comptime(n_qubits)]
 
-        qec_counter: array[int, comptime(n_qubits)]  # type: ignore[valid-type]
+        qec_counter: array[int, comptime(n_qubits)]  # ty: ignore[invalid-type-form]
 
         @guppy
         @no_type_check
@@ -263,6 +263,6 @@ def identity_code_gen(
             state = with_global_state(state, func)
             state.discard()
 
-        return wrapper  # type: ignore[no-any-return]
+        return wrapper
 
     return EncoderSpec(ops=ops, build_wrapper=build_wrapper)
