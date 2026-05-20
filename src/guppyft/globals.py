@@ -1,18 +1,18 @@
 from collections.abc import Callable
-from typing import Any, cast, no_type_check
+from typing import cast, no_type_check
 
 from guppylang import guppy
 from guppylang.std.builtins import owned
-from guppylang_internals.compiler.core import EXTENSION_OPS_WITH_SIDE_EFFECTS
+from guppylang_internals.compiler.core import (
+    EXTENSION_OPS_WITH_SIDE_EFFECTS,
+)
 from guppylang_internals.decorator import hugr_op
-from guppylang_internals.tys.arg import Argument
-from guppylang_internals.tys.arg import TypeArg as GuppyTypeArg
+from guppylang_internals.tys.arg import Argument, TypeArg
 from guppylang_internals.tys.common import ToHugrContext
 from guppylang_internals.tys.subst import Inst
 from guppylang_internals.tys.ty import NoneType, TupleType
 from hugr import ops
 from hugr import tys as ht
-from hugr.tys import ListArg, TypeArg, TypeBound, TypeTypeArg
 from tket_exts import globals
 
 T = guppy.type_var("T", copyable=False, droppable=False)
@@ -32,13 +32,13 @@ def with_op_for_global_var(
     var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
-        global_arg = cast("TypeTypeArg", args[0].to_hugr(ctx))
+        global_arg = cast("ht.TypeTypeArg", args[0].to_hugr(ctx))
 
-        if global_arg.ty.type_bound() != TypeBound.Linear:
+        if global_arg.ty.type_bound() != ht.TypeBound.Linear:
             raise TypeError(f"Global arg must be linear. Found {global_arg.ty}.")
 
         return globals.with_def.instantiate(
-            [ht.StringArg(var_name), global_arg, ListArg([]), ListArg([])],
+            [ht.StringArg(var_name), global_arg, ht.ListArg([]), ht.ListArg([])],
             concrete,
         )
 
@@ -47,12 +47,12 @@ def with_op_for_global_var(
 
 @hugr_op(with_op_for_global_var("GUPPY_FT_GLOBAL"))
 @no_type_check
-def with_global_state(new_value: T @ owned, func: Callable[[], None]) -> T: ...
+def with_global_state(func: Callable[[], None], new_value: T @ owned) -> T: ...
 
 
-def _unpack_tuple_arg(arg: Argument, ctx: ToHugrContext) -> list[TypeArg]:
+def _unpack_tuple_arg(arg: Argument, ctx: ToHugrContext) -> list[ht.TypeArg]:
     match arg:
-        case GuppyTypeArg(ty=gty):
+        case TypeArg(ty=gty):
             match gty:
                 case TupleType(args=elems):
                     return [ty.to_hugr(ctx) for ty in elems]
@@ -68,22 +68,25 @@ def _map_op_for_global_var(
     var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
-        global_arg = args[0].to_hugr(ctx)
         if len(args) == 2:
-            input_args = ListArg([])
+            input_args = ht.ListArg([])
+            global_arg = args[0].to_hugr(ctx)
             # There is a mismatch in function signatures between the Guppy compiler
             # and the HUGR Op instantiation. The Guppy compile unpacks tuples at
             # the output of functions while HUGR does not. It is necessary for us
             # to manually unpack the tuple type here for the signatures to match.
-            output_args = ListArg(_unpack_tuple_arg(args[1], ctx))
+            output_args = ht.ListArg(_unpack_tuple_arg(args[1], ctx))
         else:
-            input_args = ListArg([args[1].to_hugr(ctx)])
+            input_args = ht.ListArg([args[0].to_hugr(ctx)])
+            global_arg = args[1].to_hugr(ctx)
 
-            if args[1].ty.copyable:
-                output_args = ListArg(_unpack_tuple_arg(args[2], ctx))
+            input_ty_arg = args[0]
+            assert isinstance(input_ty_arg, TypeArg)
+            if input_ty_arg.ty.copyable:
+                output_args = ht.ListArg(_unpack_tuple_arg(args[2], ctx))
             else:
-                output_args = ListArg(
-                    [*_unpack_tuple_arg(args[2], ctx), args[1].to_hugr(ctx)]
+                output_args = ht.ListArg(
+                    [*_unpack_tuple_arg(args[2], ctx), args[0].to_hugr(ctx)]
                 )
 
         return globals.map_def.instantiate(
@@ -101,13 +104,13 @@ def _map_op_for_global_var(
 
 @hugr_op(_map_op_for_global_var("GUPPY_FT_GLOBAL"))
 @no_type_check
-def _map_global_state_input(func: Callable[[T, IN], OUT], inputs: IN) -> OUT: ...
+def _map_global_state_input(func: Callable[[IN, T], OUT], inputs: IN) -> OUT: ...
 
 
 @hugr_op(_map_op_for_global_var("GUPPY_FT_GLOBAL"))
 @no_type_check
 def _map_global_state_linear_input(
-    func: Callable[[T, L_IN], OUT], inputs: L_IN
+    func: Callable[[L_IN, T], OUT], inputs: L_IN
 ) -> OUT: ...
 
 
@@ -119,4 +122,4 @@ def _map_global_state_no_input(func: Callable[[T], OUT]) -> OUT: ...
 @guppy.overload(
     _map_global_state_input, _map_global_state_linear_input, _map_global_state_no_input
 )
-def map_global_state(state: T, args: Any = None) -> Any | None: ...  # type: ignore[valid-type]
+def map_global_state(state: T, args: IN | None = None) -> OUT: ...  # type: ignore[valid-type]

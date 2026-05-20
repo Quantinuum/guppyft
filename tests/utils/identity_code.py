@@ -107,7 +107,7 @@ def identity_code_gen(
     @no_type_check
     def _MeasureFree(q: tuple[int, int]) -> bool:
         @guppy
-        def _impl(state: STATE, q: tuple[int, int]) -> bool:
+        def _impl(q: tuple[int, int], state: STATE) -> bool:
             result("_MeasureFree", 0)
             blk_id, _ = q
             blk = state.take_block(blk_id)
@@ -124,7 +124,7 @@ def identity_code_gen(
     @no_type_check
     def _Measure(q: tuple[int, int]) -> tuple[tuple[int, int], bool]:
         @guppy
-        def _impl(state: STATE, q: tuple[int, int]) -> tuple[tuple[int, int], bool]:
+        def _impl(q: tuple[int, int], state: STATE) -> tuple[tuple[int, int], bool]:
             result("_Measure", 0)
             blk_id, qb_id = q
             blk = state.take_block(blk_id)
@@ -142,7 +142,7 @@ def identity_code_gen(
     def _QFree(q: tuple[int, int]) -> None:
         # `_impl` requires a return type otherwise it will not be called.
         @guppy
-        def _impl(state: STATE, q: tuple[int, int]) -> None:
+        def _impl(q: tuple[int, int], state: STATE) -> None:
             result("_QFree", 0)
             blk_id, _ = q
             blk = state.take_block(blk_id)
@@ -158,7 +158,7 @@ def identity_code_gen(
     @no_type_check
     def _X(q: tuple[int, int]) -> tuple[tuple[int, int]]:
         @guppy
-        def _impl(state: STATE, q: tuple[int, int]) -> tuple[tuple[int, int]]:
+        def _impl(q: tuple[int, int], state: STATE) -> tuple[tuple[int, int]]:
             result("_X", 0)
             blk_id, qb_id = q
             blk = state.take_block(blk_id)
@@ -182,7 +182,7 @@ def identity_code_gen(
     ) -> tuple[tuple[int, int], tuple[int, int]]:
         @guppy
         def _impl(
-            state: STATE, input: tuple[tuple[int, int], tuple[int, int]]
+            input: tuple[tuple[int, int], tuple[int, int]], state: STATE
         ) -> tuple[tuple[int, int], tuple[int, int]]:
             result("_CX", 0)
             ctl, tgt = input
@@ -206,7 +206,7 @@ def identity_code_gen(
     ) -> tuple[tuple[int, int], tuple[int, int]]:
         @guppy
         def _impl(
-            state: STATE, input: tuple[tuple[int, int], tuple[int, int], float]
+            input: tuple[tuple[int, int], tuple[int, int], float], state: STATE
         ) -> tuple[tuple[int, int], tuple[int, int]]:
             result("_ZZPhase", 0)
             ctl, tgt, theta = input
@@ -260,7 +260,7 @@ def identity_code_gen(
         @no_type_check
         def wrapper() -> None:
             state = global_state_gen()
-            state = with_global_state(state, func)
+            state = with_global_state(func, state)
             state.discard()
 
         return wrapper  # type: ignore[no-any-return]
