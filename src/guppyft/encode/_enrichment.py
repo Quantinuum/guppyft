@@ -14,9 +14,9 @@ from guppyft._util import link_name
 
 class OpReplacements:
     ops: dict[tuple[str, str], tuple[GuppyFunctionDefinition[Any, Any] | None, str]]
-    """Stores the operations to replace during encoding and their replacement functions.
-    A function can be set to `None` to indicate that a declaration with the given name
-    should be generated."""
+    """Stores the operations to replace during enrichment and their replacement
+    functions. A function can be set to `None` to indicate that a declaration with the
+    given name should be generated."""
 
     def __init__(self) -> None:
         self.ops = {}
@@ -57,6 +57,9 @@ class OpReplacements:
 
 @dataclass(frozen=True, kw_only=True)
 class EnrichmentSpec:
+    """A QEC code-specific specification for the enrichment pass, supplying
+    implementations to a set of HUGR extension ops."""
+
     ops: OpReplacements
     """The operations to replace."""
     build_wrapper: Callable[
@@ -91,14 +94,12 @@ def enrich(
     spec: EnrichmentSpec,
 ) -> Package:
     """
-    Encodes the given function using the given spec by replacing all operations in the
+    Enriches the given package using the given spec by replacing all operations in the
     program with function calls to the functions in `spec.ops`.
 
     :param hugr_pkg: A package containing a single module.
-    :param spec: The spec for the encoding. See `EncoderSpec` for details.
-    :param passes: Tket passes to run on the unencoded program, before passes from the
-        spec. The default is a single run of `tket.passes.NormalizeGuppy`.
-    :return: The compiled, encoded function as an executable HUGR package.
+    :param spec: The spec for the encoding. See `EnrichmentSpec` for details.
+    :return: The enriched function as an executable HUGR package.
     """
     assert len(hugr_pkg.modules) == 1
     hugr = hugr_pkg.modules[0]
