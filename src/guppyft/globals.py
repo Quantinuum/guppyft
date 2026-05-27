@@ -11,11 +11,11 @@ from hugr import ops
 from hugr import tys as ht
 from tket_exts import globals
 
-T = guppy.type_var("T", copyable=False, droppable=False)
-
+T = guppy.type_var("T")
+T_LIN = guppy.type_var("T", copyable=False, droppable=False)
 IN = guppy.type_var("IN")
 L_IN = guppy.type_var("L_IN", copyable=False, droppable=False)
-OUT = guppy.type_var("OUT")
+OUT = guppy.type_var("OUT", copyable=False, droppable=False)
 
 # Mark ops as having side effects to add order edges in the HUGR
 # when calls return None.
@@ -46,7 +46,18 @@ def with_op_for_global_var(
 
 @hugr_op(with_op_for_global_var("GUPPY_FT_GLOBAL"))
 @no_type_check
-def with_global_state(func: Callable[[], None], new_value: T @ owned) -> T: ...
+def _with_non_linear_global(func: Callable[[], None], init_global: T) -> T: ...
+
+
+@hugr_op(with_op_for_global_var("GUPPY_FT_GLOBAL"))
+@no_type_check
+def _with_linear_global(
+    func: Callable[[], None], init_global: T_LIN @ owned
+) -> T_LIN: ...
+
+
+@guppy.overload(_with_linear_global, _with_non_linear_global)
+def with_global(*args): ...
 
 
 def _map_op_for_global_var(
@@ -78,22 +89,32 @@ def _map_op_for_global_var(
 
 @hugr_op(_map_op_for_global_var("GUPPY_FT_GLOBAL"))
 @no_type_check
-def _map_global_state_input(func: Callable[[IN, T], OUT], inputs: IN) -> OUT: ...
+def _map_global_with_input(func: Callable[[IN, T_LIN], OUT], inputs: IN) -> OUT: ...
 
 
 @hugr_op(_map_op_for_global_var("GUPPY_FT_GLOBAL"))
 @no_type_check
-def _map_global_state_linear_input(
-    func: Callable[[L_IN, T], OUT], inputs: L_IN
+def _map_global_with_linear_input(
+    func: Callable[[L_IN, T_LIN], OUT], inputs: L_IN
 ) -> OUT: ...
 
 
 @hugr_op(_map_op_for_global_var("GUPPY_FT_GLOBAL"))
 @no_type_check
-def _map_global_state_no_input(func: Callable[[T], OUT]) -> OUT: ...
+def _map_global_with_linear_input_no_output(
+    func: Callable[[L_IN, T_LIN], None], inputs: L_IN
+) -> None: ...
+
+
+@hugr_op(_map_op_for_global_var("GUPPY_FT_GLOBAL"))
+@no_type_check
+def _map_global_no_input(func: Callable[[T_LIN], OUT]) -> OUT: ...
 
 
 @guppy.overload(
-    _map_global_state_input, _map_global_state_linear_input, _map_global_state_no_input
+    _map_global_with_input,
+    _map_global_with_linear_input,
+    _map_global_with_linear_input_no_output,
+    _map_global_no_input,
 )
-def map_global_state(state: T, args: IN | None = None) -> OUT: ...  # type: ignore[valid-type]
+def map_global(*args): ...  # type: ignore[valid-type]
