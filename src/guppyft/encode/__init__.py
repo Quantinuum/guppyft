@@ -6,7 +6,6 @@ from hugr.package import Package
 from hugr.passes.composable import ComposablePass
 from tket.passes import NormalizeGuppy
 
-from ._allocation import mark_qubits_for_dynamic_allocation
 from ._enrichment import EnrichmentSpec, OpReplacements, enrich
 
 __all__ = [
@@ -41,9 +40,9 @@ def encode(
     """
     Encodes the given package (or Guppy function, directly compiled to a package for
     convenience) by applying computational passes, lowering to a logical level
-    (resolving as many qubit allocations statically as possible) and further
-    lowering the logical operations to the physical level, providing their
-    implementations.
+    (resolving as many qubit allocations statically as possible, marking the rest for
+    dynamic allocations) and further lowering the logical operations to the physical
+    level, providing their implementations.
 
     The returned runnable package is guaranteed to be semantically equivalent to the
     given one.
@@ -71,12 +70,9 @@ def encode(
     if spec.lower_to_logical is not None:
         spec.lower_to_logical(hugr.modules[0], inplace=True)
 
-    # 3. Resolve missing qubit allocations to dynamic allocations
-    hugr = mark_qubits_for_dynamic_allocation(hugr)
-
-    # 4. Code specific passes
+    # 3. Code specific passes
     for tket_pass in spec.code_passes or []:
         tket_pass(hugr.modules[0], inplace=True)
 
-    # 5. Enrich with global state, QEC policies, etc.
+    # 4. Enrich with global state, QEC policies, etc.
     return enrich(hugr, spec.enrichment)
