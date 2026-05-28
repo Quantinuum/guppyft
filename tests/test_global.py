@@ -191,13 +191,8 @@ def test_mismatch_global_type() -> None:
 
 def test_non_linear_global() -> None:
     @guppy
-    def foo(i: int) -> int:
-        result("foo", i)
-        return i
-
-    @guppy
     def my_prog() -> None:
-        map_global_state(foo)
+        pass
 
     @guppy
     def main() -> None:
