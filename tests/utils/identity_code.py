@@ -10,7 +10,7 @@ from guppylang.std.option import Option, nothing, some
 from guppylang.std.qsystem import zz_phase
 from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
 
-from guppyft.globals import map_global, with_global
+from guppyft.globals import map_global_state, with_global_state
 from guppyft.spec import EncoderSpec, OpReplacements
 
 N = guppy.nat_var("N")
@@ -100,7 +100,7 @@ def identity_code_gen(
             state.put_block(blk_id, qubit())
             return ((blk_id, qb_id),)
 
-        return map_global(_impl)
+        return map_global_state(_impl)
 
     # MeasureFree is compiled from `guppylang.std.quantum.measure`
     @guppy(link_name="link.identity.MeasureFree")
@@ -117,7 +117,7 @@ def identity_code_gen(
             state.free_addr(q)
             return res
 
-        return map_global(_impl, q)
+        return map_global_state(_impl, q)
 
     # Measure is compiled from `guppylang.std.quantum.project_z`
     @guppy(link_name="link.identity.Measure")
@@ -134,7 +134,7 @@ def identity_code_gen(
             state.put_block(blk_id, blk)
             return (blk_id, qb_id), res
 
-        return map_global(_impl, q)
+        return map_global_state(_impl, q)
 
     # QFree is compiled from `guppylang.std.quantum.discard`
     @guppy(link_name="link.identity.QFree")
@@ -152,7 +152,7 @@ def identity_code_gen(
             state.free_addr(q)
 
         # The return must be used otherwise the function is not called.
-        return map_global(_impl, q)
+        return map_global_state(_impl, q)
 
     @guppy(link_name="link.identity.X")
     @no_type_check
@@ -173,7 +173,7 @@ def identity_code_gen(
 
             return ((blk_id, qb_id),)
 
-        return map_global(_impl, q)
+        return map_global_state(_impl, q)
 
     @guppy(link_name="link.identity.CX")
     @no_type_check
@@ -197,7 +197,7 @@ def identity_code_gen(
             )
             return ctl, tgt
 
-        return map_global(_impl, (ctl, tgt))
+        return map_global_state(_impl, (ctl, tgt))
 
     @guppy(link_name="link.identity.ZZPhase")
     @no_type_check
@@ -223,7 +223,7 @@ def identity_code_gen(
             )
             return ctl, tgt
 
-        return map_global(_impl, (ctl, tgt, phase))
+        return map_global_state(_impl, (ctl, tgt, phase))
 
     ops = OpReplacements()
     ops.with_funcs(
@@ -260,7 +260,7 @@ def identity_code_gen(
         @no_type_check
         def wrapper() -> None:
             state = global_state_gen()
-            state = with_global(state, func)
+            state = with_global_state(state, func)
             state.discard()
 
         return wrapper  # type: ignore[no-any-return]
