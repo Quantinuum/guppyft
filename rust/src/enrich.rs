@@ -1,3 +1,5 @@
+//! The enrichment pass for replacing operations with function implementations.
+
 #![allow(missing_docs)]
 
 use hugr::{
@@ -32,7 +34,7 @@ use tket::{
 
 #[derive(derive_more::Error, Debug, derive_more::Display, derive_more::From)]
 #[non_exhaustive]
-pub enum EncoderPassError {
+pub enum EnrichmentPassError {
     #[from]
     ReplaceTypesError(ReplaceTypesError),
     #[from]
@@ -56,13 +58,13 @@ pub enum EncoderPassError {
 }
 
 #[derive(Debug, Clone)]
-pub struct EncoderPass {
+pub struct EnrichmentPass {
     scope: PassScope,
     qubit_to_ty: Type,
     pub rewrite_ops: BTreeMap<(String, String), (Option<Hugr>, String)>,
 }
 
-impl EncoderPass {
+impl EnrichmentPass {
     pub fn new(rewrite_ops: BTreeMap<(String, String), (Option<Hugr>, String)>) -> Self {
         Self {
             rewrite_ops,
@@ -71,7 +73,7 @@ impl EncoderPass {
     }
 }
 
-impl Default for EncoderPass {
+impl Default for EnrichmentPass {
     fn default() -> Self {
         let int: TypeRV = INT_TYPES[6].clone().into();
         Self {
@@ -82,15 +84,15 @@ impl Default for EncoderPass {
     }
 }
 
-impl WithScope for EncoderPass {
+impl WithScope for EnrichmentPass {
     fn with_scope(mut self, scope: impl Into<PassScope>) -> Self {
         self.scope = scope.into();
         self
     }
 }
 
-impl<H: HugrMut<Node = Node>> ComposablePass<H> for EncoderPass {
-    type Error = EncoderPassError;
+impl<H: HugrMut<Node = Node>> ComposablePass<H> for EnrichmentPass {
+    type Error = EnrichmentPassError;
     type Result = ();
 
     fn run(&self, hugr: &mut H) -> Result<Self::Result, Self::Error> {
@@ -177,7 +179,7 @@ impl<'a, H: HugrMut<Node = Node>> RewriteQuantumState<'a, H> {
         expected_sig: PolyFuncType,
         func_hugr: &Hugr,
         func_name: &str,
-    ) -> Result<Node, EncoderPassError> {
+    ) -> Result<Node, EnrichmentPassError> {
         // Extract target function
         let Some(func_node) = func_hugr.children(func_hugr.module_root()).find(|node| {
             if let Some(name) = match &func_hugr.get_optype(*node) {
@@ -203,7 +205,7 @@ impl<'a, H: HugrMut<Node = Node>> RewriteQuantumState<'a, H> {
             _ => unreachable!(),
         };
         if func_sig != &expected_sig {
-            return Err(EncoderPassError::ExistingFunctionSignatureMismatch {
+            return Err(EnrichmentPassError::ExistingFunctionSignatureMismatch {
                 op_id,
                 node: func_node,
                 name: func_name.to_string(),
@@ -220,7 +222,7 @@ impl<'a, H: HugrMut<Node = Node>> RewriteQuantumState<'a, H> {
         ext_op: ExtensionOp,
         func_hugr_opt: Option<Hugr>,
         func_name: &str,
-    ) -> Result<(), EncoderPassError> {
+    ) -> Result<(), EnrichmentPassError> {
         // Replace hugr-bool with tket-bool in function signature
         let op_sig: PolyFuncType = {
             let mut sig = ext_op.signature().into_owned();
@@ -269,7 +271,7 @@ impl<'a, H: HugrMut<Node = Node>> RewriteQuantumState<'a, H> {
         Ok(())
     }
 
-    pub fn finish(mut self) -> Result<(), EncoderPassError> {
+    pub fn finish(mut self) -> Result<(), EnrichmentPassError> {
         // In an optimal scenario we would use the type replacer to insert the function alongside
         // a call. However, since there is no way to stop the type replacer from recursively
         // processing the RHS at the moment, we have to resort to this hacky approach of manually

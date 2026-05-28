@@ -5,13 +5,12 @@ mod hugr;
 use pyo3::pymodule;
 /// Python module containing the Rust bindings.
 ///
-/// The definitions here should be reflected in the
-/// `encoder/src/guppy_ft_encoder/_bindings/__init__.pyi` type stubs.
+/// The definitions here should be reflected in the `src/guppyft/_bindings/__init__.pyi` type stubs.
 #[pymodule]
 mod _bindings {
     #[pymodule_export]
     use crate::hugr::RsHugr;
-    use encoder::encode;
+    use guppy_ft::enrich;
     use pyo3::exceptions::PyValueError;
     use pyo3::prelude::*;
     use std::collections::BTreeMap;
@@ -29,7 +28,7 @@ mod _bindings {
             .map(|(k, (rs_hugr, func_name))| (k, (rs_hugr.map(|x| x.hugr), func_name)))
             .collect();
 
-        let pass = encode::EncoderPass::new(new_ops);
+        let pass = enrich::EnrichmentPass::new(new_ops);
         pass.run(hugr)
             .map_err(|e| PyValueError::new_err(format!("Error replacing operations: {e}")))?;
 

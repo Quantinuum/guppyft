@@ -1,6 +1,6 @@
 [package]
-name = "encoder"
-description = "The Guppy FT encoder pass"
+name = "guppy-ft"
+description = "Guppy FT Rust utilities and modules"
 version = "0.1.0"
 edition = "2024"
 publish = false

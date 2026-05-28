@@ -505,28 +505,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9eb1aa714776b75c7e67e1da744b81a129b3ff919c8712b5e1b32252c1f07cc7"
 
 [[package]]
-name = "encoder"
-version = "0.1.0"
-dependencies = [
- "derive_more 2.1.1",
- "hugr",
- "hugr-core",
- "itertools 0.14.0",
- "tket",
-]
-
-[[package]]
-name = "encoder-py"
-version = "0.1.0"
-dependencies = [
- "derive_more 2.1.1",
- "encoder",
- "hugr",
- "pyo3",
- "tket",
-]
-
-[[package]]
 name = "enum_dispatch"
 version = "0.3.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -627,6 +605,28 @@ dependencies = [
  "r-efi 6.0.0",
  "wasip2",
  "wasip3",
+]
+
+[[package]]
+name = "guppy-ft"
+version = "0.1.0"
+dependencies = [
+ "derive_more 2.1.1",
+ "hugr",
+ "hugr-core",
+ "itertools 0.14.0",
+ "tket",
+]
+
+[[package]]
+name = "guppy-ft-bindings"
+version = "0.1.0"
+dependencies = [
+ "derive_more 2.1.1",
+ "guppy-ft",
+ "hugr",
+ "pyo3",
+ "tket",
 ]
 
 [[package]]

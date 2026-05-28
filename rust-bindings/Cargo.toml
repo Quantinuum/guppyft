@@ -1,6 +1,6 @@
 [package]
-name = "encoder-py"
-description = "Python bindings for the Guppy FT encoder pass"
+name = "guppy-ft-bindings"
+description = "Python bindings for Guppy FT"
 version = "0.1.0"
 publish = false
 edition = "2024"
@@ -21,6 +21,6 @@ bench = false
 tket = { workspace = true }
 hugr = { workspace = true }
 derive_more = { workspace = true }
-encoder = { path = "../encoder-rs" }
+guppy-ft = { path = "../rust" }
 
 pyo3 = { version = "0.28.0", features = ["extension-module", "abi3-py310", "anyhow"] }
