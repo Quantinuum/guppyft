@@ -1,0 +1,22 @@
+{
+  "version": "0.1.0",
+  "name": "tket.qec.iceberg.types",
+  "types": {
+    "block": {
+      "extension": "tket.qec.iceberg.types",
+      "name": "block",
+      "params": [
+        {
+          "tp": "BoundedNat",
+          "bound": null
+        }
+      ],
+      "description": "logical iceberg block",
+      "bound": {
+        "b": "Explicit",
+        "bound": "A"
+      }
+    }
+  },
+  "operations": {}
+}

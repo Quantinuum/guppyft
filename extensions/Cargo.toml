@@ -9,3 +9,14 @@ rust-version.workspace = true
 hugr.workspace = true
 semver = "1.0.28"
 strum = "0.28.0"
+clap = {version = "4.6.1", optional = true}
+hugr-cli = {version = "0.27.1", optional = true}
+anyhow = {version = "1.0.102", optional = true}
+
+[features]
+default = ["cli"]
+cli = ["dep:clap", "dep:hugr-cli", "dep:anyhow"]
+
+[[bin]]
+name = "extensions"
+required-features = ["cli"]
