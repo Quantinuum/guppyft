@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import no_type_check
+from typing import Any, no_type_check
 
 from guppylang import guppy
 from guppylang.std.builtins import owned
@@ -11,11 +11,11 @@ from hugr import ops
 from hugr import tys as ht
 from tket_exts import globals
 
-T = guppy.type_var("T")
-T_LIN = guppy.type_var("T", copyable=False, droppable=False)
-IN = guppy.type_var("IN")
-L_IN = guppy.type_var("L_IN", copyable=False, droppable=False)
-OUT = guppy.type_var("OUT", copyable=False, droppable=False)
+State = guppy.type_var("State")
+State_Linear = guppy.type_var("State_Linear", copyable=False, droppable=False)
+In = guppy.type_var("In")
+In_Linear = guppy.type_var("In_Linear", copyable=False, droppable=False)
+Out = guppy.type_var("OUT", copyable=False, droppable=False)
 
 # Mark ops as having side effects to add order edges in the HUGR
 # when calls return None.
@@ -31,13 +31,19 @@ def with_op_for_global_var(
         assert len(concrete.input) == 2, (
             f"Expected 2 inputs args, found {len(concrete.input)}."
         )
-        global_arg = concrete.input[1].type_arg()
+        global_arg = concrete.input[0].type_arg()
 
         if global_arg.ty.type_bound() != ht.TypeBound.Linear:
             raise TypeError(f"Global arg must be linear. Found {global_arg.ty}.")
 
         return globals.with_def.instantiate(
-            [ht.StringArg(var_name), global_arg, ht.ListArg([]), ht.ListArg([])],
+            [
+                ht.StringArg(var_name),
+                global_arg,
+                ht.ListArg([]),
+                ht.ListArg([]),
+                ht.ListArg([]),
+            ],
             concrete,
         )
 
@@ -46,18 +52,18 @@ def with_op_for_global_var(
 
 @hugr_op(with_op_for_global_var("GUPPY_FT_GLOBAL"))
 @no_type_check
-def _with_non_linear_global(func: Callable[[], None], init_global: T) -> T: ...
+def _with_non_linear_global(init_global: State, func: Callable[[], None]) -> State: ...
 
 
 @hugr_op(with_op_for_global_var("GUPPY_FT_GLOBAL"))
 @no_type_check
 def _with_linear_global(
-    func: Callable[[], None], init_global: T_LIN @ owned
-) -> T_LIN: ...
+    init_global: State_Linear @ owned, func: Callable[[], None]
+) -> State_Linear: ...
 
 
 @guppy.overload(_with_linear_global, _with_non_linear_global)
-def with_global(*args): ...
+def with_global(state: Any, func: Callable[[], None]) -> Any: ...
 
 
 def _map_op_for_global_var(
@@ -70,16 +76,38 @@ def _map_op_for_global_var(
         assert isinstance(func_input_ty, ht.FunctionType), (
             f"Expected a function, found {func_input_ty}."
         )
-        *input_args, global_arg = [inp.type_arg() for inp in func_input_ty.input]
 
+        func_input_args = [inp.type_arg() for inp in func_input_ty.input]
         output_args = [out.type_arg() for out in concrete.output]
+
+        global_arg = func_input_args[0]
+
+        # The function should have at most two inputs
+        assert len(func_input_args) <= 2
+
+        if len(func_input_args) == 2:
+            op_input_arg = func_input_args[1:]
+
+            # If the input is linear, we need to separate the output into explicit and
+            # implicit returns to correctly initialise the signature of the HUGR op
+            if op_input_arg[0].ty.type_bound() == ht.TypeBound.Linear:
+                explicit_output_args = output_args[:-1]
+                implicit_output_arg = [output_args[-1]]
+            else:
+                explicit_output_args = output_args
+                implicit_output_arg = []
+        else:
+            op_input_arg = []
+            explicit_output_args = output_args
+            implicit_output_arg = []
 
         return globals.map_def.instantiate(
             [
                 ht.StringArg(var_name),
                 global_arg,
-                ht.ListArg(input_args),
-                ht.ListArg(output_args),
+                ht.ListArg(op_input_arg),  # type: ignore[arg-type]
+                ht.ListArg(explicit_output_args),  # type: ignore[arg-type]
+                ht.ListArg(implicit_output_arg),  # type: ignore[arg-type]
             ],
             concrete,
         )
@@ -89,32 +117,26 @@ def _map_op_for_global_var(
 
 @hugr_op(_map_op_for_global_var("GUPPY_FT_GLOBAL"))
 @no_type_check
-def _map_global_with_input(func: Callable[[IN, T_LIN], OUT], inputs: IN) -> OUT: ...
+def _map_global_with_nonlinear_input(
+    func: Callable[[State_Linear, In], Out], inputs: In
+) -> Out: ...
 
 
 @hugr_op(_map_op_for_global_var("GUPPY_FT_GLOBAL"))
 @no_type_check
 def _map_global_with_linear_input(
-    func: Callable[[L_IN, T_LIN], OUT], inputs: L_IN
-) -> OUT: ...
+    func: Callable[[State_Linear, In_Linear], Out], inputs: In_Linear
+) -> Out: ...
 
 
 @hugr_op(_map_op_for_global_var("GUPPY_FT_GLOBAL"))
 @no_type_check
-def _map_global_with_linear_input_no_output(
-    func: Callable[[L_IN, T_LIN], None], inputs: L_IN
-) -> None: ...
-
-
-@hugr_op(_map_op_for_global_var("GUPPY_FT_GLOBAL"))
-@no_type_check
-def _map_global_no_input(func: Callable[[T_LIN], OUT]) -> OUT: ...
+def _map_global_no_input(func: Callable[[State_Linear], Out]) -> Out: ...
 
 
 @guppy.overload(
-    _map_global_with_input,
+    _map_global_with_nonlinear_input,
     _map_global_with_linear_input,
-    _map_global_with_linear_input_no_output,
     _map_global_no_input,
 )
-def map_global(*args): ...  # type: ignore[valid-type]
+def map_global(func: Any, inputs: Any | None = None) -> Any: ...

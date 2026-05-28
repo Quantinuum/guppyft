@@ -60,8 +60,8 @@ build-backend = "maturin"
 guppylang = { git = "https://github.com/quantinuum/guppylang", rev = "561882f760d48be0327d8785b7b82085ea657957", subdirectory = "guppylang" }
 guppylang-internals = { git = "https://github.com/quantinuum/guppylang", rev = "561882f760d48be0327d8785b7b82085ea657957", subdirectory = "guppylang-internals" }
 # Needs tket branch for globals extension
-tket = { git = "https://github.com/quantinuum/tket2", rev = "1c4e29513079982ba078699269858003e2449c38", subdirectory = "tket-py" }
-selene-hugr-qis-compiler = { git = "https://github.com/quantinuum/tket2", rev = "1c4e29513079982ba078699269858003e2449c38", subdirectory = "qis-compiler" }
+tket = { git = "https://github.com/quantinuum/tket2", rev = "a5d12cdb37bf80d17912e5ed5f2a94b1fd277e7a", subdirectory = "tket-py" }
+selene-hugr-qis-compiler = { git = "https://github.com/quantinuum/tket2", rev = "a5d12cdb37bf80d17912e5ed5f2a94b1fd277e7a", subdirectory = "qis-compiler" }
 
 [tool.maturin]
 module-name = "guppyft._bindings"
