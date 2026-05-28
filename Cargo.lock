@@ -624,7 +624,6 @@ version = "0.1.0"
 dependencies = [
  "derive_more 2.1.1",
  "guppy-ft",
- "hugr",
  "pyo3",
  "tket",
 ]

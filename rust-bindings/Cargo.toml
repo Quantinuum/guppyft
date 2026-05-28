@@ -19,7 +19,6 @@ bench = false
 
 [dependencies]
 tket = { workspace = true }
-hugr = { workspace = true }
 derive_more = { workspace = true }
 guppy-ft = { path = "../rust" }
 
