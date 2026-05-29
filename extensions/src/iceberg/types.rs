@@ -9,7 +9,7 @@ use hugr::{
 };
 
 /// The extension identifier.
-pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("tket.qec.iceberg.types");
+pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.iceberg.types");
 /// Extension version.
 pub const VERSION: semver::Version = semver::Version::new(0, 1, 0);
 

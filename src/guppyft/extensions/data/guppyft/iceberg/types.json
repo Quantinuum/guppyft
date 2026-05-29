@@ -1,9 +1,9 @@
 {
   "version": "0.1.0",
-  "name": "tket.qec.iceberg.types",
+  "name": "guppyft.iceberg.types",
   "types": {
     "block": {
-      "extension": "tket.qec.iceberg.types",
+      "extension": "guppyft.iceberg.types",
       "name": "block",
       "params": [
         {

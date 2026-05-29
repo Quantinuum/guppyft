@@ -27,7 +27,7 @@ use strum::{EnumIter, EnumString, IntoStaticStr};
 use super::types::block_tv;
 
 /// The extension identifier.
-pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("tket.qec.iceberg.ops");
+pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.iceberg.ops");
 /// Extension version.
 pub const VERSION: semver::Version = semver::Version::new(0, 2, 0);
 

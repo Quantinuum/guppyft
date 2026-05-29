@@ -1,10 +1,10 @@
 {
   "version": "0.2.0",
-  "name": "tket.qec.iceberg.ops",
+  "name": "guppyft.iceberg.ops",
   "types": {},
   "operations": {
     "all_but_one_rx": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "all_but_one_rx",
       "description": "apply an Rx gate to all but one qubit",
       "signature": {
@@ -22,7 +22,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -47,7 +47,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -67,7 +67,7 @@
       "binary": true
     },
     "all_but_one_rx_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "all_but_one_rx_d",
       "description": "apply an Rx gate to all but one qubit with dynamic index",
       "signature": {
@@ -81,7 +81,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -118,7 +118,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -138,7 +138,7 @@
       "binary": false
     },
     "all_but_one_rz": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "all_but_one_rz",
       "description": "apply an Rz gate to all but one qubit",
       "signature": {
@@ -156,7 +156,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -181,7 +181,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -201,7 +201,7 @@
       "binary": true
     },
     "all_but_one_rz_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "all_but_one_rz_d",
       "description": "apply an Rz gate to all but one qubit with dynamic index",
       "signature": {
@@ -215,7 +215,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -252,7 +252,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -272,7 +272,7 @@
       "binary": false
     },
     "all_but_one_x": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "all_but_one_x",
       "description": "apply an X gate to all but one qubit",
       "signature": {
@@ -290,7 +290,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -308,7 +308,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -328,7 +328,7 @@
       "binary": true
     },
     "all_but_one_x_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "all_but_one_x_d",
       "description": "apply an X gate to all but one qubit with dynamic index",
       "signature": {
@@ -342,7 +342,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -372,7 +372,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -392,7 +392,7 @@
       "binary": false
     },
     "all_but_one_z": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "all_but_one_z",
       "description": "apply a Z gate to all but one qubit",
       "signature": {
@@ -410,7 +410,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -428,7 +428,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -448,7 +448,7 @@
       "binary": true
     },
     "all_but_one_z_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "all_but_one_z_d",
       "description": "apply a Z gate to all but one qubit with dynamic index",
       "signature": {
@@ -462,7 +462,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -492,7 +492,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -512,7 +512,7 @@
       "binary": false
     },
     "all_h": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "all_h",
       "description": "apply an H gate to all qubits",
       "signature": {
@@ -526,7 +526,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -544,7 +544,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -564,7 +564,7 @@
       "binary": true
     },
     "all_rx": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "all_rx",
       "description": "apply an Rx gate to all qubits",
       "signature": {
@@ -578,7 +578,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -603,7 +603,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -623,7 +623,7 @@
       "binary": true
     },
     "all_ry": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "all_ry",
       "description": "apply an Ry gate to all qubits",
       "signature": {
@@ -637,7 +637,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -662,7 +662,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -682,7 +682,7 @@
       "binary": true
     },
     "all_rz": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "all_rz",
       "description": "apply an Rz gate to all qubits",
       "signature": {
@@ -696,7 +696,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -721,7 +721,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -741,7 +741,7 @@
       "binary": true
     },
     "all_x": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "all_x",
       "description": "apply an X gate to all qubits",
       "signature": {
@@ -755,7 +755,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -773,7 +773,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -793,7 +793,7 @@
       "binary": true
     },
     "all_y": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "all_y",
       "description": "apply a Y gate to all qubits",
       "signature": {
@@ -807,7 +807,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -825,7 +825,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -845,7 +845,7 @@
       "binary": true
     },
     "all_z": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "all_z",
       "description": "apply a Z gate to all qubits",
       "signature": {
@@ -859,7 +859,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -877,7 +877,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -897,7 +897,7 @@
       "binary": true
     },
     "alloc_zero": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "alloc_zero",
       "description": "allocate a block in the all-zero state",
       "signature": {
@@ -912,7 +912,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -932,7 +932,7 @@
       "binary": true
     },
     "cx": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "cx",
       "description": "apply a CX gate to two qubits within a block",
       "signature": {
@@ -954,7 +954,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -972,7 +972,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -992,7 +992,7 @@
       "binary": true
     },
     "cx_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "cx_d",
       "description": "apply a CX gate to two qubits within a block with dynamic indices",
       "signature": {
@@ -1006,7 +1006,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1048,7 +1048,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1068,7 +1068,7 @@
       "binary": false
     },
     "cx_transverse": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "cx_transverse",
       "description": "apply a CX gate transversally over two blocks of the same size",
       "signature": {
@@ -1082,7 +1082,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1098,7 +1098,7 @@
             },
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1116,7 +1116,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1132,7 +1132,7 @@
             },
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1152,7 +1152,7 @@
       "binary": true
     },
     "fan_in": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "fan_in",
       "description": "fan-in to one qubit from the rest",
       "signature": {
@@ -1170,7 +1170,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1188,7 +1188,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1208,7 +1208,7 @@
       "binary": true
     },
     "fan_in_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "fan_in_d",
       "description": "fan-in to one qubit from the rest with dynamic index",
       "signature": {
@@ -1222,7 +1222,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1252,7 +1252,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1272,7 +1272,7 @@
       "binary": false
     },
     "fan_out": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "fan_out",
       "description": "fan-out from one qubit to the rest",
       "signature": {
@@ -1290,7 +1290,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1308,7 +1308,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1328,7 +1328,7 @@
       "binary": true
     },
     "fan_out_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "fan_out_d",
       "description": "fan-out from one qubit to the rest with dynamic index",
       "signature": {
@@ -1342,7 +1342,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1372,7 +1372,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1392,7 +1392,7 @@
       "binary": false
     },
     "free": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "free",
       "description": "free a block",
       "signature": {
@@ -1406,7 +1406,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1427,7 +1427,7 @@
       "binary": true
     },
     "measure_all": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "measure_all",
       "description": "destructively measure all qubits in the Z basis",
       "signature": {
@@ -1441,7 +1441,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1487,7 +1487,7 @@
       "binary": true
     },
     "measure_one_x": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "measure_one_x",
       "description": "non-destructively measure one qubit in the X basis",
       "signature": {
@@ -1505,7 +1505,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1523,7 +1523,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1548,7 +1548,7 @@
       "binary": true
     },
     "measure_one_x_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "measure_one_x_d",
       "description": "non-destructively measure one qubit in the X basis with dynamic index",
       "signature": {
@@ -1562,7 +1562,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1592,7 +1592,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1617,7 +1617,7 @@
       "binary": false
     },
     "measure_one_z": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "measure_one_z",
       "description": "non-destructively measure one qubit in the Z basis",
       "signature": {
@@ -1635,7 +1635,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1653,7 +1653,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1678,7 +1678,7 @@
       "binary": true
     },
     "measure_one_z_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "measure_one_z_d",
       "description": "non-destructively measure one qubit in the Z basis with dynamic index",
       "signature": {
@@ -1692,7 +1692,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1722,7 +1722,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1747,7 +1747,7 @@
       "binary": false
     },
     "measure_syndrome": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "measure_syndrome",
       "description": "perform a syndrome measurement, producing (X,Z) error indicators",
       "signature": {
@@ -1761,7 +1761,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1779,7 +1779,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1809,7 +1809,7 @@
       "binary": true
     },
     "rx": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "rx",
       "description": "apply an Rx gate to one qubit",
       "signature": {
@@ -1827,7 +1827,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1852,7 +1852,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1872,7 +1872,7 @@
       "binary": true
     },
     "rx_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "rx_d",
       "description": "apply an Rx gate to one qubit with dynamic index",
       "signature": {
@@ -1886,7 +1886,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1923,7 +1923,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1943,7 +1943,7 @@
       "binary": false
     },
     "rz": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "rz",
       "description": "apply an Rz gate to one qubit",
       "signature": {
@@ -1961,7 +1961,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -1986,7 +1986,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2006,7 +2006,7 @@
       "binary": true
     },
     "rz_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "rz_d",
       "description": "apply an Rz gate to one qubit with dynamic index",
       "signature": {
@@ -2020,7 +2020,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2057,7 +2057,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2077,7 +2077,7 @@
       "binary": false
     },
     "swap": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "swap",
       "description": "swap two qubits within a block",
       "signature": {
@@ -2099,7 +2099,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2117,7 +2117,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2137,7 +2137,7 @@
       "binary": true
     },
     "swap_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "swap_d",
       "description": "swap two qubits within a block with dynamic indices",
       "signature": {
@@ -2151,7 +2151,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2193,7 +2193,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2213,7 +2213,7 @@
       "binary": false
     },
     "x": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "x",
       "description": "apply an X gate to one qubit",
       "signature": {
@@ -2231,7 +2231,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2249,7 +2249,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2269,7 +2269,7 @@
       "binary": true
     },
     "x_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "x_d",
       "description": "apply an X gate to one qubit with dynamic index",
       "signature": {
@@ -2283,7 +2283,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2313,7 +2313,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2333,7 +2333,7 @@
       "binary": false
     },
     "x_with_all_but_one_z": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "x_with_all_but_one_z",
       "description": "apply an X gate to one qubit and a Z to the rest",
       "signature": {
@@ -2351,7 +2351,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2369,7 +2369,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2389,7 +2389,7 @@
       "binary": true
     },
     "x_with_all_but_one_z_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "x_with_all_but_one_z_d",
       "description": "apply an X gate to one qubit and a Z to the rest with dynamic index",
       "signature": {
@@ -2403,7 +2403,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2433,7 +2433,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2453,7 +2453,7 @@
       "binary": false
     },
     "xx": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "xx",
       "description": "apply an X gate to two qubits",
       "signature": {
@@ -2475,7 +2475,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2493,7 +2493,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2513,7 +2513,7 @@
       "binary": true
     },
     "xx_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "xx_d",
       "description": "apply an X gate to two qubits with dynamic indices",
       "signature": {
@@ -2527,7 +2527,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2569,7 +2569,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2589,7 +2589,7 @@
       "binary": false
     },
     "xx_phase": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "xx_phase",
       "description": "apply an XXPhase gate to two qubits within a block",
       "signature": {
@@ -2611,7 +2611,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2636,7 +2636,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2656,7 +2656,7 @@
       "binary": true
     },
     "xx_phase_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "xx_phase_d",
       "description": "apply an XXPhase gate to two qubits within a block with dynamic indices",
       "signature": {
@@ -2670,7 +2670,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2719,7 +2719,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2739,7 +2739,7 @@
       "binary": false
     },
     "yy": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "yy",
       "description": "apply a Y gate to two qubits",
       "signature": {
@@ -2761,7 +2761,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2779,7 +2779,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2799,7 +2799,7 @@
       "binary": true
     },
     "yy_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "yy_d",
       "description": "apply a Y gate to two qubits with dynamic indices",
       "signature": {
@@ -2813,7 +2813,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2855,7 +2855,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2875,7 +2875,7 @@
       "binary": false
     },
     "yy_phase": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "yy_phase",
       "description": "apply a YYPhase gate to two qubits within a block",
       "signature": {
@@ -2897,7 +2897,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2922,7 +2922,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -2942,7 +2942,7 @@
       "binary": true
     },
     "yy_phase_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "yy_phase_d",
       "description": "apply a YYPhase gate to two qubits within a block with dynamic indices",
       "signature": {
@@ -2956,7 +2956,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3005,7 +3005,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3025,7 +3025,7 @@
       "binary": false
     },
     "z": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "z",
       "description": "apply a Z gate to one qubit",
       "signature": {
@@ -3043,7 +3043,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3061,7 +3061,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3081,7 +3081,7 @@
       "binary": true
     },
     "z_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "z_d",
       "description": "apply a Z gate to one qubit with dynamic index",
       "signature": {
@@ -3095,7 +3095,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3125,7 +3125,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3145,7 +3145,7 @@
       "binary": false
     },
     "z_with_all_but_one_x": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "z_with_all_but_one_x",
       "description": "apply a Z gate to one qubit and an X to the rest",
       "signature": {
@@ -3163,7 +3163,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3181,7 +3181,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3201,7 +3201,7 @@
       "binary": true
     },
     "z_with_all_but_one_x_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "z_with_all_but_one_x_d",
       "description": "apply a Z gate to one qubit and an X to the rest with dynamic index",
       "signature": {
@@ -3215,7 +3215,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3245,7 +3245,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3265,7 +3265,7 @@
       "binary": false
     },
     "zz": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "zz",
       "description": "apply a Z gate to two qubits",
       "signature": {
@@ -3287,7 +3287,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3305,7 +3305,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3325,7 +3325,7 @@
       "binary": true
     },
     "zz_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "zz_d",
       "description": "apply a Z gate to two qubits with dynamic indices",
       "signature": {
@@ -3339,7 +3339,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3381,7 +3381,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3401,7 +3401,7 @@
       "binary": false
     },
     "zz_phase": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "zz_phase",
       "description": "apply a ZZPhase gate to two qubits within a block",
       "signature": {
@@ -3423,7 +3423,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3448,7 +3448,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3468,7 +3468,7 @@
       "binary": true
     },
     "zz_phase_between_blocks": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "zz_phase_between_blocks",
       "description": "apply a ZZPhase gate to two qubits on different blocks of the same size",
       "signature": {
@@ -3490,7 +3490,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3506,7 +3506,7 @@
             },
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3531,7 +3531,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3547,7 +3547,7 @@
             },
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3567,7 +3567,7 @@
       "binary": true
     },
     "zz_phase_between_blocks_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "zz_phase_between_blocks_d",
       "description": "apply a ZZPhase gate to two qubits on different blocks of the same size with dynamic indices",
       "signature": {
@@ -3581,7 +3581,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3597,7 +3597,7 @@
             },
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3646,7 +3646,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3662,7 +3662,7 @@
             },
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3682,7 +3682,7 @@
       "binary": false
     },
     "zz_phase_d": {
-      "extension": "tket.qec.iceberg.ops",
+      "extension": "guppyft.iceberg.ops",
       "name": "zz_phase_d",
       "description": "apply a ZZPhase gate to two qubits within a block with dynamic indices",
       "signature": {
@@ -3696,7 +3696,7 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
@@ -3745,7 +3745,7 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.qec.iceberg.types",
+              "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
                 {
