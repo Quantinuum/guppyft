@@ -23,6 +23,7 @@ jobs:
       - uses: googleapis/release-please-action@v4
         with:
           token: ${{ secrets.HUGRBOT_PAT }}
+          target-branch: 'mr/chore/release-workflow'
 
   update-uv-lock:
     name: Update uv.lock
