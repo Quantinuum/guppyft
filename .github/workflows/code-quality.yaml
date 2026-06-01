@@ -41,7 +41,7 @@ jobs:
           enable-cache: true
 
       - name: Ensure uv lockfile is up to date
-        run: uv lock
+        run: uv lock --check
 
       - name: Ensure cargo lockfile is up to date
         run: cargo generate-lockfile --locked
