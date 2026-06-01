@@ -27,8 +27,6 @@ jobs:
     name: Update uv.lock
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'release-please--')
-    env:
-      UV_EXTRA_INDEX_URL: "https://${{ secrets.QTNM_ARTIF_SW_READ_USER }}:${{ secrets.QTNM_ARTIF_SW_READ_TOKEN }}@quantinuumsw.jfrog.io/artifactory/api/pypi/pypi_local/simple"
     steps:
       - uses: actions/checkout@v6
         with:
