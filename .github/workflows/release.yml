@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - mr/chore/release-workflow
   pull_request:
     branches:
       - main
