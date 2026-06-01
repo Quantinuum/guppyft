@@ -6,6 +6,7 @@ from guppylang import array, guppy
 from guppylang.emulator import EmulatorError
 from guppylang.std.builtins import owned, result
 from guppylang.std.quantum import discard, measure, qubit, x
+from guppylang_internals.error import GuppyError
 
 from guppyft.globals import map_global_state, with_global_state
 
@@ -89,10 +90,7 @@ def test_map_return_none() -> None:
 
 def test_map_return_tuple() -> None:
     @guppy
-    def foo(
-        qb: qubit,
-        i: tuple[int, int],
-    ) -> tuple[int, int]:
+    def foo(qb: qubit, i: tuple[int, int]) -> tuple[int, int]:
         x(qb)
         return i
 
@@ -125,7 +123,6 @@ def test_map_without_with() -> None:
     def main() -> None:
         map_global_state(foo)
 
-    # TODO the error should be more specific
     with pytest.raises(EmulatorError) as _:
         main.emulator(n_qubits=1).run().collated_shots()
 
@@ -192,7 +189,7 @@ def test_mismatch_global_type() -> None:
 def test_non_linear_global() -> None:
     @guppy
     def my_prog() -> None:
-        pass
+        return
 
     @guppy
     def main() -> None:
@@ -226,22 +223,15 @@ def test_map_linear_input_no_output() -> None:
 
     res = main.emulator(n_qubits=3).run().collated_shots()
 
-    assert res == [
-        {
-            "foo": [[0, 1]],
-        }
-    ]
+    assert res == [{"foo": [[0, 1]]}]
 
 
 # TODO an additional overload is required to support `@ owned` inputs
-@pytest.mark.skip
 def test_map_linear_owned_input_no_output() -> None:
     @guppy
     @no_type_check
     def foo(qb: qubit, qb_in: qubit @ owned) -> None:
-        result("foo", array(0, 1))
-        x(qb)
-        discard(qb_in)
+        pass
 
     @guppy
     def my_prog() -> None:
@@ -253,13 +243,34 @@ def test_map_linear_owned_input_no_output() -> None:
         qb = with_global_state(qb, my_prog)
         discard(qb)
 
-    res = main.emulator(n_qubits=3).run().collated_shots()
+    with pytest.raises(
+        GuppyError,
+        match=re.escape("OverloadNoMatchError"),
+    ) as _:
+        main.compile()
 
-    assert res == [
-        {
-            "foo": [[0, 1]],
-        }
-    ]
+
+def test_map_linear_owned_input_nonlinear_output() -> None:
+    @guppy
+    @no_type_check
+    def foo(qb: qubit, qb_in: qubit @ owned) -> int:
+        pass
+
+    @guppy
+    def my_prog() -> None:
+        map_global_state(foo, qubit())
+
+    @guppy
+    def main() -> None:
+        qb = qubit()
+        qb = with_global_state(qb, my_prog)
+        discard(qb)
+
+    with pytest.raises(
+        GuppyError,
+        match=re.escape("OverloadNoMatchError"),
+    ) as _:
+        main.compile()
 
 
 def test_map_linear_input_nonlinear_output() -> None:
@@ -315,6 +326,34 @@ def test_map_linear_input_linear_output() -> None:
     assert res == [
         {
             "foo": [[0, 1]],
+            "my_prog": [0],
+        }
+    ]
+
+
+def test_map_linear_tuple_input() -> None:
+    @guppy
+    @no_type_check
+    def foo(qb: qubit, args: tuple[qubit, int]) -> None:
+        result("foo", args[1])
+
+    @guppy
+    def my_prog() -> None:
+        args = qubit(), 19
+        map_global_state(foo, args)
+        result("my_prog", measure(args[0]))
+
+    @guppy
+    def main() -> None:
+        qb = qubit()
+        qb = with_global_state(qb, my_prog)
+        discard(qb)
+
+    res = main.emulator(n_qubits=2).run().collated_shots()
+
+    assert res == [
+        {
+            "foo": [19],
             "my_prog": [0],
         }
     ]
