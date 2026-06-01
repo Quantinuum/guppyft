@@ -1,0 +1,2 @@
+# Only users with release permissions are able to approve PRs modifying the changelog.
+CHANGELOG.md @hsemenenko @maximilianruesch
