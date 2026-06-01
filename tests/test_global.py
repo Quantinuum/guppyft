@@ -123,6 +123,8 @@ def test_map_without_with() -> None:
     def main() -> None:
         map_global_state(foo)
 
+    # TODO the error should be more specific
+    #  https://github.com/quantinuum-dev/guppy-ft/issues/36
     with pytest.raises(EmulatorError) as _:
         main.emulator(n_qubits=1).run().collated_shots()
 
@@ -227,6 +229,7 @@ def test_map_linear_input_no_output() -> None:
 
 
 # TODO an additional overload is required to support `@ owned` inputs
+#  https://github.com/quantinuum-dev/guppy-ft/issues/35
 def test_map_linear_owned_input_no_output() -> None:
     @guppy
     @no_type_check

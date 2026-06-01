@@ -95,7 +95,7 @@ def _map_op_for_global_var(
             # implicit returns to correctly initialise the signature of the HUGR op
             if op_input_arg[0].ty.type_bound() == ht.TypeBound.Linear:
                 # The mapped function can only have a single input argument. If the
-                # input is linear, the explicit output args must be all but the
+                # input is linear, the explicit output args must be all but the last
                 # element (i.e. [:-1]), while the implicit output arg is the last
                 # element (i.e. [-1]).
                 explicit_output_args = output_args[:-1]
