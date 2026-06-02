@@ -8,15 +8,15 @@ from hugr.ops import FuncDecl, FuncDefn
 from hugr.package import Package
 
 from guppyft._bindings import RsHugr
-from guppyft._bindings import _replace_ops as _replace_ops_binding
+from guppyft._bindings import _implement_ops as _implement_ops_binding
 from guppyft._util import link_name
 
 
 class OpReplacements:
     ops: dict[tuple[str, str], tuple[GuppyFunctionDefinition[Any, Any] | None, str]]
-    """Stores the operations to replace during enrichment and their replacement
+    """Stores the operations to replace during op implementation and the implementation
     functions. A function can be set to `None` to indicate that a declaration with the
-    given name should be generated."""
+    given name should be generated instead."""
 
     def __init__(self) -> None:
         self.ops = {}
@@ -56,22 +56,22 @@ class OpReplacements:
 
 
 @dataclass(frozen=True, kw_only=True)
-class EnrichmentSpec:
-    """A QEC code-specific specification for the enrichment pass, supplying
-    implementations to a set of HUGR extension ops."""
+class ImplementOpsSpec:
+    """A specification for the implement ops pass, supplying implementations to a set of
+    HUGR extension ops."""
 
     ops: OpReplacements
     """The operations to replace."""
     build_wrapper: Callable[
         [GuppyFunctionDefinition[[], None]], GuppyFunctionDefinition[[], None]
     ] = field(default=lambda x: x)
-    """Allows creating a wrapper around the enriched program, e.g. to setup and teardown
-    the required environment."""
+    """Allows creating a wrapper around the transformed program, e.g. to setup and
+    teardown the environment required for the op implementations."""
     libs: list[Package] = field(default_factory=list)
-    """Additional libraries required to run the enriched program."""
+    """Additional libraries required to run the transformed program."""
 
 
-def _replace_ops(pkg: Package, ops: OpReplacements) -> Package:
+def _implement_ops(pkg: Package, ops: OpReplacements) -> Package:
     rs_hugr = RsHugr.from_bytes(pkg.modules[0].to_bytes())
 
     rs_ops = {
@@ -84,14 +84,14 @@ def _replace_ops(pkg: Package, ops: OpReplacements) -> Package:
         for key, (func_opt, name) in ops
     }
 
-    _replace_ops_binding(rs_hugr, rs_ops)
+    _implement_ops_binding(rs_hugr, rs_ops)
 
     return Package.from_bytes(rs_hugr.to_bytes())
 
 
-def enrich(
+def implement_ops(
     hugr_pkg: Package,
-    spec: EnrichmentSpec,
+    spec: ImplementOpsSpec,
 ) -> Package:
     """
     Enriches the given package using the given spec by replacing all operations in the
@@ -112,7 +112,7 @@ def enrich(
     # Reset entrypoint, marking module as non-executable, to avoid linking conflicts
     hugr.entrypoint = hugr.module_root
     # Run rewrite, replacing ops with function calls to the functions in `spec.ops`
-    hugr_pkg = _replace_ops(hugr_pkg, spec.ops)
+    hugr_pkg = _implement_ops(hugr_pkg, spec.ops)
 
     # Build, compile, and link wrapper program
     @guppy.declare(link_name=entrypoint_op.f_name)

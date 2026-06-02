@@ -2,9 +2,9 @@
 name = "guppy-ft"
 description = "Guppy FT Rust utilities and modules"
 version = "0.1.0"
-edition = "2024"
+rust-version.workspace = true
+edition.workspace = true
 publish = false
-rust-version = "1.91.0"
 
 [lints.rust]
 missing_docs = "warn"

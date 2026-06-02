@@ -5,6 +5,10 @@ members = [
     "rust-bindings",
 ]
 
+[workspace.package]
+rust-version = "1.91.0"
+edition = "2024"
+
 [workspace.dependencies]
 tket = "0.18.0"
 hugr = "0.27.0"

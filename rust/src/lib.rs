@@ -1,3 +1,3 @@
-//! Encoder for HUGRs
+//! Supporting passes for guppy-ft
 
-pub mod enrich;
+pub mod implement_ops;
