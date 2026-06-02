@@ -40,6 +40,26 @@ jobs:
       - uses: ./.github/actions/check-changes
         id: filter
 
+  # Run tests on Rust stable
+  check-rs:
+    name: Test Rust code 🦀
+    needs: changes
+    if: ${{ needs.changes.outputs.rust == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: mozilla-actions/sccache-action@v0.0.10
+      - id: toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "stable"
+      - name: Configure default rust toolchain
+        run: rustup override set ${{steps.toolchain.outputs.name}}
+      - uses: quantinuum/hugrverse-env/install-hugrenv-action@main
+      - uses: taiki-e/install-action@nextest
+      - name: Test with all features
+        run: cargo nextest r --verbose --all-features
+
   check-py:
     name: 🐍 Test Python code (${{ matrix.python-version }})
     needs: changes
