@@ -150,7 +150,7 @@ pub enum IcebergOpDef {
     /// ZZPhase gate involving two blocks with dynamic indices.
     zz_phase_between_blocks_d,
     /// CX gate applied transversally over two blocks.
-    cx_transverse,
+    cx_transversal,
     /// Prepare the all-zero state on a block.
     alloc_zero,
     /// Free a block.
@@ -331,27 +331,16 @@ fn vec_of_blocks_and_bools(n_blocks: usize, n_bools: usize) -> Vec<Type> {
     types
 }
 
-fn block_with_angles_sig(n_angles: usize) -> FuncValueType {
-    FuncValueType::new(
-        vec_of_blocks_and_angles(1, n_angles),
-        vec_of_blocks_and_angles(1, 0),
-    )
-}
-
-fn block_with_ints_and_angles_sig(n_indices: usize, n_angles: usize) -> FuncValueType {
-    FuncValueType::new(
-        vec_of_blocks_and_ints_and_angles(1, n_indices, n_angles),
-        vec_of_blocks_and_ints_and_angles(1, 0, 0),
-    )
-}
-
 /// Signature of an operation that acts on a single block, with a number of
 /// additional angle inputs and a number of index parameters.
 fn sig_1_block(n_angles: usize, n_indices: usize) -> SignatureFunc {
     CustomValidator::new(
         PolyFuncTypeRV::new(
             vec![TypeParam::max_nat_type(); 1 + n_indices],
-            block_with_angles_sig(n_angles),
+            FuncValueType::new(
+                vec_of_blocks_and_angles(1, n_angles),
+                vec_of_blocks_and_angles(1, 0),
+            ),
         ),
         ArgsValidator { n_idx: n_indices },
     )
@@ -363,7 +352,10 @@ fn sig_1_block(n_angles: usize, n_indices: usize) -> SignatureFunc {
 fn sig_1_block_d(n_angles: usize, n_indices: usize) -> SignatureFunc {
     PolyFuncTypeRV::new(
         vec![TypeParam::max_nat_type()],
-        block_with_ints_and_angles_sig(n_indices, n_angles),
+        FuncValueType::new(
+            vec_of_blocks_and_ints_and_angles(1, n_indices, n_angles),
+            vec_of_blocks_and_ints_and_angles(1, 0, 0),
+        ),
     )
     .into()
 }
@@ -454,7 +446,7 @@ impl MakeOpDef for IcebergOpDef {
                 ),
             )
             .into(),
-            cx_transverse => CustomValidator::new(
+            cx_transversal => CustomValidator::new(
                 PolyFuncTypeRV::new(
                     vec![TypeParam::max_nat_type()],
                     FuncValueType::new_endo(vec_of_blocks_and_angles(2, 0)),
@@ -646,7 +638,7 @@ mod tests {
             .instantiate_extension_op("zz_phase_between_blocks_d", [6.into()])
             .unwrap();
         let cxtransverse = EXTENSION
-            .instantiate_extension_op("cx_transverse", [6.into()])
+            .instantiate_extension_op("cx_transversal", [6.into()])
             .unwrap();
         let cx23 = EXTENSION
             .instantiate_extension_op("cx", [6.into(), 2.into(), 3.into()])

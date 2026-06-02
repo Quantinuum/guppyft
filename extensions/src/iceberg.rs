@@ -29,7 +29,7 @@
 //!
 //! Use the `free` operation to free a previously allocated block.
 //!
-//! Some of the operations (such as `all_x` or `cx_transverse`) operate purely
+//! Some of the operations (such as `all_x` or `cx_transversal`) operate purely
 //! at the block level. Others (such as `x` or `cx`) take one or more indices
 //! as parameters: these are (64-bit unsigned) integers less than `k`, which
 //! address logical qubits within the block. Some operations also take an angle,

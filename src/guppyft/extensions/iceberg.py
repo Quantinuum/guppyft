@@ -935,23 +935,23 @@ class IcebergOpsExtension:
         """
         return self.zz_phase_between_blocks_d_def.instantiate([BoundedNatArg(k)])
 
-    # cx_transverse
+    # cx_transversal
 
     @functools.cached_property
-    def cx_transverse_def(self) -> OpDef:
+    def cx_transversal_def(self) -> OpDef:
         """Apply a CX gate transversally over two blocks of the same size.
 
         This is the generic operation definition. For the instantiated operation, see
-        `cx_transverse`."""
-        return self().get_op("cx_transverse")
+        `cx_transversal`."""
+        return self().get_op("cx_transversal")
 
-    def cx_transverse(self, k: int) -> ExtOp:
+    def cx_transversal(self, k: int) -> ExtOp:
         """Apply a CX gate transversally over two blocks of the same size.
 
         Args:
             k: The number of logical qubits encoded in the blocks.
         """
-        return self.cx_transverse_def.instantiate([BoundedNatArg(k)])
+        return self.cx_transversal_def.instantiate([BoundedNatArg(k)])
 
     # alloc_zero
 
