@@ -7,7 +7,7 @@ from guppyft.extensions import iceberg_ops, iceberg_types
 
 
 def test_hugr() -> None:
-    block6type = iceberg_types.iceberg_t(6)
+    block6type = iceberg_types.iceberg_block(6)
     assert block6type.type_def.name == "block"
     assert block6type.args == [BoundedNatArg(6)]
     block6op = iceberg_ops.all_but_one_rx(6, 2)

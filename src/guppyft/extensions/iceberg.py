@@ -17,20 +17,21 @@ class IcebergTypesExtension:
         return load_extension("guppyft.iceberg.types")
 
     @functools.cached_property
-    def iceberg_t_def(self) -> TypeDef:
+    def iceberg_block_def(self) -> TypeDef:
         """An Iceberg code block.
 
-        This is the generic type definition. For the instantiated type, see `iceberg_t`
+        This is the generic type definition. For the instantiated type, see
+        `iceberg_block`.
         """
         return self().get_type("block")
 
-    def iceberg_t(self, k: int) -> ExtType:
+    def iceberg_block(self, k: int) -> ExtType:
         """An Iceberg code block.
 
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.iceberg_t_def.instantiate([BoundedNatArg(k)])
+        return self.iceberg_block_def.instantiate([BoundedNatArg(k)])
 
 
 class IcebergOpsExtension:
