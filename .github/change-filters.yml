@@ -1,0 +1,11 @@
+# Filters used by [dorny/path-filters](https://github.com/dorny/paths-filter)
+# to detect changes in each subproject, and only run the corresponding jobs.
+
+rust:
+  - "extensions/**"
+  - "encoder-bindings/**"
+  - "encoder-rs/**"
+
+python:
+  - "src/guppyft/**"
+  - "encoder-bindings/**"
