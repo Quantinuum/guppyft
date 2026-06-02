@@ -23,6 +23,29 @@ env:
   UV_VERSION: "0.11.7"
 
 jobs:
+  check-lockfiles:
+    name: Check lock files
+    runs-on: ubuntu-latest
+    env:
+      PYTHON_VERSION: 3.13
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: mozilla-actions/sccache-action@v0.0.9
+      - name: Install stable Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+
+      - name: Ensure uv lockfile is up to date
+        run: uv lock
+
+      - name: Ensure cargo lockfile is up to date
+        run: cargo generate-lockfile --locked
+
   check-py:
     name: 🐍 Check Python code (${{ matrix.python-version }})
     runs-on: ubuntu-latest

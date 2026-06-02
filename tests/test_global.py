@@ -4,13 +4,14 @@ from typing import no_type_check
 import pytest
 from guppylang import array, guppy
 from guppylang.emulator import EmulatorError
-from guppylang.std.builtins import result
+from guppylang.std.builtins import owned, result
 from guppylang.std.quantum import discard, measure, qubit, x
+from guppylang_internals.error import GuppyError
 
 from guppyft.globals import map_global_state, with_global_state
 
 
-def test_with() -> None:
+def test_with_map() -> None:
     @guppy
     def foo(qb: qubit, i: tuple[int, int]) -> int:
         x(qb)
@@ -122,6 +123,8 @@ def test_map_without_with() -> None:
     def main() -> None:
         map_global_state(foo)
 
+    # TODO the error should be more specific
+    #  https://github.com/quantinuum-dev/guppy-ft/issues/36
     with pytest.raises(EmulatorError) as _:
         main.emulator(n_qubits=1).run().collated_shots()
 
@@ -159,7 +162,7 @@ def test_nested_with() -> None:
     ]
 
 
-def test_mismatch_type() -> None:
+def test_mismatch_global_type() -> None:
     @guppy
     @no_type_check
     def foo(arr: array[int, 1]) -> int:
@@ -178,8 +181,8 @@ def test_mismatch_type() -> None:
     with pytest.raises(
         RuntimeError,
         match=re.escape(
-            "Failed to emit LLVM for function tests.test_global.test_mismatch_type"
-            ".<locals>.my_prog at node Node(15)"
+            "Failed to emit LLVM for function tests.test_global.test_mismatch_global_"
+            "type.<locals>.my_prog at node Node(15)"
         ),
     ) as _:
         main.emulator(n_qubits=1).run().collated_shots()
@@ -198,3 +201,162 @@ def test_non_linear_global() -> None:
         TypeError, match=r"Global arg must be linear. Found int<6>."
     ) as _:
         main.emulator(n_qubits=1).run().collated_shots()
+
+
+def test_map_linear_input_no_output() -> None:
+    @guppy
+    @no_type_check
+    def foo(qb: qubit, arr: tuple[qubit]) -> None:
+        result("foo", array(0, 1))
+        x(qb)
+
+    @guppy
+    def my_prog() -> None:
+        qb_arr = (qubit(),)
+        map_global_state(foo, qb_arr)
+        (q0,) = qb_arr
+        discard(q0)
+
+    @guppy
+    def main() -> None:
+        qb = qubit()
+        qb = with_global_state(qb, my_prog)
+        discard(qb)
+
+    res = main.emulator(n_qubits=3).run().collated_shots()
+
+    assert res == [{"foo": [[0, 1]]}]
+
+
+# TODO an additional overload is required to support `@ owned` inputs
+#  https://github.com/quantinuum-dev/guppy-ft/issues/35
+def test_map_linear_owned_input_no_output() -> None:
+    @guppy
+    @no_type_check
+    def foo(qb: qubit, qb_in: qubit @ owned) -> None:
+        pass
+
+    @guppy
+    def my_prog() -> None:
+        map_global_state(foo, qubit())
+
+    @guppy
+    def main() -> None:
+        qb = qubit()
+        qb = with_global_state(qb, my_prog)
+        discard(qb)
+
+    with pytest.raises(
+        GuppyError,
+        match=re.escape("OverloadNoMatchError"),
+    ) as _:
+        main.compile()
+
+
+def test_map_linear_owned_input_nonlinear_output() -> None:
+    @guppy
+    @no_type_check
+    def foo(qb: qubit, qb_in: qubit @ owned) -> int:
+        pass
+
+    @guppy
+    def my_prog() -> None:
+        map_global_state(foo, qubit())
+
+    @guppy
+    def main() -> None:
+        qb = qubit()
+        qb = with_global_state(qb, my_prog)
+        discard(qb)
+
+    with pytest.raises(
+        GuppyError,
+        match=re.escape("OverloadNoMatchError"),
+    ) as _:
+        main.compile()
+
+
+def test_map_linear_input_nonlinear_output() -> None:
+    @guppy
+    @no_type_check
+    def foo(qb: qubit, arr: array[int, 2]) -> int:
+        result("foo", arr)
+        x(qb)
+        return 0
+
+    @guppy
+    def my_prog() -> None:
+        ret = map_global_state(foo, array(0, 1))
+        result("my_prog", ret)
+
+    @guppy
+    def main() -> None:
+        qb = qubit()
+        qb = with_global_state(qb, my_prog)
+        discard(qb)
+
+    res = main.emulator(n_qubits=2).run().collated_shots()
+
+    assert res == [
+        {
+            "foo": [[0, 1]],
+            "my_prog": [0],
+        }
+    ]
+
+
+def test_map_linear_input_linear_output() -> None:
+    @guppy
+    @no_type_check
+    def foo(qb: qubit, arr: array[int, 2]) -> qubit:
+        result("foo", arr)
+        x(qb)
+        return qubit()
+
+    @guppy
+    def my_prog() -> None:
+        ret = map_global_state(foo, array(0, 1))
+        result("my_prog", measure(ret))
+
+    @guppy
+    def main() -> None:
+        qb = qubit()
+        qb = with_global_state(qb, my_prog)
+        discard(qb)
+
+    res = main.emulator(n_qubits=2).run().collated_shots()
+
+    assert res == [
+        {
+            "foo": [[0, 1]],
+            "my_prog": [0],
+        }
+    ]
+
+
+def test_map_linear_tuple_input() -> None:
+    @guppy
+    @no_type_check
+    def foo(qb: qubit, args: tuple[qubit, int]) -> None:
+        result("foo", args[1])
+
+    @guppy
+    def my_prog() -> None:
+        args = qubit(), 19
+        map_global_state(foo, args)
+        result("my_prog", measure(args[0]))
+
+    @guppy
+    def main() -> None:
+        qb = qubit()
+        qb = with_global_state(qb, my_prog)
+        discard(qb)
+
+    res = main.emulator(n_qubits=2).run().collated_shots()
+
+    assert res == [
+        {
+            "foo": [19],
+            "my_prog": [0],
+        }
+    ]

@@ -182,10 +182,10 @@ def identity_code_spec(
     ) -> tuple[tuple[int, int], tuple[int, int]]:
         @guppy
         def _impl(
-            state: STATE, input: tuple[tuple[int, int], tuple[int, int]]
+            state: STATE, args: tuple[tuple[int, int], tuple[int, int]]
         ) -> tuple[tuple[int, int], tuple[int, int]]:
             result("_CX", 0)
-            ctl, tgt = input
+            ctl, tgt = args
             ctl_blk, tgt_blk = state.take_block(ctl[0]), state.take_block(tgt[0])
 
             cx(ctl_blk, tgt_blk)
@@ -206,10 +206,10 @@ def identity_code_spec(
     ) -> tuple[tuple[int, int], tuple[int, int]]:
         @guppy
         def _impl(
-            state: STATE, input: tuple[tuple[int, int], tuple[int, int], float]
+            state: STATE, args: tuple[tuple[int, int], tuple[int, int], float]
         ) -> tuple[tuple[int, int], tuple[int, int]]:
             result("_ZZPhase", 0)
-            ctl, tgt, theta = input
+            ctl, tgt, theta = args
             ctl_blk, tgt_blk = state.take_block(ctl[0]), state.take_block(tgt[0])
 
             zz_phase(ctl_blk, tgt_blk, angle(theta))
