@@ -1,7 +1,7 @@
 //! HUGR extension for logical operations on the
 //! [Iceberg code](https://arxiv.org/abs/2211.06703).
 //!
-//! The extension `tket.qec.iceberg.types` provides one new type: this is the
+//! The extension `guppyft.iceberg.types` provides one new type: this is the
 //! code block for the [[k+2, k, 2]] Iceberg code (parametrized by an even
 //! integer k >= 2). This is a linear (non-copyable) type.
 //!
@@ -12,7 +12,7 @@
 //! assert!(!block.copyable());
 //! ```
 //!
-//! The extension `tket.qec.iceberg.ops` provides operations that act on this
+//! The extension `guppyft.iceberg.ops` provides operations that act on this
 //! block type.
 //!
 //! To allocate a new block, with all (logical) qubits initialized to zero, use
