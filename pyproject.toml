@@ -128,7 +128,7 @@ repair-wheel-command = [
 ]
 test-command = [
     'cd /d {project}',
-    "python -c 'from guppyft._bindings import RsHugr'", # Bindings are essential
+    '''python -c "from guppyft._bindings import RsHugr"''', # Bindings are essential
 ]
 [tool.cibuildwheel.windows.environment]
 PATH = '${HUGRENV_PATH}\\bin;$PATH'
