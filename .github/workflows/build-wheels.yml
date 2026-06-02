@@ -10,7 +10,6 @@ on:
   pull_request:
     branches:
       - main
-      - "release-please--*"
   workflow_dispatch:
 
 env:
