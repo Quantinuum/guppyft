@@ -966,36 +966,43 @@ mod tests {
 
     #[test]
     fn test_invalid_ops() {
+        // block size should be at least 2
         assert!(
             EXTENSION
                 .instantiate_extension_op("x", [1.into(), 0.into()])
                 .is_err()
         );
+        // qubit index should be less than block size
         assert!(
             EXTENSION
                 .instantiate_extension_op("x", [6.into(), 6.into()])
                 .is_err()
         );
+        // `xx` expects two indices following the block size
         assert!(
             EXTENSION
                 .instantiate_extension_op("xx", [6.into(), 0.into()])
                 .is_err()
         );
+        // `xx` expects distinct indices
         assert!(
             EXTENSION
                 .instantiate_extension_op("xx", [6.into(), 0.into(), 0.into()])
                 .is_err()
         );
+        // all indices must be less than the block size
         assert!(
             EXTENSION
                 .instantiate_extension_op("zz_phase_between_blocks", [6.into(), 0.into(), 6.into()])
                 .is_err()
         );
+        // index must be an integer
         assert!(
             EXTENSION
                 .instantiate_extension_op("x", [6.into(), "0".into()])
                 .is_err()
         );
+        // block size must be an integer
         assert!(
             EXTENSION
                 .instantiate_extension_op("x", ["6".into(), 0.into()])
