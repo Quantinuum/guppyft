@@ -5,6 +5,7 @@ use std::{
     sync::{Arc, LazyLock, Weak},
 };
 
+use documented::DocumentedVariants;
 use hugr::{
     Extension,
     extension::{
@@ -43,7 +44,9 @@ pub const VERSION: semver::Version = semver::Version::new(0, 1, 0);
 ///
 /// The dynamic versions are named with the suffix `_d`: for example `x` is the
 /// static form of the X gate and `x_d` is the dynamic form.
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, EnumIter, IntoStaticStr, EnumString)]
+#[derive(
+    Clone, Copy, Debug, DocumentedVariants, Hash, PartialEq, Eq, EnumIter, IntoStaticStr, EnumString,
+)]
 #[expect(non_camel_case_types)]
 #[non_exhaustive]
 pub enum IcebergOpDef {
@@ -541,78 +544,7 @@ impl MakeOpDef for IcebergOpDef {
     }
 
     fn description(&self) -> String {
-        use IcebergOpDef::*;
-        match self {
-            x => "apply an X gate to one qubit",
-            x_d => "apply an X gate to one qubit with dynamic index",
-            z => "apply a Z gate to one qubit",
-            z_d => "apply a Z gate to one qubit with dynamic index",
-            xx => "apply an X gate to two qubits",
-            xx_d => "apply an X gate to two qubits with dynamic indices",
-            yy => "apply a Y gate to two qubits",
-            yy_d => "apply a Y gate to two qubits with dynamic indices",
-            zz => "apply a Z gate to two qubits",
-            zz_d => "apply a Z gate to two qubits with dynamic indices",
-            all_but_one_x => "apply an X gate to all but one qubit",
-            all_but_one_x_d => "apply an X gate to all but one qubit with dynamic index",
-            all_but_one_z => "apply a Z gate to all but one qubit",
-            all_but_one_z_d => "apply a Z gate to all but one qubit with dynamic index",
-            all_x => "apply an X gate to all qubits",
-            all_y => "apply a Y gate to all qubits",
-            all_z => "apply a Z gate to all qubits",
-            x_with_all_but_one_z => "apply an X gate to one qubit and a Z to the rest",
-            x_with_all_but_one_z_d => "apply an X gate to one qubit and a Z to the rest with dynamic index",
-            z_with_all_but_one_x => "apply a Z gate to one qubit and an X to the rest",
-            z_with_all_but_one_x_d => "apply a Z gate to one qubit and an X to the rest with dynamic index",
-            fan_out => "fan-out from one qubit to the rest",
-            fan_out_d => "fan-out from one qubit to the rest with dynamic index",
-            fan_in => "fan-in to one qubit from the rest",
-            fan_in_d => "fan-in to one qubit from the rest with dynamic index",
-            rx => "apply an Rx gate to one qubit",
-            rx_d => "apply an Rx gate to one qubit with dynamic index",
-            rz => "apply an Rz gate to one qubit",
-            rz_d => "apply an Rz gate to one qubit with dynamic index",
-            all_rx => "apply an Rx gate to all qubits",
-            all_ry => "apply an Ry gate to all qubits",
-            all_rz => "apply an Rz gate to all qubits",
-            all_but_one_rx => "apply an Rx gate to all but one qubit",
-            all_but_one_rx_d => "apply an Rx gate to all but one qubit with dynamic index",
-            all_but_one_rz => "apply an Rz gate to all but one qubit",
-            all_but_one_rz_d => "apply an Rz gate to all but one qubit with dynamic index",
-            all_h => "apply an H gate to all qubits",
-            xx_phase => "apply an XXPhase gate to two qubits within a block",
-            xx_phase_d => {
-                "apply an XXPhase gate to two qubits within a block with dynamic indices"
-            }
-            yy_phase => "apply a YYPhase gate to two qubits within a block",
-            yy_phase_d => {
-                "apply a YYPhase gate to two qubits within a block with dynamic indices"
-            }
-            zz_phase => "apply a ZZPhase gate to two qubits within a block",
-            zz_phase_d => {
-                "apply a ZZPhase gate to two qubits within a block with dynamic indices"
-            }
-            cx => "apply a CX gate to two qubits within a block",
-            cx_d => "apply a CX gate to two qubits within a block with dynamic indices",
-            swap => "swap two qubits within a block",
-            swap_d => "swap two qubits within a block with dynamic indices",
-            zz_phase_between_blocks => {
-                "apply a ZZPhase gate to two qubits on different blocks of the same size"
-            }
-            zz_phase_between_blocks_d => {
-                "apply a ZZPhase gate to two qubits on different blocks of the same size with dynamic indices"
-            }
-            cx_transverse => "apply a CX gate transversally over two blocks of the same size",
-            alloc_zero => "allocate a block in the all-zero state",
-            free => "free a block",
-            measure_syndrome => "perform a syndrome measurement, producing (X,Z) error indicators",
-            measure_all => "destructively measure all qubits in the Z basis",
-            measure_one_x => "non-destructively measure one qubit in the X basis",
-            measure_one_x_d => "non-destructively measure one qubit in the X basis with dynamic index",
-            measure_one_z => "non-destructively measure one qubit in the Z basis",
-            measure_one_z_d => "non-destructively measure one qubit in the Z basis with dynamic index",
-        }
-        .into()
+        self.get_variant_docs().into()
     }
 }
 
@@ -724,6 +656,11 @@ mod tests {
         let swap51 = EXTENSION
             .instantiate_extension_op("swap", [6.into(), 5.into(), 1.into()])
             .unwrap();
+        assert_eq!(x3.description(), "X gate.");
+        assert_eq!(
+            zzphasebetweenblocks_d.description(),
+            "ZZPhase gate involving two blocks with dynamic indices."
+        );
         let mut module_builder = ModuleBuilder::new();
         let signature = Signature::new_endo(vec![block; 2]);
         let mut f_build = module_builder.define_function("main", signature).unwrap();
