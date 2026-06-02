@@ -51,6 +51,8 @@ jobs:
 
       - name: Build guppy-ft wheel
         uses: pypa/cibuildwheel@v3.4.1
+        with:
+          output-dir: 'wheelhouse'
 
       - uses: actions/upload-artifact@v7
         with:
