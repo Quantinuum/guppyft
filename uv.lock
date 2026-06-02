@@ -136,8 +136,8 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "guppylang", git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang&rev=561882f760d48be0327d8785b7b82085ea657957" },
-    { name = "guppylang-internals", git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang-internals&rev=561882f760d48be0327d8785b7b82085ea657957" },
+    { name = "guppylang", specifier = ">=1.0.0a0" },
+    { name = "guppylang-internals", specifier = ">=1.0.0a0" },
     { name = "hugr", specifier = ">=0.16.0" },
     { name = "tket", git = "https://github.com/quantinuum/tket2?subdirectory=tket-py&rev=87f2ab8d6bced055653bf17d07f741e361916a74" },
 ]
@@ -165,8 +165,8 @@ test = [
 
 [[package]]
 name = "guppylang"
-version = "0.21.12"
-source = { git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang&rev=561882f760d48be0327d8785b7b82085ea657957#561882f760d48be0327d8785b7b82085ea657957" }
+version = "1.0.0a0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "guppylang-internals" },
     { name = "numpy" },
@@ -176,11 +176,15 @@ dependencies = [
     { name = "tqdm" },
     { name = "types-tqdm" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/31/ed/1c56c651469539dfbae5075cf0ba29656c8b0cb324fa8661bfc00160156a/guppylang-1.0.0a0.tar.gz", hash = "sha256:da543cd8f224eb724ae13f0a5d07c6a922bee31d44534d1d7151fc1bf13642e8", size = 70589, upload-time = "2026-06-01T09:05:03.101Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/19/90/025944810c1751f06b27064ab8493638bf4ab55afbcc440a74e9e0e05c2a/guppylang-1.0.0a0-py3-none-any.whl", hash = "sha256:8ba15d2c87126570285def29f84d3e3aaccf69142f4665d4d5e479f4ce334743", size = 67271, upload-time = "2026-06-01T09:05:01.87Z" },
+]
 
 [[package]]
 name = "guppylang-internals"
-version = "0.33.0"
-source = { git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang-internals&rev=561882f760d48be0327d8785b7b82085ea657957#561882f760d48be0327d8785b7b82085ea657957" }
+version = "1.0.0a0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "hugr" },
     { name = "pytket" },
@@ -188,6 +192,10 @@ dependencies = [
     { name = "tket-exts" },
     { name = "typing-extensions" },
     { name = "wasmtime" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/0a/8f/93139be5c5e6aacb97b45f94d32017d78ecef4087dc206ffb7ffe1e6bb6e/guppylang_internals-1.0.0a0.tar.gz", hash = "sha256:b0337281bc8e5152fa9b86ffab46bce4333e4a551d1d1a5b61c2e52253be7b21", size = 217185, upload-time = "2026-05-29T13:51:02.512Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4b/2f/419e19d135349b1ce5e72ca0ed7434769b789aa6e97bdf2cac7730d80bd0/guppylang_internals-1.0.0a0-py3-none-any.whl", hash = "sha256:54fb4d8d6085c37ef880e49c9bdff7b8007dd561a6254bafb3e9f41de04f75d2", size = 272124, upload-time = "2026-05-29T13:51:01.062Z" },
 ]
 
 [[package]]
