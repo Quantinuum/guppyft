@@ -5,7 +5,7 @@ use clap::Parser;
 /// CLI arguments.
 #[derive(Parser, Debug)]
 #[clap(version = "1.0", long_about = None)]
-#[clap(about = "extensions CLI tools")]
+#[clap(about = "CLI tools for guppyft extensions")]
 #[group(id = "extensions")]
 #[non_exhaustive]
 pub enum CliArgs {
