@@ -30,7 +30,7 @@ class IcebergTypesExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self().get_type("block").instantiate([BoundedNatArg(k)])
+        return self.iceberg_t_def.instantiate([BoundedNatArg(k)])
 
 
 class IcebergOpsExtension:
