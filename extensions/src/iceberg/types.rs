@@ -76,7 +76,7 @@ mod tests {
     #[test]
     fn test_iceberg_types_extension() {
         let extn = extension();
-        assert_eq!(extn.name() as &str, "tket.qec.iceberg.types");
+        assert_eq!(extn.name() as &str, "guppyft.iceberg.types");
         assert_eq!(extn.types().count(), 1);
         assert_eq!(extn.operations().count(), 0);
     }

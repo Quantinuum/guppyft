@@ -649,7 +649,7 @@ mod tests {
 
     #[test]
     fn test_iceberg_ops_extension() {
-        assert_eq!(EXTENSION.name() as &str, "tket.qec.iceberg.ops");
+        assert_eq!(EXTENSION.name() as &str, "guppyft.iceberg.ops");
         assert_eq!(EXTENSION.types().count(), 0);
         assert_eq!(EXTENSION.operations().count(), 58);
     }
