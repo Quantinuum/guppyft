@@ -20,6 +20,6 @@ fix:
 format:
     uv run ruff format
 
-# Generate serialized declarations for the QEC extensions
+# Generate serialized declarations for the HUGR extensions
 gen-extensions:
     cargo run -p extensions gen-extensions -o src/guppyft/extensions/data
