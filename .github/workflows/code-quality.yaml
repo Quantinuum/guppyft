@@ -44,7 +44,7 @@ jobs:
         run: uv lock
 
       - name: Ensure cargo lockfile is up to date
-        run: cargo generate-lockfile --locked
+        run: cargo update -w --locked
 
   check-py:
     name: 🐍 Check Python code (${{ matrix.python-version }})
