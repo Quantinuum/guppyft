@@ -37,7 +37,7 @@ fn extension() -> Arc<Extension> {
             .add_type(
                 BLOCK_TYPENAME,
                 vec![TypeParam::max_nat_type()],
-                "logical iceberg block".to_owned(),
+                "logical Iceberg block".to_owned(),
                 TypeBound::Linear.into(),
                 extension_ref,
             )
