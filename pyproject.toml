@@ -24,8 +24,8 @@ classifiers = [
 ]
 
 dependencies = [
-    "guppylang>=0.21.13",
-    "guppylang-internals>=0.34.0",
+    "guppylang>=1.0.0a0",
+    "guppylang-internals>=1.0.0a0",
     "hugr>=0.16.0",
     "tket>=0.13.0",
 ]
@@ -56,9 +56,6 @@ requires = ["maturin>=1.13.3,<2.0"]
 build-backend = "maturin"
 
 [tool.uv.sources]
-# Pinned to #1695 while waiting for release
-guppylang = { git = "https://github.com/quantinuum/guppylang", rev = "561882f760d48be0327d8785b7b82085ea657957", subdirectory = "guppylang" }
-guppylang-internals = { git = "https://github.com/quantinuum/guppylang", rev = "561882f760d48be0327d8785b7b82085ea657957", subdirectory = "guppylang-internals" }
 # Needs tket branch for globals extension
 tket = { git = "https://github.com/quantinuum/tket2", rev = "87f2ab8d6bced055653bf17d07f741e361916a74", subdirectory = "tket-py" }
 selene-hugr-qis-compiler = { git = "https://github.com/quantinuum/tket2", rev = "87f2ab8d6bced055653bf17d07f741e361916a74", subdirectory = "qis-compiler" }
