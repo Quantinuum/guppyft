@@ -29,7 +29,7 @@ use super::types::block_tv;
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.iceberg.ops");
 /// Extension version.
-pub const VERSION: semver::Version = semver::Version::new(0, 2, 0);
+pub const VERSION: semver::Version = semver::Version::new(0, 1, 0);
 
 /// Logical Iceberg operations.
 ///
