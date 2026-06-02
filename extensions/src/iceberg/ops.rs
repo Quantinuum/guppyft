@@ -24,6 +24,7 @@ use hugr::{
     types::{FuncValueType, PolyFuncTypeRV, Type, TypeArg, type_param::TypeParam},
 };
 use strum::{EnumIter, EnumString, IntoStaticStr};
+use tket_qsystem::extension::futures::future_type;
 
 use super::types::block_tv;
 
@@ -302,7 +303,7 @@ impl ValidateJustArgs for InterBlockArgsValidator {
 fn bool_array_tv(var_id: usize) -> Type {
     Array::ty_parametric(
         TypeArg::new_var_use(var_id, TypeParam::max_nat_type()),
-        bool_t(),
+        future_type(bool_t()),
     )
     .unwrap()
 }
@@ -326,7 +327,7 @@ fn vec_of_blocks_and_ints_and_angles(
 
 fn vec_of_blocks_and_bools(n_blocks: usize, n_bools: usize) -> Vec<Type> {
     let mut types: Vec<Type> = vec![block_tv(0); n_blocks];
-    types.extend(vec![bool_t(); n_bools]);
+    types.extend(vec![future_type(bool_t()); n_bools]);
     types
 }
 
@@ -771,7 +772,7 @@ mod tests {
         let free = EXTENSION
             .instantiate_extension_op("free", [8.into()])
             .unwrap();
-        let outputs: Vec<Type> = vec![bool_t(); 2];
+        let outputs: Vec<Type> = vec![future_type(bool_t()); 2];
         let mut dfg_builder = DFGBuilder::new(Signature::new(vec![], outputs)).unwrap();
         let handle = dfg_builder.add_dataflow_op(alloczero, vec![]).unwrap();
         let handle = dfg_builder.add_dataflow_op(x3, handle.outputs()).unwrap();
@@ -797,8 +798,11 @@ mod tests {
         let measureall = EXTENSION
             .instantiate_extension_op("measure_all", [4.into()])
             .unwrap();
-        let mut dfg_builder =
-            DFGBuilder::new(Signature::new([block_type(4)], [array_type(4, bool_t())])).unwrap();
+        let mut dfg_builder = DFGBuilder::new(Signature::new(
+            [block_type(4)],
+            [array_type(4, future_type(bool_t()))],
+        ))
+        .unwrap();
         let handle = dfg_builder
             .add_dataflow_op(measureall, dfg_builder.input_wires())
             .unwrap();
@@ -824,7 +828,12 @@ mod tests {
             .unwrap();
         let mut dfg_builder = DFGBuilder::new(Signature::new(
             vec![block_type(2)],
-            vec![block_type(2), bool_t(), bool_t(), bool_t()],
+            vec![
+                block_type(2),
+                future_type(bool_t()),
+                future_type(bool_t()),
+                future_type(bool_t()),
+            ],
         ))
         .unwrap();
         let handle = dfg_builder

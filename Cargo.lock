@@ -683,7 +683,7 @@ dependencies = [
  "hugr",
  "hugr-core",
  "itertools 0.14.0",
- "tket",
+ "tket 0.18.0",
 ]
 
 [[package]]
@@ -694,7 +694,7 @@ dependencies = [
  "encoder",
  "hugr",
  "pyo3",
- "tket",
+ "tket 0.18.0",
 ]
 
 [[package]]
@@ -747,6 +747,7 @@ dependencies = [
  "hugr-cli",
  "semver",
  "strum 0.28.0",
+ "tket-qsystem",
 ]
 
 [[package]]
@@ -1064,6 +1065,7 @@ checksum = "d466e9454f08e4a911e14806c24e16fba1b4c121d1ea474396f396069cf949d9"
 dependencies = [
  "equivalent",
  "hashbrown 0.17.1",
+ "rayon",
  "serde",
  "serde_core",
 ]
@@ -2238,6 +2240,46 @@ dependencies = [
 ]
 
 [[package]]
+name = "tket"
+version = "0.19.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a56460bb4f82313dd11c188979a4c3f2eb74b98fb6ba2d60fef0d44e0eff8b4b"
+dependencies = [
+ "ascent",
+ "bytemuck",
+ "cgmath",
+ "chrono",
+ "crossbeam-channel",
+ "csv",
+ "delegate",
+ "derive_more 2.1.1",
+ "fxhash",
+ "hugr",
+ "hugr-core",
+ "indexmap 2.14.0",
+ "itertools 0.14.0",
+ "lazy_static",
+ "num-rational",
+ "pastey",
+ "pest",
+ "pest_derive",
+ "petgraph 0.8.3",
+ "portgraph",
+ "priority-queue",
+ "rayon",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "smol_str",
+ "strum 0.28.0",
+ "thiserror 2.0.18",
+ "tket-json-rs",
+ "tracing",
+ "typetag",
+ "zstd",
+]
+
+[[package]]
 name = "tket-json-rs"
 version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2248,6 +2290,30 @@ dependencies = [
  "serde_json",
  "strum 0.28.0",
  "uuid",
+]
+
+[[package]]
+name = "tket-qsystem"
+version = "0.25.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d9b3899fb263ffd2b0990a1afc7c97fe06fc3045fcc1cb61d39bf19bd69378ad"
+dependencies = [
+ "anyhow",
+ "clap",
+ "delegate",
+ "derive_more 2.1.1",
+ "hugr",
+ "hugr-cli",
+ "hugr-core",
+ "indexmap 2.14.0",
+ "itertools 0.14.0",
+ "lazy_static",
+ "serde",
+ "smol_str",
+ "strum 0.28.0",
+ "tket 0.19.0",
+ "tket-json-rs",
+ "typetag",
 ]
 
 [[package]]
