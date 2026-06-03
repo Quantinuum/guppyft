@@ -33,3 +33,15 @@ def test_hugr() -> None:
     assert in0.type_def.name == "block"
     assert in0.args == [BoundedNatArg(6)]
     assert in1.type_def.name == "float64"
+
+
+def test_exported_extensions() -> None:
+    ops_extn = iceberg_ops()
+    types_extn = iceberg_types()
+    assert len(ops_extn.types) == 0
+    assert len(types_extn.operations) == 0
+    assert types_extn.types == {"block": iceberg_types.iceberg_block_def}
+    assert all(
+        op_def == iceberg_ops.__getattribute__(f"{op_name}_def")
+        for op_name, op_def in ops_extn.operations.items()
+    )
