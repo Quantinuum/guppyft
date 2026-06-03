@@ -865,7 +865,7 @@ class IcebergOpsExtension:
 
         This is the generic operation definition. For the instantiated operation, see
         `swap`."""
-        return self().get_op("cx")
+        return self().get_op("swap")
 
     def swap(self, k: int, i: int, j: int) -> ExtOp:
         """Apply a SWAP gate to two qubits within a block.
