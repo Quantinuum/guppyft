@@ -13,11 +13,11 @@ description: Checks if any relevant files have changed in the current pull reque
 # These outputs are always true when running after a merge to main, or if the PR has a `X-run-thorough-ci-tests` label.
 outputs:
   rust:
-    description: "Rust files have changed"
-    value: ${{ steps.override.outputs.out == 'true' || steps.change-filters.outputs.rust == 'true' }}
+    description: "Need to run rust tests"
+    value: ${{ steps.override.outputs.out == 'true' || steps.change-filters.outputs.encoder == 'true' || steps.change-filters.outputs.extensions == 'true' }}
   python:
-    description: "Python files have changed"
-    value: ${{ steps.override.outputs.out == 'true' || steps.change-filters.outputs.python == 'true' }}
+    description: "Need to run python tests"
+    value: ${{ steps.override.outputs.out == 'true' || steps.change-filters.outputs.python == 'true' || steps.change-filters.outputs.encoder == 'true' }}
   extensions:
     description: "The extension definitions have changed"
     value: ${{ steps.override.outputs.out == 'true' || steps.change-filters.outputs.extensions == 'true' }}
