@@ -45,3 +45,67 @@ def test_exported_extensions() -> None:
         op_def == iceberg_ops.__getattribute__(f"{op_name}_def")
         for op_name, op_def in ops_extn.operations.items()
     )
+
+
+def test_op_instantiations() -> None:
+    ops_extn = iceberg_ops()
+    # Dynamic ops all just take a block size:
+    for op_name, op_def in ops_extn.operations.items():
+        if op_name.endswith("_d"):
+            assert iceberg_ops.__getattribute__(op_name)(3).op_def() == op_def
+    # Other ops that take no indices:
+    for op_name in [
+        "all_x",
+        "all_y",
+        "all_z",
+        "all_rx",
+        "all_ry",
+        "all_rz",
+        "all_h",
+        "cx_transversal",
+        "alloc_zero",
+        "free",
+        "measure_syndrome",
+        "measure_all",
+    ]:
+        assert (
+            iceberg_ops.__getattribute__(op_name)(3).op_def()
+            == ops_extn.operations[op_name]
+        )
+    # Ops that take a single index:
+    for op_name in [
+        "x",
+        "z",
+        "all_but_one_x",
+        "all_but_one_z",
+        "x_with_all_but_one_z",
+        "z_with_all_but_one_x",
+        "fan_out",
+        "fan_in",
+        "rx",
+        "rz",
+        "all_but_one_rx",
+        "all_but_one_rz",
+        "measure_one_x",
+        "measure_one_z",
+    ]:
+        assert (
+            iceberg_ops.__getattribute__(op_name)(3, 1).op_def()
+            == ops_extn.operations[op_name]
+        )
+    # Ops that take two indices:
+    for op_name in [
+        "xx",
+        "yy",
+        "zz",
+        "xx_phase",
+        "yy_phase",
+        "zz_phase",
+        "cx",
+        "swap",
+        "zz_phase_between_blocks",
+    ]:
+        assert (
+            iceberg_ops.__getattribute__(op_name)(3, 1, 2).op_def()
+            == ops_extn.operations[op_name]
+        )
