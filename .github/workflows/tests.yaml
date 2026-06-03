@@ -113,7 +113,7 @@ jobs:
       - uses: extractions/setup-just@v4
       - name: Generate the updated definitions
         run: just gen-extensions
-      - name: Check if the declarations are up to date
+      - name: Check if the definitions are up to date
         run: |
           git diff --exit-code --name-only src/guppyft/extensions/data
           if [ $? -ne 0 ]; then
