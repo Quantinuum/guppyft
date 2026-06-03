@@ -86,6 +86,12 @@ jobs:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
 
+      - name: Install hugrenv
+        uses: Quantinuum/hugrverse-env/install-hugrenv-action@main
+        with:
+          packages: llvm,tket
+          lockfile: hugrenv.lock
+
       - name: Install dependencies
         run: uv sync --frozen --python ${{ env.PYTHON_VERSION }}
 
