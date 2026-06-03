@@ -1,12 +1,12 @@
 {
-  "version": "0.2.0",
+  "version": "0.1.0",
   "name": "guppyft.iceberg.ops",
   "types": {},
   "operations": {
     "all_but_one_rx": {
       "extension": "guppyft.iceberg.ops",
       "name": "all_but_one_rx",
-      "description": "apply an Rx gate to all but one qubit",
+      "description": "Rx gate on all but one qubit.",
       "signature": {
         "params": [
           {
@@ -69,7 +69,7 @@
     "all_but_one_rx_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "all_but_one_rx_d",
-      "description": "apply an Rx gate to all but one qubit with dynamic index",
+      "description": "Rx gate on all but one qubit with dynamic index.",
       "signature": {
         "params": [
           {
@@ -140,7 +140,7 @@
     "all_but_one_rz": {
       "extension": "guppyft.iceberg.ops",
       "name": "all_but_one_rz",
-      "description": "apply an Rz gate to all but one qubit",
+      "description": "Rz gate on all but one qubit.",
       "signature": {
         "params": [
           {
@@ -203,7 +203,7 @@
     "all_but_one_rz_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "all_but_one_rz_d",
-      "description": "apply an Rz gate to all but one qubit with dynamic index",
+      "description": "Rz gate on all but one qubit with dynamic index.",
       "signature": {
         "params": [
           {
@@ -274,7 +274,7 @@
     "all_but_one_x": {
       "extension": "guppyft.iceberg.ops",
       "name": "all_but_one_x",
-      "description": "apply an X gate to all but one qubit",
+      "description": "X gate on all but one qubit.",
       "signature": {
         "params": [
           {
@@ -330,7 +330,7 @@
     "all_but_one_x_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "all_but_one_x_d",
-      "description": "apply an X gate to all but one qubit with dynamic index",
+      "description": "X gate on all but one qubit with dynamic index.",
       "signature": {
         "params": [
           {
@@ -394,7 +394,7 @@
     "all_but_one_z": {
       "extension": "guppyft.iceberg.ops",
       "name": "all_but_one_z",
-      "description": "apply a Z gate to all but one qubit",
+      "description": "Z gate on all but one qubit.",
       "signature": {
         "params": [
           {
@@ -450,7 +450,7 @@
     "all_but_one_z_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "all_but_one_z_d",
-      "description": "apply a Z gate to all but one qubit with dynamic index",
+      "description": "Z gate on all but one qubit with dynamic index.",
       "signature": {
         "params": [
           {
@@ -514,7 +514,7 @@
     "all_h": {
       "extension": "guppyft.iceberg.ops",
       "name": "all_h",
-      "description": "apply an H gate to all qubits",
+      "description": "H gate on all qubits.",
       "signature": {
         "params": [
           {
@@ -566,7 +566,7 @@
     "all_rx": {
       "extension": "guppyft.iceberg.ops",
       "name": "all_rx",
-      "description": "apply an Rx gate to all qubits",
+      "description": "Rx gate on all qubits.",
       "signature": {
         "params": [
           {
@@ -625,7 +625,7 @@
     "all_ry": {
       "extension": "guppyft.iceberg.ops",
       "name": "all_ry",
-      "description": "apply an Ry gate to all qubits",
+      "description": "Ry gate on all qubits.",
       "signature": {
         "params": [
           {
@@ -684,7 +684,7 @@
     "all_rz": {
       "extension": "guppyft.iceberg.ops",
       "name": "all_rz",
-      "description": "apply an Rz gate to all qubits",
+      "description": "Rz gate on all qubits.",
       "signature": {
         "params": [
           {
@@ -743,7 +743,7 @@
     "all_x": {
       "extension": "guppyft.iceberg.ops",
       "name": "all_x",
-      "description": "apply an X gate to all qubits",
+      "description": "X gate on all qubits.",
       "signature": {
         "params": [
           {
@@ -795,7 +795,7 @@
     "all_y": {
       "extension": "guppyft.iceberg.ops",
       "name": "all_y",
-      "description": "apply a Y gate to all qubits",
+      "description": "Y gate on all qubits.",
       "signature": {
         "params": [
           {
@@ -847,7 +847,7 @@
     "all_z": {
       "extension": "guppyft.iceberg.ops",
       "name": "all_z",
-      "description": "apply a Z gate to all qubits",
+      "description": "Z gate on all qubits.",
       "signature": {
         "params": [
           {
@@ -899,7 +899,7 @@
     "alloc_zero": {
       "extension": "guppyft.iceberg.ops",
       "name": "alloc_zero",
-      "description": "allocate a block in the all-zero state",
+      "description": "Prepare the all-zero state on a block.",
       "signature": {
         "params": [
           {
@@ -934,7 +934,7 @@
     "cx": {
       "extension": "guppyft.iceberg.ops",
       "name": "cx",
-      "description": "apply a CX gate to two qubits within a block",
+      "description": "CX gate.",
       "signature": {
         "params": [
           {
@@ -994,7 +994,7 @@
     "cx_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "cx_d",
-      "description": "apply a CX gate to two qubits within a block with dynamic indices",
+      "description": "CX gate with dynamic indices.",
       "signature": {
         "params": [
           {
@@ -1067,10 +1067,10 @@
       },
       "binary": false
     },
-    "cx_transverse": {
+    "cx_transversal": {
       "extension": "guppyft.iceberg.ops",
-      "name": "cx_transverse",
-      "description": "apply a CX gate transversally over two blocks of the same size",
+      "name": "cx_transversal",
+      "description": "CX gate applied transversally over two blocks.",
       "signature": {
         "params": [
           {
@@ -1154,7 +1154,7 @@
     "fan_in": {
       "extension": "guppyft.iceberg.ops",
       "name": "fan_in",
-      "description": "fan-in to one qubit from the rest",
+      "description": "Fan-in to one qubit from all others.",
       "signature": {
         "params": [
           {
@@ -1210,7 +1210,7 @@
     "fan_in_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "fan_in_d",
-      "description": "fan-in to one qubit from the rest with dynamic index",
+      "description": "Fan-in to one qubit from all others with dynamic index.",
       "signature": {
         "params": [
           {
@@ -1274,7 +1274,7 @@
     "fan_out": {
       "extension": "guppyft.iceberg.ops",
       "name": "fan_out",
-      "description": "fan-out from one qubit to the rest",
+      "description": "Fan-out from one qubit to all others.",
       "signature": {
         "params": [
           {
@@ -1330,7 +1330,7 @@
     "fan_out_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "fan_out_d",
-      "description": "fan-out from one qubit to the rest with dynamic index",
+      "description": "Fan-out from one qubit to all others with dynamic index.",
       "signature": {
         "params": [
           {
@@ -1394,7 +1394,7 @@
     "free": {
       "extension": "guppyft.iceberg.ops",
       "name": "free",
-      "description": "free a block",
+      "description": "Free a block.",
       "signature": {
         "params": [
           {
@@ -1429,7 +1429,7 @@
     "measure_all": {
       "extension": "guppyft.iceberg.ops",
       "name": "measure_all",
-      "description": "destructively measure all qubits in the Z basis",
+      "description": "Destructive measurement of all qubits.",
       "signature": {
         "params": [
           {
@@ -1473,9 +1473,20 @@
                 {
                   "tya": "Type",
                   "ty": {
-                    "t": "Sum",
-                    "s": "Unit",
-                    "size": 2
+                    "t": "Opaque",
+                    "extension": "tket.futures",
+                    "id": "Future",
+                    "args": [
+                      {
+                        "tya": "Type",
+                        "ty": {
+                          "t": "Sum",
+                          "s": "Unit",
+                          "size": 2
+                        }
+                      }
+                    ],
+                    "bound": "A"
                   }
                 }
               ],
@@ -1489,7 +1500,7 @@
     "measure_one_x": {
       "extension": "guppyft.iceberg.ops",
       "name": "measure_one_x",
-      "description": "non-destructively measure one qubit in the X basis",
+      "description": "Non-destructive measurement of one qubit in the X basis.",
       "signature": {
         "params": [
           {
@@ -1538,9 +1549,20 @@
               "bound": "A"
             },
             {
-              "t": "Sum",
-              "s": "Unit",
-              "size": 2
+              "t": "Opaque",
+              "extension": "tket.futures",
+              "id": "Future",
+              "args": [
+                {
+                  "tya": "Type",
+                  "ty": {
+                    "t": "Sum",
+                    "s": "Unit",
+                    "size": 2
+                  }
+                }
+              ],
+              "bound": "A"
             }
           ]
         }
@@ -1550,7 +1572,7 @@
     "measure_one_x_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "measure_one_x_d",
-      "description": "non-destructively measure one qubit in the X basis with dynamic index",
+      "description": "Non-destructive measurement of one qubit in the X basis with dynamic index.",
       "signature": {
         "params": [
           {
@@ -1607,9 +1629,20 @@
               "bound": "A"
             },
             {
-              "t": "Sum",
-              "s": "Unit",
-              "size": 2
+              "t": "Opaque",
+              "extension": "tket.futures",
+              "id": "Future",
+              "args": [
+                {
+                  "tya": "Type",
+                  "ty": {
+                    "t": "Sum",
+                    "s": "Unit",
+                    "size": 2
+                  }
+                }
+              ],
+              "bound": "A"
             }
           ]
         }
@@ -1619,7 +1652,7 @@
     "measure_one_z": {
       "extension": "guppyft.iceberg.ops",
       "name": "measure_one_z",
-      "description": "non-destructively measure one qubit in the Z basis",
+      "description": "Non-destructive measurement of one qubit in the Z basis.",
       "signature": {
         "params": [
           {
@@ -1668,9 +1701,20 @@
               "bound": "A"
             },
             {
-              "t": "Sum",
-              "s": "Unit",
-              "size": 2
+              "t": "Opaque",
+              "extension": "tket.futures",
+              "id": "Future",
+              "args": [
+                {
+                  "tya": "Type",
+                  "ty": {
+                    "t": "Sum",
+                    "s": "Unit",
+                    "size": 2
+                  }
+                }
+              ],
+              "bound": "A"
             }
           ]
         }
@@ -1680,7 +1724,7 @@
     "measure_one_z_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "measure_one_z_d",
-      "description": "non-destructively measure one qubit in the Z basis with dynamic index",
+      "description": "Non-destructive measurement of one qubit in the Z basis with dynamic index.",
       "signature": {
         "params": [
           {
@@ -1737,9 +1781,20 @@
               "bound": "A"
             },
             {
-              "t": "Sum",
-              "s": "Unit",
-              "size": 2
+              "t": "Opaque",
+              "extension": "tket.futures",
+              "id": "Future",
+              "args": [
+                {
+                  "tya": "Type",
+                  "ty": {
+                    "t": "Sum",
+                    "s": "Unit",
+                    "size": 2
+                  }
+                }
+              ],
+              "bound": "A"
             }
           ]
         }
@@ -1749,7 +1804,7 @@
     "measure_syndrome": {
       "extension": "guppyft.iceberg.ops",
       "name": "measure_syndrome",
-      "description": "perform a syndrome measurement, producing (X,Z) error indicators",
+      "description": "Syndrome measurement.",
       "signature": {
         "params": [
           {
@@ -1794,14 +1849,36 @@
               "bound": "A"
             },
             {
-              "t": "Sum",
-              "s": "Unit",
-              "size": 2
+              "t": "Opaque",
+              "extension": "tket.futures",
+              "id": "Future",
+              "args": [
+                {
+                  "tya": "Type",
+                  "ty": {
+                    "t": "Sum",
+                    "s": "Unit",
+                    "size": 2
+                  }
+                }
+              ],
+              "bound": "A"
             },
             {
-              "t": "Sum",
-              "s": "Unit",
-              "size": 2
+              "t": "Opaque",
+              "extension": "tket.futures",
+              "id": "Future",
+              "args": [
+                {
+                  "tya": "Type",
+                  "ty": {
+                    "t": "Sum",
+                    "s": "Unit",
+                    "size": 2
+                  }
+                }
+              ],
+              "bound": "A"
             }
           ]
         }
@@ -1811,7 +1888,7 @@
     "rx": {
       "extension": "guppyft.iceberg.ops",
       "name": "rx",
-      "description": "apply an Rx gate to one qubit",
+      "description": "Rx gate.",
       "signature": {
         "params": [
           {
@@ -1874,7 +1951,7 @@
     "rx_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "rx_d",
-      "description": "apply an Rx gate to one qubit with dynamic index",
+      "description": "Rx gate with dynamic index.",
       "signature": {
         "params": [
           {
@@ -1945,7 +2022,7 @@
     "rz": {
       "extension": "guppyft.iceberg.ops",
       "name": "rz",
-      "description": "apply an Rz gate to one qubit",
+      "description": "Rz gate.",
       "signature": {
         "params": [
           {
@@ -2008,7 +2085,7 @@
     "rz_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "rz_d",
-      "description": "apply an Rz gate to one qubit with dynamic index",
+      "description": "Rz gate with dynamic index.",
       "signature": {
         "params": [
           {
@@ -2079,7 +2156,7 @@
     "swap": {
       "extension": "guppyft.iceberg.ops",
       "name": "swap",
-      "description": "swap two qubits within a block",
+      "description": "Swap of two qubits within a block.",
       "signature": {
         "params": [
           {
@@ -2139,7 +2216,7 @@
     "swap_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "swap_d",
-      "description": "swap two qubits within a block with dynamic indices",
+      "description": "Swap of two qubits within a block with dynamic indices.",
       "signature": {
         "params": [
           {
@@ -2215,7 +2292,7 @@
     "x": {
       "extension": "guppyft.iceberg.ops",
       "name": "x",
-      "description": "apply an X gate to one qubit",
+      "description": "X gate.",
       "signature": {
         "params": [
           {
@@ -2271,7 +2348,7 @@
     "x_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "x_d",
-      "description": "apply an X gate to one qubit with dynamic index",
+      "description": "X gate with dynamic index.",
       "signature": {
         "params": [
           {
@@ -2335,7 +2412,7 @@
     "x_with_all_but_one_z": {
       "extension": "guppyft.iceberg.ops",
       "name": "x_with_all_but_one_z",
-      "description": "apply an X gate to one qubit and a Z to the rest",
+      "description": "X gate on one qubit with Z on all others.",
       "signature": {
         "params": [
           {
@@ -2391,7 +2468,7 @@
     "x_with_all_but_one_z_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "x_with_all_but_one_z_d",
-      "description": "apply an X gate to one qubit and a Z to the rest with dynamic index",
+      "description": "X gate on one qubit with Z on all others with dynamic index.",
       "signature": {
         "params": [
           {
@@ -2455,7 +2532,7 @@
     "xx": {
       "extension": "guppyft.iceberg.ops",
       "name": "xx",
-      "description": "apply an X gate to two qubits",
+      "description": "X gate on two qubits.",
       "signature": {
         "params": [
           {
@@ -2515,7 +2592,7 @@
     "xx_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "xx_d",
-      "description": "apply an X gate to two qubits with dynamic indices",
+      "description": "X gate on two qubits with dynamic indices.",
       "signature": {
         "params": [
           {
@@ -2591,7 +2668,7 @@
     "xx_phase": {
       "extension": "guppyft.iceberg.ops",
       "name": "xx_phase",
-      "description": "apply an XXPhase gate to two qubits within a block",
+      "description": "XXPhase gate.",
       "signature": {
         "params": [
           {
@@ -2658,7 +2735,7 @@
     "xx_phase_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "xx_phase_d",
-      "description": "apply an XXPhase gate to two qubits within a block with dynamic indices",
+      "description": "XXPhase gate with dynamic indices.",
       "signature": {
         "params": [
           {
@@ -2741,7 +2818,7 @@
     "yy": {
       "extension": "guppyft.iceberg.ops",
       "name": "yy",
-      "description": "apply a Y gate to two qubits",
+      "description": "Y gate on two qubits.",
       "signature": {
         "params": [
           {
@@ -2801,7 +2878,7 @@
     "yy_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "yy_d",
-      "description": "apply a Y gate to two qubits with dynamic indices",
+      "description": "Y gate on two qubits with dynamic indices.",
       "signature": {
         "params": [
           {
@@ -2877,7 +2954,7 @@
     "yy_phase": {
       "extension": "guppyft.iceberg.ops",
       "name": "yy_phase",
-      "description": "apply a YYPhase gate to two qubits within a block",
+      "description": "YYPhase gate.",
       "signature": {
         "params": [
           {
@@ -2944,7 +3021,7 @@
     "yy_phase_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "yy_phase_d",
-      "description": "apply a YYPhase gate to two qubits within a block with dynamic indices",
+      "description": "YYPhase gate with dynamic indices.",
       "signature": {
         "params": [
           {
@@ -3027,7 +3104,7 @@
     "z": {
       "extension": "guppyft.iceberg.ops",
       "name": "z",
-      "description": "apply a Z gate to one qubit",
+      "description": "Z gate.",
       "signature": {
         "params": [
           {
@@ -3083,7 +3160,7 @@
     "z_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "z_d",
-      "description": "apply a Z gate to one qubit with dynamic index",
+      "description": "Z gate with dynamic index.",
       "signature": {
         "params": [
           {
@@ -3147,7 +3224,7 @@
     "z_with_all_but_one_x": {
       "extension": "guppyft.iceberg.ops",
       "name": "z_with_all_but_one_x",
-      "description": "apply a Z gate to one qubit and an X to the rest",
+      "description": "Z gate on one qubit with X on all others.",
       "signature": {
         "params": [
           {
@@ -3203,7 +3280,7 @@
     "z_with_all_but_one_x_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "z_with_all_but_one_x_d",
-      "description": "apply a Z gate to one qubit and an X to the rest with dynamic index",
+      "description": "Z gate on one qubit with X on all others with dynamic index.",
       "signature": {
         "params": [
           {
@@ -3267,7 +3344,7 @@
     "zz": {
       "extension": "guppyft.iceberg.ops",
       "name": "zz",
-      "description": "apply a Z gate to two qubits",
+      "description": "Z gate on two qubits.",
       "signature": {
         "params": [
           {
@@ -3327,7 +3404,7 @@
     "zz_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "zz_d",
-      "description": "apply a Z gate to two qubits with dynamic indices",
+      "description": "Z gate on two qubits with dynamic indices.",
       "signature": {
         "params": [
           {
@@ -3403,7 +3480,7 @@
     "zz_phase": {
       "extension": "guppyft.iceberg.ops",
       "name": "zz_phase",
-      "description": "apply a ZZPhase gate to two qubits within a block",
+      "description": "ZZPhase gate.",
       "signature": {
         "params": [
           {
@@ -3470,7 +3547,7 @@
     "zz_phase_between_blocks": {
       "extension": "guppyft.iceberg.ops",
       "name": "zz_phase_between_blocks",
-      "description": "apply a ZZPhase gate to two qubits on different blocks of the same size",
+      "description": "ZZPhase gate involving two blocks.",
       "signature": {
         "params": [
           {
@@ -3569,7 +3646,7 @@
     "zz_phase_between_blocks_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "zz_phase_between_blocks_d",
-      "description": "apply a ZZPhase gate to two qubits on different blocks of the same size with dynamic indices",
+      "description": "ZZPhase gate involving two blocks with dynamic indices.",
       "signature": {
         "params": [
           {
@@ -3684,7 +3761,7 @@
     "zz_phase_d": {
       "extension": "guppyft.iceberg.ops",
       "name": "zz_phase_d",
-      "description": "apply a ZZPhase gate to two qubits within a block with dynamic indices",
+      "description": "ZZPhase gate with dynamic indices.",
       "signature": {
         "params": [
           {
