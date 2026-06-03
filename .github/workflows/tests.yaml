@@ -56,7 +56,6 @@ jobs:
           toolchain: "stable"
       - name: Configure default rust toolchain
         run: rustup override set ${{steps.toolchain.outputs.name}}
-      - uses: quantinuum/hugrverse-env/install-hugrenv-action@main
       - uses: taiki-e/install-action@nextest
       - name: Test with all features
         run: cargo nextest r --verbose --all-features
