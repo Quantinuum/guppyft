@@ -86,8 +86,8 @@ def test_op_instantiations() -> None:
         "rz",
         "all_but_one_rx",
         "all_but_one_rz",
-        "measure_one_x",
-        "measure_one_z",
+        "try_measure_one_x",
+        "try_measure_one_z",
     ]:
         assert (
             iceberg_ops.__getattribute__(op_name)(3, 1).op_def()

@@ -1025,72 +1025,108 @@ class IcebergOpsExtension:
         """
         return self.measure_all_def.instantiate([BoundedNatArg(k)])
 
-    # measure_one_x
+    # try_measure_one_x
 
     @functools.cached_property
-    def measure_one_x_def(self) -> OpDef:
+    def try_measure_one_x_def(self) -> OpDef:
         """Non-destructively measure one qubit in the X basis.
+
+        This operation is fallible. The first boolean output is the success
+        indicator; the second is the result (if the operation succeeded). If the
+        operation failed, the state of the block is arbitrary.
 
         This is the generic operation definition. For the instantiated operation, see
-        `measure_one_x`."""
-        return self().get_op("measure_one_x")
+        `try_measure_one_x`."""
+        return self().get_op("try_measure_one_x")
 
-    def measure_one_x(self, k: int, i: int) -> ExtOp:
+    def try_measure_one_x(self, k: int, i: int) -> ExtOp:
         """Non-destructively measure one qubit in the X basis.
+
+        This operation is fallible. The first boolean output is the success
+        indicator; the second is the result (if the operation succeeded). If the
+        operation failed, the state of the block is arbitrary.
 
         Args:
             k: The number of logical qubits encoded in the block.
             i: The index of the logical qubit.
         """
-        return self.measure_one_x_def.instantiate([BoundedNatArg(k), BoundedNatArg(i)])
+        return self.try_measure_one_x_def.instantiate(
+            [BoundedNatArg(k), BoundedNatArg(i)]
+        )
 
     @functools.cached_property
-    def measure_one_x_d_def(self) -> OpDef:
+    def try_measure_one_x_d_def(self) -> OpDef:
         """Non-destructively measure one qubit in the X basis with dynamic index.
+
+        This operation is fallible. The first boolean output is the success
+        indicator; the second is the result (if the operation succeeded). If the
+        operation failed, the state of the block is arbitrary.
 
         This is the generic operation definition. For the instantiated operation, see
-        `measure_one_x_d`."""
-        return self().get_op("measure_one_x_d")
+        `try_measure_one_x_d`."""
+        return self().get_op("try_measure_one_x_d")
 
-    def measure_one_x_d(self, k: int) -> ExtOp:
+    def try_measure_one_x_d(self, k: int) -> ExtOp:
         """Non-destructively measure one qubit in the X basis with dynamic index.
+
+        This operation is fallible. The first boolean output is the success
+        indicator; the second is the result (if the operation succeeded). If the
+        operation failed, the state of the block is arbitrary.
 
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.measure_one_x_d_def.instantiate([BoundedNatArg(k)])
+        return self.try_measure_one_x_d_def.instantiate([BoundedNatArg(k)])
 
-    # measure_one_z
+    # try_measure_one_z
 
     @functools.cached_property
-    def measure_one_z_def(self) -> OpDef:
+    def try_measure_one_z_def(self) -> OpDef:
         """Non-destructively measure one qubit in the Z basis.
+
+        This operation is fallible. The first boolean output is the success
+        indicator; the second is the result (if the operation succeeded). If the
+        operation failed, the state of the block is arbitrary.
 
         This is the generic operation definition. For the instantiated operation, see
-        `measure_one_z`."""
-        return self().get_op("measure_one_z")
+        `try_measure_one_z`."""
+        return self().get_op("try_measure_one_z")
 
-    def measure_one_z(self, k: int, i: int) -> ExtOp:
+    def try_measure_one_z(self, k: int, i: int) -> ExtOp:
         """Non-destructively measure one qubit in the Z basis.
+
+        This operation is fallible. The first boolean output is the success
+        indicator; the second is the result (if the operation succeeded). If the
+        operation failed, the state of the block is arbitrary.
 
         Args:
             k: The number of logical qubits encoded in the block.
             i: The index of the logical qubit.
         """
-        return self.measure_one_z_def.instantiate([BoundedNatArg(k), BoundedNatArg(i)])
+        return self.try_measure_one_z_def.instantiate(
+            [BoundedNatArg(k), BoundedNatArg(i)]
+        )
 
     @functools.cached_property
-    def measure_one_z_d_def(self) -> OpDef:
+    def try_measure_one_z_d_def(self) -> OpDef:
         """Non-destructively measure one qubit in the Z basis with dynamic index.
+
+        This operation is fallible. The first boolean output is the success
+        indicator; the second is the result (if the operation succeeded). If the
+        operation failed, the state of the block is arbitrary.
 
         This is the generic operation definition. For the instantiated operation, see
-        `measure_one_z_d`."""
-        return self().get_op("measure_one_z_d")
+        `try_measure_one_z_d`."""
+        return self().get_op("try_measure_one_z_d")
 
-    def measure_one_z_d(self, k: int) -> ExtOp:
+    def try_measure_one_z_d(self, k: int) -> ExtOp:
         """Non-destructively measure one qubit in the Z basis with dynamic index.
+
+        This operation is fallible. The first boolean output is the success
+        indicator; the second is the result (if the operation succeeded). If the
+        operation failed, the state of the block is arbitrary.
 
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.measure_one_z_d_def.instantiate([BoundedNatArg(k)])
+        return self.try_measure_one_z_d_def.instantiate([BoundedNatArg(k)])

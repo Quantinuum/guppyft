@@ -159,14 +159,18 @@ pub enum IcebergOpDef {
     measure_syndrome,
     /// Destructive measurement of all qubits.
     measure_all,
-    /// Non-destructive measurement of one qubit in the X basis.
-    measure_one_x,
-    /// Non-destructive measurement of one qubit in the X basis with dynamic index.
-    measure_one_x_d,
-    /// Non-destructive measurement of one qubit in the Z basis.
-    measure_one_z,
-    /// Non-destructive measurement of one qubit in the Z basis with dynamic index.
-    measure_one_z_d,
+    /// Fallible non-destructive measurement of one qubit in the X basis.
+    /// Output is success indicator followed by measurement result.
+    try_measure_one_x,
+    /// Fallible non-destructive measurement of one qubit in the X basis with dynamic index.
+    /// Output is success indicator followed by measurement result.
+    try_measure_one_x_d,
+    /// Fallible non-destructive measurement of one qubit in the Z basis.
+    /// Output is success indicator followed by measurement result.
+    try_measure_one_z,
+    /// Fallible non-destructive measurement of one qubit in the Z basis with dynamic index.
+    /// Output is success indicator followed by measurement result.
+    try_measure_one_z_d,
 }
 
 /// Concrete Iceberg logical operation with block size and indices set.
@@ -495,41 +499,41 @@ impl MakeOpDef for IcebergOpDef {
                 ArgsValidator { n_idx: 0 },
             )
             .into(),
-            measure_one_x => CustomValidator::new(
+            try_measure_one_x => CustomValidator::new(
                 PolyFuncTypeRV::new(
                     vec![TypeParam::max_nat_type(); 2],
                     FuncValueType::new(
                         vec_of_blocks_and_angles(1, 0),
-                        vec_of_blocks_and_bools(1, 1),
+                        vec_of_blocks_and_bools(1, 2),
                     ),
                 ),
                 ArgsValidator { n_idx: 1 },
             )
             .into(),
-            measure_one_x_d => PolyFuncTypeRV::new(
+            try_measure_one_x_d => PolyFuncTypeRV::new(
                 vec![TypeParam::max_nat_type()],
                 FuncValueType::new(
                     vec_of_blocks_and_ints_and_angles(1, 1, 0),
-                    vec_of_blocks_and_bools(1, 1),
+                    vec_of_blocks_and_bools(1, 2),
                 ),
             )
             .into(),
-            measure_one_z => CustomValidator::new(
+            try_measure_one_z => CustomValidator::new(
                 PolyFuncTypeRV::new(
                     vec![TypeParam::max_nat_type(); 2],
                     FuncValueType::new(
                         vec_of_blocks_and_angles(1, 0),
-                        vec_of_blocks_and_bools(1, 1),
+                        vec_of_blocks_and_bools(1, 2),
                     ),
                 ),
                 ArgsValidator { n_idx: 1 },
             )
             .into(),
-            measure_one_z_d => PolyFuncTypeRV::new(
+            try_measure_one_z_d => PolyFuncTypeRV::new(
                 vec![TypeParam::max_nat_type()],
                 FuncValueType::new(
                     vec_of_blocks_and_ints_and_angles(1, 1, 0),
-                    vec_of_blocks_and_bools(1, 1),
+                    vec_of_blocks_and_bools(1, 2),
                 ),
             )
             .into(),
@@ -807,13 +811,13 @@ mod tests {
     #[test]
     fn test_measure_one() {
         let measureonez0 = EXTENSION
-            .instantiate_extension_op("measure_one_z", [2.into(), 0.into()])
+            .instantiate_extension_op("try_measure_one_z", [2.into(), 0.into()])
             .unwrap();
         let measureonez1 = EXTENSION
-            .instantiate_extension_op("measure_one_z", [2.into(), 1.into()])
+            .instantiate_extension_op("try_measure_one_z", [2.into(), 1.into()])
             .unwrap();
         let measureonez_d = EXTENSION
-            .instantiate_extension_op("measure_one_z_d", [2.into()])
+            .instantiate_extension_op("try_measure_one_z_d", [2.into()])
             .unwrap();
         let allh = EXTENSION
             .instantiate_extension_op("all_h", [2.into()])
@@ -834,18 +838,18 @@ mod tests {
         let handle = dfg_builder
             .add_dataflow_op(measureonez0, handle.outputs())
             .unwrap();
-        let [block, c0] = handle.outputs_arr();
+        let [block, success0, c0] = handle.outputs_arr();
         let handle = dfg_builder
             .add_dataflow_op(measureonez1, vec![block])
             .unwrap();
-        let [block, c1] = handle.outputs_arr();
+        let [block, success1, c1] = handle.outputs_arr();
         let index0_wire = dfg_builder.add_load_value(ConstInt::new_u(6, 0).unwrap());
         let handle = dfg_builder
             .add_dataflow_op(measureonez_d, [block, index0_wire])
             .unwrap();
-        let [block, c2] = handle.outputs_arr();
+        let [block, success2, c2] = handle.outputs_arr();
         let h = dfg_builder
-            .finish_hugr_with_outputs(vec![block, c0, c1, c2])
+            .finish_hugr_with_outputs(vec![block, success0, success1, success2, c0, c1, c2])
             .unwrap();
         h.validate().unwrap();
     }
