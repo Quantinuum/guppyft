@@ -1,6 +1,6 @@
 [project]
 name = "guppyft"
-version = "0.1.0"
+version = "0.0.0"
 description = "Tools for fault-tolerant quantum computing in the Guppy language"
 requires-python = ">=3.13,<4"
 license = { file = "LICENCE" }
@@ -32,7 +32,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "maturin>=1.7.0,<2",
+    "maturin>=1.13.3,<2",
     { include-group = "lint" },
     { include-group = "test" },
 ]
@@ -52,7 +52,7 @@ strict = true
 allow_redefinition = true
 
 [build-system]
-requires = ["maturin>=1.4,<2.0"]
+requires = ["maturin>=1.13.3,<2.0"]
 build-backend = "maturin"
 
 [tool.uv.sources]
@@ -66,3 +66,73 @@ python-source = "src/"
 manifest-path = "encoder-bindings/Cargo.toml"
 features = ["pyo3/extension-module"] # skips linking against libpython.so
 profile = "dev-py" # See root Cargo.toml
+
+
+[tool.cibuildwheel]
+build = "cp313-*"
+build-frontend = "build[uv]"
+skip = "*-win32 *-manylinux_i686 *-musllinux*"
+manylinux-x86_64-image = "quay.io/pypa/manylinux_2_28_x86_64"
+manylinux-aarch64-image = "quay.io/pypa/manylinux_2_28_aarch64"
+
+[tool.cibuildwheel.linux]
+environment-pass = ["HUGRENV_PATH", "TKET_C_API_PATH", "LLVM_SYS_211_PREFIX"]
+config-settings = { "build-args" = ["--compatibility", "manylinux_2_28", "--profile=release-py"] }
+before-all = [
+    "curl -sSf https://sh.rustup.rs | sh -s -- -y",
+    "dnf install -y --setopt=install_weak_deps=False libffi-devel",
+]
+repair-wheel-command = [
+    # maturin 1.13+ handles wheel repair in the backend build step, so only audit here
+    'cp {wheel} {dest_dir}',
+    'uvx abi3audit --strict --report {wheel}',
+]
+test-command = [
+    "python -c 'from guppyft._bindings import RsHugr'", # Bindings are essential
+]
+[tool.cibuildwheel.linux.environment]
+# we prepend /host to incoming paths because cibuildwheel mounts the host filesystem at /host.
+# this can ONLY be done if you know for sure that the libraries available at that directory on
+# the host are compatible with the build environment, e.g. manylinux compliant.
+PATH = '$HOME/.cargo/bin:/host${HUGRENV_PATH}/bin:$PATH'
+TKET_C_API_PATH = '/host${TKET_C_API_PATH}'
+LLVM_SYS_211_PREFIX = '/host${LLVM_SYS_211_PREFIX}'
+CARGO_INCREMENTAL = '0'
+CARGO_NET_GIT_FETCH_WITH_CLI = 'true'
+CARGO_PROFILE_RELEASE_DEBUG = 'false'
+
+[tool.cibuildwheel.macos]
+before-all = 'curl -sSf https://sh.rustup.rs | sh -s -- -y'
+config-settings = { "build-args" = ["--profile=release-py"] }
+repair-wheel-command = [
+    # maturin 1.13+ handles wheel repair in the backend build step, so only audit here
+    'cp {wheel} {dest_dir}',
+    'uvx abi3audit --strict --report {wheel}',
+]
+test-command = [
+    "python -c 'from guppyft._bindings import RsHugr'", # Bindings are essential
+]
+[tool.cibuildwheel.macos.environment]
+PATH = '$HOME/.cargo/bin:${HUGRENV_PATH}/bin:$PATH'
+MACOSX_DEPLOYMENT_TARGET = "13.2"
+CARGO_INCREMENTAL = '0'
+CARGO_NET_GIT_FETCH_WITH_CLI = 'true'
+CARGO_PROFILE_RELEASE_DEBUG = 'false'
+
+[tool.cibuildwheel.windows]
+before-all = 'rustup update'
+config-settings = { "build-args" = ["--profile=release-py"] }
+repair-wheel-command = [
+    # maturin 1.13+ handles wheel repair in the backend build step, so only audit here
+    'copy {wheel} {dest_dir}',
+    'uvx abi3audit --strict --report {wheel}',
+]
+test-command = [
+    'cd /d {project}',
+    '''python -c "from guppyft._bindings import RsHugr"''', # Bindings are essential
+]
+[tool.cibuildwheel.windows.environment]
+PATH = '${HUGRENV_PATH}\\bin;$PATH'
+CARGO_INCREMENTAL = '0'
+CARGO_NET_GIT_FETCH_WITH_CLI = 'true'
+CARGO_PROFILE_RELEASE_DEBUG = 'false'
