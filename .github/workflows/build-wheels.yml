@@ -47,7 +47,7 @@ jobs:
           packages: llvm,tket
           lockfile: hugrenv.lock
 
-      - name: Build guppy-ft wheel
+      - name: Build guppyft wheel
         uses: pypa/cibuildwheel@v3.4.1
         with:
           output-dir: 'wheelhouse'
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: wheels-${{ matrix.os }}-${{ strategy.job-index }}
-          path: ./wheelhouse/*guppy_ft*.whl
+          path: ./wheelhouse/*guppyft*.whl
 
   release:
     name: Release wheels
@@ -73,7 +73,7 @@ jobs:
       - name: Update GitHub release with artifacts
         uses: softprops/action-gh-release@v3
         with:
-          files: wheelhouse/*guppy_ft*.whl
+          files: wheelhouse/*guppyft*.whl
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v8.1.0
@@ -81,9 +81,9 @@ jobs:
           enable-cache: true
           python-version: "3.12"
 
-      - name: Upload guppy-ft wheels to SW artifactory
+      - name: Upload guppyft wheels to SW artifactory
         run: |
-          uvx twine upload --verbose --non-interactive wheelhouse/*guppy_ft*.whl
+          uvx twine upload --verbose --non-interactive wheelhouse/*guppyft*.whl
         env:
           TWINE_REPOSITORY_URL: "https://quantinuumsw.jfrog.io/artifactory/api/pypi/pypi_local/"
           TWINE_USERNAME: ${{ secrets.QTNM_ARTIF_SW_WRITE_USER }}
