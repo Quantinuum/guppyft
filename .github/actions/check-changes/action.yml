@@ -14,7 +14,7 @@ description: Checks if any relevant files have changed in the current pull reque
 outputs:
   rust:
     description: "Need to run rust tests"
-    value: ${{ steps.override.outputs.out == 'true' || steps.change-filters.outputs.encoder == 'true' || steps.change-filters.outputs.extensions == 'true' }}
+    value: ${{ steps.override.outputs.out == 'true' || steps.change-filters.outputs.rust == 'true' }}
   python:
     description: "Need to run python tests"
     value: ${{ steps.override.outputs.out == 'true' || steps.change-filters.outputs.python == 'true' || steps.change-filters.outputs.encoder == 'true' }}
