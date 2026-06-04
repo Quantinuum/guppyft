@@ -1031,9 +1031,7 @@ class IcebergOpsExtension:
     def try_measure_one_x_def(self) -> OpDef:
         """Non-destructively measure one qubit in the X basis.
 
-        This operation is fallible. The first boolean output is the success
-        indicator; the second is the result (if the operation succeeded). If the
-        operation failed, the state of the block is arbitrary.
+        This operation is fallible and produces a future optional bool.
 
         This is the generic operation definition. For the instantiated operation, see
         `try_measure_one_x`."""
@@ -1042,9 +1040,7 @@ class IcebergOpsExtension:
     def try_measure_one_x(self, k: int, i: int) -> ExtOp:
         """Non-destructively measure one qubit in the X basis.
 
-        This operation is fallible. The first boolean output is the success
-        indicator; the second is the result (if the operation succeeded). If the
-        operation failed, the state of the block is arbitrary.
+        This operation is fallible and produces a future optional bool.
 
         Args:
             k: The number of logical qubits encoded in the block.
@@ -1058,9 +1054,7 @@ class IcebergOpsExtension:
     def try_measure_one_x_d_def(self) -> OpDef:
         """Non-destructively measure one qubit in the X basis with dynamic index.
 
-        This operation is fallible. The first boolean output is the success
-        indicator; the second is the result (if the operation succeeded). If the
-        operation failed, the state of the block is arbitrary.
+        This operation is fallible and produces a future optional bool.
 
         This is the generic operation definition. For the instantiated operation, see
         `try_measure_one_x_d`."""
@@ -1069,9 +1063,7 @@ class IcebergOpsExtension:
     def try_measure_one_x_d(self, k: int) -> ExtOp:
         """Non-destructively measure one qubit in the X basis with dynamic index.
 
-        This operation is fallible. The first boolean output is the success
-        indicator; the second is the result (if the operation succeeded). If the
-        operation failed, the state of the block is arbitrary.
+        This operation is fallible and produces a future optional bool.
 
         Args:
             k: The number of logical qubits encoded in the block.
@@ -1084,9 +1076,7 @@ class IcebergOpsExtension:
     def try_measure_one_z_def(self) -> OpDef:
         """Non-destructively measure one qubit in the Z basis.
 
-        This operation is fallible. The first boolean output is the success
-        indicator; the second is the result (if the operation succeeded). If the
-        operation failed, the state of the block is arbitrary.
+        This operation is fallible and produces a future optional bool.
 
         This is the generic operation definition. For the instantiated operation, see
         `try_measure_one_z`."""
@@ -1095,9 +1085,7 @@ class IcebergOpsExtension:
     def try_measure_one_z(self, k: int, i: int) -> ExtOp:
         """Non-destructively measure one qubit in the Z basis.
 
-        This operation is fallible. The first boolean output is the success
-        indicator; the second is the result (if the operation succeeded). If the
-        operation failed, the state of the block is arbitrary.
+        This operation is fallible and produces a future optional bool.
 
         Args:
             k: The number of logical qubits encoded in the block.
@@ -1111,9 +1099,7 @@ class IcebergOpsExtension:
     def try_measure_one_z_d_def(self) -> OpDef:
         """Non-destructively measure one qubit in the Z basis with dynamic index.
 
-        This operation is fallible. The first boolean output is the success
-        indicator; the second is the result (if the operation succeeded). If the
-        operation failed, the state of the block is arbitrary.
+        This operation is fallible and produces a future optional bool.
 
         This is the generic operation definition. For the instantiated operation, see
         `try_measure_one_z_d`."""
@@ -1122,9 +1108,7 @@ class IcebergOpsExtension:
     def try_measure_one_z_d(self, k: int) -> ExtOp:
         """Non-destructively measure one qubit in the Z basis with dynamic index.
 
-        This operation is fallible. The first boolean output is the success
-        indicator; the second is the result (if the operation succeeded). If the
-        operation failed, the state of the block is arbitrary.
+        This operation is fallible and produces a future optional bool.
 
         Args:
             k: The number of logical qubits encoded in the block.

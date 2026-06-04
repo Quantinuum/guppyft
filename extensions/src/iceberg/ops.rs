@@ -10,7 +10,7 @@ use hugr::{
     Extension,
     extension::{
         CustomValidator, ExtensionId, OpDef, SignatureError, SignatureFunc, ValidateJustArgs,
-        prelude::bool_t,
+        prelude::{bool_t, option_type},
         simple_op::{
             HasConcrete, HasDef, MakeExtensionOp, MakeOpDef, MakeRegisteredOp, OpLoadError,
             try_from_name,
@@ -160,16 +160,12 @@ pub enum IcebergOpDef {
     /// Destructive measurement of all qubits.
     measure_all,
     /// Fallible non-destructive measurement of one qubit in the X basis.
-    /// Output is success indicator followed by measurement result.
     try_measure_one_x,
     /// Fallible non-destructive measurement of one qubit in the X basis with dynamic index.
-    /// Output is success indicator followed by measurement result.
     try_measure_one_x_d,
     /// Fallible non-destructive measurement of one qubit in the Z basis.
-    /// Output is success indicator followed by measurement result.
     try_measure_one_z,
     /// Fallible non-destructive measurement of one qubit in the Z basis with dynamic index.
-    /// Output is success indicator followed by measurement result.
     try_measure_one_z_d,
 }
 
@@ -333,6 +329,14 @@ fn vec_of_blocks_and_bools(n_blocks: usize, n_bools: usize) -> Vec<Type> {
     let mut types: Vec<Type> = vec![block_tv(0); n_blocks];
     types.extend(vec![future_type(bool_t()); n_bools]);
     types
+}
+
+fn future_optional_bool() -> Type {
+    future_type(option_type(vec![bool_t()]).into())
+}
+
+fn block_and_optional_bool() -> Vec<Type> {
+    vec![block_tv(0), future_optional_bool()]
 }
 
 /// Signature of an operation that acts on a single block, with a number of
@@ -502,10 +506,7 @@ impl MakeOpDef for IcebergOpDef {
             try_measure_one_x => CustomValidator::new(
                 PolyFuncTypeRV::new(
                     vec![TypeParam::max_nat_type(); 2],
-                    FuncValueType::new(
-                        vec_of_blocks_and_angles(1, 0),
-                        vec_of_blocks_and_bools(1, 2),
-                    ),
+                    FuncValueType::new(vec_of_blocks_and_angles(1, 0), block_and_optional_bool()),
                 ),
                 ArgsValidator { n_idx: 1 },
             )
@@ -514,17 +515,14 @@ impl MakeOpDef for IcebergOpDef {
                 vec![TypeParam::max_nat_type()],
                 FuncValueType::new(
                     vec_of_blocks_and_ints_and_angles(1, 1, 0),
-                    vec_of_blocks_and_bools(1, 2),
+                    block_and_optional_bool(),
                 ),
             )
             .into(),
             try_measure_one_z => CustomValidator::new(
                 PolyFuncTypeRV::new(
                     vec![TypeParam::max_nat_type(); 2],
-                    FuncValueType::new(
-                        vec_of_blocks_and_angles(1, 0),
-                        vec_of_blocks_and_bools(1, 2),
-                    ),
+                    FuncValueType::new(vec_of_blocks_and_angles(1, 0), block_and_optional_bool()),
                 ),
                 ArgsValidator { n_idx: 1 },
             )
@@ -533,7 +531,7 @@ impl MakeOpDef for IcebergOpDef {
                 vec![TypeParam::max_nat_type()],
                 FuncValueType::new(
                     vec_of_blocks_and_ints_and_angles(1, 1, 0),
-                    vec_of_blocks_and_bools(1, 2),
+                    block_and_optional_bool(),
                 ),
             )
             .into(),
@@ -826,12 +824,9 @@ mod tests {
             vec![block_type(2)],
             vec![
                 block_type(2),
-                future_type(bool_t()),
-                future_type(bool_t()),
-                future_type(bool_t()),
-                future_type(bool_t()),
-                future_type(bool_t()),
-                future_type(bool_t()),
+                future_optional_bool(),
+                future_optional_bool(),
+                future_optional_bool(),
             ],
         ))
         .unwrap();
@@ -841,18 +836,18 @@ mod tests {
         let handle = dfg_builder
             .add_dataflow_op(measureonez0, handle.outputs())
             .unwrap();
-        let [block, success0, c0] = handle.outputs_arr();
+        let [block, maybe_c0] = handle.outputs_arr();
         let handle = dfg_builder
             .add_dataflow_op(measureonez1, vec![block])
             .unwrap();
-        let [block, success1, c1] = handle.outputs_arr();
+        let [block, maybe_c1] = handle.outputs_arr();
         let index0_wire = dfg_builder.add_load_value(ConstInt::new_u(6, 0).unwrap());
         let handle = dfg_builder
             .add_dataflow_op(measureonez_d, [block, index0_wire])
             .unwrap();
-        let [block, success2, c2] = handle.outputs_arr();
+        let [block, maybe_c2] = handle.outputs_arr();
         let h = dfg_builder
-            .finish_hugr_with_outputs(vec![block, success0, success1, success2, c0, c1, c2])
+            .finish_hugr_with_outputs(vec![block, maybe_c0, maybe_c1, maybe_c2])
             .unwrap();
         h.validate().unwrap();
     }
