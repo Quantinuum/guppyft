@@ -3,7 +3,12 @@ resolver = "2"
 members = [
     "encoder-rs",
     "encoder-bindings",
+    "extensions",
 ]
+
+[workspace.package]
+rust-version = "1.91"
+edition = "2024"
 
 [workspace.dependencies]
 tket = "0.18.0"

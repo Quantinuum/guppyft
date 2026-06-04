@@ -1,0 +1,25 @@
+[package]
+name = "extensions"
+description = "HUGR extensions for logical operations on QEC codes."
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+hugr.workspace = true
+semver = "1.0.28"
+strum = "0.28.0"
+clap = {version = "4.6.1", optional = true}
+hugr-cli = {version = "0.27.1", optional = true}
+anyhow = {version = "1.0.102", optional = true}
+documented = "0.9.2"
+tket-qsystem = "0.25.0"
+
+[features]
+default = ["cli"]
+cli = ["dep:clap", "dep:hugr-cli", "dep:anyhow"]
+
+[[bin]]
+name = "extensions"
+required-features = ["cli"]
