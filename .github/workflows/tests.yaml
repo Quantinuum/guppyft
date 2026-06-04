@@ -35,7 +35,6 @@ jobs:
       rust: ${{ steps.filter.outputs.rust }}
       python: ${{ steps.filter.outputs.python }}
       extensions: ${{ steps.filter.outputs.extensions }}
-      qis: ${{ steps.filter.outputs.qis }}
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/check-changes
