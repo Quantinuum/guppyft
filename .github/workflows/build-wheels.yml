@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - "release-please--*"
-      - "mr/chore/release-workflow"
     tags:
       - "v*"
   workflow_dispatch:
