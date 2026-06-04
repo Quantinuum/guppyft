@@ -1,0 +1,21 @@
+{
+  "pull-request-title-pattern": "chore: release ${version}",
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "draft-pull-request": true,
+  "include-component-in-tag": false,
+  "include-v-in-tag": true,
+  "extra-label": "X-release",
+  "packages": {
+    ".": {
+      "release-type": "python",
+      "extra-files": [
+        "encoder-bindings/Cargo.toml",
+        "encoder-rs/Cargo.toml"
+      ],
+      "exclude-paths": [
+        "tests"
+      ]
+    }
+  }
+}

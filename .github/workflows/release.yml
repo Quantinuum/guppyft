@@ -1,0 +1,52 @@
+name: Release Please
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    name: Run
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.HUGRBOT_PAT }}
+
+  update-uv-lock:
+    name: Update uv.lock
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'release-please--')
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.HUGRBOT_PAT }}
+      - uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true
+
+      - name: Regenerate uv.lock
+        run: uv lock
+
+      - name: Commit uv.lock
+        run: |
+          if git diff --quiet -- uv.lock; then
+            echo "uv.lock unchanged"
+            exit 0
+          fi
+          git config user.name "hugrbot"
+          git config user.email "hugrbot@users.noreply.github.com"
+          git add uv.lock
+          git commit -m "chore: update uv.lock"
+          git push
