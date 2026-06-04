@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-      - uses: mozilla-actions/sccache-action@v0.0.9
+      - uses: mozilla-actions/sccache-action@v0.0.10
       - name: Install stable Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - name: Set up uv
@@ -60,7 +60,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-      - uses: mozilla-actions/sccache-action@v0.0.9
+      - uses: mozilla-actions/sccache-action@v0.0.10
       - name: Install stable Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - name: Set up uv
@@ -96,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: mozilla-actions/sccache-action@v0.0.9
+      - uses: mozilla-actions/sccache-action@v0.0.10
       - name: Install stable rust toolchain with fmt and clippy
         uses: dtolnay/rust-toolchain@stable
         with:
