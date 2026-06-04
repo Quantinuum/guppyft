@@ -829,6 +829,9 @@ mod tests {
                 future_type(bool_t()),
                 future_type(bool_t()),
                 future_type(bool_t()),
+                future_type(bool_t()),
+                future_type(bool_t()),
+                future_type(bool_t()),
             ],
         ))
         .unwrap();
