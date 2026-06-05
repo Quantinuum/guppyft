@@ -1459,24 +1459,24 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "collections.array",
-              "id": "array",
+              "extension": "tket.futures",
+              "id": "Future",
               "args": [
-                {
-                  "tya": "Variable",
-                  "idx": 0,
-                  "cached_decl": {
-                    "tp": "BoundedNat",
-                    "bound": null
-                  }
-                },
                 {
                   "tya": "Type",
                   "ty": {
                     "t": "Opaque",
-                    "extension": "tket.futures",
-                    "id": "Future",
+                    "extension": "collections.array",
+                    "id": "array",
                     "args": [
+                      {
+                        "tya": "Variable",
+                        "idx": 0,
+                        "cached_decl": {
+                          "tp": "BoundedNat",
+                          "bound": null
+                        }
+                      },
                       {
                         "tya": "Type",
                         "ty": {
