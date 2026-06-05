@@ -2,8 +2,8 @@
 # to detect changes in each subproject, and only run the corresponding jobs.
 
 encoder: &encoder
-  - "encoder-bindings/**"
-  - "encoder-rs/**"
+  - "rust-bindings/**"
+  - "rust/**"
 
 extensions: &extensions
   - "extensions/**"
@@ -14,4 +14,4 @@ rust:
 
 python:
   - "src/guppyft/**"
-  - "encoder-bindings/**"
+  - "rust-bindings/**"
