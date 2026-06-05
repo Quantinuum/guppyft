@@ -298,14 +298,16 @@ impl ValidateJustArgs for InterBlockArgsValidator {
     }
 }
 
-/// Get an array-of-future-bool type with size corresponding to a type variable
+/// Get a future-array-of-bool type with size corresponding to a type variable
 /// with a given ID.
 fn bool_array_tv(var_id: usize) -> Type {
-    Array::ty_parametric(
-        TypeArg::new_var_use(var_id, TypeParam::max_nat_type()),
-        future_type(bool_t()),
+    future_type(
+        Array::ty_parametric(
+            TypeArg::new_var_use(var_id, TypeParam::max_nat_type()),
+            bool_t(),
+        )
+        .unwrap(),
     )
-    .unwrap()
 }
 
 fn vec_of_blocks_and_angles(n_blocks: usize, n_angles: usize) -> Vec<Type> {
@@ -794,7 +796,7 @@ mod tests {
             .unwrap();
         let mut dfg_builder = DFGBuilder::new(Signature::new(
             [block_type(4)],
-            [array_type(4, future_type(bool_t()))],
+            [future_type(array_type(4, bool_t()))],
         ))
         .unwrap();
         let handle = dfg_builder
