@@ -23,8 +23,46 @@ env:
   UV_VERSION: "0.11.7"
 
 jobs:
+  # Check if changes were made to the relevant files.
+  # Always returns true if running on the default branch, to ensure all changes are thoroughly checked.
+  changes:
+    name: Check for changes
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+      contents: read
+    outputs:
+      rust: ${{ steps.filter.outputs.rust }}
+      python: ${{ steps.filter.outputs.python }}
+      extensions: ${{ steps.filter.outputs.extensions }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/check-changes
+        id: filter
+
+  # Run tests on Rust stable
+  check-rs:
+    name: Test Rust code 🦀
+    needs: changes
+    if: ${{ needs.changes.outputs.rust == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: mozilla-actions/sccache-action@v0.0.10
+      - id: toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "stable"
+      - name: Configure default rust toolchain
+        run: rustup override set ${{steps.toolchain.outputs.name}}
+      - uses: taiki-e/install-action@nextest
+      - name: Test with all features
+        run: cargo nextest r --verbose --all-features
+
   check-py:
     name: 🐍 Test Python code (${{ matrix.python-version }})
+    needs: changes
+    if: ${{ needs.changes.outputs.python == 'true' }}
     runs-on: ubuntu-latest
     env:
       PYTHON_VERSION: ${{ matrix.python-version }}
@@ -37,7 +75,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-      - uses: mozilla-actions/sccache-action@v0.0.9
+      - uses: mozilla-actions/sccache-action@v0.0.10
       - name: Install stable Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - name: Set up uv
@@ -57,3 +95,28 @@ jobs:
 
       - name: Run tests
         run: uv run pytest
+
+  # Ensure that serialized extensions match rust implementation
+  check-extensions:
+    name: Check extensions
+    needs: changes
+    if: ${{ needs.changes.outputs.rust == 'true' && github.event_name != 'merge_group' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: mozilla-actions/sccache-action@v0.0.10
+      - uses: quantinuum/hugrverse-env/install-hugrenv-action@main
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - uses: extractions/setup-just@v4
+      - name: Generate the updated definitions
+        run: just gen-extensions
+      - name: Check if the definitions are up to date
+        run: |
+          git diff --exit-code --name-only src/guppyft/extensions/data
+          if [ $? -ne 0 ]; then
+            echo "The serialized standard extensions are not up to date."
+            echo "Please run 'just gen-extensions' and commit the changes.
+            "
+            exit 1
+          fi
