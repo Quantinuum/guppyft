@@ -839,7 +839,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "guppy-ft"
+name = "guppyft"
 version = "0.1.0"
 dependencies = [
  "derive_more 2.1.1",
@@ -850,11 +850,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "guppy-ft-bindings"
+name = "guppyft-bindings"
 version = "0.1.0"
 dependencies = [
  "derive_more 2.1.1",
- "guppy-ft",
+ "guppyft",
  "pyo3",
  "tket 0.18.0",
 ]

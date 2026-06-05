@@ -10,7 +10,7 @@ use pyo3::pymodule;
 mod _bindings {
     #[pymodule_export]
     use crate::hugr::RsHugr;
-    use guppy_ft::implement_ops;
+    use guppyft::implement_ops;
     use pyo3::exceptions::PyValueError;
     use pyo3::prelude::*;
     use std::collections::BTreeMap;

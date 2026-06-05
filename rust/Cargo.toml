@@ -1,5 +1,5 @@
 [package]
-name = "guppy-ft"
+name = "guppyft"
 description = "Guppy FT Rust utilities and modules"
 version = "0.1.0"
 rust-version.workspace = true

@@ -1,5 +1,5 @@
 [package]
-name = "guppy-ft-bindings"
+name = "guppyft-bindings"
 description = "Python bindings for Guppy FT"
 version = "0.1.0"
 rust-version.workspace = true
@@ -20,6 +20,6 @@ bench = false
 [dependencies]
 tket = { workspace = true }
 derive_more = { workspace = true }
-guppy-ft = { path = "../rust" }
+guppyft = { path = "../rust" }
 
 pyo3 = { version = "0.28.0", features = ["extension-module", "abi3-py310", "anyhow"] }
