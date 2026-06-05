@@ -17,9 +17,9 @@ from guppylang.std.quantum import (
 )
 from selene_sim.backends.bundled_simulators import Stim
 
-from guppyft.encoder import encode
+from guppyft.encode import encode
 
-from .utils.identity_code import identity_code_gen
+from .utils.identity_code import identity_code_spec
 
 
 def test_qalloc_measure() -> None:
@@ -28,7 +28,7 @@ def test_qalloc_measure() -> None:
         q = qubit()
         measure(q)
 
-    id_code = identity_code_gen(n_qubits=1)
+    id_code = identity_code_spec(n_qubits=1)
 
     encoded_pkg = encode(main, id_code)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
@@ -43,7 +43,7 @@ def test_qalloc_project_z_discard() -> None:
         result("project_z", project_z(q))
         discard(q)
 
-    id_code = identity_code_gen(n_qubits=1)
+    id_code = identity_code_spec(n_qubits=1)
 
     encoded_pkg = encode(main, id_code)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
@@ -60,7 +60,7 @@ def test_x() -> None:
         x(q)
         result("q", measure(q))
 
-    id_code = identity_code_gen(n_qubits=1)
+    id_code = identity_code_spec(n_qubits=1)
 
     encoded_pkg = encode(main, id_code)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
@@ -78,7 +78,7 @@ def test_cx() -> None:
         result("ctl", measure(ctl))
         result("tgt", measure(tgt))
 
-    id_code = identity_code_gen(n_qubits=2)
+    id_code = identity_code_spec(n_qubits=2)
 
     encoded_pkg = encode(main, id_code)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
@@ -97,7 +97,7 @@ def test_zz_phase() -> None:
         result("ctl", measure(ctl))
         result("tgt", measure(tgt))
 
-    id_code = identity_code_gen(n_qubits=2)
+    id_code = identity_code_spec(n_qubits=2)
 
     encoded_pkg = encode(main, id_code)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
@@ -119,7 +119,7 @@ def test_qubit_array() -> None:
         qb_arr = array(qubit() for _ in range(2))
         measure_array(qb_arr)
 
-    id_code = identity_code_gen(n_qubits=2)
+    id_code = identity_code_spec(n_qubits=2)
 
     encoded_pkg = encode(main, id_code)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
@@ -137,7 +137,7 @@ def test_out_of_logical_qubits() -> None:
         discard(q0)
         discard(q1)
 
-    id_code = identity_code_gen(n_qubits=1)
+    id_code = identity_code_spec(n_qubits=1)
 
     encoded_pkg = encode(main, id_code)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
@@ -155,7 +155,7 @@ def test_qubit_reuse() -> None:
         qb = qubit()
         result("qb", measure(qb))
 
-    id_code = identity_code_gen(n_qubits=1)
+    id_code = identity_code_spec(n_qubits=1)
 
     encoded_pkg = encode(main, id_code)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
@@ -175,7 +175,7 @@ def test_qec_policy() -> None:
     costs: dict[str, int] = defaultdict(int)
     costs = costs | {"X": 1, "IDLE_X": 0, "CX": 0, "IDLE_CX": 0}
 
-    id_code = identity_code_gen(n_qubits=1, qec_budget=1, costs=costs)
+    id_code = identity_code_spec(n_qubits=1, qec_budget=1, costs=costs)
 
     encoded_pkg = encode(main, id_code)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())

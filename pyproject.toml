@@ -63,7 +63,7 @@ selene-hugr-qis-compiler = { git = "https://github.com/quantinuum/tket2", rev = 
 [tool.maturin]
 module-name = "guppyft._bindings"
 python-source = "src/"
-manifest-path = "encoder-bindings/Cargo.toml"
+manifest-path = "rust-bindings/Cargo.toml"
 features = ["pyo3/extension-module"] # skips linking against libpython.so
 profile = "dev-py" # See root Cargo.toml
 
