@@ -299,7 +299,7 @@ def get_expanded_stabilizer_set(
     stabilizers: pauli.SignTerms = expand_logical_signterms(
         signed_logical_paulis, code_def
     )
-    # Secondly, we include the stabilizer generatiors for each code block.
+    # Secondly, we include the stabilizer generators for each code block.
     padded_stabilizers: pauli.StringSet = pad_code_stabilizers(code_def, num_blocks)
 
     for s in padded_stabilizers.to_strings():
