@@ -59,8 +59,8 @@ def unit_length_strings_to_string(
 ) -> pauli.String:
     if len(strings) != 1:
         raise ValueError(
-            "Only a Strings object containing a single element can be converted to a String. "
-            + f"Got a Strings instance with {len(strings)} elements."
+            "Only a Strings object containing a single element can be converted"
+            f" to a String. Got a Strings instance with {len(strings)} elements."
         )
     return pauli.String.from_str(str(strings), string_capacity)
 
