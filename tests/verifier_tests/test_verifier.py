@@ -7,12 +7,25 @@ from guppyft.verifier.code import (
     STEANE,
 )
 from guppyft.verifier.gauss import canonicalize
-from guppyft.verifier.ops.bitflip import (
+from guppyft.verifier.utils import stringset_to_signterms
+from guppyft.verifier.verify import (
+    compute_stabilizers_double_block,
+    compute_stabilizers_single_block,
+    compute_verification_signterms,
+    compute_verification_signterms_double_block,
+    default_choi_state_preparation,
+    default_choi_state_preparation_double_block,
+    expand_logical_signterms,
+    get_expanded_stabilizer_set,
+    pad_code_stabilizers,
+)
+
+from .ops.bitflip import (
     bit_flip_choi_state_double_block,
     bit_flip_logical_identity_double_block,
     bit_flip_physical_identity_double_block,
 )
-from guppyft.verifier.ops.iceberg import (
+from .ops.iceberg import (
     iceberg_addressable_h_logical,
     iceberg_addressable_h_physical,
     iceberg_addressable_s_logical,
@@ -38,7 +51,7 @@ from guppyft.verifier.ops.iceberg import (
     iceberg_transversal_cx_logical,
     iceberg_transversal_cx_physical,
 )
-from guppyft.verifier.ops.steane import (
+from .ops.steane import (
     steane_choi_state,
     steane_choi_state_double_block,
     steane_logical_cx,
@@ -52,18 +65,6 @@ from guppyft.verifier.ops.steane import (
     steane_physical_identity_double_block,
     steane_physical_s,
     steane_physical_sdg,
-)
-from guppyft.verifier.utils import stringset_to_signterms
-from guppyft.verifier.verify import (
-    compute_stabilizers_double_block,
-    compute_stabilizers_single_block,
-    compute_verification_signterms,
-    compute_verification_signterms_double_block,
-    default_choi_state_preparation,
-    default_choi_state_preparation_double_block,
-    expand_logical_signterms,
-    get_expanded_stabilizer_set,
-    pad_code_stabilizers,
 )
 
 
