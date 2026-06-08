@@ -23,18 +23,18 @@ from guppyft.verifier.utils import (
 N = guppy.nat_var("N")
 
 
-SingleBlockUnitary = GuppyFunctionDefinition[[array[qubit, N]], None]
-DoubleBlockUnitary = GuppyFunctionDefinition[
+type SingleBlockUnitary = GuppyFunctionDefinition[[array[qubit, N]], None]
+type DoubleBlockUnitary = GuppyFunctionDefinition[
     [tuple[array[qubit, N]], array[qubit, N]], None
 ]
 
 
-SingleBlockChoiStateFuntion = Callable[
+type SingleBlockChoiStateFuntion = Callable[
     [SingleBlockUnitary], tuple[array[qubit, N], array[qubit, N]]
 ]
 
 
-DoubleBlockChoiStateFuntion = Callable[
+type DoubleBlockChoiStateFuntion = Callable[
     [DoubleBlockUnitary],
     tuple[array[qubit, N], array[qubit, N], array[qubit, N], array[qubit, N]],
 ]
@@ -310,16 +310,16 @@ def get_expanded_stabilizer_set(
 N_PHYSICAL = guppy.nat_var("N_PHYSICAL")
 K_LOGICAL = guppy.nat_var("K_LOGICAL")
 
-SemanticCliffordUnitary = GuppyFunctionDefinition[[array[qubit, K_LOGICAL]], None]
-ImplementationCliffordUnitary = GuppyFunctionDefinition[
+type SemanticCliffordUnitary = GuppyFunctionDefinition[[array[qubit, K_LOGICAL]], None]
+type ImplementationCliffordUnitary = GuppyFunctionDefinition[
     [array[qubit, N_PHYSICAL]], None
 ]
 
 
-SemanticCliffordUnitaryDouble = GuppyFunctionDefinition[
+type SemanticCliffordUnitaryDouble = GuppyFunctionDefinition[
     [array[qubit, K_LOGICAL], array[qubit, K_LOGICAL]], None
 ]
-ImplementationCliffordUnitaryDouble = GuppyFunctionDefinition[
+type ImplementationCliffordUnitaryDouble = GuppyFunctionDefinition[
     [array[qubit, N_PHYSICAL], array[qubit, N_PHYSICAL]], None
 ]
 
