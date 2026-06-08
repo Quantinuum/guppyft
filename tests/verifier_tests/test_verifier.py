@@ -215,7 +215,7 @@ def test_stabilizer_padding_double_block() -> None:
     )
     assert (
         str(padded_double_block_stabilizers)
-        == "X0 X1 X2 X3, X1 X2 X4 X5, X2 X3 X5 X6, Z0 Z1 Z2 Z3, Z1 Z2 Z4 Z5, Z2 Z3 Z5 Z6,"
+        == "X0 X1 X2 X3, X1 X2 X4 X5, X2 X3 X5 X6, Z0 Z1 Z2 Z3, Z1 Z2 Z4 Z5, Z2 Z3 Z5 Z6,"  # noqa: E501
         + " X7 X8 X9 X10, X8 X9 X11 X12, X9 X10 X12 X13, Z7 Z8 Z9 Z10, Z8 Z9 Z11 Z12, Z9 Z10 Z12 Z13,"  # noqa: E501
         + " X14 X15 X16 X17, X15 X16 X18 X19, X16 X17 X19 X20, Z14 Z15 Z16 Z17, Z15 Z16 Z18 Z19, Z16 Z17 Z19 Z20,"  # noqa: E501
         + " X21 X22 X23 X24, X22 X23 X25 X26, X23 X24 X26 X27, Z21 Z22 Z23 Z24, Z22 Z23 Z25 Z26, Z23 Z24 Z26 Z27"  # noqa: E501

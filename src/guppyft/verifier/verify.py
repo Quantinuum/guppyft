@@ -181,7 +181,8 @@ def pad_code_stabilizers(code: StabilizerCode, num_blocks: int) -> pauli.StringS
         combined = tuple(p0_padding + p1_padding + p2_padding + p3_padding)
     else:
         raise ValueError(
-            f"Currently no more than two codeblocks are supported. Got argument num_blocks={num_blocks}."
+            "Currently no more than two codeblocks are supported."
+            + f"Got argument num_blocks={num_blocks}."
         )
 
     return pauli.StringSet.from_iterable(
@@ -259,7 +260,7 @@ def expand_pauli_term(
         offset = logical_block_number * n
         shifted = shift_pauli(physical_pauli, offset, size=total_qubit_number)
 
-        # Obtain the expanded physical Pauli by taking the product of k expanded Strings.
+        # Get the expanded physical Pauli by taking the product of k expanded Strings.
         result_string *= shifted
 
     return pauli.SignTerm.from_cmpnt_coeff(result_string, logical_term.coeff)
