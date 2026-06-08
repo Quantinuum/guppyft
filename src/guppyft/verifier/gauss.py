@@ -8,14 +8,14 @@ def canonicalize(tab: SignTerms) -> None:
         for i in range(pivot_row, len(tab)):
             p = tab[i].string[pivot_col]
             # Find a stabilizer to pivot on
-            if p == X or p == Y:
+            if p in (X, Y):
                 # Guarantee that pivot_row contains X or Y
                 if i != pivot_row:
                     tab[pivot_row] *= tab[i]
                 # Eliminate X or Y from all other stabilizers
                 for j in range(len(tab)):
                     pj = tab[j].string[pivot_col]
-                    if j != pivot_row and (pj == X or pj == Y):
+                    if j != pivot_row and (pj in (X, Y)):
                         tab[j] *= tab[pivot_row]
                 pivot_row += 1
                 break
@@ -27,7 +27,7 @@ def canonicalize(tab: SignTerms) -> None:
                     tab[pivot_row] *= tab[i]
                 for j in range(len(tab)):
                     pj = tab[j].string[pivot_col]
-                    if j != pivot_row and (pj == Z or pj == Y):
+                    if j != pivot_row and (pj in (Z, Y)):
                         tab[j] *= tab[pivot_row]
                 pivot_row += 1
                 break

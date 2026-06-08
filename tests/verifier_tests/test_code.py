@@ -36,7 +36,7 @@ def test_code_validation() -> None:
     )
     with pytest.raises(
         CodeDefinitionError,
-        match="The number of stabilizer generators must equal n-k. Got n=4, k=2 with 4 generators.",
+        match=r"The number of stabilizer generators must equal n-k. Got n=4, k=2 with 4 generators.",
     ):
         StabilizerCode(
             4,
@@ -54,7 +54,7 @@ def test_code_validation() -> None:
 
     with pytest.raises(
         CodeDefinitionError,
-        match="Incorrect number of X logical operators: expected 2, got 3.",
+        match=r"Incorrect number of X logical operators: expected 2, got 3.",
     ):
         StabilizerCode(
             4,
