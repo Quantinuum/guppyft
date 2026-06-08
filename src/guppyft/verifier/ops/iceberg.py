@@ -1,4 +1,5 @@
-from typing import Callable, no_type_check
+from collections.abc import Callable
+from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.std.angles import angle, pi

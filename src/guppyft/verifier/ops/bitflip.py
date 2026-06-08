@@ -1,8 +1,9 @@
-from typing import no_type_check, Callable
+from collections.abc import Callable
+from typing import no_type_check
 
 from guppylang import guppy
-from guppylang.std.quantum import h, cx, qubit
 from guppylang.std.array import array
+from guppylang.std.quantum import cx, h, qubit
 
 
 @guppy

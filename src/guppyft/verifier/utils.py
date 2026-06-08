@@ -1,7 +1,6 @@
-from zixy.qubit import pauli
+from selene_stim_plugin.state import Pauli, Phase, Stabilizer, StabilizerList
 from zixy.container.coeffs import Sign
-
-from selene_stim_plugin.state import Stabilizer, Pauli, StabilizerList, Phase
+from zixy.qubit import pauli
 
 
 def convert_pauli(selene_pauli: Pauli) -> pauli.PauliMatrix:
