@@ -147,7 +147,7 @@ def compute_stabilizers_double_block(
     states_dict = seeded_stim_instance.extract_states_dict(output)
 
     # Using a hack to get the state_result across four code blocks. See the
-    # comment for compute_stabilizers_single_block for more info.
+    # comment in compute_stabilizers_single_block for more info.
     total = states_dict["total"]
     control_qubits1 = states_dict["controls1"].specified_qubits
     target_qubits1 = states_dict["targets1"].specified_qubits
@@ -294,17 +294,17 @@ def get_expanded_stabilizer_set(
     signed_logical_paulis: pauli.SignTerms, code_def: StabilizerCode, num_blocks: int
 ) -> pauli.SignTerms:
 
-    expanded_logicals: pauli.SignTerms = expand_logical_signterms(
+    # Firstly, we expand the stabilizers of the logical choi state using the
+    # logical operators of the StabilizerCode
+    stabilizers: pauli.SignTerms = expand_logical_signterms(
         signed_logical_paulis, code_def
     )
-
-    sign_terms = pauli.SignTerms.from_str(str(expanded_logicals))
-
+    # Secondly, we include the stabilizer generatiors for each code block.
     padded_stabilizers: pauli.StringSet = pad_code_stabilizers(code_def, num_blocks)
 
     for s in padded_stabilizers.to_strings():
-        sign_terms.append(s)
-    return sign_terms
+        stabilizers.append(s)
+    return stabilizers
 
 
 N_PHYSICAL = guppy.nat_var("N_PHYSICAL")
