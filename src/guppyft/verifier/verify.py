@@ -102,9 +102,10 @@ def compute_stabilizers_single_block(
     output = instance.run(simulator=seeded_stim_instance, n_qubits=2 * n_func_qubits)
     states_dict = seeded_stim_instance.extract_states_dict(output)
 
-    # This is a hack so that we can get a state_result over both the control and target registers.
-    # Currently state result doesn't support passing more than a single array. The alternative would
-    # be doing array concatenation in Guppy. This seemed easier.
+    # This is a hack so that we can get a state_result over both the
+    #  control and target registers. Currently state result doesn't support passing
+    #  more than a single array. The alternative wouldbe doing array concatenation
+    #  in Guppy. This seemed easier.
     total = states_dict["total"]
     control_qubits = states_dict["control"].specified_qubits
     target_qubits = states_dict["target"].specified_qubits
@@ -210,23 +211,28 @@ def expand_pauli_term(
     total_qubit_number = num_blocks * n
 
     # "result_string" is a Pauli String which will store a single physical Pauli term
-    # possibly across multiple code blocks. This String will be one term in the expanded tableau.
+    # possibly across multiple code blocks.
+    #  This String will be one term in the expanded tableau.
     result_string = pauli.String(qubits=total_qubit_number)
 
     for logical_qubit_index, logical_pauli in logical_term.string.get_dict().items():
-        # "non_identity_pauli_index" is the index we need to access to expand the logical operators for a StabilizerCode.
+        # "non_identity_pauli_index" is the index we need to access to expand the
+        #  logical operators for a StabilizerCode.
         # Consider StabilizerCode.x_logicals for the Iceberg code.
         # 1. (XI -> XXII) non_identity_pauli_index=0, ICEBERG_4_2_2.x_logicals[0] = XXII
         # 2. (IX -> XIXI) non_identity_pauli_index=1, ICEBERG_4_2_2.x_logicals[1] = XIXI
         non_identity_pauli_index = logical_qubit_index % k
 
-        # logical_block_number tells us which logical code block a specific (logical_qubit, logical_pauli)
-        # pair belongs to. If we had 4 logical qubits (q0, q1, q2, q3) from two logical iceberg code blocks then
-        # (q0, q1) would correspond to logical_block_number=0 and (q2, q3) would correspond to logical_block_number=1.
+        # logical_block_number tells us which logical code block a specific
+        #  (logical_qubit, logical_pauli) pair belongs to. If we had 4 logical qubit
+        #  (q0, q1, q2, q3) from two logical iceberg code blocks then (q0, q1) would
+        #  correspond to logical_block_number=0 and (q2, q3) would correspond
+        #  to logical_block_number=1.
         logical_block_number = logical_qubit_index // k
 
-        # For each logical_pauli (PauliMatrix) term in logical_term we get the corresponding physical Pauli
-        # by indexing into StabilizerCode.x_logicals/StabilizerCode.z_logicals using the
+        # For each logical_pauli (PauliMatrix) term in logical_term we get the
+        #  corresponding physical Pauli by indexing into
+        # StabilizerCode.x_logicals/StabilizerCode.z_logicals using the
         # "non_identity_pauli_index" index computed above.
         match logical_pauli:
             case pauli.PauliMatrix.X:
@@ -248,8 +254,8 @@ def expand_pauli_term(
 
         # "offset" tells us how we need to adjust the qubit indices of physical_pauli
         # depending on which code block we are in. Suppose we had two Steane blocks
-        # with seven physical qubits each. If we expanded a logical Pauli in the second logical block
-        # Then the appropriate "offset" would be (1*7) = 7.
+        # with seven physical qubits each. If we expanded a logical Pauli in the second
+        #  logical block, then the appropriate "offset" would be (1*7) = 7.
         offset = logical_block_number * n
         shifted = shift_pauli(physical_pauli, offset, size=total_qubit_number)
 
@@ -367,8 +373,8 @@ def compute_verification_signterms_double_block(
         n_func_qubits=2 * code_definition.num_logical_qubits,
     )
 
-    # Expand the 4k logical stabilizers and combine them with the generators for each block.
-    # We obtain 4k + 4(n-k) = 4n stablizers in total.
+    # Expand the 4k logical stabilizers and combine them with the generators for each
+    #  block. We obtain 4k + 4(n-k) = 4n stablizers in total.
     expanded_semantic_stabilizers = get_expanded_stabilizer_set(
         semantic_choi_stabilizers, code_definition, num_blocks=2
     )
