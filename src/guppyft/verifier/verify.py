@@ -104,7 +104,7 @@ def compute_stabilizers_single_block(
 
     # This is a hack so that we can get a state_result over both the
     #  control and target registers. Currently state result doesn't support passing
-    #  more than a single array. The alternative wouldbe doing array concatenation
+    #  more than a single array. The alternative would be doing array concatenation
     #  in Guppy. This seemed easier.
     total = states_dict["total"]
     control_qubits = states_dict["control"].specified_qubits
