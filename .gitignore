@@ -154,3 +154,10 @@ devenv.local.nix
 .envrc
 
 _build
+
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
+.direnv
