@@ -63,19 +63,31 @@ def with_op_for_global_var(
 
 @hugr_op(with_op_for_global_var(GLOBAL_VAR_NAME))
 @no_type_check
-def _with_no_input(init_global: State @ owned, func: Callable[[], Out]) -> tuple[State, Out]: ...
+def _with_no_input(
+    init_global: State @ owned, func: Callable[[], Out]
+) -> tuple[State, Out]: ...
+
 
 @hugr_op(with_op_for_global_var(GLOBAL_VAR_NAME))
 @no_type_check
-def _with_input(init_global: State @ owned, func: Callable[[In@owned], Out], inputs: In@owned) -> tuple[State, Out]: ...
+def _with_input(
+    init_global: State @ owned, func: Callable[[In @ owned], Out], inputs: In @ owned
+) -> tuple[State, Out]: ...
+
 
 @hugr_op(with_op_for_global_var(GLOBAL_VAR_NAME))
 @no_type_check
-def _with_input_no_output(init_global: State @ owned, func: Callable[[In@owned], None], inputs: In@owned) -> State: ...
+def _with_input_no_output(
+    init_global: State @ owned, func: Callable[[In @ owned], None], inputs: In @ owned
+) -> State: ...
+
 
 @hugr_op(with_op_for_global_var(GLOBAL_VAR_NAME))
 @no_type_check
-def _with_no_input_no_output(init_global: State @ owned, func: Callable[[], None]) -> State: ...
+def _with_no_input_no_output(
+    init_global: State @ owned, func: Callable[[], None]
+) -> State: ...
+
 
 # @hugr_op(with_op_for_global_var(GLOBAL_VAR_NAME))
 # @no_type_check
@@ -86,10 +98,13 @@ def _with_no_input_no_output(init_global: State @ owned, func: Callable[[], None
 
 @guppy.overload(
     _with_no_input_no_output,
-    _with_no_input, _with_input_no_output,
-    _with_input, 
-                )
-def with_global_state(state: State @ owned, func: Any, inputs: Any @owned | None = None) -> Any: ...
+    _with_no_input,
+    _with_input_no_output,
+    _with_input,
+)
+def with_global_state(
+    state: State @ owned, func: Any, inputs: Any @ owned | None = None
+) -> Any: ...
 
 
 def _map_op_for_global_var(
@@ -140,17 +155,20 @@ def _map_op_for_global_var(
 @hugr_op(_map_op_for_global_var(GLOBAL_VAR_NAME))
 @no_type_check
 def _map_global_with_input(
-    func: Callable[[State@owned, In@owned], tuple[State,Out]], inputs: In@owned
+    func: Callable[[State @ owned, In @ owned], tuple[State, Out]],
+    inputs: In @ owned,
 ) -> Out: ...
 
 
 @hugr_op(_map_op_for_global_var(GLOBAL_VAR_NAME))
 @no_type_check
-def _map_global_no_input(func: Callable[[State@owned], tuple[State,Out]]) -> Out: ...
+def _map_global_no_input(
+    func: Callable[[State @ owned], tuple[State, Out]],
+) -> Out: ...
 
 
 @guppy.overload(
     _map_global_with_input,
     _map_global_no_input,
 )
-def map_global_state(func: Any, inputs: Any@owned | None = None) -> Any: ...
+def map_global_state(func: Any, inputs: Any @ owned | None = None) -> Any: ...
