@@ -1552,25 +1552,24 @@
                 {
                   "tya": "Type",
                   "ty": {
-                    "t": "Sum",
-                    "s": "Unit",
-                    "size": 2
-                  }
-                }
-              ],
-              "bound": "A"
-            },
-            {
-              "t": "Opaque",
-              "extension": "tket.futures",
-              "id": "Future",
-              "args": [
-                {
-                  "tya": "Type",
-                  "ty": {
-                    "t": "Sum",
-                    "s": "Unit",
-                    "size": 2
+                    "t": "Opaque",
+                    "extension": "collections.array",
+                    "id": "array",
+                    "args": [
+                      {
+                        "tya": "BoundedNat",
+                        "n": 2
+                      },
+                      {
+                        "tya": "Type",
+                        "ty": {
+                          "t": "Sum",
+                          "s": "Unit",
+                          "size": 2
+                        }
+                      }
+                    ],
+                    "bound": "A"
                   }
                 }
               ],

@@ -329,7 +329,7 @@ fn vec_of_blocks_and_ints_and_angles(
 
 fn vec_of_blocks_and_bools(n_blocks: usize, n_bools: usize) -> Vec<Type> {
     let mut types: Vec<Type> = vec![block_tv(0); n_blocks];
-    types.extend(vec![future_type(bool_t()); n_bools]);
+    types.extend(vec![future_type(Array::ty(n_bools as u64, bool_t()))]);
     types
 }
 
@@ -768,7 +768,7 @@ mod tests {
         let free = EXTENSION
             .instantiate_extension_op("free", [8.into()])
             .unwrap();
-        let outputs: Vec<Type> = vec![future_type(bool_t()); 2];
+        let outputs: Vec<Type> = vec![future_type(Array::ty(2, bool_t()))];
         let mut dfg_builder = DFGBuilder::new(Signature::new(vec![], outputs)).unwrap();
         let handle = dfg_builder.add_dataflow_op(alloczero, vec![]).unwrap();
         let handle = dfg_builder.add_dataflow_op(x3, handle.outputs()).unwrap();
@@ -776,15 +776,14 @@ mod tests {
             .add_dataflow_op(measuresyndrome, handle.outputs())
             .unwrap();
         let wires: Vec<Wire> = handle.outputs().collect();
-        assert_eq!(wires.len(), 3);
+        assert_eq!(wires.len(), 2);
         let block_wire = wires[0];
-        let bool_wire_0 = wires[1];
-        let bool_wire_1 = wires[2];
+        let future_bools = wires[1];
         let handle = dfg_builder.add_dataflow_op(free, [block_wire]).unwrap();
         let outs: Vec<Wire> = handle.outputs().collect();
         assert!(outs.is_empty());
         let h = dfg_builder
-            .finish_hugr_with_outputs([bool_wire_0, bool_wire_1])
+            .finish_hugr_with_outputs([future_bools])
             .unwrap();
         h.validate().unwrap();
     }
