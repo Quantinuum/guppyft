@@ -1530,6 +1530,38 @@
           "output": [
             {
               "t": "Opaque",
+              "extension": "tket.futures",
+              "id": "Future",
+              "args": [
+                {
+                  "tya": "Type",
+                  "ty": {
+                    "t": "Sum",
+                    "s": "Unit",
+                    "size": 2
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "tket.futures",
+              "id": "Future",
+              "args": [
+                {
+                  "tya": "Type",
+                  "ty": {
+                    "t": "Sum",
+                    "s": "Unit",
+                    "size": 2
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
               "extension": "guppyft.iceberg.types",
               "id": "block",
               "args": [
@@ -1539,38 +1571,6 @@
                   "cached_decl": {
                     "tp": "BoundedNat",
                     "bound": null
-                  }
-                }
-              ],
-              "bound": "A"
-            },
-            {
-              "t": "Opaque",
-              "extension": "tket.futures",
-              "id": "Future",
-              "args": [
-                {
-                  "tya": "Type",
-                  "ty": {
-                    "t": "Sum",
-                    "s": "Unit",
-                    "size": 2
-                  }
-                }
-              ],
-              "bound": "A"
-            },
-            {
-              "t": "Opaque",
-              "extension": "tket.futures",
-              "id": "Future",
-              "args": [
-                {
-                  "tya": "Type",
-                  "ty": {
-                    "t": "Sum",
-                    "s": "Unit",
-                    "size": 2
                   }
                 }
               ],
@@ -2022,22 +2022,6 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "guppyft.iceberg.types",
-              "id": "block",
-              "args": [
-                {
-                  "tya": "Variable",
-                  "idx": 0,
-                  "cached_decl": {
-                    "tp": "BoundedNat",
-                    "bound": null
-                  }
-                }
-              ],
-              "bound": "A"
-            },
-            {
-              "t": "Opaque",
               "extension": "tket.futures",
               "id": "Future",
               "args": [
@@ -2056,6 +2040,22 @@
                         }
                       ]
                     ]
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
                   }
                 }
               ],
@@ -2111,22 +2111,6 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "guppyft.iceberg.types",
-              "id": "block",
-              "args": [
-                {
-                  "tya": "Variable",
-                  "idx": 0,
-                  "cached_decl": {
-                    "tp": "BoundedNat",
-                    "bound": null
-                  }
-                }
-              ],
-              "bound": "A"
-            },
-            {
-              "t": "Opaque",
               "extension": "tket.futures",
               "id": "Future",
               "args": [
@@ -2145,6 +2129,22 @@
                         }
                       ]
                     ]
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
                   }
                 }
               ],
@@ -2192,22 +2192,6 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "guppyft.iceberg.types",
-              "id": "block",
-              "args": [
-                {
-                  "tya": "Variable",
-                  "idx": 0,
-                  "cached_decl": {
-                    "tp": "BoundedNat",
-                    "bound": null
-                  }
-                }
-              ],
-              "bound": "A"
-            },
-            {
-              "t": "Opaque",
               "extension": "tket.futures",
               "id": "Future",
               "args": [
@@ -2226,6 +2210,22 @@
                         }
                       ]
                     ]
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
                   }
                 }
               ],
@@ -2281,22 +2281,6 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "guppyft.iceberg.types",
-              "id": "block",
-              "args": [
-                {
-                  "tya": "Variable",
-                  "idx": 0,
-                  "cached_decl": {
-                    "tp": "BoundedNat",
-                    "bound": null
-                  }
-                }
-              ],
-              "bound": "A"
-            },
-            {
-              "t": "Opaque",
               "extension": "tket.futures",
               "id": "Future",
               "args": [
@@ -2315,6 +2299,22 @@
                         }
                       ]
                     ]
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
                   }
                 }
               ],
