@@ -10,7 +10,8 @@ from typing import (
 )
 
 from guppylang import guppy
-from guppylang_internals.checker.errors.generic import UnsupportedError
+from guppylang_internals.ast_util import get_file
+from guppylang_internals.checker.errors.generic import ExpectedError, UnsupportedError
 from guppylang_internals.checker.expr_checker import (
     ExprChecker,
     ExprSynthesizer,
@@ -29,6 +30,7 @@ from guppylang_internals.definition.value import CallReturnWires
 from guppylang_internals.engine import ENGINE
 from guppylang_internals.error import GuppyTypeError
 from guppylang_internals.nodes import GlobalCall, GlobalName
+from guppylang_internals.span import Loc, Span
 from guppylang_internals.tys.builtin import string_type
 from guppylang_internals.tys.common import ToHugrContext
 from guppylang_internals.tys.subst import Inst
@@ -87,7 +89,6 @@ class GlobalWithChecker(CustomCallChecker):
     @override
     def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
         _, global_ty = ExprSynthesizer(self.ctx).synthesize(args[0])
-
         callback_expr, callback_func = ExprSynthesizer(self.ctx).synthesize(args[1])
         assert isinstance(callback_func, FunctionType)
 
@@ -106,29 +107,39 @@ class GlobalWithChecker(CustomCallChecker):
                     )
                 )
 
-        input_args = [
+        # Check the number of input args provided matches callback function signature
+        if len(args[2:]) != len(callback_func.inputs):
+            expect_ty = ", ".join(str(i.ty) for i in callback_func.inputs)
+            got_ty = ", ".join(
+                str(ExprSynthesizer(self.ctx).synthesize(arg)[1]) for arg in args[2:]
+            )
+            raise GuppyTypeError(
+                ExpectedError(
+                    self.node,
+                    f"input args ({expect_ty}) for callback func",
+                    f"({got_ty}).",
+                )
+            )
+
+        input_tys = [
             FuncInput(global_ty, InputFlags.NoFlags),
             FuncInput(callback_func, InputFlags.NoFlags),
         ]
-        # Check the number of input args provided matches
-        assert len(args[2:]) == len(callback_func.inputs)
         for arg, func_input in zip(args[2:], callback_func.inputs, strict=True):
             _, arg_ty = ExprSynthesizer(self.ctx).synthesize(arg)
-            input_args.append(FuncInput(arg_ty, func_input.flags))
+            input_tys.append(FuncInput(arg_ty, func_input.flags))
             ExprChecker(self.ctx).check(arg, func_input.ty)
 
         match callback_func.output:
             case TupleType():
-                output_args = TupleType(
-                    [global_ty, *callback_func.output.element_types]
-                )
+                output_ty = TupleType([global_ty, *callback_func.output.element_types])
             case NoneType():
-                output_args = global_ty
+                output_ty = global_ty
             case _:
-                output_args = TupleType([global_ty, callback_func.output])
+                output_ty = TupleType([global_ty, callback_func.output])
         func_ty = FunctionType(
-            inputs=input_args,
-            output=output_args,
+            inputs=input_tys,
+            output=output_ty,
         )
 
         # Use default implementation from the expression checker
@@ -162,7 +173,7 @@ def with_op_instantiate(
 )
 def with_global[G, **P, *R](
     initial_state: G,
-    func: Callable[P, *R],
+    callback_func: Callable[P, *R],
     *args: P.args,
 ) -> tuple[G, *R]: ...
 
@@ -248,6 +259,6 @@ class GlobalMapChecker(CustomCallChecker):
     higher_order_value=False,
 )
 def map_global[G, **P, *R](
-    func: Callable[Concatenate[G, P], tuple[G, *R] | G],
+    callback_func: Callable[Concatenate[G, P], tuple[G, *R] | G],
     *args: P.args,
 ) -> tuple[*R]: ...

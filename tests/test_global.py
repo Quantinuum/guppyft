@@ -109,6 +109,9 @@ def test_with_incorrect_args_length() -> None:
     main.compile()
 
 
+test_with_incorrect_args_length()
+
+
 def test_with_incorrect_arg_type_error() -> None:
     @guppy
     def my_prog(i: int) -> None:
