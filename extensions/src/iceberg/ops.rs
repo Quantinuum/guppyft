@@ -327,9 +327,11 @@ fn vec_of_blocks_and_ints_and_angles(
     types
 }
 
+/// A vector consisting of future-bool types followed by block types.
+/// (Block types last because used as output row and guppylang expects this.)
 fn vec_of_blocks_and_bools(n_blocks: usize, n_bools: usize) -> Vec<Type> {
-    let mut types: Vec<Type> = vec![block_tv(0); n_blocks];
-    types.extend(vec![future_type(bool_t()); n_bools]);
+    let mut types: Vec<Type> = vec![future_type(bool_t()); n_bools];
+    types.extend(vec![block_tv(0); n_blocks]);
     types
 }
 
@@ -337,8 +339,10 @@ fn future_optional_bool() -> Type {
     future_type(option_type(vec![bool_t()]).into())
 }
 
+/// A vector consisting of a future-optional-bool type followed by a block type.
+/// (Block type last because used as output row and guppylang expects this.)
 fn block_and_optional_bool() -> Vec<Type> {
-    vec![block_tv(0), future_optional_bool()]
+    vec![future_optional_bool(), block_tv(0)]
 }
 
 /// Signature of an operation that acts on a single block, with a number of
@@ -777,9 +781,9 @@ mod tests {
             .unwrap();
         let wires: Vec<Wire> = handle.outputs().collect();
         assert_eq!(wires.len(), 3);
-        let block_wire = wires[0];
-        let bool_wire_0 = wires[1];
-        let bool_wire_1 = wires[2];
+        let bool_wire_0 = wires[0];
+        let bool_wire_1 = wires[1];
+        let block_wire = wires[2];
         let handle = dfg_builder.add_dataflow_op(free, [block_wire]).unwrap();
         let outs: Vec<Wire> = handle.outputs().collect();
         assert!(outs.is_empty());
@@ -838,16 +842,16 @@ mod tests {
         let handle = dfg_builder
             .add_dataflow_op(measureonez0, handle.outputs())
             .unwrap();
-        let [block, maybe_c0] = handle.outputs_arr();
+        let [maybe_c0, block] = handle.outputs_arr();
         let handle = dfg_builder
             .add_dataflow_op(measureonez1, vec![block])
             .unwrap();
-        let [block, maybe_c1] = handle.outputs_arr();
+        let [maybe_c1, block] = handle.outputs_arr();
         let index0_wire = dfg_builder.add_load_value(ConstInt::new_u(6, 0).unwrap());
         let handle = dfg_builder
             .add_dataflow_op(measureonez_d, [block, index0_wire])
             .unwrap();
-        let [block, maybe_c2] = handle.outputs_arr();
+        let [maybe_c2, block] = handle.outputs_arr();
         let h = dfg_builder
             .finish_hugr_with_outputs(vec![block, maybe_c0, maybe_c1, maybe_c2])
             .unwrap();
