@@ -8,7 +8,7 @@ from guppylang.std.builtins import owned, result
 from guppylang.std.quantum import discard, measure, qubit, x
 from guppylang_internals.error import GuppyError
 
-from guppyft.globals import map_global_state, with_global_state
+from guppyft.globals import map_global, with_global
 
 
 def test_with_map() -> None:
@@ -19,13 +19,13 @@ def test_with_map() -> None:
 
     @guppy
     def my_prog() -> None:
-        i = map_global_state(foo, (9, 10))
+        i = map_global(foo, (9, 10))
         result("my_prog", i)
 
     @guppy
     def main() -> None:
         qb = qubit()
-        qb = with_global_state(qb, my_prog)
+        qb = with_global(qb, my_prog)
         result("qb_main", measure(qb))
 
     res = main.emulator(n_qubits=1).run().collated_shots()

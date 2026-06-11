@@ -1,14 +1,44 @@
+import ast
 from collections.abc import Callable
-from typing import Any, no_type_check
+from typing import (
+    Any,
+    Concatenate,
+    ParamSpec,
+    TypeVar,
+    TypeVarTuple,
+    override,
+)
 
 from guppylang import guppy
-from guppylang.std.builtins import owned
-from guppylang_internals.compiler.core import EXTENSION_OPS_WITH_SIDE_EFFECTS
-from guppylang_internals.decorator import hugr_op
+from guppylang_internals.checker.expr_checker import (
+    ExprChecker,
+    ExprSynthesizer,
+    synthesize_call,
+)
+from guppylang_internals.compiler.core import (
+    EXTENSION_OPS_WITH_SIDE_EFFECTS,
+    CompilerContext,
+)
+from guppylang_internals.decorator import custom_function
+from guppylang_internals.definition.custom import (
+    CustomCallChecker,
+    CustomInoutCallCompiler,
+)
+from guppylang_internals.definition.value import CallReturnWires
+from guppylang_internals.nodes import GlobalCall
 from guppylang_internals.tys.common import ToHugrContext
 from guppylang_internals.tys.subst import Inst
-from hugr import ops
+from guppylang_internals.tys.ty import (
+    FuncInput,
+    FunctionType,
+    InputFlags,
+    NoneType,
+    TupleType,
+    Type,
+)
+from hugr import Wire, ops
 from hugr import tys as ht
+from hugr.tys import TypeBound
 from tket_exts import globals
 
 State = guppy.type_var("State")
@@ -25,8 +55,73 @@ EXTENSION_OPS_WITH_SIDE_EFFECTS.append("tket.globals.map")
 
 GLOBAL_VAR_NAME = "guppy_ft_global"
 
+G = TypeVar("G")
+P = ParamSpec("P")
+R = TypeVarTuple("R")
 
-def with_op_for_global_var(
+
+class GlobalOpCompiler(CustomInoutCallCompiler):
+    op: Callable[[ht.FunctionType, Inst, CompilerContext], ops.DataflowOp]
+
+    def __init__(
+        self, op: Callable[[ht.FunctionType, Inst, CompilerContext], ops.DataflowOp]
+    ) -> None:
+        self.op = op
+
+    @override
+    def compile_with_inouts(self, args: list[Wire]) -> CallReturnWires:
+        op = self.op(self.ty, self.type_args, self.ctx)
+        node = self.builder.add_op(op, *args)
+        num_returns = len(self.ty.output)
+        return CallReturnWires(
+            regular_returns=list(node[:num_returns]),
+            inout_returns=list(node[num_returns:]),
+        )
+
+
+class GlobalWithChecker(CustomCallChecker):
+    @override
+    def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
+        _, global_ty = ExprSynthesizer(self.ctx).synthesize(args[0])
+
+        _, with_func_ty = ExprSynthesizer(self.ctx).synthesize(args[1])
+        assert isinstance(with_func_ty, FunctionType)
+
+        # TODO use ExprChecker to turn this into a nice Guppy compiler error
+        # Raise error if arg is borrowed
+        for i in with_func_ty.inputs:
+            if InputFlags.Inout in i.flags:
+                raise ValueError(
+                    "Input args cannot be borrowed. Consider using `@owned`."
+                )
+
+        input_args = [
+            FuncInput(global_ty, InputFlags.NoFlags),
+            FuncInput(with_func_ty, InputFlags.NoFlags),
+        ]
+        for arg, func_input in zip(args[2:], with_func_ty.inputs, strict=True):
+            _, arg_ty = ExprSynthesizer(self.ctx).synthesize(arg)
+            input_args.append(FuncInput(arg_ty, func_input.flags))
+            ExprChecker(self.ctx).check(arg, func_input.ty)
+
+        match with_func_ty.output:
+            case TupleType():
+                output_args = TupleType([global_ty, *with_func_ty.output.element_types])
+            case NoneType():
+                output_args = global_ty
+            case _:
+                output_args = TupleType([global_ty, with_func_ty.output])
+        func_ty = FunctionType(
+            inputs=input_args,
+            output=output_args,
+        )
+
+        # Use default implementation from the expression checker
+        args, ty, inst = synthesize_call(func_ty, args, self.node, self.ctx)
+        return GlobalCall(def_id=self.func.id, args=args, type_args=inst), ty
+
+
+def with_op_instantiate(
     var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
@@ -52,23 +147,19 @@ def with_op_for_global_var(
     return op
 
 
-@hugr_op(with_op_for_global_var(GLOBAL_VAR_NAME))
-@no_type_check
-def _with_non_linear_global(init_global: State, func: Callable[[], None]) -> State: ...
+@custom_function(
+    checker=GlobalWithChecker(),
+    compiler=GlobalOpCompiler(with_op_instantiate(GLOBAL_VAR_NAME)),
+    higher_order_value=False,
+)
+def with_global[G, **P, *R](
+    initial_state: G,
+    func: Callable[P, *R],
+    *args: P.args,
+) -> tuple[G, *R]: ...
 
 
-@hugr_op(with_op_for_global_var(GLOBAL_VAR_NAME))
-@no_type_check
-def _with_linear_global(
-    init_global: State_Linear @ owned, func: Callable[[], None]
-) -> State_Linear: ...
-
-
-@guppy.overload(_with_linear_global, _with_non_linear_global)
-def with_global_state(state: Any, func: Callable[[], None]) -> Any: ...
-
-
-def _map_op_for_global_var(
+def map_op_instantiate(
     var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
@@ -83,10 +174,6 @@ def _map_op_for_global_var(
         output_args = [out.type_arg() for out in concrete.output]
 
         global_arg = func_input_args[0]
-
-        # The function should have at most two inputs. This should be enforced
-        # by the Guppy overloads.
-        assert len(func_input_args) <= 2
 
         if len(func_input_args) == 2:
             op_input_arg = func_input_args[1:]
@@ -122,28 +209,62 @@ def _map_op_for_global_var(
     return op
 
 
-@hugr_op(_map_op_for_global_var(GLOBAL_VAR_NAME))
-@no_type_check
-def _map_global_with_nonlinear_input(
-    func: Callable[[State_Linear, In], Out], inputs: In
-) -> Out: ...
+class GlobalMapChecker(CustomCallChecker):
+    @override
+    def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
+        # First arg is function to be mapped
+        _, map_func_ty = ExprSynthesizer(self.ctx).synthesize(args[0])
+        assert isinstance(map_func_ty, FunctionType)
+        # Global type must be owned if linear
+        global_ty = map_func_ty.inputs[0]
+        if global_ty.ty.hugr_bound == TypeBound.Linear:
+            assert InputFlags.Owned in global_ty.flags
+
+        # Raise error if input arg is borrowed/inout
+        for i in map_func_ty.inputs:
+            if InputFlags.Inout in i.flags:
+                # TODO turn this into a nice Guppy compiler error
+                raise ValueError(
+                    "Input args cannot be borrowed. Consider using `@owned`."
+                )
+
+        input_args = [FuncInput(map_func_ty, InputFlags.NoFlags)]
+        for arg, func_input in zip(args[1:], map_func_ty.inputs[1:], strict=True):
+            _, arg_ty = ExprSynthesizer(self.ctx).synthesize(arg)
+            input_args.append(FuncInput(arg_ty, func_input.flags))
+
+        # mapped func output is [global state, *out_args]
+        func_out = map_func_ty.output
+        match func_out:
+            case TupleType():
+                # For multiple outputs, global_ty must be first
+                assert func_out.element_types[0] == global_ty
+                output_args = (
+                    TupleType(func_out.element_types[1:])
+                    if len(func_out.element_types) > 2
+                    else func_out.element_types[1]
+                )
+            case _:
+                # For single return, it must be global_ty
+                assert func_out == global_ty.ty
+                output_args = NoneType()
+
+        func_ty = FunctionType(
+            inputs=input_args,
+            output=output_args,
+        )
+
+        # Use default implementation from the expression checker
+        args, ty, inst = synthesize_call(func_ty, args, self.node, self.ctx)
+        return GlobalCall(def_id=self.func.id, args=args, type_args=inst), ty
 
 
-@hugr_op(_map_op_for_global_var(GLOBAL_VAR_NAME))
-@no_type_check
-def _map_global_with_linear_input(
-    func: Callable[[State_Linear, In_Linear], Out], inputs: In_Linear
-) -> Out: ...
-
-
-@hugr_op(_map_op_for_global_var(GLOBAL_VAR_NAME))
-@no_type_check
-def _map_global_no_input(func: Callable[[State_Linear], Out]) -> Out: ...
-
-
-@guppy.overload(
-    _map_global_with_nonlinear_input,
-    _map_global_with_linear_input,
-    _map_global_no_input,
+@custom_function(
+    checker=GlobalMapChecker(),
+    compiler=GlobalOpCompiler(map_op_instantiate(GLOBAL_VAR_NAME)),
+    higher_order_value=False,
 )
-def map_global_state(func: Any, inputs: Any | None = None) -> Any: ...
+def map_global[G, **P, *R](
+    func: Callable[Concatenate[G, P], tuple[G, *R] | G],
+    *args: P.args,
+) -> tuple[*R]: ...
