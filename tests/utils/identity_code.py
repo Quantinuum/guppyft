@@ -11,7 +11,7 @@ from guppylang.std.qsystem import zz_phase
 from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
 
 from guppyft.encode import EncoderSpec, ImplementOpsSpec, OpReplacements
-from guppyft.globals import map_global_state, with_global_state
+from guppyft.globals import map_global, with_global
 
 N = guppy.nat_var("N")
 
@@ -94,37 +94,39 @@ def identity_code_spec(
     @no_type_check
     def _QAlloc() -> tuple[tuple[int, int]]:
         @guppy
-        def _impl(state: STATE) -> tuple[tuple[int, int]]:
+        def _impl(state: STATE @ owned) -> tuple[STATE, tuple[int, int]]:
             result("_QAlloc", 0)
             blk_id, qb_id = state.get_next_addr()
             state.put_block(blk_id, qubit())
-            return ((blk_id, qb_id),)
+            return state, (blk_id, qb_id)
 
-        return map_global_state(_impl)
+        return map_global(_impl)
 
     # MeasureFree is compiled from `guppylang.std.quantum.measure`
     @guppy(link_name="link.identity.MeasureFree")
     @no_type_check
     def _MeasureFree(q: tuple[int, int]) -> bool:
         @guppy
-        def _impl(state: STATE, q: tuple[int, int]) -> bool:
+        def _impl(state: STATE @ owned, q: tuple[int, int]) -> tuple[STATE, bool]:
             result("_MeasureFree", 0)
             blk_id, _ = q
             blk = state.take_block(blk_id)
 
-            res = measure(blk)
+            res = measure(blk).read()
 
             state.free_addr(q)
-            return res
+            return state, res
 
-        return map_global_state(_impl, q)
+        return map_global(_impl, q)
 
     # Measure is compiled from `guppylang.std.quantum.project_z`
     @guppy(link_name="link.identity.Measure")
     @no_type_check
     def _Measure(q: tuple[int, int]) -> tuple[tuple[int, int], bool]:
         @guppy
-        def _impl(state: STATE, q: tuple[int, int]) -> tuple[tuple[int, int], bool]:
+        def _impl(
+            state: STATE @ owned, q: tuple[int, int]
+        ) -> tuple[STATE, tuple[int, int], bool]:
             result("_Measure", 0)
             blk_id, qb_id = q
             blk = state.take_block(blk_id)
@@ -132,33 +134,32 @@ def identity_code_spec(
             res = project_z(blk)
 
             state.put_block(blk_id, blk)
-            return (blk_id, qb_id), res
+            return state, (blk_id, qb_id), res
 
-        return map_global_state(_impl, q)
+        return map_global(_impl, q)
 
     # QFree is compiled from `guppylang.std.quantum.discard`
     @guppy(link_name="link.identity.QFree")
     @no_type_check
     def _QFree(q: tuple[int, int]) -> None:
-        # `_impl` requires a return type otherwise it will not be called.
         @guppy
-        def _impl(state: STATE, q: tuple[int, int]) -> None:
+        def _impl(state: STATE @ owned, q: tuple[int, int]) -> STATE:
             result("_QFree", 0)
             blk_id, _ = q
             blk = state.take_block(blk_id)
-
             discard(blk)
-
             state.free_addr(q)
+            return state
 
-        # The return must be used otherwise the function is not called.
-        return map_global_state(_impl, q)
+        return map_global(_impl, q)
 
     @guppy(link_name="link.identity.X")
     @no_type_check
     def _X(q: tuple[int, int]) -> tuple[tuple[int, int]]:
         @guppy
-        def _impl(state: STATE, q: tuple[int, int]) -> tuple[tuple[int, int]]:
+        def _impl(
+            state: STATE @ owned, q: tuple[int, int]
+        ) -> tuple[STATE, tuple[int, int]]:
             result("_X", 0)
             blk_id, qb_id = q
             blk = state.take_block(blk_id)
@@ -171,9 +172,9 @@ def identity_code_spec(
                 array(blk_id), comptime(costs["X"]), comptime(costs["IDLE_X"])
             )
 
-            return ((blk_id, qb_id),)
+            return state, (blk_id, qb_id)
 
-        return map_global_state(_impl, q)
+        return map_global(_impl, q)
 
     @guppy(link_name="link.identity.CX")
     @no_type_check
@@ -182,10 +183,9 @@ def identity_code_spec(
     ) -> tuple[tuple[int, int], tuple[int, int]]:
         @guppy
         def _impl(
-            state: STATE, args: tuple[tuple[int, int], tuple[int, int]]
-        ) -> tuple[tuple[int, int], tuple[int, int]]:
+            state: STATE @ owned, ctl: tuple[int, int], tgt: tuple[int, int]
+        ) -> tuple[STATE, tuple[int, int], tuple[int, int]]:
             result("_CX", 0)
-            ctl, tgt = args
             ctl_blk, tgt_blk = state.take_block(ctl[0]), state.take_block(tgt[0])
 
             cx(ctl_blk, tgt_blk)
@@ -195,9 +195,9 @@ def identity_code_spec(
             state.qec_policy(
                 array(ctl[0], tgt[0]), comptime(costs["CX"]), comptime(costs["IDLE_CX"])
             )
-            return ctl, tgt
+            return state, ctl, tgt
 
-        return map_global_state(_impl, (ctl, tgt))
+        return map_global(_impl, ctl, tgt)
 
     @guppy(link_name="link.identity.ZZPhase")
     @no_type_check
@@ -206,8 +206,8 @@ def identity_code_spec(
     ) -> tuple[tuple[int, int], tuple[int, int]]:
         @guppy
         def _impl(
-            state: STATE, args: tuple[tuple[int, int], tuple[int, int], float]
-        ) -> tuple[tuple[int, int], tuple[int, int]]:
+            state: STATE @ owned, args: tuple[tuple[int, int], tuple[int, int], float]
+        ) -> tuple[STATE, tuple[int, int], tuple[int, int]]:
             result("_ZZPhase", 0)
             ctl, tgt, theta = args
             ctl_blk, tgt_blk = state.take_block(ctl[0]), state.take_block(tgt[0])
@@ -221,9 +221,9 @@ def identity_code_spec(
                 comptime(costs["ZZPhase"]),
                 comptime(costs["IDLE_ZZPhase"]),
             )
-            return ctl, tgt
+            return state, ctl, tgt
 
-        return map_global_state(_impl, (ctl, tgt, phase))
+        return map_global(_impl, (ctl, tgt, phase))
 
     ops = OpReplacements()
     ops.with_funcs(
@@ -260,7 +260,7 @@ def identity_code_spec(
         @no_type_check
         def wrapper() -> None:
             state = global_state_gen()
-            state = with_global_state(state, func)
+            state = with_global(state, func)
             state.discard()
 
         return wrapper  # type: ignore[no-any-return]

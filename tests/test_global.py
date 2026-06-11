@@ -10,12 +10,6 @@ from guppylang_internals.error import GuppyError, GuppyTypeError
 
 from guppyft.globals import map_global, with_global
 
-## Test types
-# Linear/non-linear state type
-# 0, 1, 2 len input/output args
-# @owned input args
-# borrow input args
-
 
 def test_with_global_linear() -> None:
     @guppy
@@ -125,9 +119,6 @@ def test_with_incorrect_arg_type_error() -> None:
 
     with pytest.raises(GuppyTypeError):
         main.compile()
-
-
-# test_with_incorrect_arg_type_error()
 
 
 def test_with_borrowed_input_error() -> None:

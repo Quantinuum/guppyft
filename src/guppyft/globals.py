@@ -26,6 +26,7 @@ from guppylang_internals.definition.custom import (
 )
 from guppylang_internals.definition.value import CallReturnWires
 from guppylang_internals.nodes import GlobalCall
+from guppylang_internals.tys.builtin import string_type
 from guppylang_internals.tys.common import ToHugrContext
 from guppylang_internals.tys.subst import Inst
 from guppylang_internals.tys.ty import (
@@ -99,6 +100,8 @@ class GlobalWithChecker(CustomCallChecker):
             FuncInput(global_ty, InputFlags.NoFlags),
             FuncInput(with_func_ty, InputFlags.NoFlags),
         ]
+        # Check the number of input args provided matches
+        assert len(args[2:]) == len(with_func_ty.inputs)
         for arg, func_input in zip(args[2:], with_func_ty.inputs, strict=True):
             _, arg_ty = ExprSynthesizer(self.ctx).synthesize(arg)
             input_args.append(FuncInput(arg_ty, func_input.flags))
