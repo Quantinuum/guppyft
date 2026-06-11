@@ -1459,8 +1459,8 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "collections.array",
-              "id": "array",
+              "extension": "collections.borrow_arr",
+              "id": "borrow_array",
               "args": [
                 {
                   "tya": "Variable",

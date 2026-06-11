@@ -19,7 +19,7 @@ use hugr::{
     ops::{ExtensionOp, OpName},
     std_extensions::{
         arithmetic::{float_types::float64_type, int_types::int_type},
-        collections::array::{Array, ArrayKind},
+        collections::{array::ArrayKind, borrow_array::BorrowArray},
     },
     types::{FuncValueType, PolyFuncTypeRV, Type, TypeArg, type_param::TypeParam},
 };
@@ -301,7 +301,7 @@ impl ValidateJustArgs for InterBlockArgsValidator {
 /// Get an array-of-future-bool type with size corresponding to a type variable
 /// with a given ID.
 fn bool_array_tv(var_id: usize) -> Type {
-    Array::ty_parametric(
+    BorrowArray::ty_parametric(
         TypeArg::new_var_use(var_id, TypeParam::max_nat_type()),
         future_type(bool_t()),
     )
@@ -568,7 +568,7 @@ mod tests {
         package::Package,
         std_extensions::{
             arithmetic::{float_types::ConstF64, int_types::ConstInt},
-            collections::array::array_type,
+            collections::borrow_array::borrow_array_type,
             std_reg,
         },
         types::Signature,
@@ -799,7 +799,7 @@ mod tests {
             .unwrap();
         let mut dfg_builder = DFGBuilder::new(Signature::new(
             [block_type(4)],
-            [array_type(4, future_type(bool_t()))],
+            [borrow_array_type(4, future_type(bool_t()))],
         ))
         .unwrap();
         let handle = dfg_builder
