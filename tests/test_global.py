@@ -6,6 +6,7 @@ from guppylang import array, guppy
 from guppylang.emulator import EmulatorError
 from guppylang.std.builtins import owned, result
 from guppylang.std.quantum import discard, measure, qubit, x
+from guppylang_internals.checker.errors.generic import UnsupportedError
 from guppylang_internals.error import GuppyError, GuppyTypeError
 
 from guppyft.globals import map_global, with_global
@@ -132,8 +133,10 @@ def test_with_borrowed_input_error() -> None:
         with_global(1, my_prog0, qb)
         discard(qb)
 
+    # TODO use snapshot testing to match full error message
     with pytest.raises(
-        ValueError, match=r"Input args cannot be borrowed. Consider using `@owned`."
+        GuppyTypeError,
+        match=r"UnsupportedError",
     ):
         main.compile()
 

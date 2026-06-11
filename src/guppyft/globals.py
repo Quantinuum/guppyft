@@ -10,6 +10,7 @@ from typing import (
 )
 
 from guppylang import guppy
+from guppylang_internals.checker.errors.generic import UnsupportedError
 from guppylang_internals.checker.expr_checker import (
     ExprChecker,
     ExprSynthesizer,
@@ -25,7 +26,9 @@ from guppylang_internals.definition.custom import (
     CustomInoutCallCompiler,
 )
 from guppylang_internals.definition.value import CallReturnWires
-from guppylang_internals.nodes import GlobalCall
+from guppylang_internals.engine import ENGINE
+from guppylang_internals.error import GuppyTypeError
+from guppylang_internals.nodes import GlobalCall, GlobalName
 from guppylang_internals.tys.builtin import string_type
 from guppylang_internals.tys.common import ToHugrContext
 from guppylang_internals.tys.subst import Inst
@@ -85,35 +88,44 @@ class GlobalWithChecker(CustomCallChecker):
     def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
         _, global_ty = ExprSynthesizer(self.ctx).synthesize(args[0])
 
-        _, with_func_ty = ExprSynthesizer(self.ctx).synthesize(args[1])
-        assert isinstance(with_func_ty, FunctionType)
+        callback_expr, callback_func = ExprSynthesizer(self.ctx).synthesize(args[1])
+        assert isinstance(callback_func, FunctionType)
 
-        # TODO use ExprChecker to turn this into a nice Guppy compiler error
         # Raise error if arg is borrowed
-        for i in with_func_ty.inputs:
-            if InputFlags.Inout in i.flags:
-                raise ValueError(
-                    "Input args cannot be borrowed. Consider using `@owned`."
+        for i, func_input in enumerate(callback_func.inputs):
+            if InputFlags.Inout in func_input.flags:
+                assert isinstance(callback_expr, GlobalName)
+                callback_args: list[ast.arg] = ENGINE.get_parsed(
+                    callback_expr.def_id
+                ).defined_at.args.args
+                raise GuppyTypeError(
+                    UnsupportedError(
+                        callback_args[i],
+                        "Borrowed args",
+                        unsupported_in="callback input. Consider using `@owned`.",
+                    )
                 )
 
         input_args = [
             FuncInput(global_ty, InputFlags.NoFlags),
-            FuncInput(with_func_ty, InputFlags.NoFlags),
+            FuncInput(callback_func, InputFlags.NoFlags),
         ]
         # Check the number of input args provided matches
-        assert len(args[2:]) == len(with_func_ty.inputs)
-        for arg, func_input in zip(args[2:], with_func_ty.inputs, strict=True):
+        assert len(args[2:]) == len(callback_func.inputs)
+        for arg, func_input in zip(args[2:], callback_func.inputs, strict=True):
             _, arg_ty = ExprSynthesizer(self.ctx).synthesize(arg)
             input_args.append(FuncInput(arg_ty, func_input.flags))
             ExprChecker(self.ctx).check(arg, func_input.ty)
 
-        match with_func_ty.output:
+        match callback_func.output:
             case TupleType():
-                output_args = TupleType([global_ty, *with_func_ty.output.element_types])
+                output_args = TupleType(
+                    [global_ty, *callback_func.output.element_types]
+                )
             case NoneType():
                 output_args = global_ty
             case _:
-                output_args = TupleType([global_ty, with_func_ty.output])
+                output_args = TupleType([global_ty, callback_func.output])
         func_ty = FunctionType(
             inputs=input_args,
             output=output_args,
