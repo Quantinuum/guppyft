@@ -333,14 +333,15 @@ fn vec_of_blocks_and_bools(n_blocks: usize, n_bools: usize) -> Vec<Type> {
     types
 }
 
-fn future_optional_bool() -> Type {
-    future_type(option_type(vec![bool_t()]).into())
+fn optional_future_bool() -> Type {
+    option_type(vec![future_type(bool_t())]).into()
 }
 
-/// A vector consisting of a future-optional-bool type followed by a block type.
-/// (Block type last because used as output row and guppylang expects this.)
+/// A vector consisting of an optional-future-bool type followed by a block
+/// type. (Block type last because used as output row and guppylang expects
+/// this.)
 fn block_and_optional_bool() -> Vec<Type> {
-    vec![future_optional_bool(), block_tv(0)]
+    vec![optional_future_bool(), block_tv(0)]
 }
 
 /// Signature of an operation that acts on a single block, with a number of
@@ -828,9 +829,9 @@ mod tests {
             vec![block_type(2)],
             vec![
                 block_type(2),
-                future_optional_bool(),
-                future_optional_bool(),
-                future_optional_bool(),
+                optional_future_bool(),
+                optional_future_bool(),
+                optional_future_bool(),
             ],
         ))
         .unwrap();

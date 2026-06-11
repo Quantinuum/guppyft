@@ -2021,29 +2021,29 @@
           ],
           "output": [
             {
-              "t": "Opaque",
-              "extension": "tket.futures",
-              "id": "Future",
-              "args": [
-                {
-                  "tya": "Type",
-                  "ty": {
-                    "t": "Sum",
-                    "s": "General",
-                    "rows": [
-                      [],
-                      [
-                        {
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [],
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "tket.futures",
+                    "id": "Future",
+                    "args": [
+                      {
+                        "tya": "Type",
+                        "ty": {
                           "t": "Sum",
                           "s": "Unit",
                           "size": 2
                         }
-                      ]
-                    ]
+                      }
+                    ],
+                    "bound": "A"
                   }
-                }
-              ],
-              "bound": "A"
+                ]
+              ]
             },
             {
               "t": "Opaque",
@@ -2110,29 +2110,29 @@
           ],
           "output": [
             {
-              "t": "Opaque",
-              "extension": "tket.futures",
-              "id": "Future",
-              "args": [
-                {
-                  "tya": "Type",
-                  "ty": {
-                    "t": "Sum",
-                    "s": "General",
-                    "rows": [
-                      [],
-                      [
-                        {
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [],
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "tket.futures",
+                    "id": "Future",
+                    "args": [
+                      {
+                        "tya": "Type",
+                        "ty": {
                           "t": "Sum",
                           "s": "Unit",
                           "size": 2
                         }
-                      ]
-                    ]
+                      }
+                    ],
+                    "bound": "A"
                   }
-                }
-              ],
-              "bound": "A"
+                ]
+              ]
             },
             {
               "t": "Opaque",
@@ -2191,29 +2191,29 @@
           ],
           "output": [
             {
-              "t": "Opaque",
-              "extension": "tket.futures",
-              "id": "Future",
-              "args": [
-                {
-                  "tya": "Type",
-                  "ty": {
-                    "t": "Sum",
-                    "s": "General",
-                    "rows": [
-                      [],
-                      [
-                        {
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [],
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "tket.futures",
+                    "id": "Future",
+                    "args": [
+                      {
+                        "tya": "Type",
+                        "ty": {
                           "t": "Sum",
                           "s": "Unit",
                           "size": 2
                         }
-                      ]
-                    ]
+                      }
+                    ],
+                    "bound": "A"
                   }
-                }
-              ],
-              "bound": "A"
+                ]
+              ]
             },
             {
               "t": "Opaque",
@@ -2280,29 +2280,29 @@
           ],
           "output": [
             {
-              "t": "Opaque",
-              "extension": "tket.futures",
-              "id": "Future",
-              "args": [
-                {
-                  "tya": "Type",
-                  "ty": {
-                    "t": "Sum",
-                    "s": "General",
-                    "rows": [
-                      [],
-                      [
-                        {
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [],
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "tket.futures",
+                    "id": "Future",
+                    "args": [
+                      {
+                        "tya": "Type",
+                        "ty": {
                           "t": "Sum",
                           "s": "Unit",
                           "size": 2
                         }
-                      ]
-                    ]
+                      }
+                    ],
+                    "bound": "A"
                   }
-                }
-              ],
-              "bound": "A"
+                ]
+              ]
             },
             {
               "t": "Opaque",
