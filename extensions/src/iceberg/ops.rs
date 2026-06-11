@@ -298,16 +298,14 @@ impl ValidateJustArgs for InterBlockArgsValidator {
     }
 }
 
-/// Get a future-array-of-bool type with size corresponding to a type variable
+/// Get an array-of-future-bool type with size corresponding to a type variable
 /// with a given ID.
 fn bool_array_tv(var_id: usize) -> Type {
-    future_type(
-        Array::ty_parametric(
-            TypeArg::new_var_use(var_id, TypeParam::max_nat_type()),
-            bool_t(),
-        )
-        .unwrap(),
+    Array::ty_parametric(
+        TypeArg::new_var_use(var_id, TypeParam::max_nat_type()),
+        future_type(bool_t()),
     )
+    .unwrap()
 }
 
 fn vec_of_blocks_and_angles(n_blocks: usize, n_angles: usize) -> Vec<Type> {
@@ -335,14 +333,15 @@ fn vec_of_blocks_and_bools(n_blocks: usize, n_bools: usize) -> Vec<Type> {
     types
 }
 
-fn future_optional_bool() -> Type {
-    future_type(option_type(vec![bool_t()]).into())
+fn optional_future_bool() -> Type {
+    option_type(vec![future_type(bool_t())]).into()
 }
 
-/// A vector consisting of a future-optional-bool type followed by a block type.
-/// (Block type last because used as output row and guppylang expects this.)
+/// A vector consisting of an optional-future-bool type followed by a block
+/// type. (Block type last because used as output row and guppylang expects
+/// this.)
 fn block_and_optional_bool() -> Vec<Type> {
-    vec![future_optional_bool(), block_tv(0)]
+    vec![optional_future_bool(), block_tv(0)]
 }
 
 /// Signature of an operation that acts on a single block, with a number of
@@ -800,7 +799,7 @@ mod tests {
             .unwrap();
         let mut dfg_builder = DFGBuilder::new(Signature::new(
             [block_type(4)],
-            [future_type(array_type(4, bool_t()))],
+            [array_type(4, future_type(bool_t()))],
         ))
         .unwrap();
         let handle = dfg_builder
@@ -830,9 +829,9 @@ mod tests {
             vec![block_type(2)],
             vec![
                 block_type(2),
-                future_optional_bool(),
-                future_optional_bool(),
-                future_optional_bool(),
+                optional_future_bool(),
+                optional_future_bool(),
+                optional_future_bool(),
             ],
         ))
         .unwrap();
