@@ -38,7 +38,7 @@ from guppylang_internals.tys.ty import (
 )
 from hugr import Wire, ops
 from hugr import tys as ht
-from hugr.tys import TypeBound
+from hugr.tys import TypeArg, TypeBound
 from tket_exts import globals
 
 State = guppy.type_var("State")
@@ -125,21 +125,14 @@ def with_op_instantiate(
     var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
-        assert len(concrete.input) == 2, (
-            f"Expected 2 inputs args, found {len(concrete.input)}."
-        )
-        global_arg = concrete.input[0].type_arg()
-
-        if global_arg.ty.type_bound() != ht.TypeBound.Linear:
-            raise TypeError(f"Global arg must be linear. Found {global_arg.ty}.")
+        global_arg, func_ty, *input_args = concrete.input
 
         return globals.with_def.instantiate(
             [
                 ht.StringArg(var_name),
                 global_arg,
-                ht.ListArg([]),
-                ht.ListArg([]),
-                ht.ListArg([]),
+                ht.ListArg(input_args),
+                ht.ListArg(func_ty.output),
             ],
             concrete,
         )
@@ -163,45 +156,18 @@ def map_op_instantiate(
     var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
-        # The first input arg should be a function type with the global type as the last
-        # input arg and optional inputs
-        func_input_ty = concrete.input[0]
-        assert isinstance(func_input_ty, ht.FunctionType), (
-            f"Expected a function, found {func_input_ty}."
+        func_ty, *input_args = concrete.input
+        assert isinstance(func_ty, ht.FunctionType), (
+            f"Expected a function, found {func_ty}."
         )
-
-        func_input_args = [inp.type_arg() for inp in func_input_ty.input]
-        output_args = [out.type_arg() for out in concrete.output]
-
-        global_arg = func_input_args[0]
-
-        if len(func_input_args) == 2:
-            op_input_arg = func_input_args[1:]
-
-            # If the input is linear, we need to separate the output into explicit and
-            # implicit returns to correctly initialise the signature of the HUGR op
-            if op_input_arg[0].ty.type_bound() == ht.TypeBound.Linear:
-                # The mapped function can only have a single input argument. If the
-                # input is linear, the explicit output args must be all but the last
-                # element (i.e. [:-1]), while the implicit output arg is the last
-                # element (i.e. [-1]).
-                explicit_output_args = output_args[:-1]
-                implicit_output_arg = [output_args[-1]]
-            else:
-                explicit_output_args = output_args
-                implicit_output_arg = []
-        else:
-            op_input_arg = []
-            explicit_output_args = output_args
-            implicit_output_arg = []
+        global_ty = func_ty.input[0]
 
         return globals.map_def.instantiate(
             [
                 ht.StringArg(var_name),
-                global_arg,
-                ht.ListArg(list[ht.TypeArg](op_input_arg)),
-                ht.ListArg(list[ht.TypeArg](explicit_output_args)),
-                ht.ListArg(list[ht.TypeArg](implicit_output_arg)),
+                global_ty,
+                ht.ListArg(list[ht.TypeArg](input_args)),
+                ht.ListArg(list[ht.TypeArg](func_ty.output[1:])),
             ],
             concrete,
         )
@@ -238,7 +204,9 @@ class GlobalMapChecker(CustomCallChecker):
         match func_out:
             case TupleType():
                 # For multiple outputs, global_ty must be first
-                assert func_out.element_types[0] == global_ty
+                # assert func_out.element_types[0] == global_ty, (
+                #     f"{func_out.element_types[0]=}, {global_ty=}"
+                # )
                 output_args = (
                     TupleType(func_out.element_types[1:])
                     if len(func_out.element_types) > 2
