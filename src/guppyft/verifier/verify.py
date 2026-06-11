@@ -8,6 +8,7 @@ from guppylang.std.debug import state_result
 from guppylang.std.quantum import cx, discard_array, h, qubit
 from selene_sim import Stim
 from selene_sim.build import build
+from selene_stim_plugin import SeleneStimState
 
 if TYPE_CHECKING:
     from selene_stim_plugin.state import StabilizerList
@@ -23,20 +24,20 @@ from guppyft.verifier.utils import (
 N = guppy.nat_var("N")
 
 
-type SingleBlockUnitary = GuppyFunctionDefinition[[array[qubit, N]], None]
+type SingleBlockUnitary = GuppyFunctionDefinition[[array[qubit, N]], None]  # type: ignore[valid-type]
 type DoubleBlockUnitary = GuppyFunctionDefinition[
-    [tuple[array[qubit, N]], array[qubit, N]], None
+    [tuple[array[qubit, N]], array[qubit, N]], None  # type: ignore[valid-type]
 ]
 
 
 type SingleBlockChoiStateFuntion = Callable[
-    [SingleBlockUnitary], tuple[array[qubit, N], array[qubit, N]]
+    [SingleBlockUnitary], tuple[array[qubit, N], array[qubit, N]]  # type: ignore[valid-type]
 ]
 
 
 type DoubleBlockChoiStateFuntion = Callable[
     [DoubleBlockUnitary],
-    tuple[array[qubit, N], array[qubit, N], array[qubit, N], array[qubit, N]],
+    tuple[array[qubit, N], array[qubit, N], array[qubit, N], array[qubit, N]],  # type: ignore[valid-type]
 ]
 
 
@@ -80,6 +81,15 @@ def default_choi_state_preparation_double_block(
     )
 
 
+def _invoke_selene_stim(
+    main_function: GuppyFunctionDefinition, n_func_qubits: int, seed: int
+) -> dict[str, SeleneStimState]:
+    instance = build(main_function.compile())
+    seeded_stim_instance = Stim(random_seed=seed)
+    output = instance.run(simulator=seeded_stim_instance, n_qubits=2 * n_func_qubits)
+    return seeded_stim_instance.extract_states_dict(output)
+
+
 def compute_stabilizers_single_block(
     clifford_func: SingleBlockUnitary,
     choi_state_preparation: SingleBlockChoiStateFuntion,
@@ -97,10 +107,9 @@ def compute_stabilizers_single_block(
         discard_array(controls)
         discard_array(targets)
 
-    instance = build(main.compile())
-    seeded_stim_instance = Stim(random_seed=seed)
-    output = instance.run(simulator=seeded_stim_instance, n_qubits=2 * n_func_qubits)
-    states_dict = seeded_stim_instance.extract_states_dict(output)
+    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
+        main, n_func_qubits, seed
+    )
 
     # This is a hack so that we can get a state_result over both the
     #  control and target registers. Currently state result doesn't support passing
@@ -141,10 +150,9 @@ def compute_stabilizers_double_block(
         discard_array(second_controls)
         discard_array(second_targets)
 
-    instance = build(main.compile())
-    seeded_stim_instance = Stim(random_seed=seed)
-    output = instance.run(simulator=seeded_stim_instance, n_qubits=2 * n_func_qubits)
-    states_dict = seeded_stim_instance.extract_states_dict(output)
+    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
+        main, n_func_qubits, seed
+    )
 
     # Using a hack to get the state_result across four code blocks. See the
     # comment in compute_stabilizers_single_block for more info.
@@ -294,7 +302,7 @@ def get_expanded_stabilizer_set(
     signed_logical_paulis: pauli.SignTerms, code_def: StabilizerCode, num_blocks: int
 ) -> pauli.SignTerms:
 
-    # Firstly, we expand the stabilizers of the logical choi state using the
+    # Firstly, we expand the stabilizers of the choi state using the
     # logical operators of the StabilizerCode
     stabilizers: pauli.SignTerms = expand_logical_signterms(
         signed_logical_paulis, code_def
@@ -310,17 +318,17 @@ def get_expanded_stabilizer_set(
 N_PHYSICAL = guppy.nat_var("N_PHYSICAL")
 K_LOGICAL = guppy.nat_var("K_LOGICAL")
 
-type SemanticCliffordUnitary = GuppyFunctionDefinition[[array[qubit, K_LOGICAL]], None]
+type SemanticCliffordUnitary = GuppyFunctionDefinition[[array[qubit, K_LOGICAL]], None]  # type: ignore[valid-type]
 type ImplementationCliffordUnitary = GuppyFunctionDefinition[
-    [array[qubit, N_PHYSICAL]], None
+    [array[qubit, N_PHYSICAL]], None  # type: ignore[valid-type]
 ]
 
 
 type SemanticCliffordUnitaryDouble = GuppyFunctionDefinition[
-    [array[qubit, K_LOGICAL], array[qubit, K_LOGICAL]], None
+    [array[qubit, K_LOGICAL], array[qubit, K_LOGICAL]], None  # type: ignore[valid-type]
 ]
 type ImplementationCliffordUnitaryDouble = GuppyFunctionDefinition[
-    [array[qubit, N_PHYSICAL], array[qubit, N_PHYSICAL]], None
+    [array[qubit, N_PHYSICAL], array[qubit, N_PHYSICAL]], None  # type: ignore[valid-type]
 ]
 
 
