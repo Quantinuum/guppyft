@@ -123,8 +123,9 @@ def test_op_instantiations() -> None:
 
 
 def test_guppy_bindings() -> None:
-    """Use Guppy to construct a logical HUGR using ops of all different
-    signatures, and check that we can run compilation passes on the result."""
+    """Use Guppy to construct a logical HUGR using ops that cover all the
+    different signatures from the extension, and check that we can run
+    compilation passes on the result."""
 
     @guppy
     def main() -> None:
