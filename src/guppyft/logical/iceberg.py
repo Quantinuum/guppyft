@@ -5,7 +5,7 @@ from guppylang import guppy
 from guppylang.std.builtins import array
 from guppylang.std.lang import owned
 from guppylang.std.option import Option
-from guppylang.std.qsystem import Measurement
+from guppylang.std.quantum import Measurement
 from guppylang_internals.decorator import custom_type, hugr_op
 from guppylang_internals.tys.arg import Argument, ConstArg
 from guppylang_internals.tys.common import ToHugrContext
@@ -33,7 +33,7 @@ _block_params = [ConstParam(1, "k", NumericType(NumericType.Kind.Nat))]
 
 
 def iceberg_op(
-    op_name: str,
+        op_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], DataflowOp]:
     def op(ty: ht.FunctionType, inst: Inst, ctx: ToHugrContext) -> DataflowOp:
         return ExtOp(OPS_EXTN.get_op(op_name), ty, [arg.to_hugr(ctx) for arg in inst])
@@ -401,7 +401,7 @@ def swap(block: Block[N], i: int, j: int) -> None:
 @hugr_op(iceberg_op("zz_phase_between_blocks_d"))
 @no_type_check
 def zz_phase_between_blocks(
-    block0: Block[N], block1: Block[N], i0: int, i1: int, angle: float
+        block0: Block[N], block1: Block[N], i0: int, i1: int, angle: float
 ) -> None:
     """ZZPhase rotation of `angle` radians on the qubit with index `i0` in
     block `block0` and the qubit with index `i1` in block `block1`."""
