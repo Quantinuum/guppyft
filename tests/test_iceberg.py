@@ -158,8 +158,7 @@ def test_guppy_bindings_smoke() -> None:
 
 
 def test_guppy_hugr() -> None:
-    """Write a very simple logical HUGR in guppy and check that it is as
-    expected."""
+    """Consistency check of a simple logical HUGR written in Guppy."""
 
     @guppy
     def main() -> None:
