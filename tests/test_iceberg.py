@@ -7,14 +7,14 @@ from hugr.std.float import FLOAT_T
 from hugr.tys import BoundedNatArg, ExtType
 from tket.passes import InlineFunctions, NormalizeGuppy
 
-from guppyft.codes.iceberg import (
+from guppyft.extensions import iceberg_ops, iceberg_types
+from guppyft.logical.iceberg import (
     Block,
     cx_transversal,
     discard,
     measure_all,
     zz_phase_between_blocks,
 )
-from guppyft.extensions import iceberg_ops, iceberg_types
 
 
 def test_hugr() -> None:
