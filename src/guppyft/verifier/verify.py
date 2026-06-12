@@ -84,7 +84,7 @@ def default_choi_state_preparation_double_block(
 
 
 def _invoke_selene_stim(
-    main_function: GuppyFunctionDefinition, n_func_qubits: int, seed: int
+    main_function: GuppyFunctionDefinition, n_func_qubits: int, seed: int = 123
 ) -> dict[str, SeleneStimState]:
     instance = build(main_function.compile())
     seeded_stim_instance = Stim(random_seed=seed)
@@ -96,7 +96,6 @@ def compute_stabilizers_single_block(
     clifford_func: SingleBlockUnitary,
     choi_state_preparation: SingleBlockChoiStateFuntion,
     n_func_qubits: int,
-    seed: int = 123,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation.
 
@@ -119,9 +118,7 @@ def compute_stabilizers_single_block(
         discard_array(controls)
         discard_array(targets)
 
-    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
-        main, n_func_qubits, seed
-    )
+    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(main, n_func_qubits)
 
     # This is a hack so that we can get a state_result over both the
     #  control and target registers. Currently state result doesn't support passing
@@ -141,7 +138,6 @@ def compute_stabilizers_double_block(
     clifford_func: DoubleBlockUnitary,
     choi_state_preparation_double_block: DoubleBlockChoiStateFuntion,
     n_func_qubits: int,
-    seed: int = 123,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation across
       two code blocks.
@@ -153,8 +149,6 @@ def compute_stabilizers_double_block(
     :param n_func_qubits: An upper bound for the number of qubits used in stabilizer
     simulation.
     :param n_func_qubits: The number of qubits needed for clifford_func.
-    :seed: A random seed for the stabilizer simulation to ensure reproducibility.
-
     :return: A pair of Zixy SignTerms representing
       the semantics and the implementation.
     """
@@ -178,9 +172,7 @@ def compute_stabilizers_double_block(
         discard_array(second_controls)
         discard_array(second_targets)
 
-    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
-        main, n_func_qubits, seed
-    )
+    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(main, n_func_qubits)
 
     # Using a hack to get the state_result across four code blocks. See the
     # comment in compute_stabilizers_single_block for more info.
