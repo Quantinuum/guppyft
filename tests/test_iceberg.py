@@ -122,9 +122,9 @@ def test_op_instantiations() -> None:
         )
 
 
-def test_guppy_bindings() -> None:
-    """Use Guppy to construct a logical HUGR using ops that cover all the
-    different signatures from the extension, and check that we can run
+def test_guppy_bindings_smoke() -> None:
+    """Smoke test: use Guppy to construct a logical HUGR using ops that cover
+    all the different signatures from the extension, and check that we can run
     compilation passes on the result."""
 
     @guppy
