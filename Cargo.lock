@@ -251,9 +251,9 @@ checksum = "1e748733b7cbc798e1434b6ac524f0c1ff2ab456fe201501e6497c8417a4fc33"
 
 [[package]]
 name = "capnp"
-version = "0.25.4"
+version = "0.25.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "63da65e5e9ffc3b8f993d4ad222a548152549351a643f6b850a7773cb6ff2809"
+checksum = "1cfd2485d4b36ac9c5aa6572d7d35daa63a5b34f517627d6c34d068e616e4a73"
 dependencies = [
  "embedded-io",
 ]
@@ -295,9 +295,9 @@ dependencies = [
 
 [[package]]
 name = "chrono"
-version = "0.4.44"
+version = "0.4.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c673075a2e0e5f4a1dde27ce9dee1ea4558c7ffe648f576438a20ca1d2acc4b0"
+checksum = "1aa79e62e7697b8e29b513a68abacf485adcd1fe8284a4316c5ae868e6633327"
 dependencies = [
  "iana-time-zone",
  "js-sys",
@@ -846,7 +846,7 @@ dependencies = [
  "hugr",
  "hugr-core",
  "itertools 0.14.0",
- "tket 0.18.0",
+ "tket",
 ]
 
 [[package]]
@@ -856,7 +856,7 @@ dependencies = [
  "derive_more 2.1.1",
  "guppyft",
  "pyo3",
- "tket 0.18.0",
+ "tket",
 ]
 
 [[package]]
@@ -920,9 +920,9 @@ dependencies = [
 
 [[package]]
 name = "hugr"
-version = "0.27.1"
+version = "0.28.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e91648ee98355c1d502a0d466eec0b67ca2612f81ef5d261e62fca8aa567ab52"
+checksum = "fea26a2751aaf406c046f733333dcc7b035d3a7ae72d604215d47f4728a7d349"
 dependencies = [
  "hugr-core",
  "hugr-model",
@@ -930,9 +930,9 @@ dependencies = [
 
 [[package]]
 name = "hugr-cli"
-version = "0.27.1"
+version = "0.28.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1c7b88b23e22f987c6f65cbfb1b23fd6573ccb2be50824b39baf8b421a7958c"
+checksum = "528a7793aa15b5078aa21453dce1049056ae64d406d2c036609e9f71d0bd374e"
 dependencies = [
  "anyhow",
  "clap",
@@ -947,13 +947,14 @@ dependencies = [
  "thiserror 2.0.18",
  "tracing",
  "tracing-subscriber",
+ "walkdir",
 ]
 
 [[package]]
 name = "hugr-core"
-version = "0.27.1"
+version = "0.28.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dbea3356943ad488326fcea465519c25d03ab792198331610d1292c324d209b8"
+checksum = "9a2cc58ed1e185c553dd724397f06b5c957f50ee0ab00011d1a793859e136bfd"
 dependencies = [
  "base64",
  "cgmath",
@@ -989,9 +990,9 @@ dependencies = [
 
 [[package]]
 name = "hugr-model"
-version = "0.27.1"
+version = "0.28.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9699c56c272a729b110e989d799e63beb6f077b5bcc118cd76c088453693615e"
+checksum = "00709a8fb1f7820455bbae46bb03d30aaa41a548c78bd71109bbe1a329c8f278"
 dependencies = [
  "base64",
  "bumpalo",
@@ -1285,9 +1286,9 @@ dependencies = [
 
 [[package]]
 name = "papergrid"
-version = "0.17.0"
+version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6978128c8b51d8f4080631ceb2302ab51e32cc6e8615f735ee2f83fd269ae3f1"
+checksum = "d0984e668274d34691bc2b262ef0d115de5fa9973bcdee7ae32213f93099153e"
 dependencies = [
  "bytecount",
  "fnv",
@@ -1531,9 +1532,9 @@ dependencies = [
 
 [[package]]
 name = "pyo3"
-version = "0.28.3"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "91fd8e38a3b50ed1167fb981cd6fd60147e091784c427b8f7183a7ee32c31c12"
+checksum = "cd274650b21d4bfc26a0a47587962c1edb425f69287324355cd040c3ea66071c"
 dependencies = [
  "anyhow",
  "libc",
@@ -1546,18 +1547,18 @@ dependencies = [
 
 [[package]]
 name = "pyo3-build-config"
-version = "0.28.3"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e368e7ddfdeb98c9bca7f8383be1648fd84ab466bf2bc015e94008db6d35611e"
+checksum = "c5e2a7d2f0d013342f295c048ad19237add5154a55b1c5a254c0ec93d4109078"
 dependencies = [
  "target-lexicon",
 ]
 
 [[package]]
 name = "pyo3-ffi"
-version = "0.28.3"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f29e10af80b1f7ccaf7f69eace800a03ecd13e883acfacc1e5d0988605f651e"
+checksum = "ca85c467da1bbc8d866eea5deff9cf29ea5f7785054a17da36e65bda9c05845b"
 dependencies = [
  "libc",
  "pyo3-build-config",
@@ -1565,9 +1566,9 @@ dependencies = [
 
 [[package]]
 name = "pyo3-macros"
-version = "0.28.3"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df6e520eff47c45997d2fc7dd8214b25dd1310918bbb2642156ef66a67f29813"
+checksum = "9ac53762fd065daa3194dd09337a38bd793a188100fd1a9304c4ab312d901771"
 dependencies = [
  "proc-macro2",
  "pyo3-macros-backend",
@@ -1577,13 +1578,12 @@ dependencies = [
 
 [[package]]
 name = "pyo3-macros-backend"
-version = "0.28.3"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c4cdc218d835738f81c2338f822078af45b4afdf8b2e33cbb5916f108b813acb"
+checksum = "4ca3a1557399783172dc5bf39cfca835157732532cba56b71d2292161e53b362"
 dependencies = [
  "heck",
  "proc-macro2",
- "pyo3-build-config",
  "quote",
  "syn",
 ]
@@ -1886,9 +1886,9 @@ dependencies = [
 
 [[package]]
 name = "serde_with"
-version = "3.20.0"
+version = "3.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e72c1c2cb7b223fafb600a619537a871c2818583d619401b785e7c0b746ccde2"
+checksum = "76a5c54c7310e7b8b9577c286d7e399ddd876c3e12b3ed917a8aabc4b96e9e8c"
 dependencies = [
  "base64",
  "bs58",
@@ -1906,9 +1906,9 @@ dependencies = [
 
 [[package]]
 name = "serde_with_macros"
-version = "3.20.0"
+version = "3.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b90c488738ecb4fb0262f41f43bc40efc5868d9fb744319ddf5f5317f417bfac"
+checksum = "84d57bc0c8b9a17920c178daa6bb924850d54a9c97ab45194bb8c17ad66bb660"
 dependencies = [
  "darling",
  "proc-macro2",
@@ -2047,9 +2047,9 @@ dependencies = [
 
 [[package]]
 name = "tabled"
-version = "0.20.0"
+version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e39a2ee1fbcd360805a771e1b300f78cc88fec7b8d3e2f71cd37bbf23e725c7d"
+checksum = "b5dc662e6da844ad6e428ad16b57967c9d33c82e16bb1c258326c0c078605dff"
 dependencies = [
  "papergrid",
  "tabled_derive",
@@ -2200,49 +2200,8 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tket"
-version = "0.18.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "640b38c8fcfc7a6232b0f3afa9a9685a26e35c08d80faa2a264c69c219359181"
-dependencies = [
- "ascent",
- "bytemuck",
- "cgmath",
- "chrono",
- "crossbeam-channel",
- "csv",
- "delegate",
- "derive_more 2.1.1",
- "fxhash",
- "hugr",
- "hugr-core",
- "indexmap 2.14.0",
- "itertools 0.14.0",
- "lazy_static",
- "num-rational",
- "pastey",
- "pest",
- "pest_derive",
- "petgraph 0.8.3",
- "portgraph",
- "priority-queue",
- "rayon",
- "serde",
- "serde_json",
- "serde_with",
- "smol_str",
- "strum 0.28.0",
- "thiserror 2.0.18",
- "tket-json-rs",
- "tracing",
- "typetag",
- "zstd",
-]
-
-[[package]]
-name = "tket"
-version = "0.19.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a56460bb4f82313dd11c188979a4c3f2eb74b98fb6ba2d60fef0d44e0eff8b4b"
+version = "0.20.0"
+source = "git+https://github.com/quantinuum/tket2?rev=e56c615#e56c615515d31f61f1e0f7db0527719097a8aaa9"
 dependencies = [
  "ascent",
  "bytemuck",
@@ -2293,9 +2252,9 @@ dependencies = [
 
 [[package]]
 name = "tket-qsystem"
-version = "0.25.0"
+version = "0.26.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d9b3899fb263ffd2b0990a1afc7c97fe06fc3045fcc1cb61d39bf19bd69378ad"
+checksum = "e6a72ec8b167fd992faecefe1984f2e4acb21f6f59f312361daf892cf53fcaf2"
 dependencies = [
  "anyhow",
  "clap",
@@ -2310,7 +2269,7 @@ dependencies = [
  "serde",
  "smol_str",
  "strum 0.28.0",
- "tket 0.19.0",
+ "tket",
  "tket-json-rs",
  "typetag",
 ]

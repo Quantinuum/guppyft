@@ -5,6 +5,7 @@ use std::{
     sync::{Arc, LazyLock, Weak},
 };
 
+use super::types::block_tv;
 use documented::DocumentedVariants;
 use hugr::{
     Extension,
@@ -19,14 +20,12 @@ use hugr::{
     ops::{ExtensionOp, OpName},
     std_extensions::{
         arithmetic::{float_types::float64_type, int_types::int_type},
-        collections::array::{Array, ArrayKind},
+        collections::{array::ArrayKind, borrow_array::BorrowArray},
     },
     types::{FuncValueType, PolyFuncTypeRV, Type, TypeArg, type_param::TypeParam},
 };
 use strum::{EnumIter, EnumString, IntoStaticStr};
 use tket_qsystem::extension::futures::future_type;
-
-use super::types::block_tv;
 
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.iceberg.ops");
@@ -298,16 +297,14 @@ impl ValidateJustArgs for InterBlockArgsValidator {
     }
 }
 
-/// Get a future-array-of-bool type with size corresponding to a type variable
+/// Get an array-of-future-bool type with size corresponding to a type variable
 /// with a given ID.
 fn bool_array_tv(var_id: usize) -> Type {
-    future_type(
-        Array::ty_parametric(
-            TypeArg::new_var_use(var_id, TypeParam::max_nat_type()),
-            bool_t(),
-        )
-        .unwrap(),
+    BorrowArray::ty_parametric(
+        TypeArg::new_var_use(var_id, TypeParam::max_nat_kind()),
+        future_type(bool_t()),
     )
+    .unwrap()
 }
 
 fn vec_of_blocks_and_angles(n_blocks: usize, n_angles: usize) -> Vec<Type> {
@@ -335,14 +332,15 @@ fn vec_of_blocks_and_bools(n_blocks: usize, n_bools: usize) -> Vec<Type> {
     types
 }
 
-fn future_optional_bool() -> Type {
-    future_type(option_type(vec![bool_t()]).into())
+fn optional_future_bool() -> Type {
+    option_type(vec![future_type(bool_t())]).into()
 }
 
-/// A vector consisting of a future-optional-bool type followed by a block type.
-/// (Block type last because used as output row and guppylang expects this.)
+/// A vector consisting of an optional-future-bool type followed by a block
+/// type. (Block type last because used as output row and guppylang expects
+/// this.)
 fn block_and_optional_bool() -> Vec<Type> {
-    vec![future_optional_bool(), block_tv(0)]
+    vec![optional_future_bool(), block_tv(0)]
 }
 
 /// Signature of an operation that acts on a single block, with a number of
@@ -350,7 +348,7 @@ fn block_and_optional_bool() -> Vec<Type> {
 fn sig_1_block(n_angles: usize, n_indices: usize) -> SignatureFunc {
     CustomValidator::new(
         PolyFuncTypeRV::new(
-            vec![TypeParam::max_nat_type(); 1 + n_indices],
+            vec![TypeParam::max_nat_kind(); 1 + n_indices],
             FuncValueType::new(
                 vec_of_blocks_and_angles(1, n_angles),
                 vec_of_blocks_and_angles(1, 0),
@@ -365,7 +363,7 @@ fn sig_1_block(n_angles: usize, n_indices: usize) -> SignatureFunc {
 /// additional angle inputs and a number of index inputs.
 fn sig_1_block_d(n_angles: usize, n_indices: usize) -> SignatureFunc {
     PolyFuncTypeRV::new(
-        vec![TypeParam::max_nat_type()],
+        vec![TypeParam::max_nat_kind()],
         FuncValueType::new(
             vec_of_blocks_and_ints_and_angles(1, n_indices, n_angles),
             vec_of_blocks_and_ints_and_angles(1, 0, 0),
@@ -443,7 +441,7 @@ impl MakeOpDef for IcebergOpDef {
             swap_d => sig_1_block_d(0, 2),
             zz_phase_between_blocks => CustomValidator::new(
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type(); 3],
+                    vec![TypeParam::max_nat_kind(); 3],
                     FuncValueType::new(
                         vec_of_blocks_and_angles(2, 1),
                         vec_of_blocks_and_angles(2, 0),
@@ -453,7 +451,7 @@ impl MakeOpDef for IcebergOpDef {
             )
             .into(),
             zz_phase_between_blocks_d => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type()],
+                vec![TypeParam::max_nat_kind()],
                 FuncValueType::new(
                     vec_of_blocks_and_ints_and_angles(2, 2, 1),
                     vec_of_blocks_and_ints_and_angles(2, 0, 0),
@@ -462,7 +460,7 @@ impl MakeOpDef for IcebergOpDef {
             .into(),
             cx_transversal => CustomValidator::new(
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
+                    vec![TypeParam::max_nat_kind()],
                     FuncValueType::new_endo(vec_of_blocks_and_angles(2, 0)),
                 ),
                 ArgsValidator { n_idx: 0 },
@@ -470,7 +468,7 @@ impl MakeOpDef for IcebergOpDef {
             .into(),
             alloc_zero => CustomValidator::new(
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
+                    vec![TypeParam::max_nat_kind()],
                     FuncValueType::new(
                         vec_of_blocks_and_angles(0, 0),
                         vec_of_blocks_and_angles(1, 0),
@@ -481,7 +479,7 @@ impl MakeOpDef for IcebergOpDef {
             .into(),
             free => CustomValidator::new(
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
+                    vec![TypeParam::max_nat_kind()],
                     FuncValueType::new(
                         vec_of_blocks_and_angles(1, 0),
                         vec_of_blocks_and_angles(0, 0),
@@ -492,7 +490,7 @@ impl MakeOpDef for IcebergOpDef {
             .into(),
             measure_syndrome => CustomValidator::new(
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
+                    vec![TypeParam::max_nat_kind()],
                     FuncValueType::new(
                         vec_of_blocks_and_angles(1, 0),
                         vec_of_blocks_and_bools(1, 2),
@@ -503,7 +501,7 @@ impl MakeOpDef for IcebergOpDef {
             .into(),
             measure_all => CustomValidator::new(
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
+                    vec![TypeParam::max_nat_kind()],
                     FuncValueType::new(vec_of_blocks_and_angles(1, 0), vec![bool_array_tv(0)]),
                 ),
                 ArgsValidator { n_idx: 0 },
@@ -511,14 +509,14 @@ impl MakeOpDef for IcebergOpDef {
             .into(),
             try_measure_one_x => CustomValidator::new(
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type(); 2],
+                    vec![TypeParam::max_nat_kind(); 2],
                     FuncValueType::new(vec_of_blocks_and_angles(1, 0), block_and_optional_bool()),
                 ),
                 ArgsValidator { n_idx: 1 },
             )
             .into(),
             try_measure_one_x_d => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type()],
+                vec![TypeParam::max_nat_kind()],
                 FuncValueType::new(
                     vec_of_blocks_and_ints_and_angles(1, 1, 0),
                     block_and_optional_bool(),
@@ -527,14 +525,14 @@ impl MakeOpDef for IcebergOpDef {
             .into(),
             try_measure_one_z => CustomValidator::new(
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type(); 2],
+                    vec![TypeParam::max_nat_kind(); 2],
                     FuncValueType::new(vec_of_blocks_and_angles(1, 0), block_and_optional_bool()),
                 ),
                 ArgsValidator { n_idx: 1 },
             )
             .into(),
             try_measure_one_z_d => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type()],
+                vec![TypeParam::max_nat_kind()],
                 FuncValueType::new(
                     vec_of_blocks_and_ints_and_angles(1, 1, 0),
                     block_and_optional_bool(),
@@ -569,7 +567,7 @@ mod tests {
         package::Package,
         std_extensions::{
             arithmetic::{float_types::ConstF64, int_types::ConstInt},
-            collections::array::array_type,
+            collections::borrow_array::borrow_array_type,
             std_reg,
         },
         types::Signature,
@@ -800,7 +798,7 @@ mod tests {
             .unwrap();
         let mut dfg_builder = DFGBuilder::new(Signature::new(
             [block_type(4)],
-            [future_type(array_type(4, bool_t()))],
+            [borrow_array_type(4, future_type(bool_t()))],
         ))
         .unwrap();
         let handle = dfg_builder
@@ -830,9 +828,9 @@ mod tests {
             vec![block_type(2)],
             vec![
                 block_type(2),
-                future_optional_bool(),
-                future_optional_bool(),
-                future_optional_bool(),
+                optional_future_bool(),
+                optional_future_bool(),
+                optional_future_bool(),
             ],
         ))
         .unwrap();

@@ -1,0 +1,22 @@
+{
+  "version": "0.1.0",
+  "name": "guppyft.iceberg.types",
+  "types": {
+    "block": {
+      "extension": "guppyft.iceberg.types",
+      "name": "block",
+      "params": [
+        {
+          "tp": "BoundedNat",
+          "bound": null
+        }
+      ],
+      "description": "logical Iceberg block",
+      "bound": {
+        "b": "Explicit",
+        "bound": "A"
+      }
+    }
+  },
+  "operations": {}
+}

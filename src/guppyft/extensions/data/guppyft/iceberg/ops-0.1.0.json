@@ -23,6 +23,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -39,6 +40,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -48,6 +50,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -82,6 +85,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -98,6 +102,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -110,6 +115,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -119,6 +125,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -157,6 +164,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -173,6 +181,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -182,6 +191,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -216,6 +226,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -232,6 +243,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -244,6 +256,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -253,6 +266,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -291,6 +305,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -309,6 +324,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -343,6 +359,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -359,6 +376,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -373,6 +391,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -411,6 +430,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -429,6 +449,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -463,6 +484,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -479,6 +501,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -493,6 +516,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -527,6 +551,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -545,6 +570,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -579,6 +605,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -595,6 +622,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -604,6 +632,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -638,6 +667,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -654,6 +684,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -663,6 +694,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -697,6 +729,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -713,6 +746,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -722,6 +756,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -756,6 +791,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -774,6 +810,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -808,6 +845,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -826,6 +864,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -860,6 +899,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -878,6 +918,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -913,6 +954,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -955,6 +997,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -973,6 +1016,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1007,6 +1051,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1023,6 +1068,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -1035,6 +1081,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -1049,6 +1096,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1083,6 +1131,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1099,6 +1148,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1117,6 +1167,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1133,6 +1184,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1171,6 +1223,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1189,6 +1242,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1223,6 +1277,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1239,6 +1294,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -1253,6 +1309,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1291,6 +1348,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1309,6 +1367,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1343,6 +1402,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1359,6 +1419,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -1373,6 +1434,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1407,6 +1469,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1442,6 +1505,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1460,6 +1524,7 @@
             {
               "t": "Opaque",
               "extension": "collections.borrow_arr",
+              "extension_version": "0.2.1",
               "id": "borrow_array",
               "args": [
                 {
@@ -1475,6 +1540,7 @@
                   "ty": {
                     "t": "Opaque",
                     "extension": "tket.futures",
+                    "extension_version": "0.2.0",
                     "id": "Future",
                     "args": [
                       {
@@ -1513,6 +1579,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1529,40 +1596,19 @@
           ],
           "output": [
             {
-              "t": "Opaque",
-              "extension": "tket.futures",
-              "id": "Future",
-              "args": [
-                {
-                  "tya": "Type",
-                  "ty": {
-                    "t": "Sum",
-                    "s": "Unit",
-                    "size": 2
-                  }
-                }
-              ],
-              "bound": "A"
+              "t": "Sum",
+              "s": "Unit",
+              "size": 2
             },
             {
-              "t": "Opaque",
-              "extension": "tket.futures",
-              "id": "Future",
-              "args": [
-                {
-                  "tya": "Type",
-                  "ty": {
-                    "t": "Sum",
-                    "s": "Unit",
-                    "size": 2
-                  }
-                }
-              ],
-              "bound": "A"
+              "t": "Sum",
+              "s": "Unit",
+              "size": 2
             },
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1601,6 +1647,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1617,6 +1664,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -1626,6 +1674,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1660,6 +1709,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1676,6 +1726,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -1688,6 +1739,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -1697,6 +1749,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1735,6 +1788,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1751,6 +1805,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -1760,6 +1815,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1794,6 +1850,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1810,6 +1867,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -1822,6 +1880,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -1831,6 +1890,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1873,6 +1933,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1891,6 +1952,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1925,6 +1987,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1941,6 +2004,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -1953,6 +2017,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -1967,6 +2032,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2005,6 +2071,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2029,6 +2096,7 @@
                   {
                     "t": "Opaque",
                     "extension": "tket.futures",
+                    "extension_version": "0.2.0",
                     "id": "Future",
                     "args": [
                       {
@@ -2048,6 +2116,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2082,6 +2151,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2098,6 +2168,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2118,6 +2189,7 @@
                   {
                     "t": "Opaque",
                     "extension": "tket.futures",
+                    "extension_version": "0.2.0",
                     "id": "Future",
                     "args": [
                       {
@@ -2137,6 +2209,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2175,6 +2248,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2199,6 +2273,7 @@
                   {
                     "t": "Opaque",
                     "extension": "tket.futures",
+                    "extension_version": "0.2.0",
                     "id": "Future",
                     "args": [
                       {
@@ -2218,6 +2293,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2252,6 +2328,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2268,6 +2345,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2288,6 +2366,7 @@
                   {
                     "t": "Opaque",
                     "extension": "tket.futures",
+                    "extension_version": "0.2.0",
                     "id": "Future",
                     "args": [
                       {
@@ -2307,6 +2386,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2345,6 +2425,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2363,6 +2444,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2397,6 +2479,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2413,6 +2496,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2427,6 +2511,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2465,6 +2550,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2483,6 +2569,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2517,6 +2604,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2533,6 +2621,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2547,6 +2636,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2589,6 +2679,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2607,6 +2698,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2641,6 +2733,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2657,6 +2750,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2669,6 +2763,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2683,6 +2778,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2725,6 +2821,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2741,6 +2838,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -2750,6 +2848,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2784,6 +2883,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2800,6 +2900,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2812,6 +2913,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2824,6 +2926,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -2833,6 +2936,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2875,6 +2979,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2893,6 +2998,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2927,6 +3033,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2943,6 +3050,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2955,6 +3063,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2969,6 +3078,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3011,6 +3121,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3027,6 +3138,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -3036,6 +3148,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3070,6 +3183,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3086,6 +3200,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3098,6 +3213,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3110,6 +3226,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -3119,6 +3236,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3157,6 +3275,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3175,6 +3294,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3209,6 +3329,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3225,6 +3346,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3239,6 +3361,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3277,6 +3400,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3295,6 +3419,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3329,6 +3454,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3345,6 +3471,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3359,6 +3486,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3401,6 +3529,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3419,6 +3548,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3453,6 +3583,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3469,6 +3600,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3481,6 +3613,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3495,6 +3628,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3537,6 +3671,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3553,6 +3688,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -3562,6 +3698,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3604,6 +3741,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3620,6 +3758,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3636,6 +3775,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -3645,6 +3785,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3661,6 +3802,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3695,6 +3837,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3711,6 +3854,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3727,6 +3871,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3739,6 +3884,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3751,6 +3897,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -3760,6 +3907,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3776,6 +3924,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3810,6 +3959,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3826,6 +3976,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3838,6 +3989,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3850,6 +4002,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -3859,6 +4012,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
