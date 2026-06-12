@@ -147,7 +147,6 @@ impl From<&ExtensionOp> for OpHashWrapper {
 
 struct ImplementOpsState<'a, H: HugrMut<Node = Node>> {
     hugr: &'a mut H,
-    qubit_to_ty: &'a Type,
     type_replacer: ReplaceTypes,
     op_calls: HashMap<OpHashWrapper, (OpType, Hugr, Node)>,
 }
@@ -159,7 +158,6 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
 
         Self {
             hugr,
-            qubit_to_ty,
             type_replacer,
             op_calls: Default::default(),
         }
@@ -215,22 +213,7 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
         func_hugr_opt: Option<Hugr>,
         func_name: &str,
     ) -> Result<(), ImplementOpsPassError> {
-        // Replace hugr-bool with tket-bool in function signature
-        let op_sig: PolyFuncType = {
-            let sig = ext_op.signature().into_owned();
-            // sig.transform(&self.type_replacer)?;
-            // // bool_t is a sum type, not a CustomType, so ReplaceTypes doesn't handle it.
-            // // Replace it manually at the top level (original behaviour).
-            // sig.input
-            //     .iter_mut()
-            //     .chain(sig.output.iter_mut())
-            //     .for_each(|ty| {
-            //         if ty == &bool_t() {
-            //             *ty = bool_type();
-            //         }
-            //     });
-            sig.into()
-        };
+        let op_sig: PolyFuncType = ext_op.signature().into_owned().into();
 
         // Extract function if given, otherwise generate a declaration with the expected signature.
         let (func_hugr, _) = if let Some(hugr) = func_hugr_opt {

@@ -8,21 +8,21 @@ use std::{
 use super::types::block_tv;
 use documented::DocumentedVariants;
 use hugr::{
+    Extension,
     extension::{
-        prelude::{bool_t, option_type}, simple_op::{
-            try_from_name, HasConcrete, HasDef, MakeExtensionOp, MakeOpDef, MakeRegisteredOp,
-            OpLoadError,
-        }, CustomValidator, ExtensionId, OpDef, SignatureError,
-        SignatureFunc,
-        ValidateJustArgs,
+        CustomValidator, ExtensionId, OpDef, SignatureError, SignatureFunc, ValidateJustArgs,
+        prelude::{bool_t, option_type},
+        simple_op::{
+            HasConcrete, HasDef, MakeExtensionOp, MakeOpDef, MakeRegisteredOp, OpLoadError,
+            try_from_name,
+        },
     },
     ops::{ExtensionOp, OpName},
     std_extensions::{
         arithmetic::{float_types::float64_type, int_types::int_type},
         collections::{array::ArrayKind, borrow_array::BorrowArray},
     },
-    types::{type_param::TypeParam, FuncValueType, PolyFuncTypeRV, Type, TypeArg},
-    Extension,
+    types::{FuncValueType, PolyFuncTypeRV, Type, TypeArg, type_param::TypeParam},
 };
 use strum::{EnumIter, EnumString, IntoStaticStr};
 use tket_qsystem::extension::futures::future_type;
@@ -557,9 +557,12 @@ pub static EXTENSION: LazyLock<Arc<Extension>> = LazyLock::new(|| {
 #[cfg(test)]
 mod tests {
     use hugr::{
+        CircuitUnit, HugrView, Wire,
         builder::{
             DFGBuilder, Dataflow, DataflowHugr, DataflowSubContainer, HugrBuilder, ModuleBuilder,
-        }, envelope::{read_envelope, write_envelope, EnvelopeConfig, EnvelopeFormat}, extension::ExtensionRegistry,
+        },
+        envelope::{EnvelopeConfig, EnvelopeFormat, read_envelope, write_envelope},
+        extension::ExtensionRegistry,
         ops::DataflowOpTrait,
         package::Package,
         std_extensions::{
@@ -568,13 +571,10 @@ mod tests {
             std_reg,
         },
         types::Signature,
-        CircuitUnit,
-        HugrView,
-        Wire,
     };
 
-    use crate::iceberg::types::block_type;
     use crate::iceberg::types::EXTENSION as types_extension;
+    use crate::iceberg::types::block_type;
 
     use super::*;
 
