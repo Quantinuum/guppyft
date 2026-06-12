@@ -8,10 +8,12 @@ from guppyft.globals import with_global
 def my_prog0(qb: qubit) -> None:
     return
 
+
 @guppy
 def main() -> None:
     qb = qubit()
     with_global(1, my_prog0, qb)
     discard(qb)
+
 
 main.compile()

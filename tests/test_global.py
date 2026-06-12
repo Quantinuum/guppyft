@@ -1,3 +1,4 @@
+import re
 from typing import no_type_check
 
 import pytest
@@ -214,9 +215,6 @@ def test_with_map_mismatch_global_type_error() -> None:
         main.emulator(n_qubits=1).run().collated_shots()
 
 
-# TODO this *should* raise an error as the global state is used before being
-#  instantiated.
-@pytest.mark.xfail
 def test_map_without_with() -> None:
     @guppy
     def foo(i: int) -> int:
@@ -227,9 +225,10 @@ def test_map_without_with() -> None:
     def main() -> None:
         map_global(foo)
 
-    # TODO the error should be more specific
-    #  https://github.com/quantinuum-dev/guppy-ft/issues/36
-    with pytest.raises(EmulatorError) as _:
+    with pytest.raises(
+        EmulatorError,
+        match=re.escape("Panic (#11001): No global provided for GlobalsOp::With"),
+    ):
         main.emulator(n_qubits=1).run().collated_shots()
 
 
@@ -267,7 +266,6 @@ def test_nested_with() -> None:
     ]
 
 
-# TODO
 def test_nested_map_calls_error() -> None:
     @guppy
     def bar(i: int) -> int:
@@ -286,4 +284,8 @@ def test_nested_map_calls_error() -> None:
     def main() -> None:
         with_global(0, my_prog)
 
-    main.emulator(n_qubits=1).run().collated_shots()
+    with pytest.raises(
+        EmulatorError,
+        match=re.escape("Panic (#11001): No global provided for GlobalsOp::With"),
+    ):
+        main.emulator(n_qubits=1).run().collated_shots()
