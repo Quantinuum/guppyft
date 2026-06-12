@@ -173,11 +173,13 @@ def test_guppy_hugr() -> None:
     h = pkg.modules[0]
     InlineFunctions()(h, inplace=True)
     NormalizeGuppy()(h, inplace=True)
-    # When https://github.com/Quantinuum/tket2/issues/1691 is implemented, this
-    # test will have to change.
     entrypoint = h.entrypoint
     children = h.children(entrypoint)
     child_data = [cast("NodeData", h.get(child)) for child in children]
+    # When https://github.com/Quantinuum/tket2/issues/1691 is implemented, this
+    # test will have to change: all the logical ops including `allox_zero`
+    # should appear under the entrypoint node. (Possibly we may need to append a
+    # final `InlineFunctions()` pass to make that happen.)
     assert {data.op.name() for data in child_data} == {
         "Input",
         "LoadFunc",  # loads the alloc_zero function
