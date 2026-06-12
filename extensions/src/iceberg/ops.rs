@@ -5,28 +5,27 @@ use std::{
     sync::{Arc, LazyLock, Weak},
 };
 
+use super::types::block_tv;
 use documented::DocumentedVariants;
 use hugr::{
-    Extension,
     extension::{
-        CustomValidator, ExtensionId, OpDef, SignatureError, SignatureFunc, ValidateJustArgs,
-        prelude::{bool_t, option_type},
-        simple_op::{
-            HasConcrete, HasDef, MakeExtensionOp, MakeOpDef, MakeRegisteredOp, OpLoadError,
-            try_from_name,
-        },
+        prelude::{bool_t, option_type}, simple_op::{
+            try_from_name, HasConcrete, HasDef, MakeExtensionOp, MakeOpDef, MakeRegisteredOp,
+            OpLoadError,
+        }, CustomValidator, ExtensionId, OpDef, SignatureError,
+        SignatureFunc,
+        ValidateJustArgs,
     },
     ops::{ExtensionOp, OpName},
     std_extensions::{
         arithmetic::{float_types::float64_type, int_types::int_type},
         collections::{array::ArrayKind, borrow_array::BorrowArray},
     },
-    types::{FuncValueType, PolyFuncTypeRV, Type, TypeArg, type_param::TypeParam},
+    types::{type_param::TypeParam, FuncValueType, PolyFuncTypeRV, Type, TypeArg},
+    Extension,
 };
 use strum::{EnumIter, EnumString, IntoStaticStr};
 use tket_qsystem::extension::futures::future_type;
-
-use super::types::block_tv;
 
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.iceberg.ops");
@@ -302,7 +301,7 @@ impl ValidateJustArgs for InterBlockArgsValidator {
 /// with a given ID.
 fn bool_array_tv(var_id: usize) -> Type {
     BorrowArray::ty_parametric(
-        TypeArg::new_var_use(var_id, TypeParam::max_nat_type()),
+        TypeArg::new_var_use(var_id, TypeParam::max_nat_kind()),
         future_type(bool_t()),
     )
     .unwrap()
@@ -328,7 +327,7 @@ fn vec_of_blocks_and_ints_and_angles(
 /// A vector consisting of future-bool types followed by block types.
 /// (Block types last because used as output row and guppylang expects this.)
 fn vec_of_blocks_and_bools(n_blocks: usize, n_bools: usize) -> Vec<Type> {
-    let mut types: Vec<Type> = vec![future_type(bool_t()); n_bools];
+    let mut types: Vec<Type> = vec![bool_t(); n_bools];
     types.extend(vec![block_tv(0); n_blocks]);
     types
 }
@@ -349,7 +348,7 @@ fn block_and_optional_bool() -> Vec<Type> {
 fn sig_1_block(n_angles: usize, n_indices: usize) -> SignatureFunc {
     CustomValidator::new(
         PolyFuncTypeRV::new(
-            vec![TypeParam::max_nat_type(); 1 + n_indices],
+            vec![TypeParam::max_nat_kind(); 1 + n_indices],
             FuncValueType::new(
                 vec_of_blocks_and_angles(1, n_angles),
                 vec_of_blocks_and_angles(1, 0),
@@ -364,7 +363,7 @@ fn sig_1_block(n_angles: usize, n_indices: usize) -> SignatureFunc {
 /// additional angle inputs and a number of index inputs.
 fn sig_1_block_d(n_angles: usize, n_indices: usize) -> SignatureFunc {
     PolyFuncTypeRV::new(
-        vec![TypeParam::max_nat_type()],
+        vec![TypeParam::max_nat_kind()],
         FuncValueType::new(
             vec_of_blocks_and_ints_and_angles(1, n_indices, n_angles),
             vec_of_blocks_and_ints_and_angles(1, 0, 0),
@@ -442,7 +441,7 @@ impl MakeOpDef for IcebergOpDef {
             swap_d => sig_1_block_d(0, 2),
             zz_phase_between_blocks => CustomValidator::new(
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type(); 3],
+                    vec![TypeParam::max_nat_kind(); 3],
                     FuncValueType::new(
                         vec_of_blocks_and_angles(2, 1),
                         vec_of_blocks_and_angles(2, 0),
@@ -452,7 +451,7 @@ impl MakeOpDef for IcebergOpDef {
             )
             .into(),
             zz_phase_between_blocks_d => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type()],
+                vec![TypeParam::max_nat_kind()],
                 FuncValueType::new(
                     vec_of_blocks_and_ints_and_angles(2, 2, 1),
                     vec_of_blocks_and_ints_and_angles(2, 0, 0),
@@ -461,7 +460,7 @@ impl MakeOpDef for IcebergOpDef {
             .into(),
             cx_transversal => CustomValidator::new(
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
+                    vec![TypeParam::max_nat_kind()],
                     FuncValueType::new_endo(vec_of_blocks_and_angles(2, 0)),
                 ),
                 ArgsValidator { n_idx: 0 },
@@ -469,7 +468,7 @@ impl MakeOpDef for IcebergOpDef {
             .into(),
             alloc_zero => CustomValidator::new(
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
+                    vec![TypeParam::max_nat_kind()],
                     FuncValueType::new(
                         vec_of_blocks_and_angles(0, 0),
                         vec_of_blocks_and_angles(1, 0),
@@ -480,7 +479,7 @@ impl MakeOpDef for IcebergOpDef {
             .into(),
             free => CustomValidator::new(
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
+                    vec![TypeParam::max_nat_kind()],
                     FuncValueType::new(
                         vec_of_blocks_and_angles(1, 0),
                         vec_of_blocks_and_angles(0, 0),
@@ -491,7 +490,7 @@ impl MakeOpDef for IcebergOpDef {
             .into(),
             measure_syndrome => CustomValidator::new(
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
+                    vec![TypeParam::max_nat_kind()],
                     FuncValueType::new(
                         vec_of_blocks_and_angles(1, 0),
                         vec_of_blocks_and_bools(1, 2),
@@ -502,7 +501,7 @@ impl MakeOpDef for IcebergOpDef {
             .into(),
             measure_all => CustomValidator::new(
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
+                    vec![TypeParam::max_nat_kind()],
                     FuncValueType::new(vec_of_blocks_and_angles(1, 0), vec![bool_array_tv(0)]),
                 ),
                 ArgsValidator { n_idx: 0 },
@@ -510,14 +509,14 @@ impl MakeOpDef for IcebergOpDef {
             .into(),
             try_measure_one_x => CustomValidator::new(
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type(); 2],
+                    vec![TypeParam::max_nat_kind(); 2],
                     FuncValueType::new(vec_of_blocks_and_angles(1, 0), block_and_optional_bool()),
                 ),
                 ArgsValidator { n_idx: 1 },
             )
             .into(),
             try_measure_one_x_d => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type()],
+                vec![TypeParam::max_nat_kind()],
                 FuncValueType::new(
                     vec_of_blocks_and_ints_and_angles(1, 1, 0),
                     block_and_optional_bool(),
@@ -526,14 +525,14 @@ impl MakeOpDef for IcebergOpDef {
             .into(),
             try_measure_one_z => CustomValidator::new(
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type(); 2],
+                    vec![TypeParam::max_nat_kind(); 2],
                     FuncValueType::new(vec_of_blocks_and_angles(1, 0), block_and_optional_bool()),
                 ),
                 ArgsValidator { n_idx: 1 },
             )
             .into(),
             try_measure_one_z_d => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type()],
+                vec![TypeParam::max_nat_kind()],
                 FuncValueType::new(
                     vec_of_blocks_and_ints_and_angles(1, 1, 0),
                     block_and_optional_bool(),
@@ -558,12 +557,9 @@ pub static EXTENSION: LazyLock<Arc<Extension>> = LazyLock::new(|| {
 #[cfg(test)]
 mod tests {
     use hugr::{
-        CircuitUnit, HugrView, Wire,
         builder::{
             DFGBuilder, Dataflow, DataflowHugr, DataflowSubContainer, HugrBuilder, ModuleBuilder,
-        },
-        envelope::{EnvelopeConfig, EnvelopeFormat, read_envelope, write_envelope},
-        extension::ExtensionRegistry,
+        }, envelope::{read_envelope, write_envelope, EnvelopeConfig, EnvelopeFormat}, extension::ExtensionRegistry,
         ops::DataflowOpTrait,
         package::Package,
         std_extensions::{
@@ -572,10 +568,13 @@ mod tests {
             std_reg,
         },
         types::Signature,
+        CircuitUnit,
+        HugrView,
+        Wire,
     };
 
-    use crate::iceberg::types::EXTENSION as types_extension;
     use crate::iceberg::types::block_type;
+    use crate::iceberg::types::EXTENSION as types_extension;
 
     use super::*;
 
