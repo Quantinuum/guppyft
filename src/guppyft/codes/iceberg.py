@@ -23,7 +23,7 @@ TYPES_EXTN = iceberg_types()
 block_def = TYPES_EXTN.get_type("block")
 
 
-def block_to_hugr(args: Sequence[Argument], ctx: ToHugrContext) -> ht.Type:
+def _block_to_hugr(args: Sequence[Argument], ctx: ToHugrContext) -> ht.Type:
     [k_arg] = args
     assert isinstance(k_arg, ConstArg)
     return ht.ExtType(block_def, [k_arg.to_hugr(ctx)])
@@ -44,7 +44,7 @@ def iceberg_op(
 N = guppy.nat_var("N")
 
 
-@custom_type(block_to_hugr, copyable=False, droppable=False, params=_block_params)
+@custom_type(_block_to_hugr, copyable=False, droppable=False, params=_block_params)
 class Block(Generic[N]):  # type: ignore[misc]
     @hugr_op(iceberg_op("alloc_zero"))
     @no_type_check
