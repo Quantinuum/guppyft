@@ -457,7 +457,8 @@ def compute_verification_signterms_double_block(
       of a Clifford operator on two code blocks.
     :param ImplementationCliffordUnitaryDouble: A Guppy function for implementing
       the semantics on two code blocks.
-    :param
+    :param choi_state_preparation: A Guppy function that takes an arbitrary
+      `clifford_func` and prepares a Choi state encoding the Clifford unitary.
     :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
       and logical operators.
     :param: The number of code blocks represented in signed_logical_paulis.
