@@ -1,5 +1,3 @@
-from typing import TYPE_CHECKING, cast
-
 from guppylang import guppy
 from guppylang.std.builtins import result
 from guppylang.std.qsystem import collect_measurements
@@ -17,9 +15,6 @@ from guppyft.codes.iceberg import (
     zz_phase_between_blocks,
 )
 from guppyft.extensions import iceberg_ops, iceberg_types
-
-if TYPE_CHECKING:
-    from hugr.hugr import NodeData
 
 
 def test_hugr() -> None:
@@ -177,7 +172,7 @@ def test_guppy_hugr() -> None:
     NormalizeGuppy()(h, inplace=True)
     entrypoint = h.entrypoint
     children = h.children(entrypoint)
-    child_data = [cast("NodeData", h.get(child)) for child in children]
+    child_data = [h[child] for child in children]
     # When https://github.com/Quantinuum/tket2/issues/1691 is implemented, this
     # test will have to change: all the logical ops including `allox_zero`
     # should appear under the entrypoint node. (Possibly we may need to append a
@@ -190,10 +185,6 @@ def test_guppy_hugr() -> None:
         "guppyft.iceberg.ops.free<8>",
         "Output",
     }
-    [all_h_node] = [
-        child
-        for child in children
-        if "all_h" in cast("NodeData", h.get(child)).op.name()
-    ]
+    [all_h_node] = [child for child in children if "all_h" in h[child].op.name()]
     assert len(list(h.incoming_links(all_h_node))) == 1  # CallIndirect
     assert len(list(h.outgoing_links(all_h_node))) == 2  # Output, free
