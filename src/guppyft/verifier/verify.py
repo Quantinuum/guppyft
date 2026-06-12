@@ -202,6 +202,8 @@ def pad_code_stabilizers(code: StabilizerCode, num_blocks: int) -> pauli.StringS
     (n-k) Pauli strings indexed from 0-6 with the identity on qubits 7-13 and
     (n-k) Pauli strings indexed from 7-13 with the identity on qubits 0-6.
     We get a set of pauli strings of size 2m(n-k).
+    The factor of 2 comes about because we are encoding an N qubit unitary
+      in a 2N qubit state by using map-state duality.
 
     :param code: A StabilizerCode.
     :param num_blocks: The number of code blocks.
