@@ -173,12 +173,11 @@ def test_guppy_hugr() -> None:
     NormalizeGuppy()(h, inplace=True)
     entrypoint = h.entrypoint
     children = h.children(entrypoint)
-    child_data = [h[child] for child in children]
     # When https://github.com/Quantinuum/tket2/issues/1691 is implemented, this
     # test will have to change: all the logical ops including `allox_zero`
     # should appear under the entrypoint node. (Possibly we may need to append a
     # final `InlineFunctions()` pass to make that happen.)
-    assert {data.op.name() for data in child_data} == {
+    assert {h[child].op.name() for child in children} == {
         "Input",
         "LoadFunc",  # loads the alloc_zero function
         "CallIndirect",
