@@ -201,13 +201,25 @@ class GlobalMapChecker(CustomCallChecker):
     @override
     def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
         # First arg is function to be mapped
-        _, callback_func = ExprSynthesizer(self.ctx).synthesize(args[0])
+        callback_expr, callback_func = ExprSynthesizer(self.ctx).synthesize(args[0])
         assert isinstance(callback_func, FunctionType)
-        # Global type must be owned if linear
         global_ty = callback_func.inputs[0]
-        if global_ty.ty.hugr_bound == TypeBound.Linear:
-            # TODO raise GuppyTypeError
-            assert InputFlags.Owned in global_ty.flags
+        # Global type must be owned if linear
+        if (
+            global_ty.ty.hugr_bound == TypeBound.Linear
+            and InputFlags.Owned not in global_ty.flags
+        ):
+            assert isinstance(callback_expr, GlobalName)
+            callback_args: list[ast.arg] = ENGINE.get_parsed(
+                callback_expr.def_id
+            ).defined_at.args.args
+            raise GuppyTypeError(
+                ExpectedError(
+                    callback_args[0],
+                    "global type to be owned. Linear global arg must be "
+                    "decorated with `@ owned`.",
+                )
+            )
 
         # Raise error if input arg is borrowed/inout
         for i in callback_func.inputs:

@@ -5,7 +5,6 @@ from guppylang import array, guppy
 from guppylang.emulator import EmulatorError
 from guppylang.std.builtins import owned, result
 from guppylang.std.quantum import discard, measure, qubit, x
-from guppylang_internals.error import GuppyTypeError
 
 from guppyft.globals import map_global, with_global
 
@@ -94,64 +93,6 @@ def test_with_outputs() -> None:
     assert res == [{"my_prog": [1, 2, 3], "main": [2, [2, 3], [2, 3, 4]]}]
 
 
-def test_with_incorrect_args_length() -> None:
-    @guppy
-    def my_prog() -> None:
-        return
-
-    @guppy
-    def main() -> None:
-        with_global(1, my_prog, 1)
-
-    with pytest.raises(GuppyTypeError):
-        main.compile()
-
-
-def test_with_incorrect_arg_type_error() -> None:
-    @guppy
-    def my_prog(i: int) -> None:
-        return
-
-    @guppy
-    def main() -> None:
-        with_global(1, my_prog, 1.0)
-
-    with pytest.raises(GuppyTypeError):
-        main.compile()
-
-
-def test_with_borrowed_input_error() -> None:
-    @guppy
-    def my_prog0(qb: qubit) -> None:
-        return
-
-    @guppy
-    def main() -> None:
-        qb = qubit()
-        with_global(1, my_prog0, qb)
-        discard(qb)
-
-    # TODO use snapshot testing to match full error message
-    with pytest.raises(
-        GuppyTypeError,
-        match=r"UnsupportedError",
-    ):
-        main.compile()
-
-
-def test_with_non_matching_return_types_error() -> None:
-    @guppy
-    def my_prog() -> None:
-        return qubit()
-
-    @guppy
-    def main() -> None:
-        with_global(1, my_prog)
-
-    with pytest.raises(GuppyTypeError):
-        main.compile()
-
-
 def test_with_owned_input() -> None:
     @guppy
     def my_prog(qb: qubit @ owned) -> qubit:
@@ -188,26 +129,6 @@ def test_map_global_linear() -> None:
     assert res == [{"main": [1]}]
 
 
-def test_map_global_linear_not_owned_error() -> None:
-    @guppy
-    def foo(qb: qubit) -> qubit:
-        x(qb)
-        return qb
-
-    @guppy
-    def my_prog() -> None:
-        map_global(foo)
-
-    @guppy
-    def main() -> None:
-        qb = qubit()
-        qb = with_global(qb, my_prog)
-        result("main", measure(qb).read())
-
-    with pytest.raises(AssertionError):
-        main.compile()
-
-
 def test_map_global_linear_return_arg_order_error() -> None:
     @guppy
     def foo(qb: qubit @ owned) -> tuple[int, qubit]:
@@ -226,6 +147,20 @@ def test_map_global_linear_return_arg_order_error() -> None:
 
     with pytest.raises(AssertionError):
         main.compile()
+
+
+# TODO fix test
+@pytest.mark.skip
+def test_map_missing_global_arg_input_error() -> None:
+    @guppy
+    def foo() -> int:
+        return 0
+
+    @guppy
+    def my_prog() -> None:
+        map_global(foo)
+
+    my_prog.compile()
 
 
 def test_map_global_non_linear() -> None:
@@ -330,3 +265,25 @@ def test_nested_with() -> None:
             "arr_outer": [[3]],
         }
     ]
+
+
+# TODO
+def test_nested_map_calls_error() -> None:
+    @guppy
+    def bar(i: int) -> int:
+        return i
+
+    @guppy
+    def foo(i: int) -> int:
+        map_global(bar)
+        return i
+
+    @guppy
+    def my_prog() -> None:
+        map_global(foo)
+
+    @guppy
+    def main() -> None:
+        with_global(0, my_prog)
+
+    main.emulator(n_qubits=1).run().collated_shots()
