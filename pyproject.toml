@@ -24,10 +24,10 @@ classifiers = [
 ]
 
 dependencies = [
-    "guppylang",
-    "guppylang-internals",
-    "hugr>=0.16.0",
-    "tket>=0.13.0",
+    "guppylang>=1.0.0a4",
+    "guppylang-internals>=1.0.0a4",
+    "hugr>=0.17.0",
+    "tket>=0.14.0",
 ]
 
 [dependency-groups]
@@ -43,6 +43,8 @@ lint = [
 ]
 test = [
     "pytest>=9.0.3",
+    "pytest-snapshot>=0.9.0",
+    "pytest-xdist>=3.8.0",
     "selene-hugr-qis-compiler>=0.2.10",
     "selene-sim>=0.2.13",
 ]
@@ -57,11 +59,8 @@ build-backend = "maturin"
 
 [tool.uv.sources]
 # Needs tket branch for globals extension
-tket = { git = "https://github.com/quantinuum/tket2", rev = "ffc250fe98577cdcba81099ae900f2918426f3f1", subdirectory = "tket-py" }
-selene-hugr-qis-compiler = { git = "https://github.com/quantinuum/tket2", rev = "ffc250fe98577cdcba81099ae900f2918426f3f1", subdirectory = "qis-compiler" }
-# Need guppylang branch with tket.bool removed
-guppylang = { git = "https://github.com/quantinuum/guppylang", rev = "6e9d5d04bb256ba9a9e8294e4310ab1cedb7e2a9", subdirectory = "guppylang" }
-guppylang-internals = { git = "https://github.com/quantinuum/guppylang", rev = "6e9d5d04bb256ba9a9e8294e4310ab1cedb7e2a9", subdirectory = "guppylang-internals" }
+tket = { git = "https://github.com/quantinuum/tket2", rev = "e56c615515d31f61f1e0f7db0527719097a8aaa9", subdirectory = "tket-py" }
+selene-hugr-qis-compiler = { git = "https://github.com/quantinuum/tket2", rev = "e56c615515d31f61f1e0f7db0527719097a8aaa9", subdirectory = "qis-compiler" }
 
 [tool.maturin]
 module-name = "guppyft._bindings"

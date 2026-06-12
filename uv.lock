@@ -85,6 +85,15 @@ wheels = [
 ]
 
 [[package]]
+name = "execnet"
+version = "2.1.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/bf/89/780e11f9588d9e7128a3f87788354c7946a9cbb1401ad38a48c4db9a4f07/execnet-2.1.2.tar.gz", hash = "sha256:63d83bfdd9a23e35b9c6a3261412324f964c2ec8dcd8d3c6916ee9373e0befcd", size = 166622, upload-time = "2025-11-12T09:56:37.75Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ab/84/02fc1827e8cdded4aa65baef11296a9bbe595c474f0d6d758af082d849fd/execnet-2.1.2-py3-none-any.whl", hash = "sha256:67fba928dd5a544b783f6056f449e5e3931a5c378b128bc18501f7ea79e296ec", size = 40708, upload-time = "2025-11-12T09:56:36.333Z" },
+]
+
+[[package]]
 name = "filelock"
 version = "3.29.0"
 source = { registry = "https://pypi.org/simple" }
@@ -119,6 +128,8 @@ dev = [
     { name = "mypy" },
     { name = "pre-commit" },
     { name = "pytest" },
+    { name = "pytest-snapshot" },
+    { name = "pytest-xdist" },
     { name = "ruff" },
     { name = "selene-hugr-qis-compiler" },
     { name = "selene-sim" },
@@ -130,16 +141,18 @@ lint = [
 ]
 test = [
     { name = "pytest" },
+    { name = "pytest-snapshot" },
+    { name = "pytest-xdist" },
     { name = "selene-hugr-qis-compiler" },
     { name = "selene-sim" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "guppylang", git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang&rev=6e9d5d04bb256ba9a9e8294e4310ab1cedb7e2a9" },
-    { name = "guppylang-internals", git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang-internals&rev=6e9d5d04bb256ba9a9e8294e4310ab1cedb7e2a9" },
-    { name = "hugr", specifier = ">=0.16.0" },
-    { name = "tket", git = "https://github.com/quantinuum/tket2?subdirectory=tket-py&rev=ffc250fe98577cdcba81099ae900f2918426f3f1" },
+    { name = "guppylang", specifier = ">=1.0.0a4" },
+    { name = "guppylang-internals", specifier = ">=1.0.0a4" },
+    { name = "hugr", specifier = ">=0.17.0" },
+    { name = "tket", git = "https://github.com/quantinuum/tket2?subdirectory=tket-py&rev=e56c615515d31f61f1e0f7db0527719097a8aaa9" },
 ]
 
 [package.metadata.requires-dev]
@@ -148,8 +161,10 @@ dev = [
     { name = "mypy", specifier = ">=1.20.2" },
     { name = "pre-commit", specifier = ">=3.6.0,<5" },
     { name = "pytest", specifier = ">=9.0.3" },
+    { name = "pytest-snapshot", specifier = ">=0.9.0" },
+    { name = "pytest-xdist", specifier = ">=3.8.0" },
     { name = "ruff", specifier = ">=0.15.11" },
-    { name = "selene-hugr-qis-compiler", git = "https://github.com/quantinuum/tket2?subdirectory=qis-compiler&rev=ffc250fe98577cdcba81099ae900f2918426f3f1" },
+    { name = "selene-hugr-qis-compiler", git = "https://github.com/quantinuum/tket2?subdirectory=qis-compiler&rev=e56c615515d31f61f1e0f7db0527719097a8aaa9" },
     { name = "selene-sim", specifier = ">=0.2.13" },
 ]
 lint = [
@@ -159,14 +174,16 @@ lint = [
 ]
 test = [
     { name = "pytest", specifier = ">=9.0.3" },
-    { name = "selene-hugr-qis-compiler", git = "https://github.com/quantinuum/tket2?subdirectory=qis-compiler&rev=ffc250fe98577cdcba81099ae900f2918426f3f1" },
+    { name = "pytest-snapshot", specifier = ">=0.9.0" },
+    { name = "pytest-xdist", specifier = ">=3.8.0" },
+    { name = "selene-hugr-qis-compiler", git = "https://github.com/quantinuum/tket2?subdirectory=qis-compiler&rev=e56c615515d31f61f1e0f7db0527719097a8aaa9" },
     { name = "selene-sim", specifier = ">=0.2.13" },
 ]
 
 [[package]]
 name = "guppylang"
-version = "1.0.0a1"
-source = { git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang&rev=6e9d5d04bb256ba9a9e8294e4310ab1cedb7e2a9#6e9d5d04bb256ba9a9e8294e4310ab1cedb7e2a9" }
+version = "1.0.0a4"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "guppylang-internals" },
     { name = "numpy" },
@@ -176,11 +193,15 @@ dependencies = [
     { name = "tqdm" },
     { name = "types-tqdm" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/ef/bd/6e00018ab7671c76d30c0394950e2111e1bd9c4a3477843bd29da2525e02/guppylang-1.0.0a4.tar.gz", hash = "sha256:736c9881a4a2709e7794b9bbc38e476fb8fbd15c02fb981bc42208ace1d41a76", size = 73095, upload-time = "2026-06-12T11:02:56.619Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/69/3f/879ea64e9cbf01b4131afbb095c4cb493c6976bcaf70b176ef573c2e9f7f/guppylang-1.0.0a4-py3-none-any.whl", hash = "sha256:cb9dc3b02ad43651d32d02642159bc19b3855d3a227a666852f816403766ccd1", size = 69392, upload-time = "2026-06-12T11:02:55.258Z" },
+]
 
 [[package]]
 name = "guppylang-internals"
-version = "1.0.0a1"
-source = { git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang-internals&rev=6e9d5d04bb256ba9a9e8294e4310ab1cedb7e2a9#6e9d5d04bb256ba9a9e8294e4310ab1cedb7e2a9" }
+version = "1.0.0a4"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "hugr" },
     { name = "pytket" },
@@ -188,6 +209,10 @@ dependencies = [
     { name = "tket-exts" },
     { name = "typing-extensions" },
     { name = "wasmtime" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/1d/ab/6a707f5988c4c45e96160067e8f9adbe358bab12aa0547f30e3b1f76d69a/guppylang_internals-1.0.0a4.tar.gz", hash = "sha256:4023f5c1f893d6fd09ef52e166a77110d6aeab75a42b87ef0158803d13bef759", size = 220652, upload-time = "2026-06-12T10:42:20.621Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/09/b1/05fa386d80e2ff6d16172cf1570bcd31083a99ac25590d7c9a2c2207fa10/guppylang_internals-1.0.0a4-py3-none-any.whl", hash = "sha256:0d4436c0405f54729a2d94ff82a060aac296b87579737f6e18d4c34627745e4b", size = 274468, upload-time = "2026-06-12T10:42:19.179Z" },
 ]
 
 [[package]]
@@ -763,6 +788,31 @@ wheels = [
 ]
 
 [[package]]
+name = "pytest-snapshot"
+version = "0.9.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/9b/7b/ab8f1fc1e687218aa66acec1c3674d9c443f6a2dc8cb6a50f464548ffa34/pytest-snapshot-0.9.0.tar.gz", hash = "sha256:c7013c3abc3e860f9feff899f8b4debe3708650d8d8242a61bf2625ff64db7f3", size = 19877, upload-time = "2022-04-23T17:35:31.751Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cb/29/518f32faf6edad9f56d6e0107217f7de6b79f297a47170414a2bd4be7f01/pytest_snapshot-0.9.0-py3-none-any.whl", hash = "sha256:4b9fe1c21c868fe53a545e4e3184d36bc1c88946e3f5c1d9dd676962a9b3d4ab", size = 10715, upload-time = "2022-04-23T17:35:30.288Z" },
+]
+
+[[package]]
+name = "pytest-xdist"
+version = "3.8.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "execnet" },
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/78/b4/439b179d1ff526791eb921115fca8e44e596a13efeda518b9d845a619450/pytest_xdist-3.8.0.tar.gz", hash = "sha256:7e578125ec9bc6050861aa93f2d59f1d8d085595d6551c2c90b6f4fad8d3a9f1", size = 88069, upload-time = "2025-07-01T13:30:59.346Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ca/31/d4e37e9e550c2b92a9cbc2e4d0b7420a27224968580b5a447f420847c975/pytest_xdist-3.8.0-py3-none-any.whl", hash = "sha256:202ca578cfeb7370784a8c33d6d05bc6e13b4f25b5053c30a152269fd10f0b88", size = 46396, upload-time = "2025-07-01T13:30:56.632Z" },
+]
+
+[[package]]
 name = "python-discovery"
 version = "1.2.2"
 source = { registry = "https://pypi.org/simple" }
@@ -832,18 +882,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/da/92/1446574745d74df0c92e6aa4a7b0b3130706a4142b2d1a5869f2eaa423c6/pyyaml-6.0.3-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:16249ee61e95f858e83976573de0f5b2893b3677ba71c9dd36b9cf8be9ac6d65", size = 829923, upload-time = "2025-09-25T21:32:54.537Z" },
     { url = "https://files.pythonhosted.org/packages/f0/7a/1c7270340330e575b92f397352af856a8c06f230aa3e76f86b39d01b416a/pyyaml-6.0.3-cp314-cp314t-win_amd64.whl", hash = "sha256:4ad1906908f2f5ae4e5a8ddfce73c320c2a1429ec52eafd27138b7f1cbe341c9", size = 174062, upload-time = "2025-09-25T21:32:55.767Z" },
     { url = "https://files.pythonhosted.org/packages/f1/12/de94a39c2ef588c7e6455cfbe7343d3b2dc9d6b6b2f40c4c6565744c873d/pyyaml-6.0.3-cp314-cp314t-win_arm64.whl", hash = "sha256:ebc55a14a21cb14062aa4162f906cd962b28e2e9ea38f9b4391244cd8de4ae0b", size = 149341, upload-time = "2025-09-25T21:32:56.828Z" },
-]
-
-[[package]]
-name = "qir-qis"
-version = "0.1.3"
-source = { registry = "https://pypi.org/simple" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/52/c9/24906128a455d2de1e08ad05b6de7a0b25002e1cc1db941b7ad4a9314f6e/qir_qis-0.1.3-cp310-abi3-macosx_13_0_arm64.whl", hash = "sha256:e1704efcafea5983d686b8658f4c8dff9110229af6f47bd2d5b5213a7256aeb3", size = 15959593, upload-time = "2026-02-24T22:56:11.581Z" },
-    { url = "https://files.pythonhosted.org/packages/65/02/bd01b83fe4a811d1e2e0c20ccd49e92289e561a74480cafdfc7c00ef98f1/qir_qis-0.1.3-cp310-abi3-macosx_13_0_x86_64.whl", hash = "sha256:9a0e488bdd4015330602645aa77002f9f970764ba4ccb7b8548490aa7c3de5ed", size = 17550477, upload-time = "2026-02-24T22:56:14.353Z" },
-    { url = "https://files.pythonhosted.org/packages/81/d0/817ee7e71154d79be5e7f0c6fda45f925261b22b0b5abaf3d9932366f1ec/qir_qis-0.1.3-cp310-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:eff1fc1bc282e33707658c65ca483bc9f5558c618f746920004d74dca9ba48c6", size = 17527772, upload-time = "2026-02-24T22:56:16.882Z" },
-    { url = "https://files.pythonhosted.org/packages/3f/18/43aaac65f8d6637db0dc18ce6fa7e5458f7924dae9a1b22b9ec84b985bcb/qir_qis-0.1.3-cp310-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:5864b1165a08270a327b80ccb5c02b28544e6e40860a1ca3ec4976b99183f7e8", size = 18805051, upload-time = "2026-02-24T22:56:19.111Z" },
-    { url = "https://files.pythonhosted.org/packages/f3/16/25aa2d6ac5dba9d052c4b58049452d0174f4b2a049e6a38e4540c4a72a46/qir_qis-0.1.3-cp310-abi3-win_amd64.whl", hash = "sha256:855bc462e4f31d0dc05cba063f7632610d16a1c66e40ef99ace215355ce76faa", size = 15688465, upload-time = "2026-02-24T22:56:21.464Z" },
 ]
 
 [[package]]
@@ -936,7 +974,7 @@ wheels = [
 
 [[package]]
 name = "selene-core"
-version = "0.2.7"
+version = "0.2.10"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "hugr" },
@@ -944,24 +982,24 @@ dependencies = [
     { name = "llvmlite", version = "0.45.1", source = { registry = "https://pypi.org/simple" }, marker = "platform_machine == 'x86_64' and sys_platform == 'darwin'" },
     { name = "llvmlite", version = "0.47.0", source = { registry = "https://pypi.org/simple" }, marker = "platform_machine != 'x86_64' or sys_platform != 'darwin'" },
     { name = "networkx" },
+    { name = "pydantic" },
     { name = "pydot" },
     { name = "pyyaml" },
-    { name = "qir-qis" },
     { name = "typing-extensions" },
     { name = "ziglang" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/df/e2/46d0a50c46e15ff604e643951f7b72ca99c3aaad549acbf3908c2ec754bd/selene_core-0.2.7-py3-none-any.whl", hash = "sha256:22f4ca6435eb328079ebfe1c73dc64506665e2d64ee6b44079e4246534ea7aa8", size = 30361, upload-time = "2026-04-10T20:55:12.363Z" },
+    { url = "https://files.pythonhosted.org/packages/13/33/32906365f8359588d7d05301a2e645563321bf39a11f076ee16f7aa5178a/selene_core-0.2.10-py3-none-any.whl", hash = "sha256:c53857781c25ce95e170dcf83044ba152e68d799a3585f4874281b306a24899c", size = 33014, upload-time = "2026-05-22T10:07:21.106Z" },
 ]
 
 [[package]]
 name = "selene-hugr-qis-compiler"
-version = "0.2.10"
-source = { git = "https://github.com/quantinuum/tket2?subdirectory=qis-compiler&rev=ffc250fe98577cdcba81099ae900f2918426f3f1#ffc250fe98577cdcba81099ae900f2918426f3f1" }
+version = "0.3.0"
+source = { git = "https://github.com/quantinuum/tket2?subdirectory=qis-compiler&rev=e56c615515d31f61f1e0f7db0527719097a8aaa9#e56c615515d31f61f1e0f7db0527719097a8aaa9" }
 
 [[package]]
 name = "selene-sim"
-version = "0.2.13"
+version = "0.2.17"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
@@ -971,11 +1009,11 @@ dependencies = [
     { name = "tqdm" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/df/15/7f58330010c407dd5ebc57cbe5a2e72e14bbac380a6f68a78303bd3fe039/selene_sim-0.2.13-py3-none-macosx_11_0_arm64.whl", hash = "sha256:731947866ba0578782b4ef8511dc05b5226215d7f36e48699ab1a7ca01317fb4", size = 3675784, upload-time = "2026-04-10T21:33:57.549Z" },
-    { url = "https://files.pythonhosted.org/packages/6f/e8/d19055240dac113e02abcd947f3215df5b989f75f75ad66ee722824b6cc8/selene_sim-0.2.13-py3-none-macosx_11_0_x86_64.whl", hash = "sha256:677c634b157d374d188600b221c4ddf20a4a61861ec05c8c31feb06ccc59bf0b", size = 3810091, upload-time = "2026-04-10T21:33:59.246Z" },
-    { url = "https://files.pythonhosted.org/packages/ae/c0/0d7fd02e43721185439dc5900885ad82be2e1e9e2b7a3ead0df62856b710/selene_sim-0.2.13-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:d8b9fe4e9480e48f549b5fdb11521946df28117578d57f404618108352eba6ff", size = 4096184, upload-time = "2026-04-10T21:34:01.333Z" },
-    { url = "https://files.pythonhosted.org/packages/1d/fe/60c61a9116f6aa37766518f881c18afb630a61369326c88bf620c193810f/selene_sim-0.2.13-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:462aab4384e1a9c39b6e6b350c581bc97159cabb42b4107efb3083e2d5ad3b96", size = 4242866, upload-time = "2026-04-10T21:34:02.77Z" },
-    { url = "https://files.pythonhosted.org/packages/35/c5/5d326369f9695952f94dbf215f16b0e0164151e3b33062b64c952c0e896a/selene_sim-0.2.13-py3-none-win_amd64.whl", hash = "sha256:cad7fa64a91d2b0a2b90ee87ee4ee5b016cad3a9720755b6386f8ccb91fe954d", size = 8912980, upload-time = "2026-04-10T21:34:04.78Z" },
+    { url = "https://files.pythonhosted.org/packages/6a/70/9107bf3a7234d3e7358c05b374333c4ec6a9ac795eed941131b2a67756e6/selene_sim-0.2.17-py3-none-macosx_11_0_arm64.whl", hash = "sha256:08ff9b115bd9209ac4c8c01e6feae494aba0ab0b90d144e2f1e0285572121427", size = 4838283, upload-time = "2026-06-11T15:54:39.794Z" },
+    { url = "https://files.pythonhosted.org/packages/01/80/e052f39a33393e48f11f09acc74136e1c2514552c00628b1d0fb36a901b6/selene_sim-0.2.17-py3-none-macosx_11_0_x86_64.whl", hash = "sha256:d32506e622ee5e3cbeed7fa52a026c2c822a083d4375fd15630e0d1c87847c4e", size = 5043396, upload-time = "2026-06-11T15:54:41.36Z" },
+    { url = "https://files.pythonhosted.org/packages/e8/0f/b9e80d361e17429aa34bb8b7158012a12310f35058096e149583aa364549/selene_sim-0.2.17-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:51156ce42355cde4b87744f394790742ddeb9bf5636ecb2e4f39ec4f6c71a961", size = 4887205, upload-time = "2026-06-11T15:54:42.941Z" },
+    { url = "https://files.pythonhosted.org/packages/df/a6/2c3ee16edcbb9911812208076b5db425a77cc79c889b8ba1a5a7dda9b326/selene_sim-0.2.17-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:f756cc4e8cf44f294bdbbec4043bd0e30b581a0bfad7245993dec2b1471ef073", size = 5065581, upload-time = "2026-06-11T15:54:44.282Z" },
+    { url = "https://files.pythonhosted.org/packages/64/3e/76a082d913893ed0ec8e9de77440a8614a00e2d8a90eab9b9802aa04ad39/selene_sim-0.2.17-py3-none-win_amd64.whl", hash = "sha256:c04ffaf2b0c7a0027f04d9a482f30d93115d4bdb717067b767034599cefba6ba", size = 10409416, upload-time = "2026-06-11T15:54:45.675Z" },
 ]
 
 [[package]]
@@ -1010,8 +1048,8 @@ wheels = [
 
 [[package]]
 name = "tket"
-version = "0.13.1"
-source = { git = "https://github.com/quantinuum/tket2?subdirectory=tket-py&rev=ffc250fe98577cdcba81099ae900f2918426f3f1#ffc250fe98577cdcba81099ae900f2918426f3f1" }
+version = "0.14.1"
+source = { git = "https://github.com/quantinuum/tket2?subdirectory=tket-py&rev=e56c615515d31f61f1e0f7db0527719097a8aaa9#e56c615515d31f61f1e0f7db0527719097a8aaa9" }
 dependencies = [
     { name = "hugr" },
     { name = "tket-eccs" },
@@ -1026,12 +1064,12 @@ pytket = [
 [[package]]
 name = "tket-eccs"
 version = "0.6.0"
-source = { git = "https://github.com/quantinuum/tket2?subdirectory=tket-eccs&rev=ffc250fe98577cdcba81099ae900f2918426f3f1#ffc250fe98577cdcba81099ae900f2918426f3f1" }
+source = { git = "https://github.com/quantinuum/tket2?subdirectory=tket-eccs&rev=e56c615515d31f61f1e0f7db0527719097a8aaa9#e56c615515d31f61f1e0f7db0527719097a8aaa9" }
 
 [[package]]
 name = "tket-exts"
 version = "0.13.0"
-source = { git = "https://github.com/quantinuum/tket2?subdirectory=tket-exts&rev=ffc250fe98577cdcba81099ae900f2918426f3f1#ffc250fe98577cdcba81099ae900f2918426f3f1" }
+source = { git = "https://github.com/quantinuum/tket2?subdirectory=tket-exts&rev=e56c615515d31f61f1e0f7db0527719097a8aaa9#e56c615515d31f61f1e0f7db0527719097a8aaa9" }
 dependencies = [
     { name = "hugr" },
 ]
