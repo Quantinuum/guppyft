@@ -3,9 +3,9 @@
 use std::sync::{Arc, LazyLock};
 
 use hugr::{
-    extension::ExtensionId,
-    types::{type_param::TypeParam, CustomType, Type, TypeArg, TypeBound, TypeName},
     Extension,
+    extension::ExtensionId,
+    types::{CustomType, Type, TypeArg, TypeBound, TypeName, type_param::TypeParam},
 };
 
 /// The extension identifier.
@@ -67,9 +67,9 @@ pub fn block_tv(var_id: usize) -> Type {
 #[cfg(test)]
 mod tests {
     use hugr::{
+        HugrView,
         builder::{Dataflow, DataflowSubContainer, HugrBuilder, ModuleBuilder},
         types::Signature,
-        HugrView,
     };
 
     use super::*;
