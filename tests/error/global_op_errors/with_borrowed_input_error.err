@@ -1,0 +1,9 @@
+Error: Unsupported (at $FILE:8:13)
+  | 
+6 | 
+7 | @guppy
+8 | def my_prog0(qb: qubit) -> None:
+  |              ^^^^^^^^^ Borrowed args are not supported in callback input. Consider
+  |                        using `@owned`.
+
+Guppy compilation failed due to 1 previous error
