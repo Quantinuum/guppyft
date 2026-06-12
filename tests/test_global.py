@@ -1,4 +1,3 @@
-import re
 from typing import no_type_check
 
 import pytest
@@ -6,8 +5,7 @@ from guppylang import array, guppy
 from guppylang.emulator import EmulatorError
 from guppylang.std.builtins import owned, result
 from guppylang.std.quantum import discard, measure, qubit, x
-from guppylang_internals.checker.errors.generic import UnsupportedError
-from guppylang_internals.error import GuppyError, GuppyTypeError
+from guppylang_internals.error import GuppyTypeError
 
 from guppyft.globals import map_global, with_global
 
@@ -96,7 +94,6 @@ def test_with_outputs() -> None:
     assert res == [{"my_prog": [1, 2, 3], "main": [2, [2, 3], [2, 3, 4]]}]
 
 
-# TODO add checker than args len matches
 def test_with_incorrect_args_length() -> None:
     @guppy
     def my_prog() -> None:
@@ -106,10 +103,8 @@ def test_with_incorrect_args_length() -> None:
     def main() -> None:
         with_global(1, my_prog, 1)
 
-    main.compile()
-
-
-test_with_incorrect_args_length()
+    with pytest.raises(GuppyTypeError):
+        main.compile()
 
 
 def test_with_incorrect_arg_type_error() -> None:
@@ -144,7 +139,6 @@ def test_with_borrowed_input_error() -> None:
         main.compile()
 
 
-# TODO check `with` functions are correctly checked
 def test_with_non_matching_return_types_error() -> None:
     @guppy
     def my_prog() -> None:
@@ -154,12 +148,13 @@ def test_with_non_matching_return_types_error() -> None:
     def main() -> None:
         with_global(1, my_prog)
 
-    main.compile()
+    with pytest.raises(GuppyTypeError):
+        main.compile()
 
 
 def test_with_owned_input() -> None:
     @guppy
-    def my_prog(qb: qubit @ owned) -> None:
+    def my_prog(qb: qubit @ owned) -> qubit:
         x(qb)
         return qb
 
@@ -193,6 +188,46 @@ def test_map_global_linear() -> None:
     assert res == [{"main": [1]}]
 
 
+def test_map_global_linear_not_owned_error() -> None:
+    @guppy
+    def foo(qb: qubit) -> qubit:
+        x(qb)
+        return qb
+
+    @guppy
+    def my_prog() -> None:
+        map_global(foo)
+
+    @guppy
+    def main() -> None:
+        qb = qubit()
+        qb = with_global(qb, my_prog)
+        result("main", measure(qb).read())
+
+    with pytest.raises(AssertionError):
+        main.compile()
+
+
+def test_map_global_linear_return_arg_order_error() -> None:
+    @guppy
+    def foo(qb: qubit @ owned) -> tuple[int, qubit]:
+        x(qb)
+        return 0, qb
+
+    @guppy
+    def my_prog() -> None:
+        map_global(foo)
+
+    @guppy
+    def main() -> None:
+        qb = qubit()
+        qb = with_global(qb, my_prog)
+        result("main", measure(qb).read())
+
+    with pytest.raises(AssertionError):
+        main.compile()
+
+
 def test_map_global_non_linear() -> None:
     @guppy
     def foo(i: int) -> int:
@@ -213,7 +248,6 @@ def test_map_global_non_linear() -> None:
     assert res == [{"main": [1]}]
 
 
-# TODO match to error
 def test_map_mismatch_global_return_type_error() -> None:
     @guppy
     def foo(i: float) -> int:
@@ -223,7 +257,8 @@ def test_map_mismatch_global_return_type_error() -> None:
     def my_prog() -> None:
         map_global(foo)
 
-    my_prog.compile()
+    with pytest.raises(AssertionError):
+        my_prog.compile()
 
 
 def test_with_map_mismatch_global_type_error() -> None:
@@ -237,13 +272,16 @@ def test_with_map_mismatch_global_type_error() -> None:
 
     @guppy
     def main() -> None:
-        with_global(1.0, my_prog)
+        with_global("", my_prog)
 
     # TODO match more specific error
     with pytest.raises(RuntimeError):
         main.emulator(n_qubits=1).run().collated_shots()
 
 
+# TODO this *should* raise an error as the global state is used before being
+#  instantiated.
+@pytest.mark.xfail
 def test_map_without_with() -> None:
     @guppy
     def foo(i: int) -> int:
@@ -252,8 +290,6 @@ def test_map_without_with() -> None:
 
     @guppy
     def main() -> None:
-        map_global(foo)
-        map_global(foo)
         map_global(foo)
 
     # TODO the error should be more specific

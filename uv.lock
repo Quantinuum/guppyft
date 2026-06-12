@@ -136,8 +136,8 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "guppylang", editable = "../../Quantinuum/guppylang/guppylang" },
-    { name = "guppylang-internals", editable = "../../Quantinuum/guppylang/guppylang-internals" },
+    { name = "guppylang", git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang&rev=6e9d5d04bb256ba9a9e8294e4310ab1cedb7e2a9" },
+    { name = "guppylang-internals", git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang-internals&rev=6e9d5d04bb256ba9a9e8294e4310ab1cedb7e2a9" },
     { name = "hugr", specifier = ">=0.16.0" },
     { name = "tket", git = "https://github.com/quantinuum/tket2?subdirectory=tket-py&rev=ffc250fe98577cdcba81099ae900f2918426f3f1" },
 ]
@@ -166,7 +166,7 @@ test = [
 [[package]]
 name = "guppylang"
 version = "1.0.0a1"
-source = { editable = "../../Quantinuum/guppylang/guppylang" }
+source = { git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang&rev=6e9d5d04bb256ba9a9e8294e4310ab1cedb7e2a9#6e9d5d04bb256ba9a9e8294e4310ab1cedb7e2a9" }
 dependencies = [
     { name = "guppylang-internals" },
     { name = "numpy" },
@@ -177,22 +177,10 @@ dependencies = [
     { name = "types-tqdm" },
 ]
 
-[package.metadata]
-requires-dist = [
-    { name = "guppylang-internals", editable = "../../Quantinuum/guppylang/guppylang-internals" },
-    { name = "numpy", specifier = "~=2.0" },
-    { name = "pytket", specifier = ">=1.34" },
-    { name = "selene-hugr-qis-compiler", git = "https://github.com/quantinuum/tket2?subdirectory=qis-compiler&rev=ffc250fe98577cdcba81099ae900f2918426f3f1" },
-    { name = "selene-sim", specifier = "~=0.2.7" },
-    { name = "tqdm", specifier = ">=4.67.1" },
-    { name = "types-tqdm", specifier = ">=4.67.0.20250809" },
-]
-provides-extras = ["pytket"]
-
 [[package]]
 name = "guppylang-internals"
 version = "1.0.0a1"
-source = { editable = "../../Quantinuum/guppylang/guppylang-internals" }
+source = { git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang-internals&rev=6e9d5d04bb256ba9a9e8294e4310ab1cedb7e2a9#6e9d5d04bb256ba9a9e8294e4310ab1cedb7e2a9" }
 dependencies = [
     { name = "hugr" },
     { name = "pytket" },
@@ -201,17 +189,6 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "wasmtime" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "hugr", specifier = "~=0.17.1" },
-    { name = "pytket", specifier = ">=1.34" },
-    { name = "tket", extras = ["pytket"], git = "https://github.com/quantinuum/tket2?subdirectory=tket-py&rev=ffc250fe98577cdcba81099ae900f2918426f3f1" },
-    { name = "tket-exts", specifier = "~=0.13.0" },
-    { name = "typing-extensions", specifier = ">=4.9.0,<5" },
-    { name = "wasmtime", specifier = ">=38.0,<45.1" },
-]
-provides-extras = ["pytket"]
 
 [[package]]
 name = "hugr"

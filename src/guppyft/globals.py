@@ -1,7 +1,6 @@
 import ast
 from collections.abc import Callable
 from typing import (
-    Any,
     Concatenate,
     ParamSpec,
     TypeVar,
@@ -10,7 +9,6 @@ from typing import (
 )
 
 from guppylang import guppy
-from guppylang_internals.ast_util import get_file
 from guppylang_internals.checker.errors.generic import ExpectedError, UnsupportedError
 from guppylang_internals.checker.expr_checker import (
     ExprChecker,
@@ -30,8 +28,6 @@ from guppylang_internals.definition.value import CallReturnWires
 from guppylang_internals.engine import ENGINE
 from guppylang_internals.error import GuppyTypeError
 from guppylang_internals.nodes import GlobalCall, GlobalName
-from guppylang_internals.span import Loc, Span
-from guppylang_internals.tys.builtin import string_type
 from guppylang_internals.tys.common import ToHugrContext
 from guppylang_internals.tys.subst import Inst
 from guppylang_internals.tys.ty import (
@@ -44,7 +40,7 @@ from guppylang_internals.tys.ty import (
 )
 from hugr import Wire, ops
 from hugr import tys as ht
-from hugr.tys import TypeArg, TypeBound
+from hugr.tys import TypeBound
 from tket_exts import globals
 
 State = guppy.type_var("State")
@@ -205,34 +201,36 @@ class GlobalMapChecker(CustomCallChecker):
     @override
     def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
         # First arg is function to be mapped
-        _, map_func_ty = ExprSynthesizer(self.ctx).synthesize(args[0])
-        assert isinstance(map_func_ty, FunctionType)
+        _, callback_func = ExprSynthesizer(self.ctx).synthesize(args[0])
+        assert isinstance(callback_func, FunctionType)
         # Global type must be owned if linear
-        global_ty = map_func_ty.inputs[0]
+        global_ty = callback_func.inputs[0]
         if global_ty.ty.hugr_bound == TypeBound.Linear:
+            # TODO raise GuppyTypeError
             assert InputFlags.Owned in global_ty.flags
 
         # Raise error if input arg is borrowed/inout
-        for i in map_func_ty.inputs:
+        for i in callback_func.inputs:
             if InputFlags.Inout in i.flags:
                 # TODO turn this into a nice Guppy compiler error
                 raise ValueError(
                     "Input args cannot be borrowed. Consider using `@owned`."
                 )
 
-        input_args = [FuncInput(map_func_ty, InputFlags.NoFlags)]
-        for arg, func_input in zip(args[1:], map_func_ty.inputs[1:], strict=True):
+        input_args = [FuncInput(callback_func, InputFlags.NoFlags)]
+        for arg, func_input in zip(args[1:], callback_func.inputs[1:], strict=True):
             _, arg_ty = ExprSynthesizer(self.ctx).synthesize(arg)
             input_args.append(FuncInput(arg_ty, func_input.flags))
 
-        # mapped func output is [global state, *out_args]
-        func_out = map_func_ty.output
+        # callback_func output is [global state, *out_args]
+        func_out = callback_func.output
         match func_out:
             case TupleType():
                 # For multiple outputs, global_ty must be first
-                # assert func_out.element_types[0] == global_ty, (
-                #     f"{func_out.element_types[0]=}, {global_ty=}"
-                # )
+                # TODO prettify
+                assert func_out.element_types[0] == global_ty, (
+                    f"{func_out.element_types[0]=}, {global_ty=}"
+                )
                 output_args = (
                     TupleType(func_out.element_types[1:])
                     if len(func_out.element_types) > 2
@@ -240,6 +238,7 @@ class GlobalMapChecker(CustomCallChecker):
                 )
             case _:
                 # For single return, it must be global_ty
+                # TODO prettify
                 assert func_out == global_ty.ty
                 output_args = NoneType()
 
