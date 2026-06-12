@@ -8,21 +8,21 @@ use std::{
 use super::types::block_tv;
 use documented::DocumentedVariants;
 use hugr::{
-    Extension,
     extension::{
-        CustomValidator, ExtensionId, OpDef, SignatureError, SignatureFunc, ValidateJustArgs,
-        prelude::{bool_t, option_type},
-        simple_op::{
-            HasConcrete, HasDef, MakeExtensionOp, MakeOpDef, MakeRegisteredOp, OpLoadError,
-            try_from_name,
-        },
+        prelude::{bool_t, option_type}, simple_op::{
+            try_from_name, HasConcrete, HasDef, MakeExtensionOp, MakeOpDef, MakeRegisteredOp,
+            OpLoadError,
+        }, CustomValidator, ExtensionId, OpDef, SignatureError,
+        SignatureFunc,
+        ValidateJustArgs,
     },
     ops::{ExtensionOp, OpName},
     std_extensions::{
         arithmetic::{float_types::float64_type, int_types::int_type},
         collections::{array::ArrayKind, borrow_array::BorrowArray},
     },
-    types::{FuncValueType, PolyFuncTypeRV, Type, TypeArg, type_param::TypeParam},
+    types::{type_param::TypeParam, FuncValueType, PolyFuncTypeRV, Type, TypeArg},
+    Extension,
 };
 use strum::{EnumIter, EnumString, IntoStaticStr};
 use tket_qsystem::extension::futures::future_type;
@@ -327,7 +327,7 @@ fn vec_of_blocks_and_ints_and_angles(
 /// A vector consisting of future-bool types followed by block types.
 /// (Block types last because used as output row and guppylang expects this.)
 fn vec_of_blocks_and_bools(n_blocks: usize, n_bools: usize) -> Vec<Type> {
-    let mut types: Vec<Type> = vec![bool_t(); n_bools];
+    let mut types: Vec<Type> = vec![future_type(bool_t()); n_bools];
     types.extend(vec![block_tv(0); n_blocks]);
     types
 }
@@ -557,12 +557,9 @@ pub static EXTENSION: LazyLock<Arc<Extension>> = LazyLock::new(|| {
 #[cfg(test)]
 mod tests {
     use hugr::{
-        CircuitUnit, HugrView, Wire,
         builder::{
             DFGBuilder, Dataflow, DataflowHugr, DataflowSubContainer, HugrBuilder, ModuleBuilder,
-        },
-        envelope::{EnvelopeConfig, EnvelopeFormat, read_envelope, write_envelope},
-        extension::ExtensionRegistry,
+        }, envelope::{read_envelope, write_envelope, EnvelopeConfig, EnvelopeFormat}, extension::ExtensionRegistry,
         ops::DataflowOpTrait,
         package::Package,
         std_extensions::{
@@ -571,10 +568,13 @@ mod tests {
             std_reg,
         },
         types::Signature,
+        CircuitUnit,
+        HugrView,
+        Wire,
     };
 
-    use crate::iceberg::types::EXTENSION as types_extension;
     use crate::iceberg::types::block_type;
+    use crate::iceberg::types::EXTENSION as types_extension;
 
     use super::*;
 
