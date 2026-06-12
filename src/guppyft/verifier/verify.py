@@ -101,8 +101,7 @@ def compute_stabilizers_single_block(
     """Compute the stabilizers of a Choi state encoding a Clifford operation.
 
     :param clifford_func: A Guppy function which implements a Clifford unitary.
-    :param choi_state_preparation: A Guppy function which prepares a choi state
-      encoding the clifford_func unitary.
+    :param choi_state_preparation: A Guppy function that takes an arbitrary `clifford_func` and prepares a Choi state encoding the Clifford unitary.
     :param n_func_qubits: An upper bound for the number of qubits used in stabilizer
     simulation.
     :return: A Zixy SignTerms instance storing the stabilizers of the choi state.
