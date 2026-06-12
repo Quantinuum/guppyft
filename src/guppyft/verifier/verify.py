@@ -410,14 +410,13 @@ def compute_verification_signterms(
       acting on n qubits compute a pair of Clifford tableau. If the implementation
         of the semantic function is valid, the tableau will be equivalent.
 
-    :param SemanticCliffordUnitary: A Guppy function for semantic action
-      of a Clifford operator on k qubits.
-    :param ImplementationCliffordUnitary: A Guppy function for implementing
-      the semantics on n qubits.
-    :param
+    :param semantic_function: A Guppy function for semantic action
+      of a Clifford operator on k logical qubits.
+    :param impl_function: A Guppy function for implementing
+      the semantics on n physical qubits.
+    :param code_choi_state_function: TODO
     :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
       and logical operators.
-    :param: The number of code blocks represented in signed_logical_paulis.
     :return: A pair of Clifford tableaux made up of signed Pauli terms.
     """
 
