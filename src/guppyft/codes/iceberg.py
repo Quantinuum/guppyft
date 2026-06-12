@@ -53,43 +53,43 @@ class Block(Generic[N]):  # type: ignore[misc]
     @guppy
     @no_type_check
     def x(self: "Block[N]", i: int) -> None:
-        """X gate."""
+        """X gate on the qubit with index `i`."""
         x(self, i)
 
     @guppy
     @no_type_check
     def z(self: "Block[N]", i: int) -> None:
-        """Z gate."""
+        """Z gate on the qubit with index `i`."""
         z(self, i)
 
     @guppy
     @no_type_check
     def xx(self: "Block[N]", i: int, j: int) -> None:
-        """X gate on two qubits."""
+        """X gate on the qubits with indices `i` and `j`."""
         xx(self, i, j)
 
     @guppy
     @no_type_check
     def yy(self: "Block[N]", i: int, j: int) -> None:
-        """Y gate on two qubits."""
+        """Y gate on the qubits with indices `i` and `j`."""
         yy(self, i, j)
 
     @guppy
     @no_type_check
     def zz(self: "Block[N]", i: int, j: int) -> None:
-        """Z gate on two qubits."""
+        """Z gate on the qubits with indices `i` and `j`."""
         zz(self, i, j)
 
     @guppy
     @no_type_check
     def all_but_one_x(self: "Block[N]", i: int) -> None:
-        """X gate on all but one qubit."""
+        """X gate on all qubits except that with index `i`."""
         all_but_one_x(self, i)
 
     @guppy
     @no_type_check
     def all_but_one_z(self: "Block[N]", i: int) -> None:
-        """Z gate on all but one qubit."""
+        """Z gate on all qubits except that with index `i`."""
         all_but_one_z(self, i)
 
     @guppy
@@ -113,68 +113,68 @@ class Block(Generic[N]):  # type: ignore[misc]
     @guppy
     @no_type_check
     def x_with_all_but_one_z(self: "Block[N]", i: int) -> None:
-        """X gate on one qubit with Z on all others."""
+        """X gate on the qubit with index `i`; Z on all others."""
         x_with_all_but_one_z(self, i)
 
     @guppy
     @no_type_check
     def z_with_all_but_one_x(self: "Block[N]", i: int) -> None:
-        """Z gate on one qubit with X on all others."""
+        """Z gate on the qubit with index `i`; X on all others."""
         z_with_all_but_one_x(self, i)
 
     @guppy
     @no_type_check
     def fan_out(self: "Block[N]", i: int) -> None:
-        """Fan-out from one qubit to all others."""
+        """Fan-out from the qubit with index `i` to all others."""
         fan_out(self, i)
 
     @guppy
     @no_type_check
     def fan_in(self: "Block[N]", i: int) -> None:
-        """Fan-in to one qubit from all others."""
+        """Fan-in to the qubit with index `i` from all others."""
         fan_in(self, i)
 
     @guppy
     @no_type_check
-    def rx(self: "Block[N]", i: int, a: float) -> None:
-        """Rx gate."""
-        rx(self, i, a)
+    def rx(self: "Block[N]", i: int, angle: float) -> None:
+        """Rx rotation of `angle` radians on the qubit with index `i`."""
+        rx(self, i, angle)
 
     @guppy
     @no_type_check
-    def rz(self: "Block[N]", i: int, a: float) -> None:
-        """Rz gate."""
-        rz(self, i, a)
+    def rz(self: "Block[N]", i: int, angle: float) -> None:
+        """Rz rotation of `angle` radians on the qubit with index `i`."""
+        rz(self, i, angle)
 
     @guppy
     @no_type_check
-    def all_rx(self: "Block[N]", a: float) -> None:
-        """Rx gate on all qubits."""
-        all_rx(self, a)
+    def all_rx(self: "Block[N]", angle: float) -> None:
+        """Rx rotation of `angle` radians on all qubits."""
+        all_rx(self, angle)
 
     @guppy
     @no_type_check
-    def all_ry(self: "Block[N]", a: float) -> None:
-        """Ry gate on all qubits."""
-        all_ry(self, a)
+    def all_ry(self: "Block[N]", angle: float) -> None:
+        """Ry rotation of `angle` radians on all qubits."""
+        all_ry(self, angle)
 
     @guppy
     @no_type_check
-    def all_rz(self: "Block[N]", a: float) -> None:
-        """Rz gate on all qubits."""
-        all_rz(self, a)
+    def all_rz(self: "Block[N]", angle: float) -> None:
+        """Rz rotation of `angle` radians on all qubits."""
+        all_rz(self, angle)
 
     @guppy
     @no_type_check
-    def all_but_one_rx(self: "Block[N]", i: int, a: float) -> None:
-        """Rx gate on all but one qubit."""
-        all_but_one_rx(self, i, a)
+    def all_but_one_rx(self: "Block[N]", i: int, angle: float) -> None:
+        """Rx rotation of `angle` radians on qubits except that with index `i`."""
+        all_but_one_rx(self, i, angle)
 
     @guppy
     @no_type_check
-    def all_but_one_rz(self: "Block[N]", i: int, a: float) -> None:
-        """Rz gate on all but one qubit."""
-        all_but_one_rz(self, i, a)
+    def all_but_one_rz(self: "Block[N]", i: int, angle: float) -> None:
+        """Rz rotation of `angle` radians on qubits except that with index `i`."""
+        all_but_one_rz(self, i, angle)
 
     @guppy
     @no_type_check
@@ -184,32 +184,35 @@ class Block(Generic[N]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
-    def xx_phase(self: "Block[N]", i: int, j: int, a: float) -> None:
-        """XXPhase gate."""
-        xx_phase(self, i, j, a)
+    def xx_phase(self: "Block[N]", i: int, j: int, angle: float) -> None:
+        """XXPhase rotation of `angle` radians on the qubits with indices `i`
+        and `j`."""
+        xx_phase(self, i, j, angle)
 
     @guppy
     @no_type_check
-    def yy_phase(self: "Block[N]", i: int, j: int, a: float) -> None:
-        """YYPhase gate."""
-        yy_phase(self, i, j, a)
+    def yy_phase(self: "Block[N]", i: int, j: int, angle: float) -> None:
+        """YYPhase rotation of `angle` radians on the qubits with indices `i`
+        and `j`."""
+        yy_phase(self, i, j, angle)
 
     @guppy
     @no_type_check
-    def zz_phase(self: "Block[N]", i: int, j: int, a: float) -> None:
-        """ZZPhase gate."""
-        zz_phase(self, i, j, a)
+    def zz_phase(self: "Block[N]", i: int, j: int, angle: float) -> None:
+        """ZZPhase rotation of `angle` radians on the qubits with indices `i`
+        and `j`."""
+        zz_phase(self, i, j, angle)
 
     @guppy
     @no_type_check
     def cx(self: "Block[N]", i: int, j: int) -> None:
-        """CX gate."""
+        """CX gate on the qubits with indices `i` (control) and `j` (target)."""
         cx(self, i, j)
 
     @guppy
     @no_type_check
     def swap(self: "Block[N]", i: int, j: int) -> None:
-        """Swap of two qubits within a block."""
+        """Swap of the qubits with indices `i` and `j`."""
         swap(self, i, j)
 
     @guppy
@@ -221,56 +224,58 @@ class Block(Generic[N]):  # type: ignore[misc]
     @guppy
     @no_type_check
     def try_measure_one_x(self: "Block[N]", i: int) -> Option[Measurement]:
-        """Fallible non-destructive measurement of one qubit in the X basis."""
+        """Fallible non-destructive measurement in the X basis of the qubit
+        with index `i`."""
         return try_measure_one_x(self, i)
 
     @guppy
     @no_type_check
     def try_measure_one_z(self: "Block[N]", i: int) -> Option[Measurement]:
-        """Fallible non-destructive measurement of one qubit in the Z basis."""
+        """Fallible non-destructive measurement in the Z basis of the qubit
+        with index `i`."""
         return try_measure_one_z(self, i)
 
 
 @hugr_op(iceberg_op("x_d"))
 @no_type_check
 def x(block: Block[N], i: int) -> None:
-    """X gate."""
+    """X gate on the qubit with index `i`."""
 
 
 @hugr_op(iceberg_op("z_d"))
 @no_type_check
 def z(block: Block[N], i: int) -> None:
-    """Z gate."""
+    """Z gate on the qubit with index `i`."""
 
 
 @hugr_op(iceberg_op("xx_d"))
 @no_type_check
 def xx(block: Block[N], i: int, j: int) -> None:
-    """X gate on two qubits."""
+    """X gate on the qubits with indices `i` and `j`."""
 
 
 @hugr_op(iceberg_op("yy_d"))
 @no_type_check
 def yy(block: Block[N], i: int, j: int) -> None:
-    """Y gate on two qubits."""
+    """Y gate on the qubits with indices `i` and `j`."""
 
 
 @hugr_op(iceberg_op("zz_d"))
 @no_type_check
 def zz(block: Block[N], i: int, j: int) -> None:
-    """Z gate on two qubits."""
+    """Z gate on the qubits with indices `i` and `j`."""
 
 
 @hugr_op(iceberg_op("all_but_one_x_d"))
 @no_type_check
 def all_but_one_x(block: Block[N], i: int) -> None:
-    """X gate on all but one qubit."""
+    """X gate on all qubits except that with index `i`."""
 
 
 @hugr_op(iceberg_op("all_but_one_z_d"))
 @no_type_check
 def all_but_one_z(block: Block[N], i: int) -> None:
-    """Z gate on all but one qubit."""
+    """Z gate on all qubits except that with index `i`."""
 
 
 @hugr_op(iceberg_op("all_x"))
@@ -294,67 +299,67 @@ def all_z(block: Block[N]) -> None:
 @hugr_op(iceberg_op("x_with_all_but_one_z_d"))
 @no_type_check
 def x_with_all_but_one_z(block: Block[N], i: int) -> None:
-    """X gate on one qubit with Z on all others."""
+    """X gate on the qubit with index `i`; Z on all others."""
 
 
 @hugr_op(iceberg_op("z_with_all_but_one_x_d"))
 @no_type_check
 def z_with_all_but_one_x(block: Block[N], i: int) -> None:
-    """Z gate on one qubit with X on all others."""
+    """Z gate on the qubit with index `i`; X on all others."""
 
 
 @hugr_op(iceberg_op("fan_out_d"))
 @no_type_check
 def fan_out(block: Block[N], i: int) -> None:
-    """Fan-out from one qubit to all others."""
+    """Fan-out from the qubit with index `i` to all others."""
 
 
 @hugr_op(iceberg_op("fan_in_d"))
 @no_type_check
 def fan_in(block: Block[N], i: int) -> None:
-    """Fan-in to one qubit from all others."""
+    """Fan-in to the qubit with index `i` from all others."""
 
 
 @hugr_op(iceberg_op("rx_d"))
 @no_type_check
-def rx(block: Block[N], i: int, a: float) -> None:
-    """Rx gate."""
+def rx(block: Block[N], i: int, angle: float) -> None:
+    """Rx rotation of `angle` radians on the qubit with index `i`."""
 
 
 @hugr_op(iceberg_op("rz_d"))
 @no_type_check
-def rz(block: Block[N], i: int, a: float) -> None:
-    """Rz gate."""
+def rz(block: Block[N], i: int, angle: float) -> None:
+    """Rz rotation of `angle` radians on the qubit with index `i`."""
 
 
 @hugr_op(iceberg_op("all_rx"))
 @no_type_check
-def all_rx(block: Block[N], a: float) -> None:
+def all_rx(block: Block[N], angle: float) -> None:
     """Rx gate on all qubits."""
 
 
 @hugr_op(iceberg_op("all_ry"))
 @no_type_check
-def all_ry(block: Block[N], a: float) -> None:
+def all_ry(block: Block[N], angle: float) -> None:
     """Ry gate on all qubits."""
 
 
 @hugr_op(iceberg_op("all_rz"))
 @no_type_check
-def all_rz(block: Block[N], a: float) -> None:
+def all_rz(block: Block[N], angle: float) -> None:
     """Rz gate on all qubits."""
 
 
 @hugr_op(iceberg_op("all_but_one_rx_d"))
 @no_type_check
-def all_but_one_rx(block: Block[N], i: int, a: float) -> None:
-    """Rx gate on all but one qubit."""
+def all_but_one_rx(block: Block[N], i: int, angle: float) -> None:
+    """Rx rotation of `angle` radians on qubits except that with index `i`."""
 
 
 @hugr_op(iceberg_op("all_but_one_rz_d"))
 @no_type_check
-def all_but_one_rz(block: Block[N], i: int, a: float) -> None:
-    """Rz gate on all but one qubit."""
+def all_but_one_rz(block: Block[N], i: int, angle: float) -> None:
+    """Rz rotation of `angle` radians on qubits except that with index `i`."""
 
 
 @hugr_op(iceberg_op("all_h"))
@@ -365,52 +370,53 @@ def all_h(block: Block[N]) -> None:
 
 @hugr_op(iceberg_op("xx_phase_d"))
 @no_type_check
-def xx_phase(block: Block[N], i: int, j: int, a: float) -> None:
-    """XXPhase gate."""
+def xx_phase(block: Block[N], i: int, j: int, angle: float) -> None:
+    """XXPhase rotation of `angle` radians on the qubits with indices `i` and `j`."""
 
 
 @hugr_op(iceberg_op("yy_phase_d"))
 @no_type_check
-def yy_phase(block: Block[N], i: int, j: int, a: float) -> None:
-    """YYPhase gate."""
+def yy_phase(block: Block[N], i: int, j: int, angle: float) -> None:
+    """YYPhase rotation of `angle` radians on the qubits with indices `i` and `j`."""
 
 
 @hugr_op(iceberg_op("zz_phase_d"))
 @no_type_check
-def zz_phase(block: Block[N], i: int, j: int, a: float) -> None:
-    """ZZPhase gate."""
+def zz_phase(block: Block[N], i: int, j: int, angle: float) -> None:
+    """ZZPhase rotation of `angle` radians on the qubits with indices `i` and `j`."""
 
 
 @hugr_op(iceberg_op("cx_d"))
 @no_type_check
 def cx(block: Block[N], i: int, j: int) -> None:
-    """CX gate."""
+    """CX gate on the qubits with indices `i` (control) and `j` (target)."""
 
 
 @hugr_op(iceberg_op("swap_d"))
 @no_type_check
 def swap(block: Block[N], i: int, j: int) -> None:
-    """Swap of two qubits within a block."""
+    """Swap of the qubits with indices `i` and `j`."""
 
 
 @hugr_op(iceberg_op("zz_phase_between_blocks_d"))
 @no_type_check
 def zz_phase_between_blocks(
-    block0: Block[N], block1: Block[N], i0: int, i1: int, a: float
+    block0: Block[N], block1: Block[N], i0: int, i1: int, angle: float
 ) -> None:
-    """ZZPhase gate involving two blocks."""
+    """ZZPhase rotation of `angle` radians on the qubit with index `i0` in
+    block `block0` and the qubit with index `i1` in block `block1`."""
 
 
 @hugr_op(iceberg_op("cx_transversal"))
 @no_type_check
 def cx_transversal(block0: Block[N], block1: Block[N]) -> None:
-    """CX gate applied transversally over two blocks."""
+    """CX gate applied transversally over `block0` and `block1`."""
 
 
 @hugr_op(iceberg_op("free"))
 @no_type_check
 def discard(block: Block[N] @ owned) -> None:
-    """Free a block."""
+    """Free `block`."""
 
 
 @hugr_op(iceberg_op("measure_syndrome"))
@@ -422,16 +428,18 @@ def measure_syndrome(block: Block[N]) -> tuple[Measurement, Measurement]:
 @hugr_op(iceberg_op("measure_all"))
 @no_type_check
 def measure_all(block: Block[N] @ owned) -> array[Measurement, N]:
-    """Destructive measurement of all qubits."""
+    """Destructive measurement of all qubits in `block`."""
 
 
 @hugr_op(iceberg_op("try_measure_one_x_d"))
 @no_type_check
 def try_measure_one_x(block: Block[N], i: int) -> Option[Measurement]:
-    """Fallible non-destructive measurement of one qubit in the X basis."""
+    """Fallible non-destructive measurement in the X basis of the qubit with
+    index `i`."""
 
 
 @hugr_op(iceberg_op("try_measure_one_z_d"))
 @no_type_check
 def try_measure_one_z(block: Block[N], i: int) -> Option[Measurement]:
-    """Fallible non-destructive measurement of one qubit in the Z basis."""
+    """Fallible non-destructive measurement in the Z basis of the qubit with
+    index `i`."""
