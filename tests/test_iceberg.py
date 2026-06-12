@@ -128,8 +128,9 @@ def test_op_instantiations() -> None:
 
 
 def test_guppy_bindings() -> None:
-    # Use guppy to construct a logical HUGR using ops of all different
-    # signatutes, and check that we can run compilation passes on the result.
+    """Use Guppy to construct a logical HUGR using ops of all different
+    signatures, and check that we can run compilation passes on the result."""
+
     @guppy
     def main() -> None:
         b0 = Block[8]()
@@ -161,8 +162,9 @@ def test_guppy_bindings() -> None:
 
 
 def test_guppy_hugr() -> None:
-    # Write a very simple logical HUGR in guppy and check that it is as
-    # expected.
+    """Write a very simple logical HUGR in guppy and check that it is as
+    expected."""
+
     @guppy
     def main() -> None:
         b = Block[8]()
