@@ -3,14 +3,11 @@
 #![allow(missing_docs)]
 
 use hugr::{
-    builder::{BuildError, HugrBuilder, ModuleBuilder}, extension::{
-        prelude::{bool_t, qb_t},
-        SignatureError,
-    }, hugr::{hugrmut::HugrMut, ValidationError},
+    builder::{BuildError, HugrBuilder, ModuleBuilder}, extension::{prelude::qb_t, SignatureError}, hugr::{hugrmut::HugrMut, ValidationError},
     ops::ExtensionOp,
     ops::{handle::NodeHandle as _, DataflowOpTrait, OpType},
     std_extensions::arithmetic::int_types::INT_TYPES,
-    types::{PolyFuncType, Transformable, Type},
+    types::{PolyFuncType, Type},
     Hugr,
     HugrView,
     Node,
@@ -220,23 +217,23 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
     ) -> Result<(), ImplementOpsPassError> {
         // Replace hugr-bool with tket-bool in function signature
         let op_sig: PolyFuncType = {
-            let mut sig = ext_op.signature().into_owned();
-            sig.transform(&self.type_replacer)?;
-            // bool_t is a sum type, not a CustomType, so ReplaceTypes doesn't handle it.
-            // Replace it manually at the top level (original behaviour).
-            sig.input
-                .iter_mut()
-                .chain(sig.output.iter_mut())
-                .for_each(|ty| {
-                    if ty == &bool_t() {
-                        *ty = bool_type();
-                    }
-                });
+            let sig = ext_op.signature().into_owned();
+            // sig.transform(&self.type_replacer)?;
+            // // bool_t is a sum type, not a CustomType, so ReplaceTypes doesn't handle it.
+            // // Replace it manually at the top level (original behaviour).
+            // sig.input
+            //     .iter_mut()
+            //     .chain(sig.output.iter_mut())
+            //     .for_each(|ty| {
+            //         if ty == &bool_t() {
+            //             *ty = bool_type();
+            //         }
+            //     });
             sig.into()
         };
 
         // Extract function if given, otherwise generate a declaration with the expected signature.
-        let (mut func_hugr, func_node) = if let Some(hugr) = func_hugr_opt {
+        let (func_hugr, _) = if let Some(hugr) = func_hugr_opt {
             let node = self.extract_func(ext_op.qualified_id(), op_sig, &hugr, func_name)?;
             (hugr, node)
         } else {
