@@ -356,7 +356,7 @@ def expand_logical_signterms(
 
 
 def get_expanded_stabilizer_set(
-    signed_logical_paulis: pauli.SignTerms, code_def: StabilizerCode, num_blocks: int
+    signed_logical_paulis: pauli.SignTerms, code: StabilizerCode, num_blocks: int
 ) -> pauli.SignTerms:
     """Given a tableau of signed logical Pauli terms and a number of codeblocks(m),
       expand the terms according to the logical operators of a StabilizerCode.
@@ -372,11 +372,9 @@ def get_expanded_stabilizer_set(
 
     # Firstly, we expand the stabilizers of the choi state using the
     # logical operators of the StabilizerCode
-    stabilizers: pauli.SignTerms = expand_logical_signterms(
-        signed_logical_paulis, code_def
-    )
+    stabilizers: pauli.SignTerms = expand_logical_signterms(signed_logical_paulis, code)
     # Secondly, we include the stabilizer generators for each code block.
-    padded_stabilizers: pauli.StringSet = pad_code_stabilizers(code_def, num_blocks)
+    padded_stabilizers: pauli.StringSet = pad_code_stabilizers(code, num_blocks)
 
     for s in padded_stabilizers.to_strings():
         stabilizers.append(s)
