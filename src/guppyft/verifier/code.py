@@ -27,7 +27,7 @@ class StabilizerCode:
         terms = pauli.ComplexSignTerms(self.num_physical_qubits)
         for j in range(self.num_logical_qubits):
             y_term = self.x_logicals[j] * self.z_logicals[j]
-            # ComplexSign(k) ~= i^k
+            # ComplexSign(k) ~ i^k
             # y_logicals[j] = i * (x_logicals[j] * z_logicals[j])
             y_logical_cmpt = ComplexSign(1) * y_term
             terms.append(y_logical_cmpt)
