@@ -57,7 +57,7 @@ def steane_logical_s(block: array[qubit, 1]) -> None:
 @no_type_check
 def steane_physical_s(block: array[qubit, 7]) -> None:
     for i in range(len(block)):
-        s(block[i])
+        sdg(block[i])
 
 
 @guppy
@@ -70,7 +70,7 @@ def steane_logical_sdg(block: array[qubit, 1]) -> None:
 @no_type_check
 def steane_physical_sdg(block: array[qubit, 7]) -> None:
     for i in range(len(block)):
-        sdg(block[i])
+        s(block[i])
 
 
 @guppy
