@@ -1,6 +1,8 @@
+import functools
 from dataclasses import dataclass
 
 import numpy as np
+from zixy.container.coeffs import ComplexSignCoeffs, ComplexSign
 from zixy.qubit import pauli
 from zixy.qubit.pauli import X, Z
 
@@ -19,6 +21,16 @@ class StabilizerCode:
     generators: pauli.StringSet
     x_logicals: pauli.Strings
     z_logicals: pauli.Strings
+
+    @functools.cached_property
+    def y_logicals(self) -> pauli.ComplexSignTerms:
+        terms = pauli.ComplexSignTerms(self.num_physical_qubits)
+        for i in range(self.num_logical_qubits):
+            y_term = self.x_logicals[i] * self.z_logicals[i]
+            print(y_term)
+            y_logical_cmpt = ComplexSign(1) * y_term
+            terms.append(y_logical_cmpt)
+        return terms
 
     def __post_init__(self) -> None:
         if len(self.generators) != self.num_physical_qubits - self.num_logical_qubits:
