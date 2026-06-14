@@ -262,7 +262,9 @@ def expand_pauli_term(
         #  logical block, then the appropriate "offset" would be (1*7) = 7.
         offset = logical_block_number * n
 
-        shifted = shift_pauli(physical_pauli.string, offset, size=total_qubit_number)
+        shifted: pauli.String = shift_pauli(
+            physical_pauli.string, offset, size=total_qubit_number
+        )
         shifted_term = pauli.SignTerm.from_cmpnt_coeff(shifted, physical_pauli.coeff)
 
         # Get final expanded term by taking the product of num_blocks*k expanded terms.
