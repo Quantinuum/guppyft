@@ -15,7 +15,6 @@ if TYPE_CHECKING:
 from zixy.qubit import Qubits, pauli
 
 from guppyft.verifier.code import StabilizerCode
-from guppyft.verifier.gauss import canonicalize
 from guppyft.verifier.utils import (
     stabilizerlist_to_signterms,
 )
@@ -354,8 +353,8 @@ def compute_verification_signterms(
     )
 
     # Canonicalize both Clifford Tableaux so that we can test for equality.
-    canonicalize(expanded_semantic_stabilizers)
-    canonicalize(implementation_stabilizers)
+    expanded_semantic_stabilizers.canonicalize_all()
+    implementation_stabilizers.canonicalize_all()
 
     return expanded_semantic_stabilizers, implementation_stabilizers
 
@@ -388,7 +387,7 @@ def compute_verification_signterms_double_block(
     )
 
     # Canonicalize both Clifford Tableaux so that we can test for equality.
-    canonicalize(expanded_semantic_stabilizers)
-    canonicalize(implementation_stabilizers)
+    expanded_semantic_stabilizers.canonicalize_all()
+    implementation_stabilizers.canonicalize_all()
 
     return expanded_semantic_stabilizers, implementation_stabilizers
