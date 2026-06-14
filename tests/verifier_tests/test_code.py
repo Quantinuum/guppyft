@@ -7,6 +7,7 @@ from guppyft.verifier.code import (
     ICEBERG_4_2_2_GENERATORS,
     ICEBERG_4_2_2_X,
     ICEBERG_4_2_2_Z,
+    STEANE,
     CodeDefinitionError,
     StabilizerCode,
 )
@@ -24,6 +25,10 @@ def test_iceberg_logicals() -> None:
     assert ICEBERG_4_2_2.x_logicals[1].get_tuple() == (X, I, X, I)
     assert ICEBERG_4_2_2.z_logicals[0].get_tuple() == (I, Z, I, Z)
     assert ICEBERG_4_2_2.z_logicals[1].get_tuple() == (I, I, Z, Z)
+
+
+def test_steane_y_logicals() -> None:
+    assert str(STEANE.y_logicals) == "(-1, Y0 Y1 Y2 Y3 Y4 Y5 Y6)"
 
 
 def test_code_validation() -> None:
