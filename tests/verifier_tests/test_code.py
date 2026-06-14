@@ -29,6 +29,7 @@ def test_iceberg_logicals() -> None:
 
 def test_steane_y_logicals() -> None:
     assert str(STEANE.y_logicals) == "(-1, Y0 Y1 Y2 Y3 Y4 Y5 Y6)"
+    assert isinstance(STEANE.y_logicals, pauli.SignTerms)
 
 
 def test_code_validation() -> None:
