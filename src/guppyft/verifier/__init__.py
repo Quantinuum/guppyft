@@ -5,7 +5,6 @@ from .code import (
     CodeDefinitionError,
     StabilizerCode,
 )
-from .gauss import canonicalize
 from .utils import (
     convert_pauli,
     selene_stabilizer_to_zixy_signterm,
@@ -31,7 +30,6 @@ __all__ = [
     "STEANE",
     "CodeDefinitionError",
     "StabilizerCode",
-    "canonicalize",
     "compute_stabilizers_double_block",
     "compute_stabilizers_single_block",
     "compute_verification_signterms",

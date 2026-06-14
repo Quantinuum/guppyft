@@ -6,7 +6,6 @@ from guppyft.verifier.code import (
     ICEBERG_4_2_2,
     STEANE,
 )
-from guppyft.verifier.gauss import canonicalize
 from guppyft.verifier.utils import stringset_to_signterms
 from guppyft.verifier.verify import (
     compute_stabilizers_double_block,
@@ -140,7 +139,7 @@ def test_cannonical() -> None:
         2,
     )
 
-    canonicalize(test_tableau)
+    test_tableau.canonicalize_all()
     assert test_tableau == pauli.SignTerms.from_iterable(
         ((pauli.PauliMatrix.Z,), (pauli.PauliMatrix.I, pauli.PauliMatrix.Z)), 2
     )
