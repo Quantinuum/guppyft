@@ -241,14 +241,14 @@ def expand_pauli_term(
                     str(code.x_logicals[non_identity_pauli_index])
                 )
 
-            case pauli.PauliMatrix.Z:
-                physical_pauli = pauli.SignTerm.from_str(
-                    str(code.z_logicals[non_identity_pauli_index])
-                )
-
             case pauli.PauliMatrix.Y:
                 physical_pauli = pauli.SignTerm.from_str(
                     str(code.y_logicals[non_identity_pauli_index])
+                )
+
+            case pauli.PauliMatrix.Z:
+                physical_pauli = pauli.SignTerm.from_str(
+                    str(code.z_logicals[non_identity_pauli_index])
                 )
 
             case _:
@@ -268,14 +268,13 @@ def expand_pauli_term(
         # Get final expanded term by taking the product of num_blocks*k expanded terms.
         result_term *= shifted_term
 
-    return result_term
+    return logical_term.coeff * result_term
 
 
 def expand_logical_signterms(
     logical_terms: pauli.SignTerms,
     code: StabilizerCode,
 ) -> pauli.SignTerms:
-
     k = code.num_logical_qubits
     num_blocks = len(logical_terms.qubits) // k
 
