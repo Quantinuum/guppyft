@@ -104,7 +104,7 @@ def compute_stabilizers_single_block(
       `clifford_func` and prepares a Choi state encoding the Clifford unitary.
     :param n_func_qubits: An upper bound for the number of qubits used in stabilizer
     simulation.
-    :return: A Zixy SignTerms instance storing the stabilizers of the choi state.
+    :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
 
     @guppy
@@ -149,8 +149,7 @@ def compute_stabilizers_double_block(
     :param n_func_qubits: An upper bound for the number of qubits used in stabilizer
     simulation.
     :param n_func_qubits: The number of qubits needed for clifford_func.
-    :return: A pair of Zixy SignTerms representing
-      the semantics and the implementation.
+    :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
 
     @guppy
