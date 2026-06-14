@@ -149,7 +149,7 @@ requires-dist = [
     { name = "guppylang-internals", specifier = ">=1.0.0a0" },
     { name = "hugr", specifier = ">=0.16.0" },
     { name = "tket", git = "https://github.com/quantinuum/tket2?subdirectory=tket-py&rev=87f2ab8d6bced055653bf17d07f741e361916a74" },
-    { name = "zixy", specifier = ">=0.3" },
+    { name = "zixy", specifier = "~=0.3" },
 ]
 
 [package.metadata.requires-dev]

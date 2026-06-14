@@ -28,7 +28,7 @@ dependencies = [
     "guppylang-internals>=1.0.0a0",
     "hugr>=0.16.0",
     "tket>=0.13.0",
-    "zixy>=0.3",
+    "zixy~=0.3",
 ]
 
 [dependency-groups]
