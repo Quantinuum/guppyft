@@ -25,9 +25,10 @@ class StabilizerCode:
     @functools.cached_property
     def y_logicals(self) -> pauli.ComplexSignTerms:
         terms = pauli.ComplexSignTerms(self.num_physical_qubits)
-        for i in range(self.num_logical_qubits):
-            y_term = self.x_logicals[i] * self.z_logicals[i]
-            print(y_term)
+        for j in range(self.num_logical_qubits):
+            y_term = self.x_logicals[j] * self.z_logicals[j]
+            # ComplexSign(k) ~= i^k
+            # y_logicals[j] = i * (x_logicals[j] * z_logicals[j])
             y_logical_cmpt = ComplexSign(1) * y_term
             terms.append(y_logical_cmpt)
         return terms
