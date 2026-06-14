@@ -361,7 +361,7 @@ def get_expanded_stabilizer_set(
     :param signed_logical_paulis: A tableau of signed Pauli terms to be expanded.
     :param code: A stabilizer code with well defined [[n, k, d]] parameters
       and logical operators.
-    :param: The number of code blocks represented in signed_logical_paulis.
+    :param num_blocks: The number of code blocks represented in signed_logical_paulis.
     :return: An expanded SignTerms tableau.
     """
 
@@ -462,7 +462,6 @@ def compute_verification_signterms_double_block(
       `clifford_func` and prepares a Choi state encoding the Clifford unitary.
     :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
       and logical operators.
-    :param: The number of code blocks represented in signed_logical_paulis.
     :return: A pair of Clifford tableaux made up of signed Pauli terms.
     """
 
