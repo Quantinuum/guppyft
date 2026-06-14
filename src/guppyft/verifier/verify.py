@@ -263,13 +263,12 @@ def expand_pauli_term(
         offset = logical_block_number * n
 
         shifted = shift_pauli(physical_pauli.string, offset, size=total_qubit_number)
+        shifted_term = pauli.SignTerm.from_cmpnt_coeff(shifted, physical_pauli.coeff)
 
         # Get the expanded physical Pauli by taking the product of k expanded Strings.
-        result_term *= shifted
+        result_term *= shifted_term
 
-    return pauli.SignTerm.from_cmpnt_coeff(
-        result_term.string, result_term.coeff * physical_pauli.coeff
-    )
+    return result_term
 
 
 def expand_logical_signterms(
