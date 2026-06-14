@@ -401,7 +401,7 @@ def compute_verification_signterms(
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
     """Given a semantic Guppy function acting on k qubits and an impl Guppy function
       acting on n qubits, compute a pair of Clifford tableaux. If the implementation
-        of the semantic function is valid, the tableaux will be equivalent.
+        of the semantic function is valid, the two tableaux will be equivalent.
 
     :param semantic_function: A Guppy function for semantic action
       of a Clifford operator on k logical qubits.
@@ -452,7 +452,7 @@ def compute_verification_signterms_double_block(
     """Given a semantic Guppy function acting between two code blocks and an
       impl Guppy function acting on n qubits compute a pair of Clifford tableaux.
         If the implementation of the semantic function is valid,
-          the tableau will be equivalent.
+          the two tableaux will be equivalent.
 
     :param semantic_function: A Guppy function for semantic action
       of a Clifford operator on two code blocks.
