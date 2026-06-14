@@ -2,7 +2,7 @@ import functools
 from dataclasses import dataclass
 
 import numpy as np
-from zixy.container.coeffs import ComplexSignCoeffs, ComplexSign
+from zixy.container.coeffs import ComplexSign
 from zixy.qubit import pauli
 from zixy.qubit.pauli import X, Z
 

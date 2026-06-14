@@ -267,7 +267,9 @@ def expand_pauli_term(
         # Get the expanded physical Pauli by taking the product of k expanded Strings.
         result_term *= shifted
 
-    return pauli.SignTerm.from_cmpnt_coeff(result_term.string, physical_pauli.coeff)
+    return pauli.SignTerm.from_cmpnt_coeff(
+        result_term.string, result_term.coeff * physical_pauli.coeff
+    )
 
 
 def expand_logical_signterms(
