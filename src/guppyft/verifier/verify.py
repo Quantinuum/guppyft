@@ -207,7 +207,8 @@ def pad_code_stabilizers(code: StabilizerCode, num_blocks: int) -> pauli.StringS
 
     :param code: A StabilizerCode.
     :param num_blocks: The number of code blocks.
-    :return: A set of Pauli strings made up of padded stabilizers for each code block.
+    :return: A set of Pauli strings made up of padded stabilizers
+      for each code block. Returns Pauli Strings for 2m blocks.
     """
     code_generators: pauli.StringSet = code.generators
     generator_tuples = code_generators.to_strings().get_tuples()
