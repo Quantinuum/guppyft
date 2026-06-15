@@ -16,6 +16,10 @@ pub const VERSION: semver::Version = semver::Version::new(0, 1, 0);
 /// Type name for logical Iceberg block.
 pub const BLOCK_TYPENAME: TypeName = TypeName::new_inline("block");
 
+/// Type name for an Iceberg-encoded logical qubit, either extracted from a
+/// block or dynamically allocated.
+pub const QUBIT_TYPENAME: TypeName = TypeName::new_inline("qubit");
+
 /// Type of an Iceberg block of a given size.
 ///
 /// * `k_arg` - The number of logical qubits in the code block.
@@ -23,6 +27,18 @@ pub fn block_type(k_arg: impl Into<TypeArg>) -> Type {
     CustomType::new(
         BLOCK_TYPENAME,
         [k_arg.into()],
+        EXTENSION_ID,
+        TypeBound::Linear,
+        &Arc::<Extension>::downgrade(&EXTENSION),
+    )
+    .into()
+}
+
+/// Type of an Iceberg-encoded logical qubit.
+pub fn qubit_type() -> Type {
+    CustomType::new(
+        QUBIT_TYPENAME,
+        [],
         EXTENSION_ID,
         TypeBound::Linear,
         &Arc::<Extension>::downgrade(&EXTENSION),
@@ -38,6 +54,15 @@ fn extension() -> Arc<Extension> {
                 BLOCK_TYPENAME,
                 vec![TypeParam::max_nat_type()],
                 "logical Iceberg block".to_owned(),
+                TypeBound::Linear.into(),
+                extension_ref,
+            )
+            .unwrap();
+        extension
+            .add_type(
+                QUBIT_TYPENAME,
+                vec![],
+                "logical Iceberg qubit".to_owned(),
                 TypeBound::Linear.into(),
                 extension_ref,
             )
@@ -77,7 +102,7 @@ mod tests {
     fn test_iceberg_types_extension() {
         let extn = extension();
         assert_eq!(extn.name() as &str, "guppyft.iceberg.types");
-        assert_eq!(extn.types().count(), 1);
+        assert_eq!(extn.types().count(), 2);
         assert_eq!(extn.operations().count(), 0);
     }
 
@@ -88,10 +113,17 @@ mod tests {
     }
 
     #[test]
+    fn test_iceberg_qubit_type() {
+        let qubit = qubit_type();
+        assert!(!qubit.copyable());
+    }
+
+    #[test]
     fn test_hugr() {
         let block = block_type(2);
+        let qubit = qubit_type();
         let mut module_builder = ModuleBuilder::new();
-        let signature = Signature::new_endo(vec![block]);
+        let signature = Signature::new_endo(vec![block, qubit]);
         let f_build = module_builder.define_function("main", signature).unwrap();
         let wires: Vec<_> = f_build.input_wires().collect();
         f_build.finish_with_outputs(wires).unwrap();
