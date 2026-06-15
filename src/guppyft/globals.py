@@ -3,10 +3,8 @@ from collections.abc import Callable
 from typing import (
     Concatenate,
     ParamSpec,
-    Protocol,
     TypeVar,
     TypeVarTuple,
-    Union,
     overload,
     override,
 )
