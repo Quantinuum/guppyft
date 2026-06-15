@@ -4,6 +4,7 @@ target-version = "py313"
 line-length = 88
 
 extend-exclude = [
+    "tests/error",
     "*.ipynb",
     "**/_bindings/*.pyi"
 ]

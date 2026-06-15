@@ -11,7 +11,7 @@ from pytest_snapshot.plugin import Snapshot
 def run_error_test(file: str, capsys: CaptureFixture[str], snapshot: Snapshot) -> None:
     file = pathlib.Path(file)
 
-    with pytest.raises(Exception) as exc_info:  # noqa: PT011
+    with pytest.raises(Exception) as exc_info:
         importlib.import_module(f"tests.error.{file.parent.name}.{file.stem}")
 
     # Remove the importlib frames from the traceback by skipping beginning frames until

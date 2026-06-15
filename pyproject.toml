@@ -53,6 +53,7 @@ test = [
 [tool.mypy]
 strict = true
 allow_redefinition = true
+exclude = ["tests/error"]
 
 [[tool.mypy.overrides]]
 module = ["pytest_snapshot.plugin"]
