@@ -1539,20 +1539,11 @@
                   "tya": "Type",
                   "ty": {
                     "t": "Opaque",
-                    "extension": "tket.futures",
-                    "extension_version": "0.2.0",
-                    "id": "Future",
-                    "args": [
-                      {
-                        "tya": "Type",
-                        "ty": {
-                          "t": "Sum",
-                          "s": "Unit",
-                          "size": 2
-                        }
-                      }
-                    ],
-                    "bound": "A"
+                    "extension": "tket.measurement",
+                    "extension_version": "0.1.0",
+                    "id": "Measurement",
+                    "args": [],
+                    "bound": "C"
                   }
                 }
               ],
@@ -1596,14 +1587,20 @@
           ],
           "output": [
             {
-              "t": "Sum",
-              "s": "Unit",
-              "size": 2
+              "t": "Opaque",
+              "extension": "tket.measurement",
+              "extension_version": "0.1.0",
+              "id": "Measurement",
+              "args": [],
+              "bound": "C"
             },
             {
-              "t": "Sum",
-              "s": "Unit",
-              "size": 2
+              "t": "Opaque",
+              "extension": "tket.measurement",
+              "extension_version": "0.1.0",
+              "id": "Measurement",
+              "args": [],
+              "bound": "C"
             },
             {
               "t": "Opaque",
@@ -2095,20 +2092,11 @@
                 [
                   {
                     "t": "Opaque",
-                    "extension": "tket.futures",
-                    "extension_version": "0.2.0",
-                    "id": "Future",
-                    "args": [
-                      {
-                        "tya": "Type",
-                        "ty": {
-                          "t": "Sum",
-                          "s": "Unit",
-                          "size": 2
-                        }
-                      }
-                    ],
-                    "bound": "A"
+                    "extension": "tket.measurement",
+                    "extension_version": "0.1.0",
+                    "id": "Measurement",
+                    "args": [],
+                    "bound": "C"
                   }
                 ]
               ]
@@ -2188,20 +2176,11 @@
                 [
                   {
                     "t": "Opaque",
-                    "extension": "tket.futures",
-                    "extension_version": "0.2.0",
-                    "id": "Future",
-                    "args": [
-                      {
-                        "tya": "Type",
-                        "ty": {
-                          "t": "Sum",
-                          "s": "Unit",
-                          "size": 2
-                        }
-                      }
-                    ],
-                    "bound": "A"
+                    "extension": "tket.measurement",
+                    "extension_version": "0.1.0",
+                    "id": "Measurement",
+                    "args": [],
+                    "bound": "C"
                   }
                 ]
               ]
@@ -2272,20 +2251,11 @@
                 [
                   {
                     "t": "Opaque",
-                    "extension": "tket.futures",
-                    "extension_version": "0.2.0",
-                    "id": "Future",
-                    "args": [
-                      {
-                        "tya": "Type",
-                        "ty": {
-                          "t": "Sum",
-                          "s": "Unit",
-                          "size": 2
-                        }
-                      }
-                    ],
-                    "bound": "A"
+                    "extension": "tket.measurement",
+                    "extension_version": "0.1.0",
+                    "id": "Measurement",
+                    "args": [],
+                    "bound": "C"
                   }
                 ]
               ]
@@ -2365,20 +2335,11 @@
                 [
                   {
                     "t": "Opaque",
-                    "extension": "tket.futures",
-                    "extension_version": "0.2.0",
-                    "id": "Future",
-                    "args": [
-                      {
-                        "tya": "Type",
-                        "ty": {
-                          "t": "Sum",
-                          "s": "Unit",
-                          "size": 2
-                        }
-                      }
-                    ],
-                    "bound": "A"
+                    "extension": "tket.measurement",
+                    "extension_version": "0.1.0",
+                    "id": "Measurement",
+                    "args": [],
+                    "bound": "C"
                   }
                 ]
               ]

@@ -725,6 +725,7 @@ dependencies = [
  "hugr-cli",
  "semver",
  "strum 0.28.0",
+ "tket",
  "tket-qsystem",
 ]
 
