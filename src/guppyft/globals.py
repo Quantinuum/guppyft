@@ -6,6 +6,7 @@ from typing import (
     Protocol,
     TypeVar,
     TypeVarTuple,
+    Union,
     overload,
     override,
 )
@@ -65,10 +66,6 @@ R = TypeVarTuple("R")
 Ret = TypeVar("Ret")
 
 
-class SupportsCall[**P, Ret](Protocol):
-    def __call__(self, *args: P.args, **kwargs: P.kwargs) -> Ret: ...
-
-
 class GlobalOpCompiler(CustomInoutCallCompiler):
     op: Callable[[ht.FunctionType, Inst, CompilerContext], ops.DataflowOp]
 
@@ -99,7 +96,7 @@ class GlobalWithChecker(CustomCallChecker):
         for i, func_input in enumerate(callback_func.inputs):
             if InputFlags.Inout in func_input.flags:
                 assert isinstance(callback_expr, GlobalName)
-                callback_args: list[ast.arg] = ENGINE.get_parsed(
+                callback_args: list[ast.arg] = ENGINE.get_parsed(  # type: ignore[union-attr]
                     callback_expr.def_id
                 ).defined_at.args.args
                 raise GuppyTypeError(
@@ -163,8 +160,8 @@ def with_op_instantiate(
             [
                 ht.StringArg(var_name),
                 global_arg.type_arg(),
-                ht.ListArg(input_args),
-                ht.ListArg(func_ty.output),
+                ht.ListArg(list[ht.TypeArg](a.type_arg() for a in input_args)),
+                ht.ListArg(list[ht.TypeArg](a.type_arg() for a in func_ty.output)),
             ],
             concrete,
         )
@@ -198,33 +195,31 @@ def _get_map_output_args(func_output: Type, global_ty: Type) -> Type:
 
 
 @overload
-def with_global[G, **P](
-    initial_state: G,
-    callback_func: SupportsCall[P, None],
-    *args: P.args,
-) -> G: ...
-@overload
 def with_global[G, **P, *R](
     initial_state: G,
-    callback_func: SupportsCall[P, tuple[*R]],
+    callback_func: Callable[P, tuple[*R]],
     *args: P.args,
+    **kwargs: P.kwargs,
 ) -> tuple[G, *R]: ...
 @overload
 def with_global[G, **P, Ret](
     initial_state: G,
-    callback_func: SupportsCall[P, Ret],
+    callback_func: Callable[P, Ret],
     *args: P.args,
+    **kwargs: P.kwargs,
 ) -> tuple[G, Ret]: ...
-@custom_function(
+@custom_function(  # type: ignore[misc, arg-type]
     checker=GlobalWithChecker(),
     compiler=GlobalOpCompiler(with_op_instantiate(GLOBAL_VAR_NAME)),
     higher_order_value=False,
 )
-def with_global[G, **P, Ret](
+def with_global[G, **P, *R, Ret](
     initial_state: G,
-    callback_func: SupportsCall[P, Ret],
+    callback_func: Callable[P, tuple[*R] | Ret],
     *args: P.args,
-) -> tuple[G, Ret]: ...
+    **kwargs: P.kwargs,
+) -> tuple[G, *R] | tuple[G, Ret]:
+    raise NotImplementedError
 
 
 def map_op_instantiate(
@@ -241,8 +236,8 @@ def map_op_instantiate(
             [
                 ht.StringArg(var_name),
                 global_ty.type_arg(),
-                ht.ListArg(list[ht.TypeArg](input_args)),
-                ht.ListArg(list[ht.TypeArg](func_ty.output[1:])),
+                ht.ListArg(list[ht.TypeArg](a.type_arg() for a in input_args)),
+                ht.ListArg(list[ht.TypeArg](a.type_arg() for a in func_ty.output[1:])),
             ],
             concrete,
         )
@@ -267,7 +262,7 @@ class GlobalMapChecker(CustomCallChecker):
             and InputFlags.Owned not in global_ty.flags
         ):
             assert isinstance(callback_expr, GlobalName)
-            callback_args: list[ast.arg] = ENGINE.get_parsed(
+            callback_args: list[ast.arg] = ENGINE.get_parsed(  # type: ignore[union-attr]
                 callback_expr.def_id
             ).defined_at.args.args
             raise GuppyTypeError(
@@ -305,31 +300,24 @@ class GlobalMapChecker(CustomCallChecker):
 
 
 @overload
-def map_global[Ret](
-    callback_func: SupportsCall[[], Ret],
-) -> None: ...
-
-
-@overload
 def map_global[G, **P](
-    callback_func: SupportsCall[Concatenate[G, P], G],
+    callback_func: Callable[Concatenate[G, P], G],
     *args: P.args,
+    **kwargs: P.kwargs,
 ) -> None: ...
-
-
 @overload
 def map_global[G, **P, *R](
-    callback_func: SupportsCall[Concatenate[G, P], tuple[G, *R]],
+    callback_func: Callable[Concatenate[G, P], tuple[G, *R]],
     *args: P.args,
+    **kwargs: P.kwargs,
 ) -> tuple[*R]: ...
-# TODO Needs fixing for (G) -> (G, (int, int))
-#  The output signature is computed as ((int,int),)
-@custom_function(
+@custom_function(  # type: ignore[misc, arg-type]
     checker=GlobalMapChecker(),
     compiler=GlobalOpCompiler(map_op_instantiate(GLOBAL_VAR_NAME)),
     higher_order_value=False,
 )
-def map_global[G, **P, *R](
-    callback_func: SupportsCall[Concatenate[G, P], G | tuple[G, *R]],
+def map_global[G, **P, *R](  # type: ignore[empty-body]
+    callback_func: Callable[Concatenate[G, P], G | tuple[G, *R]],
     *args: P.args,
-) -> None | tuple[*R]: ...
+    **kwargs: P.kwargs,
+) -> tuple[*R]: ...

@@ -10,7 +10,7 @@ def my_prog() -> None:
 
 @guppy
 def main() -> None:
-    with_global(1, my_prog, 1)
+    with_global(1, my_prog, 1)  # type: ignore[call-overload]
 
 
 main.compile()

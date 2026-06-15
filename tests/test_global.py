@@ -104,8 +104,8 @@ def test_with_owned_input() -> None:
     @guppy
     def main() -> None:
         qb = qubit()
-        _, qb = with_global(1, my_prog, qb)
-        result("main", measure(qb).read())
+        r: tuple[int, qubit] = with_global(1, my_prog, qb)
+        result("main", measure(r[1]).read())
 
     res = main.emulator(n_qubits=1).run().collated_shots()
     assert res == [{"main": [1]}]
@@ -161,7 +161,7 @@ def test_map_missing_global_arg_input_error() -> None:
 
     @guppy
     def my_prog() -> None:
-        map_global(foo)
+        map_global(foo)  # type: ignore[call-overload]
 
     my_prog.compile()
 

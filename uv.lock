@@ -119,6 +119,7 @@ dependencies = [
     { name = "guppylang" },
     { name = "guppylang-internals" },
     { name = "hugr" },
+    { name = "selene-hugr-qis-compiler" },
     { name = "tket" },
 ]
 
@@ -152,6 +153,7 @@ requires-dist = [
     { name = "guppylang", specifier = ">=1.0.0a4" },
     { name = "guppylang-internals", specifier = ">=1.0.0a4" },
     { name = "hugr", specifier = ">=0.17.0" },
+    { name = "selene-hugr-qis-compiler", git = "https://github.com/quantinuum/tket2?subdirectory=qis-compiler&rev=e56c615515d31f61f1e0f7db0527719097a8aaa9" },
     { name = "tket", git = "https://github.com/quantinuum/tket2?subdirectory=tket-py&rev=e56c615515d31f61f1e0f7db0527719097a8aaa9" },
 ]
 
