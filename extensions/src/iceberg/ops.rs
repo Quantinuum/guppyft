@@ -779,7 +779,7 @@ mod tests {
         let free = EXTENSION
             .instantiate_extension_op("free", [8.into()])
             .unwrap();
-        let outputs: Vec<Type> = vec![future_type(bool_t()); 2];
+        let outputs: Vec<Type> = vec![measurement_type(); 2];
         let mut dfg_builder = DFGBuilder::new(Signature::new(vec![], outputs)).unwrap();
         let handle = dfg_builder.add_dataflow_op(alloczero, vec![]).unwrap();
         let handle = dfg_builder.add_dataflow_op(x3, handle.outputs()).unwrap();
@@ -807,7 +807,7 @@ mod tests {
             .unwrap();
         let mut dfg_builder = DFGBuilder::new(Signature::new(
             [block_type(4)],
-            [borrow_array_type(4, future_type(bool_t()))],
+            [borrow_array_type(4, measurement_type())],
         ))
         .unwrap();
         let handle = dfg_builder
@@ -837,9 +837,9 @@ mod tests {
             vec![block_type(2)],
             vec![
                 block_type(2),
-                optional_future_bool(),
-                optional_future_bool(),
-                optional_future_bool(),
+                optional_measurement(),
+                optional_measurement(),
+                optional_measurement(),
             ],
         ))
         .unwrap();
