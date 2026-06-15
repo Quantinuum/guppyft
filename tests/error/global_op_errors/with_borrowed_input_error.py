@@ -5,14 +5,14 @@ from guppyft.globals import with_global
 
 
 @guppy
-def my_prog0(qb: qubit) -> None:
+def my_prog(qb: qubit) -> None:
     return
 
 
 @guppy
 def main() -> None:
     qb = qubit()
-    with_global(1, my_prog0, qb)
+    with_global(1, my_prog, qb)
     discard(qb)
 
 

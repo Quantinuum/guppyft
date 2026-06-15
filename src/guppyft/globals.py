@@ -9,7 +9,6 @@ from typing import (
     override,
 )
 
-from guppylang import guppy
 from guppylang_internals.checker.errors.generic import ExpectedError, UnsupportedError
 from guppylang_internals.checker.expr_checker import (
     ExprChecker,
@@ -44,11 +43,7 @@ from hugr import tys as ht
 from hugr.tys import TypeBound
 from tket_exts import globals
 
-State = guppy.type_var("State")
-State_Linear = guppy.type_var("State_Linear", copyable=False, droppable=False)
-In = guppy.type_var("In")
-In_Linear = guppy.type_var("In_Linear", copyable=False, droppable=False)
-Out = guppy.type_var("OUT", copyable=False, droppable=False)
+from guppyft.errors import CallbackUsedHereNote, ConsiderOwnedHelper
 
 # Mark ops as having side effects to add order edges in the HUGR
 # when calls return None.
@@ -88,7 +83,10 @@ class GlobalWithChecker(CustomCallChecker):
     def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
         _, global_ty = ExprSynthesizer(self.ctx).synthesize(args[0])
         callback_expr, callback_func = ExprSynthesizer(self.ctx).synthesize(args[1])
-        assert isinstance(callback_func, FunctionType)
+        if not isinstance(callback_func, FunctionType):
+            raise GuppyTypeError(
+                ExpectedError(callback_expr, "FunctionType", str(callback_func))
+            )
 
         # Raise error if arg is borrowed
         for i, func_input in enumerate(callback_func.inputs):
@@ -97,13 +95,14 @@ class GlobalWithChecker(CustomCallChecker):
                 callback_args: list[ast.arg] = ENGINE.get_parsed(  # type: ignore[union-attr]
                     callback_expr.def_id
                 ).defined_at.args.args
-                raise GuppyTypeError(
-                    UnsupportedError(
-                        callback_args[i],
-                        "Borrowed args",
-                        unsupported_in="callback input. Consider using `@owned`.",
-                    )
+                err = UnsupportedError(
+                    callback_args[i],
+                    "Borrowed args",
+                    unsupported_in="callback function",
                 )
+                err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
+                err.add_sub_diagnostic(ConsiderOwnedHelper(None))
+                raise GuppyTypeError(err)
 
         # Check the number of input args provided matches callback function signature
         if len(args[2:]) != len(callback_func.inputs):
@@ -168,11 +167,12 @@ def with_op_instantiate(
 
 
 def _get_map_output_args(func_output: Type, global_ty: Type) -> Type:
+    """Helper function to get the output args for the map_global function."""
     # If output is global_ty, then outputs are None
     if func_output == global_ty:
         return NoneType()
 
-    # Return then be TupleType
+    # Return must be TupleType
     assert isinstance(func_output, TupleType)
     # First arg must be global ty
     assert func_output.element_types[0] == global_ty, (
@@ -180,16 +180,14 @@ def _get_map_output_args(func_output: Type, global_ty: Type) -> Type:
     )
 
     if len(func_output.element_types) == 2:
-        # If the only return is a Tuple, it must be repacked in a Tuple
+        # If the only return is a tuple, it must be repacked in a tuple
         # to match signatures between Guppy and HUGR.
         if isinstance(func_output.element_types[1], TupleType):
             return TupleType([func_output.element_types[1]])
         else:
             return func_output.element_types[1]
-    elif len(func_output.element_types) > 2:
-        return TupleType(func_output.element_types[1:])
     else:
-        return NoneType()
+        return TupleType(func_output.element_types[1:])
 
 
 @overload
@@ -247,7 +245,11 @@ class GlobalMapChecker(CustomCallChecker):
     def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
         # First arg is the callback function
         callback_expr, callback_func = ExprSynthesizer(self.ctx).synthesize(args[0])
-        assert isinstance(callback_func, FunctionType)
+        # assert isinstance(callback_func, FunctionType)
+        if not isinstance(callback_func, FunctionType):
+            raise GuppyTypeError(
+                ExpectedError(callback_expr, "FunctionType", str(callback_func))
+            )
         global_ty = callback_func.inputs[0]
         # TODO This is not a fundamental limitation but there is a mismatch between how
         #  Guppy and HUGR unpack tuples that needs to be fixed.

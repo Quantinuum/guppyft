@@ -1,0 +1,8 @@
+Error: Expected FunctionType (at $FILE:8:15)
+  | 
+6 | @guppy
+7 | def my_prog() -> None:
+8 |     map_global(1)
+  |                ^ Expected FunctionType, got int
+
+Guppy compilation failed due to 1 previous error
