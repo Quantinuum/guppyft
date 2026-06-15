@@ -3,14 +3,14 @@
 #![allow(missing_docs)]
 
 use hugr::{
-    builder::{BuildError, HugrBuilder, ModuleBuilder}, extension::{prelude::qb_t, SignatureError}, hugr::{hugrmut::HugrMut, ValidationError},
+    Hugr, HugrView, Node,
+    builder::{BuildError, HugrBuilder, ModuleBuilder},
+    extension::{SignatureError, prelude::qb_t},
+    hugr::{ValidationError, hugrmut::HugrMut},
     ops::ExtensionOp,
-    ops::{handle::NodeHandle as _, DataflowOpTrait, OpType},
+    ops::{DataflowOpTrait, OpType, handle::NodeHandle as _},
     std_extensions::arithmetic::int_types::INT_TYPES,
     types::{PolyFuncType, Type},
-    Hugr,
-    HugrView,
-    Node,
 };
 use hugr_core::hugr::internal::HugrMutInternals;
 use hugr_core::hugr::linking::NodeLinkingError;
@@ -20,8 +20,8 @@ use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::{BTreeMap, HashMap};
 use tket::passes::{
-    replace_types::ReplaceTypesError, ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes,
-    WithScope,
+    ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes, WithScope,
+    replace_types::ReplaceTypesError,
 };
 
 #[derive(derive_more::Error, Debug, derive_more::Display, derive_more::From)]

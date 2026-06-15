@@ -8,7 +8,7 @@ from guppylang.std.builtins import array, comptime, owned, result
 from guppylang.std.collections import Stack
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.qsystem import zz_phase
-from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
+from guppylang.std.quantum import Measurement, cx, discard, measure, project_z, qubit, x
 
 from guppyft.encode import EncoderSpec, ImplementOpsSpec, OpReplacements
 from guppyft.globals import map_global, with_global
@@ -94,25 +94,27 @@ def identity_code_spec(
     @no_type_check
     def _QAlloc() -> tuple[tuple[int, int]]:
         @guppy
-        def _impl(state: STATE @ owned) -> tuple[STATE, tuple[int, int]]:
+        def _impl(state: STATE @ owned) -> tuple[STATE, int, int]:
             result("_QAlloc", 0)
             blk_id, qb_id = state.get_next_addr()
             state.put_block(blk_id, qubit())
-            return state, (blk_id, qb_id)
+            return state, blk_id, qb_id
 
         return (map_global(_impl),)
 
     # MeasureFree is compiled from `guppylang.std.quantum.measure`
     @guppy(link_name="link.identity.MeasureFree")
     @no_type_check
-    def _MeasureFree(q: tuple[int, int]) -> bool:
+    def _MeasureFree(q: tuple[int, int]) -> Measurement:
         @guppy
-        def _impl(state: STATE @ owned, q: tuple[int, int]) -> tuple[STATE, bool]:
+        def _impl(
+            state: STATE @ owned, q: tuple[int, int]
+        ) -> tuple[STATE, Measurement]:
             result("_MeasureFree", 0)
             blk_id, _ = q
             blk = state.take_block(blk_id)
 
-            res = measure(blk).read()
+            res = measure(blk)
 
             state.free_addr(q)
             return state, res
@@ -157,9 +159,7 @@ def identity_code_spec(
     @no_type_check
     def _X(q: tuple[int, int]) -> tuple[tuple[int, int]]:
         @guppy
-        def _impl(
-            state: STATE @ owned, q: tuple[int, int]
-        ) -> tuple[STATE, tuple[int, int]]:
+        def _impl(state: STATE @ owned, q: tuple[int, int]) -> tuple[STATE, int, int]:
             result("_X", 0)
             blk_id, qb_id = q
             blk = state.take_block(blk_id)
@@ -172,7 +172,7 @@ def identity_code_spec(
                 array(blk_id), comptime(costs["X"]), comptime(costs["IDLE_X"])
             )
 
-            return state, (blk_id, qb_id)
+            return state, blk_id, qb_id
 
         return (map_global(_impl, q),)
 
@@ -224,22 +224,6 @@ def identity_code_spec(
             return state, ctl, tgt
 
         return map_global(_impl, (ctl, tgt, phase))
-
-    ops = OpReplacements()
-    ops.with_funcs(
-        {
-            ("tket.quantum", "QAlloc"): _QAlloc,
-            ("tket.quantum", "MeasureFree"): _MeasureFree,
-            ("tket.quantum", "Measure"): _Measure,
-            ("tket.quantum", "QFree"): _QFree,
-            ("tket.quantum", "X"): _X,
-            ("tket.quantum", "CX"): _CX,
-            # `tket.qsystem` extension may not be loaded in programs that only use
-            # `guppyland.std.quantum` operations. `ZZPhase` is included to test
-            # missing extension behaviour during encoding.
-            ("tket.qsystem", "ZZPhase"): _ZZPhase,
-        }
-    )
 
     @guppy.declare(link_name="link.identity.gen_state")
     @no_type_check
