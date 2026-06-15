@@ -211,13 +211,12 @@ def with_global[G, **P, Ret](
     compiler=GlobalOpCompiler(with_op_instantiate(GLOBAL_VAR_NAME)),
     higher_order_value=False,
 )
-def with_global[G, **P, *R, Ret](
+def with_global[G, **P, *R, Ret](  # type: ignore[empty-body]
     initial_state: G,
     callback_func: Callable[P, tuple[*R] | Ret],
     *args: P.args,
     **kwargs: P.kwargs,
-) -> tuple[G, *R] | tuple[G, Ret]:
-    raise NotImplementedError
+) -> tuple[G, *R] | tuple[G, Ret]: ...
 
 
 def map_op_instantiate(

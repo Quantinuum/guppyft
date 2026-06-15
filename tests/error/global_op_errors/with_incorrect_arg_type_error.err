@@ -2,7 +2,7 @@ Error: Type mismatch (at $FILE:13:28)
    | 
 11 | @guppy
 12 | def main() -> None:
-13 |     with_global(1, my_prog, 1.0)
+13 |     with_global(1, my_prog, 1.0)  # type: ignore[call-overload]
    |                             ^^^ Expected expression of type `int`, got `float`
 
 Guppy compilation failed due to 1 previous error
