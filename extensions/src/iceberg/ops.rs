@@ -21,10 +21,14 @@ use hugr::{
         arithmetic::{float_types::float64_type, int_types::int_type},
         collections::{array::ArrayKind, borrow_array::BorrowArray},
     },
-    types::{FuncValueType, PolyFuncTypeRV, Type, TypeArg, type_param::TypeParam},
+    types::{
+        FuncValueType, PolyFuncTypeRV, Signature, Type, TypeArg, TypeRow, type_param::TypeParam,
+    },
 };
 use strum::{EnumIter, EnumString, IntoStaticStr};
 use tket_qsystem::extension::futures::future_type;
+
+use crate::iceberg::types::free_logical_qubit_type;
 
 use super::types::block_tv;
 
@@ -167,6 +171,30 @@ pub enum IcebergOpDef {
     try_measure_one_z,
     /// Fallible non-destructive measurement of one qubit in the Z basis with dynamic index.
     try_measure_one_z_d,
+    /// Allocate a free logical qubit in the zero state.
+    alloc_q,
+    /// Discard a free logical qubit.
+    discard_q,
+    /// X gate on a free logical_qubit.
+    x_q,
+    /// Y gate on a free logical_qubit.
+    y_q,
+    /// Z gate on a free logical_qubit.
+    z_q,
+    /// Rx gate on a free logical qubit.
+    rx_q,
+    /// Ry gate on a free logical qubit.
+    ry_q,
+    /// Rz gate on a free logical qubit.
+    rz_q,
+    /// ZZPhase gate on two free logical qubits.
+    zz_phase_q,
+    /// CX gate on two free logical qubits.
+    cx_q,
+    /// Fallible non-destructive measurement of a free logical qubit in the X basis.
+    try_measure_x_q,
+    /// Fallible non-destructive measurement of a free logical qubit in the Z basis.
+    try_measure_z_q,
 }
 
 /// Concrete Iceberg logical operation with block size and indices set.
@@ -373,6 +401,24 @@ fn sig_1_block_d(n_angles: usize, n_indices: usize) -> SignatureFunc {
     .into()
 }
 
+/// Signature of an operation that acts on a number of free logical qubits with
+/// a number of additional angle qubits.
+fn sig_qbs_angles(n_qubits: usize, n_angles: usize) -> SignatureFunc {
+    let mut in_types: Vec<Type> = vec![free_logical_qubit_type(); n_qubits];
+    let out_types: Vec<Type> = in_types.clone();
+    in_types.extend(vec![float64_type(); n_angles]);
+    Signature::new(in_types, TypeRow::from(out_types)).into()
+}
+
+/// Signature of a fallible non-destructive measurement on a free logical qubit.
+fn sig_qb_meas() -> SignatureFunc {
+    Signature::new(
+        vec![free_logical_qubit_type()],
+        TypeRow::from(vec![optional_future_bool(), free_logical_qubit_type()]),
+    )
+    .into()
+}
+
 impl MakeOpDef for IcebergOpDef {
     fn opdef_id(&self) -> OpName {
         <&Self as Into<&'static str>>::into(self).into()
@@ -540,6 +586,22 @@ impl MakeOpDef for IcebergOpDef {
                 ),
             )
             .into(),
+            alloc_q => {
+                Signature::new(vec![], TypeRow::from(vec![free_logical_qubit_type()])).into()
+            }
+            discard_q => {
+                Signature::new(vec![free_logical_qubit_type()], TypeRow::from(vec![])).into()
+            }
+            x_q => sig_qbs_angles(1, 0),
+            y_q => sig_qbs_angles(1, 0),
+            z_q => sig_qbs_angles(1, 0),
+            rx_q => sig_qbs_angles(1, 1),
+            ry_q => sig_qbs_angles(1, 1),
+            rz_q => sig_qbs_angles(1, 1),
+            zz_phase_q => sig_qbs_angles(2, 1),
+            cx_q => sig_qbs_angles(2, 0),
+            try_measure_x_q => sig_qb_meas(),
+            try_measure_z_q => sig_qb_meas(),
         }
     }
 
@@ -583,7 +645,7 @@ mod tests {
     fn test_iceberg_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.iceberg.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 58);
+        assert_eq!(EXTENSION.operations().count(), 70);
     }
 
     #[test]
@@ -602,6 +664,7 @@ mod tests {
     #[test]
     fn test_hugr_ops() {
         let block = block_type(6);
+        let qubit = free_logical_qubit_type();
         let x3 = EXTENSION
             .instantiate_extension_op("x", [6.into(), 3.into()])
             .unwrap();
@@ -656,13 +719,20 @@ mod tests {
         let swap51 = EXTENSION
             .instantiate_extension_op("swap", [6.into(), 5.into(), 1.into()])
             .unwrap();
+        let rx_q = EXTENSION.instantiate_extension_op("rx_q", []).unwrap();
+        let zz_phase_q = EXTENSION
+            .instantiate_extension_op("zz_phase_q", [])
+            .unwrap();
+        let cx_q = EXTENSION.instantiate_extension_op("cx_q", []).unwrap();
         assert_eq!(x3.description(), "X gate.");
         assert_eq!(
             zzphasebetweenblocks_d.description(),
             "ZZPhase gate involving two blocks with dynamic indices."
         );
         let mut module_builder = ModuleBuilder::new();
-        let signature = Signature::new_endo(vec![block; 2]);
+        let mut types: Vec<Type> = vec![block; 2];
+        types.extend(vec![qubit; 2]);
+        let signature = Signature::new_endo(types);
         let mut f_build = module_builder.define_function("main", signature).unwrap();
         let wires: Vec<_> = f_build.input_wires().collect();
         let mut linear = f_build.as_circuit(wires);
@@ -691,6 +761,22 @@ mod tests {
                     CircuitUnit::Wire(angle),
                 ],
             )
+            .unwrap();
+        linear
+            .append_and_consume(rx_q, [CircuitUnit::Linear(2), CircuitUnit::Wire(angle)])
+            .unwrap();
+        linear
+            .append_and_consume(
+                zz_phase_q,
+                [
+                    CircuitUnit::Linear(2),
+                    CircuitUnit::Linear(3),
+                    CircuitUnit::Wire(angle),
+                ],
+            )
+            .unwrap();
+        linear
+            .append_and_consume(cx_q, [CircuitUnit::Linear(2), CircuitUnit::Linear(3)])
             .unwrap();
         linear
             .append_and_consume(
@@ -762,6 +848,12 @@ mod tests {
         let alloczero = EXTENSION
             .instantiate_extension_op("alloc_zero", [8.into()])
             .unwrap();
+        let allocqb = EXTENSION.instantiate_extension_op("alloc_q", []).unwrap();
+        let freeqb = EXTENSION.instantiate_extension_op("discard_q", []).unwrap();
+        let xqb = EXTENSION.instantiate_extension_op("x_q", []).unwrap();
+        let measqb = EXTENSION
+            .instantiate_extension_op("try_measure_z_q", [])
+            .unwrap();
         let x3 = EXTENSION
             .instantiate_extension_op("x", [8.into(), 3.into()])
             .unwrap();
@@ -771,7 +863,11 @@ mod tests {
         let free = EXTENSION
             .instantiate_extension_op("free", [8.into()])
             .unwrap();
-        let outputs: Vec<Type> = vec![future_type(bool_t()); 2];
+        let outputs: Vec<Type> = vec![
+            future_type(bool_t()),
+            future_type(bool_t()),
+            optional_future_bool(),
+        ];
         let mut dfg_builder = DFGBuilder::new(Signature::new(vec![], outputs)).unwrap();
         let handle = dfg_builder.add_dataflow_op(alloczero, vec![]).unwrap();
         let handle = dfg_builder.add_dataflow_op(x3, handle.outputs()).unwrap();
@@ -786,8 +882,19 @@ mod tests {
         let handle = dfg_builder.add_dataflow_op(free, [block_wire]).unwrap();
         let outs: Vec<Wire> = handle.outputs().collect();
         assert!(outs.is_empty());
+        let qubit_wire = dfg_builder.add_dataflow_op(allocqb, []).unwrap();
+        let qubit_wire = dfg_builder
+            .add_dataflow_op(xqb, qubit_wire.outputs())
+            .unwrap();
+        let handle = dfg_builder
+            .add_dataflow_op(measqb, qubit_wire.outputs())
+            .unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 2);
+        let freed_h = dfg_builder.add_dataflow_op(freeqb, [wires[1]]).unwrap();
+        assert!(freed_h.outputs().count() == 0);
         let h = dfg_builder
-            .finish_hugr_with_outputs([bool_wire_0, bool_wire_1])
+            .finish_hugr_with_outputs([bool_wire_0, bool_wire_1, wires[0]])
             .unwrap();
         h.validate().unwrap();
     }
