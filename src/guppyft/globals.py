@@ -200,7 +200,7 @@ def map_op_instantiate(
 class GlobalMapChecker(CustomCallChecker):
     @override
     def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
-        # First arg is function to be mapped
+        # First arg is the callback function
         callback_expr, callback_func = ExprSynthesizer(self.ctx).synthesize(args[0])
         assert isinstance(callback_func, FunctionType)
         global_ty = callback_func.inputs[0]
@@ -240,8 +240,8 @@ class GlobalMapChecker(CustomCallChecker):
             case TupleType():
                 # For multiple outputs, global_ty must be first
                 # TODO prettify
-                assert func_out.element_types[0] == global_ty, (
-                    f"{func_out.element_types[0]=}, {global_ty=}"
+                assert func_out.element_types[0] == global_ty.ty, (
+                    f"{func_out.element_types[0]=}, {global_ty.ty=}"
                 )
                 output_args = (
                     TupleType(func_out.element_types[1:])
@@ -264,6 +264,8 @@ class GlobalMapChecker(CustomCallChecker):
         return GlobalCall(def_id=self.func.id, args=args, type_args=inst), ty
 
 
+# TODO Needs fixing for (G) -> (G, (int, int))
+#  The output signature is computed as ((int,int),)
 @custom_function(
     checker=GlobalMapChecker(),
     compiler=GlobalOpCompiler(map_op_instantiate(GLOBAL_VAR_NAME)),

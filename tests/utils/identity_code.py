@@ -35,16 +35,16 @@ def identity_code_spec(
         @guppy
         @no_type_check
         def free_addr(self, addr: tuple[int, int]) -> None:
-            self.addr_stack = self.addr_stack.push(addr)
+            self.addr_stack.push(addr)
 
         @guppy
         @no_type_check
         def get_next_addr(
             self: "STATE",
         ) -> tuple[int, int]:
-            if self.addr_stack.end == 0:
+            if len(self.addr_stack) == 0:
                 exit("get_next_addr: No more qubits to allocate")
-            next_addr, self.addr_stack = self.addr_stack.pop()
+            next_addr = self.addr_stack.pop()
 
             return next_addr
 
@@ -100,7 +100,7 @@ def identity_code_spec(
             state.put_block(blk_id, qubit())
             return state, (blk_id, qb_id)
 
-        return map_global(_impl)
+        return (map_global(_impl),)
 
     # MeasureFree is compiled from `guppylang.std.quantum.measure`
     @guppy(link_name="link.identity.MeasureFree")
@@ -174,7 +174,7 @@ def identity_code_spec(
 
             return state, (blk_id, qb_id)
 
-        return map_global(_impl, q)
+        return (map_global(_impl, q),)
 
     @guppy(link_name="link.identity.CX")
     @no_type_check
@@ -241,9 +241,12 @@ def identity_code_spec(
         }
     )
 
-    @guppy
+    @guppy.declare(link_name="link.identity.gen_state")
     @no_type_check
-    def global_state_gen() -> STATE:
+    def state_gen_decl() -> STATE: ...
+    @guppy(link_name="link.identity.gen_state")
+    @no_type_check
+    def state_gen() -> STATE:
         return STATE(
             array(nothing[qubit]() for _ in range(comptime(n_qubits))),
             Stack(
@@ -253,18 +256,56 @@ def identity_code_spec(
             array(0 for _ in range(comptime(n_qubits))),
         )
 
+    @guppy.declare(link_name="link.identity.discard_state")
+    @no_type_check
+    def state_discard_decl(state: STATE @ owned) -> None: ...
+    @guppy(link_name="link.identity.discard_state")
+    @no_type_check
+    def state_discard(state: STATE @ owned) -> None:
+        state.discard()
+
+    lib = guppy.library(
+        state_gen,
+        state_discard,
+        _QAlloc,
+        _MeasureFree,
+        _Measure,
+        _QFree,
+        _X,
+        _CX,
+        _ZZPhase,
+    ).compile()
+
+    ops = OpReplacements()
+    ops.with_generated_decls(
+        {
+            ("tket.quantum", "QAlloc"): "link.identity.QAlloc",
+            ("tket.quantum", "MeasureFree"): "link.identity.MeasureFree",
+            ("tket.quantum", "Measure"): "link.identity.Measure",
+            ("tket.quantum", "QFree"): "link.identity.QFree",
+            ("tket.quantum", "X"): "link.identity.X",
+            ("tket.quantum", "CX"): "link.identity.CX",
+            # `tket.qsystem` extension may not be loaded in programs that only use
+            # `guppyland.std.quantum` operations. `ZZPhase` is included to test
+            # missing extension behaviour during encoding.
+            ("tket.qsystem", "ZZPhase"): "link.identity.ZZPhase",
+        }
+    )
+
     def build_wrapper(
         func: GuppyFunctionDefinition[[], None],
     ) -> GuppyFunctionDefinition[[], None]:
         @guppy
         @no_type_check
         def wrapper() -> None:
-            state = global_state_gen()
+            state = state_gen_decl()
             state = with_global(state, func)
-            state.discard()
+            state_discard_decl(state)
 
         return wrapper  # type: ignore[no-any-return]
 
     return EncoderSpec(
-        implement_spec=ImplementOpsSpec(ops=ops, build_wrapper=build_wrapper)
+        implement_spec=ImplementOpsSpec(
+            ops=ops, build_wrapper=build_wrapper, libs=[lib]
+        )
     )

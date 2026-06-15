@@ -3,25 +3,25 @@
 #![allow(missing_docs)]
 
 use hugr::{
-    Hugr, HugrView, Node,
-    builder::{BuildError, HugrBuilder, ModuleBuilder},
-    extension::{SignatureError, prelude::qb_t},
-    hugr::{ValidationError, hugrmut::HugrMut},
+    builder::{BuildError, HugrBuilder, ModuleBuilder}, extension::{prelude::qb_t, SignatureError}, hugr::{hugrmut::HugrMut, ValidationError},
     ops::ExtensionOp,
-    ops::{DataflowOpTrait, OpType, handle::NodeHandle as _},
+    ops::{handle::NodeHandle as _, DataflowOpTrait, OpType},
     std_extensions::arithmetic::int_types::INT_TYPES,
     types::{PolyFuncType, Type},
+    Hugr,
+    HugrView,
+    Node,
 };
 use hugr_core::hugr::internal::HugrMutInternals;
 use hugr_core::hugr::linking::NodeLinkingError;
 use hugr_core::ops::{Call, OpName};
-use hugr_core::types::TypeArg;
+use hugr_core::types::{Transformable, TypeArg};
 use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::{BTreeMap, HashMap};
 use tket::passes::{
-    ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes, WithScope,
-    replace_types::ReplaceTypesError,
+    replace_types::ReplaceTypesError, ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes,
+    WithScope,
 };
 
 #[derive(derive_more::Error, Debug, derive_more::Display, derive_more::From)]
@@ -106,7 +106,6 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
                 );
             }
         }
-
         let op_funcs = self
             .op_replacements
             .iter()
@@ -213,10 +212,14 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
         func_hugr_opt: Option<Hugr>,
         func_name: &str,
     ) -> Result<(), ImplementOpsPassError> {
-        let op_sig: PolyFuncType = ext_op.signature().into_owned().into();
+        let op_sig: PolyFuncType = {
+            let mut sig = ext_op.signature().into_owned();
+            sig.transform(&self.type_replacer)?;
+            sig.into()
+        };
 
         // Extract function if given, otherwise generate a declaration with the expected signature.
-        let (func_hugr, _) = if let Some(hugr) = func_hugr_opt {
+        let (func_hugr, func_node) = if let Some(hugr) = func_hugr_opt {
             let node = self.extract_func(ext_op.qualified_id(), op_sig, &hugr, func_name)?;
             (hugr, node)
         } else {
@@ -224,8 +227,6 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
             let decl = module_builder.declare(func_name, op_sig)?;
             (module_builder.finish_hugr()?, decl.node())
         };
-
-        let func_node = func_hugr.entrypoint();
 
         // Register call for later replacement
         let call_type: OpType =
@@ -296,7 +297,7 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
                     .unwrap()
                     .node_map
                     .get(&func_node)
-                    .unwrap();
+                    .unwrap_or_else(|| panic!("Could not find inserted function node!"));
                 (op_hash, inserted_func_node)
             })
             .collect();
