@@ -94,13 +94,13 @@ def identity_code_spec(
     @no_type_check
     def _QAlloc() -> tuple[tuple[int, int]]:
         @guppy
-        def _impl(state: STATE @ owned) -> tuple[STATE, int, int]:
+        def _impl(state: STATE @ owned) -> tuple[STATE, tuple[int, int]]:
             result("_QAlloc", 0)
             blk_id, qb_id = state.get_next_addr()
             state.put_block(blk_id, qubit())
-            return state, blk_id, qb_id
+            return state, (blk_id, qb_id)
 
-        return (map_global(_impl),)
+        return map_global(_impl)
 
     # MeasureFree is compiled from `guppylang.std.quantum.measure`
     @guppy(link_name="link.identity.MeasureFree")
@@ -159,7 +159,9 @@ def identity_code_spec(
     @no_type_check
     def _X(q: tuple[int, int]) -> tuple[tuple[int, int]]:
         @guppy
-        def _impl(state: STATE @ owned, q: tuple[int, int]) -> tuple[STATE, int, int]:
+        def _impl(
+            state: STATE @ owned, q: tuple[int, int]
+        ) -> tuple[STATE, tuple[int, int]]:
             result("_X", 0)
             blk_id, qb_id = q
             blk = state.take_block(blk_id)
@@ -172,9 +174,9 @@ def identity_code_spec(
                 array(blk_id), comptime(costs["X"]), comptime(costs["IDLE_X"])
             )
 
-            return state, blk_id, qb_id
+            return state, (blk_id, qb_id)
 
-        return (map_global(_impl, q),)
+        return map_global(_impl, q)
 
     @guppy(link_name="link.identity.CX")
     @no_type_check

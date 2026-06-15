@@ -37,6 +37,7 @@ from guppylang_internals.tys.ty import (
     NoneType,
     TupleType,
     Type,
+    type_to_row,
 )
 from hugr import Wire, ops
 from hugr import tys as ht
@@ -148,11 +149,14 @@ def with_op_instantiate(
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
         global_arg, func_ty, *input_args = concrete.input
+        assert isinstance(func_ty, ht.FunctionType), (
+            f"Expected a function, found {func_ty}."
+        )
 
         return globals.with_def.instantiate(
             [
                 ht.StringArg(var_name),
-                global_arg,
+                global_arg.type_arg(),
                 ht.ListArg(input_args),
                 ht.ListArg(func_ty.output),
             ],
@@ -160,6 +164,31 @@ def with_op_instantiate(
         )
 
     return op
+
+
+def _get_map_output_args(func_output: Type, global_ty: Type) -> Type:
+    # If output is global_ty, then outputs are None
+    if func_output == global_ty:
+        return NoneType()
+
+    # Return then be TupleType
+    assert isinstance(func_output, TupleType)
+    # First arg must be global ty
+    assert func_output.element_types[0] == global_ty, (
+        f"{func_output.element_types[0]=}, {global_ty=}"
+    )
+
+    if len(func_output.element_types) == 2:
+        # If the only return is a Tuple, it must be repacked in a Tuple
+        # to match signatures between Guppy and HUGR.
+        if isinstance(func_output.element_types[1], TupleType):
+            return TupleType([func_output.element_types[1]])
+        else:
+            return func_output.element_types[1]
+    elif len(func_output.element_types) > 2:
+        return TupleType(func_output.element_types[1:])
+    else:
+        return NoneType()
 
 
 @custom_function(
@@ -187,7 +216,7 @@ def map_op_instantiate(
         return globals.map_def.instantiate(
             [
                 ht.StringArg(var_name),
-                global_ty,
+                global_ty.type_arg(),
                 ht.ListArg(list[ht.TypeArg](input_args)),
                 ht.ListArg(list[ht.TypeArg](func_ty.output[1:])),
             ],
@@ -204,6 +233,10 @@ class GlobalMapChecker(CustomCallChecker):
         callback_expr, callback_func = ExprSynthesizer(self.ctx).synthesize(args[0])
         assert isinstance(callback_func, FunctionType)
         global_ty = callback_func.inputs[0]
+        # TODO This is not a fundamental limitation but there is a mismatch between how
+        #  Guppy and HUGR unpack tuples that needs to be fixed.
+        if isinstance(global_ty.ty, TupleType):
+            raise TypeError("Global type cannot be tuple.")
         # Global type must be owned if linear
         if (
             global_ty.ty.hugr_bound == TypeBound.Linear
@@ -235,24 +268,7 @@ class GlobalMapChecker(CustomCallChecker):
             input_args.append(FuncInput(arg_ty, func_input.flags))
 
         # callback_func output is [global state, *out_args]
-        func_out = callback_func.output
-        match func_out:
-            case TupleType():
-                # For multiple outputs, global_ty must be first
-                # TODO prettify
-                assert func_out.element_types[0] == global_ty.ty, (
-                    f"{func_out.element_types[0]=}, {global_ty.ty=}"
-                )
-                output_args = (
-                    TupleType(func_out.element_types[1:])
-                    if len(func_out.element_types) > 2
-                    else func_out.element_types[1]
-                )
-            case _:
-                # For single return, it must be global_ty
-                # TODO prettify
-                assert func_out == global_ty.ty
-                output_args = NoneType()
+        output_args = _get_map_output_args(callback_func.output, global_ty.ty)
 
         func_ty = FunctionType(
             inputs=input_args,

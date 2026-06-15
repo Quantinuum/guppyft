@@ -6,6 +6,7 @@ from guppylang import array, guppy
 from guppylang.emulator import EmulatorError
 from guppylang.std.builtins import owned, result
 from guppylang.std.quantum import discard, measure, qubit, x
+from selene_hugr_qis_compiler import check_hugr
 
 from guppyft.globals import map_global, with_global
 
@@ -289,3 +290,32 @@ def test_nested_map_calls_error() -> None:
         match=re.escape("Panic (#11001): No global provided for GlobalsOp::With"),
     ):
         main.emulator(n_qubits=1).run().collated_shots()
+
+
+@pytest.mark.xfail
+def test_map_global_tuple_type() -> None:
+    @guppy
+    def foo(i: tuple[int, int]) -> tuple[int, int]:
+        return i
+
+    @guppy
+    def my_prog() -> None:
+        map_global(foo)
+
+    my_prog.compile_function()
+
+
+def test_map_return_tuple_type() -> None:
+    @guppy
+    def foo(g: int) -> tuple[int, tuple[int, int]]:
+        return g, (0, 0)
+
+    @guppy
+    def my_prog() -> None:
+        map_global(foo)
+
+    @guppy
+    def main() -> None:
+        with_global(0, my_prog)
+
+    main.emulator(n_qubits=1).run().collated_shots()
