@@ -407,8 +407,8 @@ def compute_verification_signterms(
       of a Clifford operator on k logical qubits.
     :param impl_function: A Guppy function for implementing
       the semantics on n physical qubits.
-    :param code_choi_state_function:A Guppy function that takes an arbitrary
-      `clifford_func` and prepares a Choi state encoding the Clifford unitary.
+    :param code_choi_state_function: A Guppy function that takes an arbitrary
+      `impl_function` and prepares a Choi state encoding the Clifford unitary.
     :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
       and logical operators.
     :return: A pair of Clifford tableaux made up of signed Pauli terms.
@@ -459,7 +459,7 @@ def compute_verification_signterms_double_block(
     :param impl_function A Guppy function for implementing
       the semantics on two code blocks.
     :param code_choi_state_function: A Guppy function that takes an arbitrary
-      `clifford_func` and prepares a Choi state encoding the Clifford unitary.
+      `impl_function` and prepares a Choi state encoding the Clifford unitary.
     :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
       and logical operators.
     :return: A pair of Clifford tableaux made up of signed Pauli terms.
