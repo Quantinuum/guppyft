@@ -80,8 +80,8 @@ def test_op_instantiations() -> None:
         "measure_all",
     ]:
         assert (
-                iceberg_ops.__getattribute__(op_name)(3).op_def()
-                == ops_extn.operations[op_name]
+            iceberg_ops.__getattribute__(op_name)(3).op_def()
+            == ops_extn.operations[op_name]
         )
     # Ops that take a single index:
     for op_name in [
@@ -101,8 +101,8 @@ def test_op_instantiations() -> None:
         "try_measure_one_z",
     ]:
         assert (
-                iceberg_ops.__getattribute__(op_name)(3, 1).op_def()
-                == ops_extn.operations[op_name]
+            iceberg_ops.__getattribute__(op_name)(3, 1).op_def()
+            == ops_extn.operations[op_name]
         )
     # Ops that take two indices:
     for op_name in [
@@ -117,8 +117,8 @@ def test_op_instantiations() -> None:
         "zz_phase_between_blocks",
     ]:
         assert (
-                iceberg_ops.__getattribute__(op_name)(3, 1, 2).op_def()
-                == ops_extn.operations[op_name]
+            iceberg_ops.__getattribute__(op_name)(3, 1, 2).op_def()
+            == ops_extn.operations[op_name]
         )
 
 

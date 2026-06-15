@@ -14,4 +14,4 @@ def my_prog() -> None:
     map_global(foo)
 
 
-my_prog.compile_function()()
+my_prog.compile_function()

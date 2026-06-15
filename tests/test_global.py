@@ -6,7 +6,6 @@ from guppylang import array, guppy
 from guppylang.emulator import EmulatorError
 from guppylang.std.builtins import owned, result
 from guppylang.std.quantum import discard, measure, qubit, x
-from selene_hugr_qis_compiler import check_hugr
 
 from guppyft.globals import map_global, with_global
 
@@ -97,6 +96,7 @@ def test_with_outputs() -> None:
 
 def test_with_owned_input() -> None:
     @guppy
+    @no_type_check
     def my_prog(qb: qubit @ owned) -> qubit:
         x(qb)
         return qb
@@ -113,6 +113,7 @@ def test_with_owned_input() -> None:
 
 def test_map_global_linear() -> None:
     @guppy
+    @no_type_check
     def foo(qb: qubit @ owned) -> qubit:
         x(qb)
         return qb
@@ -133,7 +134,7 @@ def test_map_global_linear() -> None:
 
 def test_map_global_linear_return_arg_order_error() -> None:
     @guppy
-    def foo(qb: qubit @ owned) -> tuple[int, qubit]:
+    def foo(qb: qubit @ owned) -> tuple[int, qubit]:  # type: ignore[valid-type]
         x(qb)
         return 0, qb
 
@@ -188,7 +189,7 @@ def test_map_global_non_linear() -> None:
 def test_map_mismatch_global_return_type_error() -> None:
     @guppy
     def foo(i: float) -> int:
-        return i
+        return i  # type: ignore[return-value]
 
     @guppy
     def my_prog() -> None:

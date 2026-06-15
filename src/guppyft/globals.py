@@ -3,8 +3,10 @@ from collections.abc import Callable
 from typing import (
     Concatenate,
     ParamSpec,
+    Protocol,
     TypeVar,
     TypeVarTuple,
+    overload,
     override,
 )
 
@@ -37,7 +39,6 @@ from guppylang_internals.tys.ty import (
     NoneType,
     TupleType,
     Type,
-    type_to_row,
 )
 from hugr import Wire, ops
 from hugr import tys as ht
@@ -61,6 +62,11 @@ GLOBAL_VAR_NAME = "guppy_ft_global"
 G = TypeVar("G")
 P = ParamSpec("P")
 R = TypeVarTuple("R")
+Ret = TypeVar("Ret")
+
+
+class SupportsCall[**P, Ret](Protocol):
+    def __call__(self, *args: P.args, **kwargs: P.kwargs) -> Ret: ...
 
 
 class GlobalOpCompiler(CustomInoutCallCompiler):
@@ -191,16 +197,34 @@ def _get_map_output_args(func_output: Type, global_ty: Type) -> Type:
         return NoneType()
 
 
+@overload
+def with_global[G, **P](
+    initial_state: G,
+    callback_func: SupportsCall[P, None],
+    *args: P.args,
+) -> G: ...
+@overload
+def with_global[G, **P, *R](
+    initial_state: G,
+    callback_func: SupportsCall[P, tuple[*R]],
+    *args: P.args,
+) -> tuple[G, *R]: ...
+@overload
+def with_global[G, **P, Ret](
+    initial_state: G,
+    callback_func: SupportsCall[P, Ret],
+    *args: P.args,
+) -> tuple[G, Ret]: ...
 @custom_function(
     checker=GlobalWithChecker(),
     compiler=GlobalOpCompiler(with_op_instantiate(GLOBAL_VAR_NAME)),
     higher_order_value=False,
 )
-def with_global[G, **P, *R](
+def with_global[G, **P, Ret](
     initial_state: G,
-    callback_func: Callable[P, *R],
+    callback_func: SupportsCall[P, Ret],
     *args: P.args,
-) -> tuple[G, *R]: ...
+) -> tuple[G, Ret]: ...
 
 
 def map_op_instantiate(
@@ -280,6 +304,24 @@ class GlobalMapChecker(CustomCallChecker):
         return GlobalCall(def_id=self.func.id, args=args, type_args=inst), ty
 
 
+@overload
+def map_global[Ret](
+    callback_func: SupportsCall[[], Ret],
+) -> None: ...
+
+
+@overload
+def map_global[G, **P](
+    callback_func: SupportsCall[Concatenate[G, P], G],
+    *args: P.args,
+) -> None: ...
+
+
+@overload
+def map_global[G, **P, *R](
+    callback_func: SupportsCall[Concatenate[G, P], tuple[G, *R]],
+    *args: P.args,
+) -> tuple[*R]: ...
 # TODO Needs fixing for (G) -> (G, (int, int))
 #  The output signature is computed as ((int,int),)
 @custom_function(
@@ -288,6 +330,6 @@ class GlobalMapChecker(CustomCallChecker):
     higher_order_value=False,
 )
 def map_global[G, **P, *R](
-    callback_func: Callable[Concatenate[G, P], tuple[G, *R] | G],
+    callback_func: SupportsCall[Concatenate[G, P], G | tuple[G, *R]],
     *args: P.args,
-) -> tuple[*R]: ...
+) -> None | tuple[*R]: ...
