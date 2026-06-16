@@ -16,6 +16,9 @@ pub const VERSION: semver::Version = semver::Version::new(0, 1, 0);
 /// Type name for logical Iceberg block.
 pub const BLOCK_TYPENAME: TypeName = TypeName::new_inline("block");
 
+/// Type name for a "borrowed" logical Iceberg block.
+pub const BORROWED_BLOCK_TYPENAME: TypeName = TypeName::new_inline("borrowed_block");
+
 /// Type name for an Iceberg-encoded logical qubit, either extracted from a
 /// block or dynamically allocated.
 pub const QUBIT_TYPENAME: TypeName = TypeName::new_inline("qubit");
@@ -34,8 +37,26 @@ pub fn block_type(k_arg: impl Into<TypeArg>) -> Type {
     .into()
 }
 
+/// Type of an Iceberg block of a given size that has been "borrowed". This
+/// represents a block from which some logical qubits have been borrowed; it
+/// cannot be used in any logical operations until all those qubits have been
+/// returned.
+///
+/// * `k_arg` - The number of logical qubits in the code block.
+pub fn borrowed_block_type(k_arg: impl Into<TypeArg>) -> Type {
+    CustomType::new(
+        BORROWED_BLOCK_TYPENAME,
+        [k_arg.into()],
+        EXTENSION_ID,
+        TypeBound::Linear,
+        &Arc::<Extension>::downgrade(&EXTENSION),
+    )
+    .into()
+}
+
 /// Type of a "free" logical qubit. This represents a logical qubit whose block
-/// is not statically known (but assigned at runtime).
+/// is not statically known (but assigned at runtime). It may have been
+/// "borrowed" from a logical block, or allocated independently.
 pub fn free_logical_qubit_type() -> Type {
     CustomType::new(
         QUBIT_TYPENAME,
@@ -55,6 +76,15 @@ fn extension() -> Arc<Extension> {
                 BLOCK_TYPENAME,
                 vec![TypeParam::max_nat_type()],
                 "logical Iceberg block".to_owned(),
+                TypeBound::Linear.into(),
+                extension_ref,
+            )
+            .unwrap();
+        extension
+            .add_type(
+                BORROWED_BLOCK_TYPENAME,
+                vec![TypeParam::max_nat_type()],
+                "borrowed logical Iceberg block".to_owned(),
                 TypeBound::Linear.into(),
                 extension_ref,
             )
@@ -103,7 +133,7 @@ mod tests {
     fn test_iceberg_types_extension() {
         let extn = extension();
         assert_eq!(extn.name() as &str, "guppyft.iceberg.types");
-        assert_eq!(extn.types().count(), 2);
+        assert_eq!(extn.types().count(), 3);
         assert_eq!(extn.operations().count(), 0);
     }
 
@@ -111,6 +141,12 @@ mod tests {
     fn test_iceberg_block_type() {
         let block = block_type(6);
         assert!(!block.copyable());
+    }
+
+    #[test]
+    fn test_iceberg_borrowed_block_type() {
+        let borrowed_block = borrowed_block_type(6);
+        assert!(!borrowed_block.copyable());
     }
 
     #[test]
@@ -122,9 +158,10 @@ mod tests {
     #[test]
     fn test_hugr() {
         let block = block_type(2);
+        let bblock = borrowed_block_type(2);
         let qubit = free_logical_qubit_type();
         let mut module_builder = ModuleBuilder::new();
-        let signature = Signature::new_endo(vec![block, qubit]);
+        let signature = Signature::new_endo(vec![block, bblock, qubit]);
         let f_build = module_builder.define_function("main", signature).unwrap();
         let wires: Vec<_> = f_build.input_wires().collect();
         f_build.finish_with_outputs(wires).unwrap();
