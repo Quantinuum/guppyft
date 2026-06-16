@@ -7,13 +7,12 @@ from guppylang_internals.definition.common import DefId
 from guppylang_internals.diagnostic import Error, Help, Note
 from guppylang_internals.engine import ENGINE
 from guppylang_internals.nodes import GlobalName
-from guppylang_internals.span import Span
 from guppylang_internals.tys.ty import FuncInput, Type
 
 
 def get_function_input_arg(func_id: DefId, idx: int) -> ast.arg:
     """Helper function to get ast location of function argument"""
-    func_args = ENGINE.get_parsed(func_id).defined_at.args.args  # type:ignore[union-attr]
+    func_args: Sequence[ast.arg] = ENGINE.get_parsed(func_id).defined_at.args.args  # type: ignore[union-attr]
     return func_args[idx]
 
 

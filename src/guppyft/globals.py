@@ -49,7 +49,6 @@ from guppyft._errors import (
     CallbackFuncParametersError,
     CallbackUsedHereNote,
     ConsiderOwnedHelper,
-    get_function_input_arg,
 )
 
 # Mark ops as having side effects to add order edges in the HUGR
