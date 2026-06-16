@@ -4,11 +4,9 @@ import pathlib
 import sys
 
 import pytest
-from _pytest.capture import CaptureFixture
-from pytest_snapshot.plugin import Snapshot
 
 
-def run_error_test(file: str, capsys: CaptureFixture[str], snapshot: Snapshot) -> None:
+def run_error_test(file, capsys, snapshot) -> None:
     file = pathlib.Path(file)
 
     with pytest.raises(Exception) as exc_info:

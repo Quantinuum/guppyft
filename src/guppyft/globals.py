@@ -44,11 +44,13 @@ from hugr.tys import TypeBound
 from tket_exts import globals
 
 from guppyft._errors import (
-    BorrowedCallbackParamError,
     CallbackFuncDefinedHere,
     CallbackFuncParametersError,
+    CallbackInputParamError,
+    CallbackOutputArgError,
     CallbackUsedHereNote,
     ConsiderOwnedHelper,
+    get_function_input_arg,
 )
 
 # Mark ops as having side effects to add order edges in the HUGR
@@ -101,7 +103,14 @@ class _GlobalWithChecker(CustomCallChecker):
         # Raise error if arg is borrowed
         for i, func_input in enumerate(callback_func.inputs):
             if InputFlags.Inout in func_input.flags:
-                err = BorrowedCallbackParamError(callback_expr, i)
+                err = CallbackInputParamError(
+                    callback_expr,
+                    i,
+                    (
+                        "Parameters in callback functions used in global operation"
+                        " cannot be borrowed."
+                    ),
+                )
                 err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
                 err.add_sub_diagnostic(ConsiderOwnedHelper(None))
                 raise GuppyTypeError(err)
@@ -168,30 +177,6 @@ def _with_op_instantiate(
     return op
 
 
-def _get_map_output_args(func_output: Type, global_ty: Type) -> Type:
-    """Helper function to get the output args for the map_global function."""
-    # If output is global_ty, then outputs are None
-    if func_output == global_ty:
-        return NoneType()
-
-    # Return must be TupleType
-    assert isinstance(func_output, TupleType)
-    # First arg must be global ty
-    assert func_output.element_types[0] == global_ty, (
-        f"{func_output.element_types[0]=}, {global_ty=}"
-    )
-
-    if len(func_output.element_types) == 2:
-        # If the only return is a tuple, it must be repacked in a tuple
-        # to match signatures between Guppy and HUGR.
-        if isinstance(func_output.element_types[1], TupleType):
-            return TupleType([func_output.element_types[1]])
-        else:
-            return func_output.element_types[1]
-    else:
-        return TupleType(func_output.element_types[1:])
-
-
 @overload
 def with_global[G, **P, *R](
     initial_state: G,
@@ -247,23 +232,27 @@ class _GlobalMapChecker(CustomCallChecker):
     def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
         # First arg is the callback function
         callback_expr, callback_func = ExprSynthesizer(self.ctx).synthesize(args[0])
-        # assert isinstance(callback_func, FunctionType)
         if not isinstance(callback_func, FunctionType):
             raise GuppyTypeError(
                 ExpectedError(callback_expr, "FunctionType", str(callback_func))
             )
-        global_ty = callback_func.inputs[0]
+
+        try:
+            global_arg = callback_func.inputs[0]
+        except IndexError as e:
+            err = CallbackInputParamError(
+                callback_expr, None, "Callback function missing global input parameter"
+            )
+            err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
+            raise GuppyTypeError(err) from e
         # Global type must be owned if linear
         if (
-            global_ty.ty.hugr_bound == TypeBound.Linear
-            and InputFlags.Owned not in global_ty.flags
+            global_arg.ty.hugr_bound == TypeBound.Linear
+            and InputFlags.Owned not in global_arg.flags
         ):
-            assert isinstance(callback_expr, GlobalName)
-            callback_args: list[ast.arg] = ENGINE.get_parsed(  # type: ignore[union-attr]
-                callback_expr.def_id
-            ).defined_at.args.args
+            callback_arg = get_function_input_arg(callback_expr.def_id, 0)
             err = ExpectedError(
-                callback_args[0],
+                callback_arg,
                 "linear global arg to be owned",
             )
             err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
@@ -273,7 +262,14 @@ class _GlobalMapChecker(CustomCallChecker):
         # Raise error if input arg is borrowed/inout
         for i, input_arg in enumerate(callback_func.inputs):
             if InputFlags.Inout in input_arg.flags:
-                err = BorrowedCallbackParamError(callback_expr, i)
+                err = CallbackInputParamError(
+                    callback_expr,
+                    i,
+                    (
+                        "Parameters in callback functions used in global operation"
+                        " cannot be borrowed."
+                    ),
+                )
                 err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
                 err.add_sub_diagnostic(ConsiderOwnedHelper(None))
                 raise GuppyTypeError(err)
@@ -284,7 +280,31 @@ class _GlobalMapChecker(CustomCallChecker):
             input_args.append(FuncInput(arg_ty, func_input.flags))
 
         # callback_func output is [global state, *out_args]
-        output_args = _get_map_output_args(callback_func.output, global_ty.ty)
+        callback_output = callback_func.output
+        match callback_output:
+            case TupleType():
+                # First output must be global ty
+                if callback_output.element_types[0] != global_arg.ty:
+                    callback_def = ENGINE.get_parsed(callback_expr.def_id).defined_at
+                    err = CallbackOutputArgError(callback_def.returns, global_arg.ty)
+                    err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
+                    raise GuppyTypeError(err)
+                if len(callback_output.element_types) == 2:
+                    # If the only return is a tuple, it must be repacked in a tuple
+                    # to match signatures between Guppy and HUGR.
+                    if isinstance(callback_output.element_types[1], TupleType):
+                        output_args = TupleType([callback_output.element_types[1]])
+                    else:
+                        output_args = callback_output.element_types[1]
+                else:
+                    output_args = TupleType(callback_output.element_types[1:])
+            case _:
+                if callback_output != global_arg.ty:
+                    callback_def = ENGINE.get_parsed(callback_expr.def_id).defined_at
+                    err = CallbackOutputArgError(callback_def.returns, global_arg.ty)
+                    err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
+                    raise GuppyTypeError(err)
+                output_args = NoneType()
 
         func_ty = FunctionType(
             inputs=input_args,

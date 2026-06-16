@@ -10,10 +10,14 @@ from guppylang_internals.nodes import GlobalName
 from guppylang_internals.tys.ty import FuncInput, Type
 
 
-def get_function_input_arg(func_id: DefId, idx: int) -> ast.arg:
-    """Helper function to get ast location of function argument"""
-    func_args: Sequence[ast.arg] = ENGINE.get_parsed(func_id).defined_at.args.args  # type: ignore[union-attr]
-    return func_args[idx]
+def get_function_input_arg(func_id: DefId, idx: int | None) -> ast.AST | None:
+    """Helper function to get ast location of function argument. If `idx` is None, the
+    whole function AST is returned."""
+    if idx is None:
+        return ENGINE.get_parsed(func_id).defined_at
+    else:
+        func_args: Sequence[ast.arg] = ENGINE.get_parsed(func_id).defined_at.args.args  # type: ignore[union-attr]
+        return func_args[idx]
 
 
 @dataclass(frozen=True)
@@ -36,19 +40,31 @@ class CallbackFuncParametersError(Error):
 
 
 @dataclass(frozen=True)
-class BorrowedCallbackParamError(Error):
-    title: ClassVar[str] = "Borrowed callback function parameter error."
-    span_label: ClassVar[str] = (
-        "Parameters in callback functions used in global operation cannot be borrowed."
-    )
+class CallbackInputParamError(Error):
+    title: ClassVar[str] = "Callback input parameter error"
+    span_label: ClassVar[str] = "{kind}"
     callback_def_node: ast.expr
-    param_idx: int
+    param_idx: int | None
+    kind: str
     span: ast.arg = field(init=False)
 
     def __post_init__(self) -> None:
         assert isinstance(self.callback_def_node, GlobalName)
         arg = get_function_input_arg(self.callback_def_node.def_id, self.param_idx)
         object.__setattr__(self, "span", arg)
+
+
+@dataclass(frozen=True)
+class CallbackOutputArgError(Error):
+    title: ClassVar[str] = "Callback function output error."
+    span_label: ClassVar[str] = (
+        "First return arg must match global type `{expected_str}`."
+    )
+    expected: Type
+
+    @property
+    def expected_str(self) -> str:
+        return str(self.expected)
 
 
 @dataclass(frozen=True)

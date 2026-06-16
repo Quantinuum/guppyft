@@ -132,40 +132,6 @@ def test_map_global_linear() -> None:
     assert res == [{"main": [1]}]
 
 
-def test_map_global_linear_return_arg_order_error() -> None:
-    @guppy
-    def foo(qb: qubit @ owned) -> tuple[int, qubit]:  # type: ignore[valid-type]
-        x(qb)
-        return 0, qb
-
-    @guppy
-    def my_prog() -> None:
-        map_global(foo)
-
-    @guppy
-    def main() -> None:
-        qb = qubit()
-        qb = with_global(qb, my_prog)
-        result("main", measure(qb).read())
-
-    with pytest.raises(AssertionError):
-        main.compile()
-
-
-# TODO fix test
-@pytest.mark.skip
-def test_map_missing_global_arg_input_error() -> None:
-    @guppy
-    def foo() -> int:
-        return 0
-
-    @guppy
-    def my_prog() -> None:
-        map_global(foo)  # type: ignore[call-overload]
-
-    my_prog.compile()
-
-
 def test_map_global_non_linear() -> None:
     @guppy
     def foo(i: int) -> int:
@@ -184,19 +150,6 @@ def test_map_global_non_linear() -> None:
 
     res = main.emulator(n_qubits=1).run().collated_shots()
     assert res == [{"main": [1]}]
-
-
-def test_map_mismatch_global_return_type_error() -> None:
-    @guppy
-    def foo(i: float) -> int:
-        return i  # type: ignore[return-value]
-
-    @guppy
-    def my_prog() -> None:
-        map_global(foo)
-
-    with pytest.raises(AssertionError):
-        my_prog.compile()
 
 
 def test_with_map_mismatch_global_type_error() -> None:

@@ -1,4 +1,4 @@
-Error: Borrowed callback function parameter error. (at $FILE:7:16)
+Error: Callback input parameter error (at $FILE:7:16)
    | 
  5 | 
  6 | @guppy
