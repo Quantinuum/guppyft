@@ -952,6 +952,20 @@
       },
       "binary": true
     },
+    "borrow": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "borrow",
+      "description": "Extraction of free logical qubits from a block.",
+      "signature": null,
+      "binary": true
+    },
+    "borrow_more": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "borrow_more",
+      "description": "Extraction of free logical qubits from an already-borrowed block.",
+      "signature": null,
+      "binary": true
+    },
     "cx": {
       "extension": "guppyft.iceberg.ops",
       "name": "cx",
@@ -1664,6 +1678,20 @@
           ]
         }
       },
+      "binary": true
+    },
+    "restore": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "restore",
+      "description": "Restoration of all free logical qubits to their originating block.",
+      "signature": null,
+      "binary": true
+    },
+    "restore_some": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "restore_some",
+      "description": "Restoration of some free logical qubits to their originating block.",
+      "signature": null,
       "binary": true
     },
     "rx": {

@@ -119,6 +119,21 @@ pub fn block_tv(var_id: usize) -> Type {
     )
 }
 
+/// Get an Iceberg borrowed-block type with size corresponding to a type
+/// variable with a given ID.
+pub fn borrowed_block_tv(var_id: usize) -> Type {
+    Type::new_extension(
+        EXTENSION
+            .get_type(&BORROWED_BLOCK_TYPENAME)
+            .unwrap()
+            .instantiate(vec![TypeArg::new_var_use(
+                var_id,
+                TypeParam::max_nat_type(),
+            )])
+            .unwrap(),
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use hugr::{
