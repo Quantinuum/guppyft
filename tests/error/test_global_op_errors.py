@@ -6,7 +6,7 @@ from pytest_snapshot.plugin import Snapshot
 
 from tests.error.util import run_error_test
 
-path = pathlib.Path(__file__).parent.resolve() / "global_op_errors"
+path = pathlib.Path(__file__).parent.resolve() / "global_op"
 files = [
     x
     for x in path.iterdir()

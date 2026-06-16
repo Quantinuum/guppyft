@@ -1,0 +1,17 @@
+Error: Expected callback function parameters () (at $FILE:13:4)
+   | 
+11 | @guppy
+12 | def main() -> None:
+13 |     with_global(1, my_prog, 1)
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ Given callback function declared parameters (), but the
+   |                                provided arguments were (int)
+
+Note:
+   | 
+ 6 | @guppy
+ 7 | def my_prog() -> None:
+   | ----------------------
+ 8 |     return
+   | ---------- Callback function defined here.
+
+Guppy compilation failed due to 1 previous error

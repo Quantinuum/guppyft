@@ -43,7 +43,14 @@ from hugr import tys as ht
 from hugr.tys import TypeBound
 from tket_exts import globals
 
-from guppyft.errors import CallbackUsedHereNote, ConsiderOwnedHelper
+from guppyft._errors import (
+    BorrowedCallbackParamError,
+    CallbackFuncDefinedHere,
+    CallbackFuncParametersError,
+    CallbackUsedHereNote,
+    ConsiderOwnedHelper,
+    get_function_input_arg,
+)
 
 # Mark ops as having side effects to add order edges in the HUGR
 # when calls return None.
@@ -59,7 +66,7 @@ R = TypeVarTuple("R")
 Ret = TypeVar("Ret")
 
 
-class GlobalOpCompiler(CustomInoutCallCompiler):
+class _GlobalOpCompiler(CustomInoutCallCompiler):
     op: Callable[[ht.FunctionType, Inst, CompilerContext], ops.DataflowOp]
 
     def __init__(
@@ -78,7 +85,7 @@ class GlobalOpCompiler(CustomInoutCallCompiler):
         )
 
 
-class GlobalWithChecker(CustomCallChecker):
+class _GlobalWithChecker(CustomCallChecker):
     @override
     def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
         global_expr, global_ty = ExprSynthesizer(self.ctx).synthesize(args[0])
@@ -95,32 +102,25 @@ class GlobalWithChecker(CustomCallChecker):
         # Raise error if arg is borrowed
         for i, func_input in enumerate(callback_func.inputs):
             if InputFlags.Inout in func_input.flags:
-                assert isinstance(callback_expr, GlobalName)
-                callback_args: list[ast.arg] = ENGINE.get_parsed(  # type: ignore[union-attr]
-                    callback_expr.def_id
-                ).defined_at.args.args
-                err = UnsupportedError(
-                    callback_args[i],
-                    "Borrowed args",
-                    unsupported_in="callback function",
-                )
+                err = BorrowedCallbackParamError(callback_expr, i)
                 err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
                 err.add_sub_diagnostic(ConsiderOwnedHelper(None))
                 raise GuppyTypeError(err)
 
         # Check the number of input args provided matches callback function signature
         if len(args[2:]) != len(callback_func.inputs):
-            expect_ty = ", ".join(str(i.ty) for i in callback_func.inputs)
-            got_ty = ", ".join(
-                str(ExprSynthesizer(self.ctx).synthesize(arg)[1]) for arg in args[2:]
+            got_func_inputs = [
+                ExprSynthesizer(self.ctx).synthesize(arg)[1] for arg in args[2:]
+            ]
+            err = CallbackFuncParametersError(
+                self.node,
+                callback_func.inputs,
+                got_func_inputs,
             )
-            raise GuppyTypeError(
-                ExpectedError(
-                    self.node,
-                    f"input args ({expect_ty}) for callback func",
-                    f"({got_ty}).",
-                )
-            )
+            assert isinstance(callback_expr, GlobalName)
+            callback_def = ENGINE.get_parsed(callback_expr.def_id).defined_at
+            err.add_sub_diagnostic(CallbackFuncDefinedHere(callback_def))
+            raise GuppyTypeError(err)
 
         # with op signature is (global, func[*in, *out], *in) -> (global, *out)
         input_tys = [
@@ -149,7 +149,7 @@ class GlobalWithChecker(CustomCallChecker):
         return GlobalCall(def_id=self.func.id, args=args, type_args=inst), ty
 
 
-def with_op_instantiate(
+def _with_op_instantiate(
     var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
@@ -208,8 +208,8 @@ def with_global[G, **P, Ret](
     **kwargs: P.kwargs,
 ) -> tuple[G, Ret]: ...
 @custom_function(  # type: ignore[misc, arg-type]
-    checker=GlobalWithChecker(),
-    compiler=GlobalOpCompiler(with_op_instantiate(GLOBAL_VAR_NAME)),
+    checker=_GlobalWithChecker(),
+    compiler=_GlobalOpCompiler(_with_op_instantiate(GLOBAL_VAR_NAME)),
     higher_order_value=False,
 )
 def with_global[G, **P, *R, Ret](  # type: ignore[empty-body]
@@ -220,7 +220,7 @@ def with_global[G, **P, *R, Ret](  # type: ignore[empty-body]
 ) -> tuple[G, *R] | tuple[G, Ret]: ...
 
 
-def map_op_instantiate(
+def _map_op_instantiate(
     var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
@@ -243,7 +243,7 @@ def map_op_instantiate(
     return op
 
 
-class GlobalMapChecker(CustomCallChecker):
+class _GlobalMapChecker(CustomCallChecker):
     @override
     def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
         # First arg is the callback function
@@ -263,21 +263,21 @@ class GlobalMapChecker(CustomCallChecker):
             callback_args: list[ast.arg] = ENGINE.get_parsed(  # type: ignore[union-attr]
                 callback_expr.def_id
             ).defined_at.args.args
-            raise GuppyTypeError(
-                ExpectedError(
-                    callback_args[0],
-                    "global type to be owned. Linear global arg must be "
-                    "decorated with `@ owned`.",
-                )
+            err = ExpectedError(
+                callback_args[0],
+                "linear global arg to be owned",
             )
+            err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
+            err.add_sub_diagnostic(ConsiderOwnedHelper(None))
+            raise GuppyTypeError(err)
 
         # Raise error if input arg is borrowed/inout
-        for i in callback_func.inputs:
-            if InputFlags.Inout in i.flags:
-                # TODO turn this into a nice Guppy compiler error
-                raise ValueError(
-                    "Input args cannot be borrowed. Consider using `@owned`."
-                )
+        for i, input_arg in enumerate(callback_func.inputs):
+            if InputFlags.Inout in input_arg.flags:
+                err = BorrowedCallbackParamError(callback_expr, i)
+                err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
+                err.add_sub_diagnostic(ConsiderOwnedHelper(None))
+                raise GuppyTypeError(err)
 
         input_args = [FuncInput(callback_func, InputFlags.NoFlags)]
         for arg, func_input in zip(args[1:], callback_func.inputs[1:], strict=True):
@@ -310,8 +310,8 @@ def map_global[G, **P, *R](
     **kwargs: P.kwargs,
 ) -> tuple[*R]: ...
 @custom_function(  # type: ignore[misc, arg-type]
-    checker=GlobalMapChecker(),
-    compiler=GlobalOpCompiler(map_op_instantiate(GLOBAL_VAR_NAME)),
+    checker=_GlobalMapChecker(),
+    compiler=_GlobalOpCompiler(_map_op_instantiate(GLOBAL_VAR_NAME)),
     higher_order_value=False,
 )
 def map_global[G, **P, *R](  # type: ignore[empty-body]

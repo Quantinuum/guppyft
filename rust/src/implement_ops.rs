@@ -106,6 +106,7 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
                 );
             }
         }
+
         let op_funcs = self
             .op_replacements
             .iter()
@@ -212,6 +213,7 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
         func_hugr_opt: Option<Hugr>,
         func_name: &str,
     ) -> Result<(), ImplementOpsPassError> {
+        // Replace qubit type
         let op_sig: PolyFuncType = {
             let mut sig = ext_op.signature().into_owned();
             sig.transform(&self.type_replacer)?;
@@ -297,7 +299,12 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
                     .unwrap()
                     .node_map
                     .get(&func_node)
-                    .unwrap_or_else(|| panic!("Could not find inserted function node!"));
+                    .unwrap_or_else(|| {
+                        panic!(
+                            "Could not find inserted function node for op: {}",
+                            op_hash.op_name
+                        )
+                    });
                 (op_hash, inserted_func_node)
             })
             .collect();

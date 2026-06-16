@@ -1,8 +1,0 @@
-Error: Expected input args () for callback func (at $FILE:13:4)
-   | 
-11 | @guppy
-12 | def main() -> None:
-13 |     with_global(1, my_prog, 1)
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected input args () for callback func, got (int).
-
-Guppy compilation failed due to 1 previous error

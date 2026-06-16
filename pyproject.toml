@@ -27,7 +27,6 @@ dependencies = [
     "guppylang>=1.0.0a4",
     "guppylang-internals>=1.0.0a4",
     "hugr>=0.17.0",
-    "selene-hugr-qis-compiler>=0.3.0",
     "tket>=0.14.0",
 ]
 
@@ -56,6 +55,9 @@ allow_redefinition = true
 exclude = ["tests/error"]
 
 [[tool.mypy.overrides]]
+# pytest_snapshot is not compatible with mypy static type checking.
+# This override forces mypy to analyse the library for type hints.
+# See: https://github.com/joseph-roitman/pytest-snapshot/pull/59
 module = ["pytest_snapshot.plugin"]
 follow_untyped_imports = true
 

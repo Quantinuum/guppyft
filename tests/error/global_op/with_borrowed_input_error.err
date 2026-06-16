@@ -1,9 +1,10 @@
-Error: Unsupported (at $FILE:8:12)
+Error: Borrowed callback function parameter error. (at $FILE:8:12)
    | 
  6 | 
  7 | @guppy
  8 | def my_prog(qb: qubit) -> None:
-   |             ^^^^^^^^^ Borrowed args are not supported in callback function
+   |             ^^^^^^^^^ Parameters in callback functions used in global operation
+   |                       cannot be borrowed.
 
 Note:
    | 

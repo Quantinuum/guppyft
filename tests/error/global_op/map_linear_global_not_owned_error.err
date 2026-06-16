@@ -1,0 +1,16 @@
+Error: Expected linear global arg to be owned (at $FILE:8:8)
+   | 
+ 6 | 
+ 7 | @guppy
+ 8 | def foo(qb: qubit) -> qubit:
+   |         ^^^^^^^^^ Expected linear global arg to be owned
+
+Note:
+   | 
+13 | def my_prog() -> None:
+14 |     map_global(foo)
+   |                --- Callback function used here.
+
+Help: Consider annotating with `@owned`.
+
+Guppy compilation failed due to 1 previous error
