@@ -81,12 +81,16 @@ class GlobalOpCompiler(CustomInoutCallCompiler):
 class GlobalWithChecker(CustomCallChecker):
     @override
     def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
-        _, global_ty = ExprSynthesizer(self.ctx).synthesize(args[0])
+        global_expr, global_ty = ExprSynthesizer(self.ctx).synthesize(args[0])
         callback_expr, callback_func = ExprSynthesizer(self.ctx).synthesize(args[1])
         if not isinstance(callback_func, FunctionType):
             raise GuppyTypeError(
                 ExpectedError(callback_expr, "FunctionType", str(callback_func))
             )
+        # TODO This is not a fundamental limitation but there is a mismatch between how
+        #  Guppy and HUGR unpack tuples that needs to be fixed.
+        if isinstance(global_ty, TupleType):
+            raise GuppyTypeError(UnsupportedError(global_expr, "Tuple globals"))
 
         # Raise error if arg is borrowed
         for i, func_input in enumerate(callback_func.inputs):
@@ -250,10 +254,6 @@ class GlobalMapChecker(CustomCallChecker):
                 ExpectedError(callback_expr, "FunctionType", str(callback_func))
             )
         global_ty = callback_func.inputs[0]
-        # TODO This is not a fundamental limitation but there is a mismatch between how
-        #  Guppy and HUGR unpack tuples that needs to be fixed.
-        if isinstance(global_ty.ty, TupleType):
-            raise TypeError("Global type cannot be tuple.")
         # Global type must be owned if linear
         if (
             global_ty.ty.hugr_bound == TypeBound.Linear

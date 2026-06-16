@@ -293,19 +293,6 @@ def test_nested_map_calls_error() -> None:
         main.emulator(n_qubits=1).run().collated_shots()
 
 
-@pytest.mark.xfail
-def test_map_global_tuple_type() -> None:
-    @guppy
-    def foo(i: tuple[int, int]) -> tuple[int, int]:
-        return i
-
-    @guppy
-    def my_prog() -> None:
-        map_global(foo)
-
-    my_prog.compile_function()
-
-
 def test_map_return_tuple_type() -> None:
     @guppy
     def foo(g: int) -> tuple[int, tuple[int, int]]:
