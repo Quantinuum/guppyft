@@ -326,7 +326,7 @@ fn vec_of_blocks_and_ints_and_angles(
 
 /// A vector consisting of measurement types followed by block types.
 /// (Block types last because used as output row and guppylang expects this.)
-fn vec_of_blocks_and_measurement(n_blocks: usize, n_bools: usize) -> Vec<Type> {
+fn vec_of_blocks_and_measurements(n_blocks: usize, n_bools: usize) -> Vec<Type> {
     let mut types: Vec<Type> = vec![measurement_type(); n_bools];
     types.extend(vec![block_tv(0); n_blocks]);
     types

@@ -118,6 +118,7 @@ class GlobalWithChecker(CustomCallChecker):
                 )
             )
 
+        # with op signature is (global, func[*in, *out], *in) -> (global, *out)
         input_tys = [
             FuncInput(global_ty, InputFlags.NoFlags),
             FuncInput(callback_func, InputFlags.NoFlags),
@@ -149,9 +150,6 @@ def with_op_instantiate(
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
         global_arg, func_ty, *input_args = concrete.input
-        assert isinstance(func_ty, ht.FunctionType), (
-            f"Expected a function, found {func_ty}."
-        )
 
         return globals.with_def.instantiate(
             [

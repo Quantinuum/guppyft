@@ -5,8 +5,11 @@ import functools
 from hugr.ext import Extension, OpDef, TypeDef
 from hugr.ops import ExtOp
 from hugr.tys import BoundedNatArg, ExtType
+from semver import Version
 
 from ._util import load_extension
+
+ICEBERG_EXT_VERSION = Version(0, 1, 0)
 
 
 class IcebergTypesExtension:
@@ -14,7 +17,7 @@ class IcebergTypesExtension:
 
     def __call__(self) -> Extension:
         """Returns the Iceberg types extension"""
-        return load_extension("guppyft.iceberg.types")
+        return load_extension("guppyft.iceberg.types", ICEBERG_EXT_VERSION)
 
     @functools.cached_property
     def iceberg_block_def(self) -> TypeDef:
@@ -39,7 +42,7 @@ class IcebergOpsExtension:
 
     def __call__(self) -> Extension:
         """Returns the Iceberg ops extension"""
-        return load_extension("guppyft.iceberg.ops")
+        return load_extension("guppyft.iceberg.ops", ICEBERG_EXT_VERSION)
 
     # x
 
