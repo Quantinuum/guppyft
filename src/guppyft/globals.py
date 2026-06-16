@@ -150,6 +150,7 @@ def with_op_instantiate(
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
         global_arg, func_ty, *input_args = concrete.input
+        assert isinstance(func_ty, ht.FunctionType)
 
         return globals.with_def.instantiate(
             [

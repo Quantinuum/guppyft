@@ -493,7 +493,7 @@ impl MakeOpDef for IcebergOpDef {
                     vec![TypeParam::max_nat_kind()],
                     FuncValueType::new(
                         vec_of_blocks_and_angles(1, 0),
-                        vec_of_blocks_and_measurement(1, 2),
+                        vec_of_blocks_and_measurements(1, 2),
                     ),
                 ),
                 ArgsValidator { n_idx: 0 },
