@@ -50,6 +50,7 @@ from guppyft._errors import (
     CallbackOutputArgError,
     CallbackUsedHereNote,
     ConsiderOwnedHelper,
+    get_callback_func_ast,
     get_function_input_arg,
 )
 
@@ -236,6 +237,9 @@ class _GlobalMapChecker(CustomCallChecker):
             raise GuppyTypeError(
                 ExpectedError(callback_expr, "FunctionType", str(callback_func))
             )
+        # PlaceNode
+        # callback_def = callback_expr.place.defined_at.args.args[0]
+        # raise GuppyTypeError(ExpectedError(callback_def, ""))
 
         try:
             global_arg = callback_func.inputs[0]
@@ -250,7 +254,7 @@ class _GlobalMapChecker(CustomCallChecker):
             global_arg.ty.hugr_bound == TypeBound.Linear
             and InputFlags.Owned not in global_arg.flags
         ):
-            callback_arg = get_function_input_arg(callback_expr.def_id, 0)
+            callback_arg = get_function_input_arg(callback_expr, 0)
             err = ExpectedError(
                 callback_arg,
                 "linear global arg to be owned",
@@ -285,8 +289,8 @@ class _GlobalMapChecker(CustomCallChecker):
             case TupleType():
                 # First output must be global ty
                 if callback_output.element_types[0] != global_arg.ty:
-                    callback_def = ENGINE.get_parsed(callback_expr.def_id).defined_at
-                    err = CallbackOutputArgError(callback_def.returns, global_arg.ty)
+                    callback_def = get_callback_func_ast(callback_expr)
+                    err = CallbackOutputArgError(callback_def.returns, global_arg.ty)  # type: ignore[union-attr]
                     err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
                     raise GuppyTypeError(err)
                 if len(callback_output.element_types) == 2:
@@ -300,8 +304,8 @@ class _GlobalMapChecker(CustomCallChecker):
                     output_args = TupleType(callback_output.element_types[1:])
             case _:
                 if callback_output != global_arg.ty:
-                    callback_def = ENGINE.get_parsed(callback_expr.def_id).defined_at
-                    err = CallbackOutputArgError(callback_def.returns, global_arg.ty)
+                    callback_def = get_callback_func_ast(callback_expr)
+                    err = CallbackOutputArgError(callback_def.returns, global_arg.ty)  # type: ignore[union-attr]
                     err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
                     raise GuppyTypeError(err)
                 output_args = NoneType()

@@ -3,20 +3,29 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import ClassVar
 
-from guppylang_internals.definition.common import DefId
 from guppylang_internals.diagnostic import Error, Help, Note
 from guppylang_internals.engine import ENGINE
-from guppylang_internals.nodes import GlobalName
+from guppylang_internals.nodes import GlobalName, PlaceNode
 from guppylang_internals.tys.ty import FuncInput, Type
 
 
-def get_function_input_arg(func_id: DefId, idx: int | None) -> ast.AST | None:
+def get_callback_func_ast(callback_expr: ast.expr) -> ast.AST | None:
+    match callback_expr:
+        case GlobalName():
+            return ENGINE.get_parsed(callback_expr.def_id).defined_at
+        case PlaceNode():
+            return callback_expr.place.defined_at
+        case _:
+            raise ValueError("Unexpected expression type")
+
+
+def get_function_input_arg(func_expr: ast.expr, idx: int | None) -> ast.AST | None:
     """Helper function to get ast location of function argument. If `idx` is None, the
     whole function AST is returned."""
     if idx is None:
-        return ENGINE.get_parsed(func_id).defined_at
+        return get_callback_func_ast(func_expr)
     else:
-        func_args: Sequence[ast.arg] = ENGINE.get_parsed(func_id).defined_at.args.args  # type: ignore[union-attr]
+        func_args: Sequence[ast.arg] = get_callback_func_ast(func_expr).args.args  # type: ignore[union-attr]
         return func_args[idx]
 
 
@@ -50,7 +59,7 @@ class CallbackInputParamError(Error):
 
     def __post_init__(self) -> None:
         assert isinstance(self.callback_def_node, GlobalName)
-        arg = get_function_input_arg(self.callback_def_node.def_id, self.param_idx)
+        arg = get_function_input_arg(self.callback_def_node, self.param_idx)
         object.__setattr__(self, "span", arg)
 
 
