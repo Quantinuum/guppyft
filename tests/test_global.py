@@ -18,6 +18,7 @@ def run_global_smoke_test(
     expected_res: dict[str, list[int]] | None = None,
     n_qubits: int = 1,
 ) -> None:
+    """Fixture to test that uses of global ops can be emulated without error."""
 
     @guppy
     def main() -> None:
