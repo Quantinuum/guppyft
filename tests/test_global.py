@@ -188,7 +188,7 @@ def test_map_without_with() -> None:
 
     with pytest.raises(
         EmulatorError,
-        match=re.escape("Panic (#11001): No global provided for GlobalsOp::With"),
+        match=re.escape("Panic (#1001): No global provided for GlobalsOp::With"),
     ):
         main.emulator(n_qubits=1).run().collated_shots()
 
@@ -247,7 +247,7 @@ def test_nested_map_calls_error() -> None:
 
     with pytest.raises(
         EmulatorError,
-        match=re.escape("Panic (#11001): No global provided for GlobalsOp::With"),
+        match=re.escape("Panic (#1001): No global provided for GlobalsOp::With"),
     ):
         main.emulator(n_qubits=1).run().collated_shots()
 
