@@ -25,9 +25,8 @@ from guppylang_internals.definition.custom import (
     CustomInoutCallCompiler,
 )
 from guppylang_internals.definition.value import CallReturnWires
-from guppylang_internals.engine import ENGINE
 from guppylang_internals.error import GuppyTypeError
-from guppylang_internals.nodes import GlobalCall, GlobalName
+from guppylang_internals.nodes import GlobalCall
 from guppylang_internals.tys.common import ToHugrContext
 from guppylang_internals.tys.subst import Inst
 from guppylang_internals.tys.ty import (
@@ -126,8 +125,7 @@ class _GlobalWithChecker(CustomCallChecker):
                 callback_func.inputs,
                 got_func_inputs,
             )
-            assert isinstance(callback_expr, GlobalName)
-            callback_def = ENGINE.get_parsed(callback_expr.def_id).defined_at
+            callback_def = get_callback_func_ast(callback_expr)
             err.add_sub_diagnostic(CallbackFuncDefinedHere(callback_def))
             raise GuppyTypeError(err)
 
