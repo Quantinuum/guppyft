@@ -1,4 +1,5 @@
 import re
+from collections.abc import Callable
 from typing import no_type_check
 
 import pytest
@@ -9,8 +10,32 @@ from guppylang.std.quantum import discard, measure, qubit, x
 
 from guppyft.globals import map_global, with_global
 
+T = guppy.type_var("T")
 
-def test_with_global_linear() -> None:
+
+def run_global_smoke_test(
+    *,
+    main_func: Callable[[], None],
+    expected_res: dict[str, list[int]] | None = None,
+    n_qubits: int = 1,
+) -> None:
+
+    @guppy
+    def main() -> None:
+        main_func()
+        result("smoke", 0)
+
+    if expected_res is None:
+        expected_res = {"smoke": [0]}
+    else:
+        expected_res["smoke"] = [0]
+
+    res = main.emulator(n_qubits=n_qubits).run().collated_shots()
+    assert len(res) == 1
+    assert res[0] == expected_res
+
+
+def test_with_global_qubit() -> None:
     @guppy
     def my_prog() -> None:
         result("my_prog", 19)
@@ -21,24 +46,23 @@ def test_with_global_linear() -> None:
         qb = with_global(qb, my_prog)
         discard(qb)
 
-    res = main.emulator(n_qubits=1).run().collated_shots()
-    assert res == [{"my_prog": [19]}]
+    run_global_smoke_test(main_func=main, expected_res={"my_prog": [19]})
 
 
-def test_with_global_non_linear() -> None:
+def test_with_global_int() -> None:
     @guppy
     def my_prog() -> None:
         result("my_prog", 19)
 
     @guppy
     def main() -> None:
-        with_global(1, my_prog)
+        with_global(0, my_prog)
 
-    res = main.emulator(n_qubits=1).run().collated_shots()
-    assert res == [{"my_prog": [19]}]
+    run_global_smoke_test(main_func=main, expected_res={"my_prog": [19]})
 
 
-def test_with_non_linear_inputs() -> None:
+# Test `with_global` with input args
+def test_with_global_input_args() -> None:
     @guppy
     def my_prog0(i: int) -> None:
         result("my_prog", i)
@@ -59,10 +83,10 @@ def test_with_non_linear_inputs() -> None:
         qb = with_global(qb, my_prog2, 1, 2, 3)
         discard(qb)
 
-    res = main.emulator(n_qubits=1).run().collated_shots()
-    assert res == [{"my_prog": [1, 3, 6]}]
+    run_global_smoke_test(main_func=main, expected_res={"my_prog": [1, 3, 6]})
 
 
+# Test `with_global` outputs
 def test_with_outputs() -> None:
     @guppy
     def my_prog0(i: int) -> int:
@@ -85,13 +109,18 @@ def test_with_outputs() -> None:
         qb, i = with_global(qb, my_prog0, 1)
         result("main", i)
         qb, i, j = with_global(qb, my_prog1, 1)
-        result("main", array(i, j))
+        result("main", i)
+        result("main", j)
         qb, i, j, k = with_global(qb, my_prog2, 1)
-        result("main", array(i, j, k))
+        result("main", i)
+        result("main", j)
+        result("main", k)
         discard(qb)
 
-    res = main.emulator(n_qubits=1).run().collated_shots()
-    assert res == [{"my_prog": [1, 2, 3], "main": [2, [2, 3], [2, 3, 4]]}]
+    run_global_smoke_test(
+        main_func=main,
+        expected_res={"my_prog": [1, 2, 3], "main": [2, 2, 3, 2, 3, 4]},
+    )
 
 
 def test_with_owned_input() -> None:
@@ -107,8 +136,7 @@ def test_with_owned_input() -> None:
         r: tuple[int, qubit] = with_global(1, my_prog, qb)
         result("main", measure(r[1]).read())
 
-    res = main.emulator(n_qubits=1).run().collated_shots()
-    assert res == [{"main": [1]}]
+    run_global_smoke_test(main_func=main, expected_res={"main": [1]})
 
 
 def test_map_global_linear() -> None:
@@ -128,8 +156,7 @@ def test_map_global_linear() -> None:
         qb = with_global(qb, my_prog)
         result("main", measure(qb).read())
 
-    res = main.emulator(n_qubits=1).run().collated_shots()
-    assert res == [{"main": [1]}]
+    run_global_smoke_test(main_func=main, expected_res={"main": [1]})
 
 
 def test_map_global_non_linear() -> None:
@@ -148,8 +175,7 @@ def test_map_global_non_linear() -> None:
         i = with_global(i, my_prog)
         result("main", i)
 
-    res = main.emulator(n_qubits=1).run().collated_shots()
-    assert res == [{"main": [1]}]
+    run_global_smoke_test(main_func=main, expected_res={"main": [1]})
 
 
 def test_with_map_mismatch_global_type_error() -> None:
@@ -209,24 +235,22 @@ def test_nested_with() -> None:
         map_global(foo, 1)
         arr_inner = array(10)
         arr_inner = with_global(arr_inner, my_nested_prog)
-        result("arr_inner", arr_inner)
+        result("arr_inner", arr_inner[0])
         map_global(foo, 2)
 
     @guppy
     def main() -> None:
         arr_outer = array(0)
         arr_outer = with_global(arr_outer, my_prog)
-        result("arr_outer", arr_outer)
+        result("arr_outer", arr_outer[0])
 
-    res = main.emulator(n_qubits=1).run().collated_shots()
-    assert res == [
-        {
-            "arr_inner": [[11]],
-            "arr_outer": [[3]],
-        }
-    ]
+    run_global_smoke_test(
+        main_func=main,
+        expected_res={"arr_inner": [11], "arr_outer": [3]},
+    )
 
 
+# Test the scenario with(map(map(..))) i.e. nested map calls
 def test_nested_map_calls_error() -> None:
     @guppy
     def bar(i: int) -> int:
@@ -255,14 +279,19 @@ def test_nested_map_calls_error() -> None:
 def test_map_return_tuple_type() -> None:
     @guppy
     def foo(g: int) -> tuple[int, tuple[int, int]]:
-        return g, (0, 0)
+        return g, (g + 1, g + 2)
 
     @guppy
     def my_prog() -> None:
-        map_global(foo)
+        res = map_global(foo)  # Returns tuple[tuple[int,int]
+        result("my_prog", res[0][0])
+        result("my_prog", res[0][1])
 
     @guppy
     def main() -> None:
         with_global(0, my_prog)
 
-    main.emulator(n_qubits=1).run().collated_shots()
+    run_global_smoke_test(
+        main_func=main,
+        expected_res={"my_prog": [1, 2]},
+    )

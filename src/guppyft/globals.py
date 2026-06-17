@@ -318,17 +318,17 @@ class _GlobalMapChecker(CustomCallChecker):
 
 
 @overload
+def map_global[G, **P, *R](  # type: ignore[overload-overlap]
+    callback_func: Callable[Concatenate[G, P], tuple[G, *R]],
+    *args: P.args,
+    **kwargs: P.kwargs,
+) -> tuple[*R]: ...
+@overload
 def map_global[G, **P](
     callback_func: Callable[Concatenate[G, P], G],
     *args: P.args,
     **kwargs: P.kwargs,
 ) -> None: ...
-@overload
-def map_global[G, **P, *R](
-    callback_func: Callable[Concatenate[G, P], tuple[G, *R]],
-    *args: P.args,
-    **kwargs: P.kwargs,
-) -> tuple[*R]: ...
 @custom_function(  # type: ignore[misc, arg-type]
     checker=_GlobalMapChecker(),
     compiler=_GlobalOpCompiler(_map_op_instantiate(GLOBAL_VAR_NAME)),
