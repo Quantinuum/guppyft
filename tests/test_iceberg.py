@@ -203,7 +203,7 @@ def test_guppy_hugr() -> None:
     entrypoint = h.entrypoint
     children = h.children(entrypoint)
     # When https://github.com/Quantinuum/tket2/issues/1691 is implemented, this
-    # test will have to change: all the logical ops including `allox_zero`
+    # test will have to change: all the logical ops including `alloc_zero`
     # should appear under the entrypoint node. (Possibly we may need to append a
     # final `InlineFunctions()` pass to make that happen.)
     assert {h[child].op.name() for child in children} == {
