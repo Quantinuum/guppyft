@@ -3,7 +3,7 @@ Error: Callback input parameter error (at $FILE:8:12)
  6 | 
  7 | @guppy
  8 | def my_prog(qb: qubit) -> None:
-   |             ^^^^^^^^^ Parameters in callback functions used in global operation
+   |             ^^^^^^^^^ Parameters in callback functions used in global operations
    |                       cannot be borrowed.
 
 Note:

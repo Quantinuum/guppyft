@@ -3,7 +3,8 @@ Error: Callback function output error. (at $FILE:7:21)
  5 | 
  6 | @guppy
  7 | def foo(i: float) -> int:
-   |                      ^^^ First return arg must match global type `float`.
+   |                      ^^^ First input and return arg to callback function used in
+   |                          global map is the global variable. Expected return: `float`.
 
 Note:
    | 

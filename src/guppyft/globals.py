@@ -50,7 +50,6 @@ from guppyft._errors import (
     CallbackUsedHereNote,
     ConsiderOwnedHelper,
     get_callback_func_ast,
-    get_function_input_arg,
 )
 
 # Mark ops as having side effects to add order edges in the HUGR
@@ -107,7 +106,7 @@ class _GlobalWithChecker(CustomCallChecker):
                     callback_expr,
                     i,
                     (
-                        "Parameters in callback functions used in global operation"
+                        "Parameters in callback functions used in global operations"
                         " cannot be borrowed."
                     ),
                 )
@@ -240,7 +239,9 @@ class _GlobalMapChecker(CustomCallChecker):
             global_arg = callback_func.inputs[0]
         except IndexError as e:
             err = CallbackInputParamError(
-                callback_expr, None, "Callback function missing global input parameter"
+                callback_expr,
+                None,
+                "Callback function used in global map missing global input parameter",
             )
             err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
             raise GuppyTypeError(err) from e
@@ -249,10 +250,11 @@ class _GlobalMapChecker(CustomCallChecker):
             global_arg.ty.hugr_bound == TypeBound.Linear
             and InputFlags.Owned not in global_arg.flags
         ):
-            callback_arg = get_function_input_arg(callback_expr, 0)
-            err = ExpectedError(
-                callback_arg,
-                "linear global arg to be owned",
+            err = CallbackInputParamError(
+                callback_expr,
+                0,
+                "First argument to callback function in global map is the "
+                "global variable and cannot be borrowed.",
             )
             err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
             err.add_sub_diagnostic(ConsiderOwnedHelper(None))

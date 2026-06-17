@@ -1,9 +1,10 @@
-Error: Expected linear global arg to be owned (at $FILE:8:8)
+Error: Callback input parameter error (at $FILE:8:8)
    | 
  6 | 
  7 | @guppy
  8 | def foo(qb: qubit) -> qubit:
-   |         ^^^^^^^^^ Expected linear global arg to be owned
+   |         ^^^^^^^^^ First argument to callback function in global map is the
+   |                   global variable and cannot be borrowed.
 
 Note:
    | 

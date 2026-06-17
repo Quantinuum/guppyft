@@ -5,7 +5,8 @@ Error: Callback input parameter error (at $FILE:7:0)
  7 | def foo() -> int:
    | ^^^^^^^^^^^^^^^^^
  8 |     return 0
-   | ^^^^^^^^^^^^ Callback function missing global input parameter
+   | ^^^^^^^^^^^^ Callback function used in global map missing global input
+   |              parameter
 
 Note:
    | 

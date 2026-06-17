@@ -69,7 +69,8 @@ class CallbackInputParamError(Error):
 class CallbackOutputArgError(Error):
     title: ClassVar[str] = "Callback function output error."
     span_label: ClassVar[str] = (
-        "First return arg must match global type `{expected_str}`."
+        "First input and return arg to callback function used in global map is the "
+        "global variable. Expected return: `{expected_str}`."
     )
     expected: Type
 
