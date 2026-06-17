@@ -6,11 +6,10 @@ import pytest
 from guppylang import array, guppy
 from guppylang.emulator import EmulatorError
 from guppylang.std.builtins import owned, result
-from guppylang.std.quantum import discard, measure, qubit, x
+from guppylang.std.qsystem.random import RNG
+from guppylang.std.quantum import discard, discard_array, measure, qubit, x
 
 from guppyft.globals import map_global, with_global
-
-T = guppy.type_var("T")
 
 
 def run_global_smoke_test(
@@ -59,6 +58,88 @@ def test_with_global_int() -> None:
         with_global(0, my_prog)
 
     run_global_smoke_test(main_func=main, expected_res={"my_prog": [19]})
+
+
+def test_with_global_array_int() -> None:
+    @guppy
+    def my_prog() -> None:
+        result("my_prog", 19)
+
+    @guppy
+    def main() -> None:
+        with_global(array(0), my_prog)
+
+    run_global_smoke_test(main_func=main, expected_res={"my_prog": [19]})
+
+
+def test_with_global_array_qubit() -> None:
+    @guppy
+    def my_prog() -> None:
+        result("my_prog", 19)
+
+    @guppy
+    def main() -> None:
+        qb_arr = array(qubit())
+        qb_arr = with_global(qb_arr, my_prog)
+        discard_array(qb_arr)
+
+    run_global_smoke_test(main_func=main, expected_res={"my_prog": [19]})
+
+
+def test_with_global_struct() -> None:
+    @guppy.struct
+    class MyStruct:
+        i: int
+
+    @guppy
+    def my_prog() -> None:
+        result("my_prog", 19)
+
+    @guppy
+    def main() -> None:
+        struct = MyStruct(0)  # type: ignore[call-arg]
+        with_global(struct, my_prog)
+
+    run_global_smoke_test(main_func=main, expected_res={"my_prog": [19]})
+
+
+# Test global struct with qsystem RNG
+def test_global_struct_with_rng() -> None:
+    @guppy.struct
+    class MyStruct:
+        rng: RNG
+
+        @guppy
+        @no_type_check
+        def discard(self: "MyStruct" @ owned) -> None:
+            self.rng.discard()
+
+    @guppy
+    @no_type_check
+    def foo(struct: MyStruct @ owned) -> MyStruct:
+        result("foo", struct.rng.random_int())
+        return struct
+
+    @guppy
+    def my_prog() -> None:
+        map_global(foo)
+        map_global(foo)
+
+    @guppy
+    @no_type_check
+    def main() -> None:
+        struct = MyStruct(RNG(1))
+        struct = with_global(struct, my_prog)
+        result("main", struct.rng.random_int())
+        struct.discard()
+
+    run_global_smoke_test(
+        main_func=main,
+        expected_res={
+            "foo": [1307692281, -444364974],
+            "main": [1491967504],
+        },
+    )
 
 
 # Test `with_global` with input args
