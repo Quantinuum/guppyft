@@ -1,8 +1,6 @@
 import pathlib
 
 import pytest
-from _pytest.capture import CaptureFixture
-from pytest_snapshot.plugin import Snapshot
 
 from tests.error.util import run_error_test
 
@@ -20,6 +18,6 @@ files = [str(f) for f in files]
 
 @pytest.mark.parametrize("file", files)
 def test_global_op_errors(
-    file: str, capsys: CaptureFixture[str], snapshot: Snapshot
+    file, capsys, snapshot
 ) -> None:
     run_error_test(file, capsys, snapshot)

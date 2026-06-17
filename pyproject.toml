@@ -54,13 +54,6 @@ strict = true
 allow_redefinition = true
 exclude = ["tests/error"]
 
-[[tool.mypy.overrides]]
-# pytest_snapshot is not compatible with mypy static type checking.
-# This override forces mypy to analyse the library for type hints.
-# See: https://github.com/joseph-roitman/pytest-snapshot/pull/59
-module = ["pytest_snapshot.plugin"]
-follow_untyped_imports = true
-
 [build-system]
 requires = ["maturin>=1.13.3,<2.0"]
 build-backend = "maturin"
