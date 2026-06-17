@@ -1,5 +1,5 @@
 from guppylang import guppy
-from guppylang.std.builtins import result
+from guppylang.std.builtins import array, result
 from guppylang.std.qsystem import collect_measurements
 from hugr.build.dfg import Dfg
 from hugr.ops import DFG
@@ -10,10 +10,16 @@ from tket.passes import InlineFunctions, NormalizeGuppy
 from guppyft.extensions import iceberg_ops, iceberg_types
 from guppyft.logical.iceberg import (
     Block,
+    Qubit,
+    borrow,
+    cx_q,
     cx_transversal,
     discard,
+    discard_q,
     measure_all,
+    restore,
     zz_phase_between_blocks,
+    zz_phase_q,
 )
 
 
@@ -140,6 +146,15 @@ def test_guppy_bindings_smoke() -> None:
     def main() -> None:
         b0 = Block[8]()
         b1 = Block[8]()
+        q0 = Qubit()
+        q0.y()
+        q0.rz(-0.5)
+        bb0, q_arr0 = borrow(b0, array(3))
+        cx_q(q0, q_arr0[0])
+        q_arr1 = bb0.borrow_more(array(1, 2))
+        zz_phase_q(q_arr0[0], q_arr1[1], 0.5)
+        bb0.restore_some(q_arr1)
+        b0 = restore(bb0, q_arr0)
         b0.all_h()
         b0.x(2)
         b0.zz(3, 4)
@@ -159,6 +174,12 @@ def test_guppy_bindings_smoke() -> None:
         m0 = collect_measurements(measure_all(b0))
         result("m0_2", m0[2])
         discard(b1)
+        maybe_mq0 = q0.try_measure_x()
+        if maybe_mq0.is_some():
+            result("mq0", maybe_mq0.unwrap().read())
+        else:
+            maybe_mq0.unwrap_nothing()
+        discard_q(q0)
 
     pkg = main.compile()
     h = pkg.modules[0]

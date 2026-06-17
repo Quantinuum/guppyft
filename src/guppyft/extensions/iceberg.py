@@ -51,7 +51,7 @@ class IcebergTypesExtension:
         return self.iceberg_borrowed_block_def.instantiate([BoundedNatArg(k)])
 
     @functools.cached_property
-    def iceberg_qubit(self) -> ExtType:
+    def iceberg_qubit(self) -> TypeDef:
         """A "free" logical qubit belonging to an unspecified block."""
         return self().get_type("qubit")
 
@@ -1164,7 +1164,7 @@ class IcebergOpsExtension:
     # alloc_q
 
     @functools.cached_property
-    def alloc_q(self) -> ExtOp:
+    def alloc_q(self) -> OpDef:
         """Allocate a free logical qubit in the zero state."""
         return self().get_op("alloc_q")
 
@@ -1178,71 +1178,73 @@ class IcebergOpsExtension:
     # x_q
 
     @functools.cached_property
-    def x_q(self) -> ExtOp:
+    def x_q(self) -> OpDef:
         """X gate on a free logical_qubit."""
         return self().get_op("x_q")
 
     # y_q
 
     @functools.cached_property
-    def y_q(self) -> ExtOp:
+    def y_q(self) -> OpDef:
         """Y gate on a free logical_qubit."""
         return self().get_op("y_q")
 
     # z_q
 
     @functools.cached_property
-    def z_q(self) -> ExtOp:
+    def z_q(self) -> OpDef:
         """Z gate on a free logical_qubit."""
         return self().get_op("z_q")
 
     # rx_q
 
     @functools.cached_property
-    def rx_q(self) -> ExtOp:
+    def rx_q(self) -> OpDef:
         """Rx gate on a free logical_qubit."""
         return self().get_op("rx_q")
 
     # ry_q
 
     @functools.cached_property
-    def ry_q(self) -> ExtOp:
+    def ry_q(self) -> OpDef:
         """Ry gate on a free logical_qubit."""
         return self().get_op("ry_q")
 
     # rz_q
 
     @functools.cached_property
-    def rz_q(self) -> ExtOp:
+    def rz_q(self) -> OpDef:
         """Rz gate on a free logical_qubit."""
         return self().get_op("rz_q")
 
     # zz_phase_q
 
     @functools.cached_property
-    def zz_phase_q(self) -> ExtOp:
+    def zz_phase_q(self) -> OpDef:
         """ZZPhase gate on two free logical qubits."""
         return self().get_op("zz_phase_q")
 
     # cx_q
 
     @functools.cached_property
-    def cx_q(self) -> ExtOp:
+    def cx_q(self) -> OpDef:
         """CX gate on two free logical qubits.."""
         return self().get_op("cx_q")
 
     # try_measure_x_q
 
     @functools.cached_property
-    def try_measure_x_q(self) -> ExtOp:
-        """Fallible non-destructive measurement of a free logical qubit in the X basis."""
+    def try_measure_x_q(self) -> OpDef:
+        """Fallible non-destructive measurement of a free logical qubit in the X
+        basis."""
         return self().get_op("try_measure_x_q")
 
     # try_measure_z_q
 
     @functools.cached_property
-    def try_measure_z_q(self) -> ExtOp:
-        """Fallible non-destructive measurement of a free logical qubit in the Z basis."""
+    def try_measure_z_q(self) -> OpDef:
+        """Fallible non-destructive measurement of a free logical qubit in the Z
+        basis."""
         return self().get_op("try_measure_z_q")
 
     # borrow
