@@ -51,11 +51,14 @@ def test_exported_extensions() -> None:
     types_extn = iceberg_types()
     assert len(ops_extn.types) == 0
     assert len(types_extn.operations) == 0
-    assert types_extn.types == {"block": iceberg_types.iceberg_block_def}
-    assert all(
-        op_def == iceberg_ops.__getattribute__(f"{op_name}_def")
-        for op_name, op_def in ops_extn.operations.items()
-    )
+    assert types_extn.types == {
+        "block": iceberg_types.iceberg_block_def,
+        "borrowed_block": iceberg_types.iceberg_borrowed_block_def,
+        "qubit": iceberg_types.iceberg_qubit,
+    }
+    for op_name, op_def in ops_extn.operations.items():
+        op_def_name = op_name if op_name.endswith("_q") else f"{op_name}_def"
+        assert op_def == iceberg_ops.__getattribute__(op_def_name)
 
 
 def test_op_instantiations() -> None:
@@ -118,6 +121,12 @@ def test_op_instantiations() -> None:
     ]:
         assert (
             iceberg_ops.__getattribute__(op_name)(3, 1, 2).op_def()
+            == ops_extn.operations[op_name]
+        )
+    # Ops that take a variable number of inputs and outputs:
+    for op_name in ["borrow", "borrow_more", "restore_some", "restore"]:
+        assert (
+            iceberg_ops.__getattribute__(op_name)(1, 3).op_def()
             == ops_extn.operations[op_name]
         )
 

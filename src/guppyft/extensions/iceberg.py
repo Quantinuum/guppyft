@@ -33,6 +33,28 @@ class IcebergTypesExtension:
         """
         return self.iceberg_block_def.instantiate([BoundedNatArg(k)])
 
+    @functools.cached_property
+    def iceberg_borrowed_block_def(self) -> TypeDef:
+        """A borrowed Iceberg code block.
+
+        This is the generic type definition. For the instantiated type, see
+        `iceberg_borrowed_block`.
+        """
+        return self().get_type("borrowed_block")
+
+    def iceberg_borrowed_block(self, k: int) -> ExtType:
+        """A borrowed Iceberg code block.
+
+        Args:
+            k: The number of logical qubits encoded in the original block.
+        """
+        return self.iceberg_borrowed_block_def.instantiate([BoundedNatArg(k)])
+
+    @functools.cached_property
+    def iceberg_qubit(self) -> ExtType:
+        """A "free" logical qubit belonging to an unspecified block."""
+        return self().get_type("qubit")
+
 
 class IcebergOpsExtension:
     """Extension providing the Iceberg logical operations."""
@@ -1138,3 +1160,163 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
         """
         return self.try_measure_one_z_d_def.instantiate([BoundedNatArg(k)])
+
+    # alloc_q
+
+    @functools.cached_property
+    def alloc_q(self) -> ExtOp:
+        """Allocate a free logical qubit in the zero state."""
+        return self().get_op("alloc_q")
+
+    # discard_q
+
+    @functools.cached_property
+    def discard_q(self) -> OpDef:
+        """Discard a free logical qubit."""
+        return self().get_op("discard_q")
+
+    # x_q
+
+    @functools.cached_property
+    def x_q(self) -> ExtOp:
+        """X gate on a free logical_qubit."""
+        return self().get_op("x_q")
+
+    # y_q
+
+    @functools.cached_property
+    def y_q(self) -> ExtOp:
+        """Y gate on a free logical_qubit."""
+        return self().get_op("y_q")
+
+    # z_q
+
+    @functools.cached_property
+    def z_q(self) -> ExtOp:
+        """Z gate on a free logical_qubit."""
+        return self().get_op("z_q")
+
+    # rx_q
+
+    @functools.cached_property
+    def rx_q(self) -> ExtOp:
+        """Rx gate on a free logical_qubit."""
+        return self().get_op("rx_q")
+
+    # ry_q
+
+    @functools.cached_property
+    def ry_q(self) -> ExtOp:
+        """Ry gate on a free logical_qubit."""
+        return self().get_op("ry_q")
+
+    # rz_q
+
+    @functools.cached_property
+    def rz_q(self) -> ExtOp:
+        """Rz gate on a free logical_qubit."""
+        return self().get_op("rz_q")
+
+    # zz_phase_q
+
+    @functools.cached_property
+    def zz_phase_q(self) -> ExtOp:
+        """ZZPhase gate on two free logical qubits."""
+        return self().get_op("zz_phase_q")
+
+    # cx_q
+
+    @functools.cached_property
+    def cx_q(self) -> ExtOp:
+        """CX gate on two free logical qubits.."""
+        return self().get_op("cx_q")
+
+    # try_measure_x_q
+
+    @functools.cached_property
+    def try_measure_x_q(self) -> ExtOp:
+        """Fallible non-destructive measurement of a free logical qubit in the X basis."""
+        return self().get_op("try_measure_x_q")
+
+    # try_measure_z_q
+
+    @functools.cached_property
+    def try_measure_z_q(self) -> ExtOp:
+        """Fallible non-destructive measurement of a free logical qubit in the Z basis."""
+        return self().get_op("try_measure_z_q")
+
+    # borrow
+
+    @functools.cached_property
+    def borrow_def(self) -> OpDef:
+        """Extraction of free logical qubits from a block.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `borrow`."""
+        return self().get_op("borrow")
+
+    def borrow(self, k: int, m: int) -> ExtOp:
+        """Extraction of free logical qubits from a block.
+
+        Args:
+            k: The number of logical qubits encoded in the block.
+            m: The number of logical qubits to borrow.
+        """
+        return self.borrow_def.instantiate([BoundedNatArg(m), BoundedNatArg(k)])
+
+    # borrow_more
+
+    @functools.cached_property
+    def borrow_more_def(self) -> OpDef:
+        """Extraction of free logical qubits from an already-borrowed block.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `borrow+more`."""
+        return self().get_op("borrow_more")
+
+    def borrow_more(self, k: int, m: int) -> ExtOp:
+        """Extraction of free logical qubits from an already-borrowed block.
+
+        Args:
+            k: The number of logical qubits encoded in the block.
+            m: The number of logical qubits to borrow.
+        """
+        return self.borrow_more_def.instantiate([BoundedNatArg(m), BoundedNatArg(k)])
+
+    # restore_some
+
+    @functools.cached_property
+    def restore_some_def(self) -> OpDef:
+        """Restoration of some free logical qubits to their originating block.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `restore_some`."""
+        return self().get_op("restore_some")
+
+    def restore_some(self, k: int, m: int) -> ExtOp:
+        """Restoration of some free logical qubits to their originating block.
+
+        Args:
+            k: The number of logical qubits encoded in the block.
+            m: The number of logical qubits to restore.
+        """
+        return self.restore_some_def.instantiate([BoundedNatArg(m), BoundedNatArg(k)])
+
+    # restore
+
+    @functools.cached_property
+    def restore_def(self) -> OpDef:
+        """Restoration of all free logical qubits to their originating block.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `restore`."""
+        return self().get_op("restore")
+
+    def restore(self, k: int, m: int) -> ExtOp:
+        """Restoration of all free logical qubits to their originating block.
+
+        Args:
+            k: The number of logical qubits encoded in the block.
+            m: The number of logical qubits to restore.
+        """
+        return self.restore_def.instantiate([BoundedNatArg(m), BoundedNatArg(k)])
