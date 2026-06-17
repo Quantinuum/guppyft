@@ -166,7 +166,13 @@ def test_with_map_mismatch_global_type_error() -> None:
         with_global("", my_prog)
 
     # TODO match more specific error
-    with pytest.raises(RuntimeError):
+    with pytest.raises(
+        RuntimeError,
+        match=(
+            r"Input type does not match global variable type. Found \"{ i1, ptr }\","
+            r" Expected \"{ i1, i64 }\""
+        ),
+    ):
         main.emulator(n_qubits=1).run().collated_shots()
 
 

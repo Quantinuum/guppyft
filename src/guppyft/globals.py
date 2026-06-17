@@ -237,9 +237,6 @@ class _GlobalMapChecker(CustomCallChecker):
             raise GuppyTypeError(
                 ExpectedError(callback_expr, "FunctionType", str(callback_func))
             )
-        # PlaceNode
-        # callback_def = callback_expr.place.defined_at.args.args[0]
-        # raise GuppyTypeError(ExpectedError(callback_def, ""))
 
         try:
             global_arg = callback_func.inputs[0]
