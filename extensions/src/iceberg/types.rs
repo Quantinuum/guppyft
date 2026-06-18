@@ -38,7 +38,7 @@ pub fn block_type(k_arg: impl Into<TypeArg>) -> Type {
 }
 
 /// Type of an Iceberg block of a given size that has been "borrowed". This
-/// represents a block from which some logical qubits have been borrowed; it
+/// represents a block from which some logical qubits may have been borrowed; it
 /// cannot be used in any logical operations until all those qubits have been
 /// returned.
 ///
