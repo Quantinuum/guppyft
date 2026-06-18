@@ -1,15 +1,12 @@
 //! Extension providing logical operations on Iceberg codeblocks.
 
-use std::{
-    collections::HashSet,
-    sync::{Arc, LazyLock, Weak},
-};
+use std::sync::{Arc, LazyLock, Weak};
 
 use documented::DocumentedVariants;
 use hugr::{
     Extension,
     extension::{
-        CustomValidator, ExtensionId, OpDef, SignatureError, SignatureFunc, ValidateJustArgs,
+        ExtensionId, OpDef, SignatureFunc,
         prelude::{bool_t, option_type},
         simple_op::{
             HasConcrete, HasDef, MakeExtensionOp, MakeOpDef, MakeRegisteredOp, OpLoadError,
@@ -237,67 +234,6 @@ impl IcebergOpDef {
     }
 }
 
-/// Validator to check that the list of type arguments consists of a sequence
-/// of natural numbers, the first of which (representing the block size) is
-/// at least 2 and greater than all subsequent (representing qubit indices);
-/// in addition the qubit indices must be distinct from one another.
-struct ArgsValidator {
-    /// Expected number of index arguments following the initial block size.
-    n_idx: usize,
-}
-
-impl ValidateJustArgs for ArgsValidator {
-    fn validate(&self, arg_values: &[TypeArg]) -> Result<(), SignatureError> {
-        let n = arg_values.len();
-        if n != 1 + self.n_idx {
-            return Err(SignatureError::InvalidTypeArgs);
-        }
-        let Some(k) = arg_values[0].as_nat() else {
-            // TypeArgs may be variable uses, in which case we can't extract a k.
-            // In this case, we can't validate so just return Ok.
-            return Ok(());
-        };
-        if k == 0 || k % 2 == 1 {
-            return Err(SignatureError::InvalidTypeArgs);
-        }
-        let mut args: HashSet<u64> = HashSet::new();
-        for arg in arg_values.iter().skip(1) {
-            let Some(i) = arg.as_nat() else { continue };
-            if i >= k || args.contains(&i) {
-                return Err(SignatureError::InvalidTypeArgs);
-            }
-            args.insert(i);
-        }
-        Ok(())
-    }
-}
-
-/// Validator to check that the list of type arguments consists of 3 natural
-/// numbers, the first of which (representing the block size) is at least 2 and
-/// greater than both subsequent (representing qubit indices in two blocks).
-struct InterBlockArgsValidator {}
-
-impl ValidateJustArgs for InterBlockArgsValidator {
-    fn validate(&self, arg_values: &[TypeArg]) -> Result<(), SignatureError> {
-        if arg_values.len() != 3 {
-            return Err(SignatureError::InvalidTypeArgs);
-        }
-        let k = arg_values[0]
-            .as_nat()
-            .ok_or(SignatureError::InvalidTypeArgs)?;
-        if k == 0 || k % 2 == 1 {
-            return Err(SignatureError::InvalidTypeArgs);
-        }
-        for arg in arg_values.iter().skip(1) {
-            let i = arg.as_nat().ok_or(SignatureError::InvalidTypeArgs)?;
-            if i >= k {
-                return Err(SignatureError::InvalidTypeArgs);
-            }
-        }
-        Ok(())
-    }
-}
-
 /// Get an array-of-future-bool type with size corresponding to a type variable
 /// with a given ID.
 fn bool_array_tv(var_id: usize) -> Type {
@@ -347,15 +283,12 @@ fn block_and_optional_bool() -> Vec<Type> {
 /// Signature of an operation that acts on a single block, with a number of
 /// additional angle inputs and a number of index parameters.
 fn sig_1_block(n_angles: usize, n_indices: usize) -> SignatureFunc {
-    CustomValidator::new(
-        PolyFuncTypeRV::new(
-            vec![TypeParam::max_nat_type(); 1 + n_indices],
-            FuncValueType::new(
-                vec_of_blocks_and_angles(1, n_angles),
-                vec_of_blocks_and_angles(1, 0),
-            ),
+    PolyFuncTypeRV::new(
+        vec![TypeParam::max_nat_type(); 1 + n_indices],
+        FuncValueType::new(
+            vec_of_blocks_and_angles(1, n_angles),
+            vec_of_blocks_and_angles(1, 0),
         ),
-        ArgsValidator { n_idx: n_indices },
     )
     .into()
 }
@@ -390,6 +323,8 @@ impl MakeOpDef for IcebergOpDef {
         Arc::downgrade(&EXTENSION)
     }
 
+    /// TODO use `CustomValidator` when defining op signatures
+    /// See: <https://github.com/quantinuum-dev/guppyft/issues/82>
     fn init_signature(&self, _extension_ref: &Weak<Extension>) -> SignatureFunc {
         use IcebergOpDef::*;
         match self {
@@ -440,15 +375,12 @@ impl MakeOpDef for IcebergOpDef {
             cx_d => sig_1_block_d(0, 2),
             swap => sig_1_block(0, 2),
             swap_d => sig_1_block_d(0, 2),
-            zz_phase_between_blocks => CustomValidator::new(
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type(); 3],
-                    FuncValueType::new(
-                        vec_of_blocks_and_angles(2, 1),
-                        vec_of_blocks_and_angles(2, 0),
-                    ),
+            zz_phase_between_blocks => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_type(); 3],
+                FuncValueType::new(
+                    vec_of_blocks_and_angles(2, 1),
+                    vec_of_blocks_and_angles(2, 0),
                 ),
-                InterBlockArgsValidator {},
             )
             .into(),
             zz_phase_between_blocks_d => PolyFuncTypeRV::new(
@@ -459,61 +391,43 @@ impl MakeOpDef for IcebergOpDef {
                 ),
             )
             .into(),
-            cx_transversal => CustomValidator::new(
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
-                    FuncValueType::new_endo(vec_of_blocks_and_angles(2, 0)),
-                ),
-                ArgsValidator { n_idx: 0 },
+            cx_transversal => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_type()],
+                FuncValueType::new_endo(vec_of_blocks_and_angles(2, 0)),
             )
             .into(),
-            alloc_zero => CustomValidator::new(
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
-                    FuncValueType::new(
-                        vec_of_blocks_and_angles(0, 0),
-                        vec_of_blocks_and_angles(1, 0),
-                    ),
+            alloc_zero => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_type()],
+                FuncValueType::new(
+                    vec_of_blocks_and_angles(0, 0),
+                    vec_of_blocks_and_angles(1, 0),
                 ),
-                ArgsValidator { n_idx: 0 },
             )
             .into(),
-            free => CustomValidator::new(
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
-                    FuncValueType::new(
-                        vec_of_blocks_and_angles(1, 0),
-                        vec_of_blocks_and_angles(0, 0),
-                    ),
+            free => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_type()],
+                FuncValueType::new(
+                    vec_of_blocks_and_angles(1, 0),
+                    vec_of_blocks_and_angles(0, 0),
                 ),
-                ArgsValidator { n_idx: 0 },
             )
             .into(),
-            measure_syndrome => CustomValidator::new(
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
-                    FuncValueType::new(
-                        vec_of_blocks_and_angles(1, 0),
-                        vec_of_blocks_and_bools(1, 2),
-                    ),
+            measure_syndrome => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_type()],
+                FuncValueType::new(
+                    vec_of_blocks_and_angles(1, 0),
+                    vec_of_blocks_and_bools(1, 2),
                 ),
-                ArgsValidator { n_idx: 0 },
             )
             .into(),
-            measure_all => CustomValidator::new(
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
-                    FuncValueType::new(vec_of_blocks_and_angles(1, 0), vec![bool_array_tv(0)]),
-                ),
-                ArgsValidator { n_idx: 0 },
+            measure_all => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_type()],
+                FuncValueType::new(vec_of_blocks_and_angles(1, 0), vec![bool_array_tv(0)]),
             )
             .into(),
-            try_measure_one_x => CustomValidator::new(
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type(); 2],
-                    FuncValueType::new(vec_of_blocks_and_angles(1, 0), block_and_optional_bool()),
-                ),
-                ArgsValidator { n_idx: 1 },
+            try_measure_one_x => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_type(); 2],
+                FuncValueType::new(vec_of_blocks_and_angles(1, 0), block_and_optional_bool()),
             )
             .into(),
             try_measure_one_x_d => PolyFuncTypeRV::new(
@@ -524,12 +438,9 @@ impl MakeOpDef for IcebergOpDef {
                 ),
             )
             .into(),
-            try_measure_one_z => CustomValidator::new(
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type(); 2],
-                    FuncValueType::new(vec_of_blocks_and_angles(1, 0), block_and_optional_bool()),
-                ),
-                ArgsValidator { n_idx: 1 },
+            try_measure_one_z => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_type(); 2],
+                FuncValueType::new(vec_of_blocks_and_angles(1, 0), block_and_optional_bool()),
             )
             .into(),
             try_measure_one_z_d => PolyFuncTypeRV::new(
@@ -907,51 +818,5 @@ mod tests {
         let outs = linear.finish();
         f_build.finish_with_outputs(outs).unwrap();
         assert!(module_builder.finish_hugr().is_err());
-    }
-
-    #[test]
-    fn test_invalid_ops() {
-        // block size should be at least 2
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("x", [1.into(), 0.into()])
-                .is_err()
-        );
-        // qubit index should be less than block size
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("x", [6.into(), 6.into()])
-                .is_err()
-        );
-        // `xx` expects two indices following the block size
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("xx", [6.into(), 0.into()])
-                .is_err()
-        );
-        // `xx` expects distinct indices
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("xx", [6.into(), 0.into(), 0.into()])
-                .is_err()
-        );
-        // all indices must be less than the block size
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("zz_phase_between_blocks", [6.into(), 0.into(), 6.into()])
-                .is_err()
-        );
-        // index must be an integer
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("x", [6.into(), "0".into()])
-                .is_err()
-        );
-        // block size must be an integer
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("x", ["6".into(), 0.into()])
-                .is_err()
-        );
     }
 }
