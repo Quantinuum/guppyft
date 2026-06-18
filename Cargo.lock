@@ -726,7 +726,6 @@ dependencies = [
  "semver",
  "strum 0.28.0",
  "tket",
- "tket-qsystem",
 ]
 
 [[package]]
@@ -931,9 +930,9 @@ dependencies = [
 
 [[package]]
 name = "hugr-cli"
-version = "0.28.1"
+version = "0.28.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "528a7793aa15b5078aa21453dce1049056ae64d406d2c036609e9f71d0bd374e"
+checksum = "85704e015f4fa50e1ddd065b35963caf43be15c552de6dc1a8b318fa74176be5"
 dependencies = [
  "anyhow",
  "clap",
@@ -2258,30 +2257,6 @@ dependencies = [
  "serde_json",
  "strum 0.28.0",
  "uuid",
-]
-
-[[package]]
-name = "tket-qsystem"
-version = "0.26.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6a72ec8b167fd992faecefe1984f2e4acb21f6f59f312361daf892cf53fcaf2"
-dependencies = [
- "anyhow",
- "clap",
- "delegate",
- "derive_more 2.1.1",
- "hugr",
- "hugr-cli",
- "hugr-core",
- "indexmap 2.14.0",
- "itertools 0.14.0",
- "lazy_static",
- "serde",
- "smol_str",
- "strum 0.28.0",
- "tket",
- "tket-json-rs",
- "typetag",
 ]
 
 [[package]]
