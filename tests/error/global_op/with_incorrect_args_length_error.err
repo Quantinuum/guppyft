@@ -14,4 +14,7 @@ Note:
  8 |     return
    | ---------- Callback function defined here.
 
+Help: Signature of callback function for global with should be `(*input) ->
+(*output)` and usage is `map_global(global_ty, callback_func, *input).
+
 Guppy compilation failed due to 1 previous error

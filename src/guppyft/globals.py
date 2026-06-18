@@ -49,14 +49,18 @@ from guppyft._errors import (
     CallbackOutputArgError,
     CallbackUsedHereNote,
     ConsiderOwnedHelper,
+    MapCallbackSignatureHelper,
+    WithCallbackSignatureHelper,
     get_callback_func_ast,
 )
 
 # Mark ops as having side effects to add order edges in the HUGR
 # when calls return None.
 # https://github.com/Quantinuum/guppylang/issues/1698
-EXTENSION_OPS_WITH_SIDE_EFFECTS.append("tket.globals.with")
-EXTENSION_OPS_WITH_SIDE_EFFECTS.append("tket.globals.map")
+if "tket.globals.with" not in EXTENSION_OPS_WITH_SIDE_EFFECTS:
+    EXTENSION_OPS_WITH_SIDE_EFFECTS.append("tket.globals.with")
+if "tket.globals.map" not in EXTENSION_OPS_WITH_SIDE_EFFECTS:
+    EXTENSION_OPS_WITH_SIDE_EFFECTS.append("tket.globals.map")
 
 GLOBAL_VAR_NAME = "guppy_ft_global"
 
@@ -126,6 +130,7 @@ class _GlobalWithChecker(CustomCallChecker):
             )
             callback_def = get_callback_func_ast(callback_expr)
             err.add_sub_diagnostic(CallbackFuncDefinedHere(callback_def))
+            err.add_sub_diagnostic(WithCallbackSignatureHelper(None))
             raise GuppyTypeError(err)
 
         # with op signature is (global, func[*in, *out], *in) -> (global, *out)
@@ -274,6 +279,21 @@ class _GlobalMapChecker(CustomCallChecker):
                 err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
                 err.add_sub_diagnostic(ConsiderOwnedHelper(None))
                 raise GuppyTypeError(err)
+
+        # Check the number of input args provided matches callback function signature
+        if len(args[1:]) != len(callback_func.inputs[1:]):
+            got_func_inputs = [
+                ExprSynthesizer(self.ctx).synthesize(arg)[1] for arg in args[1:]
+            ]
+            err = CallbackFuncParametersError(
+                self.node,
+                callback_func.inputs[1:],
+                got_func_inputs,
+            )
+            callback_def = get_callback_func_ast(callback_expr)
+            err.add_sub_diagnostic(CallbackFuncDefinedHere(callback_def))
+            err.add_sub_diagnostic(MapCallbackSignatureHelper(None))
+            raise GuppyTypeError(err)
 
         input_args = [FuncInput(callback_func, InputFlags.NoFlags)]
         for arg, func_input in zip(args[1:], callback_func.inputs[1:], strict=True):

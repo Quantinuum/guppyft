@@ -1,0 +1,21 @@
+Error: Expected callback function parameters (int) (at $FILE:11:4)
+   | 
+ 9 | @guppy
+10 | def my_prog() -> None:
+11 |     map_global(foo)
+   |     ^^^^^^^^^^^^^^^ Given callback function declared parameters (int), but the
+   |                     provided arguments were ()
+
+Note:
+   | 
+ 5 | @guppy
+ 6 | def foo(i: int, j:int) -> int:
+   | ------------------------------
+ 7 |     return i
+   | ------------ Callback function defined here.
+
+Help: Signature of callback function for global map should be `(global_ty,
+*input) -> (global_ty, *output)` and usage is `map_global(callback_func,
+*input).
+
+Guppy compilation failed due to 1 previous error

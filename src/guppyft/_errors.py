@@ -89,5 +89,23 @@ class CallbackFuncDefinedHere(Note):
 
 
 @dataclass(frozen=True)
+class MapCallbackSignatureHelper(Help):
+    message: ClassVar[str] = (
+        "Signature of callback function for global map should be "
+        "`(global_ty, *input) -> (global_ty, *output)` and usage is "
+        "`map_global(callback_func, *input)."
+    )
+
+
+@dataclass(frozen=True)
+class WithCallbackSignatureHelper(Help):
+    message: ClassVar[str] = (
+        "Signature of callback function for global with should be "
+        "`(*input) -> (*output)` and usage is "
+        "`map_global(global_ty, callback_func, *input)."
+    )
+
+
+@dataclass(frozen=True)
 class ConsiderOwnedHelper(Help):
     message: ClassVar[str] = "Consider annotating with `@owned`."
