@@ -1,16 +1,13 @@
 //! Extension providing logical operations on Iceberg codeblocks.
 
-use std::{
-    collections::HashSet,
-    sync::{Arc, LazyLock, Weak},
-};
+use std::sync::{Arc, LazyLock, Weak};
 
 use super::types::block_tv;
 use documented::DocumentedVariants;
 use hugr::{
     Extension,
     extension::{
-        ExtensionId, OpDef, SignatureError, SignatureFunc, ValidateJustArgs,
+        ExtensionId, OpDef, SignatureFunc,
         prelude::option_type,
         simple_op::{
             HasConcrete, HasDef, MakeExtensionOp, MakeOpDef, MakeRegisteredOp, OpLoadError,
@@ -236,68 +233,7 @@ impl IcebergOpDef {
     }
 }
 
-/// Validator to check that the list of type arguments consists of a sequence
-/// of natural numbers, the first of which (representing the block size) is
-/// at least 2 and greater than all subsequent (representing qubit indices);
-/// in addition the qubit indices must be distinct from one another.
-struct _ArgsValidator {
-    /// Expected number of index arguments following the initial block size.
-    n_idx: usize,
-}
-
-impl ValidateJustArgs for _ArgsValidator {
-    fn validate(&self, arg_values: &[TypeArg]) -> Result<(), SignatureError> {
-        let n = arg_values.len();
-        if n != 1 + self.n_idx {
-            return Err(SignatureError::InvalidTypeArgs);
-        }
-        let Some(k) = arg_values[0].as_nat() else {
-            // TypeArgs may be variable uses, in which case we can't extract a k.
-            // In this case, we can't validate so just return Ok.
-            return Ok(());
-        };
-        if k == 0 || k % 2 == 1 {
-            return Err(SignatureError::InvalidTypeArgs);
-        }
-        let mut args: HashSet<u64> = HashSet::new();
-        for arg in arg_values.iter().skip(1) {
-            let Some(i) = arg.as_nat() else { continue };
-            if i >= k || args.contains(&i) {
-                return Err(SignatureError::InvalidTypeArgs);
-            }
-            args.insert(i);
-        }
-        Ok(())
-    }
-}
-
-/// Validator to check that the list of type arguments consists of 3 natural
-/// numbers, the first of which (representing the block size) is at least 2 and
-/// greater than both subsequent (representing qubit indices in two blocks).
-struct _InterBlockArgsValidator {}
-
-impl ValidateJustArgs for _InterBlockArgsValidator {
-    fn validate(&self, arg_values: &[TypeArg]) -> Result<(), SignatureError> {
-        if arg_values.len() != 3 {
-            return Err(SignatureError::InvalidTypeArgs);
-        }
-        let k = arg_values[0]
-            .as_nat()
-            .ok_or(SignatureError::InvalidTypeArgs)?;
-        if k == 0 || k % 2 == 1 {
-            return Err(SignatureError::InvalidTypeArgs);
-        }
-        for arg in arg_values.iter().skip(1) {
-            let i = arg.as_nat().ok_or(SignatureError::InvalidTypeArgs)?;
-            if i >= k {
-                return Err(SignatureError::InvalidTypeArgs);
-            }
-        }
-        Ok(())
-    }
-}
-
-/// Get an array-of-measurement type with size corresponding to a type variable
+/// Get an array-of-future-bool type with size corresponding to a type variable
 /// with a given ID.
 fn measurement_array_tv(var_id: usize) -> Type {
     BorrowArray::ty_parametric(
@@ -483,18 +419,12 @@ impl MakeOpDef for IcebergOpDef {
             .into(),
             measure_all => PolyFuncTypeRV::new(
                 vec![TypeParam::max_nat_kind()],
-                FuncValueType::new(
-                    vec_of_blocks_and_angles(1, 0),
-                    vec![measurement_array_tv(0)],
-                ),
+                FuncValueType::new(vec_of_blocks_and_angles(1, 0), vec![measurement_array_tv(0)]),
             )
             .into(),
             try_measure_one_x => PolyFuncTypeRV::new(
                 vec![TypeParam::max_nat_kind(); 2],
-                FuncValueType::new(
-                    vec_of_blocks_and_angles(1, 0),
-                    block_and_optional_measurement(),
-                ),
+                FuncValueType::new(vec_of_blocks_and_angles(1, 0), block_and_optional_measurement()),
             )
             .into(),
             try_measure_one_x_d => PolyFuncTypeRV::new(
@@ -507,10 +437,7 @@ impl MakeOpDef for IcebergOpDef {
             .into(),
             try_measure_one_z => PolyFuncTypeRV::new(
                 vec![TypeParam::max_nat_kind(); 2],
-                FuncValueType::new(
-                    vec_of_blocks_and_angles(1, 0),
-                    block_and_optional_measurement(),
-                ),
+                FuncValueType::new(vec_of_blocks_and_angles(1, 0), block_and_optional_measurement()),
             )
             .into(),
             try_measure_one_z_d => PolyFuncTypeRV::new(
@@ -888,54 +815,5 @@ mod tests {
         let outs = linear.finish();
         f_build.finish_with_outputs(outs).unwrap();
         assert!(module_builder.finish_hugr().is_err());
-    }
-
-    // These tests require a `CustomValidator`, however, this is unsupported for extensions that are serialized
-    // as the validator cannot be shared between tools.
-    #[test]
-    #[should_panic]
-    fn test_invalid_ops() {
-        // block size should be at least 2
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("x", [1.into(), 0.into()])
-                .is_err()
-        );
-        // qubit index should be less than block size
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("x", [6.into(), 6.into()])
-                .is_err()
-        );
-        // `xx` expects two indices following the block size
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("xx", [6.into(), 0.into()])
-                .is_err()
-        );
-        // `xx` expects distinct indices
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("xx", [6.into(), 0.into(), 0.into()])
-                .is_err()
-        );
-        // all indices must be less than the block size
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("zz_phase_between_blocks", [6.into(), 0.into(), 6.into()])
-                .is_err()
-        );
-        // index must be an integer
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("x", [6.into(), "0".into()])
-                .is_err()
-        );
-        // block size must be an integer
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("x", ["6".into(), 0.into()])
-                .is_err()
-        );
     }
 }
