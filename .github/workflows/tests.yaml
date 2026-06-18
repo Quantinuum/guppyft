@@ -120,3 +120,33 @@ jobs:
             "
             exit 1
           fi
+
+  extension-versions:
+    name: Check extension versions
+    needs: [ changes ]
+    if: ${{ needs.changes.outputs.extensions == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # Need full history to compare with main
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Check if extension versions are updated
+        run: |
+          # Check against latest tag on the target branch
+          # When not on a pull request, base_ref should be empty so we default to HEAD
+          if [ -z "$TARGET_REF" ]; then
+            BASE_SHA="HEAD~1"
+          else
+            BASE_SHA=$(git rev-parse origin/$TARGET_REF)
+          fi
+          echo "Comparing to ref: $BASE_SHA"
+
+          python ./scripts/check_extension_versions.py $BASE_SHA
+        env:
+          TARGET_REF: ${{ github.base_ref }}
