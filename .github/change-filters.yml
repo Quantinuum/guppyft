@@ -3,11 +3,13 @@
 
 encoder: &encoder
   - "Cargo.toml"
+  - "Cargo.lock"
   - "rust-bindings/**"
   - "rust/**"
 
 extensions: &extensions
   - "Cargo.toml"
+  - "Cargo.lock"
   - "extensions/**"
 
 rust:
@@ -16,5 +18,6 @@ rust:
 
 python:
   - "pyproject.toml"
+  - "uv.lock"
   - "src/guppyft/**"
   - "rust-bindings/**"
