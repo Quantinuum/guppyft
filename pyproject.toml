@@ -32,19 +32,19 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "maturin>=1.13.3,<2",
+    "maturin>=1.14.0,<2",
     { include-group = "lint" },
     { include-group = "test" },
 ]
 lint = [
-    "pre-commit>=3.6.0,<5",
-    "ruff>=0.15.11",
+    "pre-commit>=4.6.0,<5",
+    "ruff>=0.15.17",
     "mypy>=1.20.2",
 ]
 test = [
-    "pytest>=9.0.3",
+    "pytest>=9.1.0",
     "selene-hugr-qis-compiler>=0.2.10",
-    "selene-sim>=0.2.13",
+    "selene-sim>=0.2.17",
 ]
 
 [tool.mypy]
@@ -52,7 +52,7 @@ strict = true
 allow_redefinition = true
 
 [build-system]
-requires = ["maturin>=1.13.3,<2.0"]
+requires = ["maturin>=1.14.0,<2.0"]
 build-backend = "maturin"
 
 [tool.uv.sources]
