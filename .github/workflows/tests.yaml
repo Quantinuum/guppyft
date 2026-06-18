@@ -148,6 +148,6 @@ jobs:
           fi
           echo "Comparing to ref: $BASE_SHA"
 
-          python ./scripts/check_extension_versions.py $BASE_SHA
+          python ./.github/scripts/check_extension_versions.py $BASE_SHA
         env:
           TARGET_REF: ${{ github.base_ref }}
