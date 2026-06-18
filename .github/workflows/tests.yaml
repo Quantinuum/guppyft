@@ -35,6 +35,7 @@ jobs:
       rust: ${{ steps.filter.outputs.rust }}
       python: ${{ steps.filter.outputs.python }}
       extensions: ${{ steps.filter.outputs.extensions }}
+      extensions_data: ${{ steps.filter.outputs.extensions_data }}
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/check-changes
@@ -124,7 +125,7 @@ jobs:
   extension-versions:
     name: Check extension versions
     needs: [ changes ]
-    if: ${{ needs.changes.outputs.extensions == 'true' }}
+    if: ${{ needs.changes.outputs.extensions_data == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

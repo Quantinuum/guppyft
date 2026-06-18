@@ -12,6 +12,9 @@ extensions: &extensions
   - "Cargo.lock"
   - "extensions/**"
 
+extensions-data: &extensions-data
+  - "src/guppyft/extensions/data/**"
+
 rust:
   - *encoder
   - *extensions
