@@ -665,7 +665,7 @@ impl SignatureFromArgs for IcebergOpDef {
                 )
             }
             _ => unreachable!(
-                "Operation {} should not need custom computation.",
+                "Operation {} should not need custom signature computation.",
                 self.opdef_id()
             ),
         };
