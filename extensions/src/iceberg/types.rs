@@ -1,5 +1,18 @@
-//! Extension providing a type for the Iceberg codeblock.
-
+/// Extension providing types for the Iceberg codeblock.
+///
+/// There are three types defined here:
+/// - `block`: The type of a logical code block, parametrized by the number k of
+///   logical qubits.
+/// - `qubit`: The type of a single logical qubit, belonging to an unknown
+///   block. Also referred to as a "dynamic" logical qubit. May be allocated and
+///   freed independently, or borrowed from (and later restored to) a block. In
+///   the former case, the qubit will be assigned to a block at runtime. In the
+///   latter case, the block from which it is borrowed is converted to a
+///   `borrowed_block` for as long as any of its logical qubits are borrowed.
+/// - `borrowed_block`: The type of a logical code block from which some logical
+///   qubits may have been borrowed. May not be used in any logical operations.
+///   When all borrowed qubits are returned, this is converted back to a
+///   `block`.
 use std::sync::{Arc, LazyLock};
 
 use hugr::{
