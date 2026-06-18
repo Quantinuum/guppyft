@@ -412,7 +412,7 @@ fn sig_1_block_d(n_angles: usize, n_indices: usize) -> SignatureFunc {
 
 /// Signature of an operation that acts on a number of dynamic logical qubits
 /// with a number of additional angle qubits.
-fn sig_qbs_angles(n_qubits: usize, n_angles: usize) -> SignatureFunc {
+fn sig_qubits_angles(n_qubits: usize, n_angles: usize) -> SignatureFunc {
     let mut in_types: Vec<Type> = vec![dynamic_logical_qubit_type(); n_qubits];
     let out_types: Vec<Type> = in_types.clone();
     in_types.extend(vec![float64_type(); n_angles]);
@@ -421,7 +421,7 @@ fn sig_qbs_angles(n_qubits: usize, n_angles: usize) -> SignatureFunc {
 
 /// Signature of a fallible non-destructive measurement on a dynamic logical
 /// qubit.
-fn sig_qb_meas() -> SignatureFunc {
+fn sig_qubit_meas() -> SignatureFunc {
     Signature::new(
         vec![dynamic_logical_qubit_type()],
         TypeRow::from(vec![optional_future_bool(), dynamic_logical_qubit_type()]),
@@ -602,16 +602,16 @@ impl MakeOpDef for IcebergOpDef {
             free_q => {
                 Signature::new(vec![dynamic_logical_qubit_type()], TypeRow::from(vec![])).into()
             }
-            x_q => sig_qbs_angles(1, 0),
-            y_q => sig_qbs_angles(1, 0),
-            z_q => sig_qbs_angles(1, 0),
-            rx_q => sig_qbs_angles(1, 1),
-            ry_q => sig_qbs_angles(1, 1),
-            rz_q => sig_qbs_angles(1, 1),
-            zz_phase_q => sig_qbs_angles(2, 1),
-            cx_q => sig_qbs_angles(2, 0),
-            try_measure_x_q => sig_qb_meas(),
-            try_measure_z_q => sig_qb_meas(),
+            x_q => sig_qubits_angles(1, 0),
+            y_q => sig_qubits_angles(1, 0),
+            z_q => sig_qubits_angles(1, 0),
+            rx_q => sig_qubits_angles(1, 1),
+            ry_q => sig_qubits_angles(1, 1),
+            rz_q => sig_qubits_angles(1, 1),
+            zz_phase_q => sig_qubits_angles(2, 1),
+            cx_q => sig_qubits_angles(2, 0),
+            try_measure_x_q => sig_qubit_meas(),
+            try_measure_z_q => sig_qubit_meas(),
             // The following operations implement SignatureFromArgs:
             borrow => (*self).into(),
             borrow_more => (*self).into(),
