@@ -279,6 +279,7 @@ class _GlobalMapChecker(CustomCallChecker):
         for arg, func_input in zip(args[1:], callback_func.inputs[1:], strict=True):
             _, arg_ty = ExprSynthesizer(self.ctx).synthesize(arg)
             input_args.append(FuncInput(arg_ty, func_input.flags))
+            ExprChecker(self.ctx).check(arg, func_input.ty)
 
         # callback_func output is [global state, *out_args]
         callback_output = callback_func.output
