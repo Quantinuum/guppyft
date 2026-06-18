@@ -62,6 +62,7 @@ def test_exported_extensions() -> None:
         "borrowed_block": iceberg_types.iceberg_borrowed_block_def,
         "qubit": iceberg_types.iceberg_qubit,
     }
+    assert len(ops_extn.operations) == 74
     for op_name, op_def in ops_extn.operations.items():
         op_def_name = op_name if op_name.endswith("_q") else f"{op_name}_def"
         assert op_def == iceberg_ops.__getattribute__(op_def_name)
