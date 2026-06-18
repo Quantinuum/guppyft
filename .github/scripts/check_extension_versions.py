@@ -1,3 +1,5 @@
+# ruff: noqa: INP001 T201
+
 import json
 import subprocess
 import sys
@@ -77,7 +79,7 @@ def main() -> int:
     errors = check_version_changes(changed_files, target)
     if errors:
         for error in errors:
-            sys.stderr.write(error)
+            sys.stderr.write(error + "\n")
         return 1
 
     print("All changed extension files have updated versions.")
