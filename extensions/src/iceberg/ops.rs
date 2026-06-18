@@ -4,21 +4,21 @@ use std::sync::{Arc, LazyLock, Weak};
 
 use documented::DocumentedVariants;
 use hugr::{
+    Extension,
     extension::{
-        prelude::{bool_t, option_type}, simple_op::{
-            try_from_name, HasConcrete, HasDef, MakeExtensionOp, MakeOpDef, MakeRegisteredOp,
-            OpLoadError,
-        }, ExtensionId,
-        OpDef,
-        SignatureFunc,
+        ExtensionId, OpDef, SignatureFunc,
+        prelude::{bool_t, option_type},
+        simple_op::{
+            HasConcrete, HasDef, MakeExtensionOp, MakeOpDef, MakeRegisteredOp, OpLoadError,
+            try_from_name,
+        },
     },
     ops::{ExtensionOp, OpName},
     std_extensions::{
         arithmetic::{float_types::float64_type, int_types::int_type},
         collections::{array::ArrayKind, borrow_array::BorrowArray},
     },
-    types::{type_param::TypeParam, FuncValueType, PolyFuncTypeRV, Type, TypeArg},
-    Extension,
+    types::{FuncValueType, PolyFuncTypeRV, Type, TypeArg, type_param::TypeParam},
 };
 use strum::{EnumIter, EnumString, IntoStaticStr};
 use tket_qsystem::extension::futures::future_type;
@@ -43,16 +43,7 @@ pub const VERSION: semver::Version = semver::Version::new(0, 1, 0);
 /// The dynamic versions are named with the suffix `_d`: for example `x` is the
 /// static form of the X gate and `x_d` is the dynamic form.
 #[derive(
-    Clone,
-    Copy,
-    Debug,
-    DocumentedVariants,
-    Hash,
-    PartialEq,
-    Eq,
-    EnumIter,
-    IntoStaticStr,
-    EnumString,
+    Clone, Copy, Debug, DocumentedVariants, Hash, PartialEq, Eq, EnumIter, IntoStaticStr, EnumString,
 )]
 #[expect(non_camel_case_types)]
 #[non_exhaustive]
@@ -250,7 +241,7 @@ fn bool_array_tv(var_id: usize) -> Type {
         TypeArg::new_var_use(var_id, TypeParam::max_nat_type()),
         future_type(bool_t()),
     )
-        .unwrap()
+    .unwrap()
 }
 
 fn vec_of_blocks_and_angles(n_blocks: usize, n_angles: usize) -> Vec<Type> {
@@ -299,7 +290,7 @@ fn sig_1_block(n_angles: usize, n_indices: usize) -> SignatureFunc {
             vec_of_blocks_and_angles(1, 0),
         ),
     )
-        .into()
+    .into()
 }
 
 /// Signature of an operation that acts on a single block, with a number of
@@ -312,7 +303,7 @@ fn sig_1_block_d(n_angles: usize, n_indices: usize) -> SignatureFunc {
             vec_of_blocks_and_ints_and_angles(1, 0, 0),
         ),
     )
-        .into()
+    .into()
 }
 
 impl MakeOpDef for IcebergOpDef {
@@ -391,7 +382,7 @@ impl MakeOpDef for IcebergOpDef {
                     vec_of_blocks_and_angles(2, 0),
                 ),
             )
-                .into(),
+            .into(),
             zz_phase_between_blocks_d => PolyFuncTypeRV::new(
                 vec![TypeParam::max_nat_type()],
                 FuncValueType::new(
@@ -399,12 +390,12 @@ impl MakeOpDef for IcebergOpDef {
                     vec_of_blocks_and_ints_and_angles(2, 0, 0),
                 ),
             )
-                .into(),
+            .into(),
             cx_transversal => PolyFuncTypeRV::new(
                 vec![TypeParam::max_nat_type()],
                 FuncValueType::new_endo(vec_of_blocks_and_angles(2, 0)),
             )
-                .into(),
+            .into(),
             alloc_zero => PolyFuncTypeRV::new(
                 vec![TypeParam::max_nat_type()],
                 FuncValueType::new(
@@ -412,7 +403,7 @@ impl MakeOpDef for IcebergOpDef {
                     vec_of_blocks_and_angles(1, 0),
                 ),
             )
-                .into(),
+            .into(),
             free => PolyFuncTypeRV::new(
                 vec![TypeParam::max_nat_type()],
                 FuncValueType::new(
@@ -420,7 +411,7 @@ impl MakeOpDef for IcebergOpDef {
                     vec_of_blocks_and_angles(0, 0),
                 ),
             )
-                .into(),
+            .into(),
             measure_syndrome => PolyFuncTypeRV::new(
                 vec![TypeParam::max_nat_type()],
                 FuncValueType::new(
@@ -428,17 +419,17 @@ impl MakeOpDef for IcebergOpDef {
                     vec_of_blocks_and_bools(1, 2),
                 ),
             )
-                .into(),
+            .into(),
             measure_all => PolyFuncTypeRV::new(
                 vec![TypeParam::max_nat_type()],
                 FuncValueType::new(vec_of_blocks_and_angles(1, 0), vec![bool_array_tv(0)]),
             )
-                .into(),
+            .into(),
             try_measure_one_x => PolyFuncTypeRV::new(
                 vec![TypeParam::max_nat_type(); 2],
                 FuncValueType::new(vec_of_blocks_and_angles(1, 0), block_and_optional_bool()),
             )
-                .into(),
+            .into(),
             try_measure_one_x_d => PolyFuncTypeRV::new(
                 vec![TypeParam::max_nat_type()],
                 FuncValueType::new(
@@ -446,12 +437,12 @@ impl MakeOpDef for IcebergOpDef {
                     block_and_optional_bool(),
                 ),
             )
-                .into(),
+            .into(),
             try_measure_one_z => PolyFuncTypeRV::new(
                 vec![TypeParam::max_nat_type(); 2],
                 FuncValueType::new(vec_of_blocks_and_angles(1, 0), block_and_optional_bool()),
             )
-                .into(),
+            .into(),
             try_measure_one_z_d => PolyFuncTypeRV::new(
                 vec![TypeParam::max_nat_type()],
                 FuncValueType::new(
@@ -459,7 +450,7 @@ impl MakeOpDef for IcebergOpDef {
                     block_and_optional_bool(),
                 ),
             )
-                .into(),
+            .into(),
         }
     }
 
@@ -478,9 +469,12 @@ pub static EXTENSION: LazyLock<Arc<Extension>> = LazyLock::new(|| {
 #[cfg(test)]
 mod tests {
     use hugr::{
+        CircuitUnit, HugrView, Wire,
         builder::{
             DFGBuilder, Dataflow, DataflowHugr, DataflowSubContainer, HugrBuilder, ModuleBuilder,
-        }, envelope::{read_envelope, write_envelope, EnvelopeConfig, EnvelopeFormat}, extension::ExtensionRegistry,
+        },
+        envelope::{EnvelopeConfig, EnvelopeFormat, read_envelope, write_envelope},
+        extension::ExtensionRegistry,
         ops::DataflowOpTrait,
         package::Package,
         std_extensions::{
@@ -489,13 +483,10 @@ mod tests {
             std_reg,
         },
         types::Signature,
-        CircuitUnit,
-        HugrView,
-        Wire,
     };
 
-    use crate::iceberg::types::block_type;
     use crate::iceberg::types::EXTENSION as types_extension;
+    use crate::iceberg::types::block_type;
 
     use super::*;
 
@@ -721,7 +712,7 @@ mod tests {
             [block_type(4)],
             [borrow_array_type(4, future_type(bool_t()))],
         ))
-            .unwrap();
+        .unwrap();
         let handle = dfg_builder
             .add_dataflow_op(measureall, dfg_builder.input_wires())
             .unwrap();
@@ -754,7 +745,7 @@ mod tests {
                 optional_future_bool(),
             ],
         ))
-            .unwrap();
+        .unwrap();
         let handle = dfg_builder
             .add_dataflow_op(allh, dfg_builder.input_wires())
             .unwrap();
@@ -799,7 +790,7 @@ mod tests {
             &package,
             EnvelopeConfig::new(EnvelopeFormat::ModelWithExtensions),
         )
-            .unwrap();
+        .unwrap();
         let buff = std::io::BufReader::new(bytes.as_slice());
         let mut reg: ExtensionRegistry = std_reg();
         reg.extend([types_extension.clone(), EXTENSION.clone()]);
