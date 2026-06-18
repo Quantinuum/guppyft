@@ -955,7 +955,7 @@
     "borrow": {
       "extension": "guppyft.iceberg.ops",
       "name": "borrow",
-      "description": "Extraction of dynamic logical qubits from a block.",
+      "description": "Extraction of dynamic logical qubits from a block (consuming the block and emitting a borrowed block).",
       "signature": null,
       "binary": true
     },
@@ -1683,7 +1683,7 @@
     "restore": {
       "extension": "guppyft.iceberg.ops",
       "name": "restore",
-      "description": "Restoration of all dynamic logical qubits to their originating block.",
+      "description": "Restoration of all dynamic logical qubits to their originating block (consuming the borrowed block and emitting a block).",
       "signature": null,
       "binary": true
     },

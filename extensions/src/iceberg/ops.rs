@@ -196,13 +196,13 @@ pub enum IcebergOpDef {
     try_measure_x_q,
     /// Fallible non-destructive measurement of a dynamic logical qubit in the Z basis.
     try_measure_z_q,
-    /// Extraction of dynamic logical qubits from a block.
+    /// Extraction of dynamic logical qubits from a block (consuming the block and emitting a borrowed block).
     borrow,
     /// Extraction of dynamic logical qubits from an already-borrowed block.
     borrow_more,
     /// Restoration of some dynamic logical qubits to their originating block.
     restore_some,
-    /// Restoration of all dynamic logical qubits to their originating block.
+    /// Restoration of all dynamic logical qubits to their originating block (consuming the borrowed block and emitting a block).
     restore,
 }
 
