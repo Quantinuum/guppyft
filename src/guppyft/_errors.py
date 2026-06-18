@@ -60,7 +60,6 @@ class CallbackInputParamError(Error):
     span: ast.arg = field(init=False)
 
     def __post_init__(self) -> None:
-        assert isinstance(self.callback_def_node, GlobalName)
         arg = get_function_input_arg(self.callback_def_node, self.param_idx)
         object.__setattr__(self, "span", arg)
 

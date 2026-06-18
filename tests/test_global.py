@@ -12,10 +12,10 @@ from guppylang.std.quantum import discard, discard_array, measure, qubit, x
 from guppyft.globals import map_global, with_global
 
 
-def run_global_smoke_test(
-    *,
+def run_global_test(
     main_func: Callable[[], None],
-    expected_res: dict[str, list[int]] | None = None,
+    *,
+    assert_result: dict[str, list[int]] | None = None,
     n_qubits: int = 1,
 ) -> None:
     """Fixture to test that uses of global ops can be emulated without error."""
@@ -25,14 +25,15 @@ def run_global_smoke_test(
         main_func()
         result("smoke", 0)
 
-    if expected_res is None:
-        expected_res = {"smoke": [0]}
+    if assert_result is None:
+        assert_result = {"smoke": [0]}
     else:
-        expected_res["smoke"] = [0]
+        assert "smoke" not in assert_result, "Test configuration: smoke key not allowed"
+        assert_result["smoke"] = [0]
 
     res = main.emulator(n_qubits=n_qubits).run().collated_shots()
     assert len(res) == 1
-    assert res[0] == expected_res
+    assert res[0] == assert_result
 
 
 def test_with_global_qubit() -> None:
@@ -46,7 +47,7 @@ def test_with_global_qubit() -> None:
         qb = with_global(qb, my_prog)
         discard(qb)
 
-    run_global_smoke_test(main_func=main, expected_res={"my_prog": [19]})
+    run_global_test(main, assert_result={"my_prog": [19]})
 
 
 def test_with_global_int() -> None:
@@ -58,7 +59,7 @@ def test_with_global_int() -> None:
     def main() -> None:
         with_global(0, my_prog)
 
-    run_global_smoke_test(main_func=main, expected_res={"my_prog": [19]})
+    run_global_test(main, assert_result={"my_prog": [19]})
 
 
 def test_with_global_array_int() -> None:
@@ -70,7 +71,7 @@ def test_with_global_array_int() -> None:
     def main() -> None:
         with_global(array(0), my_prog)
 
-    run_global_smoke_test(main_func=main, expected_res={"my_prog": [19]})
+    run_global_test(main, assert_result={"my_prog": [19]})
 
 
 def test_with_global_array_qubit() -> None:
@@ -84,7 +85,7 @@ def test_with_global_array_qubit() -> None:
         qb_arr = with_global(qb_arr, my_prog)
         discard_array(qb_arr)
 
-    run_global_smoke_test(main_func=main, expected_res={"my_prog": [19]})
+    run_global_test(main, assert_result={"my_prog": [19]})
 
 
 def test_with_global_struct() -> None:
@@ -101,7 +102,7 @@ def test_with_global_struct() -> None:
         struct = MyStruct(0)  # type: ignore[call-arg]
         with_global(struct, my_prog)
 
-    run_global_smoke_test(main_func=main, expected_res={"my_prog": [19]})
+    run_global_test(main, assert_result={"my_prog": [19]})
 
 
 # Test global struct with qsystem RNG
@@ -134,16 +135,15 @@ def test_global_struct_with_rng() -> None:
         result("main", struct.rng.random_int())
         struct.discard()
 
-    run_global_smoke_test(
-        main_func=main,
-        expected_res={
+    run_global_test(
+        main,
+        assert_result={
             "foo": [1307692281, -444364974],
             "main": [1491967504],
         },
     )
 
 
-# Test `with_global` with input args
 def test_with_global_input_args() -> None:
     @guppy
     def my_prog0(i: int) -> None:
@@ -165,7 +165,7 @@ def test_with_global_input_args() -> None:
         qb = with_global(qb, my_prog2, 1, 2, 3)
         discard(qb)
 
-    run_global_smoke_test(main_func=main, expected_res={"my_prog": [1, 3, 6]})
+    run_global_test(main, assert_result={"my_prog": [1, 3, 6]})
 
 
 # Test `with_global` outputs
@@ -199,9 +199,9 @@ def test_with_outputs() -> None:
         result("main", k)
         discard(qb)
 
-    run_global_smoke_test(
-        main_func=main,
-        expected_res={"my_prog": [1, 2, 3], "main": [2, 2, 3, 2, 3, 4]},
+    run_global_test(
+        main,
+        assert_result={"my_prog": [1, 2, 3], "main": [2, 2, 3, 2, 3, 4]},
     )
 
 
@@ -218,7 +218,7 @@ def test_with_owned_input() -> None:
         r: tuple[int, qubit] = with_global(1, my_prog, qb)
         result("main", measure(r[1]).read())
 
-    run_global_smoke_test(main_func=main, expected_res={"main": [1]})
+    run_global_test(main, assert_result={"main": [1]})
 
 
 def test_map_global_linear() -> None:
@@ -238,7 +238,7 @@ def test_map_global_linear() -> None:
         qb = with_global(qb, my_prog)
         result("main", measure(qb).read())
 
-    run_global_smoke_test(main_func=main, expected_res={"main": [1]})
+    run_global_test(main, assert_result={"main": [1]})
 
 
 def test_map_global_non_linear() -> None:
@@ -257,7 +257,7 @@ def test_map_global_non_linear() -> None:
         i = with_global(i, my_prog)
         result("main", i)
 
-    run_global_smoke_test(main_func=main, expected_res={"main": [1]})
+    run_global_test(main, assert_result={"main": [1]})
 
 
 def test_with_map_mismatch_global_type_error() -> None:
@@ -273,7 +273,6 @@ def test_with_map_mismatch_global_type_error() -> None:
     def main() -> None:
         with_global("", my_prog)
 
-    # TODO match more specific error
     with pytest.raises(
         RuntimeError,
         match=(
@@ -281,7 +280,7 @@ def test_with_map_mismatch_global_type_error() -> None:
             r" Expected \"{ i1, i64 }\""
         ),
     ):
-        main.emulator(n_qubits=1).run().collated_shots()
+        run_global_test(main)
 
 
 def test_map_without_with() -> None:
@@ -298,7 +297,7 @@ def test_map_without_with() -> None:
         EmulatorError,
         match=re.escape("Panic (#1001): No global provided for GlobalsOp::With"),
     ):
-        main.emulator(n_qubits=1).run().collated_shots()
+        run_global_test(main)
 
 
 def test_nested_with() -> None:
@@ -326,9 +325,9 @@ def test_nested_with() -> None:
         arr_outer = with_global(arr_outer, my_prog)
         result("arr_outer", arr_outer[0])
 
-    run_global_smoke_test(
-        main_func=main,
-        expected_res={"arr_inner": [11], "arr_outer": [3]},
+    run_global_test(
+        main,
+        assert_result={"arr_inner": [11], "arr_outer": [3]},
     )
 
 
@@ -355,7 +354,7 @@ def test_nested_map_calls_error() -> None:
         EmulatorError,
         match=re.escape("Panic (#1001): No global provided for GlobalsOp::With"),
     ):
-        main.emulator(n_qubits=1).run().collated_shots()
+        run_global_test(main)
 
 
 def test_map_return_tuple_type() -> None:
@@ -373,7 +372,7 @@ def test_map_return_tuple_type() -> None:
     def main() -> None:
         with_global(0, my_prog)
 
-    run_global_smoke_test(
-        main_func=main,
-        expected_res={"my_prog": [1, 2]},
+    run_global_test(
+        main,
+        assert_result={"my_prog": [1, 2]},
     )
