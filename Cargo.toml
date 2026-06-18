@@ -13,7 +13,7 @@ edition = "2024"
 [workspace.dependencies]
 tket = "0.18.0"
 hugr = "0.27.0"
-hugr-core = "0.27.0"
+hugr-core = "0.28.2"
 itertools = "0.14.0"
 derive_more = { version = "2", features = ["display", "from"] }
 
