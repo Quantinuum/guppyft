@@ -522,9 +522,9 @@ def try_measure_one_z(block: Block[N], i: int) -> Option[Measurement]:
     index `i`."""
 
 
-@hugr_op(iceberg_op("discard_q"))
+@hugr_op(iceberg_op("free_q"))
 @no_type_check
-def discard_q(qubit: Qubit @ owned) -> None:
+def free_q(qubit: Qubit @ owned) -> None:
     """Free `qubit`."""
 
 
@@ -593,19 +593,19 @@ def cx_q(qubit0: Qubit, qubit1: Qubit) -> None:
 def borrow(
     block: Block[N] @ owned, indices: array[int, M]
 ) -> (BorrowedBlock[N], array[Qubit, M]):
-    """Extract free logical qubits from a block."""
+    """Extract dynamic logical qubits from a block."""
 
 
 @hugr_op(iceberg_op("borrow_more"))
 @no_type_check
 def borrow_more(block: BorrowedBlock[N], indices: array[int, M]) -> array[Qubit, M]:
-    """Extract free logical qubits from an already-borrowed block."""
+    """Extract dynamic logical qubits from an already-borrowed block."""
 
 
 @hugr_op(iceberg_op("restore_some"))
 @no_type_check
 def restore_some(block: BorrowedBlock[N], qubits: array[Qubit, M] @ owned) -> None:
-    """Restore some free logical qubits to their originating block."""
+    """Restore some dynamic logical qubits to their originating block."""
 
 
 @hugr_op(iceberg_op("restore"))
@@ -613,4 +613,4 @@ def restore_some(block: BorrowedBlock[N], qubits: array[Qubit, M] @ owned) -> No
 def restore(
     block: BorrowedBlock[N] @ owned, qubits: array[Qubit, M] @ owned
 ) -> Block[N]:
-    """Restore all free logical qubits to their originating block."""
+    """Restore all dynamic logical qubits to their originating block."""

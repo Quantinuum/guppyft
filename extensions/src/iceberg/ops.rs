@@ -29,7 +29,7 @@ use hugr::{
 use strum::{EnumIter, EnumString, IntoStaticStr};
 use tket_qsystem::extension::futures::future_type;
 
-use crate::iceberg::types::{borrowed_block_tv, free_logical_qubit_type};
+use crate::iceberg::types::{borrowed_block_tv, dynamic_logical_qubit_type};
 
 use super::types::block_tv;
 
@@ -172,37 +172,37 @@ pub enum IcebergOpDef {
     try_measure_one_z,
     /// Fallible non-destructive measurement of one qubit in the Z basis with dynamic index.
     try_measure_one_z_d,
-    /// Allocate a free logical qubit in the zero state.
+    /// Allocate a dynamic logical qubit in the zero state.
     alloc_q,
-    /// Discard a free logical qubit.
-    discard_q,
-    /// X gate on a free logical_qubit.
+    /// Free a dynamic logical qubit.
+    free_q,
+    /// X gate on a dynamic logical_qubit.
     x_q,
-    /// Y gate on a free logical_qubit.
+    /// Y gate on a dynamic logical_qubit.
     y_q,
-    /// Z gate on a free logical_qubit.
+    /// Z gate on a dynamic logical_qubit.
     z_q,
-    /// Rx gate on a free logical qubit.
+    /// Rx gate on a dynamic logical qubit.
     rx_q,
-    /// Ry gate on a free logical qubit.
+    /// Ry gate on a dynamic logical qubit.
     ry_q,
-    /// Rz gate on a free logical qubit.
+    /// Rz gate on a dynamic logical qubit.
     rz_q,
-    /// ZZPhase gate on two free logical qubits.
+    /// ZZPhase gate on two dynamic logical qubits.
     zz_phase_q,
-    /// CX gate on two free logical qubits.
+    /// CX gate on two dynamic logical qubits.
     cx_q,
-    /// Fallible non-destructive measurement of a free logical qubit in the X basis.
+    /// Fallible non-destructive measurement of a dynamic logical qubit in the X basis.
     try_measure_x_q,
-    /// Fallible non-destructive measurement of a free logical qubit in the Z basis.
+    /// Fallible non-destructive measurement of a dynamic logical qubit in the Z basis.
     try_measure_z_q,
-    /// Extraction of free logical qubits from a block.
+    /// Extraction of dynamic logical qubits from a block.
     borrow,
-    /// Extraction of free logical qubits from an already-borrowed block.
+    /// Extraction of dynamic logical qubits from an already-borrowed block.
     borrow_more,
-    /// Restoration of some free logical qubits to their originating block.
+    /// Restoration of some dynamic logical qubits to their originating block.
     restore_some,
-    /// Restoration of all free logical qubits to their originating block.
+    /// Restoration of all dynamic logical qubits to their originating block.
     restore,
 }
 
@@ -410,20 +410,21 @@ fn sig_1_block_d(n_angles: usize, n_indices: usize) -> SignatureFunc {
     .into()
 }
 
-/// Signature of an operation that acts on a number of free logical qubits with
-/// a number of additional angle qubits.
+/// Signature of an operation that acts on a number of dynamic logical qubits
+/// with a number of additional angle qubits.
 fn sig_qbs_angles(n_qubits: usize, n_angles: usize) -> SignatureFunc {
-    let mut in_types: Vec<Type> = vec![free_logical_qubit_type(); n_qubits];
+    let mut in_types: Vec<Type> = vec![dynamic_logical_qubit_type(); n_qubits];
     let out_types: Vec<Type> = in_types.clone();
     in_types.extend(vec![float64_type(); n_angles]);
     Signature::new(in_types, TypeRow::from(out_types)).into()
 }
 
-/// Signature of a fallible non-destructive measurement on a free logical qubit.
+/// Signature of a fallible non-destructive measurement on a dynamic logical
+/// qubit.
 fn sig_qb_meas() -> SignatureFunc {
     Signature::new(
-        vec![free_logical_qubit_type()],
-        TypeRow::from(vec![optional_future_bool(), free_logical_qubit_type()]),
+        vec![dynamic_logical_qubit_type()],
+        TypeRow::from(vec![optional_future_bool(), dynamic_logical_qubit_type()]),
     )
     .into()
 }
@@ -596,10 +597,10 @@ impl MakeOpDef for IcebergOpDef {
             )
             .into(),
             alloc_q => {
-                Signature::new(vec![], TypeRow::from(vec![free_logical_qubit_type()])).into()
+                Signature::new(vec![], TypeRow::from(vec![dynamic_logical_qubit_type()])).into()
             }
-            discard_q => {
-                Signature::new(vec![free_logical_qubit_type()], TypeRow::from(vec![])).into()
+            free_q => {
+                Signature::new(vec![dynamic_logical_qubit_type()], TypeRow::from(vec![])).into()
             }
             x_q => sig_qbs_angles(1, 0),
             y_q => sig_qbs_angles(1, 0),
@@ -637,7 +638,7 @@ impl SignatureFromArgs for IcebergOpDef {
                 let mut in_types: Vec<Type> = vec![block_tv(0)];
                 in_types.extend(vec![int_type(6); m as usize]);
                 let mut out_types: Vec<Type> = vec![borrowed_block_tv(0)];
-                out_types.extend(vec![free_logical_qubit_type(); m as usize]);
+                out_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
                 PolyFuncTypeRV::new(
                     vec![TypeParam::max_nat_type()],
                     FuncValueType::new(in_types, out_types),
@@ -647,7 +648,7 @@ impl SignatureFromArgs for IcebergOpDef {
                 let mut in_types: Vec<Type> = vec![borrowed_block_tv(0)];
                 in_types.extend(vec![int_type(6); m as usize]);
                 let mut out_types: Vec<Type> = vec![borrowed_block_tv(0)];
-                out_types.extend(vec![free_logical_qubit_type(); m as usize]);
+                out_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
                 PolyFuncTypeRV::new(
                     vec![TypeParam::max_nat_type()],
                     FuncValueType::new(in_types, out_types),
@@ -655,7 +656,7 @@ impl SignatureFromArgs for IcebergOpDef {
             }
             IcebergOpDef::restore_some => {
                 let mut in_types: Vec<Type> = vec![borrowed_block_tv(0)];
-                in_types.extend(vec![free_logical_qubit_type(); m as usize]);
+                in_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
                 PolyFuncTypeRV::new(
                     vec![TypeParam::max_nat_type()],
                     FuncValueType::new(in_types, vec![borrowed_block_tv(0)]),
@@ -663,7 +664,7 @@ impl SignatureFromArgs for IcebergOpDef {
             }
             IcebergOpDef::restore => {
                 let mut in_types: Vec<Type> = vec![borrowed_block_tv(0)];
-                in_types.extend(vec![free_logical_qubit_type(); m as usize]);
+                in_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
                 PolyFuncTypeRV::new(
                     vec![TypeParam::max_nat_type()],
                     FuncValueType::new(in_types, vec![block_tv(0)]),
@@ -736,7 +737,7 @@ mod tests {
     #[test]
     fn test_hugr_ops() {
         let block = block_type(6);
-        let qubit = free_logical_qubit_type();
+        let qubit = dynamic_logical_qubit_type();
         let x3 = EXTENSION
             .instantiate_extension_op("x", [6.into(), 3.into()])
             .unwrap();
@@ -921,7 +922,7 @@ mod tests {
             .instantiate_extension_op("alloc_zero", [8.into()])
             .unwrap();
         let allocqb = EXTENSION.instantiate_extension_op("alloc_q", []).unwrap();
-        let freeqb = EXTENSION.instantiate_extension_op("discard_q", []).unwrap();
+        let freeqb = EXTENSION.instantiate_extension_op("free_q", []).unwrap();
         let xqb = EXTENSION.instantiate_extension_op("x_q", []).unwrap();
         let measqb = EXTENSION
             .instantiate_extension_op("try_measure_z_q", [])

@@ -15,7 +15,7 @@ from guppyft.logical.iceberg import (
     cx_q,
     cx_transversal,
     discard,
-    discard_q,
+    free_q,
     measure_all,
     restore,
     zz_phase_between_blocks,
@@ -179,7 +179,7 @@ def test_guppy_bindings_smoke() -> None:
             result("mq0", maybe_mq0.unwrap().read())
         else:
             maybe_mq0.unwrap_nothing()
-        discard_q(q0)
+        free_q(q0)
 
     pkg = main.compile()
     h = pkg.modules[0]

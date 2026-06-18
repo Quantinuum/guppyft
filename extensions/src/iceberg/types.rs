@@ -54,10 +54,10 @@ pub fn borrowed_block_type(k_arg: impl Into<TypeArg>) -> Type {
     .into()
 }
 
-/// Type of a "free" logical qubit. This represents a logical qubit whose block
-/// is not statically known (but assigned at runtime). It may have been
+/// Type of a "dynamic" logical qubit. This represents a logical qubit whose
+/// block is not statically known (but assigned at runtime). It may have been
 /// "borrowed" from a logical block, or allocated independently.
-pub fn free_logical_qubit_type() -> Type {
+pub fn dynamic_logical_qubit_type() -> Type {
     CustomType::new(
         QUBIT_TYPENAME,
         [],
@@ -166,7 +166,7 @@ mod tests {
 
     #[test]
     fn test_iceberg_qubit_type() {
-        let qubit = free_logical_qubit_type();
+        let qubit = dynamic_logical_qubit_type();
         assert!(!qubit.copyable());
     }
 
@@ -174,7 +174,7 @@ mod tests {
     fn test_hugr() {
         let block = block_type(2);
         let bblock = borrowed_block_type(2);
-        let qubit = free_logical_qubit_type();
+        let qubit = dynamic_logical_qubit_type();
         let mut module_builder = ModuleBuilder::new();
         let signature = Signature::new_endo(vec![block, bblock, qubit]);
         let f_build = module_builder.define_function("main", signature).unwrap();

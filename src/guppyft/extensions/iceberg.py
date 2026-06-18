@@ -52,7 +52,7 @@ class IcebergTypesExtension:
 
     @functools.cached_property
     def iceberg_qubit(self) -> TypeDef:
-        """A "free" logical qubit belonging to an unspecified block."""
+        """A "dynamic" logical qubit belonging to an unspecified block."""
         return self().get_type("qubit")
 
 
@@ -1165,77 +1165,77 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def alloc_q(self) -> OpDef:
-        """Allocate a free logical qubit in the zero state."""
+        """Allocate a dynamic logical qubit in the zero state."""
         return self().get_op("alloc_q")
 
-    # discard_q
+    # free_q
 
     @functools.cached_property
-    def discard_q(self) -> OpDef:
-        """Discard a free logical qubit."""
-        return self().get_op("discard_q")
+    def free_q(self) -> OpDef:
+        """Discard a dynamic logical qubit."""
+        return self().get_op("free_q")
 
     # x_q
 
     @functools.cached_property
     def x_q(self) -> OpDef:
-        """X gate on a free logical_qubit."""
+        """X gate on a dynamic logical_qubit."""
         return self().get_op("x_q")
 
     # y_q
 
     @functools.cached_property
     def y_q(self) -> OpDef:
-        """Y gate on a free logical_qubit."""
+        """Y gate on a dynamic logical_qubit."""
         return self().get_op("y_q")
 
     # z_q
 
     @functools.cached_property
     def z_q(self) -> OpDef:
-        """Z gate on a free logical_qubit."""
+        """Z gate on a dynamic logical_qubit."""
         return self().get_op("z_q")
 
     # rx_q
 
     @functools.cached_property
     def rx_q(self) -> OpDef:
-        """Rx gate on a free logical_qubit."""
+        """Rx gate on a dynamic logical_qubit."""
         return self().get_op("rx_q")
 
     # ry_q
 
     @functools.cached_property
     def ry_q(self) -> OpDef:
-        """Ry gate on a free logical_qubit."""
+        """Ry gate on a dynamic logical_qubit."""
         return self().get_op("ry_q")
 
     # rz_q
 
     @functools.cached_property
     def rz_q(self) -> OpDef:
-        """Rz gate on a free logical_qubit."""
+        """Rz gate on a dynamic logical_qubit."""
         return self().get_op("rz_q")
 
     # zz_phase_q
 
     @functools.cached_property
     def zz_phase_q(self) -> OpDef:
-        """ZZPhase gate on two free logical qubits."""
+        """ZZPhase gate on two dynamic logical qubits."""
         return self().get_op("zz_phase_q")
 
     # cx_q
 
     @functools.cached_property
     def cx_q(self) -> OpDef:
-        """CX gate on two free logical qubits.."""
+        """CX gate on two dynamic logical qubits.."""
         return self().get_op("cx_q")
 
     # try_measure_x_q
 
     @functools.cached_property
     def try_measure_x_q(self) -> OpDef:
-        """Fallible non-destructive measurement of a free logical qubit in the X
+        """Fallible non-destructive measurement of a dynamic logical qubit in the X
         basis."""
         return self().get_op("try_measure_x_q")
 
@@ -1243,7 +1243,7 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def try_measure_z_q(self) -> OpDef:
-        """Fallible non-destructive measurement of a free logical qubit in the Z
+        """Fallible non-destructive measurement of a dynamic logical qubit in the Z
         basis."""
         return self().get_op("try_measure_z_q")
 
@@ -1251,14 +1251,14 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def borrow_def(self) -> OpDef:
-        """Extraction of free logical qubits from a block.
+        """Extraction of dynamic logical qubits from a block.
 
         This is the generic operation definition. For the instantiated operation, see
         `borrow`."""
         return self().get_op("borrow")
 
     def borrow(self, k: int, m: int) -> ExtOp:
-        """Extraction of free logical qubits from a block.
+        """Extraction of dynamic logical qubits from a block.
 
         Args:
             k: The number of logical qubits encoded in the block.
@@ -1270,14 +1270,14 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def borrow_more_def(self) -> OpDef:
-        """Extraction of free logical qubits from an already-borrowed block.
+        """Extraction of dynamic logical qubits from an already-borrowed block.
 
         This is the generic operation definition. For the instantiated operation, see
         `borrow+more`."""
         return self().get_op("borrow_more")
 
     def borrow_more(self, k: int, m: int) -> ExtOp:
-        """Extraction of free logical qubits from an already-borrowed block.
+        """Extraction of dynamic logical qubits from an already-borrowed block.
 
         Args:
             k: The number of logical qubits encoded in the block.
@@ -1289,14 +1289,14 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def restore_some_def(self) -> OpDef:
-        """Restoration of some free logical qubits to their originating block.
+        """Restoration of some dynamic logical qubits to their originating block.
 
         This is the generic operation definition. For the instantiated operation, see
         `restore_some`."""
         return self().get_op("restore_some")
 
     def restore_some(self, k: int, m: int) -> ExtOp:
-        """Restoration of some free logical qubits to their originating block.
+        """Restoration of some dynamic logical qubits to their originating block.
 
         Args:
             k: The number of logical qubits encoded in the block.
@@ -1308,14 +1308,14 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def restore_def(self) -> OpDef:
-        """Restoration of all free logical qubits to their originating block.
+        """Restoration of all dynamic logical qubits to their originating block.
 
         This is the generic operation definition. For the instantiated operation, see
         `restore`."""
         return self().get_op("restore")
 
     def restore(self, k: int, m: int) -> ExtOp:
-        """Restoration of all free logical qubits to their originating block.
+        """Restoration of all dynamic logical qubits to their originating block.
 
         Args:
             k: The number of logical qubits encoded in the block.
