@@ -243,7 +243,7 @@ qubit_t = ht.ExtType(qubit_def)
 
 @custom_type(qubit_t, copyable=False, droppable=False)
 class Qubit:
-    @hugr_op(iceberg_op("alloc_q"))
+    @hugr_op(iceberg_op("alloc_dynq"))
     @no_type_check
     def __new__() -> "Qubit": ...
 
@@ -251,49 +251,49 @@ class Qubit:
     @no_type_check
     def x(self: "Qubit") -> None:
         """X gate."""
-        x_q(self)
+        x_dynq(self)
 
     @guppy
     @no_type_check
     def y(self: "Qubit") -> None:
         """Y gate."""
-        y_q(self)
+        y_dynq(self)
 
     @guppy
     @no_type_check
     def z(self: "Qubit") -> None:
         """Z gate."""
-        z_q(self)
+        z_dynq(self)
 
     @guppy
     @no_type_check
     def rx(self: "Qubit", angle: float) -> None:
         """Rx rotation of `angle` radians."""
-        rx_q(self, angle)
+        rx_dynq(self, angle)
 
     @guppy
     @no_type_check
     def ry(self: "Qubit", angle: float) -> None:
         """Ry rotation of `angle` radians."""
-        ry_q(self, angle)
+        ry_dynq(self, angle)
 
     @guppy
     @no_type_check
     def rz(self: "Qubit", angle: float) -> None:
         """Rz rotation of `angle` radians."""
-        rz_q(self, angle)
+        rz_dynq(self, angle)
 
     @guppy
     @no_type_check
     def try_measure_x(self: "Qubit") -> Option[Measurement]:
         """Fallible non-destructive measurement in the X basis."""
-        return try_measure_x_q(self)
+        return try_measure_x_dynq(self)
 
     @guppy
     @no_type_check
     def try_measure_z(self: "Qubit") -> Option[Measurement]:
         """Fallible non-destructive measurement in the Z basis."""
-        return try_measure_z_q(self)
+        return try_measure_z_dynq(self)
 
 
 @custom_type(_block_to_hugr, copyable=False, droppable=False, params=_block_params)
@@ -522,69 +522,69 @@ def try_measure_one_z(block: Block[N], i: int) -> Option[Measurement]:
     index `i`."""
 
 
-@hugr_op(iceberg_op("free_q"))
+@hugr_op(iceberg_op("free_dynq"))
 @no_type_check
-def free_q(qubit: Qubit @ owned) -> None:
+def free_dynq(qubit: Qubit @ owned) -> None:
     """Free `qubit`."""
 
 
-@hugr_op(iceberg_op("x_q"))
+@hugr_op(iceberg_op("x_dynq"))
 @no_type_check
-def x_q(qubit: Qubit) -> None:
+def x_dynq(qubit: Qubit) -> None:
     """X gate."""
 
 
-@hugr_op(iceberg_op("y_q"))
+@hugr_op(iceberg_op("y_dynq"))
 @no_type_check
-def y_q(qubit: Qubit) -> None:
+def y_dynq(qubit: Qubit) -> None:
     """Y gate."""
 
 
-@hugr_op(iceberg_op("z_q"))
+@hugr_op(iceberg_op("z_dynq"))
 @no_type_check
-def z_q(qubit: Qubit) -> None:
+def z_dynq(qubit: Qubit) -> None:
     """Z gate."""
 
 
-@hugr_op(iceberg_op("rx_q"))
+@hugr_op(iceberg_op("rx_dynq"))
 @no_type_check
-def rx_q(qubit: Qubit, angle: float) -> None:
+def rx_dynq(qubit: Qubit, angle: float) -> None:
     """Rx rotation of `angle` radians."""
 
 
-@hugr_op(iceberg_op("ry_q"))
+@hugr_op(iceberg_op("ry_dynq"))
 @no_type_check
-def ry_q(qubit: Qubit, angle: float) -> None:
+def ry_dynq(qubit: Qubit, angle: float) -> None:
     """Ry rotation of `angle` radians."""
 
 
-@hugr_op(iceberg_op("rz_q"))
+@hugr_op(iceberg_op("rz_dynq"))
 @no_type_check
-def rz_q(qubit: Qubit, angle: float) -> None:
+def rz_dynq(qubit: Qubit, angle: float) -> None:
     """Rz rotation of `angle` radians."""
 
 
-@hugr_op(iceberg_op("try_measure_x_q"))
+@hugr_op(iceberg_op("try_measure_x_dynq"))
 @no_type_check
-def try_measure_x_q(qubit: Qubit) -> Option[Measurement]:
+def try_measure_x_dynq(qubit: Qubit) -> Option[Measurement]:
     """Fallible non-destructive measurement in the X basis."""
 
 
-@hugr_op(iceberg_op("try_measure_z_q"))
+@hugr_op(iceberg_op("try_measure_z_dynq"))
 @no_type_check
-def try_measure_z_q(qubit: Qubit) -> Option[Measurement]:
+def try_measure_z_dynq(qubit: Qubit) -> Option[Measurement]:
     """Fallible non-destructive measurement in the Z basis."""
 
 
-@hugr_op(iceberg_op("zz_phase_q"))
+@hugr_op(iceberg_op("zz_phase_dynq"))
 @no_type_check
-def zz_phase_q(qubit0: Qubit, qubit1: Qubit, angle: float) -> None:
+def zz_phase_dynq(qubit0: Qubit, qubit1: Qubit, angle: float) -> None:
     """ZZPhase rotation of `angle` radians on two qubits."""
 
 
-@hugr_op(iceberg_op("cx_q"))
+@hugr_op(iceberg_op("cx_dynq"))
 @no_type_check
-def cx_q(qubit0: Qubit, qubit1: Qubit) -> None:
+def cx_dynq(qubit0: Qubit, qubit1: Qubit) -> None:
     """CX gate on `qubit0` (control) and `qubit1` (target)."""
 
 

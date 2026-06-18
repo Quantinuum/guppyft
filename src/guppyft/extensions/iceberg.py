@@ -1161,91 +1161,91 @@ class IcebergOpsExtension:
         """
         return self.try_measure_one_z_d_def.instantiate([BoundedNatArg(k)])
 
-    # alloc_q
+    # alloc_dynq
 
     @functools.cached_property
-    def alloc_q(self) -> OpDef:
+    def alloc_dynq(self) -> OpDef:
         """Allocate a dynamic logical qubit in the zero state."""
-        return self().get_op("alloc_q")
+        return self().get_op("alloc_dynq")
 
-    # free_q
+    # free_dynq
 
     @functools.cached_property
-    def free_q(self) -> OpDef:
+    def free_dynq(self) -> OpDef:
         """Discard a dynamic logical qubit."""
-        return self().get_op("free_q")
+        return self().get_op("free_dynq")
 
-    # x_q
-
-    @functools.cached_property
-    def x_q(self) -> OpDef:
-        """X gate on a dynamic logical_qubit."""
-        return self().get_op("x_q")
-
-    # y_q
+    # x_dynq
 
     @functools.cached_property
-    def y_q(self) -> OpDef:
-        """Y gate on a dynamic logical_qubit."""
-        return self().get_op("y_q")
+    def x_dynq(self) -> OpDef:
+        """X gate on a dynamic logical qubit."""
+        return self().get_op("x_dynq")
 
-    # z_q
-
-    @functools.cached_property
-    def z_q(self) -> OpDef:
-        """Z gate on a dynamic logical_qubit."""
-        return self().get_op("z_q")
-
-    # rx_q
+    # y_dynq
 
     @functools.cached_property
-    def rx_q(self) -> OpDef:
-        """Rx gate on a dynamic logical_qubit."""
-        return self().get_op("rx_q")
+    def y_dynq(self) -> OpDef:
+        """Y gate on a dynamic logical qubit."""
+        return self().get_op("y_dynq")
 
-    # ry_q
-
-    @functools.cached_property
-    def ry_q(self) -> OpDef:
-        """Ry gate on a dynamic logical_qubit."""
-        return self().get_op("ry_q")
-
-    # rz_q
+    # z_dynq
 
     @functools.cached_property
-    def rz_q(self) -> OpDef:
-        """Rz gate on a dynamic logical_qubit."""
-        return self().get_op("rz_q")
+    def z_dynq(self) -> OpDef:
+        """Z gate on a dynamic logical qubit."""
+        return self().get_op("z_dynq")
 
-    # zz_phase_q
+    # rx_dynq
 
     @functools.cached_property
-    def zz_phase_q(self) -> OpDef:
+    def rx_dynq(self) -> OpDef:
+        """Rx gate on a dynamic logical qubit."""
+        return self().get_op("rx_dynq")
+
+    # ry_dynq
+
+    @functools.cached_property
+    def ry_dynq(self) -> OpDef:
+        """Ry gate on a dynamic logical qubit."""
+        return self().get_op("ry_dynq")
+
+    # rz_dynq
+
+    @functools.cached_property
+    def rz_dynq(self) -> OpDef:
+        """Rz gate on a dynamic logical qubit."""
+        return self().get_op("rz_dynq")
+
+    # zz_phase_dynq
+
+    @functools.cached_property
+    def zz_phase_dynq(self) -> OpDef:
         """ZZPhase gate on two dynamic logical qubits."""
-        return self().get_op("zz_phase_q")
+        return self().get_op("zz_phase_dynq")
 
-    # cx_q
+    # cx_dynq
 
     @functools.cached_property
-    def cx_q(self) -> OpDef:
+    def cx_dynq(self) -> OpDef:
         """CX gate on two dynamic logical qubits.."""
-        return self().get_op("cx_q")
+        return self().get_op("cx_dynq")
 
-    # try_measure_x_q
+    # try_measure_x_dynq
 
     @functools.cached_property
-    def try_measure_x_q(self) -> OpDef:
+    def try_measure_x_dynq(self) -> OpDef:
         """Fallible non-destructive measurement of a dynamic logical qubit in the X
         basis."""
-        return self().get_op("try_measure_x_q")
+        return self().get_op("try_measure_x_dynq")
 
-    # try_measure_z_q
+    # try_measure_z_dynq
 
     @functools.cached_property
-    def try_measure_z_q(self) -> OpDef:
+    def try_measure_z_dynq(self) -> OpDef:
         """Fallible non-destructive measurement of a dynamic logical qubit in the Z
         basis."""
-        return self().get_op("try_measure_z_q")
+        return self().get_op("try_measure_z_dynq")
 
     # borrow
 

@@ -171,29 +171,29 @@ pub enum IcebergOpDef {
     /// Fallible non-destructive measurement of one qubit in the Z basis with dynamic index.
     try_measure_one_z_d,
     /// Allocate a dynamic logical qubit in the zero state.
-    alloc_q,
+    alloc_dynq,
     /// Free a dynamic logical qubit.
-    free_q,
-    /// X gate on a dynamic logical_qubit.
-    x_q,
-    /// Y gate on a dynamic logical_qubit.
-    y_q,
-    /// Z gate on a dynamic logical_qubit.
-    z_q,
+    free_dynq,
+    /// X gate on a dynamic logical qubit.
+    x_dynq,
+    /// Y gate on a dynamic logical qubit.
+    y_dynq,
+    /// Z gate on a dynamic logical qubit.
+    z_dynq,
     /// Rx gate on a dynamic logical qubit.
-    rx_q,
+    rx_dynq,
     /// Ry gate on a dynamic logical qubit.
-    ry_q,
+    ry_dynq,
     /// Rz gate on a dynamic logical qubit.
-    rz_q,
+    rz_dynq,
     /// ZZPhase gate on two dynamic logical qubits.
-    zz_phase_q,
+    zz_phase_dynq,
     /// CX gate on two dynamic logical qubits.
-    cx_q,
+    cx_dynq,
     /// Fallible non-destructive measurement of a dynamic logical qubit in the X basis.
-    try_measure_x_q,
+    try_measure_x_dynq,
     /// Fallible non-destructive measurement of a dynamic logical qubit in the Z basis.
-    try_measure_z_q,
+    try_measure_z_dynq,
     /// Extraction of dynamic logical qubits from a block (consuming the block and emitting a borrowed block).
     borrow,
     /// Extraction of dynamic logical qubits from an already-borrowed block.
@@ -594,18 +594,18 @@ impl MakeOpDef for IcebergOpDef {
                 ),
             )
             .into(),
-            alloc_q => Signature::new(vec![], vec![dynamic_logical_qubit_type()]).into(),
-            free_q => Signature::new(vec![dynamic_logical_qubit_type()], vec![]).into(),
-            x_q => sig_qubits_angles(1, 0),
-            y_q => sig_qubits_angles(1, 0),
-            z_q => sig_qubits_angles(1, 0),
-            rx_q => sig_qubits_angles(1, 1),
-            ry_q => sig_qubits_angles(1, 1),
-            rz_q => sig_qubits_angles(1, 1),
-            zz_phase_q => sig_qubits_angles(2, 1),
-            cx_q => sig_qubits_angles(2, 0),
-            try_measure_x_q => sig_qubit_meas(),
-            try_measure_z_q => sig_qubit_meas(),
+            alloc_dynq => Signature::new(vec![], vec![dynamic_logical_qubit_type()]).into(),
+            free_dynq => Signature::new(vec![dynamic_logical_qubit_type()], vec![]).into(),
+            x_dynq => sig_qubits_angles(1, 0),
+            y_dynq => sig_qubits_angles(1, 0),
+            z_dynq => sig_qubits_angles(1, 0),
+            rx_dynq => sig_qubits_angles(1, 1),
+            ry_dynq => sig_qubits_angles(1, 1),
+            rz_dynq => sig_qubits_angles(1, 1),
+            zz_phase_dynq => sig_qubits_angles(2, 1),
+            cx_dynq => sig_qubits_angles(2, 0),
+            try_measure_x_dynq => sig_qubit_meas(),
+            try_measure_z_dynq => sig_qubit_meas(),
             // The following operations implement SignatureFromArgs:
             borrow => (*self).into(),
             borrow_more => (*self).into(),
@@ -786,11 +786,11 @@ mod tests {
         let swap51 = EXTENSION
             .instantiate_extension_op("swap", [6.into(), 5.into(), 1.into()])
             .unwrap();
-        let rx_q = EXTENSION.instantiate_extension_op("rx_q", []).unwrap();
-        let zz_phase_q = EXTENSION
-            .instantiate_extension_op("zz_phase_q", [])
+        let rx_dynq = EXTENSION.instantiate_extension_op("rx_dynq", []).unwrap();
+        let zz_phase_dynq = EXTENSION
+            .instantiate_extension_op("zz_phase_dynq", [])
             .unwrap();
-        let cx_q = EXTENSION.instantiate_extension_op("cx_q", []).unwrap();
+        let cx_dynq = EXTENSION.instantiate_extension_op("cx_dynq", []).unwrap();
         assert_eq!(x3.description(), "X gate.");
         assert_eq!(
             zzphasebetweenblocks_d.description(),
@@ -830,11 +830,11 @@ mod tests {
             )
             .unwrap();
         linear
-            .append_and_consume(rx_q, [CircuitUnit::Linear(2), CircuitUnit::Wire(angle)])
+            .append_and_consume(rx_dynq, [CircuitUnit::Linear(2), CircuitUnit::Wire(angle)])
             .unwrap();
         linear
             .append_and_consume(
-                zz_phase_q,
+                zz_phase_dynq,
                 [
                     CircuitUnit::Linear(2),
                     CircuitUnit::Linear(3),
@@ -843,7 +843,7 @@ mod tests {
             )
             .unwrap();
         linear
-            .append_and_consume(cx_q, [CircuitUnit::Linear(2), CircuitUnit::Linear(3)])
+            .append_and_consume(cx_dynq, [CircuitUnit::Linear(2), CircuitUnit::Linear(3)])
             .unwrap();
         linear
             .append_and_consume(
@@ -915,11 +915,13 @@ mod tests {
         let alloczero = EXTENSION
             .instantiate_extension_op("alloc_zero", [8.into()])
             .unwrap();
-        let allocqb = EXTENSION.instantiate_extension_op("alloc_q", []).unwrap();
-        let freeqb = EXTENSION.instantiate_extension_op("free_q", []).unwrap();
-        let xqb = EXTENSION.instantiate_extension_op("x_q", []).unwrap();
+        let allocqb = EXTENSION
+            .instantiate_extension_op("alloc_dynq", [])
+            .unwrap();
+        let freeqb = EXTENSION.instantiate_extension_op("free_dynq", []).unwrap();
+        let xqb = EXTENSION.instantiate_extension_op("x_dynq", []).unwrap();
         let measqb = EXTENSION
-            .instantiate_extension_op("try_measure_z_q", [])
+            .instantiate_extension_op("try_measure_z_dynq", [])
             .unwrap();
         let x3 = EXTENSION
             .instantiate_extension_op("x", [8.into(), 3.into()])
@@ -1045,7 +1047,7 @@ mod tests {
         let restore_1 = EXTENSION
             .instantiate_extension_op("restore", [1.into(), 6.into()])
             .unwrap();
-        let cx_q = EXTENSION.instantiate_extension_op("cx_q", []).unwrap();
+        let cx_dynq = EXTENSION.instantiate_extension_op("cx_dynq", []).unwrap();
         let mut dfg_builder = DFGBuilder::new(Signature::new(
             vec![block_type(6), int_type(6), int_type(6), int_type(6)],
             vec![block_type(6)],
@@ -1068,7 +1070,7 @@ mod tests {
         let q1 = wires[2];
         // Do a CX on the borrowed qubits:
         let handle = dfg_builder
-            .add_dataflow_op(cx_q.clone(), vec![q0, q1])
+            .add_dataflow_op(cx_dynq.clone(), vec![q0, q1])
             .unwrap();
         let wires: Vec<Wire> = handle.outputs().collect();
         assert_eq!(wires.len(), 2);
@@ -1083,7 +1085,7 @@ mod tests {
         let bblock = wires[0];
         let q2 = wires[1];
         // Do a CX with the first and third borrowed qubits.
-        let handle = dfg_builder.add_dataflow_op(cx_q, vec![q0, q2]).unwrap();
+        let handle = dfg_builder.add_dataflow_op(cx_dynq, vec![q0, q2]).unwrap();
         let wires: Vec<Wire> = handle.outputs().collect();
         assert_eq!(wires.len(), 2);
         let q0 = wires[0];

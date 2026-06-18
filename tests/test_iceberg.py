@@ -12,14 +12,14 @@ from guppyft.logical.iceberg import (
     Block,
     Qubit,
     borrow,
-    cx_q,
+    cx_dynq,
     cx_transversal,
     discard,
-    free_q,
+    free_dynq,
     measure_all,
     restore,
     zz_phase_between_blocks,
-    zz_phase_q,
+    zz_phase_dynq,
 )
 
 
@@ -64,7 +64,7 @@ def test_exported_extensions() -> None:
     }
     assert len(ops_extn.operations) == 74
     for op_name, op_def in ops_extn.operations.items():
-        op_def_name = op_name if op_name.endswith("_q") else f"{op_name}_def"
+        op_def_name = op_name if op_name.endswith("_dynq") else f"{op_name}_def"
         assert op_def == iceberg_ops.__getattribute__(op_def_name)
 
 
@@ -151,9 +151,9 @@ def test_guppy_bindings_smoke() -> None:
         q0.y()
         q0.rz(-0.5)
         bb0, q_arr0 = borrow(b0, array(3))
-        cx_q(q0, q_arr0[0])
+        cx_dynq(q0, q_arr0[0])
         q_arr1 = bb0.borrow_more(array(1, 2))
-        zz_phase_q(q_arr0[0], q_arr1[1], 0.5)
+        zz_phase_dynq(q_arr0[0], q_arr1[1], 0.5)
         bb0.restore_some(q_arr1)
         b0 = restore(bb0, q_arr0)
         b0.all_h()
@@ -180,7 +180,7 @@ def test_guppy_bindings_smoke() -> None:
             result("mq0", maybe_mq0.unwrap().read())
         else:
             maybe_mq0.unwrap_nothing()
-        free_q(q0)
+        free_dynq(q0)
 
     pkg = main.compile()
     h = pkg.modules[0]

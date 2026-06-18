@@ -896,9 +896,9 @@
       },
       "binary": true
     },
-    "alloc_q": {
+    "alloc_dynq": {
       "extension": "guppyft.iceberg.ops",
-      "name": "alloc_q",
+      "name": "alloc_dynq",
       "description": "Allocate a dynamic logical qubit in the zero state.",
       "signature": {
         "params": [],
@@ -1102,9 +1102,9 @@
       },
       "binary": false
     },
-    "cx_q": {
+    "cx_dynq": {
       "extension": "guppyft.iceberg.ops",
-      "name": "cx_q",
+      "name": "cx_dynq",
       "description": "CX gate on two dynamic logical qubits.",
       "signature": {
         "params": [],
@@ -1504,9 +1504,9 @@
       },
       "binary": true
     },
-    "free_q": {
+    "free_dynq": {
       "extension": "guppyft.iceberg.ops",
-      "name": "free_q",
+      "name": "free_dynq",
       "description": "Free a dynamic logical qubit.",
       "signature": {
         "params": [],
@@ -1828,9 +1828,9 @@
       },
       "binary": false
     },
-    "rx_q": {
+    "rx_dynq": {
       "extension": "guppyft.iceberg.ops",
-      "name": "rx_q",
+      "name": "rx_dynq",
       "description": "Rx gate on a dynamic logical qubit.",
       "signature": {
         "params": [],
@@ -1864,9 +1864,9 @@
       },
       "binary": false
     },
-    "ry_q": {
+    "ry_dynq": {
       "extension": "guppyft.iceberg.ops",
-      "name": "ry_q",
+      "name": "ry_dynq",
       "description": "Ry gate on a dynamic logical qubit.",
       "signature": {
         "params": [],
@@ -2034,9 +2034,9 @@
       },
       "binary": false
     },
-    "rz_q": {
+    "rz_dynq": {
       "extension": "guppyft.iceberg.ops",
-      "name": "rz_q",
+      "name": "rz_dynq",
       "description": "Rz gate on a dynamic logical qubit.",
       "signature": {
         "params": [],
@@ -2546,9 +2546,9 @@
       },
       "binary": false
     },
-    "try_measure_x_q": {
+    "try_measure_x_dynq": {
       "extension": "guppyft.iceberg.ops",
-      "name": "try_measure_x_q",
+      "name": "try_measure_x_dynq",
       "description": "Fallible non-destructive measurement of a dynamic logical qubit in the X basis.",
       "signature": {
         "params": [],
@@ -2600,9 +2600,9 @@
       },
       "binary": false
     },
-    "try_measure_z_q": {
+    "try_measure_z_dynq": {
       "extension": "guppyft.iceberg.ops",
-      "name": "try_measure_z_q",
+      "name": "try_measure_z_dynq",
       "description": "Fallible non-destructive measurement of a dynamic logical qubit in the Z basis.",
       "signature": {
         "params": [],
@@ -2774,10 +2774,10 @@
       },
       "binary": false
     },
-    "x_q": {
+    "x_dynq": {
       "extension": "guppyft.iceberg.ops",
-      "name": "x_q",
-      "description": "X gate on a dynamic logical_qubit.",
+      "name": "x_dynq",
+      "description": "X gate on a dynamic logical qubit.",
       "signature": {
         "params": [],
         "body": {
@@ -3209,10 +3209,10 @@
       },
       "binary": false
     },
-    "y_q": {
+    "y_dynq": {
       "extension": "guppyft.iceberg.ops",
-      "name": "y_q",
-      "description": "Y gate on a dynamic logical_qubit.",
+      "name": "y_dynq",
+      "description": "Y gate on a dynamic logical qubit.",
       "signature": {
         "params": [],
         "body": {
@@ -3644,10 +3644,10 @@
       },
       "binary": false
     },
-    "z_q": {
+    "z_dynq": {
       "extension": "guppyft.iceberg.ops",
-      "name": "z_q",
-      "description": "Z gate on a dynamic logical_qubit.",
+      "name": "z_dynq",
+      "description": "Z gate on a dynamic logical qubit.",
       "signature": {
         "params": [],
         "body": {
@@ -4293,9 +4293,9 @@
       },
       "binary": false
     },
-    "zz_phase_q": {
+    "zz_phase_dynq": {
       "extension": "guppyft.iceberg.ops",
-      "name": "zz_phase_q",
+      "name": "zz_phase_dynq",
       "description": "ZZPhase gate on two dynamic logical qubits.",
       "signature": {
         "params": [],
