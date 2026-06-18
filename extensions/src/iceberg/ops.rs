@@ -22,9 +22,7 @@ use hugr::{
         arithmetic::{float_types::float64_type, int_types::int_type},
         collections::{array::ArrayKind, borrow_array::BorrowArray},
     },
-    types::{
-        FuncValueType, PolyFuncTypeRV, Signature, Type, TypeArg, TypeRow, type_param::TypeParam,
-    },
+    types::{FuncValueType, PolyFuncTypeRV, Signature, Type, TypeArg, type_param::TypeParam},
 };
 use strum::{EnumIter, EnumString, IntoStaticStr};
 use tket_qsystem::extension::futures::future_type;
@@ -416,7 +414,7 @@ fn sig_qubits_angles(n_qubits: usize, n_angles: usize) -> SignatureFunc {
     let mut in_types: Vec<Type> = vec![dynamic_logical_qubit_type(); n_qubits];
     let out_types: Vec<Type> = in_types.clone();
     in_types.extend(vec![float64_type(); n_angles]);
-    Signature::new(in_types, TypeRow::from(out_types)).into()
+    Signature::new(in_types, out_types).into()
 }
 
 /// Signature of a fallible non-destructive measurement on a dynamic logical
@@ -424,7 +422,7 @@ fn sig_qubits_angles(n_qubits: usize, n_angles: usize) -> SignatureFunc {
 fn sig_qubit_meas() -> SignatureFunc {
     Signature::new(
         vec![dynamic_logical_qubit_type()],
-        TypeRow::from(vec![optional_future_bool(), dynamic_logical_qubit_type()]),
+        vec![optional_future_bool(), dynamic_logical_qubit_type()],
     )
     .into()
 }
@@ -596,12 +594,8 @@ impl MakeOpDef for IcebergOpDef {
                 ),
             )
             .into(),
-            alloc_q => {
-                Signature::new(vec![], TypeRow::from(vec![dynamic_logical_qubit_type()])).into()
-            }
-            free_q => {
-                Signature::new(vec![dynamic_logical_qubit_type()], TypeRow::from(vec![])).into()
-            }
+            alloc_q => Signature::new(vec![], vec![dynamic_logical_qubit_type()]).into(),
+            free_q => Signature::new(vec![dynamic_logical_qubit_type()], vec![]).into(),
             x_q => sig_qubits_angles(1, 0),
             y_q => sig_qubits_angles(1, 0),
             z_q => sig_qubits_angles(1, 0),
