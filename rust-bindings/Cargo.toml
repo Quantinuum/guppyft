@@ -22,4 +22,4 @@ tket = { workspace = true }
 derive_more = { workspace = true }
 guppyft = { path = "../rust" }
 
-pyo3 = { version = "0.28.0", features = ["extension-module", "abi3-py310", "anyhow"] }
+pyo3 = { version = "0.29.0", features = ["extension-module", "abi3-py310", "anyhow"] }
