@@ -890,8 +890,10 @@ mod tests {
         assert!(module_builder.finish_hugr().is_err());
     }
 
-    #[ignore]
+    // These tests require a `CustomValidator`, however, this is unsupported for extensions that are serialized
+    // as the validator cannot be shared between tools.
     #[test]
+    #[should_panic]
     fn test_invalid_ops() {
         // block size should be at least 2
         assert!(
