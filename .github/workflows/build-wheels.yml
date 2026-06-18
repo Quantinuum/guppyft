@@ -48,7 +48,7 @@ jobs:
           lockfile: hugrenv.lock
 
       - name: Build guppyft wheel
-        uses: pypa/cibuildwheel@v3.4.1
+        uses: pypa/cibuildwheel@v4.1.0
         with:
           output-dir: 'wheelhouse'
 
