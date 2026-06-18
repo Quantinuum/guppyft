@@ -18,7 +18,7 @@ def run_global_test(
     assert_result: dict[str, list[int]] | None = None,
     n_qubits: int = 1,
 ) -> None:
-    """Fixture to test that uses of global ops can be emulated without error."""
+    """Fixture to run emulation of a program with global ops."""
 
     @guppy
     def main() -> None:
@@ -32,8 +32,7 @@ def run_global_test(
         assert_result["smoke"] = [0]
 
     res = main.emulator(n_qubits=n_qubits).run().collated_shots()
-    assert len(res) == 1
-    assert res[0] == assert_result
+    assert res == [assert_result]
 
 
 def test_with_global_qubit() -> None:
@@ -105,8 +104,10 @@ def test_with_global_struct() -> None:
     run_global_test(main, assert_result={"my_prog": [19]})
 
 
-# Test global struct with qsystem RNG
 def test_global_struct_with_rng() -> None:
+    """Including an RNG in the global state is expected to be a common requirement for
+    randomised compilation so it is tested explicitly."""
+
     @guppy.struct
     class MyStruct:
         rng: RNG
@@ -168,7 +169,6 @@ def test_with_global_input_args() -> None:
     run_global_test(main, assert_result={"my_prog": [1, 3, 6]})
 
 
-# Test `with_global` outputs
 def test_with_outputs() -> None:
     @guppy
     def my_prog0(i: int) -> int:
@@ -301,6 +301,10 @@ def test_map_without_with() -> None:
 
 
 def test_nested_with() -> None:
+    """Test nested map call i.e. with(with(map(...))).
+    The outer global should be independent of the inner.
+    `map` should act on the inner global."""
+
     @guppy
     @no_type_check
     def foo(i: array[int, 1] @ owned, j: int) -> array[int, 1]:
@@ -331,8 +335,11 @@ def test_nested_with() -> None:
     )
 
 
-# Test the scenario with(map(map(..))) i.e. nested map calls
 def test_nested_map_calls_error() -> None:
+    """Test the scenario with(map(map(...))) i.e. nested map calls.
+    We expect this to fail as the first `map` call retrieves the global variable, so
+    the global will be `None` in the second call"""
+
     @guppy
     def bar(i: int) -> int:
         return i
@@ -358,6 +365,10 @@ def test_nested_map_calls_error() -> None:
 
 
 def test_map_return_tuple_type() -> None:
+    """Testing returning a tuple as the sole return value from `map`.
+    This is to check that the tuple is not unpacked by Guppy.
+    The return from map should be `tuple[tuple[int,int]]`."""
+
     @guppy
     def foo(g: int) -> tuple[int, tuple[int, int]]:
         return g, (g + 1, g + 2)
