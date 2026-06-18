@@ -59,9 +59,10 @@ requires = ["maturin>=1.13.3,<2.0"]
 build-backend = "maturin"
 
 [tool.uv.sources]
-# Needs tket branch for globals extension
-tket = { git = "https://github.com/quantinuum/tket2", rev = "eee53cec86cdeb6f130ba1e9f4b07f58b616de99", subdirectory = "tket-py" }
-selene-hugr-qis-compiler = { git = "https://github.com/quantinuum/tket2", rev = "eee53cec86cdeb6f130ba1e9f4b07f58b616de99", subdirectory = "qis-compiler" }
+# Required for global hugr ops
+# Pinned to chore: update hugr to 0.28.2 (#1718)
+tket = { git = "https://github.com/quantinuum/tket2", rev = "6e655a8a2e5287ef9d703bdd3bf586b50e2281a2", subdirectory = "tket-py" }
+selene-hugr-qis-compiler = { git = "https://github.com/quantinuum/tket2", rev = "6e655a8a2e5287ef9d703bdd3bf586b50e2281a2", subdirectory = "qis-compiler" }
 
 [tool.maturin]
 module-name = "guppyft._bindings"
