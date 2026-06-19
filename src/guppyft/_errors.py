@@ -68,8 +68,8 @@ class CallbackInputParamError(Error):
 class CallbackOutputArgError(Error):
     title: ClassVar[str] = "Callback function output error."
     span_label: ClassVar[str] = (
-        "First input and return arg to callback function used in global map is the "
-        "global variable. Expected return: `{expected_str}`."
+        "First input and first return arg to callback function used in global map is "
+        "the global variable. Expected first return arg: `{expected_str}`."
     )
     expected: Type
 
@@ -91,7 +91,7 @@ class CallbackFuncDefinedHere(Note):
 @dataclass(frozen=True)
 class MapCallbackSignatureHelper(Help):
     message: ClassVar[str] = (
-        "Signature of callback function for global map should be "
+        "Signature of callback function for `map_global` should be "
         "`(global_ty, *input) -> (global_ty, *output)` and usage is "
         "`map_global(callback_func, *input)."
     )
@@ -100,9 +100,9 @@ class MapCallbackSignatureHelper(Help):
 @dataclass(frozen=True)
 class WithCallbackSignatureHelper(Help):
     message: ClassVar[str] = (
-        "Signature of callback function for global with should be "
+        "Signature of callback function for `with_global` should be "
         "`(*input) -> (*output)` and usage is "
-        "`map_global(global_ty, callback_func, *input)."
+        "`with_global(global_ty, callback_func, *input)."
     )
 
 

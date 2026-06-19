@@ -5,4 +5,15 @@ Error: Type mismatch (at $FILE:13:28)
 13 |     with_global(1, my_prog, 1.0)
    |                             ^^^ Expected expression of type `int`, got `float`
 
+Note:
+   | 
+ 6 | @guppy
+ 7 | def my_prog(i: int) -> None:
+   | ----------------------------
+ 8 |     return
+   | ---------- Callback function defined here.
+
+Help: Signature of callback function for `with_global` should be `(*input) ->
+(*output)` and usage is `with_global(global_ty, callback_func, *input).
+
 Guppy compilation failed due to 1 previous error

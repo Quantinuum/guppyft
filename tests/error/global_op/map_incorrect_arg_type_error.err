@@ -5,4 +5,16 @@ Error: Type mismatch (at $FILE:12:20)
 12 |     map_global(foo, 1.0)
    |                     ^^^ Expected expression of type `int`, got `float`
 
+Note:
+   | 
+ 6 | @guppy
+ 7 | def foo(g: int, i: int) -> int:
+   | -------------------------------
+ 8 |     return g
+   | ------------ Callback function defined here.
+
+Help: Signature of callback function for `map_global` should be `(global_ty,
+*input) -> (global_ty, *output)` and usage is `map_global(callback_func,
+*input).
+
 Guppy compilation failed due to 1 previous error

@@ -141,7 +141,13 @@ class _GlobalWithChecker(CustomCallChecker):
         for arg, func_input in zip(args[2:], callback_func.inputs, strict=True):
             _, arg_ty = ExprSynthesizer(self.ctx).synthesize(arg)
             input_tys.append(FuncInput(arg_ty, func_input.flags))
-            ExprChecker(self.ctx).check(arg, func_input.ty)
+            try:
+                ExprChecker(self.ctx).check(arg, func_input.ty)
+            except GuppyTypeError as err:
+                callback_def = get_callback_func_ast(callback_expr)
+                err.error.add_sub_diagnostic(CallbackFuncDefinedHere(callback_def))
+                err.error.add_sub_diagnostic(WithCallbackSignatureHelper(None))
+                raise
 
         match callback_func.output:
             case TupleType():
@@ -272,7 +278,7 @@ class _GlobalMapChecker(CustomCallChecker):
                     callback_expr,
                     i,
                     (
-                        "Parameters in callback functions used in global operation"
+                        "Parameters in callback functions used in global operations"
                         " cannot be borrowed."
                     ),
                 )
@@ -299,7 +305,13 @@ class _GlobalMapChecker(CustomCallChecker):
         for arg, func_input in zip(args[1:], callback_func.inputs[1:], strict=True):
             _, arg_ty = ExprSynthesizer(self.ctx).synthesize(arg)
             input_args.append(FuncInput(arg_ty, func_input.flags))
-            ExprChecker(self.ctx).check(arg, func_input.ty)
+            try:
+                ExprChecker(self.ctx).check(arg, func_input.ty)
+            except GuppyTypeError as err:
+                callback_def = get_callback_func_ast(callback_expr)
+                err.error.add_sub_diagnostic(CallbackFuncDefinedHere(callback_def))
+                err.error.add_sub_diagnostic(MapCallbackSignatureHelper(None))
+                raise
 
         # callback_func output is [global state, *out_args]
         callback_output = callback_func.output
@@ -310,6 +322,7 @@ class _GlobalMapChecker(CustomCallChecker):
                     callback_def = get_callback_func_ast(callback_expr)
                     err = CallbackOutputArgError(callback_def.returns, global_arg.ty)  # type: ignore[union-attr]
                     err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
+                    err.add_sub_diagnostic(MapCallbackSignatureHelper(None))
                     raise GuppyTypeError(err)
                 if len(callback_output.element_types) == 2:
                     # If the only return is a tuple, it must be repacked in a tuple
@@ -325,6 +338,7 @@ class _GlobalMapChecker(CustomCallChecker):
                     callback_def = get_callback_func_ast(callback_expr)
                     err = CallbackOutputArgError(callback_def.returns, global_arg.ty)  # type: ignore[union-attr]
                     err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
+                    err.add_sub_diagnostic(MapCallbackSignatureHelper(None))
                     raise GuppyTypeError(err)
                 output_args = NoneType()
 

@@ -14,7 +14,7 @@ Note:
  7 |     return i
    | ------------ Callback function defined here.
 
-Help: Signature of callback function for global map should be `(global_ty,
+Help: Signature of callback function for `map_global` should be `(global_ty,
 *input) -> (global_ty, *output)` and usage is `map_global(callback_func,
 *input).
 
