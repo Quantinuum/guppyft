@@ -6,7 +6,7 @@ use documented::DocumentedVariants;
 use hugr::{
     Extension,
     extension::{
-        ExtensionId, OpDef, SignatureFunc,
+        ExtensionId, OpDef, SignatureError, SignatureFromArgs, SignatureFunc,
         prelude::{bool_t, option_type},
         simple_op::{
             HasConcrete, HasDef, MakeExtensionOp, MakeOpDef, MakeRegisteredOp, OpLoadError,
@@ -18,10 +18,12 @@ use hugr::{
         arithmetic::{float_types::float64_type, int_types::int_type},
         collections::{array::ArrayKind, borrow_array::BorrowArray},
     },
-    types::{FuncValueType, PolyFuncTypeRV, Type, TypeArg, type_param::TypeParam},
+    types::{FuncValueType, PolyFuncTypeRV, Signature, Type, TypeArg, type_param::TypeParam},
 };
 use strum::{EnumIter, EnumString, IntoStaticStr};
 use tket_qsystem::extension::futures::future_type;
+
+use crate::iceberg::types::{borrowed_block_tv, dynamic_logical_qubit_type};
 
 use super::types::block_tv;
 
@@ -164,6 +166,38 @@ pub enum IcebergOpDef {
     try_measure_one_z,
     /// Fallible non-destructive measurement of one qubit in the Z basis with dynamic index.
     try_measure_one_z_d,
+    /// Allocate a dynamic logical qubit in the zero state.
+    alloc_dynq,
+    /// Free a dynamic logical qubit.
+    free_dynq,
+    /// X gate on a dynamic logical qubit.
+    x_dynq,
+    /// Y gate on a dynamic logical qubit.
+    y_dynq,
+    /// Z gate on a dynamic logical qubit.
+    z_dynq,
+    /// Rx gate on a dynamic logical qubit.
+    rx_dynq,
+    /// Ry gate on a dynamic logical qubit.
+    ry_dynq,
+    /// Rz gate on a dynamic logical qubit.
+    rz_dynq,
+    /// ZZPhase gate on two dynamic logical qubits.
+    zz_phase_dynq,
+    /// CX gate on two dynamic logical qubits.
+    cx_dynq,
+    /// Fallible non-destructive measurement of a dynamic logical qubit in the X basis.
+    try_measure_x_dynq,
+    /// Fallible non-destructive measurement of a dynamic logical qubit in the Z basis.
+    try_measure_z_dynq,
+    /// Extraction of dynamic logical qubits from a block (consuming the block and emitting a borrowed block).
+    borrow,
+    /// Extraction of dynamic logical qubits from an already-borrowed block.
+    borrow_more,
+    /// Restoration of some dynamic logical qubits to their originating block.
+    restore_some,
+    /// Restoration of all dynamic logical qubits to their originating block (consuming the borrowed block and emitting a block).
+    restore,
 }
 
 /// Concrete Iceberg logical operation with block size and indices set.
@@ -302,6 +336,25 @@ fn sig_1_block_d(n_angles: usize, n_indices: usize) -> SignatureFunc {
             vec_of_blocks_and_ints_and_angles(1, n_indices, n_angles),
             vec_of_blocks_and_ints_and_angles(1, 0, 0),
         ),
+    )
+    .into()
+}
+
+/// Signature of an operation that acts on a number of dynamic logical qubits
+/// with a number of additional angle qubits.
+fn sig_qubits_angles(n_qubits: usize, n_angles: usize) -> SignatureFunc {
+    let mut in_types: Vec<Type> = vec![dynamic_logical_qubit_type(); n_qubits];
+    let out_types: Vec<Type> = in_types.clone();
+    in_types.extend(vec![float64_type(); n_angles]);
+    Signature::new(in_types, out_types).into()
+}
+
+/// Signature of a fallible non-destructive measurement on a dynamic logical
+/// qubit.
+fn sig_qubit_meas() -> SignatureFunc {
+    Signature::new(
+        vec![dynamic_logical_qubit_type()],
+        vec![optional_future_bool(), dynamic_logical_qubit_type()],
     )
     .into()
 }
@@ -451,11 +504,86 @@ impl MakeOpDef for IcebergOpDef {
                 ),
             )
             .into(),
+            alloc_dynq => Signature::new(vec![], vec![dynamic_logical_qubit_type()]).into(),
+            free_dynq => Signature::new(vec![dynamic_logical_qubit_type()], vec![]).into(),
+            x_dynq => sig_qubits_angles(1, 0),
+            y_dynq => sig_qubits_angles(1, 0),
+            z_dynq => sig_qubits_angles(1, 0),
+            rx_dynq => sig_qubits_angles(1, 1),
+            ry_dynq => sig_qubits_angles(1, 1),
+            rz_dynq => sig_qubits_angles(1, 1),
+            zz_phase_dynq => sig_qubits_angles(2, 1),
+            cx_dynq => sig_qubits_angles(2, 0),
+            try_measure_x_dynq => sig_qubit_meas(),
+            try_measure_z_dynq => sig_qubit_meas(),
+            // The following operations implement SignatureFromArgs:
+            borrow => (*self).into(),
+            borrow_more => (*self).into(),
+            restore_some => (*self).into(),
+            restore => (*self).into(),
         }
     }
 
     fn description(&self) -> String {
         self.get_variant_docs().into()
+    }
+}
+
+/// Static parameters for borrow and restore operations.
+const STATIC_NAT_PARAM: &[TypeParam; 1] = &[TypeParam::max_nat_type()];
+
+impl SignatureFromArgs for IcebergOpDef {
+    fn compute_signature(&self, arg_values: &[TypeArg]) -> Result<PolyFuncTypeRV, SignatureError> {
+        let [TypeArg::BoundedNat(m)] = *arg_values else {
+            return Err(SignatureError::InvalidTypeArgs);
+        };
+        let sig = match self {
+            IcebergOpDef::borrow => {
+                let mut in_types: Vec<Type> = vec![block_tv(0)];
+                in_types.extend(vec![int_type(6); m as usize]);
+                let mut out_types: Vec<Type> = vec![borrowed_block_tv(0)];
+                out_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_type()],
+                    FuncValueType::new(in_types, out_types),
+                )
+            }
+            IcebergOpDef::borrow_more => {
+                let mut in_types: Vec<Type> = vec![borrowed_block_tv(0)];
+                in_types.extend(vec![int_type(6); m as usize]);
+                let mut out_types: Vec<Type> = vec![borrowed_block_tv(0)];
+                out_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_type()],
+                    FuncValueType::new(in_types, out_types),
+                )
+            }
+            IcebergOpDef::restore_some => {
+                let mut in_types: Vec<Type> = vec![borrowed_block_tv(0)];
+                in_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_type()],
+                    FuncValueType::new(in_types, vec![borrowed_block_tv(0)]),
+                )
+            }
+            IcebergOpDef::restore => {
+                let mut in_types: Vec<Type> = vec![borrowed_block_tv(0)];
+                in_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_type()],
+                    FuncValueType::new(in_types, vec![block_tv(0)]),
+                )
+            }
+            _ => unreachable!(
+                "Operation {} should not need custom signature computation.",
+                self.opdef_id()
+            ),
+        };
+        Ok(sig)
+    }
+
+    fn static_params(&self) -> &[TypeParam] {
+        STATIC_NAT_PARAM
     }
 }
 
@@ -494,7 +622,7 @@ mod tests {
     fn test_iceberg_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.iceberg.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 58);
+        assert_eq!(EXTENSION.operations().count(), 74);
     }
 
     #[test]
@@ -513,6 +641,7 @@ mod tests {
     #[test]
     fn test_hugr_ops() {
         let block = block_type(6);
+        let qubit = dynamic_logical_qubit_type();
         let x3 = EXTENSION
             .instantiate_extension_op("x", [6.into(), 3.into()])
             .unwrap();
@@ -567,13 +696,20 @@ mod tests {
         let swap51 = EXTENSION
             .instantiate_extension_op("swap", [6.into(), 5.into(), 1.into()])
             .unwrap();
+        let rx_dynq = EXTENSION.instantiate_extension_op("rx_dynq", []).unwrap();
+        let zz_phase_dynq = EXTENSION
+            .instantiate_extension_op("zz_phase_dynq", [])
+            .unwrap();
+        let cx_dynq = EXTENSION.instantiate_extension_op("cx_dynq", []).unwrap();
         assert_eq!(x3.description(), "X gate.");
         assert_eq!(
             zzphasebetweenblocks_d.description(),
             "ZZPhase gate involving two blocks with dynamic indices."
         );
         let mut module_builder = ModuleBuilder::new();
-        let signature = Signature::new_endo(vec![block; 2]);
+        let mut types: Vec<Type> = vec![block; 2];
+        types.extend(vec![qubit; 2]);
+        let signature = Signature::new_endo(types);
         let mut f_build = module_builder.define_function("main", signature).unwrap();
         let wires: Vec<_> = f_build.input_wires().collect();
         let mut linear = f_build.as_circuit(wires);
@@ -602,6 +738,22 @@ mod tests {
                     CircuitUnit::Wire(angle),
                 ],
             )
+            .unwrap();
+        linear
+            .append_and_consume(rx_dynq, [CircuitUnit::Linear(2), CircuitUnit::Wire(angle)])
+            .unwrap();
+        linear
+            .append_and_consume(
+                zz_phase_dynq,
+                [
+                    CircuitUnit::Linear(2),
+                    CircuitUnit::Linear(3),
+                    CircuitUnit::Wire(angle),
+                ],
+            )
+            .unwrap();
+        linear
+            .append_and_consume(cx_dynq, [CircuitUnit::Linear(2), CircuitUnit::Linear(3)])
             .unwrap();
         linear
             .append_and_consume(
@@ -673,6 +825,14 @@ mod tests {
         let alloczero = EXTENSION
             .instantiate_extension_op("alloc_zero", [8.into()])
             .unwrap();
+        let allocqb = EXTENSION
+            .instantiate_extension_op("alloc_dynq", [])
+            .unwrap();
+        let freeqb = EXTENSION.instantiate_extension_op("free_dynq", []).unwrap();
+        let xqb = EXTENSION.instantiate_extension_op("x_dynq", []).unwrap();
+        let measqb = EXTENSION
+            .instantiate_extension_op("try_measure_z_dynq", [])
+            .unwrap();
         let x3 = EXTENSION
             .instantiate_extension_op("x", [8.into(), 3.into()])
             .unwrap();
@@ -682,7 +842,11 @@ mod tests {
         let free = EXTENSION
             .instantiate_extension_op("free", [8.into()])
             .unwrap();
-        let outputs: Vec<Type> = vec![future_type(bool_t()); 2];
+        let outputs: Vec<Type> = vec![
+            future_type(bool_t()),
+            future_type(bool_t()),
+            optional_future_bool(),
+        ];
         let mut dfg_builder = DFGBuilder::new(Signature::new(vec![], outputs)).unwrap();
         let handle = dfg_builder.add_dataflow_op(alloczero, vec![]).unwrap();
         let handle = dfg_builder.add_dataflow_op(x3, handle.outputs()).unwrap();
@@ -697,8 +861,19 @@ mod tests {
         let handle = dfg_builder.add_dataflow_op(free, [block_wire]).unwrap();
         let outs: Vec<Wire> = handle.outputs().collect();
         assert!(outs.is_empty());
+        let qubit_wire = dfg_builder.add_dataflow_op(allocqb, []).unwrap();
+        let qubit_wire = dfg_builder
+            .add_dataflow_op(xqb, qubit_wire.outputs())
+            .unwrap();
+        let handle = dfg_builder
+            .add_dataflow_op(measqb, qubit_wire.outputs())
+            .unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 2);
+        let freed_h = dfg_builder.add_dataflow_op(freeqb, [wires[1]]).unwrap();
+        assert!(freed_h.outputs().count() == 0);
         let h = dfg_builder
-            .finish_hugr_with_outputs([bool_wire_0, bool_wire_1])
+            .finish_hugr_with_outputs([bool_wire_0, bool_wire_1, wires[0]])
             .unwrap();
         h.validate().unwrap();
     }
@@ -765,6 +940,81 @@ mod tests {
         let h = dfg_builder
             .finish_hugr_with_outputs(vec![block, maybe_c0, maybe_c1, maybe_c2])
             .unwrap();
+        h.validate().unwrap();
+    }
+
+    #[test]
+    fn test_borrow_restore() {
+        let borrow_2 = EXTENSION
+            .instantiate_extension_op("borrow", [2.into(), 6.into()])
+            .unwrap();
+        let borrowmore_1 = EXTENSION
+            .instantiate_extension_op("borrow_more", [1.into(), 6.into()])
+            .unwrap();
+        let restoresome_2 = EXTENSION
+            .instantiate_extension_op("restore_some", [2.into(), 6.into()])
+            .unwrap();
+        let restore_1 = EXTENSION
+            .instantiate_extension_op("restore", [1.into(), 6.into()])
+            .unwrap();
+        let cx_dynq = EXTENSION.instantiate_extension_op("cx_dynq", []).unwrap();
+        let mut dfg_builder = DFGBuilder::new(Signature::new(
+            vec![block_type(6), int_type(6), int_type(6), int_type(6)],
+            vec![block_type(6)],
+        ))
+        .unwrap();
+        let wires: Vec<Wire> = dfg_builder.input_wires().collect();
+        assert_eq!(wires.len(), 4);
+        let block = wires[0];
+        let i0 = wires[1];
+        let i1 = wires[2];
+        let i2 = wires[3];
+        // Borrow two qubits:
+        let handle = dfg_builder
+            .add_dataflow_op(borrow_2, vec![block, i0, i1])
+            .unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 3);
+        let bblock = wires[0];
+        let q0 = wires[1];
+        let q1 = wires[2];
+        // Do a CX on the borrowed qubits:
+        let handle = dfg_builder
+            .add_dataflow_op(cx_dynq.clone(), vec![q0, q1])
+            .unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 2);
+        let q0 = wires[0];
+        let q1 = wires[1];
+        // Borrow another qubit:
+        let handle = dfg_builder
+            .add_dataflow_op(borrowmore_1, vec![bblock, i2])
+            .unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 2);
+        let bblock = wires[0];
+        let q2 = wires[1];
+        // Do a CX with the first and third borrowed qubits.
+        let handle = dfg_builder.add_dataflow_op(cx_dynq, vec![q0, q2]).unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 2);
+        let q0 = wires[0];
+        let q2 = wires[1];
+        // Put the last two borrowed qubits back.
+        let handle = dfg_builder
+            .add_dataflow_op(restoresome_2, vec![bblock, q1, q2])
+            .unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 1);
+        let bblock = wires[0];
+        // Put the first qubit back.
+        let handle = dfg_builder
+            .add_dataflow_op(restore_1, vec![bblock, q0])
+            .unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 1);
+        let block = wires[0];
+        let h = dfg_builder.finish_hugr_with_outputs(vec![block]).unwrap();
         h.validate().unwrap();
     }
 

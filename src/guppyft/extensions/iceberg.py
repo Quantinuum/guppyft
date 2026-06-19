@@ -33,6 +33,28 @@ class IcebergTypesExtension:
         """
         return self.iceberg_block_def.instantiate([BoundedNatArg(k)])
 
+    @functools.cached_property
+    def iceberg_borrowed_block_def(self) -> TypeDef:
+        """A borrowed Iceberg code block.
+
+        This is the generic type definition. For the instantiated type, see
+        `iceberg_borrowed_block`.
+        """
+        return self().get_type("borrowed_block")
+
+    def iceberg_borrowed_block(self, k: int) -> ExtType:
+        """A borrowed Iceberg code block.
+
+        Args:
+            k: The number of logical qubits encoded in the original block.
+        """
+        return self.iceberg_borrowed_block_def.instantiate([BoundedNatArg(k)])
+
+    @functools.cached_property
+    def iceberg_qubit(self) -> TypeDef:
+        """A "dynamic" logical qubit belonging to an unspecified block."""
+        return self().get_type("qubit")
+
 
 class IcebergOpsExtension:
     """Extension providing the Iceberg logical operations."""
@@ -1138,3 +1160,165 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
         """
         return self.try_measure_one_z_d_def.instantiate([BoundedNatArg(k)])
+
+    # alloc_dynq
+
+    @functools.cached_property
+    def alloc_dynq(self) -> OpDef:
+        """Allocate a dynamic logical qubit in the zero state."""
+        return self().get_op("alloc_dynq")
+
+    # free_dynq
+
+    @functools.cached_property
+    def free_dynq(self) -> OpDef:
+        """Discard a dynamic logical qubit."""
+        return self().get_op("free_dynq")
+
+    # x_dynq
+
+    @functools.cached_property
+    def x_dynq(self) -> OpDef:
+        """X gate on a dynamic logical qubit."""
+        return self().get_op("x_dynq")
+
+    # y_dynq
+
+    @functools.cached_property
+    def y_dynq(self) -> OpDef:
+        """Y gate on a dynamic logical qubit."""
+        return self().get_op("y_dynq")
+
+    # z_dynq
+
+    @functools.cached_property
+    def z_dynq(self) -> OpDef:
+        """Z gate on a dynamic logical qubit."""
+        return self().get_op("z_dynq")
+
+    # rx_dynq
+
+    @functools.cached_property
+    def rx_dynq(self) -> OpDef:
+        """Rx gate on a dynamic logical qubit."""
+        return self().get_op("rx_dynq")
+
+    # ry_dynq
+
+    @functools.cached_property
+    def ry_dynq(self) -> OpDef:
+        """Ry gate on a dynamic logical qubit."""
+        return self().get_op("ry_dynq")
+
+    # rz_dynq
+
+    @functools.cached_property
+    def rz_dynq(self) -> OpDef:
+        """Rz gate on a dynamic logical qubit."""
+        return self().get_op("rz_dynq")
+
+    # zz_phase_dynq
+
+    @functools.cached_property
+    def zz_phase_dynq(self) -> OpDef:
+        """ZZPhase gate on two dynamic logical qubits."""
+        return self().get_op("zz_phase_dynq")
+
+    # cx_dynq
+
+    @functools.cached_property
+    def cx_dynq(self) -> OpDef:
+        """CX gate on two dynamic logical qubits.."""
+        return self().get_op("cx_dynq")
+
+    # try_measure_x_dynq
+
+    @functools.cached_property
+    def try_measure_x_dynq(self) -> OpDef:
+        """Fallible non-destructive measurement of a dynamic logical qubit in the X
+        basis."""
+        return self().get_op("try_measure_x_dynq")
+
+    # try_measure_z_dynq
+
+    @functools.cached_property
+    def try_measure_z_dynq(self) -> OpDef:
+        """Fallible non-destructive measurement of a dynamic logical qubit in the Z
+        basis."""
+        return self().get_op("try_measure_z_dynq")
+
+    # borrow
+
+    @functools.cached_property
+    def borrow_def(self) -> OpDef:
+        """Extraction of dynamic logical qubits from a block.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `borrow`."""
+        return self().get_op("borrow")
+
+    def borrow(self, k: int, m: int) -> ExtOp:
+        """Extraction of dynamic logical qubits from a block.
+
+        Args:
+            k: The number of logical qubits encoded in the block.
+            m: The number of logical qubits to borrow.
+        """
+        return self.borrow_def.instantiate([BoundedNatArg(m), BoundedNatArg(k)])
+
+    # borrow_more
+
+    @functools.cached_property
+    def borrow_more_def(self) -> OpDef:
+        """Extraction of dynamic logical qubits from an already-borrowed block.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `borrow+more`."""
+        return self().get_op("borrow_more")
+
+    def borrow_more(self, k: int, m: int) -> ExtOp:
+        """Extraction of dynamic logical qubits from an already-borrowed block.
+
+        Args:
+            k: The number of logical qubits encoded in the block.
+            m: The number of logical qubits to borrow.
+        """
+        return self.borrow_more_def.instantiate([BoundedNatArg(m), BoundedNatArg(k)])
+
+    # restore_some
+
+    @functools.cached_property
+    def restore_some_def(self) -> OpDef:
+        """Restoration of some dynamic logical qubits to their originating block.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `restore_some`."""
+        return self().get_op("restore_some")
+
+    def restore_some(self, k: int, m: int) -> ExtOp:
+        """Restoration of some dynamic logical qubits to their originating block.
+
+        Args:
+            k: The number of logical qubits encoded in the block.
+            m: The number of logical qubits to restore.
+        """
+        return self.restore_some_def.instantiate([BoundedNatArg(m), BoundedNatArg(k)])
+
+    # restore
+
+    @functools.cached_property
+    def restore_def(self) -> OpDef:
+        """Restoration of all dynamic logical qubits to their originating block.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `restore`."""
+        return self().get_op("restore")
+
+    def restore(self, k: int, m: int) -> ExtOp:
+        """Restoration of all dynamic logical qubits to their originating block.
+
+        Args:
+            k: The number of logical qubits encoded in the block.
+            m: The number of logical qubits to restore.
+        """
+        return self.restore_def.instantiate([BoundedNatArg(m), BoundedNatArg(k)])
