@@ -613,4 +613,4 @@ def restore_some(block: BorrowedBlock[N], qubits: array[Qubit, M] @ owned) -> No
 def restore(
     block: BorrowedBlock[N] @ owned, qubits: array[Qubit, M] @ owned
 ) -> Block[N]:
-    """Restore all dynamic logical qubits to their originating block."""
+    """Restore all remaining dynamic logical qubits to their originating block."""
