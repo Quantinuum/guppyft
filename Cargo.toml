@@ -28,3 +28,4 @@ panic = "abort"
 
 [patch.crates-io]
 tket = { git = "https://github.com/quantinuum/tket2", "rev" = "e56c615" }
+hugr-core = { git = "https://github.com/quantinuum/hugr", "rev" = "7ccd635" }
