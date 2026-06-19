@@ -39,7 +39,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
-              "id": "int",
+              "id": "float64",
               "args": [],
               "bound": "C"
             }
