@@ -12,9 +12,13 @@ extensions: &extensions
   - "Cargo.lock"
   - "extensions/**"
 
+extensions_data: &extensions_data
+  - "src/guppyft/extensions/data/**"
+
 rust:
   - *encoder
   - *extensions
+  - *extensions_data
 
 python:
   - "pyproject.toml"
