@@ -949,6 +949,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -1161,6 +1162,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -1168,6 +1170,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -1177,6 +1180,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -1184,6 +1188,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -1578,6 +1583,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -1889,6 +1895,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -1896,6 +1903,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -1905,6 +1913,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -1925,6 +1934,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -1932,6 +1942,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -1941,6 +1952,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -2102,6 +2114,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -2109,6 +2122,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -2118,6 +2132,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -2598,6 +2613,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -2612,19 +2628,11 @@
                 [
                   {
                     "t": "Opaque",
-                    "extension": "tket.futures",
-                    "id": "Future",
-                    "args": [
-                      {
-                        "tya": "Type",
-                        "ty": {
-                          "t": "Sum",
-                          "s": "Unit",
-                          "size": 2
-                        }
-                      }
-                    ],
-                    "bound": "A"
+                    "extension": "tket.measurement",
+                    "extension_version": "0.1.0",
+                    "id": "Measurement",
+                    "args": [],
+                    "bound": "C"
                   }
                 ]
               ]
@@ -2632,6 +2640,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -2652,6 +2661,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -2666,19 +2676,11 @@
                 [
                   {
                     "t": "Opaque",
-                    "extension": "tket.futures",
-                    "id": "Future",
-                    "args": [
-                      {
-                        "tya": "Type",
-                        "ty": {
-                          "t": "Sum",
-                          "s": "Unit",
-                          "size": 2
-                        }
-                      }
-                    ],
-                    "bound": "A"
+                    "extension": "tket.measurement",
+                    "extension_version": "0.1.0",
+                    "id": "Measurement",
+                    "args": [],
+                    "bound": "C"
                   }
                 ]
               ]
@@ -2686,6 +2688,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -2831,6 +2834,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -2840,6 +2844,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -3285,6 +3290,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -3294,6 +3300,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -3739,6 +3746,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -3748,6 +3756,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -4419,6 +4428,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -4426,6 +4436,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -4433,6 +4444,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -4442,6 +4454,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -4449,6 +4462,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "qubit",
               "args": [],
               "bound": "A"

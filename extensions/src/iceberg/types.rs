@@ -15,10 +15,11 @@
 ///   `block`.
 use std::sync::{Arc, LazyLock};
 
+
 use hugr::{
-    Extension,
     extension::ExtensionId,
-    types::{CustomType, Type, TypeArg, TypeBound, TypeName, type_param::TypeParam},
+    types::{type_param::TypeParam, CustomType, Type, TypeArg, TypeBound, TypeName},
+    Extension,
 };
 
 /// The extension identifier.
@@ -58,10 +59,11 @@ pub fn block_type(k_arg: impl Into<TypeArg>) -> Type {
 ///
 /// * `k_arg` - The number of logical qubits in the code block.
 pub fn borrowed_block_type(k_arg: impl Into<TypeArg>) -> Type {
-    CustomType::new(
+    Type::from(
         BORROWED_BLOCK_TYPENAME,
         [k_arg.into()],
         EXTENSION_ID,
+        VERSION,
         TypeBound::Linear,
         &Arc::<Extension>::downgrade(&EXTENSION),
     )
@@ -76,6 +78,7 @@ pub fn dynamic_logical_qubit_type() -> Type {
         QUBIT_TYPENAME,
         [],
         EXTENSION_ID,
+        VERSION,
         TypeBound::Linear,
         &Arc::<Extension>::downgrade(&EXTENSION),
     )
@@ -86,32 +89,32 @@ pub fn dynamic_logical_qubit_type() -> Type {
 fn extension() -> Arc<Extension> {
     Extension::new_arc(EXTENSION_ID, VERSION, |extension, extension_ref| {
         extension
-            .add_type(
-                BLOCK_TYPENAME,
-                vec![TypeParam::max_nat_kind()],
-                "logical Iceberg block".to_owned(),
-                TypeBound::Linear.into(),
-                extension_ref,
-            )
-            .unwrap();
+        .add_type(
+            BLOCK_TYPENAME,
+            vec![TypeParam::max_nat_kind()],
+            "logical Iceberg block".to_owned(),
+            TypeBound::Linear.into(),
+            extension_ref,
+        )
+        .unwrap();
         extension
-            .add_type(
-                BORROWED_BLOCK_TYPENAME,
-                vec![TypeParam::max_nat_type()],
-                "borrowed logical Iceberg block".to_owned(),
-                TypeBound::Linear.into(),
-                extension_ref,
-            )
-            .unwrap();
+        .add_type(
+            BORROWED_BLOCK_TYPENAME,
+            vec![TypeParam::max_nat_kind()],
+            "borrowed logical Iceberg block".to_owned(),
+            TypeBound::Linear.into(),
+            extension_ref,
+        )
+        .unwrap();
         extension
-            .add_type(
-                QUBIT_TYPENAME,
-                vec![],
-                "logical Iceberg qubit".to_owned(),
-                TypeBound::Linear.into(),
-                extension_ref,
-            )
-            .unwrap();
+        .add_type(
+            QUBIT_TYPENAME,
+            vec![],
+            "logical Iceberg qubit".to_owned(),
+            TypeBound::Linear.into(),
+            extension_ref,
+        )
+        .unwrap();
     })
 }
 
@@ -123,13 +126,13 @@ pub static EXTENSION: LazyLock<Arc<Extension>> = LazyLock::new(extension);
 pub fn block_tv(var_id: usize) -> Type {
     Type::new_extension(
         EXTENSION
-            .get_type(&BLOCK_TYPENAME)
-            .unwrap()
-            .instantiate(vec![TypeArg::new_var_use(
-                var_id,
-                TypeParam::max_nat_kind(),
-            )])
-            .unwrap(),
+        .get_type(&BLOCK_TYPENAME)
+        .unwrap()
+        .instantiate(vec![TypeArg::new_var_use(
+            var_id,
+            TypeParam::max_nat_kind(),
+        )])
+        .unwrap(),
     )
 }
 
@@ -138,22 +141,22 @@ pub fn block_tv(var_id: usize) -> Type {
 pub fn borrowed_block_tv(var_id: usize) -> Type {
     Type::new_extension(
         EXTENSION
-            .get_type(&BORROWED_BLOCK_TYPENAME)
-            .unwrap()
-            .instantiate(vec![TypeArg::new_var_use(
-                var_id,
-                TypeParam::max_nat_type(),
-            )])
-            .unwrap(),
+        .get_type(&BORROWED_BLOCK_TYPENAME)
+        .unwrap()
+        .instantiate(vec![TypeArg::new_var_use(
+            var_id,
+            TypeParam::max_nat_kind(),
+        )])
+        .unwrap(),
     )
 }
 
 #[cfg(test)]
 mod tests {
     use hugr::{
-        HugrView,
         builder::{Dataflow, DataflowSubContainer, HugrBuilder, ModuleBuilder},
         types::Signature,
+        HugrView,
     };
 
     use super::*;
