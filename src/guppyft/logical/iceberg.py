@@ -42,6 +42,7 @@ def iceberg_op(
 
 
 N = guppy.nat_var("N")
+M = guppy.nat_var("M")
 
 
 @custom_type(_block_to_hugr, copyable=False, droppable=False, params=_block_params)
@@ -234,6 +235,82 @@ class Block(Generic[N]):  # type: ignore[misc]
         """Fallible non-destructive measurement in the Z basis of the qubit
         with index `i`."""
         return try_measure_one_z(self, i)
+
+
+qubit_def = TYPES_EXTN.get_type("qubit")
+qubit_t = ht.ExtType(qubit_def)
+
+
+@custom_type(qubit_t, copyable=False, droppable=False)
+class Qubit:
+    @hugr_op(iceberg_op("alloc_dynq"))
+    @no_type_check
+    def __new__() -> "Qubit": ...
+
+    @guppy
+    @no_type_check
+    def x(self: "Qubit") -> None:
+        """X gate."""
+        x_dynq(self)
+
+    @guppy
+    @no_type_check
+    def y(self: "Qubit") -> None:
+        """Y gate."""
+        y_dynq(self)
+
+    @guppy
+    @no_type_check
+    def z(self: "Qubit") -> None:
+        """Z gate."""
+        z_dynq(self)
+
+    @guppy
+    @no_type_check
+    def rx(self: "Qubit", angle: float) -> None:
+        """Rx rotation of `angle` radians."""
+        rx_dynq(self, angle)
+
+    @guppy
+    @no_type_check
+    def ry(self: "Qubit", angle: float) -> None:
+        """Ry rotation of `angle` radians."""
+        ry_dynq(self, angle)
+
+    @guppy
+    @no_type_check
+    def rz(self: "Qubit", angle: float) -> None:
+        """Rz rotation of `angle` radians."""
+        rz_dynq(self, angle)
+
+    @guppy
+    @no_type_check
+    def try_measure_x(self: "Qubit") -> Option[Measurement]:
+        """Fallible non-destructive measurement in the X basis."""
+        return try_measure_x_dynq(self)
+
+    @guppy
+    @no_type_check
+    def try_measure_z(self: "Qubit") -> Option[Measurement]:
+        """Fallible non-destructive measurement in the Z basis."""
+        return try_measure_z_dynq(self)
+
+
+@custom_type(_block_to_hugr, copyable=False, droppable=False, params=_block_params)
+class BorrowedBlock(Generic[N]):  # type: ignore[misc]
+    @guppy
+    @no_type_check
+    def borrow_more(
+        self: "BorrowedBlock[N]", indices: array[int, M]
+    ) -> array[Qubit, M]:
+        """Extract dynamic logical qubits from an already-borrowed block."""
+        return borrow_more(self, indices)
+
+    @guppy
+    @no_type_check
+    def restore_some(self: "BorrowedBlock[N]", qubits: array[Qubit, M] @ owned) -> None:
+        """Restore some dynamic logical qubits to their originating block."""
+        restore_some(self, qubits)
 
 
 @hugr_op(iceberg_op("x_d"))
@@ -443,3 +520,97 @@ def try_measure_one_x(block: Block[N], i: int) -> Option[Measurement]:
 def try_measure_one_z(block: Block[N], i: int) -> Option[Measurement]:
     """Fallible non-destructive measurement in the Z basis of the qubit with
     index `i`."""
+
+
+@hugr_op(iceberg_op("free_dynq"))
+@no_type_check
+def free_dynq(qubit: Qubit @ owned) -> None:
+    """Free `qubit`."""
+
+
+@hugr_op(iceberg_op("x_dynq"))
+@no_type_check
+def x_dynq(qubit: Qubit) -> None:
+    """X gate."""
+
+
+@hugr_op(iceberg_op("y_dynq"))
+@no_type_check
+def y_dynq(qubit: Qubit) -> None:
+    """Y gate."""
+
+
+@hugr_op(iceberg_op("z_dynq"))
+@no_type_check
+def z_dynq(qubit: Qubit) -> None:
+    """Z gate."""
+
+
+@hugr_op(iceberg_op("rx_dynq"))
+@no_type_check
+def rx_dynq(qubit: Qubit, angle: float) -> None:
+    """Rx rotation of `angle` radians."""
+
+
+@hugr_op(iceberg_op("ry_dynq"))
+@no_type_check
+def ry_dynq(qubit: Qubit, angle: float) -> None:
+    """Ry rotation of `angle` radians."""
+
+
+@hugr_op(iceberg_op("rz_dynq"))
+@no_type_check
+def rz_dynq(qubit: Qubit, angle: float) -> None:
+    """Rz rotation of `angle` radians."""
+
+
+@hugr_op(iceberg_op("try_measure_x_dynq"))
+@no_type_check
+def try_measure_x_dynq(qubit: Qubit) -> Option[Measurement]:
+    """Fallible non-destructive measurement in the X basis."""
+
+
+@hugr_op(iceberg_op("try_measure_z_dynq"))
+@no_type_check
+def try_measure_z_dynq(qubit: Qubit) -> Option[Measurement]:
+    """Fallible non-destructive measurement in the Z basis."""
+
+
+@hugr_op(iceberg_op("zz_phase_dynq"))
+@no_type_check
+def zz_phase_dynq(qubit0: Qubit, qubit1: Qubit, angle: float) -> None:
+    """ZZPhase rotation of `angle` radians on two qubits."""
+
+
+@hugr_op(iceberg_op("cx_dynq"))
+@no_type_check
+def cx_dynq(qubit0: Qubit, qubit1: Qubit) -> None:
+    """CX gate on `qubit0` (control) and `qubit1` (target)."""
+
+
+@hugr_op(iceberg_op("borrow"))
+@no_type_check
+def borrow(
+    block: Block[N] @ owned, indices: array[int, M]
+) -> (BorrowedBlock[N], array[Qubit, M]):
+    """Extract dynamic logical qubits from a block."""
+
+
+@hugr_op(iceberg_op("borrow_more"))
+@no_type_check
+def borrow_more(block: BorrowedBlock[N], indices: array[int, M]) -> array[Qubit, M]:
+    """Extract additional dynamic logical qubits from an already-borrowed block."""
+
+
+@hugr_op(iceberg_op("restore_some"))
+@no_type_check
+def restore_some(block: BorrowedBlock[N], qubits: array[Qubit, M] @ owned) -> None:
+    """Restore some dynamic logical qubits to their originating block."""
+
+
+@hugr_op(iceberg_op("restore"))
+@no_type_check
+def restore(
+    block: BorrowedBlock[N] @ owned, qubits: array[Qubit, M] @ owned
+) -> Block[N]:
+    """Restore all remaining dynamic logical qubits to their originating block."""

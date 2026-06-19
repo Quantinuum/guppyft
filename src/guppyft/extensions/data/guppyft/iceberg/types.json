@@ -16,6 +16,31 @@
         "b": "Explicit",
         "bound": "A"
       }
+    },
+    "borrowed_block": {
+      "extension": "guppyft.iceberg.types",
+      "name": "borrowed_block",
+      "params": [
+        {
+          "tp": "BoundedNat",
+          "bound": null
+        }
+      ],
+      "description": "borrowed logical Iceberg block",
+      "bound": {
+        "b": "Explicit",
+        "bound": "A"
+      }
+    },
+    "qubit": {
+      "extension": "guppyft.iceberg.types",
+      "name": "qubit",
+      "params": [],
+      "description": "logical Iceberg qubit",
+      "bound": {
+        "b": "Explicit",
+        "bound": "A"
+      }
     }
   },
   "operations": {}

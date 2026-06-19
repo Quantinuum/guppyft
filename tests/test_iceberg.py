@@ -1,5 +1,5 @@
 from guppylang import guppy
-from guppylang.std.builtins import result
+from guppylang.std.builtins import array, result
 from guppylang.std.quantum import collect_measurements
 from hugr.build.dfg import Dfg
 from hugr.ops import DFG
@@ -10,10 +10,16 @@ from tket.passes import InlineFunctions, NormalizeGuppy
 from guppyft.extensions import iceberg_ops, iceberg_types
 from guppyft.logical.iceberg import (
     Block,
+    Qubit,
+    borrow,
+    cx_dynq,
     cx_transversal,
     discard,
+    free_dynq,
     measure_all,
+    restore,
     zz_phase_between_blocks,
+    zz_phase_dynq,
 )
 
 
@@ -51,11 +57,15 @@ def test_exported_extensions() -> None:
     types_extn = iceberg_types()
     assert len(ops_extn.types) == 0
     assert len(types_extn.operations) == 0
-    assert types_extn.types == {"block": iceberg_types.iceberg_block_def}
-    assert all(
-        op_def == iceberg_ops.__getattribute__(f"{op_name}_def")
-        for op_name, op_def in ops_extn.operations.items()
-    )
+    assert types_extn.types == {
+        "block": iceberg_types.iceberg_block_def,
+        "borrowed_block": iceberg_types.iceberg_borrowed_block_def,
+        "qubit": iceberg_types.iceberg_qubit,
+    }
+    assert len(ops_extn.operations) == 74
+    for op_name, op_def in ops_extn.operations.items():
+        op_def_name = op_name if op_name.endswith("_dynq") else f"{op_name}_def"
+        assert op_def == iceberg_ops.__getattribute__(op_def_name)
 
 
 def test_op_instantiations() -> None:
@@ -120,6 +130,12 @@ def test_op_instantiations() -> None:
             iceberg_ops.__getattribute__(op_name)(3, 1, 2).op_def()
             == ops_extn.operations[op_name]
         )
+    # Ops that take a variable number of inputs and outputs:
+    for op_name in ["borrow", "borrow_more", "restore_some", "restore"]:
+        assert (
+            iceberg_ops.__getattribute__(op_name)(1, 3).op_def()
+            == ops_extn.operations[op_name]
+        )
 
 
 def test_guppy_bindings_smoke() -> None:
@@ -131,6 +147,15 @@ def test_guppy_bindings_smoke() -> None:
     def main() -> None:
         b0 = Block[8]()
         b1 = Block[8]()
+        q0 = Qubit()
+        q0.y()
+        q0.rz(-0.5)
+        bb0, q_arr0 = borrow(b0, array(3))
+        cx_dynq(q0, q_arr0[0])
+        q_arr1 = bb0.borrow_more(array(1, 2))
+        zz_phase_dynq(q_arr0[0], q_arr1[1], 0.5)
+        bb0.restore_some(q_arr1)
+        b0 = restore(bb0, q_arr0)
         b0.all_h()
         b0.x(2)
         b0.zz(3, 4)
@@ -150,6 +175,12 @@ def test_guppy_bindings_smoke() -> None:
         m0 = collect_measurements(measure_all(b0))
         result("m0_2", m0[2])
         discard(b1)
+        maybe_mq0 = q0.try_measure_x()
+        if maybe_mq0.is_some():
+            result("mq0", maybe_mq0.unwrap().read())
+        else:
+            maybe_mq0.unwrap_nothing()
+        free_dynq(q0)
 
     pkg = main.compile()
     h = pkg.modules[0]
@@ -173,7 +204,7 @@ def test_guppy_hugr() -> None:
     entrypoint = h.entrypoint
     children = h.children(entrypoint)
     # When https://github.com/Quantinuum/tket2/issues/1691 is implemented, this
-    # test will have to change: all the logical ops including `allox_zero`
+    # test will have to change: all the logical ops including `alloc_zero`
     # should appear under the entrypoint node. (Possibly we may need to append a
     # final `InlineFunctions()` pass to make that happen.)
     assert {h[child].op.name() for child in children} == {
