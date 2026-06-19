@@ -599,7 +599,7 @@ def borrow(
 @hugr_op(iceberg_op("borrow_more"))
 @no_type_check
 def borrow_more(block: BorrowedBlock[N], indices: array[int, M]) -> array[Qubit, M]:
-    """Extract dynamic logical qubits from an already-borrowed block."""
+    """Extract additional dynamic logical qubits from an already-borrowed block."""
 
 
 @hugr_op(iceberg_op("restore_some"))
