@@ -303,13 +303,13 @@ class BorrowedBlock(Generic[N]):  # type: ignore[misc]
     def borrow_more(
         self: "BorrowedBlock[N]", indices: array[int, M]
     ) -> array[Qubit, M]:
-        """Extract free logical qubits from an already-borrowed block."""
+        """Extract dynamic logical qubits from an already-borrowed block."""
         return borrow_more(self, indices)
 
     @guppy
     @no_type_check
     def restore_some(self: "BorrowedBlock[N]", qubits: array[Qubit, M] @ owned) -> None:
-        """Restore some free logical qubits to their originating block."""
+        """Restore some dynamic logical qubits to their originating block."""
         restore_some(self, qubits)
 
 
