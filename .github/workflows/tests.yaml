@@ -138,16 +138,4 @@ jobs:
           python-version: "3.13"
 
       - name: Check if extension versions are updated
-        run: |
-          # Check against latest tag on the target branch
-          # When not on a pull request, base_ref should be empty so we default to HEAD
-          if [ -z "$TARGET_REF" ]; then
-            BASE_SHA="HEAD~1"
-          else
-            BASE_SHA=$(git rev-parse origin/$TARGET_REF)
-          fi
-          echo "Comparing to ref: $BASE_SHA"
-
-          python ./.github/scripts/check_extension_versions.py $BASE_SHA
-        env:
-          TARGET_REF: ${{ github.base_ref }}
+        run: python ./.github/scripts/check_extension_versions.py
