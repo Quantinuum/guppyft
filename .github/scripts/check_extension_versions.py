@@ -1,4 +1,4 @@
-# ruff: noqa: INP001 T201
+# ruff: noqa: INP001
 
 import json
 import subprocess
@@ -52,9 +52,9 @@ def check_version_changes(changed_files: list[Path], target: str) -> list[str]:
                         " was not updated."
                     )
                 else:
-                    print(
+                    sys.stdout.write(
                         f"Version updated in {file_path}: {target_version}"
-                        f" -> {current_version}"
+                        f" -> {current_version}\n"
                     )
 
             else:
@@ -67,14 +67,33 @@ def check_version_changes(changed_files: list[Path], target: str) -> list[str]:
     return errors
 
 
+def get_latest_release_tag() -> str | None:
+    """Get the latest release tag from git if available, otherwise return None."""
+    result = subprocess.run(
+        ["git", "tag", "--sort=-version:refname", "--list"],  # noqa: S607
+        capture_output=True,
+        text=True,
+    )
+    tags = [t.strip() for t in result.stdout.splitlines() if t.strip()]
+    if tags:
+        sys.stdout.write(f"Using latest release tag: {tags[0]}\n")
+        return tags[0]
+
+    return None
+
+
 def main() -> int:
-    target = sys.argv[1] if len(sys.argv) > 1 else "origin/main"
-    changed_files = get_changed_files(target)
-    if not changed_files:
-        print("No extension files changed.")
+    target = sys.argv[1] if len(sys.argv) > 1 else get_latest_release_tag()
+    if target is None:
+        sys.stdout.write("No release tags found.\n")
         return 0
 
-    print(f"Changed extension files: {', '.join(map(str, changed_files))}")
+    changed_files = get_changed_files(target)
+    if not changed_files:
+        sys.stdout.write("No extension files changed.\n")
+        return 0
+
+    sys.stdout.write(f"Changed extension files: {', '.join(map(str, changed_files))}\n")
 
     errors = check_version_changes(changed_files, target)
     if errors:
@@ -82,7 +101,7 @@ def main() -> int:
             sys.stderr.write(error + "\n")
         return 1
 
-    print("All changed extension files have updated versions.")
+    sys.stdout.write("All changed extension files have updated versions.\n")
     return 0
 
 
