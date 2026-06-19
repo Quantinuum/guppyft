@@ -10,7 +10,7 @@
       "signature": {
         "params": [
           {
-            "tp": "BoundedNat",
+            "tp": "int",
             "bound": null
           },
           {
