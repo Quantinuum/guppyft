@@ -7,7 +7,7 @@ use hugr::{
     Extension,
     extension::{
         ExtensionId, OpDef, SignatureError, SignatureFromArgs, SignatureFunc,
-        prelude::{bool_t, option_type},
+        prelude::option_type,
         simple_op::{
             HasConcrete, HasDef, MakeExtensionOp, MakeOpDef, MakeRegisteredOp, OpLoadError,
             try_from_name,
@@ -21,7 +21,7 @@ use hugr::{
     types::{FuncValueType, PolyFuncTypeRV, Signature, Type, TypeArg, type_param::TypeParam},
 };
 use strum::{EnumIter, EnumString, IntoStaticStr};
-use tket_qsystem::extension::futures::future_type;
+use tket::extension::measurement::measurement_type;
 
 use crate::iceberg::types::{borrowed_block_tv, dynamic_logical_qubit_type};
 
@@ -270,10 +270,10 @@ impl IcebergOpDef {
 
 /// Get an array-of-future-bool type with size corresponding to a type variable
 /// with a given ID.
-fn bool_array_tv(var_id: usize) -> Type {
+fn measurement_array_tv(var_id: usize) -> Type {
     BorrowArray::ty_parametric(
-        TypeArg::new_var_use(var_id, TypeParam::max_nat_type()),
-        future_type(bool_t()),
+        TypeArg::new_var_use(var_id, TypeParam::max_nat_kind()),
+        measurement_type(),
     )
     .unwrap()
 }
@@ -295,30 +295,30 @@ fn vec_of_blocks_and_ints_and_angles(
     types
 }
 
-/// A vector consisting of future-bool types followed by block types.
+/// A vector consisting of measurement types followed by block types.
 /// (Block types last because used as output row and guppylang expects this.)
-fn vec_of_blocks_and_bools(n_blocks: usize, n_bools: usize) -> Vec<Type> {
-    let mut types: Vec<Type> = vec![future_type(bool_t()); n_bools];
+fn vec_of_blocks_and_measurements(n_blocks: usize, n_bools: usize) -> Vec<Type> {
+    let mut types: Vec<Type> = vec![measurement_type(); n_bools];
     types.extend(vec![block_tv(0); n_blocks]);
     types
 }
 
-fn optional_future_bool() -> Type {
-    option_type(vec![future_type(bool_t())]).into()
+fn optional_measurement() -> Type {
+    option_type(vec![measurement_type()]).into()
 }
 
-/// A vector consisting of an optional-future-bool type followed by a block
+/// A vector consisting of an optional-measurement type followed by a block
 /// type. (Block type last because used as output row and guppylang expects
 /// this.)
-fn block_and_optional_bool() -> Vec<Type> {
-    vec![optional_future_bool(), block_tv(0)]
+fn block_and_optional_measurement() -> Vec<Type> {
+    vec![optional_measurement(), block_tv(0)]
 }
 
 /// Signature of an operation that acts on a single block, with a number of
 /// additional angle inputs and a number of index parameters.
 fn sig_1_block(n_angles: usize, n_indices: usize) -> SignatureFunc {
     PolyFuncTypeRV::new(
-        vec![TypeParam::max_nat_type(); 1 + n_indices],
+        vec![TypeParam::max_nat_kind(); 1 + n_indices],
         FuncValueType::new(
             vec_of_blocks_and_angles(1, n_angles),
             vec_of_blocks_and_angles(1, 0),
@@ -331,7 +331,7 @@ fn sig_1_block(n_angles: usize, n_indices: usize) -> SignatureFunc {
 /// additional angle inputs and a number of index inputs.
 fn sig_1_block_d(n_angles: usize, n_indices: usize) -> SignatureFunc {
     PolyFuncTypeRV::new(
-        vec![TypeParam::max_nat_type()],
+        vec![TypeParam::max_nat_kind()],
         FuncValueType::new(
             vec_of_blocks_and_ints_and_angles(1, n_indices, n_angles),
             vec_of_blocks_and_ints_and_angles(1, 0, 0),
@@ -354,7 +354,7 @@ fn sig_qubits_angles(n_qubits: usize, n_angles: usize) -> SignatureFunc {
 fn sig_qubit_meas() -> SignatureFunc {
     Signature::new(
         vec![dynamic_logical_qubit_type()],
-        vec![optional_future_bool(), dynamic_logical_qubit_type()],
+        vec![optional_measurement(), dynamic_logical_qubit_type()],
     )
     .into()
 }
@@ -429,7 +429,7 @@ impl MakeOpDef for IcebergOpDef {
             swap => sig_1_block(0, 2),
             swap_d => sig_1_block_d(0, 2),
             zz_phase_between_blocks => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type(); 3],
+                vec![TypeParam::max_nat_kind(); 3],
                 FuncValueType::new(
                     vec_of_blocks_and_angles(2, 1),
                     vec_of_blocks_and_angles(2, 0),
@@ -437,7 +437,7 @@ impl MakeOpDef for IcebergOpDef {
             )
             .into(),
             zz_phase_between_blocks_d => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type()],
+                vec![TypeParam::max_nat_kind()],
                 FuncValueType::new(
                     vec_of_blocks_and_ints_and_angles(2, 2, 1),
                     vec_of_blocks_and_ints_and_angles(2, 0, 0),
@@ -445,12 +445,12 @@ impl MakeOpDef for IcebergOpDef {
             )
             .into(),
             cx_transversal => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type()],
+                vec![TypeParam::max_nat_kind()],
                 FuncValueType::new_endo(vec_of_blocks_and_angles(2, 0)),
             )
             .into(),
             alloc_zero => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type()],
+                vec![TypeParam::max_nat_kind()],
                 FuncValueType::new(
                     vec_of_blocks_and_angles(0, 0),
                     vec_of_blocks_and_angles(1, 0),
@@ -458,7 +458,7 @@ impl MakeOpDef for IcebergOpDef {
             )
             .into(),
             free => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type()],
+                vec![TypeParam::max_nat_kind()],
                 FuncValueType::new(
                     vec_of_blocks_and_angles(1, 0),
                     vec_of_blocks_and_angles(0, 0),
@@ -466,41 +466,50 @@ impl MakeOpDef for IcebergOpDef {
             )
             .into(),
             measure_syndrome => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type()],
+                vec![TypeParam::max_nat_kind()],
                 FuncValueType::new(
                     vec_of_blocks_and_angles(1, 0),
-                    vec_of_blocks_and_bools(1, 2),
+                    vec_of_blocks_and_measurements(1, 2),
                 ),
             )
             .into(),
             measure_all => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type()],
-                FuncValueType::new(vec_of_blocks_and_angles(1, 0), vec![bool_array_tv(0)]),
+                vec![TypeParam::max_nat_kind()],
+                FuncValueType::new(
+                    vec_of_blocks_and_angles(1, 0),
+                    vec![measurement_array_tv(0)],
+                ),
             )
             .into(),
             try_measure_one_x => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type(); 2],
-                FuncValueType::new(vec_of_blocks_and_angles(1, 0), block_and_optional_bool()),
+                vec![TypeParam::max_nat_kind(); 2],
+                FuncValueType::new(
+                    vec_of_blocks_and_angles(1, 0),
+                    block_and_optional_measurement(),
+                ),
             )
             .into(),
             try_measure_one_x_d => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type()],
+                vec![TypeParam::max_nat_kind()],
                 FuncValueType::new(
                     vec_of_blocks_and_ints_and_angles(1, 1, 0),
-                    block_and_optional_bool(),
+                    block_and_optional_measurement(),
                 ),
             )
             .into(),
             try_measure_one_z => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type(); 2],
-                FuncValueType::new(vec_of_blocks_and_angles(1, 0), block_and_optional_bool()),
+                vec![TypeParam::max_nat_kind(); 2],
+                FuncValueType::new(
+                    vec_of_blocks_and_angles(1, 0),
+                    block_and_optional_measurement(),
+                ),
             )
             .into(),
             try_measure_one_z_d => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type()],
+                vec![TypeParam::max_nat_kind()],
                 FuncValueType::new(
                     vec_of_blocks_and_ints_and_angles(1, 1, 0),
-                    block_and_optional_bool(),
+                    block_and_optional_measurement(),
                 ),
             )
             .into(),
@@ -530,7 +539,7 @@ impl MakeOpDef for IcebergOpDef {
 }
 
 /// Static parameters for borrow and restore operations.
-const STATIC_NAT_PARAM: &[TypeParam; 1] = &[TypeParam::max_nat_type()];
+const STATIC_NAT_PARAM: &[TypeParam; 1] = &[TypeParam::max_nat_kind()];
 
 impl SignatureFromArgs for IcebergOpDef {
     fn compute_signature(&self, arg_values: &[TypeArg]) -> Result<PolyFuncTypeRV, SignatureError> {
@@ -544,7 +553,7 @@ impl SignatureFromArgs for IcebergOpDef {
                 let mut out_types: Vec<Type> = vec![borrowed_block_tv(0)];
                 out_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
+                    vec![TypeParam::max_nat_kind()],
                     FuncValueType::new(in_types, out_types),
                 )
             }
@@ -554,7 +563,7 @@ impl SignatureFromArgs for IcebergOpDef {
                 let mut out_types: Vec<Type> = vec![borrowed_block_tv(0)];
                 out_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
+                    vec![TypeParam::max_nat_kind()],
                     FuncValueType::new(in_types, out_types),
                 )
             }
@@ -562,7 +571,7 @@ impl SignatureFromArgs for IcebergOpDef {
                 let mut in_types: Vec<Type> = vec![borrowed_block_tv(0)];
                 in_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
+                    vec![TypeParam::max_nat_kind()],
                     FuncValueType::new(in_types, vec![borrowed_block_tv(0)]),
                 )
             }
@@ -570,7 +579,7 @@ impl SignatureFromArgs for IcebergOpDef {
                 let mut in_types: Vec<Type> = vec![borrowed_block_tv(0)];
                 in_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
                 PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
+                    vec![TypeParam::max_nat_kind()],
                     FuncValueType::new(in_types, vec![block_tv(0)]),
                 )
             }
@@ -843,9 +852,9 @@ mod tests {
             .instantiate_extension_op("free", [8.into()])
             .unwrap();
         let outputs: Vec<Type> = vec![
-            future_type(bool_t()),
-            future_type(bool_t()),
-            optional_future_bool(),
+            measurement_type(),
+            measurement_type(),
+            optional_measurement(),
         ];
         let mut dfg_builder = DFGBuilder::new(Signature::new(vec![], outputs)).unwrap();
         let handle = dfg_builder.add_dataflow_op(alloczero, vec![]).unwrap();
@@ -885,7 +894,7 @@ mod tests {
             .unwrap();
         let mut dfg_builder = DFGBuilder::new(Signature::new(
             [block_type(4)],
-            [borrow_array_type(4, future_type(bool_t()))],
+            [borrow_array_type(4, measurement_type())],
         ))
         .unwrap();
         let handle = dfg_builder
@@ -915,9 +924,9 @@ mod tests {
             vec![block_type(2)],
             vec![
                 block_type(2),
-                optional_future_bool(),
-                optional_future_bool(),
-                optional_future_bool(),
+                optional_measurement(),
+                optional_measurement(),
+                optional_measurement(),
             ],
         ))
         .unwrap();

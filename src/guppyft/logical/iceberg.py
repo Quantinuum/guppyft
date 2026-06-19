@@ -5,7 +5,7 @@ from guppylang import guppy
 from guppylang.std.builtins import array
 from guppylang.std.lang import owned
 from guppylang.std.option import Option
-from guppylang.std.qsystem import Measurement
+from guppylang.std.quantum import Measurement
 from guppylang_internals.decorator import custom_type, hugr_op
 from guppylang_internals.tys.arg import Argument, ConstArg
 from guppylang_internals.tys.common import ToHugrContext

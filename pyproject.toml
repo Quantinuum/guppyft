@@ -24,10 +24,10 @@ classifiers = [
 ]
 
 dependencies = [
-    "guppylang>=1.0.0a0",
-    "guppylang-internals>=1.0.0a0",
-    "hugr>=0.16.0",
-    "tket>=0.13.0",
+    "guppylang>=1.0.0a4",
+    "guppylang-internals>=1.0.0a4",
+    "hugr>=0.17.0",
+    "tket>=0.14.0",
 ]
 
 [dependency-groups]
@@ -43,22 +43,26 @@ lint = [
 ]
 test = [
     "pytest>=9.1.0",
-    "selene-hugr-qis-compiler>=0.2.10",
+    "pytest-snapshot>=0.9.0",
+    "pytest-xdist>=3.8.0",
+    "selene-hugr-qis-compiler>=0.3.1",
     "selene-sim>=0.2.17",
 ]
 
 [tool.mypy]
 strict = true
 allow_redefinition = true
+exclude = ["tests/error"]
 
 [build-system]
 requires = ["maturin>=1.14.0,<2.0"]
 build-backend = "maturin"
 
 [tool.uv.sources]
-# Needs tket branch for globals extension
-tket = { git = "https://github.com/quantinuum/tket2", rev = "87f2ab8d6bced055653bf17d07f741e361916a74", subdirectory = "tket-py" }
-selene-hugr-qis-compiler = { git = "https://github.com/quantinuum/tket2", rev = "87f2ab8d6bced055653bf17d07f741e361916a74", subdirectory = "qis-compiler" }
+# Required for global hugr ops and hugr fix
+# https://github.com/Quantinuum/hugr/pull/3121
+tket = { git = "https://github.com/quantinuum/tket2", rev = "e08f55c8", subdirectory = "tket-py" }
+selene-hugr-qis-compiler = { git = "https://github.com/quantinuum/tket2", rev = "e08f55c8", subdirectory = "qis-compiler" }
 
 [tool.maturin]
 module-name = "guppyft._bindings"

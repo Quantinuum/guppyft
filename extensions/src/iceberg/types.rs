@@ -44,6 +44,7 @@ pub fn block_type(k_arg: impl Into<TypeArg>) -> Type {
         BLOCK_TYPENAME,
         [k_arg.into()],
         EXTENSION_ID,
+        VERSION,
         TypeBound::Linear,
         &Arc::<Extension>::downgrade(&EXTENSION),
     )
@@ -61,6 +62,7 @@ pub fn borrowed_block_type(k_arg: impl Into<TypeArg>) -> Type {
         BORROWED_BLOCK_TYPENAME,
         [k_arg.into()],
         EXTENSION_ID,
+        VERSION,
         TypeBound::Linear,
         &Arc::<Extension>::downgrade(&EXTENSION),
     )
@@ -75,6 +77,7 @@ pub fn dynamic_logical_qubit_type() -> Type {
         QUBIT_TYPENAME,
         [],
         EXTENSION_ID,
+        VERSION,
         TypeBound::Linear,
         &Arc::<Extension>::downgrade(&EXTENSION),
     )
@@ -87,7 +90,7 @@ fn extension() -> Arc<Extension> {
         extension
             .add_type(
                 BLOCK_TYPENAME,
-                vec![TypeParam::max_nat_type()],
+                vec![TypeParam::max_nat_kind()],
                 "logical Iceberg block".to_owned(),
                 TypeBound::Linear.into(),
                 extension_ref,
@@ -96,7 +99,7 @@ fn extension() -> Arc<Extension> {
         extension
             .add_type(
                 BORROWED_BLOCK_TYPENAME,
-                vec![TypeParam::max_nat_type()],
+                vec![TypeParam::max_nat_kind()],
                 "borrowed logical Iceberg block".to_owned(),
                 TypeBound::Linear.into(),
                 extension_ref,
@@ -126,7 +129,7 @@ pub fn block_tv(var_id: usize) -> Type {
             .unwrap()
             .instantiate(vec![TypeArg::new_var_use(
                 var_id,
-                TypeParam::max_nat_type(),
+                TypeParam::max_nat_kind(),
             )])
             .unwrap(),
     )
@@ -141,7 +144,7 @@ pub fn borrowed_block_tv(var_id: usize) -> Type {
             .unwrap()
             .instantiate(vec![TypeArg::new_var_use(
                 var_id,
-                TypeParam::max_nat_type(),
+                TypeParam::max_nat_kind(),
             )])
             .unwrap(),
     )

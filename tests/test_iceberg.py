@@ -1,6 +1,6 @@
 from guppylang import guppy
 from guppylang.std.builtins import array, result
-from guppylang.std.qsystem import collect_measurements
+from guppylang.std.quantum import collect_measurements
 from hugr.build.dfg import Dfg
 from hugr.ops import DFG
 from hugr.std.float import FLOAT_T

@@ -58,7 +58,7 @@ def test_x() -> None:
     def main() -> None:
         q = qubit()
         x(q)
-        result("q", measure(q))
+        result("q", measure(q).read())
 
     id_code = identity_code_spec(n_qubits=1)
 
@@ -75,8 +75,8 @@ def test_cx() -> None:
     def main() -> None:
         ctl, tgt = qubit(), qubit()
         cx(ctl, tgt)
-        result("ctl", measure(ctl))
-        result("tgt", measure(tgt))
+        result("ctl", measure(ctl).read())
+        result("tgt", measure(tgt).read())
 
     id_code = identity_code_spec(n_qubits=2)
 
@@ -94,8 +94,8 @@ def test_zz_phase() -> None:
     def main() -> None:
         ctl, tgt = qubit(), qubit()
         zz_phase(ctl, tgt, angle(0.0))
-        result("ctl", measure(ctl))
-        result("tgt", measure(tgt))
+        result("ctl", measure(ctl).read())
+        result("tgt", measure(tgt).read())
 
     id_code = identity_code_spec(n_qubits=2)
 
@@ -151,9 +151,9 @@ def test_qubit_reuse() -> None:
     @guppy
     def main() -> None:
         qb = qubit()
-        result("qb", measure(qb))
+        result("qb", measure(qb).read())
         qb = qubit()
-        result("qb", measure(qb))
+        result("qb", measure(qb).read())
 
     id_code = identity_code_spec(n_qubits=1)
 

@@ -1,0 +1,11 @@
+Error: Expected FunctionType (at $FILE:8:19)
+  | 
+6 | @guppy
+7 | def my_prog() -> None:
+8 |     with_global(1, 1)
+  |                    ^ Expected FunctionType, got int
+
+Help: Signature of callback function for `with_global` should be `(*input) ->
+(*output)` and usage is `with_global(global_ty, callback_func, *input).
+
+Guppy compilation failed due to 1 previous error

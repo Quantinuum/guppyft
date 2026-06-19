@@ -1,0 +1,20 @@
+Error: Callback function output error. (at $FILE:7:21)
+   | 
+ 5 | 
+ 6 | @guppy
+ 7 | def foo(i: float) -> int:
+   |                      ^^^ First input and first return arg to callback function used
+   |                          in global map is the global variable. Expected first return
+   |                          arg: `float`.
+
+Note:
+   | 
+11 | def main() -> None:
+12 |     map_global(foo)
+   |                --- Callback function used here.
+
+Help: Signature of callback function for `map_global` should be `(global_ty,
+*input) -> (global_ty, *output)` and usage is `map_global(callback_func,
+*input).
+
+Guppy compilation failed due to 1 previous error
