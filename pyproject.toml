@@ -24,10 +24,11 @@ classifiers = [
 ]
 
 dependencies = [
-    "guppylang>=1.0.0a4",
-    "guppylang-internals>=1.0.0a4",
+    "guppylang>=1.0.0a5",
+    "guppylang-internals>=1.0.0a5",
     "hugr>=0.17.0",
-    "tket>=0.14.0",
+    "tket>=0.14.2",
+    "tket-exts>=0.13.1",
 ]
 
 [dependency-groups]
@@ -45,8 +46,8 @@ test = [
     "pytest>=9.1.0",
     "pytest-snapshot>=0.9.0",
     "pytest-xdist>=3.8.0",
-    "selene-hugr-qis-compiler>=0.3.1",
-    "selene-sim>=0.2.17",
+    "selene-hugr-qis-compiler>=0.3.2",
+    "selene-sim>=0.3.0a1",
 ]
 
 [tool.mypy]
@@ -59,10 +60,9 @@ requires = ["maturin>=1.14.0,<2.0"]
 build-backend = "maturin"
 
 [tool.uv.sources]
-# Required for global hugr ops and hugr fix
-# https://github.com/Quantinuum/hugr/pull/3121
-tket = { git = "https://github.com/quantinuum/tket2", rev = "e08f55c8", subdirectory = "tket-py" }
-selene-hugr-qis-compiler = { git = "https://github.com/quantinuum/tket2", rev = "e08f55c8", subdirectory = "qis-compiler" }
+# uncomment to use unrelease dependencies
+#tket = { git = "https://github.com/quantinuum/tket2", rev = "e08f55c8", subdirectory = "tket-py" }
+#selene-hugr-qis-compiler = { git = "https://github.com/quantinuum/tket2", rev = "e08f55c8", subdirectory = "qis-compiler" }
 
 [tool.maturin]
 module-name = "guppyft._bindings"
