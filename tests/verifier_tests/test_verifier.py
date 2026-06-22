@@ -167,6 +167,28 @@ def test_steane_sdg() -> None:
     assert sem == impl
 
 
+def test_steane_invalid_s() -> None:
+    sem, impl = compute_verification_signterms(
+        steane_logical_s,
+        steane_physical_sdg,
+        code_choi_state_function=steane_choi_state,
+        code_definition=STEANE,
+    )
+
+    assert sem != impl
+
+
+def test_steane_invalid_sdg() -> None:
+    sem, impl = compute_verification_signterms(
+        steane_logical_sdg,
+        steane_physical_s,
+        code_choi_state_function=steane_choi_state,
+        code_definition=STEANE,
+    )
+
+    assert sem != impl
+
+
 def test_compute_stabilizers_double_block() -> None:
     stabilizers = compute_stabilizers_double_block(
         steane_logical_identity_double_block,

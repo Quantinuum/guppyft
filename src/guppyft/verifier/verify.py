@@ -266,7 +266,7 @@ def expand_pauli_term(
     # "result_string" is a Pauli String which will store a single physical Pauli term
     # possibly across multiple code blocks.
     #  This String will be one term in the expanded tableau.
-    result_string = pauli.String(qubits=total_qubit_number)
+    result_term = pauli.SignTerm(qubits=total_qubit_number)
 
     for logical_qubit_index, logical_pauli in logical_term.string.get_dict().items():
         # "non_identity_pauli_index" is the index we need to access to expand the
@@ -289,16 +289,19 @@ def expand_pauli_term(
         # "non_identity_pauli_index" index computed above.
         match logical_pauli:
             case pauli.PauliMatrix.X:
-                physical_pauli: pauli.String = code.x_logicals[non_identity_pauli_index]
-
-            case pauli.PauliMatrix.Z:
-                physical_pauli: pauli.String = code.z_logicals[non_identity_pauli_index]
+                physical_pauli = pauli.SignTerm.from_str(
+                    str(code.x_logicals[non_identity_pauli_index])
+                )
 
             case pauli.PauliMatrix.Y:
-                physical_pauli: pauli.String = (
-                    code.x_logicals[non_identity_pauli_index]
-                    * code.z_logicals[non_identity_pauli_index]
-                ).string
+                physical_pauli = pauli.SignTerm.from_str(
+                    str(code.y_logicals[non_identity_pauli_index])
+                )
+
+            case pauli.PauliMatrix.Z:
+                physical_pauli = pauli.SignTerm.from_str(
+                    str(code.z_logicals[non_identity_pauli_index])
+                )
 
             case _:
                 raise ValueError(
@@ -310,12 +313,16 @@ def expand_pauli_term(
         # with seven physical qubits each. If we expanded a logical Pauli in the second
         #  logical block, then the appropriate "offset" would be (1*7) = 7.
         offset = logical_block_number * n
-        shifted = shift_pauli(physical_pauli, offset, size=total_qubit_number)
 
-        # Get the expanded physical Pauli by taking the product of k expanded Strings.
-        result_string *= shifted
+        shifted: pauli.String = shift_pauli(
+            physical_pauli.string, offset, size=total_qubit_number
+        )
+        shifted_term = pauli.SignTerm.from_cmpnt_coeff(shifted, physical_pauli.coeff)
 
-    return pauli.SignTerm.from_cmpnt_coeff(result_string, logical_term.coeff)
+        # Get final expanded term by taking the product of num_blocks*k expanded terms.
+        result_term *= shifted_term
+
+    return logical_term.coeff * result_term
 
 
 def expand_logical_signterms(
