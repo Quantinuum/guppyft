@@ -5,7 +5,7 @@ from guppylang import guppy
 from guppylang.emulator import EmulatorBuilder
 from guppylang.std.angles import angle
 from guppylang.std.builtins import array, result
-from guppylang.std.qsystem import zz_phase
+from guppylang.std.qsystem.helios import zz_phase
 from guppylang.std.quantum import (
     cx,
     discard,

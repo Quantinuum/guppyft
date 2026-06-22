@@ -260,9 +260,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.2.64"
+version = "1.2.65"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dad887fd958be91b5098c0248def011f4523ab786cd411be668777e55063501f"
+checksum = "e228eec9be7c17ccb640b59b36a5cd805ea2a564a4c5e162c2f659fea30d3b96"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -917,8 +917,9 @@ dependencies = [
 
 [[package]]
 name = "hugr"
-version = "0.28.2"
-source = "git+https://github.com/quantinuum/hugr?rev=7ccd635#7ccd6353b716c92cf0da8b12422d9bc22dd27968"
+version = "0.28.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3f4ee8c86d356d26d4f9f560da549cda97c0a1964fdeddff124467dda41d8cc"
 dependencies = [
  "hugr-core",
  "hugr-model",
@@ -926,9 +927,9 @@ dependencies = [
 
 [[package]]
 name = "hugr-cli"
-version = "0.28.2"
+version = "0.28.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "85704e015f4fa50e1ddd065b35963caf43be15c552de6dc1a8b318fa74176be5"
+checksum = "d275666819ec05ec051b26cb79f221827225b1fb20437b5eea8e75391054566a"
 dependencies = [
  "anyhow",
  "clap",
@@ -948,8 +949,9 @@ dependencies = [
 
 [[package]]
 name = "hugr-core"
-version = "0.28.2"
-source = "git+https://github.com/quantinuum/hugr?rev=7ccd635#7ccd6353b716c92cf0da8b12422d9bc22dd27968"
+version = "0.28.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6cf94f955bf4cb90eeadbac537089c11e8d5ee8685be87f6dc73157cac3065a4"
 dependencies = [
  "base64",
  "cgmath",
@@ -985,8 +987,9 @@ dependencies = [
 
 [[package]]
 name = "hugr-model"
-version = "0.28.2"
-source = "git+https://github.com/quantinuum/hugr?rev=7ccd635#7ccd6353b716c92cf0da8b12422d9bc22dd27968"
+version = "0.28.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c3c3bc3a87ee6cfa2c8c619bafb2828aeabb8cb4fba7b4958c58355208ed17da"
 dependencies = [
  "base64",
  "bumpalo",
@@ -1176,9 +1179,9 @@ dependencies = [
 
 [[package]]
 name = "log"
-version = "0.4.32"
+version = "0.4.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "953f07c43838f8e6f9758cab68bf5bed85465e7587ebe0b823f1bcd81978ad3a"
+checksum = "0ceec5bc11778974d1bcb055b18002eba7f4b3518b6a0081b3af5f21666da9ad"
 
 [[package]]
 name = "memchr"
@@ -1570,9 +1573,9 @@ dependencies = [
 
 [[package]]
 name = "quote"
-version = "1.0.45"
+version = "1.0.46"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "41f2619966050689382d2b44f664f4bc593e129785a36d6ee376ddf37259b924"
+checksum = "dfbc457d0c7a0759a614551b11a6409e5951f6c7537be1f1b7682b9ae9230368"
 dependencies = [
  "proc-macro2",
 ]
@@ -2134,9 +2137,9 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.49"
+version = "0.3.51"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "711a53c2d47bbd818258c498c8dbfe186a2526c631495cfe7e078567f86b8469"
+checksum = "85c17d80feb7334b40c484e45ed1a5273dfd8bfda537c3be2e74a06a6686f327"
 dependencies = [
  "deranged",
  "num-conv",
@@ -2154,9 +2157,9 @@ checksum = "9e1c906769ad99c88eaa54e728060edef082f8e358ff32030cb7c7d315e81109"
 
 [[package]]
 name = "time-macros"
-version = "0.2.29"
+version = "0.2.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "71c652a3727a9cbb9a02f707f530b618ce00d0ccd762009c8c23bd191df3c17d"
+checksum = "dcef1a61bdb119096e153208ec5cbec23944ce8bca13be5c7f60c634f7403935"
 dependencies = [
  "num-conv",
  "time-core",
@@ -2180,7 +2183,8 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 [[package]]
 name = "tket"
 version = "0.20.0"
-source = "git+https://github.com/quantinuum/tket2?rev=e56c615#e56c615515d31f61f1e0f7db0527719097a8aaa9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f88203d74a716b3a29c01a3f27fdffc5595364be87810a80a58d4a953a44b85"
 dependencies = [
  "ascent",
  "bytemuck",

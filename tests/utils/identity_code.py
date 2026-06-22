@@ -7,7 +7,7 @@ from guppylang.std.angles import angle
 from guppylang.std.builtins import array, comptime, owned, result
 from guppylang.std.collections import Stack
 from guppylang.std.option import Option, nothing, some
-from guppylang.std.qsystem import zz_phase
+from guppylang.std.qsystem.helios import zz_phase
 from guppylang.std.quantum import Measurement, cx, discard, measure, project_z, qubit, x
 
 from guppyft.encode import EncoderSpec, ImplementOpsSpec, OpReplacements
@@ -274,7 +274,7 @@ def identity_code_spec(
             # `tket.qsystem` extension may not be loaded in programs that only use
             # `guppyland.std.quantum` operations. `ZZPhase` is included to test
             # missing extension behaviour during encoding.
-            ("tket.qsystem", "ZZPhase"): "link.identity.ZZPhase",
+            ("tket.qsystem.helios", "ZZPhase"): "link.identity.ZZPhase",
         }
     )
 
