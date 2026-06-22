@@ -41,12 +41,6 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Install hugrenv
-        uses: Quantinuum/hugrverse-env/install-hugrenv-action@main
-        with:
-          packages: llvm,tket
-          lockfile: hugrenv.lock
-
       - name: Build guppyft wheel
         uses: pypa/cibuildwheel@v4.1.0
         with:

@@ -77,7 +77,6 @@ manylinux-x86_64-image = "quay.io/pypa/manylinux_2_28_x86_64"
 manylinux-aarch64-image = "quay.io/pypa/manylinux_2_28_aarch64"
 
 [tool.cibuildwheel.linux]
-environment-pass = ["HUGRENV_PATH", "TKET_C_API_PATH", "LLVM_SYS_211_PREFIX"]
 config-settings = { "build-args" = ["--compatibility", "manylinux_2_28", "--profile=release-py"] }
 before-all = [
     "curl -sSf https://sh.rustup.rs | sh -s -- -y",
@@ -95,9 +94,7 @@ test-command = [
 # we prepend /host to incoming paths because cibuildwheel mounts the host filesystem at /host.
 # this can ONLY be done if you know for sure that the libraries available at that directory on
 # the host are compatible with the build environment, e.g. manylinux compliant.
-PATH = '$HOME/.cargo/bin:/host${HUGRENV_PATH}/bin:$PATH'
-TKET_C_API_PATH = '/host${TKET_C_API_PATH}'
-LLVM_SYS_211_PREFIX = '/host${LLVM_SYS_211_PREFIX}'
+PATH = '$HOME/.cargo/bin:$PATH'
 CARGO_INCREMENTAL = '0'
 CARGO_NET_GIT_FETCH_WITH_CLI = 'true'
 CARGO_PROFILE_RELEASE_DEBUG = 'false'
@@ -114,7 +111,7 @@ test-command = [
     "python -c 'from guppyft._bindings import RsHugr'", # Bindings are essential
 ]
 [tool.cibuildwheel.macos.environment]
-PATH = '$HOME/.cargo/bin:${HUGRENV_PATH}/bin:$PATH'
+PATH = '$HOME/.cargo/bin:$PATH'
 MACOSX_DEPLOYMENT_TARGET = "13.2"
 CARGO_INCREMENTAL = '0'
 CARGO_NET_GIT_FETCH_WITH_CLI = 'true'
@@ -133,7 +130,6 @@ test-command = [
     '''python -c "from guppyft._bindings import RsHugr"''', # Bindings are essential
 ]
 [tool.cibuildwheel.windows.environment]
-PATH = '${HUGRENV_PATH}\\bin;$PATH'
 CARGO_INCREMENTAL = '0'
 CARGO_NET_GIT_FETCH_WITH_CLI = 'true'
 CARGO_PROFILE_RELEASE_DEBUG = 'false'
