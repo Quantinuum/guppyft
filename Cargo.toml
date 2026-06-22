@@ -25,8 +25,3 @@ inherits = "release"
 lto = "fat"
 strip = "symbols"
 panic = "abort"
-
-[patch.crates-io]
-# uncomment to use unrelease dependencies
-#tket = { git = "https://github.com/quantinuum/tket2", "rev" = "e56c615" }
-#hugr = { git = "https://github.com/quantinuum/hugr", "rev" = "7ccd635" }
