@@ -140,6 +140,12 @@ def identity_code_spec(
 
         return map_global(_impl, q)
 
+    # Replacement for `tket.measurement.Read` operation
+    @guppy(link_name="link.identity.Read")
+    @no_type_check
+    def _Read(m: Measurement) -> bool:
+        return m.read()
+
     # QFree is compiled from `guppylang.std.quantum.discard`
     @guppy(link_name="link.identity.QFree")
     @no_type_check
@@ -256,6 +262,7 @@ def identity_code_spec(
         _QAlloc,
         _MeasureFree,
         _Measure,
+        _Read,
         _QFree,
         _X,
         _CX,
@@ -268,6 +275,7 @@ def identity_code_spec(
             ("tket.quantum", "QAlloc"): "link.identity.QAlloc",
             ("tket.quantum", "MeasureFree"): "link.identity.MeasureFree",
             ("tket.quantum", "Measure"): "link.identity.Measure",
+            ("tket.measurement", "Read"): "link.identity.Read",
             ("tket.quantum", "QFree"): "link.identity.QFree",
             ("tket.quantum", "X"): "link.identity.X",
             ("tket.quantum", "CX"): "link.identity.CX",
