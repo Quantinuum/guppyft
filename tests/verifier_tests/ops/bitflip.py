@@ -41,14 +41,14 @@ def bit_flip_choi_state_double_block(
     second_target_block = bit_flip_non_ft_zero()
 
     # First logical Bell pair
+    # Apply logical H
     h(first_control_block[0])
-    cx(first_control_block[0], first_target_block[0])
-
     cx(first_control_block[0], first_control_block[1])
     cx(first_control_block[0], first_control_block[2])
-
-    cx(first_target_block[0], first_target_block[1])
-    cx(first_target_block[0], first_target_block[2])
+    # Apply transversal CX
+    cx(first_control_block[0], first_target_block[0])
+    cx(first_control_block[1], first_target_block[1])
+    cx(first_control_block[2], first_target_block[2])
 
     # Second logical Bell pair
     h(second_control_block[0])
