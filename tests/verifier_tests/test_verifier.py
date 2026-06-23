@@ -237,7 +237,12 @@ def test_stabilizer_padding_double_block() -> None:
     )
 
     assert (
-        np.all(padded_double_block_stabilizers.to_strings().compatibility_matrix()) == 1
+        np.all(
+            padded_double_block_stabilizers.to_strings()
+            .into(pauli.Strings)
+            .compatibility_matrix()
+        )
+        == 1
     )
     assert (
         str(padded_double_block_stabilizers)

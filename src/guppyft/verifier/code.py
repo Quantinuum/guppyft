@@ -56,7 +56,10 @@ class StabilizerCode:
             )
 
         all_stabilizer_generators_commute = (
-            np.all(self.generators.to_strings().compatibility_matrix()) == 1
+            np.all(
+                self.generators.to_strings().into(pauli.Strings).compatibility_matrix()
+            )
+            == 1
         )
 
         if not all_stabilizer_generators_commute:
