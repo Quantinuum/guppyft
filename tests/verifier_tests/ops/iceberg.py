@@ -83,13 +83,11 @@ def iceberg_addressable_v_logical(block: array[qubit, 2]) -> None:
 @guppy
 @no_type_check
 def iceberg_addressable_v_physical(block: array[qubit, 4]) -> None:
-    mem_swap(block[1], block[2])
     h(block[0])
-    h(block[1])
-    zz_max(block[0], block[1])
+    h(block[2])
+    zz_max(block[0], block[2])
     h(block[0])
-    h(block[1])
-    mem_swap(block[1], block[2])
+    h(block[2])
 
 
 @guppy
