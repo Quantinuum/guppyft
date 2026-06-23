@@ -58,7 +58,7 @@ def iceberg_addressable_h_logical(block: array[qubit, 2]) -> None:
 @no_type_check
 def iceberg_addressable_h_physical(block: array[qubit, 4]) -> None:
     iceberg_addressable_s_physical(block)
-    iceberg_addressable_v_physical(block)
+    iceberg_addressable_rx_half_pi_physical(block)
     iceberg_addressable_s_physical(block)
 
 
@@ -76,13 +76,13 @@ def iceberg_addressable_s_physical(block: array[qubit, 4]) -> None:
 
 @guppy
 @no_type_check
-def iceberg_addressable_v_logical(block: array[qubit, 2]) -> None:
+def iceberg_addressable_rx_half_pi_logical(block: array[qubit, 2]) -> None:
     rx(block[1], pi / 2)
 
 
 @guppy
 @no_type_check
-def iceberg_addressable_v_physical(block: array[qubit, 4]) -> None:
+def iceberg_addressable_rx_half_pi_physical(block: array[qubit, 4]) -> None:
     h(block[0])
     h(block[2])
     zz_max(block[0], block[2])
