@@ -87,7 +87,7 @@ def test_s_state_stabilizers() -> None:
     assert len(terms_physical) == 14
 
 
-LOGICAL_STRINGSET = pauli.StringSet.from_strings(pauli.Strings.from_str("X0 X1, Z0 Z1"))
+LOGICAL_STRINGSET = pauli.StringSet.from_cmpnts(pauli.Strings.from_str("X0 X1, Z0 Z1"))
 
 
 def test_padding() -> None:
@@ -141,7 +141,11 @@ def test_cannonical() -> None:
 
     test_tableau.canonicalize_all()
     assert test_tableau == pauli.SignTerms.from_iterable(
-        ((pauli.PauliMatrix.Z, pauli.PauliMatrix.I), (pauli.PauliMatrix.I, pauli.PauliMatrix.Z)), 2
+        (
+            (pauli.PauliMatrix.Z, pauli.PauliMatrix.I),
+            (pauli.PauliMatrix.I, pauli.PauliMatrix.Z),
+        ),
+        2,
     )
 
 

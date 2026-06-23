@@ -72,4 +72,4 @@ def string_to_strings(string: pauli.String) -> pauli.Strings:
 
 def string_to_unit_stringset(string: pauli.String) -> pauli.StringSet:
     strings = string_to_strings(string)
-    return pauli.StringSet.from_strings(strings)
+    return pauli.StringSet.from_cmpnts(strings)

@@ -34,7 +34,7 @@ def test_steane_y_logicals() -> None:
 
 def test_code_validation() -> None:
 
-    fake_generators1 = pauli.StringSet.from_strings(
+    fake_generators1 = pauli.StringSet.from_cmpnts(
         pauli.Strings.from_str(
             "X0 X1 X2 X3, Z0 Z1 Z2 Z3, Y0, Z2 X1",
             4,
@@ -72,7 +72,7 @@ def test_code_validation() -> None:
             z_logicals=ICEBERG_4_2_2_Z,
         )
 
-    fake_generators2 = pauli.StringSet.from_strings(
+    fake_generators2 = pauli.StringSet.from_cmpnts(
         pauli.Strings.from_str(
             "X0 X1 X2 X3, X0 Z1 Z2 Z3",
             4,

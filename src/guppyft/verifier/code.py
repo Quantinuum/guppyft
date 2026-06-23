@@ -75,7 +75,7 @@ STEANE_Z_LOGICAL = pauli.String(7, (Z, Z, Z, Z, Z, Z, Z))
 # Steane is self dual so the X stabilizers have the same indices.
 
 
-STEANE_STABILIZER_GENERATORS = pauli.StringSet.from_strings(
+STEANE_STABILIZER_GENERATORS = pauli.StringSet.from_cmpnts(
     pauli.Strings.from_str(
         "X0 X1 X2 X3 I4 I5 I6, I0 X1 X2 I3 X4 X5 I6, I0 I1 X2 X3 I4 X5 X6, "
         "Z0 Z1 Z2 Z3 I4 I5 I6, I0 Z1 Z2 I3 Z4 Z5 I6, I0 I1 Z2 Z3 I4 Z5 Z6",
@@ -93,7 +93,7 @@ STEANE = StabilizerCode(
     z_logicals=string_to_strings(STEANE_Z_LOGICAL),
 )
 
-BIT_FLIP_CODE_GENERATORS = pauli.StringSet.from_strings(
+BIT_FLIP_CODE_GENERATORS = pauli.StringSet.from_cmpnts(
     pauli.Strings.from_str("Z0 Z1, Z1 Z2", 3)
 )
 
@@ -107,7 +107,7 @@ BIT_FLIP_CODE = StabilizerCode(
 )
 
 
-ICEBERG_4_2_2_GENERATORS = pauli.StringSet.from_strings(
+ICEBERG_4_2_2_GENERATORS = pauli.StringSet.from_cmpnts(
     pauli.Strings.from_str(
         "X0 X1 X2 X3, Z0 Z1 Z2 Z3",
         4,
