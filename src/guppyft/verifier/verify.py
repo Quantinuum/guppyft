@@ -6,7 +6,7 @@ from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.array import array
 from guppylang.std.debug import state_result
 from guppylang.std.quantum import cx, discard_array, h, qubit
-from selene_sim import Stim
+from selene_sim.backends import Stim
 from selene_sim.build import build
 from selene_stim_plugin import SeleneStimState
 
