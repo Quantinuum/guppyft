@@ -17,9 +17,9 @@ N = guppy.nat_var("N")
 
 
 def identity_code_spec(
-        n_qubits: int,
-        qec_budget: int = 1,
-        costs: dict[str, int] | None = None,
+    n_qubits: int,
+    qec_budget: int = 1,
+    costs: dict[str, int] | None = None,
 ) -> EncoderSpec:
     if costs is None:
         costs = defaultdict(int)
@@ -39,7 +39,7 @@ def identity_code_spec(
         @guppy
         @no_type_check
         def get_next_addr(
-                self: "STATE",
+            self: "STATE",
         ) -> tuple[int, int]:
             if len(self.addr_stack) == 0:
                 exit("get_next_addr: No more qubits to allocate")
@@ -69,10 +69,10 @@ def identity_code_spec(
         @guppy
         @no_type_check
         def qec_policy(
-                self: "STATE",
-                blk_ids: array[int, N],
-                cost_op: int,
-                cost_idle: int,
+            self: "STATE",
+            blk_ids: array[int, N],
+            cost_op: int,
+            cost_idle: int,
         ) -> None:
             # Array of idle costs
             cost_to_apply = array(cost_idle for _ in range(comptime(n_qubits)))
@@ -106,9 +106,7 @@ def identity_code_spec(
     @no_type_check
     def _MeasureFree(q: tuple[int, int]) -> bool:
         @guppy
-        def _impl(
-                state: STATE @ owned, q: tuple[int, int]
-        ) -> tuple[STATE, bool]:
+        def _impl(state: STATE @ owned, q: tuple[int, int]) -> tuple[STATE, bool]:
             result("_MeasureFree", 0)
             blk_id, _ = q
             blk = state.take_block(blk_id)
@@ -165,7 +163,7 @@ def identity_code_spec(
     def _X(q: tuple[int, int]) -> tuple[tuple[int, int]]:
         @guppy
         def _impl(
-                state: STATE @ owned, q: tuple[int, int]
+            state: STATE @ owned, q: tuple[int, int]
         ) -> tuple[STATE, tuple[int, int]]:
             result("_X", 0)
             blk_id, qb_id = q
@@ -186,11 +184,11 @@ def identity_code_spec(
     @guppy(link_name="link.identity.CX")
     @no_type_check
     def _CX(
-            ctl: tuple[int, int], tgt: tuple[int, int]
+        ctl: tuple[int, int], tgt: tuple[int, int]
     ) -> tuple[tuple[int, int], tuple[int, int]]:
         @guppy
         def _impl(
-                state: STATE @ owned, ctl: tuple[int, int], tgt: tuple[int, int]
+            state: STATE @ owned, ctl: tuple[int, int], tgt: tuple[int, int]
         ) -> tuple[STATE, tuple[int, int], tuple[int, int]]:
             result("_CX", 0)
             ctl_blk, tgt_blk = state.take_block(ctl[0]), state.take_block(tgt[0])
@@ -209,11 +207,11 @@ def identity_code_spec(
     @guppy(link_name="link.identity.ZZPhase")
     @no_type_check
     def _ZZPhase(
-            ctl: tuple[int, int], tgt: tuple[int, int], phase: float
+        ctl: tuple[int, int], tgt: tuple[int, int], phase: float
     ) -> tuple[tuple[int, int], tuple[int, int]]:
         @guppy
         def _impl(
-                state: STATE @ owned, args: tuple[tuple[int, int], tuple[int, int], float]
+            state: STATE @ owned, args: tuple[tuple[int, int], tuple[int, int], float]
         ) -> tuple[STATE, tuple[int, int], tuple[int, int]]:
             result("_ZZPhase", 0)
             ctl, tgt, theta = args
@@ -234,8 +232,7 @@ def identity_code_spec(
 
     @guppy.declare(link_name="link.identity.gen_state")
     @no_type_check
-    def state_gen_decl() -> STATE:
-        ...
+    def state_gen_decl() -> STATE: ...
 
     @guppy(link_name="link.identity.gen_state")
     @no_type_check
@@ -251,8 +248,7 @@ def identity_code_spec(
 
     @guppy.declare(link_name="link.identity.discard_state")
     @no_type_check
-    def state_discard_decl(state: STATE @ owned) -> None:
-        ...
+    def state_discard_decl(state: STATE @ owned) -> None: ...
 
     @guppy(link_name="link.identity.discard_state")
     @no_type_check
@@ -290,7 +286,7 @@ def identity_code_spec(
     )
 
     def build_wrapper(
-            func: GuppyFunctionDefinition[[], None],
+        func: GuppyFunctionDefinition[[], None],
     ) -> GuppyFunctionDefinition[[], None]:
         @guppy
         @no_type_check
