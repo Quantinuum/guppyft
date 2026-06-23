@@ -3,15 +3,16 @@
 #![allow(missing_docs)]
 
 use hugr::{
-    Hugr, HugrView, Node,
-    builder::{BuildError, HugrBuilder, ModuleBuilder},
-    extension::{SignatureError, prelude::qb_t},
-    hugr::{ValidationError, hugrmut::HugrMut},
+    builder::{BuildError, HugrBuilder, ModuleBuilder}, extension::{prelude::qb_t, SignatureError}, hugr::{hugrmut::HugrMut, ValidationError},
     ops::ExtensionOp,
-    ops::{DataflowOpTrait, OpType, handle::NodeHandle as _},
+    ops::{handle::NodeHandle as _, DataflowOpTrait, OpType},
     std_extensions::arithmetic::int_types::INT_TYPES,
     types::{PolyFuncType, Type},
+    Hugr,
+    HugrView,
+    Node,
 };
+use hugr_core::extension::prelude::bool_t;
 use hugr_core::hugr::internal::HugrMutInternals;
 use hugr_core::hugr::linking::NodeLinkingError;
 use hugr_core::ops::{Call, OpName};
@@ -19,9 +20,10 @@ use hugr_core::types::{Transformable, TypeArg};
 use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::{BTreeMap, HashMap};
+use tket::extension::measurement::measurement_type;
 use tket::passes::{
-    ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes, WithScope,
-    replace_types::ReplaceTypesError,
+    replace_types::ReplaceTypesError, ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes,
+    WithScope,
 };
 
 #[derive(derive_more::Error, Debug, derive_more::Display, derive_more::From)]
@@ -155,6 +157,8 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
     pub fn new(hugr: &'a mut H, qubit_to_ty: &'a Type) -> Self {
         let mut type_replacer = ReplaceTypes::default();
         type_replacer.set_replace_type(qb_t().as_extension().unwrap().clone(), qubit_to_ty.clone());
+        type_replacer
+            .set_replace_type(measurement_type().as_extension().unwrap().clone(), bool_t());
 
         Self {
             hugr,
