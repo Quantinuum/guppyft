@@ -92,13 +92,13 @@ def iceberg_addressable_v_physical(block: array[qubit, 4]) -> None:
 
 @guppy
 @no_type_check
-def iceberg_addressable_vdg_logical(block: array[qubit, 2]) -> None:
+def iceberg_addressable_rx_minus_half_pi_logical(block: array[qubit, 2]) -> None:
     rx(block[1], -pi / 2)
 
 
 @guppy
 @no_type_check
-def iceberg_addressable_vdg_physical(block: array[qubit, 4]) -> None:
+def iceberg_addressable_rx_minus_half_pi_physical(block: array[qubit, 4]) -> None:
     h(block[0])
     h(block[2])
     zz_phase(block[0], block[2], -pi / 2)
