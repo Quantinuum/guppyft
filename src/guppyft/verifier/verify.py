@@ -253,8 +253,7 @@ def expand_pauli_term(
     :param logical_term: The (signed) Pauli term to expand.
     :param code: A stabilizer code with well defined [[n, k, d]] parameters
       and logical operators.
-    :param n_func_qubits: An upper bound for the number of qubits used in stabilizer
-    simulation.
+    :param num_blocks: The number of code blocks represented in the SignTerm.
     :return: An expanded SignTerm which represents the physical implementation
       of the logical term.
     """
