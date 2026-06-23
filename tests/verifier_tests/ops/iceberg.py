@@ -101,13 +101,11 @@ def iceberg_addressable_vdg_logical(block: array[qubit, 2]) -> None:
 @guppy
 @no_type_check
 def iceberg_addressable_vdg_physical(block: array[qubit, 4]) -> None:
-    mem_swap(block[1], block[2])
     h(block[0])
-    h(block[1])
-    zz_phase(block[0], block[1], angle(-1 / 2))
+    h(block[2])
+    zz_phase(block[0], block[2], -pi / 2)
     h(block[0])
-    h(block[1])
-    mem_swap(block[1], block[2])
+    h(block[2])
 
 
 @guppy
