@@ -141,7 +141,7 @@ def test_cannonical() -> None:
 
     test_tableau.canonicalize_all()
     assert test_tableau == pauli.SignTerms.from_iterable(
-        ((pauli.PauliMatrix.Z,), (pauli.PauliMatrix.I, pauli.PauliMatrix.Z)), 2
+        ((pauli.PauliMatrix.Z, pauli.PauliMatrix.I), (pauli.PauliMatrix.I, pauli.PauliMatrix.Z)), 2
     )
 
 
