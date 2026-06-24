@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from selene_stim_plugin.state import StabilizerList
 
 from zixy.qubit import Qubits, pauli
+from zixy.container.coeffs import Sign
 
 from guppyft.verifier.code import StabilizerCode
 from guppyft.verifier.utils import (
@@ -268,6 +269,7 @@ def expand_pauli_term(
     # possibly across multiple code blocks.
     #  This String will be one term in the expanded tableau.
     result_term = pauli.SignTerm(qubits=total_qubit_number)
+    result_sign: Sign = logical_term.coeff
 
     for logical_qubit_index, logical_pauli in logical_term.string.get_dict().items():
         # "non_identity_pauli_index" is the index we need to access to expand the
@@ -315,17 +317,15 @@ def expand_pauli_term(
         #  logical block, then the appropriate "offset" would be (1*7) = 7.
         offset = logical_block_number * n
 
-        shifted: pauli.String = shift_pauli(
+        shifted_string: pauli.String = shift_pauli(
             physical_pauli.string, offset, size=total_qubit_number
         )
-        shifted_term = pauli.SignTerm.from_cmpnt_coeff(shifted, physical_pauli.coeff)
 
         # Get final expanded term by taking the product of num_blocks*k expanded terms.
-        result_term *= shifted_term
+        result_term *= shifted_string
+        result_sign *= physical_pauli.coeff
 
-    # TODO: remove type ignore here. Not obvious how to fix currently
-
-    return logical_term.coeff * result_term  # type: ignore  # noqa: PGH003
+    return pauli.SignTerm.from_cmpnt_coeff(result_term.string, result_sign)
 
 
 def expand_logical_signterms(
@@ -350,7 +350,7 @@ def expand_logical_signterms(
     #  of the Stabilizer code.
     for logical_term in logical_terms:
         expanded = expand_pauli_term(
-            logical_term,  # type: ignore  # noqa: PGH003
+            logical_term.into(pauli.SignTerm),
             code,
             num_blocks,
         )
