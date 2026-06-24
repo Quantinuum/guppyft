@@ -25,7 +25,7 @@ N = guppy.nat_var("N")
 
 type SingleBlockUnitary = GuppyFunctionDefinition[[array[qubit, N]], None]  # type: ignore[valid-type]
 type DoubleBlockUnitary = GuppyFunctionDefinition[
-    [tuple[array[qubit, N]], array[qubit, N]], None  # type: ignore[valid-type]
+    [array[qubit, N], array[qubit, N]], None  # type: ignore[valid-type]
 ]
 
 
@@ -83,7 +83,9 @@ def default_choi_state_preparation_double_block(
 
 
 def _invoke_selene_stim(
-    main_function: GuppyFunctionDefinition, n_func_qubits: int, seed: int = 123
+    main_function: GuppyFunctionDefinition[[], None],
+    n_func_qubits: int,
+    seed: int = 123,
 ) -> dict[str, SeleneStimState]:
     instance = build(main_function.compile())
     seeded_stim_instance = Stim(random_seed=seed)
@@ -321,7 +323,9 @@ def expand_pauli_term(
         # Get final expanded term by taking the product of num_blocks*k expanded terms.
         result_term *= shifted_term
 
-    return logical_term.coeff * result_term
+    # TODO: remove type ignore here. Not obvious how to fix currently
+
+    return logical_term.coeff * result_term  # type: ignore  # noqa: PGH003
 
 
 def expand_logical_signterms(
@@ -346,7 +350,7 @@ def expand_logical_signterms(
     #  of the Stabilizer code.
     for logical_term in logical_terms:
         expanded = expand_pauli_term(
-            logical_term,
+            logical_term,  # type: ignore  # noqa: PGH003
             code,
             num_blocks,
         )
