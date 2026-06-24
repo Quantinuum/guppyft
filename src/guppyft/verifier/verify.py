@@ -12,9 +12,9 @@ from selene_stim_plugin import SeleneStimState
 
 if TYPE_CHECKING:
     from selene_stim_plugin.state import StabilizerList
+    from zixy.container.coeffs import Sign
 
 from zixy.qubit import Qubits, pauli
-from zixy.container.coeffs import Sign
 
 from guppyft.verifier.code import StabilizerCode
 from guppyft.verifier.utils import (
