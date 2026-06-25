@@ -21,6 +21,9 @@ outputs:
   extensions:
     description: "The extension definitions have changed"
     value: ${{ steps.override.outputs.out == 'true' || steps.change-filters.outputs.extensions == 'true' }}
+  extensions_data:
+    description: "The extension data has changed"
+    value: ${{ steps.override.outputs.out == 'true' || steps.change-filters.outputs.extensions_data == 'true' }}
 
 runs:
   using: composite

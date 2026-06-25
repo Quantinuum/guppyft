@@ -2,16 +2,26 @@
 # to detect changes in each subproject, and only run the corresponding jobs.
 
 encoder: &encoder
+  - "Cargo.toml"
+  - "Cargo.lock"
   - "rust-bindings/**"
   - "rust/**"
 
 extensions: &extensions
+  - "Cargo.toml"
+  - "Cargo.lock"
   - "extensions/**"
+
+extensions_data: &extensions_data
+  - "src/guppyft/extensions/data/**"
 
 rust:
   - *encoder
   - *extensions
+  - *extensions_data
 
 python:
+  - "pyproject.toml"
+  - "uv.lock"
   - "src/guppyft/**"
   - "rust-bindings/**"

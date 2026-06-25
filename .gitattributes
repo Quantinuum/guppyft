@@ -1,2 +1,5 @@
 uv.lock linguist-generated
 Cargo.lock linguist-generated
+
+# Mark extensions as generated
+src/guppyft/extensions/data/guppyft/*/*.json linguist-generated

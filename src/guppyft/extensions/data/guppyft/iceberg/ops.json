@@ -23,6 +23,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -39,6 +40,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -48,6 +50,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -64,7 +67,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "all_but_one_rx_d": {
       "extension": "guppyft.iceberg.ops",
@@ -82,6 +85,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -98,6 +102,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -110,6 +115,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -119,6 +125,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -157,6 +164,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -173,6 +181,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -182,6 +191,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -198,7 +208,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "all_but_one_rz_d": {
       "extension": "guppyft.iceberg.ops",
@@ -216,6 +226,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -232,6 +243,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -244,6 +256,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -253,6 +266,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -291,6 +305,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -309,6 +324,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -325,7 +341,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "all_but_one_x_d": {
       "extension": "guppyft.iceberg.ops",
@@ -343,6 +359,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -359,6 +376,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -373,6 +391,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -411,6 +430,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -429,6 +449,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -445,7 +466,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "all_but_one_z_d": {
       "extension": "guppyft.iceberg.ops",
@@ -463,6 +484,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -479,6 +501,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -493,6 +516,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -527,6 +551,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -545,6 +570,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -561,7 +587,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "all_rx": {
       "extension": "guppyft.iceberg.ops",
@@ -579,6 +605,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -595,6 +622,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -604,6 +632,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -620,7 +649,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "all_ry": {
       "extension": "guppyft.iceberg.ops",
@@ -638,6 +667,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -654,6 +684,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -663,6 +694,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -679,7 +711,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "all_rz": {
       "extension": "guppyft.iceberg.ops",
@@ -697,6 +729,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -713,6 +746,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -722,6 +756,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -738,7 +773,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "all_x": {
       "extension": "guppyft.iceberg.ops",
@@ -756,6 +791,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -774,6 +810,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -790,7 +827,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "all_y": {
       "extension": "guppyft.iceberg.ops",
@@ -808,6 +845,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -826,6 +864,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -842,7 +881,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "all_z": {
       "extension": "guppyft.iceberg.ops",
@@ -860,6 +899,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -878,6 +918,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -894,7 +935,29 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
+    },
+    "alloc_dynq": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "alloc_dynq",
+      "description": "Allocate a dynamic logical qubit in the zero state.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
     },
     "alloc_zero": {
       "extension": "guppyft.iceberg.ops",
@@ -913,6 +976,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -929,6 +993,20 @@
           ]
         }
       },
+      "binary": false
+    },
+    "borrow": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "borrow",
+      "description": "Extraction of dynamic logical qubits from a block (consuming the block and emitting a borrowed block).",
+      "signature": null,
+      "binary": true
+    },
+    "borrow_more": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "borrow_more",
+      "description": "Extraction of dynamic logical qubits from an already-borrowed block.",
+      "signature": null,
       "binary": true
     },
     "cx": {
@@ -955,6 +1033,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -973,6 +1052,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -989,7 +1069,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "cx_d": {
       "extension": "guppyft.iceberg.ops",
@@ -1007,6 +1087,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1023,6 +1104,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -1035,6 +1117,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -1049,6 +1132,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1060,6 +1144,53 @@
                   }
                 }
               ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "cx_dynq": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "cx_dynq",
+      "description": "CX gate on two dynamic logical qubits.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
               "bound": "A"
             }
           ]
@@ -1083,6 +1214,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1099,6 +1231,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1117,6 +1250,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1133,6 +1267,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1149,7 +1284,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "fan_in": {
       "extension": "guppyft.iceberg.ops",
@@ -1171,6 +1306,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1189,6 +1325,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1205,7 +1342,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "fan_in_d": {
       "extension": "guppyft.iceberg.ops",
@@ -1223,6 +1360,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1239,6 +1377,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -1253,6 +1392,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1291,6 +1431,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1309,6 +1450,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1325,7 +1467,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "fan_out_d": {
       "extension": "guppyft.iceberg.ops",
@@ -1343,6 +1485,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1359,6 +1502,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -1373,6 +1517,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1407,6 +1552,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1424,7 +1570,29 @@
           "output": []
         }
       },
-      "binary": true
+      "binary": false
+    },
+    "free_dynq": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "free_dynq",
+      "description": "Free a dynamic logical qubit.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": []
+        }
+      },
+      "binary": false
     },
     "measure_all": {
       "extension": "guppyft.iceberg.ops",
@@ -1442,6 +1610,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1459,34 +1628,27 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "tket.futures",
-              "id": "Future",
+              "extension": "collections.borrow_arr",
+              "extension_version": "0.2.1",
+              "id": "borrow_array",
               "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                },
                 {
                   "tya": "Type",
                   "ty": {
                     "t": "Opaque",
-                    "extension": "collections.array",
-                    "id": "array",
-                    "args": [
-                      {
-                        "tya": "Variable",
-                        "idx": 0,
-                        "cached_decl": {
-                          "tp": "BoundedNat",
-                          "bound": null
-                        }
-                      },
-                      {
-                        "tya": "Type",
-                        "ty": {
-                          "t": "Sum",
-                          "s": "Unit",
-                          "size": 2
-                        }
-                      }
-                    ],
-                    "bound": "A"
+                    "extension": "tket.measurement",
+                    "extension_version": "0.1.0",
+                    "id": "Measurement",
+                    "args": [],
+                    "bound": "C"
                   }
                 }
               ],
@@ -1495,7 +1657,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "measure_syndrome": {
       "extension": "guppyft.iceberg.ops",
@@ -1513,6 +1675,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1530,7 +1693,24 @@
           "output": [
             {
               "t": "Opaque",
+              "extension": "tket.measurement",
+              "extension_version": "0.1.0",
+              "id": "Measurement",
+              "args": [],
+              "bound": "C"
+            },
+            {
+              "t": "Opaque",
+              "extension": "tket.measurement",
+              "extension_version": "0.1.0",
+              "id": "Measurement",
+              "args": [],
+              "bound": "C"
+            },
+            {
+              "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1543,42 +1723,24 @@
                 }
               ],
               "bound": "A"
-            },
-            {
-              "t": "Opaque",
-              "extension": "tket.futures",
-              "id": "Future",
-              "args": [
-                {
-                  "tya": "Type",
-                  "ty": {
-                    "t": "Sum",
-                    "s": "Unit",
-                    "size": 2
-                  }
-                }
-              ],
-              "bound": "A"
-            },
-            {
-              "t": "Opaque",
-              "extension": "tket.futures",
-              "id": "Future",
-              "args": [
-                {
-                  "tya": "Type",
-                  "ty": {
-                    "t": "Sum",
-                    "s": "Unit",
-                    "size": 2
-                  }
-                }
-              ],
-              "bound": "A"
             }
           ]
         }
       },
+      "binary": false
+    },
+    "restore": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "restore",
+      "description": "Restoration of all dynamic logical qubits to their originating block (consuming the borrowed block and emitting a block).",
+      "signature": null,
+      "binary": true
+    },
+    "restore_some": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "restore_some",
+      "description": "Restoration of some dynamic logical qubits to their originating block.",
+      "signature": null,
       "binary": true
     },
     "rx": {
@@ -1601,6 +1763,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1617,6 +1780,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -1626,6 +1790,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1642,7 +1807,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "rx_d": {
       "extension": "guppyft.iceberg.ops",
@@ -1660,6 +1825,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1676,6 +1842,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -1688,6 +1855,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -1697,6 +1865,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1708,6 +1877,84 @@
                   }
                 }
               ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "rx_dynq": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "rx_dynq",
+      "description": "Rx gate on a dynamic logical qubit.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
+              "id": "float64",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "ry_dynq": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "ry_dynq",
+      "description": "Ry gate on a dynamic logical qubit.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
+              "id": "float64",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
               "bound": "A"
             }
           ]
@@ -1735,6 +1982,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1751,6 +1999,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -1760,6 +2009,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1776,7 +2026,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "rz_d": {
       "extension": "guppyft.iceberg.ops",
@@ -1794,6 +2044,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1810,6 +2061,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -1822,6 +2074,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -1831,6 +2084,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1842,6 +2096,45 @@
                   }
                 }
               ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "rz_dynq": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "rz_dynq",
+      "description": "Rz gate on a dynamic logical qubit.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
+              "id": "float64",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
               "bound": "A"
             }
           ]
@@ -1873,6 +2166,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1891,6 +2185,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1907,7 +2202,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "swap_d": {
       "extension": "guppyft.iceberg.ops",
@@ -1925,6 +2220,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -1941,6 +2237,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -1953,6 +2250,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -1967,6 +2265,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2005,6 +2304,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2021,8 +2321,26 @@
           ],
           "output": [
             {
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [],
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "tket.measurement",
+                    "extension_version": "0.1.0",
+                    "id": "Measurement",
+                    "args": [],
+                    "bound": "C"
+                  }
+                ]
+              ]
+            },
+            {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2035,36 +2353,11 @@
                 }
               ],
               "bound": "A"
-            },
-            {
-              "t": "Opaque",
-              "extension": "tket.futures",
-              "id": "Future",
-              "args": [
-                {
-                  "tya": "Type",
-                  "ty": {
-                    "t": "Sum",
-                    "s": "General",
-                    "rows": [
-                      [],
-                      [
-                        {
-                          "t": "Sum",
-                          "s": "Unit",
-                          "size": 2
-                        }
-                      ]
-                    ]
-                  }
-                }
-              ],
-              "bound": "A"
             }
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "try_measure_one_x_d": {
       "extension": "guppyft.iceberg.ops",
@@ -2082,6 +2375,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2098,6 +2392,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2110,8 +2405,26 @@
           ],
           "output": [
             {
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [],
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "tket.measurement",
+                    "extension_version": "0.1.0",
+                    "id": "Measurement",
+                    "args": [],
+                    "bound": "C"
+                  }
+                ]
+              ]
+            },
+            {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2120,31 +2433,6 @@
                   "cached_decl": {
                     "tp": "BoundedNat",
                     "bound": null
-                  }
-                }
-              ],
-              "bound": "A"
-            },
-            {
-              "t": "Opaque",
-              "extension": "tket.futures",
-              "id": "Future",
-              "args": [
-                {
-                  "tya": "Type",
-                  "ty": {
-                    "t": "Sum",
-                    "s": "General",
-                    "rows": [
-                      [],
-                      [
-                        {
-                          "t": "Sum",
-                          "s": "Unit",
-                          "size": 2
-                        }
-                      ]
-                    ]
                   }
                 }
               ],
@@ -2175,6 +2463,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2191,8 +2480,26 @@
           ],
           "output": [
             {
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [],
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "tket.measurement",
+                    "extension_version": "0.1.0",
+                    "id": "Measurement",
+                    "args": [],
+                    "bound": "C"
+                  }
+                ]
+              ]
+            },
+            {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2205,36 +2512,11 @@
                 }
               ],
               "bound": "A"
-            },
-            {
-              "t": "Opaque",
-              "extension": "tket.futures",
-              "id": "Future",
-              "args": [
-                {
-                  "tya": "Type",
-                  "ty": {
-                    "t": "Sum",
-                    "s": "General",
-                    "rows": [
-                      [],
-                      [
-                        {
-                          "t": "Sum",
-                          "s": "Unit",
-                          "size": 2
-                        }
-                      ]
-                    ]
-                  }
-                }
-              ],
-              "bound": "A"
             }
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "try_measure_one_z_d": {
       "extension": "guppyft.iceberg.ops",
@@ -2252,6 +2534,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2268,6 +2551,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2280,8 +2564,26 @@
           ],
           "output": [
             {
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [],
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "tket.measurement",
+                    "extension_version": "0.1.0",
+                    "id": "Measurement",
+                    "args": [],
+                    "bound": "C"
+                  }
+                ]
+              ]
+            },
+            {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2294,30 +2596,101 @@
                 }
               ],
               "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "try_measure_x_dynq": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "try_measure_x_dynq",
+      "description": "Fallible non-destructive measurement of a dynamic logical qubit in the X basis.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [],
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "tket.measurement",
+                    "extension_version": "0.1.0",
+                    "id": "Measurement",
+                    "args": [],
+                    "bound": "C"
+                  }
+                ]
+              ]
             },
             {
               "t": "Opaque",
-              "extension": "tket.futures",
-              "id": "Future",
-              "args": [
-                {
-                  "tya": "Type",
-                  "ty": {
-                    "t": "Sum",
-                    "s": "General",
-                    "rows": [
-                      [],
-                      [
-                        {
-                          "t": "Sum",
-                          "s": "Unit",
-                          "size": 2
-                        }
-                      ]
-                    ]
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "try_measure_z_dynq": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "try_measure_z_dynq",
+      "description": "Fallible non-destructive measurement of a dynamic logical qubit in the Z basis.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [],
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "tket.measurement",
+                    "extension_version": "0.1.0",
+                    "id": "Measurement",
+                    "args": [],
+                    "bound": "C"
                   }
-                }
-              ],
+                ]
+              ]
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
               "bound": "A"
             }
           ]
@@ -2345,6 +2718,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2363,6 +2737,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2379,7 +2754,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "x_d": {
       "extension": "guppyft.iceberg.ops",
@@ -2397,6 +2772,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2413,6 +2789,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2427,6 +2804,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2438,6 +2816,37 @@
                   }
                 }
               ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "x_dynq": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "x_dynq",
+      "description": "X gate on a dynamic logical qubit.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
               "bound": "A"
             }
           ]
@@ -2465,6 +2874,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2483,6 +2893,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2499,7 +2910,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "x_with_all_but_one_z_d": {
       "extension": "guppyft.iceberg.ops",
@@ -2517,6 +2928,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2533,6 +2945,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2547,6 +2960,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2589,6 +3003,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2607,6 +3022,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2623,7 +3039,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "xx_d": {
       "extension": "guppyft.iceberg.ops",
@@ -2641,6 +3057,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2657,6 +3074,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2669,6 +3087,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2683,6 +3102,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2725,6 +3145,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2741,6 +3162,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -2750,6 +3172,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2766,7 +3189,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "xx_phase_d": {
       "extension": "guppyft.iceberg.ops",
@@ -2784,6 +3207,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2800,6 +3224,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2812,6 +3237,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2824,6 +3250,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -2833,6 +3260,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2844,6 +3272,37 @@
                   }
                 }
               ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "y_dynq": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "y_dynq",
+      "description": "Y gate on a dynamic logical qubit.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
               "bound": "A"
             }
           ]
@@ -2875,6 +3334,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2893,6 +3353,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2909,7 +3370,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "yy_d": {
       "extension": "guppyft.iceberg.ops",
@@ -2927,6 +3388,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -2943,6 +3405,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2955,6 +3418,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -2969,6 +3433,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3011,6 +3476,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3027,6 +3493,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -3036,6 +3503,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3052,7 +3520,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "yy_phase_d": {
       "extension": "guppyft.iceberg.ops",
@@ -3070,6 +3538,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3086,6 +3555,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3098,6 +3568,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3110,6 +3581,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -3119,6 +3591,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3157,6 +3630,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3175,6 +3649,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3191,7 +3666,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "z_d": {
       "extension": "guppyft.iceberg.ops",
@@ -3209,6 +3684,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3225,6 +3701,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3239,6 +3716,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3250,6 +3728,37 @@
                   }
                 }
               ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "z_dynq": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "z_dynq",
+      "description": "Z gate on a dynamic logical qubit.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
               "bound": "A"
             }
           ]
@@ -3277,6 +3786,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3295,6 +3805,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3311,7 +3822,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "z_with_all_but_one_x_d": {
       "extension": "guppyft.iceberg.ops",
@@ -3329,6 +3840,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3345,6 +3857,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3359,6 +3872,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3401,6 +3915,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3419,6 +3934,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3435,7 +3951,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "zz_d": {
       "extension": "guppyft.iceberg.ops",
@@ -3453,6 +3969,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3469,6 +3986,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3481,6 +3999,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3495,6 +4014,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3537,6 +4057,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3553,6 +4074,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -3562,6 +4084,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3578,7 +4101,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "zz_phase_between_blocks": {
       "extension": "guppyft.iceberg.ops",
@@ -3604,6 +4127,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3620,6 +4144,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3636,6 +4161,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -3645,6 +4171,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3661,6 +4188,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3677,7 +4205,7 @@
           ]
         }
       },
-      "binary": true
+      "binary": false
     },
     "zz_phase_between_blocks_d": {
       "extension": "guppyft.iceberg.ops",
@@ -3695,6 +4223,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3711,6 +4240,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3727,6 +4257,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3739,6 +4270,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3751,6 +4283,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -3760,6 +4293,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3776,6 +4310,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3810,6 +4345,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3826,6 +4362,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3838,6 +4375,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
               "id": "int",
               "args": [
                 {
@@ -3850,6 +4388,7 @@
             {
               "t": "Opaque",
               "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
               "id": "float64",
               "args": [],
               "bound": "C"
@@ -3859,6 +4398,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
               "id": "block",
               "args": [
                 {
@@ -3870,6 +4410,61 @@
                   }
                 }
               ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "zz_phase_dynq": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "zz_phase_dynq",
+      "description": "ZZPhase gate on two dynamic logical qubits.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
+              "id": "float64",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
               "bound": "A"
             }
           ]

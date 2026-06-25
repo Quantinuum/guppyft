@@ -5,7 +5,7 @@ from guppylang import guppy
 from guppylang.emulator import EmulatorBuilder
 from guppylang.std.angles import angle
 from guppylang.std.builtins import array, result
-from guppylang.std.qsystem import zz_phase
+from guppylang.std.qsystem.helios import zz_phase
 from guppylang.std.quantum import (
     cx,
     discard,
@@ -40,7 +40,7 @@ def test_qalloc_project_z_discard() -> None:
     @guppy
     def main() -> None:
         q = qubit()
-        result("project_z", project_z(q))
+        result("project_z", project_z(q).read())
         discard(q)
 
     id_code = identity_code_spec(n_qubits=1)
@@ -49,7 +49,12 @@ def test_qalloc_project_z_discard() -> None:
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [
-        {"_Measure": [0], "_QAlloc": [0], "_QFree": [0], "project_z": [0]}
+        # From guppylang v1.0.0a6, `project_z` has been updated to return `Measurement`.
+        # As the op `tket.quantum.Measure` still returns a bool, the way this is
+        # achieved is by calling `measure` on the qubit and then initialising a new
+        # qubit in the correct state. This is why `_QAlloc` is called twice and
+        # the results include `_MeasureFree`.
+        {"_MeasureFree": [0], "_QAlloc": [0, 0], "_QFree": [0], "project_z": [0]}
     ]
 
 
@@ -58,7 +63,7 @@ def test_x() -> None:
     def main() -> None:
         q = qubit()
         x(q)
-        result("q", measure(q))
+        result("q", measure(q).read())
 
     id_code = identity_code_spec(n_qubits=1)
 
@@ -75,8 +80,8 @@ def test_cx() -> None:
     def main() -> None:
         ctl, tgt = qubit(), qubit()
         cx(ctl, tgt)
-        result("ctl", measure(ctl))
-        result("tgt", measure(tgt))
+        result("ctl", measure(ctl).read())
+        result("tgt", measure(tgt).read())
 
     id_code = identity_code_spec(n_qubits=2)
 
@@ -94,8 +99,8 @@ def test_zz_phase() -> None:
     def main() -> None:
         ctl, tgt = qubit(), qubit()
         zz_phase(ctl, tgt, angle(0.0))
-        result("ctl", measure(ctl))
-        result("tgt", measure(tgt))
+        result("ctl", measure(ctl).read())
+        result("tgt", measure(tgt).read())
 
     id_code = identity_code_spec(n_qubits=2)
 
@@ -151,9 +156,9 @@ def test_qubit_reuse() -> None:
     @guppy
     def main() -> None:
         qb = qubit()
-        result("qb", measure(qb))
+        result("qb", measure(qb).read())
         qb = qubit()
-        result("qb", measure(qb))
+        result("qb", measure(qb).read())
 
     id_code = identity_code_spec(n_qubits=1)
 

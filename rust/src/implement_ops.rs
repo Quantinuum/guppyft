@@ -4,32 +4,26 @@
 
 use hugr::{
     Hugr, HugrView, Node,
-    builder::{BuildError, Dataflow, DataflowSubContainer, HugrBuilder, ModuleBuilder},
-    extension::{
-        SignatureError,
-        prelude::{bool_t, qb_t},
-    },
+    builder::{BuildError, HugrBuilder, ModuleBuilder},
+    extension::{SignatureError, prelude::qb_t},
     hugr::{ValidationError, hugrmut::HugrMut},
     ops::ExtensionOp,
     ops::{DataflowOpTrait, OpType, handle::NodeHandle as _},
     std_extensions::arithmetic::int_types::INT_TYPES,
-    types::{PolyFuncType, Signature, Transformable, Type, TypeRV},
+    types::{PolyFuncType, Type},
 };
-use hugr_core::builder::Container;
+use hugr_core::extension::prelude::bool_t;
 use hugr_core::hugr::internal::HugrMutInternals;
 use hugr_core::hugr::linking::NodeLinkingError;
-use hugr_core::ops::{Call, OpName, handle::FuncID};
-use hugr_core::types::TypeArg;
+use hugr_core::ops::{Call, OpName};
+use hugr_core::types::{Transformable, TypeArg};
 use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::{BTreeMap, HashMap};
-use tket::{
-    TketOp,
-    extension::bool::{BoolOpBuilder, bool_type},
-    passes::{
-        ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes, WithScope,
-        replace_types::ReplaceTypesError,
-    },
+use tket::extension::measurement::measurement_type;
+use tket::passes::{
+    ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes, WithScope,
+    replace_types::ReplaceTypesError,
 };
 
 #[derive(derive_more::Error, Debug, derive_more::Display, derive_more::From)]
@@ -60,7 +54,7 @@ pub enum ImplementOpsPassError {
 #[derive(Debug, Clone)]
 pub struct ImplementOpsPass {
     scope: PassScope,
-    qubit_to_ty: Type,
+    pub type_replacements: HashMap<Type, Type>,
     pub op_replacements: BTreeMap<(String, String), (Option<Hugr>, String)>,
 }
 
@@ -75,10 +69,17 @@ impl ImplementOpsPass {
 
 impl Default for ImplementOpsPass {
     fn default() -> Self {
-        let int: TypeRV = INT_TYPES[6].clone().into();
+        let int: Type = INT_TYPES[6].clone();
         Self {
             scope: Default::default(),
-            qubit_to_ty: Type::new_tuple(vec![int.clone(), int]),
+            type_replacements: {
+                let mut map = HashMap::new();
+                // qubit -> tuple[int, int]
+                map.insert(qb_t(), Type::new_tuple(vec![int.clone(), int]));
+                // measurement -> bool
+                map.insert(measurement_type(), bool_t());
+                map
+            },
             op_replacements: Default::default(),
         }
     }
@@ -128,7 +129,7 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
             })
             .collect_vec();
 
-        let mut state = ImplementOpsState::new(hugr, &self.qubit_to_ty);
+        let mut state = ImplementOpsState::new(hugr, &self.type_replacements);
         for (op_def, func_hugr, func_name) in op_funcs {
             state.op(ExtensionOp::new(op_def, [])?, func_hugr, func_name)?;
         }
@@ -155,19 +156,19 @@ impl From<&ExtensionOp> for OpHashWrapper {
 
 struct ImplementOpsState<'a, H: HugrMut<Node = Node>> {
     hugr: &'a mut H,
-    qubit_to_ty: &'a Type,
     type_replacer: ReplaceTypes,
     op_calls: HashMap<OpHashWrapper, (OpType, Hugr, Node)>,
 }
 
 impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
-    pub fn new(hugr: &'a mut H, qubit_to_ty: &'a Type) -> Self {
+    pub fn new(hugr: &'a mut H, types: &'a HashMap<Type, Type>) -> Self {
         let mut type_replacer = ReplaceTypes::default();
-        type_replacer.set_replace_type(qb_t().as_extension().unwrap().clone(), qubit_to_ty.clone());
+        for (src, tgt) in types.iter() {
+            type_replacer.set_replace_type(src.as_extension().unwrap().clone(), tgt.clone());
+        }
 
         Self {
             hugr,
-            qubit_to_ty,
             type_replacer,
             op_calls: Default::default(),
         }
@@ -223,25 +224,15 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
         func_hugr_opt: Option<Hugr>,
         func_name: &str,
     ) -> Result<(), ImplementOpsPassError> {
-        // Replace hugr-bool with tket-bool in function signature
+        // Replace qubit type
         let op_sig: PolyFuncType = {
             let mut sig = ext_op.signature().into_owned();
             sig.transform(&self.type_replacer)?;
-            // bool_t is a sum type, not a CustomType, so ReplaceTypes doesn't handle it.
-            // Replace it manually at the top level (original behaviour).
-            sig.input
-                .iter_mut()
-                .chain(sig.output.iter_mut())
-                .for_each(|ty| {
-                    if ty == &bool_t() {
-                        *ty = bool_type();
-                    }
-                });
             sig.into()
         };
 
         // Extract function if given, otherwise generate a declaration with the expected signature.
-        let (mut func_hugr, func_node) = if let Some(hugr) = func_hugr_opt {
+        let (func_hugr, func_node) = if let Some(hugr) = func_hugr_opt {
             let node = self.extract_func(ext_op.qualified_id(), op_sig, &hugr, func_name)?;
             (hugr, node)
         } else {
@@ -250,22 +241,12 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
             (module_builder.finish_hugr()?, decl.node())
         };
 
-        let wrapped_func_hugr = {
-            if matches!(ext_op.cast::<TketOp>(), Some(TketOp::Measure)) {
-                wrap_measure_declaration(func_hugr, self.qubit_to_ty, func_name, func_node.into())?
-            } else {
-                func_hugr.set_entrypoint(func_node);
-                func_hugr
-            }
-        };
-        let func_node = wrapped_func_hugr.entrypoint();
-
         // Register call for later replacement
         let call_type: OpType =
             Call::try_new((*ext_op.signature()).clone().into(), ext_op.args())?.into();
         self.op_calls.insert(
             OpHashWrapper::from(&ext_op),
-            (call_type, wrapped_func_hugr, func_node),
+            (call_type, func_hugr, func_node),
         );
 
         Ok(())
@@ -329,7 +310,12 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
                     .unwrap()
                     .node_map
                     .get(&func_node)
-                    .unwrap();
+                    .unwrap_or_else(|| {
+                        panic!(
+                            "Could not find inserted function node for op: {}",
+                            op_hash.op_name
+                        )
+                    });
                 (op_hash, inserted_func_node)
             })
             .collect();
@@ -344,23 +330,4 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
 
         Ok(())
     }
-}
-
-fn wrap_measure_declaration(
-    hugr: Hugr,
-    qubit_to_ty: &Type,
-    func_name: &str,
-    func_defn_id: FuncID<true>,
-) -> Result<Hugr, BuildError> {
-    let mut module_builder = ModuleBuilder::with_hugr(hugr);
-    let mut wrapper_func = module_builder.define_function(
-        format!("{}.Wrapped", func_name),
-        Signature::new([qubit_to_ty.clone()], vec![qubit_to_ty.clone(), bool_t()]),
-    )?;
-    let [q] = wrapper_func.input_wires_arr();
-    let [q, r] = wrapper_func.call(&func_defn_id, &[], [q])?.outputs_arr();
-    let [r] = wrapper_func.add_bool_read(r)?;
-    let n = wrapper_func.finish_with_outputs([q, r])?.node();
-    module_builder.hugr_mut().set_entrypoint(n);
-    Ok(module_builder.finish_hugr()?)
 }

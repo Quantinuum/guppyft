@@ -32,7 +32,7 @@ jobs:
     name: 🐍 Check Python code breaking changes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: mozilla-actions/sccache-action@v0.0.10
       - name: Install stable Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -41,12 +41,6 @@ jobs:
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
-
-      - name: Install hugrenv
-        uses: Quantinuum/hugrverse-env/install-hugrenv-action@main
-        with:
-          packages: llvm,tket
-          lockfile: hugrenv.lock
 
       - name: Install dependencies
         run: uv sync --frozen
@@ -61,7 +55,7 @@ jobs:
     name: 🦀 Check Rust code breaking changes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: mozilla-actions/sccache-action@v0.0.10
       - name: Install stable rust toolchain
         uses: dtolnay/rust-toolchain@stable

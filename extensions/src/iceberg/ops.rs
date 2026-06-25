@@ -1,16 +1,13 @@
 //! Extension providing logical operations on Iceberg codeblocks.
 
-use std::{
-    collections::HashSet,
-    sync::{Arc, LazyLock, Weak},
-};
+use std::sync::{Arc, LazyLock, Weak};
 
 use documented::DocumentedVariants;
 use hugr::{
     Extension,
     extension::{
-        CustomValidator, ExtensionId, OpDef, SignatureError, SignatureFunc, ValidateJustArgs,
-        prelude::{bool_t, option_type},
+        ExtensionId, OpDef, SignatureError, SignatureFromArgs, SignatureFunc,
+        prelude::option_type,
         simple_op::{
             HasConcrete, HasDef, MakeExtensionOp, MakeOpDef, MakeRegisteredOp, OpLoadError,
             try_from_name,
@@ -19,12 +16,14 @@ use hugr::{
     ops::{ExtensionOp, OpName},
     std_extensions::{
         arithmetic::{float_types::float64_type, int_types::int_type},
-        collections::array::{Array, ArrayKind},
+        collections::{array::ArrayKind, borrow_array::BorrowArray},
     },
-    types::{FuncValueType, PolyFuncTypeRV, Type, TypeArg, type_param::TypeParam},
+    types::{FuncValueType, PolyFuncTypeRV, Signature, Type, TypeArg, type_param::TypeParam},
 };
 use strum::{EnumIter, EnumString, IntoStaticStr};
-use tket_qsystem::extension::futures::future_type;
+use tket::extension::measurement::measurement_type;
+
+use crate::iceberg::types::{borrowed_block_tv, dynamic_logical_qubit_type};
 
 use super::types::block_tv;
 
@@ -167,6 +166,38 @@ pub enum IcebergOpDef {
     try_measure_one_z,
     /// Fallible non-destructive measurement of one qubit in the Z basis with dynamic index.
     try_measure_one_z_d,
+    /// Allocate a dynamic logical qubit in the zero state.
+    alloc_dynq,
+    /// Free a dynamic logical qubit.
+    free_dynq,
+    /// X gate on a dynamic logical qubit.
+    x_dynq,
+    /// Y gate on a dynamic logical qubit.
+    y_dynq,
+    /// Z gate on a dynamic logical qubit.
+    z_dynq,
+    /// Rx gate on a dynamic logical qubit.
+    rx_dynq,
+    /// Ry gate on a dynamic logical qubit.
+    ry_dynq,
+    /// Rz gate on a dynamic logical qubit.
+    rz_dynq,
+    /// ZZPhase gate on two dynamic logical qubits.
+    zz_phase_dynq,
+    /// CX gate on two dynamic logical qubits.
+    cx_dynq,
+    /// Fallible non-destructive measurement of a dynamic logical qubit in the X basis.
+    try_measure_x_dynq,
+    /// Fallible non-destructive measurement of a dynamic logical qubit in the Z basis.
+    try_measure_z_dynq,
+    /// Extraction of dynamic logical qubits from a block (consuming the block and emitting a borrowed block).
+    borrow,
+    /// Extraction of dynamic logical qubits from an already-borrowed block.
+    borrow_more,
+    /// Restoration of some dynamic logical qubits to their originating block.
+    restore_some,
+    /// Restoration of all dynamic logical qubits to their originating block (consuming the borrowed block and emitting a block).
+    restore,
 }
 
 /// Concrete Iceberg logical operation with block size and indices set.
@@ -237,77 +268,14 @@ impl IcebergOpDef {
     }
 }
 
-/// Validator to check that the list of type arguments consists of a sequence
-/// of natural numbers, the first of which (representing the block size) is
-/// at least 2 and greater than all subsequent (representing qubit indices);
-/// in addition the qubit indices must be distinct from one another.
-struct ArgsValidator {
-    /// Expected number of index arguments following the initial block size.
-    n_idx: usize,
-}
-
-impl ValidateJustArgs for ArgsValidator {
-    fn validate(&self, arg_values: &[TypeArg]) -> Result<(), SignatureError> {
-        let n = arg_values.len();
-        if n != 1 + self.n_idx {
-            return Err(SignatureError::InvalidTypeArgs);
-        }
-        let Some(k) = arg_values[0].as_nat() else {
-            // TypeArgs may be variable uses, in which case we can't extract a k.
-            // In this case, we can't validate so just return Ok.
-            return Ok(());
-        };
-        if k == 0 || k % 2 == 1 {
-            return Err(SignatureError::InvalidTypeArgs);
-        }
-        let mut args: HashSet<u64> = HashSet::new();
-        for arg in arg_values.iter().skip(1) {
-            let Some(i) = arg.as_nat() else { continue };
-            if i >= k || args.contains(&i) {
-                return Err(SignatureError::InvalidTypeArgs);
-            }
-            args.insert(i);
-        }
-        Ok(())
-    }
-}
-
-/// Validator to check that the list of type arguments consists of 3 natural
-/// numbers, the first of which (representing the block size) is at least 2 and
-/// greater than both subsequent (representing qubit indices in two blocks).
-struct InterBlockArgsValidator {}
-
-impl ValidateJustArgs for InterBlockArgsValidator {
-    fn validate(&self, arg_values: &[TypeArg]) -> Result<(), SignatureError> {
-        if arg_values.len() != 3 {
-            return Err(SignatureError::InvalidTypeArgs);
-        }
-        let k = arg_values[0]
-            .as_nat()
-            .ok_or(SignatureError::InvalidTypeArgs)?;
-        if k == 0 || k % 2 == 1 {
-            return Err(SignatureError::InvalidTypeArgs);
-        }
-        for arg in arg_values.iter().skip(1) {
-            let i = arg.as_nat().ok_or(SignatureError::InvalidTypeArgs)?;
-            if i >= k {
-                return Err(SignatureError::InvalidTypeArgs);
-            }
-        }
-        Ok(())
-    }
-}
-
-/// Get a future-array-of-bool type with size corresponding to a type variable
+/// Get an array-of-future-bool type with size corresponding to a type variable
 /// with a given ID.
-fn bool_array_tv(var_id: usize) -> Type {
-    future_type(
-        Array::ty_parametric(
-            TypeArg::new_var_use(var_id, TypeParam::max_nat_type()),
-            bool_t(),
-        )
-        .unwrap(),
+fn measurement_array_tv(var_id: usize) -> Type {
+    BorrowArray::ty_parametric(
+        TypeArg::new_var_use(var_id, TypeParam::max_nat_kind()),
+        measurement_type(),
     )
+    .unwrap()
 }
 
 fn vec_of_blocks_and_angles(n_blocks: usize, n_angles: usize) -> Vec<Type> {
@@ -327,32 +295,34 @@ fn vec_of_blocks_and_ints_and_angles(
     types
 }
 
-fn vec_of_blocks_and_bools(n_blocks: usize, n_bools: usize) -> Vec<Type> {
-    let mut types: Vec<Type> = vec![block_tv(0); n_blocks];
-    types.extend(vec![future_type(bool_t()); n_bools]);
+/// A vector consisting of measurement types followed by block types.
+/// (Block types last because used as output row and guppylang expects this.)
+fn vec_of_blocks_and_measurements(n_blocks: usize, n_bools: usize) -> Vec<Type> {
+    let mut types: Vec<Type> = vec![measurement_type(); n_bools];
+    types.extend(vec![block_tv(0); n_blocks]);
     types
 }
 
-fn future_optional_bool() -> Type {
-    future_type(option_type(vec![bool_t()]).into())
+fn optional_measurement() -> Type {
+    option_type(vec![measurement_type()]).into()
 }
 
-fn block_and_optional_bool() -> Vec<Type> {
-    vec![block_tv(0), future_optional_bool()]
+/// A vector consisting of an optional-measurement type followed by a block
+/// type. (Block type last because used as output row and guppylang expects
+/// this.)
+fn block_and_optional_measurement() -> Vec<Type> {
+    vec![optional_measurement(), block_tv(0)]
 }
 
 /// Signature of an operation that acts on a single block, with a number of
 /// additional angle inputs and a number of index parameters.
 fn sig_1_block(n_angles: usize, n_indices: usize) -> SignatureFunc {
-    CustomValidator::new(
-        PolyFuncTypeRV::new(
-            vec![TypeParam::max_nat_type(); 1 + n_indices],
-            FuncValueType::new(
-                vec_of_blocks_and_angles(1, n_angles),
-                vec_of_blocks_and_angles(1, 0),
-            ),
+    PolyFuncTypeRV::new(
+        vec![TypeParam::max_nat_kind(); 1 + n_indices],
+        FuncValueType::new(
+            vec_of_blocks_and_angles(1, n_angles),
+            vec_of_blocks_and_angles(1, 0),
         ),
-        ArgsValidator { n_idx: n_indices },
     )
     .into()
 }
@@ -361,11 +331,30 @@ fn sig_1_block(n_angles: usize, n_indices: usize) -> SignatureFunc {
 /// additional angle inputs and a number of index inputs.
 fn sig_1_block_d(n_angles: usize, n_indices: usize) -> SignatureFunc {
     PolyFuncTypeRV::new(
-        vec![TypeParam::max_nat_type()],
+        vec![TypeParam::max_nat_kind()],
         FuncValueType::new(
             vec_of_blocks_and_ints_and_angles(1, n_indices, n_angles),
             vec_of_blocks_and_ints_and_angles(1, 0, 0),
         ),
+    )
+    .into()
+}
+
+/// Signature of an operation that acts on a number of dynamic logical qubits
+/// with a number of additional angle qubits.
+fn sig_qubits_angles(n_qubits: usize, n_angles: usize) -> SignatureFunc {
+    let mut in_types: Vec<Type> = vec![dynamic_logical_qubit_type(); n_qubits];
+    let out_types: Vec<Type> = in_types.clone();
+    in_types.extend(vec![float64_type(); n_angles]);
+    Signature::new(in_types, out_types).into()
+}
+
+/// Signature of a fallible non-destructive measurement on a dynamic logical
+/// qubit.
+fn sig_qubit_meas() -> SignatureFunc {
+    Signature::new(
+        vec![dynamic_logical_qubit_type()],
+        vec![optional_measurement(), dynamic_logical_qubit_type()],
     )
     .into()
 }
@@ -387,6 +376,8 @@ impl MakeOpDef for IcebergOpDef {
         Arc::downgrade(&EXTENSION)
     }
 
+    /// TODO use `CustomValidator` when defining op signatures
+    /// See: <https://github.com/quantinuum-dev/guppyft/issues/82>
     fn init_signature(&self, _extension_ref: &Weak<Extension>) -> SignatureFunc {
         use IcebergOpDef::*;
         match self {
@@ -437,111 +428,171 @@ impl MakeOpDef for IcebergOpDef {
             cx_d => sig_1_block_d(0, 2),
             swap => sig_1_block(0, 2),
             swap_d => sig_1_block_d(0, 2),
-            zz_phase_between_blocks => CustomValidator::new(
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type(); 3],
-                    FuncValueType::new(
-                        vec_of_blocks_and_angles(2, 1),
-                        vec_of_blocks_and_angles(2, 0),
-                    ),
+            zz_phase_between_blocks => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_kind(); 3],
+                FuncValueType::new(
+                    vec_of_blocks_and_angles(2, 1),
+                    vec_of_blocks_and_angles(2, 0),
                 ),
-                InterBlockArgsValidator {},
             )
             .into(),
             zz_phase_between_blocks_d => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type()],
+                vec![TypeParam::max_nat_kind()],
                 FuncValueType::new(
                     vec_of_blocks_and_ints_and_angles(2, 2, 1),
                     vec_of_blocks_and_ints_and_angles(2, 0, 0),
                 ),
             )
             .into(),
-            cx_transversal => CustomValidator::new(
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
-                    FuncValueType::new_endo(vec_of_blocks_and_angles(2, 0)),
-                ),
-                ArgsValidator { n_idx: 0 },
+            cx_transversal => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_kind()],
+                FuncValueType::new_endo(vec_of_blocks_and_angles(2, 0)),
             )
             .into(),
-            alloc_zero => CustomValidator::new(
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
-                    FuncValueType::new(
-                        vec_of_blocks_and_angles(0, 0),
-                        vec_of_blocks_and_angles(1, 0),
-                    ),
+            alloc_zero => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_kind()],
+                FuncValueType::new(
+                    vec_of_blocks_and_angles(0, 0),
+                    vec_of_blocks_and_angles(1, 0),
                 ),
-                ArgsValidator { n_idx: 0 },
             )
             .into(),
-            free => CustomValidator::new(
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
-                    FuncValueType::new(
-                        vec_of_blocks_and_angles(1, 0),
-                        vec_of_blocks_and_angles(0, 0),
-                    ),
+            free => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_kind()],
+                FuncValueType::new(
+                    vec_of_blocks_and_angles(1, 0),
+                    vec_of_blocks_and_angles(0, 0),
                 ),
-                ArgsValidator { n_idx: 0 },
             )
             .into(),
-            measure_syndrome => CustomValidator::new(
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
-                    FuncValueType::new(
-                        vec_of_blocks_and_angles(1, 0),
-                        vec_of_blocks_and_bools(1, 2),
-                    ),
+            measure_syndrome => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_kind()],
+                FuncValueType::new(
+                    vec_of_blocks_and_angles(1, 0),
+                    vec_of_blocks_and_measurements(1, 2),
                 ),
-                ArgsValidator { n_idx: 0 },
             )
             .into(),
-            measure_all => CustomValidator::new(
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type()],
-                    FuncValueType::new(vec_of_blocks_and_angles(1, 0), vec![bool_array_tv(0)]),
+            measure_all => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_kind()],
+                FuncValueType::new(
+                    vec_of_blocks_and_angles(1, 0),
+                    vec![measurement_array_tv(0)],
                 ),
-                ArgsValidator { n_idx: 0 },
             )
             .into(),
-            try_measure_one_x => CustomValidator::new(
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type(); 2],
-                    FuncValueType::new(vec_of_blocks_and_angles(1, 0), block_and_optional_bool()),
+            try_measure_one_x => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_kind(); 2],
+                FuncValueType::new(
+                    vec_of_blocks_and_angles(1, 0),
+                    block_and_optional_measurement(),
                 ),
-                ArgsValidator { n_idx: 1 },
             )
             .into(),
             try_measure_one_x_d => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type()],
+                vec![TypeParam::max_nat_kind()],
                 FuncValueType::new(
                     vec_of_blocks_and_ints_and_angles(1, 1, 0),
-                    block_and_optional_bool(),
+                    block_and_optional_measurement(),
                 ),
             )
             .into(),
-            try_measure_one_z => CustomValidator::new(
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_type(); 2],
-                    FuncValueType::new(vec_of_blocks_and_angles(1, 0), block_and_optional_bool()),
+            try_measure_one_z => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_kind(); 2],
+                FuncValueType::new(
+                    vec_of_blocks_and_angles(1, 0),
+                    block_and_optional_measurement(),
                 ),
-                ArgsValidator { n_idx: 1 },
             )
             .into(),
             try_measure_one_z_d => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_type()],
+                vec![TypeParam::max_nat_kind()],
                 FuncValueType::new(
                     vec_of_blocks_and_ints_and_angles(1, 1, 0),
-                    block_and_optional_bool(),
+                    block_and_optional_measurement(),
                 ),
             )
             .into(),
+            alloc_dynq => Signature::new(vec![], vec![dynamic_logical_qubit_type()]).into(),
+            free_dynq => Signature::new(vec![dynamic_logical_qubit_type()], vec![]).into(),
+            x_dynq => sig_qubits_angles(1, 0),
+            y_dynq => sig_qubits_angles(1, 0),
+            z_dynq => sig_qubits_angles(1, 0),
+            rx_dynq => sig_qubits_angles(1, 1),
+            ry_dynq => sig_qubits_angles(1, 1),
+            rz_dynq => sig_qubits_angles(1, 1),
+            zz_phase_dynq => sig_qubits_angles(2, 1),
+            cx_dynq => sig_qubits_angles(2, 0),
+            try_measure_x_dynq => sig_qubit_meas(),
+            try_measure_z_dynq => sig_qubit_meas(),
+            // The following operations implement SignatureFromArgs:
+            borrow => (*self).into(),
+            borrow_more => (*self).into(),
+            restore_some => (*self).into(),
+            restore => (*self).into(),
         }
     }
 
     fn description(&self) -> String {
         self.get_variant_docs().into()
+    }
+}
+
+/// Static parameters for borrow and restore operations.
+const STATIC_NAT_PARAM: &[TypeParam; 1] = &[TypeParam::max_nat_kind()];
+
+impl SignatureFromArgs for IcebergOpDef {
+    fn compute_signature(&self, arg_values: &[TypeArg]) -> Result<PolyFuncTypeRV, SignatureError> {
+        let [TypeArg::BoundedNat(m)] = *arg_values else {
+            return Err(SignatureError::InvalidTypeArgs);
+        };
+        let sig = match self {
+            IcebergOpDef::borrow => {
+                let mut in_types: Vec<Type> = vec![block_tv(0)];
+                in_types.extend(vec![int_type(6); m as usize]);
+                let mut out_types: Vec<Type> = vec![borrowed_block_tv(0)];
+                out_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_kind()],
+                    FuncValueType::new(in_types, out_types),
+                )
+            }
+            IcebergOpDef::borrow_more => {
+                let mut in_types: Vec<Type> = vec![borrowed_block_tv(0)];
+                in_types.extend(vec![int_type(6); m as usize]);
+                let mut out_types: Vec<Type> = vec![borrowed_block_tv(0)];
+                out_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_kind()],
+                    FuncValueType::new(in_types, out_types),
+                )
+            }
+            IcebergOpDef::restore_some => {
+                let mut in_types: Vec<Type> = vec![borrowed_block_tv(0)];
+                in_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_kind()],
+                    FuncValueType::new(in_types, vec![borrowed_block_tv(0)]),
+                )
+            }
+            IcebergOpDef::restore => {
+                let mut in_types: Vec<Type> = vec![borrowed_block_tv(0)];
+                in_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_kind()],
+                    FuncValueType::new(in_types, vec![block_tv(0)]),
+                )
+            }
+            _ => unreachable!(
+                "Operation {} should not need custom signature computation.",
+                self.opdef_id()
+            ),
+        };
+        Ok(sig)
+    }
+
+    fn static_params(&self) -> &[TypeParam] {
+        STATIC_NAT_PARAM
     }
 }
 
@@ -565,7 +616,7 @@ mod tests {
         package::Package,
         std_extensions::{
             arithmetic::{float_types::ConstF64, int_types::ConstInt},
-            collections::array::array_type,
+            collections::borrow_array::borrow_array_type,
             std_reg,
         },
         types::Signature,
@@ -580,7 +631,7 @@ mod tests {
     fn test_iceberg_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.iceberg.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 58);
+        assert_eq!(EXTENSION.operations().count(), 74);
     }
 
     #[test]
@@ -599,6 +650,7 @@ mod tests {
     #[test]
     fn test_hugr_ops() {
         let block = block_type(6);
+        let qubit = dynamic_logical_qubit_type();
         let x3 = EXTENSION
             .instantiate_extension_op("x", [6.into(), 3.into()])
             .unwrap();
@@ -653,13 +705,20 @@ mod tests {
         let swap51 = EXTENSION
             .instantiate_extension_op("swap", [6.into(), 5.into(), 1.into()])
             .unwrap();
+        let rx_dynq = EXTENSION.instantiate_extension_op("rx_dynq", []).unwrap();
+        let zz_phase_dynq = EXTENSION
+            .instantiate_extension_op("zz_phase_dynq", [])
+            .unwrap();
+        let cx_dynq = EXTENSION.instantiate_extension_op("cx_dynq", []).unwrap();
         assert_eq!(x3.description(), "X gate.");
         assert_eq!(
             zzphasebetweenblocks_d.description(),
             "ZZPhase gate involving two blocks with dynamic indices."
         );
         let mut module_builder = ModuleBuilder::new();
-        let signature = Signature::new_endo(vec![block; 2]);
+        let mut types: Vec<Type> = vec![block; 2];
+        types.extend(vec![qubit; 2]);
+        let signature = Signature::new_endo(types);
         let mut f_build = module_builder.define_function("main", signature).unwrap();
         let wires: Vec<_> = f_build.input_wires().collect();
         let mut linear = f_build.as_circuit(wires);
@@ -688,6 +747,22 @@ mod tests {
                     CircuitUnit::Wire(angle),
                 ],
             )
+            .unwrap();
+        linear
+            .append_and_consume(rx_dynq, [CircuitUnit::Linear(2), CircuitUnit::Wire(angle)])
+            .unwrap();
+        linear
+            .append_and_consume(
+                zz_phase_dynq,
+                [
+                    CircuitUnit::Linear(2),
+                    CircuitUnit::Linear(3),
+                    CircuitUnit::Wire(angle),
+                ],
+            )
+            .unwrap();
+        linear
+            .append_and_consume(cx_dynq, [CircuitUnit::Linear(2), CircuitUnit::Linear(3)])
             .unwrap();
         linear
             .append_and_consume(
@@ -759,6 +834,14 @@ mod tests {
         let alloczero = EXTENSION
             .instantiate_extension_op("alloc_zero", [8.into()])
             .unwrap();
+        let allocqb = EXTENSION
+            .instantiate_extension_op("alloc_dynq", [])
+            .unwrap();
+        let freeqb = EXTENSION.instantiate_extension_op("free_dynq", []).unwrap();
+        let xqb = EXTENSION.instantiate_extension_op("x_dynq", []).unwrap();
+        let measqb = EXTENSION
+            .instantiate_extension_op("try_measure_z_dynq", [])
+            .unwrap();
         let x3 = EXTENSION
             .instantiate_extension_op("x", [8.into(), 3.into()])
             .unwrap();
@@ -768,7 +851,11 @@ mod tests {
         let free = EXTENSION
             .instantiate_extension_op("free", [8.into()])
             .unwrap();
-        let outputs: Vec<Type> = vec![future_type(bool_t()); 2];
+        let outputs: Vec<Type> = vec![
+            measurement_type(),
+            measurement_type(),
+            optional_measurement(),
+        ];
         let mut dfg_builder = DFGBuilder::new(Signature::new(vec![], outputs)).unwrap();
         let handle = dfg_builder.add_dataflow_op(alloczero, vec![]).unwrap();
         let handle = dfg_builder.add_dataflow_op(x3, handle.outputs()).unwrap();
@@ -777,14 +864,25 @@ mod tests {
             .unwrap();
         let wires: Vec<Wire> = handle.outputs().collect();
         assert_eq!(wires.len(), 3);
-        let block_wire = wires[0];
-        let bool_wire_0 = wires[1];
-        let bool_wire_1 = wires[2];
+        let bool_wire_0 = wires[0];
+        let bool_wire_1 = wires[1];
+        let block_wire = wires[2];
         let handle = dfg_builder.add_dataflow_op(free, [block_wire]).unwrap();
         let outs: Vec<Wire> = handle.outputs().collect();
         assert!(outs.is_empty());
+        let qubit_wire = dfg_builder.add_dataflow_op(allocqb, []).unwrap();
+        let qubit_wire = dfg_builder
+            .add_dataflow_op(xqb, qubit_wire.outputs())
+            .unwrap();
+        let handle = dfg_builder
+            .add_dataflow_op(measqb, qubit_wire.outputs())
+            .unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 2);
+        let freed_h = dfg_builder.add_dataflow_op(freeqb, [wires[1]]).unwrap();
+        assert!(freed_h.outputs().count() == 0);
         let h = dfg_builder
-            .finish_hugr_with_outputs([bool_wire_0, bool_wire_1])
+            .finish_hugr_with_outputs([bool_wire_0, bool_wire_1, wires[0]])
             .unwrap();
         h.validate().unwrap();
     }
@@ -796,7 +894,7 @@ mod tests {
             .unwrap();
         let mut dfg_builder = DFGBuilder::new(Signature::new(
             [block_type(4)],
-            [future_type(array_type(4, bool_t()))],
+            [borrow_array_type(4, measurement_type())],
         ))
         .unwrap();
         let handle = dfg_builder
@@ -826,9 +924,9 @@ mod tests {
             vec![block_type(2)],
             vec![
                 block_type(2),
-                future_optional_bool(),
-                future_optional_bool(),
-                future_optional_bool(),
+                optional_measurement(),
+                optional_measurement(),
+                optional_measurement(),
             ],
         ))
         .unwrap();
@@ -838,19 +936,94 @@ mod tests {
         let handle = dfg_builder
             .add_dataflow_op(measureonez0, handle.outputs())
             .unwrap();
-        let [block, maybe_c0] = handle.outputs_arr();
+        let [maybe_c0, block] = handle.outputs_arr();
         let handle = dfg_builder
             .add_dataflow_op(measureonez1, vec![block])
             .unwrap();
-        let [block, maybe_c1] = handle.outputs_arr();
+        let [maybe_c1, block] = handle.outputs_arr();
         let index0_wire = dfg_builder.add_load_value(ConstInt::new_u(6, 0).unwrap());
         let handle = dfg_builder
             .add_dataflow_op(measureonez_d, [block, index0_wire])
             .unwrap();
-        let [block, maybe_c2] = handle.outputs_arr();
+        let [maybe_c2, block] = handle.outputs_arr();
         let h = dfg_builder
             .finish_hugr_with_outputs(vec![block, maybe_c0, maybe_c1, maybe_c2])
             .unwrap();
+        h.validate().unwrap();
+    }
+
+    #[test]
+    fn test_borrow_restore() {
+        let borrow_2 = EXTENSION
+            .instantiate_extension_op("borrow", [2.into(), 6.into()])
+            .unwrap();
+        let borrowmore_1 = EXTENSION
+            .instantiate_extension_op("borrow_more", [1.into(), 6.into()])
+            .unwrap();
+        let restoresome_2 = EXTENSION
+            .instantiate_extension_op("restore_some", [2.into(), 6.into()])
+            .unwrap();
+        let restore_1 = EXTENSION
+            .instantiate_extension_op("restore", [1.into(), 6.into()])
+            .unwrap();
+        let cx_dynq = EXTENSION.instantiate_extension_op("cx_dynq", []).unwrap();
+        let mut dfg_builder = DFGBuilder::new(Signature::new(
+            vec![block_type(6), int_type(6), int_type(6), int_type(6)],
+            vec![block_type(6)],
+        ))
+        .unwrap();
+        let wires: Vec<Wire> = dfg_builder.input_wires().collect();
+        assert_eq!(wires.len(), 4);
+        let block = wires[0];
+        let i0 = wires[1];
+        let i1 = wires[2];
+        let i2 = wires[3];
+        // Borrow two qubits:
+        let handle = dfg_builder
+            .add_dataflow_op(borrow_2, vec![block, i0, i1])
+            .unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 3);
+        let bblock = wires[0];
+        let q0 = wires[1];
+        let q1 = wires[2];
+        // Do a CX on the borrowed qubits:
+        let handle = dfg_builder
+            .add_dataflow_op(cx_dynq.clone(), vec![q0, q1])
+            .unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 2);
+        let q0 = wires[0];
+        let q1 = wires[1];
+        // Borrow another qubit:
+        let handle = dfg_builder
+            .add_dataflow_op(borrowmore_1, vec![bblock, i2])
+            .unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 2);
+        let bblock = wires[0];
+        let q2 = wires[1];
+        // Do a CX with the first and third borrowed qubits.
+        let handle = dfg_builder.add_dataflow_op(cx_dynq, vec![q0, q2]).unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 2);
+        let q0 = wires[0];
+        let q2 = wires[1];
+        // Put the last two borrowed qubits back.
+        let handle = dfg_builder
+            .add_dataflow_op(restoresome_2, vec![bblock, q1, q2])
+            .unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 1);
+        let bblock = wires[0];
+        // Put the first qubit back.
+        let handle = dfg_builder
+            .add_dataflow_op(restore_1, vec![bblock, q0])
+            .unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 1);
+        let block = wires[0];
+        let h = dfg_builder.finish_hugr_with_outputs(vec![block]).unwrap();
         h.validate().unwrap();
     }
 
@@ -904,51 +1077,5 @@ mod tests {
         let outs = linear.finish();
         f_build.finish_with_outputs(outs).unwrap();
         assert!(module_builder.finish_hugr().is_err());
-    }
-
-    #[test]
-    fn test_invalid_ops() {
-        // block size should be at least 2
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("x", [1.into(), 0.into()])
-                .is_err()
-        );
-        // qubit index should be less than block size
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("x", [6.into(), 6.into()])
-                .is_err()
-        );
-        // `xx` expects two indices following the block size
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("xx", [6.into(), 0.into()])
-                .is_err()
-        );
-        // `xx` expects distinct indices
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("xx", [6.into(), 0.into(), 0.into()])
-                .is_err()
-        );
-        // all indices must be less than the block size
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("zz_phase_between_blocks", [6.into(), 0.into(), 6.into()])
-                .is_err()
-        );
-        // index must be an integer
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("x", [6.into(), "0".into()])
-                .is_err()
-        );
-        // block size must be an integer
-        assert!(
-            EXTENSION
-                .instantiate_extension_op("x", ["6".into(), 0.into()])
-                .is_err()
-        );
     }
 }

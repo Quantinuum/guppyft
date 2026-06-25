@@ -1,50 +1,184 @@
+import ast
 from collections.abc import Callable
-from typing import Any, no_type_check
+from typing import (
+    Concatenate,
+    ParamSpec,
+    TypeVar,
+    TypeVarTuple,
+    overload,
+    override,
+)
 
-from guppylang import guppy
-from guppylang.std.builtins import owned
-from guppylang_internals.compiler.core import EXTENSION_OPS_WITH_SIDE_EFFECTS
-from guppylang_internals.decorator import hugr_op
+from guppylang_internals.checker.errors.generic import ExpectedError, UnsupportedError
+from guppylang_internals.checker.expr_checker import (
+    ExprChecker,
+    ExprSynthesizer,
+    synthesize_call,
+)
+from guppylang_internals.compiler.core import (
+    EXTENSION_OPS_WITH_SIDE_EFFECTS,
+    CompilerContext,
+)
+from guppylang_internals.decorator import custom_function
+from guppylang_internals.definition.custom import (
+    CustomCallChecker,
+    CustomInoutCallCompiler,
+)
+from guppylang_internals.definition.value import CallReturnWires
+from guppylang_internals.error import GuppyTypeError
+from guppylang_internals.nodes import GlobalCall
 from guppylang_internals.tys.common import ToHugrContext
 from guppylang_internals.tys.subst import Inst
-from hugr import ops
+from guppylang_internals.tys.ty import (
+    FuncInput,
+    FunctionType,
+    InputFlags,
+    NoneType,
+    TupleType,
+    Type,
+)
+from hugr import Wire, ops
 from hugr import tys as ht
+from hugr.tys import TypeBound
 from tket_exts import globals
 
-State = guppy.type_var("State")
-State_Linear = guppy.type_var("State_Linear", copyable=False, droppable=False)
-In = guppy.type_var("In")
-In_Linear = guppy.type_var("In_Linear", copyable=False, droppable=False)
-Out = guppy.type_var("OUT", copyable=False, droppable=False)
+from guppyft._errors import (
+    CallbackFuncDefinedHere,
+    CallbackFuncParametersError,
+    CallbackInputParamError,
+    CallbackOutputArgError,
+    CallbackUsedHereNote,
+    ConsiderOwnedHelper,
+    MapCallbackSignatureHelper,
+    WithCallbackSignatureHelper,
+    get_callback_func_ast,
+)
 
 # Mark ops as having side effects to add order edges in the HUGR
 # when calls return None.
 # https://github.com/Quantinuum/guppylang/issues/1698
-EXTENSION_OPS_WITH_SIDE_EFFECTS.append("tket.globals.with")
-EXTENSION_OPS_WITH_SIDE_EFFECTS.append("tket.globals.map")
+if "tket.globals.with" not in EXTENSION_OPS_WITH_SIDE_EFFECTS:
+    EXTENSION_OPS_WITH_SIDE_EFFECTS.append("tket.globals.with")
+if "tket.globals.map" not in EXTENSION_OPS_WITH_SIDE_EFFECTS:
+    EXTENSION_OPS_WITH_SIDE_EFFECTS.append("tket.globals.map")
 
 GLOBAL_VAR_NAME = "guppy_ft_global"
 
+G = TypeVar("G")
+P = ParamSpec("P")
+R = TypeVarTuple("R")
+Ret = TypeVar("Ret")
 
-def with_op_for_global_var(
+
+class _GlobalOpCompiler(CustomInoutCallCompiler):
+    op: Callable[[ht.FunctionType, Inst, CompilerContext], ops.DataflowOp]
+
+    def __init__(
+        self, op: Callable[[ht.FunctionType, Inst, CompilerContext], ops.DataflowOp]
+    ) -> None:
+        self.op = op
+
+    @override
+    def compile_with_inouts(self, args: list[Wire]) -> CallReturnWires:
+        op = self.op(self.ty, self.type_args, self.ctx)
+        node = self.builder.add_op(op, *args)
+        num_returns = len(self.ty.output)
+        return CallReturnWires(
+            regular_returns=list(node[:num_returns]),
+            inout_returns=list(node[num_returns:]),
+        )
+
+
+class _GlobalWithChecker(CustomCallChecker):
+    @override
+    def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
+        global_expr, global_ty = ExprSynthesizer(self.ctx).synthesize(args[0])
+        callback_expr, callback_func = ExprSynthesizer(self.ctx).synthesize(args[1])
+        if not isinstance(callback_func, FunctionType):
+            err = ExpectedError(callback_expr, "FunctionType", str(callback_func))
+            err.add_sub_diagnostic(WithCallbackSignatureHelper(None))
+            raise GuppyTypeError(err)
+        # TODO This is not a fundamental limitation but there is a mismatch between how
+        #  Guppy and HUGR unpack tuples that needs to be fixed.
+        if isinstance(global_ty, TupleType):
+            raise GuppyTypeError(UnsupportedError(global_expr, "Tuple globals"))
+
+        # Raise error if arg is borrowed
+        for i, func_input in enumerate(callback_func.inputs):
+            if InputFlags.Inout in func_input.flags:
+                err = CallbackInputParamError(
+                    callback_expr,
+                    i,
+                    (
+                        "Parameters in callback functions used in global operations"
+                        " cannot be borrowed."
+                    ),
+                )
+                err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
+                err.add_sub_diagnostic(ConsiderOwnedHelper(None))
+                raise GuppyTypeError(err)
+
+        # Check the number of input args provided matches callback function signature
+        if len(args[2:]) != len(callback_func.inputs):
+            got_func_inputs = [
+                ExprSynthesizer(self.ctx).synthesize(arg)[1] for arg in args[2:]
+            ]
+            err = CallbackFuncParametersError(
+                self.node,
+                callback_func.inputs,
+                got_func_inputs,
+            )
+            callback_def = get_callback_func_ast(callback_expr)
+            err.add_sub_diagnostic(CallbackFuncDefinedHere(callback_def))
+            err.add_sub_diagnostic(WithCallbackSignatureHelper(None))
+            raise GuppyTypeError(err)
+
+        # with op signature is (global, func[*in, *out], *in) -> (global, *out)
+        input_tys = [
+            FuncInput(global_ty, InputFlags.NoFlags),
+            FuncInput(callback_func, InputFlags.NoFlags),
+        ]
+        for arg, func_input in zip(args[2:], callback_func.inputs, strict=True):
+            _, arg_ty = ExprSynthesizer(self.ctx).synthesize(arg)
+            input_tys.append(FuncInput(arg_ty, func_input.flags))
+            try:
+                ExprChecker(self.ctx).check(arg, func_input.ty)
+            except GuppyTypeError as err:
+                callback_def = get_callback_func_ast(callback_expr)
+                err.error.add_sub_diagnostic(CallbackFuncDefinedHere(callback_def))
+                err.error.add_sub_diagnostic(WithCallbackSignatureHelper(None))
+                raise
+
+        match callback_func.output:
+            case TupleType():
+                output_ty = TupleType([global_ty, *callback_func.output.element_types])
+            case NoneType():
+                output_ty = global_ty
+            case _:
+                output_ty = TupleType([global_ty, callback_func.output])
+        func_ty = FunctionType(
+            inputs=input_tys,
+            output=output_ty,
+        )
+
+        # Use default implementation from the expression checker
+        args, ty, inst = synthesize_call(func_ty, args, self.node, self.ctx)
+        return GlobalCall(def_id=self.func.id, args=args, type_args=inst), ty
+
+
+def _with_op_instantiate(
     var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
-        assert len(concrete.input) == 2, (
-            f"Expected 2 inputs args, found {len(concrete.input)}."
-        )
-        global_arg = concrete.input[0].type_arg()
-
-        if global_arg.ty.type_bound() != ht.TypeBound.Linear:
-            raise TypeError(f"Global arg must be linear. Found {global_arg.ty}.")
+        global_arg, func_ty, *input_args = concrete.input
+        assert isinstance(func_ty, ht.FunctionType)
 
         return globals.with_def.instantiate(
             [
                 ht.StringArg(var_name),
-                global_arg,
-                ht.ListArg([]),
-                ht.ListArg([]),
-                ht.ListArg([]),
+                global_arg.type_arg(),
+                ht.ListArg(list[ht.TypeArg](a.type_arg() for a in input_args)),
+                ht.ListArg(list[ht.TypeArg](a.type_arg() for a in func_ty.output)),
             ],
             concrete,
         )
@@ -52,69 +186,49 @@ def with_op_for_global_var(
     return op
 
 
-@hugr_op(with_op_for_global_var(GLOBAL_VAR_NAME))
-@no_type_check
-def _with_non_linear_global(init_global: State, func: Callable[[], None]) -> State: ...
+@overload
+def with_global[G, **P, *R](
+    initial_state: G,
+    callback_func: Callable[P, tuple[*R]],
+    *args: P.args,
+    **kwargs: P.kwargs,
+) -> tuple[G, *R]: ...
+@overload
+def with_global[G, **P, Ret](
+    initial_state: G,
+    callback_func: Callable[P, Ret],
+    *args: P.args,
+    **kwargs: P.kwargs,
+) -> tuple[G, Ret]: ...
+@custom_function(  # type: ignore[misc, arg-type]
+    checker=_GlobalWithChecker(),
+    compiler=_GlobalOpCompiler(_with_op_instantiate(GLOBAL_VAR_NAME)),
+    higher_order_value=False,
+)
+def with_global[G, **P, *R, Ret](  # type: ignore[empty-body]
+    initial_state: G,
+    callback_func: Callable[P, tuple[*R] | Ret],
+    *args: P.args,
+    **kwargs: P.kwargs,
+) -> tuple[G, *R] | tuple[G, Ret]: ...
 
 
-@hugr_op(with_op_for_global_var(GLOBAL_VAR_NAME))
-@no_type_check
-def _with_linear_global(
-    init_global: State_Linear @ owned, func: Callable[[], None]
-) -> State_Linear: ...
-
-
-@guppy.overload(_with_linear_global, _with_non_linear_global)
-def with_global_state(state: Any, func: Callable[[], None]) -> Any: ...
-
-
-def _map_op_for_global_var(
+def _map_op_instantiate(
     var_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], ops.DataflowOp]:
     def op(concrete: ht.FunctionType, args: Inst, ctx: ToHugrContext) -> ops.DataflowOp:
-        # The first input arg should be a function type with the global type as the last
-        # input arg and optional inputs
-        func_input_ty = concrete.input[0]
-        assert isinstance(func_input_ty, ht.FunctionType), (
-            f"Expected a function, found {func_input_ty}."
+        func_ty, *input_args = concrete.input
+        assert isinstance(func_ty, ht.FunctionType), (
+            f"Expected a function, found {func_ty}."
         )
-
-        func_input_args = [inp.type_arg() for inp in func_input_ty.input]
-        output_args = [out.type_arg() for out in concrete.output]
-
-        global_arg = func_input_args[0]
-
-        # The function should have at most two inputs. This should be enforced
-        # by the Guppy overloads.
-        assert len(func_input_args) <= 2
-
-        if len(func_input_args) == 2:
-            op_input_arg = func_input_args[1:]
-
-            # If the input is linear, we need to separate the output into explicit and
-            # implicit returns to correctly initialise the signature of the HUGR op
-            if op_input_arg[0].ty.type_bound() == ht.TypeBound.Linear:
-                # The mapped function can only have a single input argument. If the
-                # input is linear, the explicit output args must be all but the last
-                # element (i.e. [:-1]), while the implicit output arg is the last
-                # element (i.e. [-1]).
-                explicit_output_args = output_args[:-1]
-                implicit_output_arg = [output_args[-1]]
-            else:
-                explicit_output_args = output_args
-                implicit_output_arg = []
-        else:
-            op_input_arg = []
-            explicit_output_args = output_args
-            implicit_output_arg = []
+        global_ty = func_ty.input[0]
 
         return globals.map_def.instantiate(
             [
                 ht.StringArg(var_name),
-                global_arg,
-                ht.ListArg(list[ht.TypeArg](op_input_arg)),
-                ht.ListArg(list[ht.TypeArg](explicit_output_args)),
-                ht.ListArg(list[ht.TypeArg](implicit_output_arg)),
+                global_ty.type_arg(),
+                ht.ListArg(list[ht.TypeArg](a.type_arg() for a in input_args)),
+                ht.ListArg(list[ht.TypeArg](a.type_arg() for a in func_ty.output[1:])),
             ],
             concrete,
         )
@@ -122,28 +236,141 @@ def _map_op_for_global_var(
     return op
 
 
-@hugr_op(_map_op_for_global_var(GLOBAL_VAR_NAME))
-@no_type_check
-def _map_global_with_nonlinear_input(
-    func: Callable[[State_Linear, In], Out], inputs: In
-) -> Out: ...
+class _GlobalMapChecker(CustomCallChecker):
+    @override
+    def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
+        # First arg is the callback function
+        callback_expr, callback_func = ExprSynthesizer(self.ctx).synthesize(args[0])
+        if not isinstance(callback_func, FunctionType):
+            err = ExpectedError(callback_expr, "FunctionType", str(callback_func))
+            err.add_sub_diagnostic(MapCallbackSignatureHelper(None))
+            raise GuppyTypeError(err)
+
+        try:
+            global_arg = callback_func.inputs[0]
+        except IndexError as e:
+            err = CallbackInputParamError(
+                callback_expr,
+                None,
+                "Callback function used in global map missing global input parameter",
+            )
+            err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
+            raise GuppyTypeError(err) from e
+        # Global type must be owned if linear
+        if (
+            global_arg.ty.hugr_bound == TypeBound.Linear
+            and InputFlags.Owned not in global_arg.flags
+        ):
+            err = CallbackInputParamError(
+                callback_expr,
+                0,
+                "First argument to callback function in global map is the "
+                "global variable and cannot be borrowed.",
+            )
+            err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
+            err.add_sub_diagnostic(ConsiderOwnedHelper(None))
+            raise GuppyTypeError(err)
+
+        # Raise error if input arg is borrowed/inout
+        for i, input_arg in enumerate(callback_func.inputs):
+            if InputFlags.Inout in input_arg.flags:
+                err = CallbackInputParamError(
+                    callback_expr,
+                    i,
+                    (
+                        "Parameters in callback functions used in global operations"
+                        " cannot be borrowed."
+                    ),
+                )
+                err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
+                err.add_sub_diagnostic(ConsiderOwnedHelper(None))
+                raise GuppyTypeError(err)
+
+        # Check the number of input args provided matches callback function signature
+        if len(args[1:]) != len(callback_func.inputs[1:]):
+            got_func_inputs = [
+                ExprSynthesizer(self.ctx).synthesize(arg)[1] for arg in args[1:]
+            ]
+            err = CallbackFuncParametersError(
+                self.node,
+                callback_func.inputs[1:],
+                got_func_inputs,
+            )
+            callback_def = get_callback_func_ast(callback_expr)
+            err.add_sub_diagnostic(CallbackFuncDefinedHere(callback_def))
+            err.add_sub_diagnostic(MapCallbackSignatureHelper(None))
+            raise GuppyTypeError(err)
+
+        input_args = [FuncInput(callback_func, InputFlags.NoFlags)]
+        for arg, func_input in zip(args[1:], callback_func.inputs[1:], strict=True):
+            _, arg_ty = ExprSynthesizer(self.ctx).synthesize(arg)
+            input_args.append(FuncInput(arg_ty, func_input.flags))
+            try:
+                ExprChecker(self.ctx).check(arg, func_input.ty)
+            except GuppyTypeError as err:
+                callback_def = get_callback_func_ast(callback_expr)
+                err.error.add_sub_diagnostic(CallbackFuncDefinedHere(callback_def))
+                err.error.add_sub_diagnostic(MapCallbackSignatureHelper(None))
+                raise
+
+        # callback_func output is [global state, *out_args]
+        callback_output = callback_func.output
+        match callback_output:
+            case TupleType():
+                # First output must be global ty
+                if callback_output.element_types[0] != global_arg.ty:
+                    callback_def = get_callback_func_ast(callback_expr)
+                    err = CallbackOutputArgError(callback_def.returns, global_arg.ty)  # type: ignore[union-attr]
+                    err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
+                    err.add_sub_diagnostic(MapCallbackSignatureHelper(None))
+                    raise GuppyTypeError(err)
+                if len(callback_output.element_types) == 2:
+                    # If the only return is a tuple, it must be repacked in a tuple
+                    # to match signatures between Guppy and HUGR.
+                    if isinstance(callback_output.element_types[1], TupleType):
+                        output_args = TupleType([callback_output.element_types[1]])
+                    else:
+                        output_args = callback_output.element_types[1]
+                else:
+                    output_args = TupleType(callback_output.element_types[1:])
+            case _:
+                if callback_output != global_arg.ty:
+                    callback_def = get_callback_func_ast(callback_expr)
+                    err = CallbackOutputArgError(callback_def.returns, global_arg.ty)  # type: ignore[union-attr]
+                    err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
+                    err.add_sub_diagnostic(MapCallbackSignatureHelper(None))
+                    raise GuppyTypeError(err)
+                output_args = NoneType()
+
+        func_ty = FunctionType(
+            inputs=input_args,
+            output=output_args,
+        )
+
+        # Use default implementation from the expression checker
+        args, ty, inst = synthesize_call(func_ty, args, self.node, self.ctx)
+        return GlobalCall(def_id=self.func.id, args=args, type_args=inst), ty
 
 
-@hugr_op(_map_op_for_global_var(GLOBAL_VAR_NAME))
-@no_type_check
-def _map_global_with_linear_input(
-    func: Callable[[State_Linear, In_Linear], Out], inputs: In_Linear
-) -> Out: ...
-
-
-@hugr_op(_map_op_for_global_var(GLOBAL_VAR_NAME))
-@no_type_check
-def _map_global_no_input(func: Callable[[State_Linear], Out]) -> Out: ...
-
-
-@guppy.overload(
-    _map_global_with_nonlinear_input,
-    _map_global_with_linear_input,
-    _map_global_no_input,
+@overload
+def map_global[G, **P, *R](  # type: ignore[overload-overlap]
+    callback_func: Callable[Concatenate[G, P], tuple[G, *R]],
+    *args: P.args,
+    **kwargs: P.kwargs,
+) -> tuple[*R]: ...
+@overload
+def map_global[G, **P](
+    callback_func: Callable[Concatenate[G, P], G],
+    *args: P.args,
+    **kwargs: P.kwargs,
+) -> None: ...
+@custom_function(  # type: ignore[misc, arg-type]
+    checker=_GlobalMapChecker(),
+    compiler=_GlobalOpCompiler(_map_op_instantiate(GLOBAL_VAR_NAME)),
+    higher_order_value=False,
 )
-def map_global_state(func: Any, inputs: Any | None = None) -> Any: ...
+def map_global[G, **P, *R](  # type: ignore[empty-body]
+    callback_func: Callable[Concatenate[G, P], G | tuple[G, *R]],
+    *args: P.args,
+    **kwargs: P.kwargs,
+) -> tuple[*R]: ...

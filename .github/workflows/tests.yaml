@@ -35,8 +35,9 @@ jobs:
       rust: ${{ steps.filter.outputs.rust }}
       python: ${{ steps.filter.outputs.python }}
       extensions: ${{ steps.filter.outputs.extensions }}
+      extensions_data: ${{ steps.filter.outputs.extensions_data }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/check-changes
         id: filter
 
@@ -47,7 +48,7 @@ jobs:
     if: ${{ needs.changes.outputs.rust == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: mozilla-actions/sccache-action@v0.0.10
       - id: toolchain
         uses: dtolnay/rust-toolchain@master
@@ -57,7 +58,7 @@ jobs:
         run: rustup override set ${{steps.toolchain.outputs.name}}
       - uses: taiki-e/install-action@nextest
       - name: Test with all features
-        run: cargo nextest r --verbose --all-features
+        run: cargo nextest r --verbose --workspace --exclude guppyft-bindings --all-features
 
   check-py:
     name: 🐍 Test Python code (${{ matrix.python-version }})
@@ -74,7 +75,7 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: mozilla-actions/sccache-action@v0.0.10
       - name: Install stable Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -83,12 +84,6 @@ jobs:
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
-
-      - name: Install hugrenv
-        uses: Quantinuum/hugrverse-env/install-hugrenv-action@main
-        with:
-          packages: llvm,tket
-          lockfile: hugrenv.lock
 
       - name: Install dependencies
         run: uv sync --frozen --python ${{ env.PYTHON_VERSION }}
@@ -103,9 +98,8 @@ jobs:
     if: ${{ needs.changes.outputs.rust == 'true' && github.event_name != 'merge_group' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: mozilla-actions/sccache-action@v0.0.10
-      - uses: quantinuum/hugrverse-env/install-hugrenv-action@main
       - name: Install stable toolchain
         uses: dtolnay/rust-toolchain@stable
       - uses: extractions/setup-just@v4
@@ -120,3 +114,21 @@ jobs:
             "
             exit 1
           fi
+
+  extension-versions:
+    name: Check extension versions
+    needs: [ changes ]
+    if: ${{ needs.changes.outputs.extensions_data == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # Need full history to compare with main
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Check if extension versions are updated
+        run: python ./.github/scripts/check_extension_versions.py
