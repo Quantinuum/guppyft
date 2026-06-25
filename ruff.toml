@@ -6,7 +6,8 @@ line-length = 88
 extend-exclude = [
     "tests/error",
     "*.ipynb",
-    "**/_bindings/*.pyi"
+    "**/_bindings/*.pyi",
+    "tests/conftest.py",
 ]
 
 src = ["src"]
