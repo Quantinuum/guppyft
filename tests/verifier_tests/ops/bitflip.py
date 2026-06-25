@@ -1,8 +1,8 @@
-from collections.abc import Callable
 from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.std.array import array
+from guppylang.std.builtins import Function
 from guppylang.std.quantum import cx, h, qubit
 
 
@@ -31,7 +31,7 @@ def bit_flip_non_ft_zero() -> array[qubit, 3]:
 @guppy
 @no_type_check
 def bit_flip_choi_state_double_block(
-    unitary: Callable[[array[qubit, 3], array[qubit, 3]], None],
+    unitary: Function[[array[qubit, 3], array[qubit, 3]], None],
 ) -> tuple[array[qubit, 3], array[qubit, 3], array[qubit, 3], array[qubit, 3]]:
 
     first_control_block = bit_flip_non_ft_zero()

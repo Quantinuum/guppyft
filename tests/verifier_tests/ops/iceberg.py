@@ -1,10 +1,10 @@
-from collections.abc import Callable
 from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.std.angles import pi
 from guppylang.std.array import array
-from guppylang.std.builtins import mem_swap
+from guppylang.std.builtins import Function
+from guppylang.std.mem import mem_swap
 from guppylang.std.qsystem.helios import zz_max, zz_phase
 from guppylang.std.quantum import cx, cz, h, qubit, rx, s, sdg
 
@@ -200,7 +200,7 @@ def iceberg_non_ft_zero() -> array[qubit, 4]:
 @guppy
 @no_type_check
 def iceberg_choi_state(
-    unitary: Callable[[array[qubit, 4]], None],
+    unitary: Function[[array[qubit, 4]], None],
 ) -> tuple[array[qubit, 4], array[qubit, 4]]:
     control_block = iceberg_non_ft_zero()
     target_block = iceberg_non_ft_zero()
@@ -216,7 +216,7 @@ def iceberg_choi_state(
 @guppy
 @no_type_check
 def iceberg_choi_state_double_block(
-    unitary: Callable[[array[qubit, 4], array[qubit, 4]], None],
+    unitary: Function[[array[qubit, 4], array[qubit, 4]], None],
 ) -> tuple[array[qubit, 4], array[qubit, 4], array[qubit, 4], array[qubit, 4]]:
     first_control_block = iceberg_non_ft_zero()
     first_target_block = iceberg_non_ft_zero()

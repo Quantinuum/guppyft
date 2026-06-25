@@ -1,8 +1,8 @@
-from collections.abc import Callable
 from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.std.array import array
+from guppylang.std.builtins import Function
 from guppylang.std.quantum import cx, h, qubit, s, sdg
 
 
@@ -110,7 +110,7 @@ def steane_non_ft_zero() -> array[qubit, 7]:
 @guppy
 @no_type_check
 def steane_choi_state(
-    unitary: Callable[[array[qubit, 7]], None],
+    unitary: Function[[array[qubit, 7]], None],
 ) -> tuple[array[qubit, 7], array[qubit, 7]]:
     control_block = steane_non_ft_zero()
     target_block = steane_non_ft_zero()
@@ -126,7 +126,7 @@ def steane_choi_state(
 @guppy
 @no_type_check
 def steane_choi_state_double_block(
-    unitary: Callable[[array[qubit, 7], array[qubit, 7]], None],
+    unitary: Function[[array[qubit, 7], array[qubit, 7]], None],
 ) -> tuple[
     array[qubit, 7],
     array[qubit, 7],

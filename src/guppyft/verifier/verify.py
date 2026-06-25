@@ -4,6 +4,7 @@ from typing import no_type_check
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.array import array
+from guppylang.std.builtins import Function
 from guppylang.std.debug import state_result
 from guppylang.std.quantum import cx, discard_array, h, qubit
 from selene_sim.backends import Stim
@@ -39,7 +40,7 @@ type DoubleBlockChoiStateFunction = Callable[
 @guppy
 @no_type_check
 def default_choi_state_preparation(
-    unitary_func: Callable[[array[qubit, N]], None],
+    unitary_func: Function[[array[qubit, N]], None],
 ) -> tuple[array[qubit, N], array[qubit, N]]:
     """Prepare a Choi state (unencoded) for a particular n-qubit unitary."""
     control_block = array(qubit() for _ in range(N))
@@ -55,7 +56,7 @@ def default_choi_state_preparation(
 @guppy
 @no_type_check
 def default_choi_state_preparation_double_block(
-    unitary_func: Callable[[array[qubit, N], array[qubit, N]], None],
+    unitary_func: Function[[array[qubit, N], array[qubit, N]], None],
 ) -> tuple[array[qubit, N], array[qubit, N], array[qubit, N], array[qubit, N]]:
     """Prepare a Choi state (unencoded) for a particular 2n qubit unitary."""
     first_control_block = array(qubit() for _ in range(N))
