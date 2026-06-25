@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import TYPE_CHECKING, no_type_check
+from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -9,11 +9,6 @@ from guppylang.std.quantum import cx, discard_array, h, qubit
 from selene_sim.backends import Stim
 from selene_sim.build import build
 from selene_stim_plugin import SeleneStimState
-
-if TYPE_CHECKING:
-    from selene_stim_plugin.state import StabilizerList
-    from zixy.container.coeffs import Sign
-
 from zixy.qubit import Qubits, pauli
 
 from guppyft.verifier.code import StabilizerCode
@@ -132,7 +127,7 @@ def compute_stabilizers_single_block(
     total.specified_qubits = control_qubits + target_qubits
     ########
 
-    stab_list: StabilizerList = states_dict["total"].get_reduced_stabilizers()
+    stab_list = states_dict["total"].get_reduced_stabilizers()
     return stabilizerlist_to_signterms(stab_list)
 
 
@@ -187,7 +182,7 @@ def compute_stabilizers_double_block(
     )
     ########
 
-    stab_list: StabilizerList = states_dict["total"].get_reduced_stabilizers()
+    stab_list = states_dict["total"].get_reduced_stabilizers()
 
     return stabilizerlist_to_signterms(stab_list)
 
@@ -269,7 +264,7 @@ def expand_pauli_term(
     # possibly across multiple code blocks.
     #  This String will be one term in the expanded tableau.
     result_term = pauli.SignTerm(qubits=total_qubit_number)
-    result_sign: Sign = logical_term.coeff
+    result_sign = logical_term.coeff
 
     for logical_qubit_index, logical_pauli in logical_term.string.get_dict().items():
         # "non_identity_pauli_index" is the index we need to access to expand the
