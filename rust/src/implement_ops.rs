@@ -12,6 +12,7 @@ use hugr::{
     std_extensions::arithmetic::int_types::INT_TYPES,
     types::{PolyFuncType, Type},
 };
+use hugr_core::extension::prelude::bool_t;
 use hugr_core::hugr::internal::HugrMutInternals;
 use hugr_core::hugr::linking::NodeLinkingError;
 use hugr_core::ops::{Call, OpName};
@@ -19,6 +20,7 @@ use hugr_core::types::{Transformable, TypeArg};
 use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::{BTreeMap, HashMap};
+use tket::extension::measurement::measurement_type;
 use tket::passes::{
     ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes, WithScope,
     replace_types::ReplaceTypesError,
@@ -52,7 +54,7 @@ pub enum ImplementOpsPassError {
 #[derive(Debug, Clone)]
 pub struct ImplementOpsPass {
     scope: PassScope,
-    qubit_to_ty: Type,
+    pub type_replacements: HashMap<Type, Type>,
     pub op_replacements: BTreeMap<(String, String), (Option<Hugr>, String)>,
 }
 
@@ -70,7 +72,14 @@ impl Default for ImplementOpsPass {
         let int: Type = INT_TYPES[6].clone();
         Self {
             scope: Default::default(),
-            qubit_to_ty: Type::new_tuple(vec![int.clone(), int]),
+            type_replacements: {
+                let mut map = HashMap::new();
+                // qubit -> tuple[int, int]
+                map.insert(qb_t(), Type::new_tuple(vec![int.clone(), int]));
+                // measurement -> bool
+                map.insert(measurement_type(), bool_t());
+                map
+            },
             op_replacements: Default::default(),
         }
     }
@@ -120,7 +129,7 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
             })
             .collect_vec();
 
-        let mut state = ImplementOpsState::new(hugr, &self.qubit_to_ty);
+        let mut state = ImplementOpsState::new(hugr, &self.type_replacements);
         for (op_def, func_hugr, func_name) in op_funcs {
             state.op(ExtensionOp::new(op_def, [])?, func_hugr, func_name)?;
         }
@@ -152,9 +161,11 @@ struct ImplementOpsState<'a, H: HugrMut<Node = Node>> {
 }
 
 impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
-    pub fn new(hugr: &'a mut H, qubit_to_ty: &'a Type) -> Self {
+    pub fn new(hugr: &'a mut H, types: &'a HashMap<Type, Type>) -> Self {
         let mut type_replacer = ReplaceTypes::default();
-        type_replacer.set_replace_type(qb_t().as_extension().unwrap().clone(), qubit_to_ty.clone());
+        for (src, tgt) in types.iter() {
+            type_replacer.set_replace_type(src.as_extension().unwrap().clone(), tgt.clone());
+        }
 
         Self {
             hugr,

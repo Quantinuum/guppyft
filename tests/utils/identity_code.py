@@ -8,7 +8,7 @@ from guppylang.std.builtins import array, comptime, owned, result
 from guppylang.std.collections import Stack
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.qsystem.helios import zz_phase
-from guppylang.std.quantum import Measurement, cx, discard, measure, project_z, qubit, x
+from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
 
 from guppyft.encode import EncoderSpec, ImplementOpsSpec, OpReplacements
 from guppyft.globals import map_global, with_global
@@ -105,16 +105,14 @@ def identity_code_spec(
     # MeasureFree is compiled from `guppylang.std.quantum.measure`
     @guppy(link_name="link.identity.MeasureFree")
     @no_type_check
-    def _MeasureFree(q: tuple[int, int]) -> Measurement:
+    def _MeasureFree(q: tuple[int, int]) -> bool:
         @guppy
-        def _impl(
-            state: STATE @ owned, q: tuple[int, int]
-        ) -> tuple[STATE, Measurement]:
+        def _impl(state: STATE @ owned, q: tuple[int, int]) -> tuple[STATE, bool]:
             result("_MeasureFree", 0)
             blk_id, _ = q
             blk = state.take_block(blk_id)
 
-            res = measure(blk)
+            res = measure(blk).read()
 
             state.free_addr(q)
             return state, res
@@ -143,8 +141,8 @@ def identity_code_spec(
     # Replacement for `tket.measurement.Read` operation
     @guppy(link_name="link.identity.Read")
     @no_type_check
-    def _Read(m: Measurement) -> bool:
-        return m.read()
+    def _Read(m: bool) -> bool:
+        return m
 
     # QFree is compiled from `guppylang.std.quantum.discard`
     @guppy(link_name="link.identity.QFree")
