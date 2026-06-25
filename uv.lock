@@ -117,7 +117,6 @@ version = "0.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "guppylang" },
-    { name = "guppylang-internals" },
     { name = "hugr" },
     { name = "tket" },
     { name = "tket-exts" },
@@ -153,7 +152,6 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "guppylang", specifier = ">=1.0.0a6" },
-    { name = "guppylang-internals", specifier = ">=1.0.0" },
     { name = "hugr", specifier = ">=0.17.0" },
     { name = "tket", specifier = ">=0.14.2" },
     { name = "tket-exts", specifier = ">=0.13.1" },
