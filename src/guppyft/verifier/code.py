@@ -28,7 +28,7 @@ class StabilizerCode:
         for j in range(self.num_logical_qubits):
             # ComplexSign(k) ~ i^k
             # y_logicals[j] = i * (x_logicals[j] * z_logicals[j])
-            # y_term will always have a real (+/-)1 coefficent.
+            # y_term will always have a real (+/-)1 coefficient.
             y_term = ComplexSign(1) * (self.x_logicals[j] * self.z_logicals[j])
             terms.append(y_term)
         return terms.into(pauli.SignTerms)
@@ -55,8 +55,11 @@ class StabilizerCode:
                 f"got {len(self.z_logicals)}."
             )
 
-        all_stabilizer_generators_commute = (
-            np.all(self.generators.to_strings().compatibility_matrix()) == 1
+        all_stabilizer_generators_commute: bool = (
+            np.all(
+                self.generators.to_strings().into(pauli.Strings).compatibility_matrix()
+            )
+            == 1
         )
 
         if not all_stabilizer_generators_commute:
@@ -75,7 +78,7 @@ STEANE_Z_LOGICAL = pauli.String(7, (Z, Z, Z, Z, Z, Z, Z))
 # Steane is self dual so the X stabilizers have the same indices.
 
 
-STEANE_STABILIZER_GENERATORS = pauli.StringSet.from_strings(
+STEANE_STABILIZER_GENERATORS = pauli.StringSet.from_cmpnts(
     pauli.Strings.from_str(
         "X0 X1 X2 X3 I4 I5 I6, I0 X1 X2 I3 X4 X5 I6, I0 I1 X2 X3 I4 X5 X6, "
         "Z0 Z1 Z2 Z3 I4 I5 I6, I0 Z1 Z2 I3 Z4 Z5 I6, I0 I1 Z2 Z3 I4 Z5 Z6",
@@ -93,7 +96,7 @@ STEANE = StabilizerCode(
     z_logicals=string_to_strings(STEANE_Z_LOGICAL),
 )
 
-BIT_FLIP_CODE_GENERATORS = pauli.StringSet.from_strings(
+BIT_FLIP_CODE_GENERATORS = pauli.StringSet.from_cmpnts(
     pauli.Strings.from_str("Z0 Z1, Z1 Z2", 3)
 )
 
@@ -107,7 +110,7 @@ BIT_FLIP_CODE = StabilizerCode(
 )
 
 
-ICEBERG_4_2_2_GENERATORS = pauli.StringSet.from_strings(
+ICEBERG_4_2_2_GENERATORS = pauli.StringSet.from_cmpnts(
     pauli.Strings.from_str(
         "X0 X1 X2 X3, Z0 Z1 Z2 Z3",
         4,

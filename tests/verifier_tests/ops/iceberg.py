@@ -2,7 +2,7 @@ from collections.abc import Callable
 from typing import no_type_check
 
 from guppylang import guppy
-from guppylang.std.angles import angle, pi
+from guppylang.std.angles import pi
 from guppylang.std.array import array
 from guppylang.std.builtins import mem_swap
 from guppylang.std.qsystem import zz_max, zz_phase
