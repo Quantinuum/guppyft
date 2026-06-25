@@ -131,7 +131,7 @@ def identity_code_spec(
             blk_id, qb_id = q
             blk = state.take_block(blk_id)
 
-            res = project_z(blk)
+            res = project_z(blk).read()
 
             state.put_block(blk_id, blk)
             return state, (blk_id, qb_id), res
