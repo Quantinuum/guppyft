@@ -130,7 +130,7 @@ def test_steane_h() -> None:
     assert sem == impl
 
 
-def test_cannonical() -> None:
+def test_canonical() -> None:
     test_tableau = pauli.SignTerms.from_iterable(
         (
             (pauli.PauliMatrix.Z, pauli.PauliMatrix.Z),

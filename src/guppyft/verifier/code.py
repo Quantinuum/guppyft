@@ -28,7 +28,7 @@ class StabilizerCode:
         for j in range(self.num_logical_qubits):
             # ComplexSign(k) ~ i^k
             # y_logicals[j] = i * (x_logicals[j] * z_logicals[j])
-            # y_term will always have a real (+/-)1 coefficent.
+            # y_term will always have a real (+/-)1 coefficient.
             y_term = ComplexSign(1) * (self.x_logicals[j] * self.z_logicals[j])
             terms.append(y_term)
         return terms.into(pauli.SignTerms)

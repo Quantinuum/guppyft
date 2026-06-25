@@ -30,12 +30,12 @@ type DoubleBlockUnitary = GuppyFunctionDefinition[
 ]
 
 
-type SingleBlockChoiStateFuntion = Callable[
+type SingleBlockChoiStateFunction = Callable[
     [SingleBlockUnitary], tuple[array[qubit, N], array[qubit, N]]  # type: ignore[valid-type]
 ]
 
 
-type DoubleBlockChoiStateFuntion = Callable[
+type DoubleBlockChoiStateFunction = Callable[
     [DoubleBlockUnitary],
     tuple[array[qubit, N], array[qubit, N], array[qubit, N], array[qubit, N]],  # type: ignore[valid-type]
 ]
@@ -96,7 +96,7 @@ def _invoke_selene_stim(
 
 def compute_stabilizers_single_block(
     clifford_func: SingleBlockUnitary,
-    choi_state_preparation: SingleBlockChoiStateFuntion,
+    choi_state_preparation: SingleBlockChoiStateFunction,
     n_func_qubits: int,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation.
@@ -138,7 +138,7 @@ def compute_stabilizers_single_block(
 
 def compute_stabilizers_double_block(
     clifford_func: DoubleBlockUnitary,
-    choi_state_preparation_double_block: DoubleBlockChoiStateFuntion,
+    choi_state_preparation_double_block: DoubleBlockChoiStateFunction,
     n_func_qubits: int,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation across
@@ -333,7 +333,7 @@ def expand_logical_signterms(
     code: StabilizerCode,
 ) -> pauli.SignTerms:
     """Given a tableau made up of signed Paul terms, expand each term according
-      as perscribed by the logical operators of a StabilizerCode.
+      as prescribed by the logical operators of a StabilizerCode.
 
     :param logical_terms: A tableau of signed Pauli terms to be expanded.
     :param code: A stabilizer code with well defined [[n, k, d]] parameters
@@ -405,7 +405,7 @@ type ImplementationCliffordUnitaryDouble = GuppyFunctionDefinition[
 def compute_verification_signterms(
     semantic_function: SemanticCliffordUnitary,
     impl_function: ImplementationCliffordUnitary,
-    code_choi_state_function: SingleBlockChoiStateFuntion,
+    code_choi_state_function: SingleBlockChoiStateFunction,
     code_definition: StabilizerCode,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
     """Given a semantic Guppy function acting on k qubits and an impl Guppy function
@@ -455,7 +455,7 @@ def compute_verification_signterms(
 def compute_verification_signterms_double_block(
     semantic_function: SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitaryDouble,
-    code_choi_state_function: DoubleBlockChoiStateFuntion,
+    code_choi_state_function: DoubleBlockChoiStateFunction,
     code_definition: StabilizerCode,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
     """Given a semantic Guppy function acting between two code blocks and an
