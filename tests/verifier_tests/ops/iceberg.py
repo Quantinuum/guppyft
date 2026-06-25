@@ -5,7 +5,7 @@ from guppylang import guppy
 from guppylang.std.angles import pi
 from guppylang.std.array import array
 from guppylang.std.builtins import mem_swap
-from guppylang.std.qsystem import zz_max, zz_phase
+from guppylang.std.qsystem.helios import zz_max, zz_phase
 from guppylang.std.quantum import cx, cz, h, qubit, rx, s, sdg
 
 
