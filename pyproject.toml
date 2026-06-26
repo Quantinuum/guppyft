@@ -26,6 +26,7 @@ classifiers = [
 dependencies = [
     "guppylang>=1.0.0a6",
     "hugr>=0.17.0",
+    "jupyterlab>=4.6.0",
     "tket>=0.14.2",
     "tket-exts>=0.13.1",
     "zixy~=0.3",
