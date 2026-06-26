@@ -317,9 +317,11 @@ impl ValidateJustArgs for InterBlockArgsValidator {
         if arg_values.len() != 3 {
             return Err(SignatureError::InvalidTypeArgs);
         }
-        let k = arg_values[0]
-            .as_nat()
-            .ok_or(SignatureError::InvalidTypeArgs)?;
+        let Some(k) = arg_values[0].as_nat() else {
+            // TypeArgs may be variable uses, in which case we can't extract a k.
+            // In this case, we can't validate so just return Ok.
+            return Ok(());
+        };
         if k == 0 || k % 2 == 1 {
             return Err(SignatureError::InvalidTypeArgs);
         }
