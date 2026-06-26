@@ -3,6 +3,7 @@ from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
+from guppylang.library import GuppyLibrary
 from guppylang.std.angles import angle
 from guppylang.std.builtins import array, comptime, owned, result
 from guppylang.std.collections import Stack
@@ -254,7 +255,7 @@ def identity_code_spec(
     def state_discard(state: STATE @ owned) -> None:
         state.discard()
 
-    lib = guppy.library(
+    lib = GuppyLibrary.from_members(
         state_gen,
         state_discard,
         _QAlloc,
