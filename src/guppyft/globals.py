@@ -98,10 +98,6 @@ class _GlobalWithChecker(CustomCallChecker):
             err = ExpectedError(callback_expr, "FunctionType", str(callback_func))
             err.add_sub_diagnostic(WithCallbackSignatureHelper(None))
             raise GuppyTypeError(err)
-        # TODO This is not a fundamental limitation but there is a mismatch between how
-        #  Guppy and HUGR unpack tuples that needs to be fixed.
-        if isinstance(global_ty, TupleType):
-            raise GuppyTypeError(UnsupportedError(global_expr, "Tuple globals"))
 
         # Raise error if arg is borrowed
         for i, func_input in enumerate(callback_func.inputs):
@@ -153,7 +149,12 @@ class _GlobalWithChecker(CustomCallChecker):
             case TupleType():
                 output_ty = TupleType([global_ty, *callback_func.output.element_types])
             case NoneType():
-                output_ty = global_ty
+                if isinstance(global_ty, TupleType):
+                    # If global type is a tuple, then it must be wrapped in another
+                    # tuple to match HUGR op signature
+                    output_ty = TupleType([global_ty])
+                else:
+                    output_ty = global_ty
             case _:
                 output_ty = TupleType([global_ty, callback_func.output])
         func_ty = FunctionType(
