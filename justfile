@@ -4,6 +4,11 @@ set shell := ["bash", "-uc"]
 help:
     @just --list --justfile {{ justfile() }}
 
+# Prepare the development environment by installing all dependencies and enable pre-commit hooks.
+setup:
+    uv sync --all-extras
+    [[ -n "${JUST_INHIBIT_GIT_HOOKS:-}" ]] || uv run pre-commit install -t pre-commit
+
 # Run the pre-commit checks.
 check:
     uv run pre-commit run --all-files
