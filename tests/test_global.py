@@ -393,7 +393,6 @@ def test_with_global_tuple_type() -> None:
 
     @guppy
     def no_return() -> None:
-        # map_global(map_no_return)
         pass
 
     @guppy
