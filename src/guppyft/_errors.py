@@ -6,7 +6,7 @@ from typing import ClassVar
 from guppylang_internals.diagnostic import Error, Help, Note
 from guppylang_internals.engine import ENGINE
 from guppylang_internals.nodes import GlobalName, PlaceNode
-from guppylang_internals.tys.ty import FuncInput, Type
+from guppylang_internals.tys.ty import FuncInput, TupleType, Type
 
 
 def get_callback_func_ast(callback_expr: ast.expr) -> ast.AST | None:
@@ -76,6 +76,23 @@ class CallbackOutputArgError(Error):
     @property
     def expected_str(self) -> str:
         return str(self.expected)
+
+
+@dataclass(frozen=True)
+class CallbackOutputGlobalTupleError(CallbackOutputArgError):
+    span_label: ClassVar[str] = (
+        "Global tuples must be packed into a tuple in the return of the global map "
+        "callback function. Expected: `{expected_str}`.`"
+    )
+    expected: TupleType
+
+    @property
+    def expected_str(self) -> str:
+        return (
+            "tuple[tuple["
+            + str(", ".join(str(elm) for elm in self.expected.element_types))
+            + "]]"
+        )
 
 
 @dataclass(frozen=True)

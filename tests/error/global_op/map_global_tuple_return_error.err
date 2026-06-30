@@ -1,0 +1,16 @@
+Error: Callback function output error. (at $FILE:6:44)
+   | 
+ 4 | 
+ 5 | @guppy
+ 6 | def map_tuple_return(g: tuple[int, int]) -> tuple[int, int]:
+   |                                             ^^^^^^^^^^^^^^^ Global tuples must be packed into a tuple in the return of
+   |                                                             the global map callback function. Expected:
+   |                                                             `tuple[tuple[int, int]]`.`
+
+Note:
+   | 
+10 | def main() -> None:
+11 |     map_global(map_tuple_return)
+   |                ---------------- Callback function used here.
+
+Guppy compilation failed due to 1 previous error

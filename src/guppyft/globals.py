@@ -9,7 +9,7 @@ from typing import (
     override,
 )
 
-from guppylang_internals.checker.errors.generic import ExpectedError, UnsupportedError
+from guppylang_internals.checker.errors.generic import ExpectedError
 from guppylang_internals.checker.expr_checker import (
     ExprChecker,
     ExprSynthesizer,
@@ -47,6 +47,7 @@ from guppyft._errors import (
     CallbackFuncParametersError,
     CallbackInputParamError,
     CallbackOutputArgError,
+    CallbackOutputGlobalTupleError,
     CallbackUsedHereNote,
     ConsiderOwnedHelper,
     MapCallbackSignatureHelper,
@@ -92,7 +93,7 @@ class _GlobalOpCompiler(CustomInoutCallCompiler):
 class _GlobalWithChecker(CustomCallChecker):
     @override
     def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
-        global_expr, global_ty = ExprSynthesizer(self.ctx).synthesize(args[0])
+        _, global_ty = ExprSynthesizer(self.ctx).synthesize(args[0])
         callback_expr, callback_func = ExprSynthesizer(self.ctx).synthesize(args[1])
         if not isinstance(callback_func, FunctionType):
             err = ExpectedError(callback_expr, "FunctionType", str(callback_func))
@@ -249,6 +250,7 @@ class _GlobalMapChecker(CustomCallChecker):
 
         try:
             global_arg = callback_func.inputs[0]
+            global_ty = global_arg.ty
         except IndexError as e:
             err = CallbackInputParamError(
                 callback_expr,
@@ -259,7 +261,7 @@ class _GlobalMapChecker(CustomCallChecker):
             raise GuppyTypeError(err) from e
         # Global type must be owned if linear
         if (
-            global_arg.ty.hugr_bound == TypeBound.Linear
+            global_ty.hugr_bound == TypeBound.Linear
             and InputFlags.Owned not in global_arg.flags
         ):
             err = CallbackInputParamError(
@@ -318,6 +320,21 @@ class _GlobalMapChecker(CustomCallChecker):
         callback_output = callback_func.output
         match callback_output:
             case TupleType():
+                # If callback_output and global type are equal, then the global type
+                # is a tuple and is the only return from the callback. The Guppy
+                # compiler unpacks tuple return types, while HUGR ops do not. To
+                # avoid this, the callback output must be packed into a tuple
+                # i.e. tuple[tuple[...]].
+                if global_ty == callback_output:
+                    assert isinstance(global_ty, TupleType)
+                    callback_def = get_callback_func_ast(callback_expr)
+                    err = CallbackOutputGlobalTupleError(
+                        callback_def.returns,  # type: ignore[union-attr]
+                        global_ty,
+                    )
+                    err.add_sub_diagnostic(CallbackUsedHereNote(callback_expr))
+                    raise GuppyTypeError(err)
+
                 # First output must be global ty
                 if callback_output.element_types[0] != global_arg.ty:
                     callback_def = get_callback_func_ast(callback_expr)
