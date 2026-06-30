@@ -5,7 +5,7 @@ Error: Callback function output error. (at $FILE:6:44)
  6 | def map_tuple_return(g: tuple[int, int]) -> tuple[int, int]:
    |                                             ^^^^^^^^^^^^^^^ Global tuples must be packed into a tuple in the return of
    |                                                             the global map callback function. Expected:
-   |                                                             `tuple[tuple[int, int]]`.`
+   |                                                             `tuple[tuple[int, int]]`.
 
 Note:
    | 

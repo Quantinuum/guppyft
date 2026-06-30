@@ -82,7 +82,7 @@ class CallbackOutputArgError(Error):
 class CallbackOutputGlobalTupleError(CallbackOutputArgError):
     span_label: ClassVar[str] = (
         "Global tuples must be packed into a tuple in the return of the global map "
-        "callback function. Expected: `{expected_str}`.`"
+        "callback function. Expected: `{expected_str}`."
     )
     expected: TupleType
 
