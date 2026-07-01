@@ -31,6 +31,7 @@ from guppylang_internals.tys.common import ToHugrContext
 from guppylang_internals.tys.subst import Inst
 from guppylang_internals.tys.ty import (
     FuncInput,
+    FunctionDefType,
     FunctionType,
     InputFlags,
     NoneType,
@@ -94,11 +95,12 @@ class _GlobalWithChecker(CustomCallChecker):
     @override
     def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
         _, global_ty = ExprSynthesizer(self.ctx).synthesize(args[0])
-        callback_expr, callback_func = ExprSynthesizer(self.ctx).synthesize(args[1])
-        if not isinstance(callback_func, FunctionType):
-            err = ExpectedError(callback_expr, "FunctionType", str(callback_func))
+        callback_expr, callback_def = ExprSynthesizer(self.ctx).synthesize(args[1])
+        if not isinstance(callback_def, FunctionDefType):
+            err = ExpectedError(callback_expr, "FunctionType", str(callback_def))
             err.add_sub_diagnostic(WithCallbackSignatureHelper(None))
             raise GuppyTypeError(err)
+        callback_func = callback_def.sig
 
         # Raise error if arg is borrowed
         for i, func_input in enumerate(callback_func.inputs):
@@ -242,11 +244,16 @@ class _GlobalMapChecker(CustomCallChecker):
     @override
     def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
         # First arg is the callback function
-        callback_expr, callback_func = ExprSynthesizer(self.ctx).synthesize(args[0])
-        if not isinstance(callback_func, FunctionType):
-            err = ExpectedError(callback_expr, "FunctionType", str(callback_func))
-            err.add_sub_diagnostic(MapCallbackSignatureHelper(None))
-            raise GuppyTypeError(err)
+        callback_expr, callback_def = ExprSynthesizer(self.ctx).synthesize(args[0])
+        match callback_def:
+            case FunctionType():
+                callback_func = callback_def
+            case FunctionDefType():
+                callback_func = callback_def.sig
+            case _:
+                err = ExpectedError(callback_expr, "FunctionType", str(callback_def))
+                err.add_sub_diagnostic(MapCallbackSignatureHelper(None))
+                raise GuppyTypeError(err)
 
         try:
             global_arg = callback_func.inputs[0]
