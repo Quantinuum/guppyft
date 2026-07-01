@@ -54,22 +54,6 @@ def stringset_to_signterms(
     return terms
 
 
-def unit_length_strings_to_string(
-    strings: pauli.Strings, string_capacity: int
-) -> pauli.String:
-    if len(strings) != 1:
-        raise ValueError(
-            "Only a Strings object containing a single element can be converted"
-            f" to a String. Got a Strings instance with {len(strings)} elements."
-        )
-    return pauli.String.from_str(str(strings), string_capacity)
-
-
 def string_to_strings(string: pauli.String) -> pauli.Strings:
     my_tuple = (string.get_tuple(),)
     return pauli.Strings.from_iterable(my_tuple, len(my_tuple[0]))
-
-
-def string_to_unit_stringset(string: pauli.String) -> pauli.StringSet:
-    strings = string_to_strings(string)
-    return pauli.StringSet.from_cmpnts(strings)

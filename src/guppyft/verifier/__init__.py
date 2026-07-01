@@ -7,9 +7,7 @@ from .utils import (
     selene_stabilizer_to_zixy_signterm,
     stabilizerlist_to_signterms,
     string_to_strings,
-    string_to_unit_stringset,
     stringset_to_signterms,
-    unit_length_strings_to_string,
 )
 from .verify import (
     compute_stabilizers_double_block,
@@ -35,7 +33,5 @@ __all__ = [
     "selene_stabilizer_to_zixy_signterm",
     "stabilizerlist_to_signterms",
     "string_to_strings",
-    "string_to_unit_stringset",
     "stringset_to_signterms",
-    "unit_length_strings_to_string",
 ]
