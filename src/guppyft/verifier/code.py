@@ -4,9 +4,6 @@ from functools import cached_property
 import numpy as np
 from zixy.container.coeffs import ComplexSign
 from zixy.qubit import pauli
-from zixy.qubit.pauli import X, Z
-
-from guppyft.verifier.utils import string_to_strings
 
 
 class CodeDefinitionError(ValueError):

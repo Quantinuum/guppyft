@@ -1,6 +1,5 @@
 import pytest
 from zixy.qubit import pauli
-from zixy.qubit.pauli import I, X, Z
 
 from guppyft.verifier.code import (
     CodeDefinitionError,
