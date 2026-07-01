@@ -1,11 +1,6 @@
 import numpy as np
 from zixy.qubit import pauli
 
-from guppyft.verifier.code import (
-    BIT_FLIP_CODE,
-    ICEBERG_4_2_2,
-    STEANE,
-)
 from guppyft.verifier.utils import stringset_to_signterms
 from guppyft.verifier.verify import (
     compute_stabilizers_double_block,
@@ -20,11 +15,13 @@ from guppyft.verifier.verify import (
 )
 
 from .ops.bitflip import (
+    BIT_FLIP_CODE,
     bit_flip_choi_state_double_block,
     bit_flip_logical_identity_double_block,
     bit_flip_physical_identity_double_block,
 )
 from .ops.iceberg import (
+    ICEBERG_4_2_2,
     iceberg_addressable_h_logical,
     iceberg_addressable_h_physical,
     iceberg_addressable_rx_half_pi_logical,
@@ -51,6 +48,7 @@ from .ops.iceberg import (
     iceberg_transversal_cx_physical,
 )
 from .ops.steane import (
+    STEANE,
     steane_choi_state,
     steane_choi_state_double_block,
     steane_logical_cx,

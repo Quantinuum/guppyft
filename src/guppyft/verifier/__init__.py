@@ -1,7 +1,4 @@
 from .code import (
-    BIT_FLIP_CODE,
-    ICEBERG_4_2_2,
-    STEANE,
     CodeDefinitionError,
     StabilizerCode,
 )
@@ -25,9 +22,6 @@ from .verify import (
 )
 
 __all__ = [
-    "BIT_FLIP_CODE",
-    "ICEBERG_4_2_2",
-    "STEANE",
     "CodeDefinitionError",
     "StabilizerCode",
     "compute_stabilizers_double_block",

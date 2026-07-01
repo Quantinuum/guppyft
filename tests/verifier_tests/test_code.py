@@ -3,14 +3,17 @@ from zixy.qubit import pauli
 from zixy.qubit.pauli import I, X, Z
 
 from guppyft.verifier.code import (
+    CodeDefinitionError,
+    StabilizerCode,
+)
+
+from .ops.iceberg import (
     ICEBERG_4_2_2,
     ICEBERG_4_2_2_GENERATORS,
     ICEBERG_4_2_2_X,
     ICEBERG_4_2_2_Z,
-    STEANE,
-    CodeDefinitionError,
-    StabilizerCode,
 )
+from .ops.steane import STEANE
 
 
 def test_iceberg_stabilizers() -> None:

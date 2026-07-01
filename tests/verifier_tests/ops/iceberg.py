@@ -7,6 +7,9 @@ from guppylang.std.builtins import Function
 from guppylang.std.mem import mem_swap
 from guppylang.std.qsystem.helios import zz_max, zz_phase
 from guppylang.std.quantum import cx, cz, h, qubit, rx, s, sdg
+from zixy.qubit import pauli
+
+from guppyft.verifier.code import StabilizerCode
 
 
 @guppy
@@ -237,3 +240,41 @@ def iceberg_choi_state_double_block(
         second_control_block,
         second_target_block,
     )
+
+
+ICEBERG_4_2_2_GENERATORS = pauli.StringSet.from_cmpnts(
+    pauli.Strings.from_str(
+        "X0 X1 X2 X3, Z0 Z1 Z2 Z3",
+        4,
+    )
+)
+
+# IMPORTANT: Iceberg codeblock ordering
+
+# [top q1, q2, bottom]
+
+# ICEBERG_4_2_2_X[0]: XI -> XXII
+# ICEBERG_4_2_2_X[1]: IX -> XIXI
+
+ICEBERG_4_2_2_X = pauli.Strings.from_str(
+    "X0 X1 I2 I3, X0 I1 X2 I3",
+    4,
+)
+
+# ICEBERG_4_2_2_Z[0]: ZI -> IZIZ
+# ICEBERG_4_2_2_Z[1]: IZ -> IIZZ
+
+ICEBERG_4_2_2_Z = pauli.Strings.from_str(
+    "I0 Z1 I2 Z3, I0 I1 Z2 Z3",
+    4,
+)
+
+
+ICEBERG_4_2_2 = StabilizerCode(
+    num_physical_qubits=4,
+    num_logical_qubits=2,
+    distance=2,
+    generators=ICEBERG_4_2_2_GENERATORS,
+    x_logicals=ICEBERG_4_2_2_X,
+    z_logicals=ICEBERG_4_2_2_Z,
+)
