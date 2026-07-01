@@ -4,7 +4,7 @@ from zixy.qubit import pauli
 
 
 def _convert_pauli(selene_pauli: Pauli) -> pauli.PauliMatrix:
-    "Convert a selene_stim_plugin.state.Pauli to a zixy.qubit.pauli.PauliMatrix"
+    "Convert a selene_stim_plugin.state.Pauli to a zixy.qubit.pauli.PauliMatrix."
     match selene_pauli:
         case selene_pauli.X:
             return pauli.PauliMatrix.X
@@ -17,7 +17,7 @@ def _convert_pauli(selene_pauli: Pauli) -> pauli.PauliMatrix:
 
 
 def _get_real_phase(selene_phase: Phase) -> Sign:
-    "Convert the selene_phase to zixy. Phase must be real valued."
+    "Convert a selene Pauli phase to zixy. Phase must be real valued."
     match selene_phase:
         case Phase.REAL_POSITIVE:
             return Sign(0)
@@ -47,7 +47,7 @@ def selene_stabilizer_to_zixy_signterm(stabilizer: Stabilizer) -> pauli.SignTerm
 def stabilizerlist_to_signterms(stab_list: StabilizerList) -> pauli.SignTerms:
     """Convert a list of signed Pauli stablizers to zixy's representation.
 
-    :param stab_list: A list of stabilizer's in Selene's representation
+    :param stab_list: A list of stabilizer's in Selene's representation.
     :return: a zixy SignTerms instance equivalent to stab_list.
     """
     sign_terms = pauli.SignTerms(qubits=len(stab_list.generators[0].paulis))
