@@ -387,3 +387,71 @@ def test_map_return_tuple_type() -> None:
         main,
         assert_result={"my_prog": [1, 2]},
     )
+
+
+def test_with_global_tuple_type() -> None:
+
+    @guppy
+    def no_return() -> None:
+        pass
+
+    @guppy
+    def int_return() -> int:
+        return 1
+
+    @guppy
+    def tuple_return() -> tuple[int, int]:
+        return 2, 3
+
+    @guppy
+    def main() -> None:
+        with_global((0, 0), no_return)
+        _, i = with_global((0, 0), int_return)
+        result("int_return", i)
+        _, i, j = with_global(
+            (0, 0),
+            tuple_return,
+        )
+        result("tuple_return", i)
+        result("tuple_return", j)
+
+    run_global_test(main, assert_result={"int_return": [1], "tuple_return": [2, 3]})
+
+
+def test_map_global_tuple_type() -> None:
+
+    @guppy
+    def map_no_return(g: tuple[int, int]) -> tuple[tuple[int, int]]:
+        return (g,)
+
+    @guppy
+    def map_int_return(g: tuple[int, int]) -> tuple[tuple[int, int], int]:
+        return g, 0
+
+    @guppy
+    def map_tuple_return(g: tuple[int, int]) -> tuple[tuple[int, int], tuple[int, int]]:
+        return g, (1, 2)
+
+    @guppy
+    def my_prog() -> None:
+        map_global(map_no_return)
+        i = map_global(map_int_return)
+        result("map_int_return", i)
+        ((i, j),) = map_global(map_tuple_return)
+        result("map_tuple_return", i)
+        result("map_tuple_return", j)
+
+    @guppy
+    def main() -> None:
+        with_global((0, 0), my_prog)
+
+    run_global_test(
+        main,
+        assert_result={
+            "map_int_return": [0],
+            "map_tuple_return": [
+                1,
+                2,
+            ],
+        },
+    )

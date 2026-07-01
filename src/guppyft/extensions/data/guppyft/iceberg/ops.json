@@ -67,7 +67,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "all_but_one_rx_d": {
       "extension": "guppyft.iceberg.ops",
@@ -208,7 +208,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "all_but_one_rz_d": {
       "extension": "guppyft.iceberg.ops",
@@ -341,7 +341,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "all_but_one_x_d": {
       "extension": "guppyft.iceberg.ops",
@@ -466,7 +466,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "all_but_one_z_d": {
       "extension": "guppyft.iceberg.ops",
@@ -587,7 +587,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "all_rx": {
       "extension": "guppyft.iceberg.ops",
@@ -649,7 +649,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "all_ry": {
       "extension": "guppyft.iceberg.ops",
@@ -711,7 +711,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "all_rz": {
       "extension": "guppyft.iceberg.ops",
@@ -773,7 +773,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "all_x": {
       "extension": "guppyft.iceberg.ops",
@@ -827,7 +827,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "all_y": {
       "extension": "guppyft.iceberg.ops",
@@ -881,7 +881,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "all_z": {
       "extension": "guppyft.iceberg.ops",
@@ -935,7 +935,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "alloc_dynq": {
       "extension": "guppyft.iceberg.ops",
@@ -993,7 +993,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "borrow": {
       "extension": "guppyft.iceberg.ops",
@@ -1069,7 +1069,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "cx_d": {
       "extension": "guppyft.iceberg.ops",
@@ -1284,7 +1284,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "fan_in": {
       "extension": "guppyft.iceberg.ops",
@@ -1342,7 +1342,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "fan_in_d": {
       "extension": "guppyft.iceberg.ops",
@@ -1467,7 +1467,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "fan_out_d": {
       "extension": "guppyft.iceberg.ops",
@@ -1570,7 +1570,7 @@
           "output": []
         }
       },
-      "binary": false
+      "binary": true
     },
     "free_dynq": {
       "extension": "guppyft.iceberg.ops",
@@ -1657,7 +1657,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "measure_syndrome": {
       "extension": "guppyft.iceberg.ops",
@@ -1727,7 +1727,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "restore": {
       "extension": "guppyft.iceberg.ops",
@@ -1807,7 +1807,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "rx_d": {
       "extension": "guppyft.iceberg.ops",
@@ -2026,7 +2026,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "rz_d": {
       "extension": "guppyft.iceberg.ops",
@@ -2202,7 +2202,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "swap_d": {
       "extension": "guppyft.iceberg.ops",
@@ -2357,7 +2357,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "try_measure_one_x_d": {
       "extension": "guppyft.iceberg.ops",
@@ -2516,7 +2516,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "try_measure_one_z_d": {
       "extension": "guppyft.iceberg.ops",
@@ -2754,7 +2754,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "x_d": {
       "extension": "guppyft.iceberg.ops",
@@ -2910,7 +2910,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "x_with_all_but_one_z_d": {
       "extension": "guppyft.iceberg.ops",
@@ -3039,7 +3039,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "xx_d": {
       "extension": "guppyft.iceberg.ops",
@@ -3189,7 +3189,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "xx_phase_d": {
       "extension": "guppyft.iceberg.ops",
@@ -3370,7 +3370,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "yy_d": {
       "extension": "guppyft.iceberg.ops",
@@ -3520,7 +3520,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "yy_phase_d": {
       "extension": "guppyft.iceberg.ops",
@@ -3666,7 +3666,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "z_d": {
       "extension": "guppyft.iceberg.ops",
@@ -3822,7 +3822,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "z_with_all_but_one_x_d": {
       "extension": "guppyft.iceberg.ops",
@@ -3951,7 +3951,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "zz_d": {
       "extension": "guppyft.iceberg.ops",
@@ -4101,7 +4101,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "zz_phase_between_blocks": {
       "extension": "guppyft.iceberg.ops",
@@ -4205,7 +4205,7 @@
           ]
         }
       },
-      "binary": false
+      "binary": true
     },
     "zz_phase_between_blocks_d": {
       "extension": "guppyft.iceberg.ops",

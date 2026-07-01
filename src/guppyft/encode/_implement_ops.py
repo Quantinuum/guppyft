@@ -4,12 +4,13 @@ from typing import Any, Self, no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
+from guppylang.library import link_name
 from hugr.ops import FuncDecl, FuncDefn
 from hugr.package import Package
 
 from guppyft._bindings import RsHugr
 from guppyft._bindings import _implement_ops as _implement_ops_binding
-from guppyft._util import link_name
+from guppyft._util import get_link_name
 
 
 class OpReplacements:
@@ -31,7 +32,7 @@ class OpReplacements:
     def with_func(
         self, op: tuple[str, str], func: GuppyFunctionDefinition[Any, Any]
     ) -> Self:
-        self.ops[op] = (func, link_name(func))
+        self.ops[op] = (func, get_link_name(func))
 
         return self
 
@@ -115,7 +116,8 @@ def implement_ops(
     hugr_pkg = _implement_ops(hugr_pkg, spec.ops)
 
     # Build, compile, and link wrapper program
-    @guppy.declare(link_name=entrypoint_op.f_name)
+    @guppy.declare
+    @link_name(entrypoint_op.f_name)
     @no_type_check
     def func_decl() -> None: ...
 

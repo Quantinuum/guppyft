@@ -89,7 +89,7 @@ jobs:
         run: uv sync --frozen --python ${{ env.PYTHON_VERSION }}
 
       - name: Run tests
-        run: uv run pytest
+        run: uv run pytest -n auto
 
   # Ensure that serialized extensions match rust implementation
   check-extensions:
