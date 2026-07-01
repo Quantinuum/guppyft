@@ -3,7 +3,6 @@ from .code import (
     StabilizerCode,
 )
 from .utils import (
-    convert_pauli,
     selene_stabilizer_to_zixy_signterm,
     stabilizerlist_to_signterms,
     string_to_strings,
@@ -26,7 +25,6 @@ __all__ = [
     "compute_stabilizers_single_block",
     "compute_verification_signterms",
     "compute_verification_signterms_double_block",
-    "convert_pauli",
     "expand_logical_signterms",
     "get_expanded_stabilizer_set",
     "pad_code_stabilizers",
