@@ -7,6 +7,7 @@ from guppylang_internals.engine import ENGINE
 
 
 # TODO this should eventually be moved to guppylang and made generally available
+# See: https://github.com/Quantinuum/guppylang/issues/1697
 def get_link_name(func: GuppyFunctionDefinition[Any, Any]) -> str:
     """Extracts the link name from a function, if possible (i.e. if the function is a
     definition or a declaration)."""
