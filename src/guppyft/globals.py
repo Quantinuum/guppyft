@@ -244,11 +244,15 @@ class _GlobalMapChecker(CustomCallChecker):
     def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
         # First arg is the callback function
         callback_expr, callback_def = ExprSynthesizer(self.ctx).synthesize(args[0])
-        if not isinstance(callback_def, FunctionDefType):
-            err = ExpectedError(callback_expr, "FunctionDefType", str(callback_def))
-            err.add_sub_diagnostic(MapCallbackSignatureHelper(None))
-            raise GuppyTypeError(err)
-        callback_func = callback_def.sig
+        match callback_def:
+            case FunctionType():
+                callback_func = callback_def
+            case FunctionDefType():
+                callback_func = callback_def.sig
+            case _:
+                err = ExpectedError(callback_expr, "FunctionType", str(callback_def))
+                err.add_sub_diagnostic(MapCallbackSignatureHelper(None))
+                raise GuppyTypeError(err)
 
         try:
             global_arg = callback_func.inputs[0]

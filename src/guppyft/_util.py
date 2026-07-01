@@ -7,7 +7,7 @@ from guppylang_internals.engine import ENGINE
 
 
 # TODO this should eventually be moved to guppylang and made generally available
-def link_name(func: GuppyFunctionDefinition[Any, Any]) -> str:
+def get_link_name(func: GuppyFunctionDefinition[Any, Any]) -> str:
     """Extracts the link name from a function, if possible (i.e. if the function is a
     definition or a declaration)."""
     match ENGINE.get_parsed(func.id):

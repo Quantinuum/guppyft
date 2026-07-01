@@ -217,4 +217,4 @@ def test_guppy_hugr() -> None:
     }
     [all_h_node] = [child for child in children if "all_h" in h[child].op.name()]
     assert len(list(h.incoming_links(all_h_node))) == 1  # CallIndirect
-    assert len(list(h.outgoing_links(all_h_node))) == 2  # Output, free
+    assert len(list(h.outgoing_links(all_h_node))) == 1  # free
