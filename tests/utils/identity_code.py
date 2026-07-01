@@ -3,7 +3,7 @@ from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
-from guppylang.library import GuppyLibrary
+from guppylang.library import GuppyLibrary, link_name
 from guppylang.std.angles import angle
 from guppylang.std.builtins import array, comptime, owned, result
 from guppylang.std.collections import Stack
@@ -91,7 +91,8 @@ def identity_code_spec(
                     result("qec_counter", self.qec_counter)
                     self.qec_counter[i] = 0
 
-    @guppy(link_name="link.identity.QAlloc")
+    @guppy
+    @link_name("link.identity.QAlloc")
     @no_type_check
     def _QAlloc() -> tuple[tuple[int, int]]:
         @guppy
@@ -104,7 +105,8 @@ def identity_code_spec(
         return map_global(_impl)
 
     # MeasureFree is compiled from `guppylang.std.quantum.measure`
-    @guppy(link_name="link.identity.MeasureFree")
+    @guppy
+    @link_name("link.identity.MeasureFree")
     @no_type_check
     def _MeasureFree(q: tuple[int, int]) -> bool:
         @guppy
@@ -121,7 +123,8 @@ def identity_code_spec(
         return map_global(_impl, q)
 
     # Measure is compiled from `guppylang.std.quantum.project_z`
-    @guppy(link_name="link.identity.Measure")
+    @guppy
+    @link_name("link.identity.Measure")
     @no_type_check
     def _Measure(q: tuple[int, int]) -> tuple[tuple[int, int], bool]:
         @guppy
@@ -140,13 +143,15 @@ def identity_code_spec(
         return map_global(_impl, q)
 
     # Replacement for `tket.measurement.Read` operation
-    @guppy(link_name="link.identity.Read")
+    @guppy
+    @link_name("link.identity.Read")
     @no_type_check
     def _Read(m: bool) -> bool:
         return m
 
     # QFree is compiled from `guppylang.std.quantum.discard`
-    @guppy(link_name="link.identity.QFree")
+    @guppy
+    @link_name("link.identity.QFree")
     @no_type_check
     def _QFree(q: tuple[int, int]) -> None:
         @guppy
@@ -160,7 +165,8 @@ def identity_code_spec(
 
         return map_global(_impl, q)
 
-    @guppy(link_name="link.identity.X")
+    @guppy
+    @link_name("link.identity.X")
     @no_type_check
     def _X(q: tuple[int, int]) -> tuple[tuple[int, int]]:
         @guppy
@@ -183,7 +189,8 @@ def identity_code_spec(
 
         return map_global(_impl, q)
 
-    @guppy(link_name="link.identity.CX")
+    @guppy
+    @link_name("link.identity.CX")
     @no_type_check
     def _CX(
         ctl: tuple[int, int], tgt: tuple[int, int]
@@ -206,7 +213,8 @@ def identity_code_spec(
 
         return map_global(_impl, ctl, tgt)
 
-    @guppy(link_name="link.identity.ZZPhase")
+    @guppy
+    @link_name("link.identity.ZZPhase")
     @no_type_check
     def _ZZPhase(
         ctl: tuple[int, int], tgt: tuple[int, int], phase: float
@@ -232,10 +240,12 @@ def identity_code_spec(
 
         return map_global(_impl, (ctl, tgt, phase))
 
-    @guppy.declare(link_name="link.identity.gen_state")
+    @guppy.declare
+    @link_name("link.identity.gen_state")
     @no_type_check
     def state_gen_decl() -> STATE: ...
-    @guppy(link_name="link.identity.gen_state")
+    @guppy
+    @link_name("link.identity.gen_state")
     @no_type_check
     def state_gen() -> STATE:
         return STATE(
@@ -247,10 +257,12 @@ def identity_code_spec(
             array(0 for _ in range(comptime(n_qubits))),
         )
 
-    @guppy.declare(link_name="link.identity.discard_state")
+    @guppy.declare
+    @link_name("link.identity.discard_state")
     @no_type_check
     def state_discard_decl(state: STATE @ owned) -> None: ...
-    @guppy(link_name="link.identity.discard_state")
+    @guppy
+    @link_name("link.identity.discard_state")
     @no_type_check
     def state_discard(state: STATE @ owned) -> None:
         state.discard()
