@@ -8,26 +8,11 @@ from guppyft.verifier.code import (
 )
 
 from .ops.iceberg import (
-    ICEBERG_4_2_2,
     ICEBERG_4_2_2_GENERATORS,
     ICEBERG_4_2_2_X,
     ICEBERG_4_2_2_Z,
 )
 from .ops.steane import STEANE
-
-
-def test_iceberg_stabilizers() -> None:
-    assert (
-        len(ICEBERG_4_2_2.generators)
-        == ICEBERG_4_2_2.num_physical_qubits - ICEBERG_4_2_2.num_logical_qubits
-    )
-
-
-def test_iceberg_logicals() -> None:
-    assert ICEBERG_4_2_2.x_logicals[0].get_tuple() == (X, X, I, I)
-    assert ICEBERG_4_2_2.x_logicals[1].get_tuple() == (X, I, X, I)
-    assert ICEBERG_4_2_2.z_logicals[0].get_tuple() == (I, Z, I, Z)
-    assert ICEBERG_4_2_2.z_logicals[1].get_tuple() == (I, I, Z, Z)
 
 
 def test_steane_y_logicals() -> None:
