@@ -1,8 +1,0 @@
-Error: Unsupported (at $FILE:12:16)
-   | 
-10 | @guppy
-11 | def main() -> None:
-12 |     with_global((1, 1), foo)
-   |                 ^^^^^^ Tuple globals are not supported
-
-Guppy compilation failed due to 1 previous error
