@@ -101,27 +101,26 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
             }
         }
 
-        let op_funcs = self
-            .op_replacements
-            .iter()
-            .filter_map(|((ext_name, op_name), (func_hugr, func_name))| {
-                let ext = hugr.extensions().get(ext_name)?;
-
-                let op_def = ext.get_op(op_name).unwrap().clone();
-                // We cannot handle ops with custom instantiations at the moment
-                assert_eq!(op_def.params().unwrap().len(), 0);
-                Some((op_def, func_hugr.clone(), func_name))
+        let op_funcs: Vec<(ExtensionOp, Option<Hugr>, &str)> = hugr
+            .nodes()
+            .filter_map(|n| hugr.get_optype(n).as_extension_op())
+            .filter_map(|ext_op| {
+                let key = (
+                    ext_op.def().extension_id().to_string(),
+                    ext_op.def().name().to_string(),
+                );
+                let (func_hugr, func_name) = self.op_replacements.get(&key)?;
+                Some((ext_op.clone(), func_hugr.clone(), func_name.as_str()))
             })
+            .unique_by(|(op, _, _)| OpHashWrapper::from(op)) // one per unique (name, args) combo
             .collect_vec();
 
         let type_replacements_map = op_funcs
             .iter()
             .filter_map(|(op_def, func_hugr, func_name)| {
-                let op_sig = op_def.clone().compute_signature(&[]).unwrap(); // TODO op args??
+                let op_sig = op_def.signature();
                 let func_sig = extract_func_sig(&func_hugr.clone()?, func_name).unwrap();
-                let func_sig = func_sig
-                    .instantiate(&[]) // TODO function args??
-                    .unwrap();
+                let func_sig = func_sig.instantiate(&[]).unwrap();
                 let replacements = op_sig
                     .input
                     .iter()
@@ -154,7 +153,7 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
 
         let mut state = ImplementOpsState::new(hugr, &type_replacements_map);
         for (op_def, func_hugr, func_name) in op_funcs {
-            state.op(ExtensionOp::new(op_def, [])?, func_hugr, func_name)?;
+            state.op(op_def, func_hugr, func_name)?;
         }
         state.finish()?;
         hugr.validate()?;
@@ -296,8 +295,7 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
         };
 
         // Register call for later replacement
-        let call_type: OpType =
-            Call::try_new((*ext_op.signature()).clone().into(), ext_op.args())?.into();
+        let call_type: OpType = Call::try_new((*ext_op.signature()).clone().into(), [])?.into();
         self.op_calls.insert(
             OpHashWrapper::from(&ext_op),
             (call_type, func_hugr, func_node),
