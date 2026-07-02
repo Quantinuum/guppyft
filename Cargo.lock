@@ -917,9 +917,9 @@ dependencies = [
 
 [[package]]
 name = "hugr"
-version = "0.28.3"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3f4ee8c86d356d26d4f9f560da549cda97c0a1964fdeddff124467dda41d8cc"
+checksum = "cc1f882fa7bdba5d057df2cb291dfa6bcad147820dbde8ca67ee2b5d420fd9bb"
 dependencies = [
  "hugr-core",
  "hugr-model",
@@ -927,9 +927,9 @@ dependencies = [
 
 [[package]]
 name = "hugr-cli"
-version = "0.28.3"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d275666819ec05ec051b26cb79f221827225b1fb20437b5eea8e75391054566a"
+checksum = "1f8f21a16b4527ad53cc0409dcfebcbd9a9213eea21a1668781790830b759dd9"
 dependencies = [
  "anyhow",
  "clap",
@@ -949,9 +949,9 @@ dependencies = [
 
 [[package]]
 name = "hugr-core"
-version = "0.28.3"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6cf94f955bf4cb90eeadbac537089c11e8d5ee8685be87f6dc73157cac3065a4"
+checksum = "7bf64fec311a741c77d25c2293945a6fc872f03d401ec241425c73a2a85851a9"
 dependencies = [
  "base64",
  "cgmath",
@@ -987,9 +987,9 @@ dependencies = [
 
 [[package]]
 name = "hugr-model"
-version = "0.28.3"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3c3bc3a87ee6cfa2c8c619bafb2828aeabb8cb4fba7b4958c58355208ed17da"
+checksum = "e0c4548e4d628a4565e467e04c486612a9ddf783c83cf0cb416efe6dbfdc4392"
 dependencies = [
  "base64",
  "bumpalo",
@@ -2182,9 +2182,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tket"
-version = "0.20.0"
+version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f88203d74a716b3a29c01a3f27fdffc5595364be87810a80a58d4a953a44b85"
+checksum = "af2e0fff8b6d5fc25bac7636ce9d0d17448454286717bb89f27e6fed40819c02"
 dependencies = [
  "ascent",
  "bytemuck",
@@ -2198,7 +2198,7 @@ dependencies = [
  "hugr",
  "hugr-core",
  "indexmap 2.14.0",
- "itertools 0.14.0",
+ "itertools 0.15.0",
  "lazy_static",
  "num-rational",
  "pastey",
