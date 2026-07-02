@@ -11,9 +11,9 @@ rust-version = "1.91"
 edition = "2024"
 
 [workspace.dependencies]
-tket = "0.20.0"
-hugr = "0.28.2"
-hugr-core = "0.28.2"
+tket = "0.21.0"
+hugr = "0.29.0"
+hugr-core = "0.29.0"
 itertools = "0.15.0"
 derive_more = { version = "2", features = ["display", "from"] }
 
