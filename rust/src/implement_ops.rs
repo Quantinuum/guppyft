@@ -5,7 +5,7 @@
 use hugr::{
     Hugr, HugrView, Node,
     builder::{BuildError, HugrBuilder, ModuleBuilder},
-    extension::{SignatureError, prelude::qb_t},
+    extension::SignatureError,
     hugr::{ValidationError, hugrmut::HugrMut},
     ops::ExtensionOp,
     ops::{DataflowOpTrait, OpType, handle::NodeHandle as _},
@@ -19,7 +19,6 @@ use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::hash_map::Entry;
 use std::collections::{BTreeMap, HashMap};
-use tket::extension::measurement::measurement_type;
 use tket::passes::{
     ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes, WithScope,
     replace_types::ReplaceTypesError,
@@ -50,16 +49,15 @@ pub enum ImplementOpsPassError {
     NodeLinkingError(NodeLinkingError<Node, Node>),
     #[display("Type replacement mismatch error. src: {src}, first: {first}, second: {second}.")]
     InconsistentTypeReplacement {
-        src: Type,
-        first: Type,
-        second: Type,
+        src: Box<Type>,
+        first: Box<Type>,
+        second: Box<Type>,
     },
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct ImplementOpsPass {
     scope: PassScope,
-    pub type_replacements: Vec<Type>,
     pub op_replacements: BTreeMap<(String, String), (Option<Hugr>, String)>,
 }
 
@@ -68,16 +66,6 @@ impl ImplementOpsPass {
         Self {
             op_replacements,
             ..Self::default()
-        }
-    }
-}
-
-impl Default for ImplementOpsPass {
-    fn default() -> Self {
-        Self {
-            scope: Default::default(),
-            type_replacements: vec![qb_t(), measurement_type()],
-            op_replacements: Default::default(),
         }
     }
 }
@@ -126,27 +114,19 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
             })
             .collect_vec();
 
-        let type_replacements_map = self
-            .op_replacements
+        let type_replacements_map = op_funcs
             .iter()
-            .filter_map(|((ext_name, op_name), (func_hugr, func_name))| {
-                let ext = hugr.extensions().get(ext_name)?;
-                let op_sig = ext
-                    .get_op(op_name)
-                    .unwrap()
-                    .clone()
-                    .compute_signature(&[]) // TODO op args??
-                    .unwrap();
-                let func_sig = extract_func_sig(func_hugr.as_ref().unwrap(), func_name)
-                    .unwrap()
+            .filter_map(|(op_def, func_hugr, func_name)| {
+                let op_sig = op_def.clone().compute_signature(&[]).unwrap(); // TODO op args??
+                let func_sig = extract_func_sig(&func_hugr.clone()?, func_name).unwrap();
+                let func_sig = func_sig
                     .instantiate(&[]) // TODO function args??
                     .unwrap();
                 let replacements = op_sig
                     .input
                     .iter()
                     .zip(func_sig.input.iter())
-                    .chain(op_sig.output.into_iter().zip(func_sig.output.iter()))
-                    .filter(|(op_ty, _)| self.type_replacements.contains(op_ty))
+                    .chain(op_sig.output.iter().zip(func_sig.output.iter()))
                     .map(|(op_ty, func_ty)| (op_ty.clone(), func_ty.clone()))
                     .collect_vec();
                 Some(replacements)
@@ -163,9 +143,9 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
                         Entry::Occupied(o) if o.get() == &dst => Ok(acc), // consistent duplicate
                         Entry::Occupied(o) => {
                             Err(ImplementOpsPassError::InconsistentTypeReplacement {
-                                src: o.key().clone(),
-                                first: o.get().clone(),
-                                second: dst,
+                                src: Box::new(o.key().clone()),
+                                first: Box::new(o.get().clone()),
+                                second: Box::new(dst),
                             })
                         }
                     }
