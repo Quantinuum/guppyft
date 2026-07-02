@@ -5,7 +5,7 @@ from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.array import array
 from guppylang.std.builtins import Function
-from guppylang.std.debug import state_result
+from guppylang.std.debug import state_output
 from guppylang.std.quantum import cx, discard_array, h, qubit
 from selene_sim.backends import Stim
 from selene_sim.build import build
@@ -109,16 +109,16 @@ def compute_stabilizers_single_block(
     def main() -> None:
         controls, targets = choi_state_preparation(clifford_func)
 
-        state_result("control", controls)
-        state_result("target", targets)
-        state_result("total", targets)
+        state_output("control", controls)
+        state_output("target", targets)
+        state_output("total", targets)
 
         discard_array(controls)
         discard_array(targets)
 
     states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(main, n_func_qubits)
 
-    # This is a hack so that we can get a state_result over both the
+    # This is a hack so that we can get a state_output over both the
     #  control and target registers. Currently state result doesn't support passing
     #  more than a single array. The alternative would be doing array concatenation
     #  in Guppy. This seemed easier.
@@ -156,12 +156,12 @@ def compute_stabilizers_double_block(
             choi_state_preparation_double_block(clifford_func)
         )
 
-        state_result("controls1", first_controls)
-        state_result("targets1", first_targets)
-        state_result("total", first_targets)
+        state_output("controls1", first_controls)
+        state_output("targets1", first_targets)
+        state_output("total", first_targets)
 
-        state_result("controls2", second_controls)
-        state_result("targets2", second_targets)
+        state_output("controls2", second_controls)
+        state_output("targets2", second_targets)
 
         discard_array(first_controls)
         discard_array(first_targets)
@@ -171,7 +171,7 @@ def compute_stabilizers_double_block(
 
     states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(main, n_func_qubits)
 
-    # Using a hack to get the state_result across four code blocks. See the
+    # Using a hack to get the state_output across four code blocks. See the
     # comment in compute_stabilizers_single_block for more info.
     total = states_dict["total"]
     control_qubits1 = states_dict["controls1"].specified_qubits
