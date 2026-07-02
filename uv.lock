@@ -119,6 +119,8 @@ dependencies = [
     { name = "guppylang" },
     { name = "guppylang-internals" },
     { name = "hugr" },
+    { name = "selene-core" },
+    { name = "selene-sim" },
     { name = "tket" },
     { name = "tket-exts" },
 ]
@@ -149,6 +151,8 @@ requires-dist = [
     { name = "guppylang", specifier = ">=1.0.0a8" },
     { name = "guppylang-internals", specifier = ">=1.0.0a8" },
     { name = "hugr", specifier = ">=0.18.0" },
+    { name = "selene-core", specifier = "~=0.3.0a1" },
+    { name = "selene-sim", specifier = "~=0.3.0a1" },
     { name = "tket", specifier = ">=0.15.1" },
     { name = "tket-exts", specifier = ">=0.14.0" },
 ]
