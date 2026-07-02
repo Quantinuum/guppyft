@@ -3,16 +3,15 @@
 #![allow(missing_docs)]
 
 use hugr::{
-    Hugr, HugrView, Node,
-    builder::{BuildError, HugrBuilder, ModuleBuilder},
-    extension::{SignatureError, prelude::qb_t},
-    hugr::{ValidationError, hugrmut::HugrMut},
+    builder::{BuildError, HugrBuilder, ModuleBuilder}, extension::{prelude::qb_t, SignatureError}, hugr::{hugrmut::HugrMut, ValidationError},
     ops::ExtensionOp,
-    ops::{DataflowOpTrait, OpType, handle::NodeHandle as _},
+    ops::{handle::NodeHandle as _, DataflowOpTrait, OpType},
     std_extensions::arithmetic::int_types::INT_TYPES,
     types::{PolyFuncType, Type},
+    Hugr,
+    HugrView,
+    Node,
 };
-use hugr_core::extension::prelude::bool_t;
 use hugr_core::hugr::internal::HugrMutInternals;
 use hugr_core::hugr::linking::NodeLinkingError;
 use hugr_core::ops::{Call, OpName};
@@ -22,8 +21,8 @@ use itertools::Itertools;
 use std::collections::{BTreeMap, HashMap};
 use tket::extension::measurement::measurement_type;
 use tket::passes::{
-    ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes, WithScope,
-    replace_types::ReplaceTypesError,
+    replace_types::ReplaceTypesError, ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes,
+    WithScope,
 };
 
 #[derive(derive_more::Error, Debug, derive_more::Display, derive_more::From)]
@@ -54,7 +53,7 @@ pub enum ImplementOpsPassError {
 #[derive(Debug, Clone)]
 pub struct ImplementOpsPass {
     scope: PassScope,
-    pub type_replacements: HashMap<Type, Type>,
+    pub type_replacements: Vec<Type>,
     pub op_replacements: BTreeMap<(String, String), (Option<Hugr>, String)>,
 }
 
@@ -72,14 +71,7 @@ impl Default for ImplementOpsPass {
         let int: Type = INT_TYPES[6].clone();
         Self {
             scope: Default::default(),
-            type_replacements: {
-                let mut map = HashMap::new();
-                // qubit -> tuple[int, int]
-                map.insert(qb_t(), Type::new_tuple(vec![int.clone(), int]));
-                // measurement -> bool
-                map.insert(measurement_type(), bool_t());
-                map
-            },
+            type_replacements: vec![qb_t(), measurement_type()],
             op_replacements: Default::default(),
         }
     }
@@ -129,7 +121,34 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
             })
             .collect_vec();
 
-        let mut state = ImplementOpsState::new(hugr, &self.type_replacements);
+        let type_replacements = self
+            .op_replacements
+            .iter()
+            .filter_map(|((ext_name, op_name), (func_hugr, func_name))| {
+                let ext = hugr.extensions().get(ext_name)?;
+                let op_sig = ext
+                    .get_op(op_name)
+                    .unwrap()
+                    .clone()
+                    .compute_signature(&[])
+                    .unwrap();
+                let func_sig = extract_func_sig(&func_hugr.unwrap(), func_name)
+                    .unwrap()
+                    .instantiate(&[])
+                    .unwrap();
+                let type_map: HashMap<Type, Type> = op_sig
+                    .input
+                    .iter()
+                    .zip(func_sig.input.iter())
+                    .chain(op_sig.output.into_iter().zip(func_sig.output.iter()))
+                    .filter(|(op_ty, _)| self.type_replacements.contains(op_ty))
+                    .map(|(op_ty, func_ty)| (op_ty.clone(), func_ty.clone()))
+                    .collect();
+                Some(type_map)
+            })
+            .into();
+
+        let mut state = ImplementOpsState::new(hugr, &type_replacements);
         for (op_def, func_hugr, func_name) in op_funcs {
             state.op(ExtensionOp::new(op_def, [])?, func_hugr, func_name)?;
         }
@@ -137,6 +156,37 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
         hugr.validate()?;
         Ok(())
     }
+}
+
+pub fn extract_func_sig(
+    func_hugr: &Hugr,
+    func_name: &str,
+) -> Result<PolyFuncType, ImplementOpsPassError> {
+    // Extract target function
+    let Some(func_node) = func_hugr.children(func_hugr.module_root()).find(|node| {
+        if let Some(name) = match &func_hugr.get_optype(*node) {
+            OpType::FuncDecl(decl) => Some(decl.func_name().to_owned()),
+            OpType::FuncDefn(defn) => Some(defn.func_name().to_owned()),
+            _ => None,
+        } {
+            name == func_name
+        } else {
+            false
+        }
+    }) else {
+        panic!(
+            "Expected hugr containing a function with name '{}' but it was not found!",
+            func_name
+        );
+    };
+
+    let func_sig = match &func_hugr.get_optype(func_node) {
+        OpType::FuncDecl(decl) => decl.signature(),
+        OpType::FuncDefn(defn) => defn.signature(),
+        _ => unreachable!(),
+    };
+
+    Ok(func_sig.clone())
 }
 
 #[derive(Clone, Hash, PartialEq, Eq)]
