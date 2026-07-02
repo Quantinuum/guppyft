@@ -29,6 +29,11 @@ dependencies = [
     "hugr>=0.18.0",
     "tket>=0.15.1",
     "tket-exts>=0.14.0",
+    # selene-sim~=0.3.0a1 is a dependency of guppylang. However, we need to specify here
+    # for uv to use a pre-release version. Once a stable version of `selene` is release,
+    # these dependencies can be removed.
+    "selene-sim~=0.3.0a1",
+    "selene-core~=0.3.0a1",
 ]
 
 [dependency-groups]
@@ -46,10 +51,6 @@ test = [
     "pytest>=9.1.0",
     "pytest-snapshot>=0.9.0",
     "pytest-xdist>=3.8.0",
-    "selene-hugr-qis-compiler>=0.4.0",
-    "selene-sim>=0.3.0a1",
-    # Adding to allow prerelease versions of selene-core as it is required by selene-sim
-    "selene-core>=0.3.0a1",
 ]
 
 [tool.mypy]

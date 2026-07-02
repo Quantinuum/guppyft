@@ -132,9 +132,6 @@ dev = [
     { name = "pytest-snapshot" },
     { name = "pytest-xdist" },
     { name = "ruff" },
-    { name = "selene-core" },
-    { name = "selene-hugr-qis-compiler" },
-    { name = "selene-sim" },
 ]
 lint = [
     { name = "mypy" },
@@ -145,9 +142,6 @@ test = [
     { name = "pytest" },
     { name = "pytest-snapshot" },
     { name = "pytest-xdist" },
-    { name = "selene-core" },
-    { name = "selene-hugr-qis-compiler" },
-    { name = "selene-sim" },
 ]
 
 [package.metadata]
@@ -168,9 +162,6 @@ dev = [
     { name = "pytest-snapshot", specifier = ">=0.9.0" },
     { name = "pytest-xdist", specifier = ">=3.8.0" },
     { name = "ruff", specifier = ">=0.15.20" },
-    { name = "selene-core", specifier = ">=0.3.0a1" },
-    { name = "selene-hugr-qis-compiler", specifier = ">=0.4.0" },
-    { name = "selene-sim", specifier = ">=0.3.0a1" },
 ]
 lint = [
     { name = "mypy", specifier = ">=1.20.2" },
@@ -181,9 +172,6 @@ test = [
     { name = "pytest", specifier = ">=9.1.0" },
     { name = "pytest-snapshot", specifier = ">=0.9.0" },
     { name = "pytest-xdist", specifier = ">=3.8.0" },
-    { name = "selene-core", specifier = ">=0.3.0a1" },
-    { name = "selene-hugr-qis-compiler", specifier = ">=0.4.0" },
-    { name = "selene-sim", specifier = ">=0.3.0a1" },
 ]
 
 [[package]]
