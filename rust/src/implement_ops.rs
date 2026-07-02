@@ -3,14 +3,13 @@
 #![allow(missing_docs)]
 
 use hugr::{
-    builder::{BuildError, HugrBuilder, ModuleBuilder}, extension::{prelude::qb_t, SignatureError}, hugr::{hugrmut::HugrMut, ValidationError},
+    Hugr, HugrView, Node,
+    builder::{BuildError, HugrBuilder, ModuleBuilder},
+    extension::{SignatureError, prelude::qb_t},
+    hugr::{ValidationError, hugrmut::HugrMut},
     ops::ExtensionOp,
-    ops::{handle::NodeHandle as _, DataflowOpTrait, OpType},
-    std_extensions::arithmetic::int_types::INT_TYPES,
+    ops::{DataflowOpTrait, OpType, handle::NodeHandle as _},
     types::{PolyFuncType, Type},
-    Hugr,
-    HugrView,
-    Node,
 };
 use hugr_core::hugr::internal::HugrMutInternals;
 use hugr_core::hugr::linking::NodeLinkingError;
@@ -18,11 +17,12 @@ use hugr_core::ops::{Call, OpName};
 use hugr_core::types::{Transformable, TypeArg};
 use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
+use std::collections::hash_map::Entry;
 use std::collections::{BTreeMap, HashMap};
 use tket::extension::measurement::measurement_type;
 use tket::passes::{
-    replace_types::ReplaceTypesError, ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes,
-    WithScope,
+    ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes, WithScope,
+    replace_types::ReplaceTypesError,
 };
 
 #[derive(derive_more::Error, Debug, derive_more::Display, derive_more::From)]
@@ -48,6 +48,12 @@ pub enum ImplementOpsPassError {
     RemoveDeadFuncsError(RemoveDeadFuncsError),
     #[from]
     NodeLinkingError(NodeLinkingError<Node, Node>),
+    #[display("Type replacement mismatch error. src: {src}, first: {first}, second: {second}.")]
+    InconsistentTypeReplacement {
+        src: Type,
+        first: Type,
+        second: Type,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -68,7 +74,6 @@ impl ImplementOpsPass {
 
 impl Default for ImplementOpsPass {
     fn default() -> Self {
-        let int: Type = INT_TYPES[6].clone();
         Self {
             scope: Default::default(),
             type_replacements: vec![qb_t(), measurement_type()],
@@ -121,7 +126,7 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
             })
             .collect_vec();
 
-        let type_replacements = self
+        let type_replacements_map = self
             .op_replacements
             .iter()
             .filter_map(|((ext_name, op_name), (func_hugr, func_name))| {
@@ -130,25 +135,44 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
                     .get_op(op_name)
                     .unwrap()
                     .clone()
-                    .compute_signature(&[])
+                    .compute_signature(&[]) // TODO op args??
                     .unwrap();
-                let func_sig = extract_func_sig(&func_hugr.unwrap(), func_name)
+                let func_sig = extract_func_sig(func_hugr.as_ref().unwrap(), func_name)
                     .unwrap()
-                    .instantiate(&[])
+                    .instantiate(&[]) // TODO function args??
                     .unwrap();
-                let type_map: HashMap<Type, Type> = op_sig
+                let replacements = op_sig
                     .input
                     .iter()
                     .zip(func_sig.input.iter())
                     .chain(op_sig.output.into_iter().zip(func_sig.output.iter()))
                     .filter(|(op_ty, _)| self.type_replacements.contains(op_ty))
                     .map(|(op_ty, func_ty)| (op_ty.clone(), func_ty.clone()))
-                    .collect();
-                Some(type_map)
+                    .collect_vec();
+                Some(replacements)
             })
-            .into();
+            .flatten()
+            .try_fold(
+                HashMap::new(),
+                |mut acc: HashMap<Type, Type>, (src, dst)| {
+                    match acc.entry(src) {
+                        Entry::Vacant(v) => {
+                            v.insert(dst);
+                            Ok(acc)
+                        }
+                        Entry::Occupied(o) if o.get() == &dst => Ok(acc), // consistent duplicate
+                        Entry::Occupied(o) => {
+                            Err(ImplementOpsPassError::InconsistentTypeReplacement {
+                                src: o.key().clone(),
+                                first: o.get().clone(),
+                                second: dst,
+                            })
+                        }
+                    }
+                },
+            )?;
 
-        let mut state = ImplementOpsState::new(hugr, &type_replacements);
+        let mut state = ImplementOpsState::new(hugr, &type_replacements_map);
         for (op_def, func_hugr, func_name) in op_funcs {
             state.op(ExtensionOp::new(op_def, [])?, func_hugr, func_name)?;
         }
