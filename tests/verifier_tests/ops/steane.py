@@ -186,6 +186,6 @@ STEANE = StabilizerCode(
     num_logical_qubits=1,
     distance=3,
     generators=STEANE_STABILIZER_GENERATORS,
-    x_logicals=string_to_strings(STEANE_X_LOGICAL),
-    z_logicals=string_to_strings(STEANE_Z_LOGICAL),
+    x_logicals=STEANE_X_LOGICAL.into(pauli.Strings),
+    z_logicals=STEANE_Z_LOGICAL.into(pauli.Strings),
 )

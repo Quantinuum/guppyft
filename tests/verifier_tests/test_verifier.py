@@ -97,7 +97,7 @@ def test_padding() -> None:
 
 def test_logical_expansion() -> None:
     expanded_logicals = expand_logical_signterms(
-        stringset_to_signterms(LOGICAL_STRINGSET, 2), STEANE
+        LOGICAL_STRINGSET.to_strings().into(pauli.SignTerms), STEANE
     )
     expanded_tuples = expanded_logicals.strings.get_tuples()
     zs = tuple([pauli.PauliMatrix.Z] * 14)
@@ -107,7 +107,7 @@ def test_logical_expansion() -> None:
 
 def test_entire_stabilizer_set() -> None:
     stab_set = get_expanded_stabilizer_set(
-        stringset_to_signterms(LOGICAL_STRINGSET, qubit_capacity=2),
+        LOGICAL_STRINGSET.to_strings().into(pauli.SignTerms),
         STEANE,
         num_blocks=1,
     )

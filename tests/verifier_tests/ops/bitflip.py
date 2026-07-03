@@ -83,6 +83,6 @@ BIT_FLIP_CODE = StabilizerCode(
     num_logical_qubits=1,
     distance=1,
     generators=BIT_FLIP_CODE_GENERATORS,
-    x_logicals=string_to_strings(pauli.String.from_str("X0 X1 X2")),
-    z_logicals=string_to_strings(pauli.String.from_str("Z0 I1 I2")),
+    x_logicals=pauli.String.from_str("X0 X1 X2").into(pauli.Strings),
+    z_logicals=pauli.String.from_str("Z0 I1 I2").into(pauli.Strings),
 )

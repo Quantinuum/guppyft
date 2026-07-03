@@ -55,19 +55,3 @@ def stabilizerlist_to_signterms(stab_list: StabilizerList) -> pauli.SignTerms:
         term = selene_stabilizer_to_zixy_signterm(gen)
         sign_terms.append(term)
     return sign_terms
-
-
-def stringset_to_signterms(
-    string_set: pauli.StringSet, qubit_capacity: int
-) -> pauli.SignTerms:
-    """Utils function for converting a StringSet to an eqivalent SignTerms instance."""
-    terms = pauli.SignTerms(qubits=qubit_capacity)
-    for string in string_set.to_strings():
-        terms.append(pauli.SignTerm.from_cmpnt_coeff(string, Sign(0)))
-    return terms
-
-
-def string_to_strings(string: pauli.String) -> pauli.Strings:
-    """Convert a String instance to a Strings of unit length."""
-    my_tuple = (string.get_tuple(),)
-    return pauli.Strings.from_iterable(my_tuple, len(my_tuple[0]))
