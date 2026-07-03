@@ -4,6 +4,9 @@ from guppylang import guppy
 from guppylang.std.array import array
 from guppylang.std.builtins import Function
 from guppylang.std.quantum import cx, h, qubit
+from zixy.qubit import pauli
+
+from guppyft.verifier.code import StabilizerCode
 
 
 @guppy
@@ -68,3 +71,17 @@ def bit_flip_choi_state_double_block(
         second_control_block,
         second_target_block,
     )
+
+
+BIT_FLIP_CODE_GENERATORS = pauli.StringSet.from_cmpnts(
+    pauli.Strings.from_str("Z0 Z1, Z1 Z2", 3)
+)
+
+BIT_FLIP_CODE = StabilizerCode(
+    num_physical_qubits=3,
+    num_logical_qubits=1,
+    distance=1,
+    generators=BIT_FLIP_CODE_GENERATORS,
+    x_logicals=pauli.String.from_str("X0 X1 X2").into(pauli.Strings),
+    z_logicals=pauli.String.from_str("Z0 I1 I2").into(pauli.Strings),
+)

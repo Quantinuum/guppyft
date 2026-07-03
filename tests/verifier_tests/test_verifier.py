@@ -1,12 +1,6 @@
 import numpy as np
 from zixy.qubit import pauli
 
-from guppyft.verifier.code import (
-    BIT_FLIP_CODE,
-    ICEBERG_4_2_2,
-    STEANE,
-)
-from guppyft.verifier.utils import stringset_to_signterms
 from guppyft.verifier.verify import (
     compute_stabilizers_double_block,
     compute_stabilizers_single_block,
@@ -20,11 +14,13 @@ from guppyft.verifier.verify import (
 )
 
 from .ops.bitflip import (
+    BIT_FLIP_CODE,
     bit_flip_choi_state_double_block,
     bit_flip_logical_identity_double_block,
     bit_flip_physical_identity_double_block,
 )
 from .ops.iceberg import (
+    ICEBERG_4_2_2,
     iceberg_addressable_h_logical,
     iceberg_addressable_h_physical,
     iceberg_addressable_rx_half_pi_logical,
@@ -51,6 +47,7 @@ from .ops.iceberg import (
     iceberg_transversal_cx_physical,
 )
 from .ops.steane import (
+    STEANE,
     steane_choi_state,
     steane_choi_state_double_block,
     steane_logical_cx,
@@ -99,7 +96,7 @@ def test_padding() -> None:
 
 def test_logical_expansion() -> None:
     expanded_logicals = expand_logical_signterms(
-        stringset_to_signterms(LOGICAL_STRINGSET, 2), STEANE
+        LOGICAL_STRINGSET.to_strings().into(pauli.SignTerms), STEANE
     )
     expanded_tuples = expanded_logicals.strings.get_tuples()
     zs = tuple([pauli.PauliMatrix.Z] * 14)
@@ -109,7 +106,7 @@ def test_logical_expansion() -> None:
 
 def test_entire_stabilizer_set() -> None:
     stab_set = get_expanded_stabilizer_set(
-        stringset_to_signterms(LOGICAL_STRINGSET, qubit_capacity=2),
+        LOGICAL_STRINGSET.to_strings().into(pauli.SignTerms),
         STEANE,
         num_blocks=1,
     )
