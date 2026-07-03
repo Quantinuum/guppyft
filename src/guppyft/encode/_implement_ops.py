@@ -11,6 +11,7 @@ from hugr.ext import TypeDef
 from hugr.ops import FuncDecl, FuncDefn
 from hugr.package import Package
 from hugr.tys import ExtType, Type
+from tket.extensions import measurement
 
 from guppyft._bindings import RsHugr
 from guppyft._bindings import _implement_ops as _implement_ops_binding
@@ -115,6 +116,9 @@ class TyReplacements:
 
         return self
 
+    def with_defaults(self) -> Self:
+        return self.with_types([measurement.measurement_t, ("prelude", "qubit")])
+
 
 @dataclass(frozen=True, kw_only=True)
 class ImplementOpsSpec:
@@ -123,7 +127,7 @@ class ImplementOpsSpec:
 
     ops: OpReplacements
     """The operations to replace."""
-    tys: TyReplacements
+    tys: TyReplacements = field(default=TyReplacements().with_defaults())
     """The types to replace."""
     build_wrapper: Callable[
         [GuppyFunctionDefinition[[], None]], GuppyFunctionDefinition[[], None]

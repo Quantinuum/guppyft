@@ -1,7 +1,6 @@
 from collections import defaultdict
 from typing import no_type_check
 
-import tket.extensions
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.library import GuppyLibrary, link_name
@@ -13,7 +12,6 @@ from guppylang.std.qsystem.helios import zz_phase
 from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
 
 from guppyft.encode import EncoderSpec, ImplementOpsSpec, OpReplacements
-from guppyft.encode._implement_ops import TyReplacements
 from guppyft.globals import map_global, with_global
 
 N = guppy.nat_var("N")
@@ -300,9 +298,6 @@ def identity_code_spec(
         }
     )
 
-    tys = TyReplacements()
-    tys.with_types([tket.extensions.measurement.measurement_t, ("prelude", "qubit")])
-
     def build_wrapper(
         func: GuppyFunctionDefinition[[], None],
     ) -> GuppyFunctionDefinition[[], None]:
@@ -317,6 +312,6 @@ def identity_code_spec(
 
     return EncoderSpec(
         implement_spec=ImplementOpsSpec(
-            ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[lib]
+            ops=ops, build_wrapper=build_wrapper, libs=[lib]
         )
     )
