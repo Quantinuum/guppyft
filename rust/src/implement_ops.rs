@@ -53,6 +53,9 @@ pub enum ImplementOpsPassError {
         first: Box<Type>,
         second: Box<Type>,
     },
+    MissingFunctionHugr {
+        name: String,
+    },
 }
 
 #[derive(Debug, Clone, Default)]
@@ -115,41 +118,48 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
             .unique_by(|(op, _, _)| OpHashWrapper::from(op)) // one per unique (name, args) combo
             .collect_vec();
 
-        let type_replacements_map = op_funcs
+        let type_replacements: Result<Vec<Vec<(Type, Type)>>, ImplementOpsPassError> = op_funcs
             .iter()
-            .filter_map(|(op_def, func_hugr, func_name)| {
+            .map(|(op_def, func_hugr, func_name)| {
+                let func_hugr =
+                    func_hugr
+                        .as_ref()
+                        .ok_or(ImplementOpsPassError::MissingFunctionHugr {
+                            name: func_name.to_string(),
+                        })?;
                 let op_sig = op_def.signature();
-                let func_sig = extract_func_sig(&func_hugr.clone()?, func_name).unwrap();
-                let func_sig = func_sig.instantiate(&[]).unwrap();
-                let replacements = op_sig
+                let func_sig = extract_func_sig(func_hugr, func_name)?.instantiate(&[])?;
+                assert_eq!(op_sig.input.len(), func_sig.input.len());
+                assert_eq!(op_sig.output.len(), func_sig.output.len());
+                Ok(op_sig
                     .input
                     .iter()
                     .zip(func_sig.input.iter())
                     .chain(op_sig.output.iter().zip(func_sig.output.iter()))
                     .map(|(op_ty, func_ty)| (op_ty.clone(), func_ty.clone()))
-                    .collect_vec();
-                Some(replacements)
+                    .filter(|(op_ty, _)| op_ty.as_extension().is_some())
+                    .filter(|(op_ty, func_ty)| op_ty != func_ty)
+                    .collect())
             })
-            .flatten()
-            .try_fold(
-                HashMap::new(),
-                |mut acc: HashMap<Type, Type>, (src, dst)| {
-                    match acc.entry(src) {
-                        Entry::Vacant(v) => {
-                            v.insert(dst);
-                            Ok(acc)
-                        }
-                        Entry::Occupied(o) if o.get() == &dst => Ok(acc), // consistent duplicate
-                        Entry::Occupied(o) => {
-                            Err(ImplementOpsPassError::InconsistentTypeReplacement {
-                                src: Box::new(o.key().clone()),
-                                first: Box::new(o.get().clone()),
-                                second: Box::new(dst),
-                            })
-                        }
+            .collect();
+
+        let type_replacements_map = type_replacements?.iter().flatten().try_fold(
+            HashMap::new(),
+            |mut acc: HashMap<Type, Type>, (src, dst)| {
+                match acc.entry(src.clone()) {
+                    Entry::Vacant(v) => {
+                        v.insert(dst.clone());
+                        Ok(acc)
                     }
-                },
-            )?;
+                    Entry::Occupied(o) if o.get() == dst => Ok(acc), // consistent duplicate
+                    Entry::Occupied(o) => Err(ImplementOpsPassError::InconsistentTypeReplacement {
+                        src: Box::new(o.key().clone()),
+                        first: Box::new(o.get().clone()),
+                        second: Box::new(dst.clone()),
+                    }),
+                }
+            },
+        )?;
 
         let mut state = ImplementOpsState::new(hugr, &type_replacements_map);
         for (op_def, func_hugr, func_name) in op_funcs {
@@ -217,7 +227,12 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
     pub fn new(hugr: &'a mut H, types: &'a HashMap<Type, Type>) -> Self {
         let mut type_replacer = ReplaceTypes::default();
         for (src, tgt) in types.iter() {
-            type_replacer.set_replace_type(src.as_extension().unwrap().clone(), tgt.clone());
+            type_replacer.set_replace_type(
+                src.as_extension()
+                    .unwrap_or_else(|| panic!("Failed to unwrap extension for src op: {}.", src))
+                    .clone(),
+                tgt.clone(),
+            );
         }
 
         Self {
