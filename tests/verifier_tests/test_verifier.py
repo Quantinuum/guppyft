@@ -1,7 +1,6 @@
 import numpy as np
 from zixy.qubit import pauli
 
-from guppyft.verifier.utils import stringset_to_signterms
 from guppyft.verifier.verify import (
     compute_stabilizers_double_block,
     compute_stabilizers_single_block,

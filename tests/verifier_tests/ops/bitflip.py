@@ -7,7 +7,6 @@ from guppylang.std.quantum import cx, h, qubit
 from zixy.qubit import pauli
 
 from guppyft.verifier.code import StabilizerCode
-from guppyft.verifier.utils import string_to_strings
 
 
 @guppy

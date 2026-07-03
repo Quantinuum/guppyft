@@ -5,8 +5,6 @@ from .code import (
 from .utils import (
     selene_stabilizer_to_zixy_signterm,
     stabilizerlist_to_signterms,
-    string_to_strings,
-    stringset_to_signterms,
 )
 from .verify import (
     compute_stabilizers_double_block,
@@ -30,6 +28,4 @@ __all__ = [
     "pad_code_stabilizers",
     "selene_stabilizer_to_zixy_signterm",
     "stabilizerlist_to_signterms",
-    "string_to_strings",
-    "stringset_to_signterms",
 ]

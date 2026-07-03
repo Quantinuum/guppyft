@@ -8,7 +8,6 @@ from zixy.qubit import pauli
 from zixy.qubit.pauli import X, Z
 
 from guppyft.verifier.code import StabilizerCode
-from guppyft.verifier.utils import string_to_strings
 
 
 @guppy
