@@ -14,6 +14,7 @@ mod _bindings {
     use pyo3::exceptions::PyValueError;
     use pyo3::prelude::*;
     use std::collections::{BTreeMap, HashSet};
+    use tket::hugr::HugrView;
     use tket::passes::ComposablePass;
 
     #[pyfunction]
@@ -29,7 +30,20 @@ mod _bindings {
             .map(|(k, (rs_hugr, func_name))| (k, (rs_hugr.map(|x| x.hugr), func_name)))
             .collect();
 
-        let pass = implement_ops::ImplementOpsPass::new(new_ops, ty_replacements);
+        let ty_hashmap = ty_replacements
+            .iter()
+            .map(|(ext_str, ty_str)| {
+                let ty = hugr
+                    .extensions()
+                    .get(ext_str)
+                    .unwrap()
+                    .get_type(ty_str)
+                    .unwrap();
+                (ty.extension_id().clone(), ty.name().clone())
+            })
+            .collect();
+
+        let pass = implement_ops::ImplementOpsPass::new(new_ops, ty_hashmap);
         pass.run(hugr)
             .map_err(|e| PyValueError::new_err(format!("Error replacing operations: {e}")))?;
 

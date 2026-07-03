@@ -9,17 +9,20 @@ use hugr::{
     hugr::{ValidationError, hugrmut::HugrMut},
     ops::ExtensionOp,
     ops::{DataflowOpTrait, OpType, handle::NodeHandle as _},
-    types::{PolyFuncType, Type},
+    types::{PolyFuncType, Type, TypeRow},
 };
+use hugr_core::extension::ExtensionId;
 use hugr_core::hugr::internal::HugrMutInternals;
 use hugr_core::hugr::linking::NodeLinkingError;
 use hugr_core::ops::{Call, OpName};
-use hugr_core::types::{Transformable, TypeArg};
+use hugr_core::std_extensions::collections::array::Array;
+use hugr_core::std_extensions::collections::borrow_array::BorrowArray;
+use hugr_core::types::{SumType, Transformable, TypeArg, TypeName, TypeRowRV};
 use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::hash_map::Entry;
 use std::collections::{BTreeMap, HashMap, HashSet};
-use tket::passes::utils::unpack_container::TypeUnpacker;
+use tket::passes::utils::unpack_container::type_unpack::array_args;
 use tket::passes::{
     ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes, WithScope,
     replace_types::ReplaceTypesError,
@@ -63,13 +66,13 @@ pub enum ImplementOpsPassError {
 pub struct ImplementOpsPass {
     scope: PassScope,
     pub op_replacements: BTreeMap<(String, String), (Option<Hugr>, String)>,
-    ty_replacements: HashSet<(String, String)>,
+    ty_replacements: HashSet<(ExtensionId, TypeName)>,
 }
 
 impl ImplementOpsPass {
     pub fn new(
         op_replacements: BTreeMap<(String, String), (Option<Hugr>, String)>,
-        ty_replacements: HashSet<(String, String)>,
+        ty_replacements: HashSet<(ExtensionId, TypeName)>,
     ) -> Self {
         Self {
             op_replacements,
@@ -135,46 +138,25 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
                         .ok_or(ImplementOpsPassError::MissingFunctionHugr {
                             name: func_name.to_string(),
                         })?;
-                let op_sig = op_def.signature();
-                let func_sig = extract_func_sig(func_hugr, func_name)?.instantiate(&[])?;
+                let src_sig = op_def.signature();
+                let tgt_sig = extract_func_sig(func_hugr, func_name)?.instantiate(&[])?;
                 // Check that the lengths of the op and func signatures match
-                assert_eq!(op_sig.input.len(), func_sig.input.len());
-                assert_eq!(op_sig.output.len(), func_sig.output.len());
-                Ok(op_sig
+                assert_eq!(src_sig.input.len(), tgt_sig.input.len());
+                assert_eq!(src_sig.output.len(), tgt_sig.output.len());
+                let unpacker = &mut TypeUnpacker::new();
+                Ok(src_sig
                     .input
                     .iter()
-                    .zip(func_sig.input.iter())
-                    .chain(op_sig.output.iter().zip(func_sig.output.iter()))
-                    .map(|(op_ty, func_ty)| (op_ty.clone(), func_ty.clone()))
-                    // Filter on differences
-                    .filter(|(op_ty, func_ty)| op_ty != func_ty)
-                    // Filter on types can have extensions i.e. not builtin types like `int`
-                    .filter(|(op_ty, _)| op_ty.as_extension().is_some())
-                    // Filter recursively using `self.ty_replacements` as required for types like `borrow_array<N, Type>`
-                    // This is not ideal as this will include `borrow_array<...>` in the replacement types, when ideally
-                    // we should just include the nested type with its replacement.
-                    // For example, if we want to replace `Measurement` types. If we find that `op_sig`
-                    // has type `borrow_array<N, Measurement>` and the `func_sig` `borrow_array<N, Bool>`,
-                    // the type replacement will include the `borrow_array`, while we would actually want
-                    // to just include `Measurement` with `Bool`.
-                    .filter(|(op_ty, _)| {
-                        let unpacker = TypeUnpacker::new(op_ty.clone());
-                        self.ty_replacements.iter().any(|(ext, ty)| {
-                            let filter_ty: Type = hugr
-                                .extensions()
-                                .get(ext)
-                                .unwrap_or_else(|| panic!("Missing extension '{ext}'"))
-                                .get_type(ty)
-                                .unwrap_or_else(|| panic!("Missing type '{ext}.{ty}'"))
-                                .instantiate([])
-                                .unwrap_or_else(|e| {
-                                    panic!("Failed to instantiate type '{ext}.{ty}': {e}")
-                                })
-                                .into();
-                            unpacker.contains_element_type(&filter_ty)
-                        })
+                    .zip(tgt_sig.input.iter())
+                    .chain(src_sig.output.iter().zip(tgt_sig.output.iter()))
+                    .filter(|(src, tgt)| src != tgt)
+                    .filter_map(|(src, tgt)| {
+                        unpacker.unpack_type(src);
+                        unpacker
+                            .contains_filter_type(self.ty_replacements.clone())
+                            .then(|| (src.clone(), tgt.clone()))
                     })
-                    .collect())
+                    .collect_vec())
             })
             .collect();
 
@@ -203,6 +185,65 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
         state.finish()?;
         hugr.validate()?;
         Ok(())
+    }
+}
+
+#[derive(Clone, Default)]
+pub struct TypeUnpacker {
+    /// Cache of unpacked types.
+    cache: HashMap<Type, Vec<Type>>,
+}
+
+impl TypeUnpacker {
+    pub fn new() -> Self {
+        Self {
+            cache: HashMap::new(),
+        }
+    }
+
+    pub fn unpack_type(&mut self, ty: &Type) -> Vec<Type> {
+        if self.cache.contains_key(ty) {
+            return self.cache.get(ty).cloned().expect("checked above");
+        }
+
+        let unpacked = self._new_unpack_type(ty);
+        // SAFETY: types form trees so no cycles, cache will not be corrupted
+        self.cache.insert(ty.clone(), unpacked.clone());
+        unpacked
+    }
+
+    fn _new_unpack_type(&mut self, ty: &Type) -> Vec<Type> {
+        if let Some(row) = ty.as_sum().and_then(SumType::as_tuple) {
+            self.tuple_row(row)
+        } else if let Some((size, elem_ty)) = ty
+            .as_extension()
+            .and_then(|ext| array_args::<Array>(ext).or_else(|| array_args::<BorrowArray>(ext)))
+        {
+            let inner = self.unpack_type(&elem_ty);
+            let total_size = size as usize * inner.len();
+            let mut result = Vec::with_capacity(total_size);
+            for _ in 0..size {
+                result.extend_from_slice(&inner);
+            }
+            result
+        } else {
+            vec![ty.clone()]
+        }
+    }
+
+    fn tuple_row(&mut self, row: &TypeRowRV) -> Vec<Type> {
+        TypeRow::try_from(row.clone())
+            .expect("unexpected row variable.")
+            .iter()
+            .flat_map(|t| self.unpack_type(t))
+            .collect::<Vec<_>>()
+    }
+
+    fn contains_filter_type(&self, filter: HashSet<(ExtensionId, TypeName)>) -> bool {
+        self.cache.keys().any(|ty| {
+            ty.as_extension()
+                .is_some_and(|ct| filter.contains(&(ct.extension().clone(), ct.name().clone())))
+        })
     }
 }
 
@@ -260,6 +301,9 @@ struct ImplementOpsState<'a, H: HugrMut<Node = Node>> {
 
 impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
     pub fn new(hugr: &'a mut H, types: &'a HashMap<Type, Type>) -> Self {
+        for (src, tgt) in types.iter() {
+            eprintln!("{} {}", src, tgt)
+        }
         let mut type_replacer = ReplaceTypes::default();
         for (src, tgt) in types.iter() {
             type_replacer.set_replace_type(
