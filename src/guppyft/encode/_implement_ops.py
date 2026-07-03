@@ -1,4 +1,4 @@
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Self, no_type_check
 
@@ -7,8 +7,10 @@ from guppylang.defs import GuppyFunctionDefinition
 from guppylang.library import link_name
 from hugr import Hugr
 from hugr.build import DefinitionBuilder
+from hugr.ext import TypeDef
 from hugr.ops import FuncDecl, FuncDefn
 from hugr.package import Package
+from hugr.tys import ExtType, Type
 
 from guppyft._bindings import RsHugr
 from guppyft._bindings import _implement_ops as _implement_ops_binding
@@ -88,6 +90,32 @@ class OpReplacements:
         return self
 
 
+class TyReplacements:
+    tys: set[tuple[str, str]]
+
+    def __init__(self) -> None:
+        self.tys = set()
+
+    def with_type(self, ty: Type | tuple[str, str]) -> Self:
+        match ty:
+            case TypeDef():
+                self.tys.add((ty.get_extension().name, ty.name))
+            case ExtType():
+                self.tys.add((ty.type_def.get_extension().name, ty.type_def.name))
+            case tuple():
+                self.tys.add(ty)
+            case _:
+                raise TypeError(f"Unexpected Type: {ty}, {type(ty)}")
+
+        return self
+
+    def with_types(self, tys: Sequence[Type | tuple[str, str]]) -> Self:
+        for ty in tys:
+            self.with_type(ty)
+
+        return self
+
+
 @dataclass(frozen=True, kw_only=True)
 class ImplementOpsSpec:
     """A specification for the implement ops pass, supplying implementations to a set of
@@ -95,6 +123,8 @@ class ImplementOpsSpec:
 
     ops: OpReplacements
     """The operations to replace."""
+    tys: TyReplacements
+    """The types to replace."""
     build_wrapper: Callable[
         [GuppyFunctionDefinition[[], None]], GuppyFunctionDefinition[[], None]
     ] = field(default=lambda x: x)
@@ -119,7 +149,9 @@ def _to_rs_hugr(
             )
 
 
-def _implement_ops(pkg: Package, ops: OpReplacements) -> Package:
+def _implement_ops(
+    pkg: Package, ops: OpReplacements, tys: set[tuple[str, str]]
+) -> Package:
     rs_hugr = RsHugr.from_bytes(pkg.modules[0].to_bytes())
 
     rs_ops = {
@@ -130,7 +162,7 @@ def _implement_ops(pkg: Package, ops: OpReplacements) -> Package:
         for key, (func_opt, name) in ops
     }
 
-    _implement_ops_binding(rs_hugr, rs_ops)
+    _implement_ops_binding(rs_hugr, rs_ops, tys)
 
     return Package.from_bytes(rs_hugr.to_bytes())
 
@@ -162,7 +194,7 @@ def implement_ops(
     # Reset entrypoint, marking module as non-executable, to avoid linking conflicts
     hugr.entrypoint = hugr.module_root
     # Run rewrite, replacing ops with function calls to the functions in `spec.ops`
-    hugr_pkg = _implement_ops(hugr_pkg, spec.ops)
+    hugr_pkg = _implement_ops(hugr_pkg, spec.ops, spec.tys.tys)
 
     # Build, compile, and link wrapper program
     @guppy.declare

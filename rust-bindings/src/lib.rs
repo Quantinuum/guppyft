@@ -13,13 +13,14 @@ mod _bindings {
     use guppyft::implement_ops;
     use pyo3::exceptions::PyValueError;
     use pyo3::prelude::*;
-    use std::collections::BTreeMap;
+    use std::collections::{BTreeMap, HashSet};
     use tket::passes::ComposablePass;
 
     #[pyfunction]
     fn _implement_ops(
         rs_hugr: &mut RsHugr,
         op_replacements: BTreeMap<(String, String), (Option<RsHugr>, String)>,
+        ty_replacements: HashSet<(String, String)>,
     ) -> PyResult<()> {
         let hugr = &mut rs_hugr.hugr;
 
@@ -28,7 +29,7 @@ mod _bindings {
             .map(|(k, (rs_hugr, func_name))| (k, (rs_hugr.map(|x| x.hugr), func_name)))
             .collect();
 
-        let pass = implement_ops::ImplementOpsPass::new(new_ops);
+        let pass = implement_ops::ImplementOpsPass::new(new_ops, ty_replacements);
         pass.run(hugr)
             .map_err(|e| PyValueError::new_err(format!("Error replacing operations: {e}")))?;
 

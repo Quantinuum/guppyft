@@ -18,7 +18,7 @@ use hugr_core::types::{Transformable, TypeArg};
 use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::hash_map::Entry;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use tket::passes::{
     ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes, WithScope,
     replace_types::ReplaceTypesError,
@@ -62,12 +62,17 @@ pub enum ImplementOpsPassError {
 pub struct ImplementOpsPass {
     scope: PassScope,
     pub op_replacements: BTreeMap<(String, String), (Option<Hugr>, String)>,
+    ty_replacements: HashSet<(String, String)>,
 }
 
 impl ImplementOpsPass {
-    pub fn new(op_replacements: BTreeMap<(String, String), (Option<Hugr>, String)>) -> Self {
+    pub fn new(
+        op_replacements: BTreeMap<(String, String), (Option<Hugr>, String)>,
+        ty_replacements: HashSet<(String, String)>,
+    ) -> Self {
         Self {
             op_replacements,
+            ty_replacements,
             ..Self::default()
         }
     }
@@ -115,9 +120,11 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
                 let (func_hugr, func_name) = self.op_replacements.get(&key)?;
                 Some((ext_op.clone(), func_hugr.clone(), func_name.as_str()))
             })
-            .unique_by(|(op, _, _)| OpHashWrapper::from(op)) // one per unique (name, args) combo
+            .unique_by(|(op, _, _)| OpHashWrapper::from(op))
             .collect_vec();
 
+        // Determine type replacements from differences between the `ext_op` and `func_hugr` signatures
+        // Filter using `self.type_def_filter` to only replace specific types
         let type_replacements: Result<Vec<Vec<(Type, Type)>>, ImplementOpsPassError> = op_funcs
             .iter()
             .map(|(op_def, func_hugr, func_name)| {
@@ -129,6 +136,7 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
                         })?;
                 let op_sig = op_def.signature();
                 let func_sig = extract_func_sig(func_hugr, func_name)?.instantiate(&[])?;
+                // Check that the lengths of the op and func signatures match
                 assert_eq!(op_sig.input.len(), func_sig.input.len());
                 assert_eq!(op_sig.output.len(), func_sig.output.len());
                 Ok(op_sig
@@ -137,7 +145,13 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
                     .zip(func_sig.input.iter())
                     .chain(op_sig.output.iter().zip(func_sig.output.iter()))
                     .map(|(op_ty, func_ty)| (op_ty.clone(), func_ty.clone()))
-                    .filter(|(op_ty, _)| op_ty.as_extension().is_some())
+                    // Filter type replacements
+                    .filter(|(op_ty, _)| {
+                        op_ty.as_extension().is_some_and(|ct| {
+                            self.ty_replacements
+                                .contains(&(ct.extension().to_string(), ct.name().to_string()))
+                        })
+                    })
                     .filter(|(op_ty, func_ty)| op_ty != func_ty)
                     .collect())
             })
