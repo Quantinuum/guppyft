@@ -19,6 +19,7 @@ use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::hash_map::Entry;
 use std::collections::{BTreeMap, HashMap, HashSet};
+use tket::passes::utils::unpack_container::TypeUnpacker;
 use tket::passes::{
     ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes, WithScope,
     replace_types::ReplaceTypesError,
@@ -123,8 +124,8 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
             .unique_by(|(op, _, _)| OpHashWrapper::from(op))
             .collect_vec();
 
-        // Determine type replacements from differences between the `ext_op` and `func_hugr` signatures
-        // Filter using `self.type_def_filter` to only replace specific types
+        // Determine type replacements from differences between the `ext_op` and `func_hugr` signatures.
+        // Filter using `self.ty_replacements` to only replace specific extension types.
         let type_replacements: Result<Vec<Vec<(Type, Type)>>, ImplementOpsPassError> = op_funcs
             .iter()
             .map(|(op_def, func_hugr, func_name)| {
@@ -145,14 +146,34 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
                     .zip(func_sig.input.iter())
                     .chain(op_sig.output.iter().zip(func_sig.output.iter()))
                     .map(|(op_ty, func_ty)| (op_ty.clone(), func_ty.clone()))
-                    // Filter type replacements
+                    // Filter on differences
+                    .filter(|(op_ty, func_ty)| op_ty != func_ty)
+                    // Filter on types can have extensions i.e. not builtin types like `int`
+                    .filter(|(op_ty, _)| op_ty.as_extension().is_some())
+                    // Filter recursively using `self.ty_replacements` as required for types like `borrow_array<N, Type>`
+                    // This is not ideal as this will include `borrow_array<...>` in the replacement types, when ideally
+                    // we should just include the nested type with its replacement.
+                    // For example, if we want to replace `Measurement` types. If we find that `op_sig`
+                    // has type `borrow_array<N, Measurement>` and the `func_sig` `borrow_array<N, Bool>`,
+                    // the type replacement will include the `borrow_array`, while we would actually want
+                    // to just include `Measurement` with `Bool`.
                     .filter(|(op_ty, _)| {
-                        op_ty.as_extension().is_some_and(|ct| {
-                            self.ty_replacements
-                                .contains(&(ct.extension().to_string(), ct.name().to_string()))
+                        let unpacker = TypeUnpacker::new(op_ty.clone());
+                        self.ty_replacements.iter().any(|(ext, ty)| {
+                            let filter_ty: Type = hugr
+                                .extensions()
+                                .get(ext)
+                                .unwrap_or_else(|| panic!("Missing extension '{ext}'"))
+                                .get_type(ty)
+                                .unwrap_or_else(|| panic!("Missing type '{ext}.{ty}'"))
+                                .instantiate([])
+                                .unwrap_or_else(|e| {
+                                    panic!("Failed to instantiate type '{ext}.{ty}': {e}")
+                                })
+                                .into();
+                            unpacker.contains_element_type(&filter_ty)
                         })
                     })
-                    .filter(|(op_ty, func_ty)| op_ty != func_ty)
                     .collect())
             })
             .collect();

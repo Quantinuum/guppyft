@@ -106,7 +106,7 @@ class TyReplacements:
             case tuple():
                 self.tys.add(ty)
             case _:
-                raise TypeError(f"Unexpected Type: {ty}, {type(ty)}")
+                raise TypeError(f"TyReplacements: Unexpected Type: {ty}, {type(ty)}")
 
         return self
 
