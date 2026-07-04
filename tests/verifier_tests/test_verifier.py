@@ -27,8 +27,8 @@ from .ops.iceberg import (
     iceberg_addressable_rx_half_pi_physical,
     iceberg_addressable_rx_minus_half_pi_logical,
     iceberg_addressable_rx_minus_half_pi_physical,
-    iceberg_addressable_s_logical,
-    iceberg_addressable_s_physical,
+    iceberg_addressable_rz_half_pi_logical,
+    iceberg_addressable_rz_half_pi_physical,
     iceberg_choi_state,
     iceberg_choi_state_double_block,
     # iceberg_double_h_logical,
@@ -399,10 +399,10 @@ def test_iceberg_intrablock_cx() -> None:
     assert sem == impl
 
 
-def test_iceberg_addressable_s() -> None:
+def test_iceberg_addressable_rz_half_pi() -> None:
     sem, impl = compute_verification_signterms(
-        iceberg_addressable_s_logical,
-        iceberg_addressable_s_physical,
+        iceberg_addressable_rz_half_pi_logical,
+        iceberg_addressable_rz_half_pi_physical,
         iceberg_choi_state,
         ICEBERG_4_2_2,
     )

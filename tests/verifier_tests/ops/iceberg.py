@@ -6,7 +6,7 @@ from guppylang.std.array import array
 from guppylang.std.builtins import Function
 from guppylang.std.mem import mem_swap
 from guppylang.std.qsystem.helios import zz_max, zz_phase
-from guppylang.std.quantum import cx, cz, h, qubit, rx, s, sdg
+from guppylang.std.quantum import cx, cz, h, qubit, rx, rz, s, sdg
 from zixy.qubit import pauli
 
 from guppyft.verifier.code import StabilizerCode
@@ -57,23 +57,24 @@ def iceberg_addressable_h_logical(block: array[qubit, 2]) -> None:
     h(block[1])
 
 
+# Technically this is -H due to the global phase difference between S/Rz and V/Rx.
 @guppy
 @no_type_check
 def iceberg_addressable_h_physical(block: array[qubit, 4]) -> None:
-    iceberg_addressable_s_physical(block)
+    iceberg_addressable_rz_half_pi_physical(block)
     iceberg_addressable_rx_half_pi_physical(block)
-    iceberg_addressable_s_physical(block)
+    iceberg_addressable_rz_half_pi_physical(block)
 
 
 @guppy
 @no_type_check
-def iceberg_addressable_s_logical(block: array[qubit, 2]) -> None:
-    s(block[1])
+def iceberg_addressable_rz_half_pi_logical(block: array[qubit, 2]) -> None:
+    rz(block[1], pi / 2)
 
 
 @guppy
 @no_type_check
-def iceberg_addressable_s_physical(block: array[qubit, 4]) -> None:
+def iceberg_addressable_rz_half_pi_physical(block: array[qubit, 4]) -> None:
     zz_max(block[2], block[3])
 
 
@@ -113,14 +114,14 @@ def iceberg_addressable_rx_minus_half_pi_physical(block: array[qubit, 4]) -> Non
 @no_type_check
 def iceberg_double_h_logical(block: array[qubit, 2]) -> None:
     for i in range(2):
-        h(i)
+        h(block[i])
 
 
 @guppy
 @no_type_check
 def iceberg_double_h_physical(block: array[qubit, 4]) -> None:
     for i in range(4):
-        h(i)
+        h(block[i])
     mem_swap(block[1], block[2])
 
 
@@ -156,8 +157,8 @@ def iceberg_interblock_zzmax_physical(
 def iceberg_transversal_cx_logical(
     first_block: array[qubit, 2], second_block: array[qubit, 2]
 ) -> None:
-    cx(first_block[0], second_block[0])
-    cx(first_block[1], second_block[1])
+    for i in range(2):
+        cx(first_block[i], second_block[i])
 
 
 @guppy
@@ -165,10 +166,8 @@ def iceberg_transversal_cx_logical(
 def iceberg_transversal_cx_physical(
     first_block: array[qubit, 4], second_block: array[qubit, 4]
 ) -> None:
-    cx(first_block[0], second_block[0])
-    cx(first_block[1], second_block[1])
-    cx(first_block[2], second_block[2])
-    cx(first_block[3], second_block[3])
+    for i in range(4):
+        cx(first_block[i], second_block[i])
 
 
 @guppy
