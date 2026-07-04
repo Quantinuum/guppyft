@@ -199,8 +199,18 @@ def test_compute_stabilizers_double_block() -> None:
 
     assert stabilizers == pauli.SignTerms.from_iterable(
         (
-            (pauli.PauliMatrix.X, pauli.PauliMatrix.X),
-            (pauli.PauliMatrix.Z, pauli.PauliMatrix.Z),
+            (
+                pauli.PauliMatrix.X,
+                pauli.PauliMatrix.X,
+                pauli.PauliMatrix.I,
+                pauli.PauliMatrix.I,
+            ),
+            (
+                pauli.PauliMatrix.Z,
+                pauli.PauliMatrix.Z,
+                pauli.PauliMatrix.I,
+                pauli.PauliMatrix.I,
+            ),
             (
                 pauli.PauliMatrix.I,
                 pauli.PauliMatrix.I,
