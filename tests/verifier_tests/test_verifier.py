@@ -13,13 +13,13 @@ from guppyft.verifier.verify import (
     pad_code_stabilizers,
 )
 
+from .ops import iceberg
 from .ops.bitflip import (
     BIT_FLIP_CODE,
     bit_flip_choi_state_double_block,
     bit_flip_logical_identity_double_block,
     bit_flip_physical_identity_double_block,
 )
-from .ops import iceberg
 from .ops.steane import (
     STEANE,
     steane_choi_state,
