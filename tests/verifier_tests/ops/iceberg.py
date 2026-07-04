@@ -112,17 +112,15 @@ def iceberg_addressable_rx_minus_half_pi_physical(block: array[qubit, 4]) -> Non
 @guppy
 @no_type_check
 def iceberg_double_h_logical(block: array[qubit, 2]) -> None:
-    h(block[0])
-    h(block[1])
+    for i in range(2):
+        h(i)
 
 
 @guppy
 @no_type_check
 def iceberg_double_h_physical(block: array[qubit, 4]) -> None:
-    h(block[0])
-    h(block[1])
-    h(block[2])
-    h(block[3])
+    for i in range(4):
+        h(i)
     mem_swap(block[1], block[2])
 
 
@@ -131,8 +129,8 @@ def iceberg_double_h_physical(block: array[qubit, 4]) -> None:
 def iceberg_interblock_zzmax_logical(
     first_block: array[qubit, 2], second_block: array[qubit, 2]
 ) -> None:
-    zz_max(first_block[0], second_block[0])
-    zz_max(first_block[1], second_block[1])
+    for i in range(2):
+        zz_max(first_block[i], second_block[i])
 
 
 @guppy
