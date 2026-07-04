@@ -234,7 +234,7 @@ def choi_state_double_block(
     )
 
 
-ICEBERG_4_2_2_GENERATORS = pauli.StringSet.from_cmpnts(
+ICEBERG_GENERATORS = pauli.StringSet.from_cmpnts(
     pauli.Strings.from_str(
         "X0 X1 X2 X3, Z0 Z1 Z2 Z3",
         4,
@@ -245,28 +245,28 @@ ICEBERG_4_2_2_GENERATORS = pauli.StringSet.from_cmpnts(
 
 # [top q1, q2, bottom]
 
-# ICEBERG_4_2_2_X[0]: XI -> XXII
-# ICEBERG_4_2_2_X[1]: IX -> XIXI
+# ICEBERG_X_LOGICAL[0]: XI -> XXII
+# ICEBERG_X_LOGICAL[1]: IX -> XIXI
 
-ICEBERG_4_2_2_X = pauli.Strings.from_str(
+ICEBERG_X_LOGICAL = pauli.Strings.from_str(
     "X0 X1 I2 I3, X0 I1 X2 I3",
     4,
 )
 
-# ICEBERG_4_2_2_Z[0]: ZI -> IZIZ
-# ICEBERG_4_2_2_Z[1]: IZ -> IIZZ
+# ICEBERG_Z_LOGICAL[0]: ZI -> IZIZ
+# ICEBERG_Z_LOGICAL[1]: IZ -> IIZZ
 
-ICEBERG_4_2_2_Z = pauli.Strings.from_str(
+ICEBERG_Z_LOGICAL = pauli.Strings.from_str(
     "I0 Z1 I2 Z3, I0 I1 Z2 Z3",
     4,
 )
 
 
-ICEBERG_4_2_2 = StabilizerCode(
+ICEBERG_DEF = StabilizerCode(
     num_physical_qubits=4,
     num_logical_qubits=2,
     distance=2,
-    generators=ICEBERG_4_2_2_GENERATORS,
-    x_logicals=ICEBERG_4_2_2_X,
-    z_logicals=ICEBERG_4_2_2_Z,
+    generators=ICEBERG_GENERATORS,
+    x_logicals=ICEBERG_X_LOGICAL,
+    z_logicals=ICEBERG_Z_LOGICAL,
 )

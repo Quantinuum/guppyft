@@ -15,13 +15,13 @@ from guppyft.verifier.verify import (
 
 from .ops import iceberg
 from .ops.bitflip import (
-    BIT_FLIP_CODE,
+    BIT_FLIP_DEF,
     bit_flip_choi_state_double_block,
     bit_flip_logical_identity_double_block,
     bit_flip_physical_identity_double_block,
 )
 from .ops.steane import (
-    STEANE,
+    STEANE_DEF,
     steane_choi_state,
     steane_choi_state_double_block,
     steane_logical_cx,
@@ -62,7 +62,7 @@ LOGICAL_STRINGSET = pauli.StringSet.from_cmpnts(pauli.Strings.from_str("X0 X1, Z
 
 
 def test_padding() -> None:
-    padded_steane_stabilizers = pad_code_stabilizers(STEANE, num_blocks=1)
+    padded_steane_stabilizers = pad_code_stabilizers(STEANE_DEF, num_blocks=1)
     assert len(padded_steane_stabilizers) == 2 * (7 - 1)
     for g_tuple in padded_steane_stabilizers.to_strings().get_tuples():
         assert len(g_tuple) == 2 * 7
@@ -70,7 +70,7 @@ def test_padding() -> None:
 
 def test_logical_expansion() -> None:
     expanded_logicals = expand_logical_signterms(
-        LOGICAL_STRINGSET.to_strings().into(pauli.SignTerms), STEANE
+        LOGICAL_STRINGSET.to_strings().into(pauli.SignTerms), STEANE_DEF
     )
     expanded_tuples = expanded_logicals.strings.get_tuples()
     zs = tuple([pauli.PauliMatrix.Z] * 14)
@@ -81,7 +81,7 @@ def test_logical_expansion() -> None:
 def test_entire_stabilizer_set() -> None:
     stab_set = get_expanded_stabilizer_set(
         LOGICAL_STRINGSET.to_strings().into(pauli.SignTerms),
-        STEANE,
+        STEANE_DEF,
         num_blocks=1,
     )
     assert len(stab_set.strings.get_tuples()) == 14
@@ -95,7 +95,7 @@ def test_steane_h() -> None:
         steane_logical_h,
         steane_physical_h,
         code_choi_state_function=steane_choi_state,
-        code_definition=STEANE,
+        code_definition=STEANE_DEF,
     )
 
     assert sem == impl
@@ -125,7 +125,7 @@ def test_steane_s() -> None:
         steane_logical_s,
         steane_physical_s,
         code_choi_state_function=steane_choi_state,
-        code_definition=STEANE,
+        code_definition=STEANE_DEF,
     )
 
     assert sem == impl
@@ -136,7 +136,7 @@ def test_steane_sdg() -> None:
         steane_logical_sdg,
         steane_physical_sdg,
         code_choi_state_function=steane_choi_state,
-        code_definition=STEANE,
+        code_definition=STEANE_DEF,
     )
 
     assert sem == impl
@@ -147,7 +147,7 @@ def test_steane_invalid_s() -> None:
         steane_logical_s,
         steane_physical_sdg,
         code_choi_state_function=steane_choi_state,
-        code_definition=STEANE,
+        code_definition=STEANE_DEF,
     )
 
     assert sem != impl
@@ -158,7 +158,7 @@ def test_steane_invalid_sdg() -> None:
         steane_logical_sdg,
         steane_physical_s,
         code_choi_state_function=steane_choi_state,
-        code_definition=STEANE,
+        code_definition=STEANE_DEF,
     )
 
     assert sem != impl
@@ -201,7 +201,7 @@ def test_compute_stabilizers_double_block() -> None:
         4,
     )
 
-    expanded_pauli_ops = expand_logical_signterms(stabilizers, STEANE)
+    expanded_pauli_ops = expand_logical_signterms(stabilizers, STEANE_DEF)
     assert (
         str(expanded_pauli_ops)
         == "(+1, X0 X1 X2 X3 X4 X5 X6 X7 X8 X9 X10 X11 X12 X13),"
@@ -212,9 +212,9 @@ def test_compute_stabilizers_double_block() -> None:
 
 
 def test_stabilizer_padding_double_block() -> None:
-    padded_double_block_stabilizers = pad_code_stabilizers(STEANE, num_blocks=2)
+    padded_double_block_stabilizers = pad_code_stabilizers(STEANE_DEF, num_blocks=2)
     assert len(padded_double_block_stabilizers) == 4 * (
-        STEANE.num_physical_qubits - STEANE.num_logical_qubits
+        STEANE_DEF.num_physical_qubits - STEANE_DEF.num_logical_qubits
     )
 
     assert (
@@ -239,7 +239,7 @@ def test_bit_flip_double_block_identity() -> None:
         bit_flip_logical_identity_double_block,
         bit_flip_physical_identity_double_block,
         code_choi_state_function=bit_flip_choi_state_double_block,
-        code_definition=BIT_FLIP_CODE,
+        code_definition=BIT_FLIP_DEF,
     )
     assert sem == impl
 
@@ -249,7 +249,7 @@ def test_steane_double_block_identity() -> None:
         steane_logical_identity_double_block,
         steane_physical_identity_double_block,
         code_choi_state_function=steane_choi_state_double_block,
-        code_definition=STEANE,
+        code_definition=STEANE_DEF,
     )
     assert sem == impl
 
@@ -259,7 +259,7 @@ def test_steane_cx() -> None:
         steane_logical_cx,
         steane_physical_cx,
         code_choi_state_function=steane_choi_state_double_block,
-        code_definition=STEANE,
+        code_definition=STEANE_DEF,
     )
     assert sem == impl
 
@@ -274,17 +274,17 @@ def test_compute_stabilizers_single_block_iceberg_id() -> None:
     )
 
     expanded = expand_logical_signterms(
-        choi_stabilizers_before_expansion, iceberg.ICEBERG_4_2_2
+        choi_stabilizers_before_expansion, iceberg.ICEBERG_DEF
     )
     assert (
         str(expanded)
         == "(+1, X0 X1 X4 X5), (+1, Z1 Z3 Z5 Z7), (+1, X0 X2 X4 X6), (+1, Z2 Z3 Z6 Z7)"
     )
 
-    padded = pad_code_stabilizers(iceberg.ICEBERG_4_2_2, num_blocks=1)
+    padded = pad_code_stabilizers(iceberg.ICEBERG_DEF, num_blocks=1)
     assert str(padded) == "X0 X1 X2 X3, Z0 Z1 Z2 Z3, X4 X5 X6 X7, Z4 Z5 Z6 Z7"
     expanded_stabilizer_state_stabilizers = get_expanded_stabilizer_set(
-        choi_stabilizers_before_expansion, iceberg.ICEBERG_4_2_2, num_blocks=1
+        choi_stabilizers_before_expansion, iceberg.ICEBERG_DEF, num_blocks=1
     )
     assert (
         str(expanded_stabilizer_state_stabilizers)
@@ -298,7 +298,7 @@ def test_single_block_iceberg_id_verification() -> None:
         iceberg.logical_identity,
         iceberg.physical_identity,
         iceberg.choi_state,
-        iceberg.ICEBERG_4_2_2,
+        iceberg.ICEBERG_DEF,
     )
     assert sem == impl
 
@@ -315,7 +315,7 @@ def test_compute_stabilizers_double_block_iceberg_id() -> None:
         + " (+1, X4 X6), (+1, Z4 Z6), (+1, X5 X7), (+1, Z5 Z7)"
     )
     expanded = expand_logical_signterms(
-        choi_stabilizers_before_expansion, iceberg.ICEBERG_4_2_2
+        choi_stabilizers_before_expansion, iceberg.ICEBERG_DEF
     )
     assert (
         str(expanded)
@@ -329,7 +329,7 @@ def test_double_block_iceberg_id() -> None:
         iceberg.logical_identity_double_block,
         iceberg.physical_identity_double_block,
         iceberg.choi_state_double_block,
-        iceberg.ICEBERG_4_2_2,
+        iceberg.ICEBERG_DEF,
     )
     assert sem == impl
 
@@ -345,7 +345,7 @@ def test_compute_stabilizers_intrablock_cx_iceberg() -> None:
         == "(+1, X0 X2 X3), (+1, Z0 Z2), (+1, X1 X3), (+1, Z1 Z2 Z3)"
     )
     expanded = expand_logical_signterms(
-        choi_stabilizers_before_expansion, iceberg.ICEBERG_4_2_2
+        choi_stabilizers_before_expansion, iceberg.ICEBERG_DEF
     )
     assert (
         str(expanded)
@@ -358,7 +358,7 @@ def test_iceberg_intrablock_cz() -> None:
         iceberg.intra_block_cz_logical,
         iceberg.intra_block_cz_physical,
         iceberg.choi_state,
-        iceberg.ICEBERG_4_2_2,
+        iceberg.ICEBERG_DEF,
     )
     assert sem == impl
 
@@ -368,7 +368,7 @@ def test_iceberg_intrablock_cx() -> None:
         iceberg.intra_block_cx_logical,
         iceberg.intra_block_cx_physical,
         iceberg.choi_state,
-        iceberg.ICEBERG_4_2_2,
+        iceberg.ICEBERG_DEF,
     )
     assert sem == impl
 
@@ -378,7 +378,7 @@ def test_iceberg_addressable_rz_half_pi() -> None:
         iceberg.addressable_rz_half_pi_logical,
         iceberg.addressable_rz_half_pi_physical,
         iceberg.choi_state,
-        iceberg.ICEBERG_4_2_2,
+        iceberg.ICEBERG_DEF,
     )
     assert sem == impl
 
@@ -388,7 +388,7 @@ def test_iceberg_addressable_rx_half_pi() -> None:
         iceberg.addressable_rx_half_pi_logical,
         iceberg.addressable_rx_half_pi_physical,
         iceberg.choi_state,
-        iceberg.ICEBERG_4_2_2,
+        iceberg.ICEBERG_DEF,
     )
     assert sem == impl
 
@@ -398,7 +398,7 @@ def test_iceberg_addressable_rx_minus_half_pi() -> None:
         iceberg.addressable_rx_minus_half_pi_logical,
         iceberg.addressable_rx_minus_half_pi_physical,
         iceberg.choi_state,
-        iceberg.ICEBERG_4_2_2,
+        iceberg.ICEBERG_DEF,
     )
     assert sem == impl
 
@@ -408,7 +408,7 @@ def test_iceberg_addressable_h() -> None:
         iceberg.addressable_h_logical,
         iceberg.addressable_h_physical,
         iceberg.choi_state,
-        iceberg.ICEBERG_4_2_2,
+        iceberg.ICEBERG_DEF,
     )
     assert sem == impl
 
@@ -418,7 +418,7 @@ def test_iceberg_transversal_cx() -> None:
         iceberg.transversal_cx_logical,
         iceberg.transversal_cx_physical,
         iceberg.choi_state_double_block,
-        iceberg.ICEBERG_4_2_2,
+        iceberg.ICEBERG_DEF,
     )
     assert sem == impl
 
@@ -428,6 +428,6 @@ def test_iceberg_transversal_zzmax() -> None:
         iceberg.interblock_zzmax_logical,
         iceberg.interblock_zzmax_physical,
         iceberg.choi_state_double_block,
-        iceberg.ICEBERG_4_2_2,
+        iceberg.ICEBERG_DEF,
     )
     assert sem == impl

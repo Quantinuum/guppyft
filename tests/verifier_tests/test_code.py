@@ -7,16 +7,16 @@ from guppyft.verifier.code import (
 )
 
 from .ops.iceberg import (
-    ICEBERG_4_2_2_GENERATORS,
-    ICEBERG_4_2_2_X,
-    ICEBERG_4_2_2_Z,
+    ICEBERG_GENERATORS,
+    ICEBERG_X_LOGICAL,
+    ICEBERG_Z_LOGICAL,
 )
-from .ops.steane import STEANE
+from .ops.steane import STEANE_DEF
 
 
 def test_steane_y_logicals() -> None:
-    assert str(STEANE.y_logicals) == "(-1, Y0 Y1 Y2 Y3 Y4 Y5 Y6)"
-    assert isinstance(STEANE.y_logicals, pauli.SignTerms)
+    assert str(STEANE_DEF.y_logicals) == "(-1, Y0 Y1 Y2 Y3 Y4 Y5 Y6)"
+    assert isinstance(STEANE_DEF.y_logicals, pauli.SignTerms)
 
 
 def test_code_validation() -> None:
@@ -37,8 +37,8 @@ def test_code_validation() -> None:
             2,
             2,
             generators=fake_generators1,
-            x_logicals=ICEBERG_4_2_2_X,
-            z_logicals=ICEBERG_4_2_2_Z,
+            x_logicals=ICEBERG_X_LOGICAL,
+            z_logicals=ICEBERG_Z_LOGICAL,
         )
 
     fake_x_logicals = pauli.Strings.from_str(
@@ -54,9 +54,9 @@ def test_code_validation() -> None:
             4,
             2,
             2,
-            generators=ICEBERG_4_2_2_GENERATORS,
+            generators=ICEBERG_GENERATORS,
             x_logicals=fake_x_logicals,
-            z_logicals=ICEBERG_4_2_2_Z,
+            z_logicals=ICEBERG_Z_LOGICAL,
         )
 
     fake_generators2 = pauli.StringSet.from_cmpnts(
@@ -74,6 +74,6 @@ def test_code_validation() -> None:
             2,
             2,
             generators=fake_generators2,
-            x_logicals=ICEBERG_4_2_2_X,
-            z_logicals=ICEBERG_4_2_2_Z,
+            x_logicals=ICEBERG_X_LOGICAL,
+            z_logicals=ICEBERG_Z_LOGICAL,
         )
