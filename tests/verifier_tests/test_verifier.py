@@ -31,10 +31,8 @@ from .ops.iceberg import (
     iceberg_addressable_rz_half_pi_physical,
     iceberg_choi_state,
     iceberg_choi_state_double_block,
-    # iceberg_double_h_logical,
-    # iceberg_double_h_physical,
-    # iceberg_interblock_zzmax_logical,
-    # iceberg_interblock_zzmax_physical,
+    iceberg_interblock_zzmax_logical,
+    iceberg_interblock_zzmax_physical,
     iceberg_intra_block_cx_logical,
     iceberg_intra_block_cx_physical,
     iceberg_intra_block_cz_logical,
@@ -449,11 +447,11 @@ def test_iceberg_transversal_cx() -> None:
     assert sem == impl
 
 
-# def test_iceberg_transversal_zzmax() -> None:
-#    sem, impl = compute_verification_signterms_double_block(
-#        interblock_zzmax_iceberg_sem,
-#        interblock_zzmax_iceberg_impl,
-#        choi_state_iceberg_double_block,
-#        ICEBERG_4_2_2,
-#    )
-#    assert sem == impl
+def test_iceberg_transversal_zzmax() -> None:
+    sem, impl = compute_verification_signterms_double_block(
+        iceberg_interblock_zzmax_logical,
+        iceberg_interblock_zzmax_physical,
+        iceberg_choi_state_double_block,
+        ICEBERG_4_2_2,
+    )
+    assert sem == impl

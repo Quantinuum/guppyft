@@ -126,24 +126,18 @@ def iceberg_double_h_physical(block: array[qubit, 4]) -> None:
 
 
 @guppy
-@no_type_check
 def iceberg_interblock_zzmax_logical(
-    first_block: array[qubit, 2], second_block: array[qubit, 2]
+    first_block: array[qubit, 2],
+    second_block: array[qubit, 2],
 ) -> None:
-    for i in range(2):
-        zz_max(first_block[i], second_block[i])
+    zz_max(first_block[1], second_block[1])
 
 
 @guppy
-@no_type_check
 def iceberg_interblock_zzmax_physical(
-    first_block: array[qubit, 4], second_block: array[qubit, 4]
+    first_block: array[qubit, 4],
+    second_block: array[qubit, 4],
 ) -> None:
-    cx(first_block[0], second_block[0])
-    cx(first_block[1], second_block[1])
-    zz_max(second_block[0], second_block[1])
-    cx(first_block[0], second_block[0])
-    cx(first_block[1], second_block[1])
 
     cx(first_block[2], second_block[2])
     cx(first_block[3], second_block[3])
