@@ -14,37 +14,37 @@ from guppyft.verifier.code import StabilizerCode
 
 @guppy
 @no_type_check
-def iceberg_logical_identity(block: array[qubit, 2]) -> None:
+def logical_identity(block: array[qubit, 2]) -> None:
     pass
 
 
 @guppy
 @no_type_check
-def iceberg_physical_identity(block: array[qubit, 4]) -> None:
+def physical_identity(block: array[qubit, 4]) -> None:
     pass
 
 
 @guppy
 @no_type_check
-def iceberg_intra_block_cx_logical(block: array[qubit, 2]) -> None:
+def intra_block_cx_logical(block: array[qubit, 2]) -> None:
     cx(block[0], block[1])
 
 
 @guppy
 @no_type_check
-def iceberg_intra_block_cx_physical(block: array[qubit, 4]) -> None:
+def intra_block_cx_physical(block: array[qubit, 4]) -> None:
     mem_swap(block[3], block[1])
 
 
 @guppy
 @no_type_check
-def iceberg_intra_block_cz_logical(block: array[qubit, 2]) -> None:
+def intra_block_cz_logical(block: array[qubit, 2]) -> None:
     cz(block[0], block[1])
 
 
 @guppy
 @no_type_check
-def iceberg_intra_block_cz_physical(block: array[qubit, 4]) -> None:
+def intra_block_cz_physical(block: array[qubit, 4]) -> None:
     s(block[0])
     sdg(block[1])
     sdg(block[2])
@@ -53,40 +53,40 @@ def iceberg_intra_block_cz_physical(block: array[qubit, 4]) -> None:
 
 @guppy
 @no_type_check
-def iceberg_addressable_h_logical(block: array[qubit, 2]) -> None:
+def addressable_h_logical(block: array[qubit, 2]) -> None:
     h(block[1])
 
 
 # Technically this is -H due to the global phase difference between S/Rz and V/Rx.
 @guppy
 @no_type_check
-def iceberg_addressable_h_physical(block: array[qubit, 4]) -> None:
-    iceberg_addressable_rz_half_pi_physical(block)
-    iceberg_addressable_rx_half_pi_physical(block)
-    iceberg_addressable_rz_half_pi_physical(block)
+def addressable_h_physical(block: array[qubit, 4]) -> None:
+    addressable_rz_half_pi_physical(block)
+    addressable_rx_half_pi_physical(block)
+    addressable_rz_half_pi_physical(block)
 
 
 @guppy
 @no_type_check
-def iceberg_addressable_rz_half_pi_logical(block: array[qubit, 2]) -> None:
+def addressable_rz_half_pi_logical(block: array[qubit, 2]) -> None:
     rz(block[1], pi / 2)
 
 
 @guppy
 @no_type_check
-def iceberg_addressable_rz_half_pi_physical(block: array[qubit, 4]) -> None:
+def addressable_rz_half_pi_physical(block: array[qubit, 4]) -> None:
     zz_max(block[2], block[3])
 
 
 @guppy
 @no_type_check
-def iceberg_addressable_rx_half_pi_logical(block: array[qubit, 2]) -> None:
+def addressable_rx_half_pi_logical(block: array[qubit, 2]) -> None:
     rx(block[1], pi / 2)
 
 
 @guppy
 @no_type_check
-def iceberg_addressable_rx_half_pi_physical(block: array[qubit, 4]) -> None:
+def addressable_rx_half_pi_physical(block: array[qubit, 4]) -> None:
     h(block[0])
     h(block[2])
     zz_max(block[0], block[2])
@@ -96,13 +96,13 @@ def iceberg_addressable_rx_half_pi_physical(block: array[qubit, 4]) -> None:
 
 @guppy
 @no_type_check
-def iceberg_addressable_rx_minus_half_pi_logical(block: array[qubit, 2]) -> None:
+def addressable_rx_minus_half_pi_logical(block: array[qubit, 2]) -> None:
     rx(block[1], -pi / 2)
 
 
 @guppy
 @no_type_check
-def iceberg_addressable_rx_minus_half_pi_physical(block: array[qubit, 4]) -> None:
+def addressable_rx_minus_half_pi_physical(block: array[qubit, 4]) -> None:
     h(block[0])
     h(block[2])
     zz_phase(block[0], block[2], -pi / 2)
@@ -112,14 +112,14 @@ def iceberg_addressable_rx_minus_half_pi_physical(block: array[qubit, 4]) -> Non
 
 @guppy
 @no_type_check
-def iceberg_double_h_logical(block: array[qubit, 2]) -> None:
+def double_h_logical(block: array[qubit, 2]) -> None:
     for i in range(2):
         h(block[i])
 
 
 @guppy
 @no_type_check
-def iceberg_double_h_physical(block: array[qubit, 4]) -> None:
+def double_h_physical(block: array[qubit, 4]) -> None:
     for i in range(4):
         h(block[i])
     mem_swap(block[1], block[2])
@@ -127,7 +127,7 @@ def iceberg_double_h_physical(block: array[qubit, 4]) -> None:
 
 @guppy
 @no_type_check
-def iceberg_interblock_zzmax_logical(
+def interblock_zzmax_logical(
     first_block: array[qubit, 2],
     second_block: array[qubit, 2],
 ) -> None:
@@ -136,7 +136,7 @@ def iceberg_interblock_zzmax_logical(
 
 @guppy
 @no_type_check
-def iceberg_interblock_zzmax_physical(
+def interblock_zzmax_physical(
     first_block: array[qubit, 4],
     second_block: array[qubit, 4],
 ) -> None:
@@ -149,7 +149,7 @@ def iceberg_interblock_zzmax_physical(
 
 @guppy
 @no_type_check
-def iceberg_transversal_cx_logical(
+def transversal_cx_logical(
     first_block: array[qubit, 2], second_block: array[qubit, 2]
 ) -> None:
     for i in range(2):
@@ -158,7 +158,7 @@ def iceberg_transversal_cx_logical(
 
 @guppy
 @no_type_check
-def iceberg_transversal_cx_physical(
+def transversal_cx_physical(
     first_block: array[qubit, 4], second_block: array[qubit, 4]
 ) -> None:
     for i in range(4):
@@ -167,7 +167,7 @@ def iceberg_transversal_cx_physical(
 
 @guppy
 @no_type_check
-def iceberg_logical_identity_double_block(
+def logical_identity_double_block(
     first_block: array[qubit, 2], second_block: array[qubit, 2]
 ) -> None:
     pass
@@ -175,7 +175,7 @@ def iceberg_logical_identity_double_block(
 
 @guppy
 @no_type_check
-def iceberg_physical_identity_double_block(
+def physical_identity_double_block(
     first_block: array[qubit, 4], second_block: array[qubit, 4]
 ) -> None:
     pass
@@ -183,7 +183,7 @@ def iceberg_physical_identity_double_block(
 
 @guppy
 @no_type_check
-def iceberg_non_ft_zero() -> array[qubit, 4]:
+def non_ft_zero() -> array[qubit, 4]:
     block = array(qubit() for _ in range(4))
     h(block[2])
     cx(block[2], block[1])
@@ -194,14 +194,14 @@ def iceberg_non_ft_zero() -> array[qubit, 4]:
 
 @guppy
 @no_type_check
-def iceberg_choi_state(
+def choi_state(
     unitary: Function[[array[qubit, 4]], None],
 ) -> tuple[array[qubit, 4], array[qubit, 4]]:
-    control_block = iceberg_non_ft_zero()
-    target_block = iceberg_non_ft_zero()
+    control_block = non_ft_zero()
+    target_block = non_ft_zero()
 
-    iceberg_double_h_physical(control_block)
-    iceberg_transversal_cx_physical(control_block, target_block)
+    double_h_physical(control_block)
+    transversal_cx_physical(control_block, target_block)
 
     unitary(target_block)
 
@@ -210,19 +210,19 @@ def iceberg_choi_state(
 
 @guppy
 @no_type_check
-def iceberg_choi_state_double_block(
+def choi_state_double_block(
     unitary: Function[[array[qubit, 4], array[qubit, 4]], None],
 ) -> tuple[array[qubit, 4], array[qubit, 4], array[qubit, 4], array[qubit, 4]]:
-    first_control_block = iceberg_non_ft_zero()
-    first_target_block = iceberg_non_ft_zero()
-    second_control_block = iceberg_non_ft_zero()
-    second_target_block = iceberg_non_ft_zero()
+    first_control_block = non_ft_zero()
+    first_target_block = non_ft_zero()
+    second_control_block = non_ft_zero()
+    second_target_block = non_ft_zero()
 
-    iceberg_double_h_physical(first_control_block)
-    iceberg_double_h_physical(second_control_block)
+    double_h_physical(first_control_block)
+    double_h_physical(second_control_block)
 
-    iceberg_transversal_cx_physical(first_control_block, first_target_block)
-    iceberg_transversal_cx_physical(second_control_block, second_target_block)
+    transversal_cx_physical(first_control_block, first_target_block)
+    transversal_cx_physical(second_control_block, second_target_block)
 
     unitary(first_target_block, second_target_block)
 

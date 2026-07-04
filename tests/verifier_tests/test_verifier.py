@@ -19,31 +19,7 @@ from .ops.bitflip import (
     bit_flip_logical_identity_double_block,
     bit_flip_physical_identity_double_block,
 )
-from .ops.iceberg import (
-    ICEBERG_4_2_2,
-    iceberg_addressable_h_logical,
-    iceberg_addressable_h_physical,
-    iceberg_addressable_rx_half_pi_logical,
-    iceberg_addressable_rx_half_pi_physical,
-    iceberg_addressable_rx_minus_half_pi_logical,
-    iceberg_addressable_rx_minus_half_pi_physical,
-    iceberg_addressable_rz_half_pi_logical,
-    iceberg_addressable_rz_half_pi_physical,
-    iceberg_choi_state,
-    iceberg_choi_state_double_block,
-    iceberg_interblock_zzmax_logical,
-    iceberg_interblock_zzmax_physical,
-    iceberg_intra_block_cx_logical,
-    iceberg_intra_block_cx_physical,
-    iceberg_intra_block_cz_logical,
-    iceberg_intra_block_cz_physical,
-    iceberg_logical_identity,
-    iceberg_logical_identity_double_block,
-    iceberg_physical_identity,
-    iceberg_physical_identity_double_block,
-    iceberg_transversal_cx_logical,
-    iceberg_transversal_cx_physical,
-)
+from .ops import iceberg
 from .ops.steane import (
     STEANE,
     steane_choi_state,
@@ -290,7 +266,7 @@ def test_steane_cx() -> None:
 
 def test_compute_stabilizers_single_block_iceberg_id() -> None:
     choi_stabilizers_before_expansion = compute_stabilizers_single_block(
-        iceberg_logical_identity, default_choi_state_preparation, 2
+        iceberg.logical_identity, default_choi_state_preparation, 2
     )
     assert (
         str(choi_stabilizers_before_expansion)
@@ -298,17 +274,17 @@ def test_compute_stabilizers_single_block_iceberg_id() -> None:
     )
 
     expanded = expand_logical_signterms(
-        choi_stabilizers_before_expansion, ICEBERG_4_2_2
+        choi_stabilizers_before_expansion, iceberg.ICEBERG_4_2_2
     )
     assert (
         str(expanded)
         == "(+1, X0 X1 X4 X5), (+1, Z1 Z3 Z5 Z7), (+1, X0 X2 X4 X6), (+1, Z2 Z3 Z6 Z7)"
     )
 
-    padded = pad_code_stabilizers(ICEBERG_4_2_2, num_blocks=1)
+    padded = pad_code_stabilizers(iceberg.ICEBERG_4_2_2, num_blocks=1)
     assert str(padded) == "X0 X1 X2 X3, Z0 Z1 Z2 Z3, X4 X5 X6 X7, Z4 Z5 Z6 Z7"
     expanded_stabilizer_state_stabilizers = get_expanded_stabilizer_set(
-        choi_stabilizers_before_expansion, ICEBERG_4_2_2, num_blocks=1
+        choi_stabilizers_before_expansion, iceberg.ICEBERG_4_2_2, num_blocks=1
     )
     assert (
         str(expanded_stabilizer_state_stabilizers)
@@ -319,17 +295,17 @@ def test_compute_stabilizers_single_block_iceberg_id() -> None:
 
 def test_single_block_iceberg_id_verification() -> None:
     sem, impl = compute_verification_signterms(
-        iceberg_logical_identity,
-        iceberg_physical_identity,
-        iceberg_choi_state,
-        ICEBERG_4_2_2,
+        iceberg.logical_identity,
+        iceberg.physical_identity,
+        iceberg.choi_state,
+        iceberg.ICEBERG_4_2_2,
     )
     assert sem == impl
 
 
 def test_compute_stabilizers_double_block_iceberg_id() -> None:
     choi_stabilizers_before_expansion = compute_stabilizers_double_block(
-        iceberg_logical_identity_double_block,
+        iceberg.logical_identity_double_block,
         default_choi_state_preparation_double_block,
         4,
     )
@@ -339,7 +315,7 @@ def test_compute_stabilizers_double_block_iceberg_id() -> None:
         + " (+1, X4 X6), (+1, Z4 Z6), (+1, X5 X7), (+1, Z5 Z7)"
     )
     expanded = expand_logical_signterms(
-        choi_stabilizers_before_expansion, ICEBERG_4_2_2
+        choi_stabilizers_before_expansion, iceberg.ICEBERG_4_2_2
     )
     assert (
         str(expanded)
@@ -350,17 +326,17 @@ def test_compute_stabilizers_double_block_iceberg_id() -> None:
 
 def test_double_block_iceberg_id() -> None:
     sem, impl = compute_verification_signterms_double_block(
-        iceberg_logical_identity_double_block,
-        iceberg_physical_identity_double_block,
-        iceberg_choi_state_double_block,
-        ICEBERG_4_2_2,
+        iceberg.logical_identity_double_block,
+        iceberg.physical_identity_double_block,
+        iceberg.choi_state_double_block,
+        iceberg.ICEBERG_4_2_2,
     )
     assert sem == impl
 
 
 def test_compute_stabilizers_intrablock_cx_iceberg() -> None:
     choi_stabilizers_before_expansion = compute_stabilizers_single_block(
-        iceberg_intra_block_cx_logical,
+        iceberg.intra_block_cx_logical,
         default_choi_state_preparation,
         2,
     )
@@ -369,7 +345,7 @@ def test_compute_stabilizers_intrablock_cx_iceberg() -> None:
         == "(+1, X0 X2 X3), (+1, Z0 Z2), (+1, X1 X3), (+1, Z1 Z2 Z3)"
     )
     expanded = expand_logical_signterms(
-        choi_stabilizers_before_expansion, ICEBERG_4_2_2
+        choi_stabilizers_before_expansion, iceberg.ICEBERG_4_2_2
     )
     assert (
         str(expanded)
@@ -379,79 +355,79 @@ def test_compute_stabilizers_intrablock_cx_iceberg() -> None:
 
 def test_iceberg_intrablock_cz() -> None:
     sem, impl = compute_verification_signterms(
-        iceberg_intra_block_cz_logical,
-        iceberg_intra_block_cz_physical,
-        iceberg_choi_state,
-        ICEBERG_4_2_2,
+        iceberg.intra_block_cz_logical,
+        iceberg.intra_block_cz_physical,
+        iceberg.choi_state,
+        iceberg.ICEBERG_4_2_2,
     )
     assert sem == impl
 
 
 def test_iceberg_intrablock_cx() -> None:
     sem, impl = compute_verification_signterms(
-        iceberg_intra_block_cx_logical,
-        iceberg_intra_block_cx_physical,
-        iceberg_choi_state,
-        ICEBERG_4_2_2,
+        iceberg.intra_block_cx_logical,
+        iceberg.intra_block_cx_physical,
+        iceberg.choi_state,
+        iceberg.ICEBERG_4_2_2,
     )
     assert sem == impl
 
 
 def test_iceberg_addressable_rz_half_pi() -> None:
     sem, impl = compute_verification_signterms(
-        iceberg_addressable_rz_half_pi_logical,
-        iceberg_addressable_rz_half_pi_physical,
-        iceberg_choi_state,
-        ICEBERG_4_2_2,
+        iceberg.addressable_rz_half_pi_logical,
+        iceberg.addressable_rz_half_pi_physical,
+        iceberg.choi_state,
+        iceberg.ICEBERG_4_2_2,
     )
     assert sem == impl
 
 
 def test_iceberg_addressable_rx_half_pi() -> None:
     sem, impl = compute_verification_signterms(
-        iceberg_addressable_rx_half_pi_logical,
-        iceberg_addressable_rx_half_pi_physical,
-        iceberg_choi_state,
-        ICEBERG_4_2_2,
+        iceberg.addressable_rx_half_pi_logical,
+        iceberg.addressable_rx_half_pi_physical,
+        iceberg.choi_state,
+        iceberg.ICEBERG_4_2_2,
     )
     assert sem == impl
 
 
 def test_iceberg_addressable_rx_minus_half_pi() -> None:
     sem, impl = compute_verification_signterms(
-        iceberg_addressable_rx_minus_half_pi_logical,
-        iceberg_addressable_rx_minus_half_pi_physical,
-        iceberg_choi_state,
-        ICEBERG_4_2_2,
+        iceberg.addressable_rx_minus_half_pi_logical,
+        iceberg.addressable_rx_minus_half_pi_physical,
+        iceberg.choi_state,
+        iceberg.ICEBERG_4_2_2,
     )
     assert sem == impl
 
 
 def test_iceberg_addressable_h() -> None:
     sem, impl = compute_verification_signterms(
-        iceberg_addressable_h_logical,
-        iceberg_addressable_h_physical,
-        iceberg_choi_state,
-        ICEBERG_4_2_2,
+        iceberg.addressable_h_logical,
+        iceberg.addressable_h_physical,
+        iceberg.choi_state,
+        iceberg.ICEBERG_4_2_2,
     )
     assert sem == impl
 
 
 def test_iceberg_transversal_cx() -> None:
     sem, impl = compute_verification_signterms_double_block(
-        iceberg_transversal_cx_logical,
-        iceberg_transversal_cx_physical,
-        iceberg_choi_state_double_block,
-        ICEBERG_4_2_2,
+        iceberg.transversal_cx_logical,
+        iceberg.transversal_cx_physical,
+        iceberg.choi_state_double_block,
+        iceberg.ICEBERG_4_2_2,
     )
     assert sem == impl
 
 
 def test_iceberg_transversal_zzmax() -> None:
     sem, impl = compute_verification_signterms_double_block(
-        iceberg_interblock_zzmax_logical,
-        iceberg_interblock_zzmax_physical,
-        iceberg_choi_state_double_block,
-        ICEBERG_4_2_2,
+        iceberg.interblock_zzmax_logical,
+        iceberg.interblock_zzmax_physical,
+        iceberg.choi_state_double_block,
+        iceberg.ICEBERG_4_2_2,
     )
     assert sem == impl
