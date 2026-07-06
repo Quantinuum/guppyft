@@ -22,6 +22,7 @@ def identity_code_spec(
     qec_budget: int = 1,
     costs: dict[str, int] | None = None,
 ) -> EncoderSpec:
+
     if costs is None:
         costs = defaultdict(int)
 
@@ -243,7 +244,6 @@ def identity_code_spec(
     @link_name("link.identity.gen_state")
     @no_type_check
     def state_gen_decl() -> STATE: ...
-
     @guppy
     @link_name("link.identity.gen_state")
     @no_type_check
@@ -261,7 +261,6 @@ def identity_code_spec(
     @link_name("link.identity.discard_state")
     @no_type_check
     def state_discard_decl(state: STATE @ owned) -> None: ...
-
     @guppy
     @link_name("link.identity.discard_state")
     @no_type_check
