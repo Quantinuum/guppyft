@@ -266,11 +266,7 @@ impl TypeUnpacker {
     }
 }
 
-pub fn extract_func_sig(
-    func_hugr: &Hugr,
-    func_name: &str,
-) -> Result<PolyFuncType, ImplementOpsPassError> {
-    // Extract target function
+fn get_func_node(func_hugr: &Hugr, func_name: &str) -> Result<Node, ImplementOpsPassError> {
     let Some(func_node) = func_hugr.children(func_hugr.module_root()).find(|node| {
         if let Some(name) = match &func_hugr.get_optype(*node) {
             OpType::FuncDecl(decl) => Some(decl.func_name().to_owned()),
@@ -287,6 +283,15 @@ pub fn extract_func_sig(
             func_name
         );
     };
+    Ok(func_node)
+}
+
+fn extract_func_sig(
+    func_hugr: &Hugr,
+    func_name: &str,
+) -> Result<PolyFuncType, ImplementOpsPassError> {
+    // Extract target function
+    let func_node = get_func_node(func_hugr, func_name)?;
 
     let func_sig = match &func_hugr.get_optype(func_node) {
         OpType::FuncDecl(decl) => decl.signature(),
@@ -337,7 +342,7 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
         }
     }
 
-    fn extract_func(
+    fn check_func_sig(
         &self,
         op_id: OpName,
         expected_sig: PolyFuncType,
@@ -345,30 +350,10 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
         func_name: &str,
     ) -> Result<Node, ImplementOpsPassError> {
         // Extract target function
-        let Some(func_node) = func_hugr.children(func_hugr.module_root()).find(|node| {
-            if let Some(name) = match &func_hugr.get_optype(*node) {
-                OpType::FuncDecl(decl) => Some(decl.func_name().to_owned()),
-                OpType::FuncDefn(defn) => Some(defn.func_name().to_owned()),
-                _ => None,
-            } {
-                name == func_name
-            } else {
-                false
-            }
-        }) else {
-            panic!(
-                "Expected hugr containing a function with name '{}' but it was not found!",
-                func_name
-            );
-        };
+        let func_node = get_func_node(func_hugr, func_name)?;
+        let func_sig = extract_func_sig(func_hugr, func_name)?;
 
-        // Test signature
-        let func_sig = match &func_hugr.get_optype(func_node) {
-            OpType::FuncDecl(decl) => decl.signature(),
-            OpType::FuncDefn(defn) => defn.signature(),
-            _ => unreachable!(),
-        };
-        if func_sig != &expected_sig {
+        if func_sig != expected_sig {
             return Err(ImplementOpsPassError::ExistingFunctionSignatureMismatch {
                 op_id,
                 node: func_node,
@@ -396,7 +381,7 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
 
         // Extract function if given, otherwise generate a declaration with the expected signature.
         let (func_hugr, func_node) = if let Some(hugr) = func_hugr_opt {
-            let node = self.extract_func(ext_op.qualified_id(), op_sig, &hugr, func_name)?;
+            let node = self.check_func_sig(ext_op.qualified_id(), op_sig, &hugr, func_name)?;
             (hugr, node)
         } else {
             let mut module_builder = ModuleBuilder::new();
