@@ -266,7 +266,7 @@ impl TypeUnpacker {
     }
 }
 
-fn get_func_node(func_hugr: &Hugr, func_name: &str) -> Result<Node, ImplementOpsPassError> {
+fn extract_func_node(func_hugr: &Hugr, func_name: &str) -> Result<Node, ImplementOpsPassError> {
     let Some(func_node) = func_hugr.children(func_hugr.module_root()).find(|node| {
         if let Some(name) = match &func_hugr.get_optype(*node) {
             OpType::FuncDecl(decl) => Some(decl.func_name().to_owned()),
@@ -291,7 +291,7 @@ fn extract_func_sig(
     func_name: &str,
 ) -> Result<PolyFuncType, ImplementOpsPassError> {
     // Extract target function
-    let func_node = get_func_node(func_hugr, func_name)?;
+    let func_node = extract_func_node(func_hugr, func_name)?;
 
     let func_sig = match &func_hugr.get_optype(func_node) {
         OpType::FuncDecl(decl) => decl.signature(),
@@ -342,7 +342,7 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
         }
     }
 
-    fn check_func_sig(
+    fn get_func_node(
         &self,
         op_id: OpName,
         expected_sig: PolyFuncType,
@@ -350,7 +350,7 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
         func_name: &str,
     ) -> Result<Node, ImplementOpsPassError> {
         // Extract target function
-        let func_node = get_func_node(func_hugr, func_name)?;
+        let func_node = extract_func_node(func_hugr, func_name)?;
         let func_sig = extract_func_sig(func_hugr, func_name)?;
 
         if func_sig != expected_sig {
@@ -381,7 +381,7 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
 
         // Extract function if given, otherwise generate a declaration with the expected signature.
         let (func_hugr, func_node) = if let Some(hugr) = func_hugr_opt {
-            let node = self.check_func_sig(ext_op.qualified_id(), op_sig, &hugr, func_name)?;
+            let node = self.get_func_node(ext_op.qualified_id(), op_sig, &hugr, func_name)?;
             (hugr, node)
         } else {
             let mut module_builder = ModuleBuilder::new();
