@@ -143,51 +143,51 @@ class Block(Generic[N]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
-    def rx(self: "Block[N]", i: int, angle: float) -> None:
-        """Rx rotation of `angle` radians on the qubit with index `i`."""
-        rx(self, i, angle)
+    def rx(self: "Block[N]", i: int, phase: float) -> None:
+        """Rx rotation of `phase` radians on the qubit with index `i`."""
+        rx(self, i, phase)
 
     @guppy
     @no_type_check
-    def ry(self: "Block[N]", i: int, angle: float) -> None:
-        """Ry rotation of `angle` radians on the qubit with index `i`."""
-        ry(self, i, angle)
+    def ry(self: "Block[N]", i: int, phase: float) -> None:
+        """Ry rotation of `phase` radians on the qubit with index `i`."""
+        ry(self, i, phase)
 
     @guppy
     @no_type_check
-    def rz(self: "Block[N]", i: int, angle: float) -> None:
-        """Rz rotation of `angle` radians on the qubit with index `i`."""
-        rz(self, i, angle)
+    def rz(self: "Block[N]", i: int, phase: float) -> None:
+        """Rz rotation of `phase` radians on the qubit with index `i`."""
+        rz(self, i, phase)
 
     @guppy
     @no_type_check
-    def all_rx(self: "Block[N]", angle: float) -> None:
-        """Rx rotation of `angle` radians on all qubits."""
-        all_rx(self, angle)
+    def all_rx(self: "Block[N]", phase: float) -> None:
+        """Rx rotation of `phase` radians on all qubits."""
+        all_rx(self, phase)
 
     @guppy
     @no_type_check
-    def all_ry(self: "Block[N]", angle: float) -> None:
-        """Ry rotation of `angle` radians on all qubits."""
-        all_ry(self, angle)
+    def all_ry(self: "Block[N]", phase: float) -> None:
+        """Ry rotation of `phase` radians on all qubits."""
+        all_ry(self, phase)
 
     @guppy
     @no_type_check
-    def all_rz(self: "Block[N]", angle: float) -> None:
-        """Rz rotation of `angle` radians on all qubits."""
-        all_rz(self, angle)
+    def all_rz(self: "Block[N]", phase: float) -> None:
+        """Rz rotation of `phase` radians on all qubits."""
+        all_rz(self, phase)
 
     @guppy
     @no_type_check
-    def all_but_one_rx(self: "Block[N]", i: int, angle: float) -> None:
-        """Rx rotation of `angle` radians on qubits except that with index `i`."""
-        all_but_one_rx(self, i, angle)
+    def all_but_one_rx(self: "Block[N]", i: int, phase: float) -> None:
+        """Rx rotation of `phase` radians on qubits except that with index `i`."""
+        all_but_one_rx(self, i, phase)
 
     @guppy
     @no_type_check
-    def all_but_one_rz(self: "Block[N]", i: int, angle: float) -> None:
-        """Rz rotation of `angle` radians on qubits except that with index `i`."""
-        all_but_one_rz(self, i, angle)
+    def all_but_one_rz(self: "Block[N]", i: int, phase: float) -> None:
+        """Rz rotation of `phase` radians on qubits except that with index `i`."""
+        all_but_one_rz(self, i, phase)
 
     @guppy
     @no_type_check
@@ -197,24 +197,24 @@ class Block(Generic[N]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
-    def xx_phase(self: "Block[N]", i: int, j: int, angle: float) -> None:
-        """XXPhase rotation of `angle` radians on the qubits with indices `i`
+    def xx_phase(self: "Block[N]", i: int, j: int, phase: float) -> None:
+        """XXPhase rotation of `phase` radians on the qubits with indices `i`
         and `j`."""
-        xx_phase(self, i, j, angle)
+        xx_phase(self, i, j, phase)
 
     @guppy
     @no_type_check
-    def yy_phase(self: "Block[N]", i: int, j: int, angle: float) -> None:
-        """YYPhase rotation of `angle` radians on the qubits with indices `i`
+    def yy_phase(self: "Block[N]", i: int, j: int, phase: float) -> None:
+        """YYPhase rotation of `phase` radians on the qubits with indices `i`
         and `j`."""
-        yy_phase(self, i, j, angle)
+        yy_phase(self, i, j, phase)
 
     @guppy
     @no_type_check
-    def zz_phase(self: "Block[N]", i: int, j: int, angle: float) -> None:
-        """ZZPhase rotation of `angle` radians on the qubits with indices `i`
+    def zz_phase(self: "Block[N]", i: int, j: int, phase: float) -> None:
+        """ZZPhase rotation of `phase` radians on the qubits with indices `i`
         and `j`."""
-        zz_phase(self, i, j, angle)
+        zz_phase(self, i, j, phase)
 
     @guppy
     @no_type_check
@@ -279,21 +279,21 @@ class Qubit:
 
     @guppy
     @no_type_check
-    def rx(self: "Qubit", angle: float) -> None:
-        """Rx rotation of `angle` radians."""
-        rx_dynq(self, angle)
+    def rx(self: "Qubit", phase: float) -> None:
+        """Rx rotation of `phase` radians."""
+        rx_dynq(self, phase)
 
     @guppy
     @no_type_check
-    def ry(self: "Qubit", angle: float) -> None:
-        """Ry rotation of `angle` radians."""
-        ry_dynq(self, angle)
+    def ry(self: "Qubit", phase: float) -> None:
+        """Ry rotation of `phase` radians."""
+        ry_dynq(self, phase)
 
     @guppy
     @no_type_check
-    def rz(self: "Qubit", angle: float) -> None:
-        """Rz rotation of `angle` radians."""
-        rz_dynq(self, angle)
+    def rz(self: "Qubit", phase: float) -> None:
+        """Rz rotation of `phase` radians."""
+        rz_dynq(self, phase)
 
     @guppy
     @no_type_check
@@ -417,50 +417,50 @@ def fan_in(block: Block[N], i: int) -> None:
 
 @hugr_op(iceberg_op("rx_d"))
 @no_type_check
-def rx(block: Block[N], i: int, angle: float) -> None:
-    """Rx rotation of `angle` radians on the qubit with index `i`."""
+def rx(block: Block[N], i: int, phase: float) -> None:
+    """Rx rotation of `phase` radians on the qubit with index `i`."""
 
 
 @hugr_op(iceberg_op("ry_d"))
 @no_type_check
-def ry(block: Block[N], i: int, angle: float) -> None:
-    """Ry rotation of `angle` radians on the qubit with index `i`."""
+def ry(block: Block[N], i: int, phase: float) -> None:
+    """Ry rotation of `phase` radians on the qubit with index `i`."""
 
 
 @hugr_op(iceberg_op("rz_d"))
 @no_type_check
-def rz(block: Block[N], i: int, angle: float) -> None:
-    """Rz rotation of `angle` radians on the qubit with index `i`."""
+def rz(block: Block[N], i: int, phase: float) -> None:
+    """Rz rotation of `phase` radians on the qubit with index `i`."""
 
 
 @hugr_op(iceberg_op("all_rx"))
 @no_type_check
-def all_rx(block: Block[N], angle: float) -> None:
+def all_rx(block: Block[N], phase: float) -> None:
     """Rx gate on all qubits."""
 
 
 @hugr_op(iceberg_op("all_ry"))
 @no_type_check
-def all_ry(block: Block[N], angle: float) -> None:
+def all_ry(block: Block[N], phase: float) -> None:
     """Ry gate on all qubits."""
 
 
 @hugr_op(iceberg_op("all_rz"))
 @no_type_check
-def all_rz(block: Block[N], angle: float) -> None:
+def all_rz(block: Block[N], phase: float) -> None:
     """Rz gate on all qubits."""
 
 
 @hugr_op(iceberg_op("all_but_one_rx_d"))
 @no_type_check
-def all_but_one_rx(block: Block[N], i: int, angle: float) -> None:
-    """Rx rotation of `angle` radians on qubits except that with index `i`."""
+def all_but_one_rx(block: Block[N], i: int, phase: float) -> None:
+    """Rx rotation of `phase` radians on qubits except that with index `i`."""
 
 
 @hugr_op(iceberg_op("all_but_one_rz_d"))
 @no_type_check
-def all_but_one_rz(block: Block[N], i: int, angle: float) -> None:
-    """Rz rotation of `angle` radians on qubits except that with index `i`."""
+def all_but_one_rz(block: Block[N], i: int, phase: float) -> None:
+    """Rz rotation of `phase` radians on qubits except that with index `i`."""
 
 
 @hugr_op(iceberg_op("all_h"))
@@ -471,20 +471,20 @@ def all_h(block: Block[N]) -> None:
 
 @hugr_op(iceberg_op("xx_phase_d"))
 @no_type_check
-def xx_phase(block: Block[N], i: int, j: int, angle: float) -> None:
-    """XXPhase rotation of `angle` radians on the qubits with indices `i` and `j`."""
+def xx_phase(block: Block[N], i: int, j: int, phase: float) -> None:
+    """XXPhase rotation of `phase` radians on the qubits with indices `i` and `j`."""
 
 
 @hugr_op(iceberg_op("yy_phase_d"))
 @no_type_check
-def yy_phase(block: Block[N], i: int, j: int, angle: float) -> None:
-    """YYPhase rotation of `angle` radians on the qubits with indices `i` and `j`."""
+def yy_phase(block: Block[N], i: int, j: int, phase: float) -> None:
+    """YYPhase rotation of `phase` radians on the qubits with indices `i` and `j`."""
 
 
 @hugr_op(iceberg_op("zz_phase_d"))
 @no_type_check
-def zz_phase(block: Block[N], i: int, j: int, angle: float) -> None:
-    """ZZPhase rotation of `angle` radians on the qubits with indices `i` and `j`."""
+def zz_phase(block: Block[N], i: int, j: int, phase: float) -> None:
+    """ZZPhase rotation of `phase` radians on the qubits with indices `i` and `j`."""
 
 
 @hugr_op(iceberg_op("cx_d"))
@@ -502,27 +502,27 @@ def swap(block: Block[N], i: int, j: int) -> None:
 @hugr_op(iceberg_op("xx_phase_between_blocks_d"))
 @no_type_check
 def xx_phase_between_blocks(
-    block0: Block[N], block1: Block[N], i0: int, i1: int, angle: float
+    block0: Block[N], block1: Block[N], i0: int, i1: int, phase: float
 ) -> None:
-    """XXPhase rotation of `angle` radians on the qubit with index `i0` in
+    """XXPhase rotation of `phase` radians on the qubit with index `i0` in
     block `block0` and the qubit with index `i1` in block `block1`."""
 
 
 @hugr_op(iceberg_op("yy_phase_between_blocks_d"))
 @no_type_check
 def yy_phase_between_blocks(
-    block0: Block[N], block1: Block[N], i0: int, i1: int, angle: float
+    block0: Block[N], block1: Block[N], i0: int, i1: int, phase: float
 ) -> None:
-    """YYPhase rotation of `angle` radians on the qubit with index `i0` in
+    """YYPhase rotation of `phase` radians on the qubit with index `i0` in
     block `block0` and the qubit with index `i1` in block `block1`."""
 
 
 @hugr_op(iceberg_op("zz_phase_between_blocks_d"))
 @no_type_check
 def zz_phase_between_blocks(
-    block0: Block[N], block1: Block[N], i0: int, i1: int, angle: float
+    block0: Block[N], block1: Block[N], i0: int, i1: int, phase: float
 ) -> None:
-    """ZZPhase rotation of `angle` radians on the qubit with index `i0` in
+    """ZZPhase rotation of `phase` radians on the qubit with index `i0` in
     block `block0` and the qubit with index `i1` in block `block1`."""
 
 
@@ -597,20 +597,20 @@ def z_dynq(qubit: Qubit) -> None:
 
 @hugr_op(iceberg_op("rx_dynq"))
 @no_type_check
-def rx_dynq(qubit: Qubit, angle: float) -> None:
-    """Rx rotation of `angle` radians."""
+def rx_dynq(qubit: Qubit, phase: float) -> None:
+    """Rx rotation of `phase` radians."""
 
 
 @hugr_op(iceberg_op("ry_dynq"))
 @no_type_check
-def ry_dynq(qubit: Qubit, angle: float) -> None:
-    """Ry rotation of `angle` radians."""
+def ry_dynq(qubit: Qubit, phase: float) -> None:
+    """Ry rotation of `phase` radians."""
 
 
 @hugr_op(iceberg_op("rz_dynq"))
 @no_type_check
-def rz_dynq(qubit: Qubit, angle: float) -> None:
-    """Rz rotation of `angle` radians."""
+def rz_dynq(qubit: Qubit, phase: float) -> None:
+    """Rz rotation of `phase` radians."""
 
 
 @hugr_op(iceberg_op("try_measure_x_dynq"))
@@ -627,20 +627,20 @@ def try_measure_z_dynq(qubit: Qubit) -> Option[Measurement]:
 
 @hugr_op(iceberg_op("xx_phase_dynq"))
 @no_type_check
-def xx_phase_dynq(qubit0: Qubit, qubit1: Qubit, angle: float) -> None:
-    """XXPhase rotation of `angle` radians on two qubits."""
+def xx_phase_dynq(qubit0: Qubit, qubit1: Qubit, phase: float) -> None:
+    """XXPhase rotation of `phase` radians on two qubits."""
 
 
 @hugr_op(iceberg_op("yy_phase_dynq"))
 @no_type_check
-def yy_phase_dynq(qubit0: Qubit, qubit1: Qubit, angle: float) -> None:
-    """YYPhase rotation of `angle` radians on two qubits."""
+def yy_phase_dynq(qubit0: Qubit, qubit1: Qubit, phase: float) -> None:
+    """YYPhase rotation of `phase` radians on two qubits."""
 
 
 @hugr_op(iceberg_op("zz_phase_dynq"))
 @no_type_check
-def zz_phase_dynq(qubit0: Qubit, qubit1: Qubit, angle: float) -> None:
-    """ZZPhase rotation of `angle` radians on two qubits."""
+def zz_phase_dynq(qubit0: Qubit, qubit1: Qubit, phase: float) -> None:
+    """ZZPhase rotation of `phase` radians on two qubits."""
 
 
 @hugr_op(iceberg_op("cx_dynq"))
