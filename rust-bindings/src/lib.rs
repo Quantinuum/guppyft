@@ -33,15 +33,20 @@ mod _bindings {
         let ty_hashmap = ty_replacements
             .iter()
             .map(|(ext_str, ty_str)| {
-                let ty = hugr
-                    .extensions()
-                    .get(ext_str)
-                    .unwrap()
-                    .get_type(ty_str)
-                    .unwrap();
-                (ty.extension_id().clone(), ty.name().clone())
+                let ext = hugr.extensions().get(ext_str).ok_or_else(|| {
+                    PyValueError::new_err(format!(
+                        "Unknown extension in ty_replacements: '{ext_str}'"
+                    ))
+                })?;
+
+                let ty = ext.get_type(ty_str).ok_or_else(|| {
+                    PyValueError::new_err(format!(
+                        "Unknown type in ty_replacements: '{ext_str}.{ty_str}'"
+                    ))
+                })?;
+                Ok((ty.extension_id().clone(), ty.name().clone()))
             })
-            .collect();
+            .collect::<PyResult<HashSet<_>>>()?;
 
         let pass = implement_ops::ImplementOpsPass::new(new_ops, ty_hashmap);
         pass.run(hugr)

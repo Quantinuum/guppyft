@@ -127,7 +127,9 @@ class ImplementOpsSpec:
 
     ops: OpReplacements
     """The operations to replace."""
-    tys: TyReplacements = field(default=TyReplacements().with_defaults())
+    tys: TyReplacements = field(
+        default_factory=lambda: TyReplacements().with_defaults()
+    )
     """The types to replace."""
     build_wrapper: Callable[
         [GuppyFunctionDefinition[[], None]], GuppyFunctionDefinition[[], None]

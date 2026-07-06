@@ -17,7 +17,7 @@ use hugr_core::hugr::linking::NodeLinkingError;
 use hugr_core::ops::{Call, OpName};
 use hugr_core::std_extensions::collections::array::Array;
 use hugr_core::std_extensions::collections::borrow_array::BorrowArray;
-use hugr_core::types::{SumType, Transformable, TypeArg, TypeName, TypeRowRV};
+use hugr_core::types::{SumType, Transformable, TypeArg, TypeName};
 use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::hash_map::Entry;
@@ -127,142 +127,65 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
             .unique_by(|(op, _, _)| OpHashWrapper::from(op))
             .collect_vec();
 
-        let mut unpacker = TypeUnpacker::new();
-
         // Determine type replacements from differences between the `ext_op` and `func_hugr` signatures.
         // Filter using `self.ty_replacements` to only replace specific extension types.
-        let type_replacements: Result<Vec<Vec<(Type, Type)>>, ImplementOpsPassError> = op_funcs
-            .iter()
-            .map(|(op_def, func_hugr, func_name)| {
+        let type_map: HashMap<Type, Type> = op_funcs.iter().try_fold(
+            HashMap::new(),
+            |mut map, (op_def, func_hugr, func_name)| -> Result<_, ImplementOpsPassError> {
                 let func_hugr =
                     func_hugr
                         .as_ref()
                         .ok_or(ImplementOpsPassError::MissingFunctionHugr {
                             name: func_name.to_string(),
                         })?;
+
                 let src_sig = op_def.signature();
                 let tgt_sig = extract_func_sig(func_hugr, func_name)?.instantiate(&[])?;
-                // Check that the lengths of the op and func signatures match
-                assert_eq!(src_sig.input.len(), tgt_sig.input.len());
-                assert_eq!(src_sig.output.len(), tgt_sig.output.len());
 
                 // Iterate through all types in the signature, recursively unpack both `src` and `tgt`
                 // to check if `src` is in `ty_replacements` and then use corresponding `tgt` type
                 // as the replacement.
-                let pairs: Vec<(Type, Type)> = src_sig
+                for (src_ty, tgt_ty) in src_sig
                     .input
                     .iter()
                     .zip(tgt_sig.input.iter())
                     .chain(src_sig.output.iter().zip(tgt_sig.output.iter()))
-                    .flat_map(|(src_ty, tgt_ty)| {
-                        if let Some(src_ct) = src_ty.as_extension() {
+                {
+                    let mut pending = vec![(src_ty.clone(), tgt_ty.clone())];
+                    while let Some((src, tgt)) = pending.pop() {
+                        if let Some(src_ct) = src.as_extension() {
                             let key = (src_ct.extension().clone(), src_ct.name().clone());
-                            if self.ty_replacements.contains(&key) && src_ty != tgt_ty {
-                                return vec![(src_ty.clone(), tgt_ty.clone())];
+                            if self.ty_replacements.contains(&key) && src != tgt {
+                                insert_type_mapping(&mut map, src, tgt)?;
+                                continue;
                             }
                         }
 
-                        let src_row = unpacker.unpack_type(src_ty);
-                        let tgt_row = unpacker.unpack_type(tgt_ty);
-                        assert_eq!(src_row.len(), tgt_row.len());
+                        let (Some(src_children), Some(tgt_children)) =
+                            (unpack_type(&src), unpack_type(&tgt))
+                        else {
+                            continue;
+                        };
 
-                        src_row
-                            .iter()
-                            .zip(tgt_row.iter())
-                            .filter_map(|(src_leaf, tgt_leaf)| {
-                                let ct = src_leaf.as_extension()?;
-                                let key = (ct.extension().clone(), ct.name().clone());
-                                if self.ty_replacements.contains(&key) && src_leaf != tgt_leaf {
-                                    Some((src_leaf.clone(), tgt_leaf.clone()))
-                                } else {
-                                    None
-                                }
-                            })
-                            .collect_vec()
-                    })
-                    .collect();
-                Ok(pairs)
-            })
-            .collect();
+                        if src_children.len() != tgt_children.len() {
+                            continue;
+                        }
 
-        let type_replacements_map = type_replacements?.iter().flatten().try_fold(
-            HashMap::new(),
-            |mut acc: HashMap<Type, Type>, (src, dst)| {
-                match acc.entry(src.clone()) {
-                    Entry::Vacant(v) => {
-                        v.insert(dst.clone());
-                        Ok(acc)
+                        pending.extend(src_children.into_iter().zip(tgt_children));
                     }
-                    Entry::Occupied(o) if o.get() == dst => Ok(acc), // consistent duplicate
-                    Entry::Occupied(o) => Err(ImplementOpsPassError::InconsistentTypeReplacement {
-                        src: Box::new(o.key().clone()),
-                        first: Box::new(o.get().clone()),
-                        second: Box::new(dst.clone()),
-                    }),
                 }
+
+                Ok(map)
             },
         )?;
 
-        let mut state = ImplementOpsState::new(hugr, &type_replacements_map);
+        let mut state = ImplementOpsState::new(hugr, &type_map);
         for (op_def, func_hugr, func_name) in op_funcs {
             state.op(op_def, func_hugr, func_name)?;
         }
         state.finish()?;
         hugr.validate()?;
         Ok(())
-    }
-}
-
-#[derive(Clone, Default)]
-pub struct TypeUnpacker {
-    /// Cache of unpacked types.
-    cache: HashMap<Type, Vec<Type>>,
-}
-
-impl TypeUnpacker {
-    pub fn new() -> Self {
-        Self {
-            cache: HashMap::new(),
-        }
-    }
-
-    pub fn unpack_type(&mut self, ty: &Type) -> Vec<Type> {
-        if self.cache.contains_key(ty) {
-            return self.cache.get(ty).cloned().expect("checked above");
-        }
-
-        let unpacked = self._new_unpack_type(ty);
-        // SAFETY: types form trees so no cycles, cache will not be corrupted
-        debug_assert!(!self.cache.contains_key(ty));
-        self.cache.insert(ty.clone(), unpacked.clone());
-        unpacked
-    }
-
-    fn _new_unpack_type(&mut self, ty: &Type) -> Vec<Type> {
-        if let Some(row) = ty.as_sum().and_then(SumType::as_tuple) {
-            self.tuple_row(row)
-        } else if let Some((size, elem_ty)) = ty
-            .as_extension()
-            .and_then(|ext| array_args::<Array>(ext).or_else(|| array_args::<BorrowArray>(ext)))
-        {
-            let inner = self.unpack_type(&elem_ty);
-            let total_size = size as usize * inner.len();
-            let mut result = Vec::with_capacity(total_size);
-            for _ in 0..size {
-                result.extend_from_slice(&inner);
-            }
-            result
-        } else {
-            vec![ty.clone()]
-        }
-    }
-
-    fn tuple_row(&mut self, row: &TypeRowRV) -> Vec<Type> {
-        TypeRow::try_from(row.clone())
-            .expect("unexpected row variable.")
-            .iter()
-            .flat_map(|t| self.unpack_type(t))
-            .collect::<Vec<_>>()
     }
 }
 
@@ -278,12 +201,49 @@ fn extract_func_node(func_hugr: &Hugr, func_name: &str) -> Result<Node, Implemen
             false
         }
     }) else {
-        panic!(
-            "Expected hugr containing a function with name '{}' but it was not found!",
-            func_name
-        );
+        return Err(ImplementOpsPassError::MissingFunctionHugr {
+            name: func_name.to_string(),
+        });
     };
     Ok(func_node)
+}
+
+fn unpack_type(ty: &Type) -> Option<Vec<Type>> {
+    if let Some(row) = ty.as_sum().and_then(SumType::as_tuple) {
+        Some(
+            TypeRow::try_from(row.clone())
+                .expect("unexpected row variable.")
+                .iter()
+                .cloned()
+                .collect(),
+        )
+    } else if let Some((size, elem_ty)) = ty
+        .as_extension()
+        .and_then(|ext| array_args::<Array>(ext).or_else(|| array_args::<BorrowArray>(ext)))
+    {
+        Some(vec![elem_ty; size as usize])
+    } else {
+        None
+    }
+}
+
+fn insert_type_mapping(
+    map: &mut HashMap<Type, Type>,
+    src: Type,
+    tgt: Type,
+) -> Result<(), ImplementOpsPassError> {
+    match map.entry(src) {
+        Entry::Vacant(v) => {
+            v.insert(tgt);
+            Ok(())
+        }
+        Entry::Occupied(o) if o.get() == &tgt => Ok(()),
+        Entry::Occupied(o) => Err(ImplementOpsPassError::InconsistentTypeReplacement {
+            src: Box::new(o.key().clone()),
+            first: Box::new(o.get().clone()),
+            second: Box::new(tgt),
+        }),
+    }
 }
 
 fn extract_func_sig(
