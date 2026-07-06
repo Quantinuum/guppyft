@@ -127,6 +127,8 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
             .unique_by(|(op, _, _)| OpHashWrapper::from(op))
             .collect_vec();
 
+        let mut unpacker = TypeUnpacker::new();
+
         // Determine type replacements from differences between the `ext_op` and `func_hugr` signatures.
         // Filter using `self.ty_replacements` to only replace specific extension types.
         let type_replacements: Result<Vec<Vec<(Type, Type)>>, ImplementOpsPassError> = op_funcs
@@ -143,20 +145,43 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
                 // Check that the lengths of the op and func signatures match
                 assert_eq!(src_sig.input.len(), tgt_sig.input.len());
                 assert_eq!(src_sig.output.len(), tgt_sig.output.len());
-                let unpacker = &mut TypeUnpacker::new();
-                Ok(src_sig
+
+                // Iterate through all types in the signature, recursively unpack both `src` and `tgt`
+                // to check if `src` is in `ty_replacements` and then use corresponding `tgt` type
+                // as the replacement.
+                let pairs: Vec<(Type, Type)> = src_sig
                     .input
                     .iter()
                     .zip(tgt_sig.input.iter())
                     .chain(src_sig.output.iter().zip(tgt_sig.output.iter()))
-                    .filter(|(src, tgt)| src != tgt)
-                    .filter_map(|(src, tgt)| {
-                        unpacker.unpack_type(src);
-                        unpacker
-                            .contains_filter_type(self.ty_replacements.clone())
-                            .then(|| (src.clone(), tgt.clone()))
+                    .flat_map(|(src_ty, tgt_ty)| {
+                        if let Some(src_ct) = src_ty.as_extension() {
+                            let key = (src_ct.extension().clone(), src_ct.name().clone());
+                            if self.ty_replacements.contains(&key) && src_ty != tgt_ty {
+                                return vec![(src_ty.clone(), tgt_ty.clone())];
+                            }
+                        }
+
+                        let src_row = unpacker.unpack_type(src_ty);
+                        let tgt_row = unpacker.unpack_type(tgt_ty);
+                        assert_eq!(src_row.len(), tgt_row.len());
+
+                        src_row
+                            .iter()
+                            .zip(tgt_row.iter())
+                            .filter_map(|(src_leaf, tgt_leaf)| {
+                                let ct = src_leaf.as_extension()?;
+                                let key = (ct.extension().clone(), ct.name().clone());
+                                if self.ty_replacements.contains(&key) && src_leaf != tgt_leaf {
+                                    Some((src_leaf.clone(), tgt_leaf.clone()))
+                                } else {
+                                    None
+                                }
+                            })
+                            .collect_vec()
                     })
-                    .collect_vec())
+                    .collect();
+                Ok(pairs)
             })
             .collect();
 
@@ -208,6 +233,7 @@ impl TypeUnpacker {
 
         let unpacked = self._new_unpack_type(ty);
         // SAFETY: types form trees so no cycles, cache will not be corrupted
+        debug_assert!(!self.cache.contains_key(ty));
         self.cache.insert(ty.clone(), unpacked.clone());
         unpacked
     }
@@ -237,13 +263,6 @@ impl TypeUnpacker {
             .iter()
             .flat_map(|t| self.unpack_type(t))
             .collect::<Vec<_>>()
-    }
-
-    fn contains_filter_type(&self, filter: HashSet<(ExtensionId, TypeName)>) -> bool {
-        self.cache.keys().any(|ty| {
-            ty.as_extension()
-                .is_some_and(|ct| filter.contains(&(ct.extension().clone(), ct.name().clone())))
-        })
     }
 }
 
@@ -301,9 +320,6 @@ struct ImplementOpsState<'a, H: HugrMut<Node = Node>> {
 
 impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
     pub fn new(hugr: &'a mut H, types: &'a HashMap<Type, Type>) -> Self {
-        for (src, tgt) in types.iter() {
-            eprintln!("{} {}", src, tgt)
-        }
         let mut type_replacer = ReplaceTypes::default();
         for (src, tgt) in types.iter() {
             type_replacer.set_replace_type(
