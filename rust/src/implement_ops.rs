@@ -66,7 +66,7 @@ pub enum ImplementOpsPassError {
 pub struct ImplementOpsPass {
     scope: PassScope,
     pub op_replacements: BTreeMap<(String, String), (Option<Hugr>, String)>,
-    ty_replacements: HashSet<(ExtensionId, TypeName)>,
+    replaceable_types: HashSet<(ExtensionId, TypeName)>,
 }
 
 impl ImplementOpsPass {
@@ -76,7 +76,7 @@ impl ImplementOpsPass {
     ) -> Self {
         Self {
             op_replacements,
-            ty_replacements,
+            replaceable_types: ty_replacements,
             ..Self::default()
         }
     }
@@ -153,9 +153,12 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
                 {
                     let mut pending = vec![(src_ty.clone(), tgt_ty.clone())];
                     while let Some((src, tgt)) = pending.pop() {
+                        if src == tgt {
+                            continue;
+                        }
                         if let Some(src_ct) = src.as_extension() {
                             let key = (src_ct.extension().clone(), src_ct.name().clone());
-                            if self.ty_replacements.contains(&key) && src != tgt {
+                            if self.replaceable_types.contains(&key) {
                                 insert_type_mapping(&mut map, src, tgt)?;
                                 continue;
                             }

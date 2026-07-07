@@ -21,7 +21,7 @@ mod _bindings {
     fn _implement_ops(
         rs_hugr: &mut RsHugr,
         op_replacements: BTreeMap<(String, String), (Option<RsHugr>, String)>,
-        ty_replacements: HashSet<(String, String)>,
+        replaceable_types: HashSet<(String, String)>,
     ) -> PyResult<()> {
         let hugr = &mut rs_hugr.hugr;
 
@@ -30,7 +30,7 @@ mod _bindings {
             .map(|(k, (rs_hugr, func_name))| (k, (rs_hugr.map(|x| x.hugr), func_name)))
             .collect();
 
-        let ty_hashset = ty_replacements
+        let ty_hashset = replaceable_types
             .iter()
             .map(|(ext_str, ty_str)| {
                 let ext = hugr.extensions().get(ext_str).ok_or_else(|| {
