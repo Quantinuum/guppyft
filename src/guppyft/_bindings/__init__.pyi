@@ -27,5 +27,11 @@ def _implement_ops(
         type_replacements: set[tuple[str, str]]
     ) -> None:
     """
-    TODO
+    Replace extension ops in `rs_hugr` to calls to the provided implementations.
+
+    `op_replacements` maps each `(extension_name, op_name)` pair to either a
+    compiled implementation HUGR or `None` if only a declaration should be
+    generated, together with the function name to use.
+    `type_replacements` is a set of extension types that should be replaced by
+    the corresponding types in the implementation HUGRs.
     """

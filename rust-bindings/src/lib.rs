@@ -30,7 +30,7 @@ mod _bindings {
             .map(|(k, (rs_hugr, func_name))| (k, (rs_hugr.map(|x| x.hugr), func_name)))
             .collect();
 
-        let ty_hashmap = ty_replacements
+        let ty_hashset = ty_replacements
             .iter()
             .map(|(ext_str, ty_str)| {
                 let ext = hugr.extensions().get(ext_str).ok_or_else(|| {
@@ -48,7 +48,7 @@ mod _bindings {
             })
             .collect::<PyResult<HashSet<_>>>()?;
 
-        let pass = implement_ops::ImplementOpsPass::new(new_ops, ty_hashmap);
+        let pass = implement_ops::ImplementOpsPass::new(new_ops, ty_hashset);
         pass.run(hugr)
             .map_err(|e| PyValueError::new_err(format!("Error replacing operations: {e}")))?;
 
