@@ -13,13 +13,15 @@ mod _bindings {
     use guppyft::implement_ops;
     use pyo3::exceptions::PyValueError;
     use pyo3::prelude::*;
-    use std::collections::BTreeMap;
+    use std::collections::{BTreeMap, HashSet};
+    use tket::hugr::HugrView;
     use tket::passes::ComposablePass;
 
     #[pyfunction]
     fn _implement_ops(
         rs_hugr: &mut RsHugr,
         op_replacements: BTreeMap<(String, String), (Option<RsHugr>, String)>,
+        replaceable_types: HashSet<(String, String)>,
     ) -> PyResult<()> {
         let hugr = &mut rs_hugr.hugr;
 
@@ -28,7 +30,25 @@ mod _bindings {
             .map(|(k, (rs_hugr, func_name))| (k, (rs_hugr.map(|x| x.hugr), func_name)))
             .collect();
 
-        let pass = implement_ops::ImplementOpsPass::new(new_ops);
+        let ty_hashset = replaceable_types
+            .iter()
+            .map(|(ext_str, ty_str)| {
+                let ext = hugr.extensions().get(ext_str).ok_or_else(|| {
+                    PyValueError::new_err(format!(
+                        "Unknown extension in ty_replacements: '{ext_str}'"
+                    ))
+                })?;
+
+                let ty = ext.get_type(ty_str).ok_or_else(|| {
+                    PyValueError::new_err(format!(
+                        "Unknown type in ty_replacements: '{ext_str}.{ty_str}'"
+                    ))
+                })?;
+                Ok((ty.extension_id().clone(), ty.name().clone()))
+            })
+            .collect::<PyResult<HashSet<_>>>()?;
+
+        let pass = implement_ops::ImplementOpsPass::new(new_ops, ty_hashset);
         pass.run(hugr)
             .map_err(|e| PyValueError::new_err(format!("Error replacing operations: {e}")))?;
 
