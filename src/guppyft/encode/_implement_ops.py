@@ -1,19 +1,28 @@
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Self, no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
+from guppylang.library import link_name
+from hugr import Hugr
+from hugr.build import DefinitionBuilder
+from hugr.ext import TypeDef
 from hugr.ops import FuncDecl, FuncDefn
 from hugr.package import Package
+from hugr.tys import ExtType, Type
+from tket.extensions import measurement
 
 from guppyft._bindings import RsHugr
 from guppyft._bindings import _implement_ops as _implement_ops_binding
-from guppyft._util import link_name
+from guppyft._util import get_link_name
 
 
 class OpReplacements:
-    ops: dict[tuple[str, str], tuple[GuppyFunctionDefinition[Any, Any] | None, str]]
+    ops: dict[
+        tuple[str, str],
+        tuple[GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str],
+    ]
     """Stores the operations to replace during op implementation and the implementation
     functions. A function can be set to `None` to indicate that a declaration with the
     given name should be generated instead."""
@@ -24,14 +33,17 @@ class OpReplacements:
     def __iter__(
         self,
     ) -> Iterator[
-        tuple[tuple[str, str], tuple[GuppyFunctionDefinition[Any, Any] | None, str]]
+        tuple[
+            tuple[str, str],
+            tuple[GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str],
+        ]
     ]:
         return iter(self.ops.items())
 
     def with_func(
         self, op: tuple[str, str], func: GuppyFunctionDefinition[Any, Any]
     ) -> Self:
-        self.ops[op] = (func, link_name(func))
+        self.ops[op] = (func, get_link_name(func))
 
         return self
 
@@ -54,6 +66,59 @@ class OpReplacements:
 
         return self
 
+    def gen_missing_decls_from_lib(self, lib: Package) -> Self:
+        # Build index of names missing declaration/definition
+        missing: dict[str, tuple[str, str]] = {
+            f_name: op_key
+            for op_key, (func_opt, f_name) in self.ops.items()
+            if func_opt is None
+        }
+        if not missing:
+            return self
+
+        for module in lib.modules:
+            for _, data in module.nodes():
+                if isinstance(data.op, FuncDefn) and data.op.f_name in missing:
+                    op_key = missing.pop(data.op.f_name)
+                    h: Hugr[Any] = Hugr()
+                    DefinitionBuilder(h).module_root_builder().declare_function(
+                        data.op.f_name, data.op.signature, data.op.visibility
+                    )
+                    self.ops[op_key] = (h, data.op.f_name)
+                    if not missing:
+                        return self
+
+        return self
+
+
+class TyReplacements:
+    tys: set[tuple[str, str]]
+
+    def __init__(self) -> None:
+        self.tys = set()
+
+    def with_type(self, ty: Type | tuple[str, str]) -> Self:
+        match ty:
+            case TypeDef():
+                self.tys.add((ty.get_extension().name, ty.name))
+            case ExtType():
+                self.tys.add((ty.type_def.get_extension().name, ty.type_def.name))
+            case tuple():
+                self.tys.add(ty)
+            case _:
+                raise TypeError(f"TyReplacements: Unexpected Type: {ty}, {type(ty)}")
+
+        return self
+
+    def with_types(self, tys: Sequence[Type | tuple[str, str]]) -> Self:
+        for ty in tys:
+            self.with_type(ty)
+
+        return self
+
+    def with_defaults(self) -> Self:
+        return self.with_types([measurement.measurement_t, ("prelude", "qubit")])
+
 
 @dataclass(frozen=True, kw_only=True)
 class ImplementOpsSpec:
@@ -62,6 +127,10 @@ class ImplementOpsSpec:
 
     ops: OpReplacements
     """The operations to replace."""
+    tys: TyReplacements = field(
+        default_factory=lambda: TyReplacements().with_defaults()
+    )
+    """The types to replace."""
     build_wrapper: Callable[
         [GuppyFunctionDefinition[[], None]], GuppyFunctionDefinition[[], None]
     ] = field(default=lambda x: x)
@@ -71,20 +140,35 @@ class ImplementOpsSpec:
     """Additional libraries required to run the transformed program."""
 
 
-def _implement_ops(pkg: Package, ops: OpReplacements) -> Package:
+def _to_rs_hugr(
+    func_opt: GuppyFunctionDefinition[Any, Any] | Hugr[Any],
+) -> RsHugr:
+    match func_opt:
+        case GuppyFunctionDefinition():
+            return RsHugr.from_bytes(func_opt.compile_function().modules[0].to_bytes())
+        case Hugr():
+            return RsHugr.from_bytes(func_opt.to_bytes())
+        case _:
+            raise TypeError(
+                f"Expected GuppyFunctionDefinition or Hugr, "
+                f"got {type(func_opt)}: {func_opt}"
+            )
+
+
+def _implement_ops(
+    pkg: Package, ops: OpReplacements, tys: set[tuple[str, str]]
+) -> Package:
     rs_hugr = RsHugr.from_bytes(pkg.modules[0].to_bytes())
 
     rs_ops = {
         key: (
-            func_opt
-            if func_opt is None
-            else RsHugr.from_bytes(func_opt.compile_function().modules[0].to_bytes()),
+            func_opt if func_opt is None else _to_rs_hugr(func_opt),
             name,
         )
         for key, (func_opt, name) in ops
     }
 
-    _implement_ops_binding(rs_hugr, rs_ops)
+    _implement_ops_binding(rs_hugr, rs_ops, tys)
 
     return Package.from_bytes(rs_hugr.to_bytes())
 
@@ -109,13 +193,18 @@ def implement_ops(
         "Provided a non-function entrypoint HUGR!"
     )
 
+    # Add function declaration for missing ops to use during type replacement
+    for lib in spec.libs:
+        spec.ops.gen_missing_decls_from_lib(lib)
+
     # Reset entrypoint, marking module as non-executable, to avoid linking conflicts
     hugr.entrypoint = hugr.module_root
     # Run rewrite, replacing ops with function calls to the functions in `spec.ops`
-    hugr_pkg = _implement_ops(hugr_pkg, spec.ops)
+    hugr_pkg = _implement_ops(hugr_pkg, spec.ops, spec.tys.tys)
 
     # Build, compile, and link wrapper program
-    @guppy.declare(link_name=entrypoint_op.f_name)
+    @guppy.declare
+    @link_name(entrypoint_op.f_name)
     @no_type_check
     def func_decl() -> None: ...
 

@@ -12,6 +12,7 @@ from guppyft.logical.iceberg import (
     Block,
     Qubit,
     borrow,
+    cx_between_blocks,
     cx_dynq,
     cx_transversal,
     discard,
@@ -62,7 +63,7 @@ def test_exported_extensions() -> None:
         "borrowed_block": iceberg_types.iceberg_borrowed_block_def,
         "qubit": iceberg_types.iceberg_qubit,
     }
-    assert len(ops_extn.operations) == 74
+    assert len(ops_extn.operations) == 86
     for op_name, op_def in ops_extn.operations.items():
         op_def_name = op_name if op_name.endswith("_dynq") else f"{op_name}_def"
         assert op_def == iceberg_ops.__getattribute__(op_def_name)
@@ -96,6 +97,7 @@ def test_op_instantiations() -> None:
     # Ops that take a single index:
     for op_name in [
         "x",
+        "y",
         "z",
         "all_but_one_x",
         "all_but_one_z",
@@ -104,6 +106,7 @@ def test_op_instantiations() -> None:
         "fan_out",
         "fan_in",
         "rx",
+        "ry",
         "rz",
         "all_but_one_rx",
         "all_but_one_rz",
@@ -124,6 +127,9 @@ def test_op_instantiations() -> None:
         "zz_phase",
         "cx",
         "swap",
+        "cx_between_blocks",
+        "xx_phase_between_blocks",
+        "yy_phase_between_blocks",
         "zz_phase_between_blocks",
     ]:
         assert (
@@ -162,6 +168,7 @@ def test_guppy_bindings_smoke() -> None:
         b1.rx(5, 0.5)
         b1.all_ry(0.25)
         b1.zz_phase(6, 7, 0.5)
+        cx_between_blocks(b0, b1, 7, 3)
         zz_phase_between_blocks(b0, b1, 1, 0, 0.25)
         cx_transversal(b0, b1)
         [s_z, s_x] = b0.measure_syndrome()
@@ -217,4 +224,4 @@ def test_guppy_hugr() -> None:
     }
     [all_h_node] = [child for child in children if "all_h" in h[child].op.name()]
     assert len(list(h.incoming_links(all_h_node))) == 1  # CallIndirect
-    assert len(list(h.outgoing_links(all_h_node))) == 2  # Output, free
+    assert len(list(h.outgoing_links(all_h_node))) == 1  # free

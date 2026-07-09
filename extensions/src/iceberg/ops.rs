@@ -1,12 +1,16 @@
 //! Extension providing logical operations on Iceberg codeblocks.
 
-use std::sync::{Arc, LazyLock, Weak};
+use std::{
+    collections::HashSet,
+    sync::{Arc, LazyLock, Weak},
+};
 
 use documented::DocumentedVariants;
 use hugr::{
     Extension,
     extension::{
-        ExtensionId, OpDef, SignatureError, SignatureFromArgs, SignatureFunc,
+        CustomValidator, ExtensionId, OpDef, SignatureError, SignatureFromArgs, SignatureFunc,
+        ValidateJustArgs,
         prelude::option_type,
         simple_op::{
             HasConcrete, HasDef, MakeExtensionOp, MakeOpDef, MakeRegisteredOp, OpLoadError,
@@ -54,6 +58,10 @@ pub enum IcebergOpDef {
     x,
     /// X gate with dynamic index.
     x_d,
+    /// Y gate.
+    y,
+    /// Y gate with dynamic index.
+    y_d,
     /// Z gate.
     z,
     /// Z gate with dynamic index.
@@ -104,6 +112,10 @@ pub enum IcebergOpDef {
     rx,
     /// Rx gate with dynamic index.
     rx_d,
+    /// Ry gate.
+    ry,
+    /// Ry gate with dynamic index.
+    ry_d,
     /// Rz gate.
     rz,
     /// Rz gate with dynamic index.
@@ -144,10 +156,22 @@ pub enum IcebergOpDef {
     swap,
     /// Swap of two qubits within a block with dynamic indices.
     swap_d,
+    /// XXPhase gate involving two blocks.
+    xx_phase_between_blocks,
+    /// XXPhase gate involving two blocks with dynamic indices.
+    xx_phase_between_blocks_d,
+    /// YYPhase gate involving two blocks.
+    yy_phase_between_blocks,
+    /// YYPhase gate involving two blocks with dynamic indices.
+    yy_phase_between_blocks_d,
     /// ZZPhase gate involving two blocks.
     zz_phase_between_blocks,
     /// ZZPhase gate involving two blocks with dynamic indices.
     zz_phase_between_blocks_d,
+    /// CX gate involving two blocks.
+    cx_between_blocks,
+    /// CX gate involving two blocks with dynamic indices.
+    cx_between_blocks_d,
     /// CX gate applied transversally over two blocks.
     cx_transversal,
     /// Prepare the all-zero state on a block.
@@ -182,6 +206,10 @@ pub enum IcebergOpDef {
     ry_dynq,
     /// Rz gate on a dynamic logical qubit.
     rz_dynq,
+    /// XXPhase gate on two dynamic logical qubits.
+    xx_phase_dynq,
+    /// YYPhase gate on two dynamic logical qubits.
+    yy_phase_dynq,
     /// ZZPhase gate on two dynamic logical qubits.
     zz_phase_dynq,
     /// CX gate on two dynamic logical qubits.
@@ -268,6 +296,69 @@ impl IcebergOpDef {
     }
 }
 
+/// Validator to check that the list of type arguments consists of a sequence
+/// of natural numbers, the first of which (representing the block size) is
+/// at least 2 and greater than all subsequent (representing qubit indices);
+/// in addition the qubit indices must be distinct from one another.
+struct ArgsValidator {
+    /// Expected number of index arguments following the initial block size.
+    n_idx: usize,
+}
+
+impl ValidateJustArgs for ArgsValidator {
+    fn validate(&self, arg_values: &[TypeArg]) -> Result<(), SignatureError> {
+        let n = arg_values.len();
+        if n != 1 + self.n_idx {
+            return Err(SignatureError::InvalidTypeArgs);
+        }
+        let Some(k) = arg_values[0].as_nat() else {
+            // TypeArgs may be variable uses, in which case we can't extract a k.
+            // In this case, we can't validate so just return Ok.
+            return Ok(());
+        };
+        if k == 0 || k % 2 == 1 {
+            return Err(SignatureError::InvalidTypeArgs);
+        }
+        let mut args: HashSet<u64> = HashSet::new();
+        for arg in arg_values.iter().skip(1) {
+            let Some(i) = arg.as_nat() else { continue };
+            if i >= k || args.contains(&i) {
+                return Err(SignatureError::InvalidTypeArgs);
+            }
+            args.insert(i);
+        }
+        Ok(())
+    }
+}
+
+/// Validator to check that the list of type arguments consists of 3 natural
+/// numbers, the first of which (representing the block size) is at least 2 and
+/// greater than both subsequent (representing qubit indices in two blocks).
+struct InterBlockArgsValidator {}
+
+impl ValidateJustArgs for InterBlockArgsValidator {
+    fn validate(&self, arg_values: &[TypeArg]) -> Result<(), SignatureError> {
+        if arg_values.len() != 3 {
+            return Err(SignatureError::InvalidTypeArgs);
+        }
+        let Some(k) = arg_values[0].as_nat() else {
+            // TypeArgs may be variable uses, in which case we can't extract a k.
+            // In this case, we can't validate so just return Ok.
+            return Ok(());
+        };
+        if k == 0 || k % 2 == 1 {
+            return Err(SignatureError::InvalidTypeArgs);
+        }
+        for arg in arg_values.iter().skip(1) {
+            let i = arg.as_nat().ok_or(SignatureError::InvalidTypeArgs)?;
+            if i >= k {
+                return Err(SignatureError::InvalidTypeArgs);
+            }
+        }
+        Ok(())
+    }
+}
+
 /// Get an array-of-future-bool type with size corresponding to a type variable
 /// with a given ID.
 fn measurement_array_tv(var_id: usize) -> Type {
@@ -317,12 +408,15 @@ fn block_and_optional_measurement() -> Vec<Type> {
 /// Signature of an operation that acts on a single block, with a number of
 /// additional angle inputs and a number of index parameters.
 fn sig_1_block(n_angles: usize, n_indices: usize) -> SignatureFunc {
-    PolyFuncTypeRV::new(
-        vec![TypeParam::max_nat_kind(); 1 + n_indices],
-        FuncValueType::new(
-            vec_of_blocks_and_angles(1, n_angles),
-            vec_of_blocks_and_angles(1, 0),
+    CustomValidator::new(
+        PolyFuncTypeRV::new(
+            vec![TypeParam::max_nat_kind(); 1 + n_indices],
+            FuncValueType::new(
+                vec_of_blocks_and_angles(1, n_angles),
+                vec_of_blocks_and_angles(1, 0),
+            ),
         ),
+        ArgsValidator { n_idx: n_indices },
     )
     .into()
 }
@@ -335,6 +429,35 @@ fn sig_1_block_d(n_angles: usize, n_indices: usize) -> SignatureFunc {
         FuncValueType::new(
             vec_of_blocks_and_ints_and_angles(1, n_indices, n_angles),
             vec_of_blocks_and_ints_and_angles(1, 0, 0),
+        ),
+    )
+    .into()
+}
+
+// Signature of a two-qubit gate between blocks, with a number of additional
+// angle inputs.
+fn sig_2q_phase(n_angles: usize) -> SignatureFunc {
+    CustomValidator::new(
+        PolyFuncTypeRV::new(
+            vec![TypeParam::max_nat_kind(); 3],
+            FuncValueType::new(
+                vec_of_blocks_and_angles(2, n_angles),
+                vec_of_blocks_and_angles(2, 0),
+            ),
+        ),
+        InterBlockArgsValidator {},
+    )
+    .into()
+}
+
+// Signature of a two-qubit gate between blocks, with a number of additional
+// angle inputs.
+fn sig_2q_phase_d(n_angles: usize) -> SignatureFunc {
+    PolyFuncTypeRV::new(
+        vec![TypeParam::max_nat_kind()],
+        FuncValueType::new(
+            vec_of_blocks_and_ints_and_angles(2, 2, n_angles),
+            vec_of_blocks_and_ints_and_angles(2, 0, 0),
         ),
     )
     .into()
@@ -376,13 +499,13 @@ impl MakeOpDef for IcebergOpDef {
         Arc::downgrade(&EXTENSION)
     }
 
-    /// TODO use `CustomValidator` when defining op signatures
-    /// See: <https://github.com/quantinuum-dev/guppyft/issues/82>
     fn init_signature(&self, _extension_ref: &Weak<Extension>) -> SignatureFunc {
         use IcebergOpDef::*;
         match self {
             x => sig_1_block(0, 1),
             x_d => sig_1_block_d(0, 1),
+            y => sig_1_block(0, 1),
+            y_d => sig_1_block_d(0, 1),
             z => sig_1_block(0, 1),
             z_d => sig_1_block_d(0, 1),
             xx => sig_1_block(0, 2),
@@ -408,6 +531,8 @@ impl MakeOpDef for IcebergOpDef {
             fan_in_d => sig_1_block_d(0, 1),
             rx => sig_1_block(1, 1),
             rx_d => sig_1_block_d(1, 1),
+            ry => sig_1_block(1, 1),
+            ry_d => sig_1_block_d(1, 1),
             rz => sig_1_block(1, 1),
             rz_d => sig_1_block_d(1, 1),
             all_rx => sig_1_block(1, 0),
@@ -428,65 +553,75 @@ impl MakeOpDef for IcebergOpDef {
             cx_d => sig_1_block_d(0, 2),
             swap => sig_1_block(0, 2),
             swap_d => sig_1_block_d(0, 2),
-            zz_phase_between_blocks => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_kind(); 3],
-                FuncValueType::new(
-                    vec_of_blocks_and_angles(2, 1),
-                    vec_of_blocks_and_angles(2, 0),
+            xx_phase_between_blocks => sig_2q_phase(1),
+            xx_phase_between_blocks_d => sig_2q_phase_d(1),
+            yy_phase_between_blocks => sig_2q_phase(1),
+            yy_phase_between_blocks_d => sig_2q_phase_d(1),
+            zz_phase_between_blocks => sig_2q_phase(1),
+            zz_phase_between_blocks_d => sig_2q_phase_d(1),
+            cx_between_blocks => sig_2q_phase(0),
+            cx_between_blocks_d => sig_2q_phase_d(0),
+            cx_transversal => CustomValidator::new(
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_kind()],
+                    FuncValueType::new_endo(vec_of_blocks_and_angles(2, 0)),
                 ),
+                ArgsValidator { n_idx: 0 },
             )
             .into(),
-            zz_phase_between_blocks_d => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_kind()],
-                FuncValueType::new(
-                    vec_of_blocks_and_ints_and_angles(2, 2, 1),
-                    vec_of_blocks_and_ints_and_angles(2, 0, 0),
+            alloc_zero => CustomValidator::new(
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_kind()],
+                    FuncValueType::new(
+                        vec_of_blocks_and_angles(0, 0),
+                        vec_of_blocks_and_angles(1, 0),
+                    ),
                 ),
+                ArgsValidator { n_idx: 0 },
             )
             .into(),
-            cx_transversal => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_kind()],
-                FuncValueType::new_endo(vec_of_blocks_and_angles(2, 0)),
+            free => CustomValidator::new(
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_kind()],
+                    FuncValueType::new(
+                        vec_of_blocks_and_angles(1, 0),
+                        vec_of_blocks_and_angles(0, 0),
+                    ),
+                ),
+                ArgsValidator { n_idx: 0 },
             )
             .into(),
-            alloc_zero => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_kind()],
-                FuncValueType::new(
-                    vec_of_blocks_and_angles(0, 0),
-                    vec_of_blocks_and_angles(1, 0),
+            measure_syndrome => CustomValidator::new(
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_kind()],
+                    FuncValueType::new(
+                        vec_of_blocks_and_angles(1, 0),
+                        vec_of_blocks_and_measurements(1, 2),
+                    ),
                 ),
+                ArgsValidator { n_idx: 0 },
             )
             .into(),
-            free => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_kind()],
-                FuncValueType::new(
-                    vec_of_blocks_and_angles(1, 0),
-                    vec_of_blocks_and_angles(0, 0),
+            measure_all => CustomValidator::new(
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_kind()],
+                    FuncValueType::new(
+                        vec_of_blocks_and_angles(1, 0),
+                        vec![measurement_array_tv(0)],
+                    ),
                 ),
+                ArgsValidator { n_idx: 0 },
             )
             .into(),
-            measure_syndrome => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_kind()],
-                FuncValueType::new(
-                    vec_of_blocks_and_angles(1, 0),
-                    vec_of_blocks_and_measurements(1, 2),
+            try_measure_one_x => CustomValidator::new(
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_kind(); 2],
+                    FuncValueType::new(
+                        vec_of_blocks_and_angles(1, 0),
+                        block_and_optional_measurement(),
+                    ),
                 ),
-            )
-            .into(),
-            measure_all => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_kind()],
-                FuncValueType::new(
-                    vec_of_blocks_and_angles(1, 0),
-                    vec![measurement_array_tv(0)],
-                ),
-            )
-            .into(),
-            try_measure_one_x => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_kind(); 2],
-                FuncValueType::new(
-                    vec_of_blocks_and_angles(1, 0),
-                    block_and_optional_measurement(),
-                ),
+                ArgsValidator { n_idx: 1 },
             )
             .into(),
             try_measure_one_x_d => PolyFuncTypeRV::new(
@@ -497,12 +632,15 @@ impl MakeOpDef for IcebergOpDef {
                 ),
             )
             .into(),
-            try_measure_one_z => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_kind(); 2],
-                FuncValueType::new(
-                    vec_of_blocks_and_angles(1, 0),
-                    block_and_optional_measurement(),
+            try_measure_one_z => CustomValidator::new(
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_kind(); 2],
+                    FuncValueType::new(
+                        vec_of_blocks_and_angles(1, 0),
+                        block_and_optional_measurement(),
+                    ),
                 ),
+                ArgsValidator { n_idx: 1 },
             )
             .into(),
             try_measure_one_z_d => PolyFuncTypeRV::new(
@@ -521,6 +659,8 @@ impl MakeOpDef for IcebergOpDef {
             rx_dynq => sig_qubits_angles(1, 1),
             ry_dynq => sig_qubits_angles(1, 1),
             rz_dynq => sig_qubits_angles(1, 1),
+            xx_phase_dynq => sig_qubits_angles(2, 1),
+            yy_phase_dynq => sig_qubits_angles(2, 1),
             zz_phase_dynq => sig_qubits_angles(2, 1),
             cx_dynq => sig_qubits_angles(2, 0),
             try_measure_x_dynq => sig_qubit_meas(),
@@ -631,7 +771,7 @@ mod tests {
     fn test_iceberg_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.iceberg.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 74);
+        assert_eq!(EXTENSION.operations().count(), 86);
     }
 
     #[test]
@@ -1077,5 +1217,51 @@ mod tests {
         let outs = linear.finish();
         f_build.finish_with_outputs(outs).unwrap();
         assert!(module_builder.finish_hugr().is_err());
+    }
+
+    #[test]
+    fn test_invalid_ops() {
+        // block size should be at least 2
+        assert!(
+            EXTENSION
+                .instantiate_extension_op("x", [1.into(), 0.into()])
+                .is_err()
+        );
+        // qubit index should be less than block size
+        assert!(
+            EXTENSION
+                .instantiate_extension_op("x", [6.into(), 6.into()])
+                .is_err()
+        );
+        // `xx` expects two indices following the block size
+        assert!(
+            EXTENSION
+                .instantiate_extension_op("xx", [6.into(), 0.into()])
+                .is_err()
+        );
+        // `xx` expects distinct indices
+        assert!(
+            EXTENSION
+                .instantiate_extension_op("xx", [6.into(), 0.into(), 0.into()])
+                .is_err()
+        );
+        // all indices must be less than the block size
+        assert!(
+            EXTENSION
+                .instantiate_extension_op("zz_phase_between_blocks", [6.into(), 0.into(), 6.into()])
+                .is_err()
+        );
+        // index must be an integer
+        assert!(
+            EXTENSION
+                .instantiate_extension_op("x", [6.into(), "0".into()])
+                .is_err()
+        );
+        // block size must be an integer
+        assert!(
+            EXTENSION
+                .instantiate_extension_op("x", ["6".into(), 0.into()])
+                .is_err()
+        );
     }
 }
