@@ -27,7 +27,7 @@ jobs:
   update-uv-lock:
     name: Update uv.lock
     runs-on: ubuntu-latest
-    if: (github.event_name == 'pull_request' && startsWith(github.head_ref, 'release-please--')) || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'release-please--')
     steps:
       - uses: actions/checkout@v7
         with:
