@@ -1,14 +1,13 @@
 /// Extension providing types for logical operations on the Steane code.
 ///
 /// Currently, there is only a single type defined here:
-/// - `qubit`: The type of a logical qubit.
+/// - `qubit`: The type of a logical Steane qubit.
 use std::sync::{Arc, LazyLock};
 
-
 use hugr::{
+    Extension,
     extension::ExtensionId,
     types::{CustomType, Type, TypeBound, TypeName},
-    Extension,
 };
 
 /// The extension identifier.
@@ -53,9 +52,9 @@ pub static EXTENSION: LazyLock<Arc<Extension>> = LazyLock::new(extension);
 #[cfg(test)]
 mod tests {
     use hugr::{
+        HugrView,
         builder::{Dataflow, DataflowSubContainer, HugrBuilder, ModuleBuilder},
         types::Signature,
-        HugrView,
     };
 
     use super::*;
@@ -64,7 +63,7 @@ mod tests {
     fn test_steane_types_extension() {
         let extn = extension();
         assert_eq!(extn.name() as &str, "guppyft.steane.types");
-        assert_eq!(extn.types().count(), 3);
+        assert_eq!(extn.types().count(), 1);
         assert_eq!(extn.operations().count(), 0);
     }
 
