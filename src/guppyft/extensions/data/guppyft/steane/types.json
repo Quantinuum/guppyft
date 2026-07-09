@@ -1,0 +1,17 @@
+{
+  "version": "0.1.0",
+  "name": "guppyft.steane.types",
+  "types": {
+    "qubit": {
+      "extension": "guppyft.steane.types",
+      "name": "qubit",
+      "params": [],
+      "description": "logical Iceberg qubit",
+      "bound": {
+        "b": "Explicit",
+        "bound": "A"
+      }
+    }
+  },
+  "operations": {}
+}
