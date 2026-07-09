@@ -78,13 +78,13 @@ class Qubit:
     @no_type_check
     def inject_magic_for_t(self: "Qubit", magic: "Qubit" @ owned) -> None:
         """Perform a T gate by injecting a magic state."""
-        inject_magic_for_t(self)
+        inject_magic_for_t(self, magic)
 
     @guppy
     @no_type_check
     def inject_magic_for_tdg(self: "Qubit", magic: "Qubit" @ owned) -> None:
         """Perform a Tdg gate by injecting a magic state."""
-        inject_magic_for_tdg(self)
+        inject_magic_for_tdg(self, magic)
 
 
 @hugr_op(steane_op("free"))
@@ -93,11 +93,10 @@ def free(qubit: "Qubit" @ owned) -> None:
     """Free q qubit."""
 
 
-@guppy
+@hugr_op(steane_op("measure_z"))
 @no_type_check
 def measure_z(self: "Qubit" @ owned) -> bool:
     """Destructive measurement of the qubit in the Z basis."""
-    return measure_z(self)
 
 
 @hugr_op(steane_op("x"))
