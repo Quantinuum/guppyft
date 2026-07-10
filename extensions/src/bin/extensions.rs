@@ -11,6 +11,8 @@ fn main() -> Result<()> {
             let reg = ExtensionRegistry::new([
                 extensions::iceberg::types::EXTENSION.to_owned(),
                 extensions::iceberg::ops::EXTENSION.to_owned(),
+                extensions::steane::types::EXTENSION.to_owned(),
+                extensions::steane::ops::EXTENSION.to_owned(),
             ]);
 
             args.run_dump(&reg)?;
