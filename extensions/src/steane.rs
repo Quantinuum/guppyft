@@ -1,7 +1,7 @@
 //! HUGR extension for logical operations on the
 //! [Steane code](https://arxiv.org/abs/quant-ph/9601029).
 //!
-//! The extension `guppyft.steane.types` provides one new type: the code block
+//! The extension `guppyft.steane.types` provides one new type: the code block for the
 //! Steane code, herein named a 'logical qubit', as a linear (non-copyable) type.
 //!
 //! ```
