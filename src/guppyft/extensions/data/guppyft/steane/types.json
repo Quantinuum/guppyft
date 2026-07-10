@@ -6,7 +6,7 @@
       "extension": "guppyft.steane.types",
       "name": "qubit",
       "params": [],
-      "description": "logical Iceberg qubit",
+      "description": "logical Steane qubit",
       "bound": {
         "b": "Explicit",
         "bound": "A"
