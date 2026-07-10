@@ -15,7 +15,7 @@ use hugr::{
         },
     },
     ops::{ExtensionOp, OpName},
-    types::{FuncValueType, Signature, Type, TypeArg},
+    types::{FuncValueType, Signature, TypeArg},
 };
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
@@ -25,17 +25,6 @@ pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.steane
 pub const VERSION: semver::Version = semver::Version::new(0, 1, 0);
 
 /// Logical Steane operations.
-///
-/// Those operations that are "addressable", i.e. are associated with one or
-/// more specific logical qubits within the block, have two versions: a "static"
-/// version, where the indices are parameters to the operation definition, and a
-/// "dynamic" version, where the indices are integer inputs to the operation.
-/// The static form provides static guarantees that the indices are within the
-/// allowed range, and is simpler to reason about; the dynamic form provides
-/// greater flexibility to the programmer.
-///
-/// The dynamic versions are named with the suffix `_d`: for example `x` is the
-/// static form of the X gate and `x_d` is the dynamic form.
 #[derive(
     Clone, Copy, Debug, DocumentedVariants, Hash, PartialEq, Eq, EnumIter, IntoStaticStr, EnumString,
 )]
@@ -114,18 +103,20 @@ impl MakeRegisteredOp for ConcreteSteaneOp {
 }
 
 impl SteaneOpDef {
-    /// Initialise a [`ConcreteSteaneOp`] from an [`SteaneOpDef`].
+    /// Initialise a [`ConcreteSteaneOp`] from a [`SteaneOpDef`].
     #[must_use]
     pub fn instantiate_no_args(self) -> ConcreteSteaneOp {
         ConcreteSteaneOp { def: self }
     }
 }
 
-/// Signature of an operation that acts on a number of dynamic logical qubits
-/// with a number of additional angle qubits.
-fn sig_qubits(n_qubits: usize) -> SignatureFunc {
-    let qubit_row: Vec<Type> = vec![logical_qubit_type(); n_qubits];
-    Signature::new(qubit_row.clone(), qubit_row).into()
+/// Signature of an operation consisting only of logical qubits
+fn sig_qubits(n_qubits_in: usize, n_qubits_out: usize) -> SignatureFunc {
+    Signature::new(
+        vec![logical_qubit_type(); n_qubits_in],
+        vec![logical_qubit_type(); n_qubits_out],
+    )
+    .into()
 }
 
 impl MakeOpDef for SteaneOpDef {
@@ -148,23 +139,19 @@ impl MakeOpDef for SteaneOpDef {
     fn init_signature(&self, _extension_ref: &Weak<Extension>) -> SignatureFunc {
         use SteaneOpDef::*;
         match self {
-            prep_zero => FuncValueType::new(vec![], vec![logical_qubit_type()]).into(),
-            free => FuncValueType::new(vec![logical_qubit_type()], vec![]).into(),
+            prep_zero => sig_qubits(0, 1),
+            free => sig_qubits(1, 0),
             measure_z => FuncValueType::new(vec![logical_qubit_type()], vec![bool_t()]).into(),
-            x => sig_qubits(1),
-            z => sig_qubits(1),
-            h => sig_qubits(1),
-            s => sig_qubits(1),
-            sdg => sig_qubits(1),
-            prep_magic_for_t_like => FuncValueType::new(vec![], vec![logical_qubit_type()]).into(),
-            inject_magic_for_t => {
-                FuncValueType::new(vec![logical_qubit_type(); 2], vec![logical_qubit_type()]).into()
-            }
-            inject_magic_for_tdg => {
-                FuncValueType::new(vec![logical_qubit_type(); 2], vec![logical_qubit_type()]).into()
-            }
-            cx => sig_qubits(2),
-            swap => sig_qubits(2),
+            x => sig_qubits(1, 1),
+            z => sig_qubits(1, 1),
+            h => sig_qubits(1, 1),
+            s => sig_qubits(1, 1),
+            sdg => sig_qubits(1, 1),
+            prep_magic_for_t_like => sig_qubits(0, 1),
+            inject_magic_for_t => sig_qubits(2, 1),
+            inject_magic_for_tdg => sig_qubits(2, 1),
+            cx => sig_qubits(2, 2),
+            swap => sig_qubits(2, 2),
         }
     }
 
@@ -291,13 +278,13 @@ mod tests {
     #[test]
     fn test_serialization() {
         let qubit = logical_qubit_type();
-        let x3 = EXTENSION.instantiate_extension_op("x", []).unwrap();
+        let x = EXTENSION.instantiate_extension_op("x", []).unwrap();
         let mut module_builder = ModuleBuilder::new();
         let signature = Signature::new_endo(vec![qubit]);
         let mut f_build = module_builder.define_function("main", signature).unwrap();
         let wires: Vec<_> = f_build.input_wires().collect();
         let mut linear = f_build.as_circuit(wires);
-        linear.append(x3, [0]).unwrap();
+        linear.append(x, [0]).unwrap();
         let outs = linear.finish();
         f_build.finish_with_outputs(outs).unwrap();
         let h = module_builder.finish_hugr().unwrap();

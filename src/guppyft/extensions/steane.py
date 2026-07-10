@@ -114,7 +114,7 @@ class SteaneOpsExtension:
         """Apply an S gate to one qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `h`."""
+        `s`."""
         return self().get_op("s")
 
     def s(self) -> ExtOp:
@@ -126,7 +126,7 @@ class SteaneOpsExtension:
         """Apply an Sdg gate to one qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `h`."""
+        `sdg`."""
         return self().get_op("sdg")
 
     def sdg(self) -> ExtOp:

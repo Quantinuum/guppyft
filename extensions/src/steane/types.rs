@@ -38,7 +38,7 @@ fn extension() -> Arc<Extension> {
             .add_type(
                 QUBIT_TYPENAME,
                 vec![],
-                "logical Iceberg qubit".to_owned(),
+                "logical Steane qubit".to_owned(),
                 TypeBound::Linear.into(),
                 extension_ref,
             )
