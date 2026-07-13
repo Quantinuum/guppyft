@@ -756,8 +756,6 @@ pub static EXTENSION: LazyLock<Arc<Extension>> = LazyLock::new(|| {
 
 #[cfg(test)]
 mod tests {
-    use crate::iceberg::types::EXTENSION as types_extension;
-    use crate::iceberg::types::block_type;
     use hugr::extension::prelude::UnwrapBuilder;
     use hugr::{
         CircuitUnit, HugrView, Wire,
@@ -775,6 +773,9 @@ mod tests {
         },
         types::Signature,
     };
+
+    use crate::iceberg::types::EXTENSION as types_extension;
+    use crate::iceberg::types::block_type;
 
     use super::*;
 
