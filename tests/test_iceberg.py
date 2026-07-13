@@ -88,7 +88,7 @@ def test_op_instantiations() -> None:
         "all_h",
         "cx_transversal",
         "alloc_zero",
-        "check",
+        "check_pre_block",
         "free",
         "measure_syndrome",
         "measure_all",

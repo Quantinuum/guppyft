@@ -1186,37 +1186,37 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def alloc_zero_def(self) -> OpDef:
-        """Attempt to prepare a pre-block in the all-zero state.
+        """Attempt to prepare a `PreBlock` in the all-zero state.
 
         This is the generic operation definition. For the instantiated operation, see
         `alloc_zero`."""
         return self().get_op("alloc_zero")
 
     def alloc_zero(self, k: int) -> ExtOp:
-        """Attempt to prepare a pre-block in the all-zero state.
+        """Attempt to prepare a `PreBlock` in the all-zero state.
 
         Args:
             k: The number of logical qubits encoded in the block.
         """
         return self.alloc_zero_def.instantiate([BoundedNatArg(k)])
 
-    # check
+    # check_pre_block
 
     @functools.cached_property
-    def check_def(self) -> OpDef:
+    def check_pre_block_def(self) -> OpDef:
         """Check if a PreBlock is in a valid all-zero state.
 
         This is the generic operation definition. For the instantiated operation, see
         `check`."""
-        return self().get_op("check")
+        return self().get_op("check_pre_block")
 
-    def check(self, k: int) -> ExtOp:
-        """Check if a PreBlock is in a valid logical state.
+    def check_pre_block(self, k: int) -> ExtOp:
+        """Check if a `PreBlock` is in a valid logical state.
 
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.check_def.instantiate([BoundedNatArg(k)])
+        return self.check_pre_block_def.instantiate([BoundedNatArg(k)])
 
     # free
 

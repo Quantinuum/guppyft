@@ -57,7 +57,7 @@ class Block(Generic[N]):  # type: ignore[misc]
     @guppy
     @no_type_check
     def __new__() -> "Block[N]":
-        return alloc_zero().check()
+        return alloc_zero[N]().check()
 
     @guppy
     @no_type_check
@@ -338,9 +338,9 @@ class PreBlock(Generic[N]):  # type: ignore[misc]
     @guppy
     @no_type_check
     def __new__() -> "PreBlock[N]":
-        alloc_zero()
+        return alloc_zero[N]()
 
-    @hugr_op(iceberg_op("check"))
+    @hugr_op(iceberg_op("check_pre_block"))
     @no_type_check
     def check(self: "PreBlock[N]" @ owned) -> Block[N]: ...
 

@@ -177,7 +177,7 @@ pub enum IcebergOpDef {
     /// Prepare the all-zero state on a block.
     alloc_zero,
     /// Check whether pre-block is in a logical state.
-    check,
+    check_pre_block,
     /// Free a block.
     free,
     /// Syndrome measurement.
@@ -579,7 +579,7 @@ impl MakeOpDef for IcebergOpDef {
                 ArgsValidator { n_idx: 0 },
             )
             .into(),
-            check => CustomValidator::new(
+            check_pre_block => CustomValidator::new(
                 PolyFuncTypeRV::new(
                     vec![TypeParam::max_nat_kind()],
                     FuncValueType::new(vec![pre_block_tv(0)], vec_of_blocks_and_angles(1, 0)),
@@ -981,8 +981,8 @@ mod tests {
         let alloczero = EXTENSION
             .instantiate_extension_op("alloc_zero", [8.into()])
             .unwrap();
-        let check = EXTENSION
-            .instantiate_extension_op("check", [8.into()])
+        let checkpreblock = EXTENSION
+            .instantiate_extension_op("check_pre_block", [8.into()])
             .unwrap();
         let allocqb = EXTENSION
             .instantiate_extension_op("alloc_dynq", [])
@@ -1009,7 +1009,7 @@ mod tests {
         let mut dfg_builder = DFGBuilder::new(Signature::new(vec![], outputs)).unwrap();
         let handle = dfg_builder.add_dataflow_op(alloczero, vec![]).unwrap();
         let handle = dfg_builder
-            .add_dataflow_op(check, handle.outputs())
+            .add_dataflow_op(checkpreblock, handle.outputs())
             .unwrap();
         let handle = dfg_builder.add_dataflow_op(x3, handle.outputs()).unwrap();
         let handle = dfg_builder
