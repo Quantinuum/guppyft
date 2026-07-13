@@ -27,7 +27,7 @@ use hugr::{
 use strum::{EnumIter, EnumString, IntoStaticStr};
 use tket::extension::measurement::measurement_type;
 
-use crate::iceberg::types::{borrowed_block_tv, dynamic_logical_qubit_type};
+use crate::iceberg::types::{borrowed_block_tv, dynamic_logical_qubit_type, pre_block_tv};
 
 use super::types::block_tv;
 
@@ -176,6 +176,8 @@ pub enum IcebergOpDef {
     cx_transversal,
     /// Prepare the all-zero state on a block.
     alloc_zero,
+    /// Check whether pre-block is in a logical state.
+    check,
     /// Free a block.
     free,
     /// Syndrome measurement.
@@ -572,10 +574,15 @@ impl MakeOpDef for IcebergOpDef {
             alloc_zero => CustomValidator::new(
                 PolyFuncTypeRV::new(
                     vec![TypeParam::max_nat_kind()],
-                    FuncValueType::new(
-                        vec_of_blocks_and_angles(0, 0),
-                        vec_of_blocks_and_angles(1, 0),
-                    ),
+                    FuncValueType::new(vec_of_blocks_and_angles(0, 0), vec![pre_block_tv(0)]),
+                ),
+                ArgsValidator { n_idx: 0 },
+            )
+            .into(),
+            check => CustomValidator::new(
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_kind()],
+                    FuncValueType::new(vec![pre_block_tv(0)], vec_of_blocks_and_angles(1, 0)),
                 ),
                 ArgsValidator { n_idx: 0 },
             )
@@ -771,7 +778,7 @@ mod tests {
     fn test_iceberg_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.iceberg.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 86);
+        assert_eq!(EXTENSION.operations().count(), 87);
     }
 
     #[test]
@@ -974,6 +981,9 @@ mod tests {
         let alloczero = EXTENSION
             .instantiate_extension_op("alloc_zero", [8.into()])
             .unwrap();
+        let check = EXTENSION
+            .instantiate_extension_op("check", [8.into()])
+            .unwrap();
         let allocqb = EXTENSION
             .instantiate_extension_op("alloc_dynq", [])
             .unwrap();
@@ -998,6 +1008,9 @@ mod tests {
         ];
         let mut dfg_builder = DFGBuilder::new(Signature::new(vec![], outputs)).unwrap();
         let handle = dfg_builder.add_dataflow_op(alloczero, vec![]).unwrap();
+        let handle = dfg_builder
+            .add_dataflow_op(check, handle.outputs())
+            .unwrap();
         let handle = dfg_builder.add_dataflow_op(x3, handle.outputs()).unwrap();
         let handle = dfg_builder
             .add_dataflow_op(measuresyndrome, handle.outputs())

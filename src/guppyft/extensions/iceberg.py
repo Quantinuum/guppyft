@@ -51,6 +51,23 @@ class IcebergTypesExtension:
         return self.iceberg_borrowed_block_def.instantiate([BoundedNatArg(k)])
 
     @functools.cached_property
+    def iceberg_pre_block_def(self) -> TypeDef:
+        """A borrowed Iceberg code block.
+
+        This is the generic type definition. For the instantiated type, see
+        `iceberg_pre_block`.
+        """
+        return self().get_type("pre_block")
+
+    def iceberg_pre_block(self, k: int) -> ExtType:
+        """An Iceberg code pre-block.
+
+        Args:
+            k: The number of logical qubits encoded in the block.
+        """
+        return self.iceberg_borrowed_block_def.instantiate([BoundedNatArg(k)])
+
+    @functools.cached_property
     def iceberg_qubit(self) -> TypeDef:
         """A "dynamic" logical qubit belonging to an unspecified block."""
         return self().get_type("qubit")
@@ -1169,19 +1186,37 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def alloc_zero_def(self) -> OpDef:
-        """Allocate a block in the all-zero state.
+        """Attempt to prepare a pre-block in the all-zero state.
 
         This is the generic operation definition. For the instantiated operation, see
         `alloc_zero`."""
         return self().get_op("alloc_zero")
 
     def alloc_zero(self, k: int) -> ExtOp:
-        """Allocate a block in the all-zero state.
+        """Attempt to prepare a pre-block in the all-zero state.
 
         Args:
             k: The number of logical qubits encoded in the block.
         """
         return self.alloc_zero_def.instantiate([BoundedNatArg(k)])
+
+    # check
+
+    @functools.cached_property
+    def check_def(self) -> OpDef:
+        """Check if a PreBlock is in a valid all-zero state.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `check`."""
+        return self().get_op("check")
+
+    def check(self, k: int) -> ExtOp:
+        """Check if a PreBlock is in a valid logical state.
+
+        Args:
+            k: The number of logical qubits encoded in the block.
+        """
+        return self.check_def.instantiate([BoundedNatArg(k)])
 
     # free
 

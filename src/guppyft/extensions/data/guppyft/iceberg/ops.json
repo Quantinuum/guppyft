@@ -977,7 +977,7 @@
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
               "extension_version": "0.1.0",
-              "id": "block",
+              "id": "pre_block",
               "args": [
                 {
                   "tya": "Variable",
@@ -1007,6 +1007,60 @@
       "name": "borrow_more",
       "description": "Extraction of dynamic logical qubits from an already-borrowed block.",
       "signature": null,
+      "binary": true
+    },
+    "check": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "check",
+      "description": "Check whether pre-block is in a logical state.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "pre_block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
       "binary": true
     },
     "cx": {

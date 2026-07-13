@@ -32,6 +32,21 @@
         "bound": "A"
       }
     },
+    "pre_block": {
+      "extension": "guppyft.iceberg.types",
+      "name": "pre_block",
+      "params": [
+        {
+          "tp": "BoundedNat",
+          "bound": null
+        }
+      ],
+      "description": "logical Iceberg pre-block",
+      "bound": {
+        "b": "Explicit",
+        "bound": "A"
+      }
+    },
     "qubit": {
       "extension": "guppyft.iceberg.types",
       "name": "qubit",

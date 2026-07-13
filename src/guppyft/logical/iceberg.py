@@ -21,12 +21,19 @@ OPS_EXTN = iceberg_ops()
 TYPES_EXTN = iceberg_types()
 
 block_def = TYPES_EXTN.get_type("block")
+pre_block_def = TYPES_EXTN.get_type("pre_block")
 
 
 def _block_to_hugr(args: Sequence[Argument], ctx: ToHugrContext) -> ht.Type:
     [k_arg] = args
     assert isinstance(k_arg, ConstArg)
     return ht.ExtType(block_def, [k_arg.to_hugr(ctx)])
+
+
+def _pre_block_to_hugr(args: Sequence[Argument], ctx: ToHugrContext) -> ht.Type:
+    [k_arg] = args
+    assert isinstance(k_arg, ConstArg)
+    return ht.ExtType(pre_block_def, [k_arg.to_hugr(ctx)])
 
 
 _block_params = [ConstParam(1, "k", NumericType(NumericType.Kind.Nat))]
@@ -47,9 +54,10 @@ M = guppy.nat_var("M")
 
 @custom_type(_block_to_hugr, copyable=False, droppable=False, params=_block_params)
 class Block(Generic[N]):  # type: ignore[misc]
-    @hugr_op(iceberg_op("alloc_zero"))
+    @guppy
     @no_type_check
-    def __new__() -> "Block[N]": ...
+    def __new__() -> "Block[N]":
+        return alloc_zero().check()
 
     @guppy
     @no_type_check
@@ -323,6 +331,23 @@ class BorrowedBlock(Generic[N]):  # type: ignore[misc]
     def restore_some(self: "BorrowedBlock[N]", qubits: array[Qubit, M] @ owned) -> None:
         """Restore some dynamic logical qubits to their originating block."""
         restore_some(self, qubits)
+
+
+@custom_type(_pre_block_to_hugr, copyable=False, droppable=False, params=_block_params)
+class PreBlock(Generic[N]):  # type: ignore[misc]
+    @guppy
+    @no_type_check
+    def __new__() -> "PreBlock[N]":
+        alloc_zero()
+
+    @hugr_op(iceberg_op("check"))
+    @no_type_check
+    def check(self: "PreBlock[N]" @ owned) -> Block[N]: ...
+
+
+@hugr_op(iceberg_op("alloc_zero"))
+@no_type_check
+def alloc_zero() -> PreBlock[N]: ...
 
 
 @hugr_op(iceberg_op("x_d"))
