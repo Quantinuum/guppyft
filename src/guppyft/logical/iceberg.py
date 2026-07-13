@@ -342,7 +342,7 @@ class PreBlock(Generic[N]):  # type: ignore[misc]
 
     @hugr_op(iceberg_op("check_pre_block"))
     @no_type_check
-    def check(self: "PreBlock[N]" @ owned) -> Block[N]: ...
+    def check(self: "PreBlock[N]" @ owned) -> Option[Block[N]]: ...
 
 
 @hugr_op(iceberg_op("alloc_zero"))

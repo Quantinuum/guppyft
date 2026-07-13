@@ -65,7 +65,7 @@ class IcebergTypesExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.iceberg_borrowed_block_def.instantiate([BoundedNatArg(k)])
+        return self.iceberg_pre_block_def.instantiate([BoundedNatArg(k)])
 
     @functools.cached_property
     def iceberg_qubit(self) -> TypeDef:

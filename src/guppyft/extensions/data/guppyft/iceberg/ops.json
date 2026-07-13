@@ -1042,21 +1042,30 @@
           ],
           "output": [
             {
-              "t": "Opaque",
-              "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.1",
-              "id": "block",
-              "args": [
-                {
-                  "tya": "Variable",
-                  "idx": 0,
-                  "cached_decl": {
-                    "tp": "BoundedNat",
-                    "bound": null
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [],
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.iceberg.types",
+                    "extension_version": "0.1.1",
+                    "id": "block",
+                    "args": [
+                      {
+                        "tya": "Variable",
+                        "idx": 0,
+                        "cached_decl": {
+                          "tp": "BoundedNat",
+                          "bound": null
+                        }
+                      }
+                    ],
+                    "bound": "A"
                   }
-                }
-              ],
-              "bound": "A"
+                ]
+              ]
             }
           ]
         }

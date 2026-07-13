@@ -371,6 +371,10 @@ fn measurement_array_tv(var_id: usize) -> Type {
     .unwrap()
 }
 
+fn vec_of_option_blocks(n_blocks: usize) -> Vec<Type> {
+    vec![option_type([block_tv(0)]).into(); n_blocks]
+}
+
 fn vec_of_blocks_and_angles(n_blocks: usize, n_angles: usize) -> Vec<Type> {
     let mut types: Vec<Type> = vec![block_tv(0); n_blocks];
     types.extend(vec![float64_type(); n_angles]);
@@ -582,7 +586,7 @@ impl MakeOpDef for IcebergOpDef {
             check_pre_block => CustomValidator::new(
                 PolyFuncTypeRV::new(
                     vec![TypeParam::max_nat_kind()],
-                    FuncValueType::new(vec![pre_block_tv(0)], vec_of_blocks_and_angles(1, 0)),
+                    FuncValueType::new(vec![pre_block_tv(0)], vec_of_option_blocks(1)),
                 ),
                 ArgsValidator { n_idx: 0 },
             )
@@ -752,6 +756,9 @@ pub static EXTENSION: LazyLock<Arc<Extension>> = LazyLock::new(|| {
 
 #[cfg(test)]
 mod tests {
+    use crate::iceberg::types::EXTENSION as types_extension;
+    use crate::iceberg::types::block_type;
+    use hugr::extension::prelude::UnwrapBuilder;
     use hugr::{
         CircuitUnit, HugrView, Wire,
         builder::{
@@ -768,9 +775,6 @@ mod tests {
         },
         types::Signature,
     };
-
-    use crate::iceberg::types::EXTENSION as types_extension;
-    use crate::iceberg::types::block_type;
 
     use super::*;
 
@@ -1011,7 +1015,10 @@ mod tests {
         let handle = dfg_builder
             .add_dataflow_op(checkpreblock, handle.outputs())
             .unwrap();
-        let handle = dfg_builder.add_dataflow_op(x3, handle.outputs()).unwrap();
+        let [handle] = dfg_builder
+            .build_unwrap_sum(1, option_type([block_type(8)]), handle.out_wire(0))
+            .unwrap();
+        let handle = dfg_builder.add_dataflow_op(x3, [handle]).unwrap();
         let handle = dfg_builder
             .add_dataflow_op(measuresyndrome, handle.outputs())
             .unwrap();
