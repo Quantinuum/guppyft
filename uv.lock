@@ -150,7 +150,7 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "guppylang", specifier = ">=1.0.0rc1" },
-    { name = "guppylang-internals", specifier = ">=1.0.0a8" },
+    { name = "guppylang-internals", specifier = ">=1.0.0rc1" },
     { name = "hugr", specifier = ">=0.18.0" },
     { name = "selene-core", specifier = "~=0.3.0a1" },
     { name = "selene-sim", specifier = "~=0.3.0a1" },
