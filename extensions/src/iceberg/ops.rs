@@ -27,14 +27,14 @@ use hugr::{
 use strum::{EnumIter, EnumString, IntoStaticStr};
 use tket::extension::measurement::measurement_type;
 
-use crate::iceberg::types::{borrowed_block_tv, dynamic_logical_qubit_type};
+use crate::iceberg::types::{borrowed_block_tv, dynamic_logical_qubit_type, pre_block_tv};
 
 use super::types::block_tv;
 
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.iceberg.ops");
 /// Extension version.
-pub const VERSION: semver::Version = semver::Version::new(0, 1, 0);
+pub const VERSION: semver::Version = semver::Version::new(0, 1, 1);
 
 /// Logical Iceberg operations.
 ///
@@ -176,6 +176,10 @@ pub enum IcebergOpDef {
     cx_transversal,
     /// Prepare the all-zero state on a block.
     alloc_zero,
+    /// Attempt to prepare the all-zero state on a block.
+    try_alloc_zero,
+    /// Check whether pre-block is in a logical state.
+    check_pre_block,
     /// Free a block.
     free,
     /// Syndrome measurement.
@@ -580,6 +584,25 @@ impl MakeOpDef for IcebergOpDef {
                 ArgsValidator { n_idx: 0 },
             )
             .into(),
+            try_alloc_zero => CustomValidator::new(
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_kind()],
+                    FuncValueType::new(vec_of_blocks_and_angles(0, 0), vec![pre_block_tv(0)]),
+                ),
+                ArgsValidator { n_idx: 0 },
+            )
+            .into(),
+            check_pre_block => CustomValidator::new(
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_kind()],
+                    FuncValueType::new(
+                        vec![pre_block_tv(0)],
+                        vec![option_type([block_tv(0)]).into()],
+                    ),
+                ),
+                ArgsValidator { n_idx: 0 },
+            )
+            .into(),
             free => CustomValidator::new(
                 PolyFuncTypeRV::new(
                     vec![TypeParam::max_nat_kind()],
@@ -745,6 +768,7 @@ pub static EXTENSION: LazyLock<Arc<Extension>> = LazyLock::new(|| {
 
 #[cfg(test)]
 mod tests {
+    use hugr::extension::prelude::UnwrapBuilder;
     use hugr::{
         CircuitUnit, HugrView, Wire,
         builder::{
@@ -771,7 +795,7 @@ mod tests {
     fn test_iceberg_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.iceberg.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 86);
+        assert_eq!(EXTENSION.operations().count(), 88);
     }
 
     #[test]
@@ -1020,10 +1044,37 @@ mod tests {
         let wires: Vec<Wire> = handle.outputs().collect();
         assert_eq!(wires.len(), 2);
         let freed_h = dfg_builder.add_dataflow_op(freeqb, [wires[1]]).unwrap();
-        assert!(freed_h.outputs().count() == 0);
+        assert_eq!(freed_h.outputs().count(), 0);
         let h = dfg_builder
             .finish_hugr_with_outputs([bool_wire_0, bool_wire_1, wires[0]])
             .unwrap();
+        h.validate().unwrap();
+    }
+
+    #[test]
+    fn test_try_alloc_measure() {
+        let tryalloczero = EXTENSION
+            .instantiate_extension_op("try_alloc_zero", [8.into()])
+            .unwrap();
+        let checkpreblock = EXTENSION
+            .instantiate_extension_op("check_pre_block", [8.into()])
+            .unwrap();
+        let free = EXTENSION
+            .instantiate_extension_op("free", [8.into()])
+            .unwrap();
+
+        let mut dfg_builder = DFGBuilder::new(Signature::new([], [])).unwrap();
+        let handle = dfg_builder.add_dataflow_op(tryalloczero, vec![]).unwrap();
+        let handle = dfg_builder
+            .add_dataflow_op(checkpreblock, handle.outputs())
+            .unwrap();
+        let [block_wire] = dfg_builder
+            .build_unwrap_sum(1, option_type([block_type(8)]), handle.out_wire(0))
+            .unwrap();
+        let handle = dfg_builder.add_dataflow_op(free, [block_wire]).unwrap();
+        let outs: Vec<Wire> = handle.outputs().collect();
+        assert!(outs.is_empty());
+        let h = dfg_builder.finish_hugr_with_outputs([]).unwrap();
         h.validate().unwrap();
     }
 

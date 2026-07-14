@@ -6,6 +6,7 @@ from guppylang.std.builtins import array
 from guppylang.std.lang import owned
 from guppylang.std.option import Option
 from guppylang.std.quantum import Measurement
+from guppylang_internals.compiler.core import CompilerContext
 from guppylang_internals.decorator import custom_type, hugr_op
 from guppylang_internals.tys.arg import Argument, ConstArg
 from guppylang_internals.tys.common import ToHugrContext
@@ -13,6 +14,7 @@ from guppylang_internals.tys.param import ConstParam
 from guppylang_internals.tys.subst import Inst
 from guppylang_internals.tys.ty import NumericType
 from hugr import tys as ht
+from hugr.ext import TypeDef
 from hugr.ops import DataflowOp, ExtOp
 
 from guppyft.extensions import iceberg_ops, iceberg_types
@@ -22,18 +24,18 @@ TYPES_EXTN = iceberg_types()
 
 block_def = TYPES_EXTN.get_type("block")
 borrowed_block_def = TYPES_EXTN.get_type("borrowed_block")
+pre_block_def = TYPES_EXTN.get_type("pre_block")
 
 
-def _block_to_hugr(args: Sequence[Argument], ctx: ToHugrContext) -> ht.Type:
-    [k_arg] = args
-    assert isinstance(k_arg, ConstArg)
-    return ht.ExtType(block_def, [k_arg.to_hugr(ctx)])
+def _block_to_hugr(
+    ty_def: TypeDef,
+) -> Callable[[Sequence[Argument], CompilerContext], ht.Type]:
+    def hugr_ty(args: Sequence[Argument], ctx: ToHugrContext) -> ht.Type:
+        [k_arg] = args
+        assert isinstance(k_arg, ConstArg)
+        return ht.ExtType(ty_def, [k_arg.to_hugr(ctx)])
 
-
-def _borrowed_block_to_hugr(args: Sequence[Argument], ctx: ToHugrContext) -> ht.Type:
-    [k_arg] = args
-    assert isinstance(k_arg, ConstArg)
-    return ht.ExtType(borrowed_block_def, [k_arg.to_hugr(ctx)])
+    return hugr_ty
 
 
 _block_params = [ConstParam(1, "k", NumericType(NumericType.Kind.Nat))]
@@ -52,7 +54,9 @@ N = guppy.nat_var("N")
 M = guppy.nat_var("M")
 
 
-@custom_type(_block_to_hugr, copyable=False, droppable=False, params=_block_params)
+@custom_type(
+    _block_to_hugr(block_def), copyable=False, droppable=False, params=_block_params
+)
 class Block(Generic[N]):  # type: ignore[misc]
     @hugr_op(iceberg_op("alloc_zero"))
     @no_type_check
@@ -316,7 +320,10 @@ class Qubit:
 
 
 @custom_type(
-    _borrowed_block_to_hugr, copyable=False, droppable=False, params=_block_params
+    _block_to_hugr(borrowed_block_def),
+    copyable=False,
+    droppable=False,
+    params=_block_params,
 )
 class BorrowedBlock(Generic[N]):  # type: ignore[misc]
     @guppy
@@ -332,6 +339,19 @@ class BorrowedBlock(Generic[N]):  # type: ignore[misc]
     def restore_some(self: "BorrowedBlock[N]", qubits: array[Qubit, M] @ owned) -> None:
         """Restore some dynamic logical qubits to their originating block."""
         restore_some(self, qubits)
+
+
+@custom_type(
+    _block_to_hugr(pre_block_def), copyable=False, droppable=False, params=_block_params
+)
+class PreBlock(Generic[N]):  # type: ignore[misc]
+    @hugr_op(iceberg_op("try_alloc_zero"))
+    @no_type_check
+    def __new__() -> "PreBlock[N]": ...
+
+    @hugr_op(iceberg_op("check_pre_block"))
+    @no_type_check
+    def check(self: "PreBlock[N]" @ owned) -> Option[Block[N]]: ...
 
 
 @hugr_op(iceberg_op("x_d"))

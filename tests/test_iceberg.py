@@ -10,6 +10,7 @@ from tket.passes import InlineFunctions, NormalizeGuppy
 from guppyft.extensions import iceberg_ops, iceberg_types
 from guppyft.logical.iceberg import (
     Block,
+    PreBlock,
     Qubit,
     borrow,
     cx_between_blocks,
@@ -61,9 +62,10 @@ def test_exported_extensions() -> None:
     assert types_extn.types == {
         "block": iceberg_types.iceberg_block_def,
         "borrowed_block": iceberg_types.iceberg_borrowed_block_def,
+        "pre_block": iceberg_types.iceberg_pre_block_def,
         "qubit": iceberg_types.iceberg_qubit,
     }
-    assert len(ops_extn.operations) == 86
+    assert len(ops_extn.operations) == 88
     for op_name, op_def in ops_extn.operations.items():
         op_def_name = op_name if op_name.endswith("_dynq") else f"{op_name}_def"
         assert op_def == iceberg_ops.__getattribute__(op_def_name)
@@ -86,6 +88,8 @@ def test_op_instantiations() -> None:
         "all_h",
         "cx_transversal",
         "alloc_zero",
+        "try_alloc_zero",
+        "check_pre_block",
         "free",
         "measure_syndrome",
         "measure_all",
@@ -152,7 +156,7 @@ def test_guppy_bindings_smoke() -> None:
     @guppy
     def main() -> None:
         b0 = Block[8]()
-        b1 = Block[8]()
+        b1 = PreBlock[8]().check().unwrap()
         q0 = Qubit()
         q0.y()
         q0.rz(-0.5)
