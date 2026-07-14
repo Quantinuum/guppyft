@@ -977,7 +977,7 @@
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
               "extension_version": "0.1.1",
-              "id": "pre_block",
+              "id": "block",
               "args": [
                 {
                   "tya": "Variable",
@@ -2697,6 +2697,42 @@
         }
       },
       "binary": false
+    },
+    "try_alloc_zero": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "try_alloc_zero",
+      "description": "Attempt to prepare the all-zero state on a block.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "pre_block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": true
     },
     "try_measure_one_x": {
       "extension": "guppyft.iceberg.ops",

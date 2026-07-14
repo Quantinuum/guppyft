@@ -52,7 +52,7 @@ class IcebergTypesExtension:
 
     @functools.cached_property
     def iceberg_pre_block_def(self) -> TypeDef:
-        """A borrowed Iceberg code block.
+        """An Iceberg code pre-block.
 
         This is the generic type definition. For the instantiated type, see
         `iceberg_pre_block`.
@@ -1186,19 +1186,37 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def alloc_zero_def(self) -> OpDef:
-        """Prepare a `PreBlock` in the all-zero state.
+        """Allocate a block in the all-zero state.
 
         This is the generic operation definition. For the instantiated operation, see
         `alloc_zero`."""
         return self().get_op("alloc_zero")
 
     def alloc_zero(self, k: int) -> ExtOp:
-        """Prepare a `PreBlock` in the all-zero state.
+        """Allocate a block in the all-zero state.
 
         Args:
             k: The number of logical qubits encoded in the block.
         """
         return self.alloc_zero_def.instantiate([BoundedNatArg(k)])
+
+    # try_alloc_zero
+
+    @functools.cached_property
+    def try_alloc_zero_def(self) -> OpDef:
+        """Allocate a `PreBlock` in the all-zero state.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `alloc_zero`."""
+        return self().get_op("try_alloc_zero")
+
+    def try_alloc_zero(self, k: int) -> ExtOp:
+        """Allocate a `PreBlock` in the all-zero state.
+
+        Args:
+            k: The number of logical qubits encoded in the block.
+        """
+        return self.try_alloc_zero_def.instantiate([BoundedNatArg(k)])
 
     # check_pre_block
 

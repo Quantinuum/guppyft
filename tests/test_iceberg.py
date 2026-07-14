@@ -9,8 +9,9 @@ from tket.passes import InlineFunctions, NormalizeGuppy
 
 from guppyft.extensions import iceberg_ops, iceberg_types
 from guppyft.logical.iceberg import (
+    Block,
+    PreBlock,
     Qubit,
-    alloc_zero,
     borrow,
     cx_between_blocks,
     cx_dynq,
@@ -64,7 +65,7 @@ def test_exported_extensions() -> None:
         "pre_block": iceberg_types.iceberg_pre_block_def,
         "qubit": iceberg_types.iceberg_qubit,
     }
-    assert len(ops_extn.operations) == 87
+    assert len(ops_extn.operations) == 88
     for op_name, op_def in ops_extn.operations.items():
         op_def_name = op_name if op_name.endswith("_dynq") else f"{op_name}_def"
         assert op_def == iceberg_ops.__getattribute__(op_def_name)
@@ -87,6 +88,7 @@ def test_op_instantiations() -> None:
         "all_h",
         "cx_transversal",
         "alloc_zero",
+        "try_alloc_zero",
         "check_pre_block",
         "free",
         "measure_syndrome",
@@ -153,10 +155,8 @@ def test_guppy_bindings_smoke() -> None:
 
     @guppy
     def main() -> None:
-        pb0 = alloc_zero[8]()
-        pb1 = alloc_zero[8]()
-        b0 = pb0.check().unwrap()
-        b1 = pb1.check().unwrap()
+        b0 = Block[8]()
+        b1 = PreBlock[8]().check().unwrap()
         q0 = Qubit()
         q0.y()
         q0.rz(-0.5)
@@ -204,7 +204,7 @@ def test_guppy_hugr() -> None:
 
     @guppy
     def main() -> None:
-        b = alloc_zero[8]().check().unwrap()
+        b = Block[8]()
         b.all_h()
         discard(b)
 
@@ -224,9 +224,7 @@ def test_guppy_hugr() -> None:
         "CallIndirect",
         "guppyft.iceberg.ops.all_h<8>",
         "guppyft.iceberg.ops.free<8>",
-        "guppyft.iceberg.ops.check_pre_block<8>",
         "Output",
-        "Conditional",  # Used to unwrap Option[Block] from `.check().unwrap()`
     }
     [all_h_node] = [child for child in children if "all_h" in h[child].op.name()]
     assert len(list(h.incoming_links(all_h_node))) == 1  # CallIndirect
