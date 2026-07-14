@@ -373,10 +373,6 @@ fn measurement_array_tv(var_id: usize) -> Type {
     .unwrap()
 }
 
-fn vec_of_option_blocks(n_blocks: usize) -> Vec<Type> {
-    vec![option_type([block_tv(0)]).into(); n_blocks]
-}
-
 fn vec_of_blocks_and_angles(n_blocks: usize, n_angles: usize) -> Vec<Type> {
     let mut types: Vec<Type> = vec![block_tv(0); n_blocks];
     types.extend(vec![float64_type(); n_angles]);
@@ -599,7 +595,10 @@ impl MakeOpDef for IcebergOpDef {
             check_pre_block => CustomValidator::new(
                 PolyFuncTypeRV::new(
                     vec![TypeParam::max_nat_kind()],
-                    FuncValueType::new(vec![pre_block_tv(0)], vec_of_option_blocks(1)),
+                    FuncValueType::new(
+                        vec![pre_block_tv(0)],
+                        vec![option_type([block_tv(0)]).into()],
+                    ),
                 ),
                 ArgsValidator { n_idx: 0 },
             )
