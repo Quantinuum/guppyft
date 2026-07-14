@@ -13,6 +13,8 @@ fn main() -> Result<()> {
                 extensions::iceberg::ops::EXTENSION.to_owned(),
                 extensions::steane::types::EXTENSION.to_owned(),
                 extensions::steane::ops::EXTENSION.to_owned(),
+                extensions::std::types::EXTENSION.to_owned(),
+                extensions::std::ops::EXTENSION.to_owned(),
             ]);
 
             args.run_dump(&reg)?;

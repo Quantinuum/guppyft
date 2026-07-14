@@ -18,6 +18,7 @@ from hugr.ext import TypeDef
 from hugr.ops import DataflowOp, ExtOp
 
 from guppyft.extensions import iceberg_ops, iceberg_types
+from guppyft.std import LogicalMeasurement
 
 OPS_EXTN = iceberg_ops()
 TYPES_EXTN = iceberg_types()
@@ -582,7 +583,7 @@ def measure_syndrome(block: Block[N]) -> tuple[Measurement, Measurement]:
 
 @hugr_op(iceberg_op("measure_all"))
 @no_type_check
-def measure_all(block: Block[N] @ owned) -> array[Measurement, N]:
+def measure_all(block: Block[N] @ owned) -> LogicalMeasurement[N]:
     """Destructive measurement of all qubits in `block`."""
 
 

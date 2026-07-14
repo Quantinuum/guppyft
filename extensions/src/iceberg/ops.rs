@@ -18,18 +18,15 @@ use hugr::{
         },
     },
     ops::{ExtensionOp, OpName},
-    std_extensions::{
-        arithmetic::{float_types::float64_type, int_types::int_type},
-        collections::{array::ArrayKind, borrow_array::BorrowArray},
-    },
+    std_extensions::arithmetic::{float_types::float64_type, int_types::int_type},
     types::{FuncValueType, PolyFuncTypeRV, Signature, Type, TypeArg, type_param::TypeParam},
 };
 use strum::{EnumIter, EnumString, IntoStaticStr};
 use tket::extension::measurement::measurement_type;
 
-use crate::iceberg::types::{borrowed_block_tv, dynamic_logical_qubit_type, pre_block_tv};
-
 use super::types::block_tv;
+use crate::iceberg::types::{borrowed_block_tv, dynamic_logical_qubit_type, pre_block_tv};
+use crate::std::types::logical_measurement_tv;
 
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.iceberg.ops");
@@ -363,16 +360,6 @@ impl ValidateJustArgs for InterBlockArgsValidator {
     }
 }
 
-/// Get an array-of-future-bool type with size corresponding to a type variable
-/// with a given ID.
-fn measurement_array_tv(var_id: usize) -> Type {
-    BorrowArray::ty_parametric(
-        TypeArg::new_var_use(var_id, TypeParam::max_nat_kind()),
-        measurement_type(),
-    )
-    .unwrap()
-}
-
 fn vec_of_blocks_and_angles(n_blocks: usize, n_angles: usize) -> Vec<Type> {
     let mut types: Vec<Type> = vec![block_tv(0); n_blocks];
     types.extend(vec![float64_type(); n_angles]);
@@ -630,7 +617,7 @@ impl MakeOpDef for IcebergOpDef {
                     vec![TypeParam::max_nat_kind()],
                     FuncValueType::new(
                         vec_of_blocks_and_angles(1, 0),
-                        vec![measurement_array_tv(0)],
+                        vec![logical_measurement_tv(0)],
                     ),
                 ),
                 ArgsValidator { n_idx: 0 },
@@ -780,16 +767,15 @@ mod tests {
         package::Package,
         std_extensions::{
             arithmetic::{float_types::ConstF64, int_types::ConstInt},
-            collections::borrow_array::borrow_array_type,
             std_reg,
         },
         types::Signature,
     };
 
+    use super::*;
     use crate::iceberg::types::EXTENSION as types_extension;
     use crate::iceberg::types::block_type;
-
-    use super::*;
+    use crate::std::types::logical_measurement_type;
 
     #[test]
     fn test_iceberg_ops_extension() {
@@ -1085,7 +1071,7 @@ mod tests {
             .unwrap();
         let mut dfg_builder = DFGBuilder::new(Signature::new(
             [block_type(4)],
-            [borrow_array_type(4, measurement_type())],
+            [logical_measurement_type(4)],
         ))
         .unwrap();
         let handle = dfg_builder

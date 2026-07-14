@@ -1901,9 +1901,9 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "collections.borrow_arr",
-              "extension_version": "0.2.1",
-              "id": "borrow_array",
+              "extension": "guppyft.std.types",
+              "extension_version": "0.1.0",
+              "id": "logical_measurement",
               "args": [
                 {
                   "tya": "Variable",
@@ -1912,20 +1912,9 @@
                     "tp": "BoundedNat",
                     "bound": null
                   }
-                },
-                {
-                  "tya": "Type",
-                  "ty": {
-                    "t": "Opaque",
-                    "extension": "tket.measurement",
-                    "extension_version": "0.1.0",
-                    "id": "Measurement",
-                    "args": [],
-                    "bound": "C"
-                  }
                 }
               ],
-              "bound": "A"
+              "bound": "C"
             }
           ]
         }
