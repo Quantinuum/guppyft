@@ -23,6 +23,7 @@ OPS_EXTN = iceberg_ops()
 TYPES_EXTN = iceberg_types()
 
 block_def = TYPES_EXTN.get_type("block")
+borrowed_block_def = TYPES_EXTN.get_type("borrowed_block")
 pre_block_def = TYPES_EXTN.get_type("pre_block")
 
 
@@ -319,7 +320,10 @@ class Qubit:
 
 
 @custom_type(
-    _block_to_hugr(block_def), copyable=False, droppable=False, params=_block_params
+    _block_to_hugr(borrowed_block_def),
+    copyable=False,
+    droppable=False,
+    params=_block_params,
 )
 class BorrowedBlock(Generic[N]):  # type: ignore[misc]
     @guppy
