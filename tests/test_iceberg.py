@@ -252,9 +252,27 @@ def test_guppy_types() -> None:
     ]
     assert len(borrow_nodes) == 1
     assert len(restore_nodes) == 1
-    borrow_sig = h.get(borrow_nodes[0]).op.signature
-    restore_sig = h.get(restore_nodes[0]).op.signature
-    assert borrow_sig.input[0].type_def.name == "block"
-    assert borrow_sig.output[0].type_def.name == "borrowed_block"
-    assert restore_sig.input[0].type_def.name == "borrowed_block"
-    assert restore_sig.output[0].type_def.name == "block"
+    borrow_nodedata = h.get(borrow_nodes[0])
+    restore_nodedata = h.get(restore_nodes[0])
+    assert borrow_nodedata is not None
+    assert restore_nodedata is not None
+    borrow_op = borrow_nodedata.op
+    restore_op = restore_nodedata.op
+    assert isinstance(borrow_op, ExtOp)
+    assert isinstance(restore_op, ExtOp)
+    borrow_sig = borrow_op.signature
+    restore_sig = restore_op.signature
+    assert borrow_sig is not None
+    assert restore_sig is not None
+    borrow_input0 = borrow_sig.input[0]
+    borrow_output0 = borrow_sig.output[0]
+    restore_input0 = restore_sig.input[0]
+    restore_output0 = restore_sig.output[0]
+    assert isinstance(borrow_input0, ExtType)
+    assert isinstance(borrow_output0, ExtType)
+    assert isinstance(restore_input0, ExtType)
+    assert isinstance(restore_output0, ExtType)
+    assert borrow_input0.type_def.name == "block"
+    assert borrow_output0.type_def.name == "borrowed_block"
+    assert restore_input0.type_def.name == "borrowed_block"
+    assert restore_output0.type_def.name == "block"
