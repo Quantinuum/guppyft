@@ -21,12 +21,19 @@ OPS_EXTN = iceberg_ops()
 TYPES_EXTN = iceberg_types()
 
 block_def = TYPES_EXTN.get_type("block")
+borrowed_block_def = TYPES_EXTN.get_type("borrowed_block")
 
 
 def _block_to_hugr(args: Sequence[Argument], ctx: ToHugrContext) -> ht.Type:
     [k_arg] = args
     assert isinstance(k_arg, ConstArg)
     return ht.ExtType(block_def, [k_arg.to_hugr(ctx)])
+
+
+def _borrowed_block_to_hugr(args: Sequence[Argument], ctx: ToHugrContext) -> ht.Type:
+    [k_arg] = args
+    assert isinstance(k_arg, ConstArg)
+    return ht.ExtType(borrowed_block_def, [k_arg.to_hugr(ctx)])
 
 
 _block_params = [ConstParam(1, "k", NumericType(NumericType.Kind.Nat))]
@@ -308,7 +315,9 @@ class Qubit:
         return try_measure_z_dynq(self)
 
 
-@custom_type(_block_to_hugr, copyable=False, droppable=False, params=_block_params)
+@custom_type(
+    _borrowed_block_to_hugr, copyable=False, droppable=False, params=_block_params
+)
 class BorrowedBlock(Generic[N]):  # type: ignore[misc]
     @guppy
     @no_type_check
