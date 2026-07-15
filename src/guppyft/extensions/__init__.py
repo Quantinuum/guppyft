@@ -25,6 +25,8 @@ std_types: StdTypesExtension = std.StdTypesExtension()
 
 # Resolve all the extensions. This is a temporary patch required to
 # cache the extensions for Guppy compilation.
+# Relevant issue:
+# https://github.com/Quantinuum/hugr/issues/3159
 _registry = ExtensionRegistry.from_extensions(
     [
         iceberg_types(),

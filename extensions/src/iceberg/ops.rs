@@ -772,10 +772,11 @@ mod tests {
         types::Signature,
     };
 
-    use super::*;
     use crate::iceberg::types::EXTENSION as types_extension;
     use crate::iceberg::types::block_type;
     use crate::std::types::logical_measurement_type;
+
+    use super::*;
 
     #[test]
     fn test_iceberg_ops_extension() {
