@@ -1,10 +1,12 @@
 """Utility functions for QEC extensions."""
 
+import functools
 import pkgutil
 
 from hugr.ext import Extension
 
 
+@functools.cache
 def load_extension(name: str) -> Extension:
     from guppyft import extensions
 
