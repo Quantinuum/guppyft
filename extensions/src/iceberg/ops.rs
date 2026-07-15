@@ -24,9 +24,10 @@ use hugr::{
 use strum::{EnumIter, EnumString, IntoStaticStr};
 use tket::extension::measurement::measurement_type;
 
-use super::types::block_tv;
 use crate::iceberg::types::{borrowed_block_tv, dynamic_logical_qubit_type, pre_block_tv};
 use crate::std::types::logical_measurement_tv;
+
+use super::types::block_tv;
 
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.iceberg.ops");
