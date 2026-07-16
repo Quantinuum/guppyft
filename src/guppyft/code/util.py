@@ -1,7 +1,8 @@
-from typing import no_type_check
+from typing import Generic, no_type_check
 
 from guppylang import guppy
 from guppylang.std.builtins import array
+from guppylang.std.quantum import Measurement
 
 N = guppy.nat_var("N")
 
@@ -13,3 +14,8 @@ def parity_check(data_bits: array[bool, N]) -> bool:
     for i in range(N):
         out ^= data_bits[i]
     return out
+
+
+@guppy.struct
+class LogicalMeasurement(Generic[N]):  # type: ignore[misc]
+    measurements: array[Measurement, N]  # type: ignore[valid-type]

@@ -36,4 +36,6 @@ def build_wrapper(
     return wrapper
 
 
-steane_spec = ImplementOpsSpec(ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[lib])
+steane_spec = ImplementOpsSpec(
+    ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[lib]
+)

@@ -6,8 +6,10 @@ from guppyft.encode import (
     implement_ops,
 )
 from guppyft.logical.std import decode
-from guppyft.logical.steane import measure_z, Qubit
+from guppyft.logical.steane import Qubit, measure_z
+
 from .util import steane_spec
+
 
 def test_qalloc_measure() -> None:
 
