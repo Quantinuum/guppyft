@@ -45,7 +45,7 @@ dev = [
 lint = [
     "pre-commit>=4.6.0,<5",
     "ruff>=0.15.21",
-    "mypy>=2.2.0",
+    "mypy>=2.3.0",
 ]
 test = [
     "pytest>=9.1.0",
