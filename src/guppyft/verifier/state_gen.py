@@ -99,22 +99,21 @@ def convert_to_graph_state(tableau: pauli.SignTerms) -> list[SQClifford]:
     )
 
     # Find out which qubits need a Hadamard applied to them
-    remaining_strings = {s for s in range(len(tableau))}
-    for q in all_q:
-        matches = set()  # Identify all strings with an X or Y on qubit q
-        for i in remaining_strings:
+    last_solved_q = -1
+    for i in range(len(tableau)):
+        for q in range(last_solved_q+1, len(tableau.qubits)):
             if tableau[i].string[q] in (pauli.X, pauli.Y):
-                matches.add(i)
-        if len(matches) == 1:
-            # This qubit is already solved for X/Y
-            # Eliminate the corresponding string from the set since we don't
-            # want any other qubit to use it as its X/Y representative.
-            remaining_strings -= matches
-        else:
-            # This qubit is not solved for X/Y. Therefore, it must be possible
-            # to solve it for Z. Apply a Hadamard to convert it to X/Y.
-            gates_to_apply[q] = SQClifford.H
-            tableau.conj_clifford_list(GateList().h(q))
+                # This qubit is already solved for X/Y. It is guaranteed that
+                # none of the other Pauli strings will have an X/Y on `q`
+                last_solved_q = q
+                break  # We are done with this Pauli string, move on
+            else:
+                # Since `canonicalize` guarantees the `mode_order`, if `q` was
+                # solvable for X/Y, it would have been found here.
+                # Since it is not solvable for X/Y, it must solvable for Z.
+                # Apply a Hadamard to convert it to solvable for X.
+                gates_to_apply[q] = SQClifford.H
+                tableau.conj_clifford_list(GateList().h(q))
 
     # Solve for X/Y everywhere. Now it is guaranteed to solve for all qubits.
     tableau.canonicalize(
