@@ -18,7 +18,7 @@ from hugr.ext import TypeDef
 from hugr.ops import DataflowOp, ExtOp
 
 from guppyft.extensions import iceberg_ops, iceberg_types
-from guppyft.std import LogicalMeasurement
+from guppyft.logical.std import LogicalMeasurement
 
 OPS_EXTN = iceberg_ops()
 TYPES_EXTN = iceberg_types()

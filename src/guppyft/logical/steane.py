@@ -10,7 +10,7 @@ from hugr import tys as ht
 from hugr.ops import DataflowOp, ExtOp
 
 from guppyft.extensions import steane_ops, steane_types
-from guppyft.std import LogicalMeasurement
+from guppyft.logical.std import LogicalMeasurement
 
 OPS_EXTN = steane_ops()
 TYPES_EXTN = steane_types()

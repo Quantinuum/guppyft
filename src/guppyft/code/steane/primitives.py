@@ -6,7 +6,7 @@ from guppylang import guppy
 from guppylang.library import link_name
 from guppylang.std import quantum as qlib
 from guppylang.std.builtins import array, comptime, owned
-from guppylang.std.quantum import collect_measurements
+from guppylang.std.quantum import Measurement, collect_measurements
 
 from guppyft.code.util import parity_check
 
@@ -21,17 +21,21 @@ stabilizer_indices = [
 
 
 @guppy.struct
-@no_type_check
-class Steane:
+class SteaneBlock:
     data_qs: array[qlib.qubit, 7]  # type: ignore[valid-type]
+
+
+@guppy.struct
+class SteaneMeasurement:
+    measurements: array[Measurement, 7]  # type: ignore[valid-type]
 
 
 @guppy
 @link_name("guppyft.Steane.prep_zero")
 @no_type_check
-def prep_zero() -> Steane:
+def prep_zero() -> SteaneBlock:
     """Prepare Steane blk in the logical zero state."""
-    blk = Steane(array(qlib.qubit() for _ in range(7)))
+    blk = SteaneBlock(array(qlib.qubit() for _ in range(7)))
 
     plus_ids = array(0, 4, 6)
     for i in plus_ids:
@@ -56,14 +60,19 @@ def get_syndrome(data_bits: array[bool, 7]) -> array[bool, 3]:
 @guppy
 @link_name("guppyft.Steane.measure_z")
 @no_type_check
-def measure_z(blk: Steane @ owned) -> bool:
+def measure_z(blk: SteaneBlock @ owned) -> SteaneMeasurement:
     """Measure Steane block in the Z basis."""
-    meas = collect_measurements(qlib.measure_array(blk.data_qs))
+    return SteaneMeasurement(qlib.measure_array(blk.data_qs))
 
+
+@guppy
+@link_name("guppyft.Steane.decode")
+@no_type_check
+def decode(m: SteaneMeasurement @ owned) -> array[bool, 1]:
+    """Decode Steane measurement of logical block"""
+    meas = collect_measurements(m.measurements)
     synds = get_syndrome(meas)
-
     logical_meas = parity_check(meas)
-
     logical_meas ^= synds[0] or synds[1] or synds[2]
 
-    return logical_meas
+    return array(logical_meas)
