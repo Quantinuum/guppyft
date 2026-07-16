@@ -3,7 +3,6 @@
 mod hugr;
 
 use pyo3::pymodule;
-
 /// Python module containing the Rust bindings.
 ///
 /// The definitions here should be reflected in the `src/guppyft/_bindings/__init__.pyi` type stubs.
