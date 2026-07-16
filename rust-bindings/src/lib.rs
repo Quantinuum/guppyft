@@ -1,6 +1,7 @@
 //! Supporting Rust library for the Python bindings.
 
 mod hugr;
+mod util;
 
 use pyo3::pymodule;
 /// Python module containing the Rust bindings.
@@ -10,41 +11,14 @@ use pyo3::pymodule;
 mod _bindings {
     #[pymodule_export]
     use crate::hugr::RsHugr;
+    use crate::util::lookup_op;
     use guppyft::implement_ops;
     use pyo3::exceptions::PyValueError;
     use pyo3::prelude::*;
     use std::collections::{BTreeMap, HashSet};
-    use std::sync::Arc;
-    use tket::hugr::extension::ExtensionRegistry;
-    use tket::hugr::ops::ExtensionOp;
-    use tket::hugr::types::TypeArg;
-    use tket::hugr::{Extension, HugrView};
+    use tket::hugr::HugrView;
     use tket::passes::replace_types::NodeTemplate;
     use tket::passes::{ComposablePass, ReplaceTypes};
-
-    pub fn lookup_ext<'a>(
-        registry: &'a ExtensionRegistry,
-        name: &str,
-    ) -> PyResult<&'a Arc<Extension>> {
-        registry
-            .get(name)
-            .ok_or_else(|| PyValueError::new_err(format!("Unknown extension: '{name}'")))
-    }
-
-    pub fn lookup_op(
-        registry: &ExtensionRegistry,
-        ext_name: &str,
-        op_name: &str,
-        args: Vec<TypeArg>,
-    ) -> PyResult<ExtensionOp> {
-        let ext = lookup_ext(registry, ext_name)?;
-        ext.instantiate_extension_op(op_name, args.clone())
-            .map_err(|e| {
-                PyValueError::new_err(format!(
-                    "Could not instantiate op '{ext_name}.{op_name}' with args {args:?}: {e}"
-                ))
-            })
-    }
 
     /// A single [`hugr::types::TypeArg`] value as passed from Python, either an int
     /// (mapped to a `BoundedNat` argument) or a str (mapped to a `String` argument).
@@ -97,12 +71,12 @@ mod _bindings {
         pass.run(hugr)
             .map_err(|e| PyValueError::new_err(format!("Error encoding operations: {e}")))?;
 
-        // `ReplaceTypes` (used internally by `SimpleEncoder`) swaps in ops/types from
-        // `registry` but does not update the Hugr's own extension registry
-        // (`hugr.extensions()`), which is what gets used when serializing. Without
-        // this, the newly-introduced ops/types are written out as unresolved
-        // `Custom` nodes, and the envelope doesn't declare the new extensions as
-        // dependencies, so downstream consumers can't resolve them.
+        // `ReplaceTypes` swaps in ops/types from `registry` but does not update
+        // the Hugr extension registry (`hugr.extensions()`), which is what
+        // gets used when serializing. Without this, the newly-introduced ops/types
+        // are written out as unresolved  `Custom` nodes, and the envelope doesn't
+        // declare the new extensions as dependencies, so downstream consumers
+        // can't resolve them.
         hugr.resolve_extension_defs(&registry).map_err(|e| {
             PyValueError::new_err(format!("Could not resolve extensions after encoding: {e}"))
         })?;
