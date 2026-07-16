@@ -66,3 +66,37 @@ def decode(m: LogicalMeasurement[7] @ owned) -> array[bool, 1]:
     logical_meas ^= synds[0] or synds[1] or synds[2]
 
     return array(logical_meas)
+
+
+# TODO Replace with Pauli frame tracking
+# https://github.com/quantinuum-dev/guppyft/issues/159
+@guppy
+@link_name("guppyft.Steane.x")
+@no_type_check
+def x(blk: LogicalBlock[7]) -> None:
+    for i in range(7):
+        qlib.x(blk.data_qs[i])
+
+
+@guppy
+@link_name("guppyft.Steane.z")
+@no_type_check
+def z(blk: LogicalBlock[7]) -> None:
+    for i in range(7):
+        qlib.z(blk.data_qs[i])
+
+
+@guppy
+@link_name("guppyft.Steane.h")
+@no_type_check
+def h(blk: LogicalBlock[7]) -> None:
+    for i in range(7):
+        qlib.h(blk.data_qs[i])
+
+
+@guppy
+@link_name("guppyft.Steane.cx")
+@no_type_check
+def cx(ctl: LogicalBlock[7], tgt: LogicalBlock[7]) -> None:
+    for i in range(7):
+        qlib.cx(ctl.data_qs[i], tgt.data_qs[i])

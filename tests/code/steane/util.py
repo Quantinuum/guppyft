@@ -2,19 +2,23 @@ from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.library import GuppyLibrary
 
-from guppyft.code.steane.primitives import decode, measure_z, prep_zero
+from guppyft.code.steane.primitives import cx, decode, h, measure_z, prep_zero, x, z
 from guppyft.encode import (
     ImplementOpsSpec,
     OpReplacements,
     TyReplacements,
 )
 
-lib = GuppyLibrary.from_members(prep_zero, measure_z, decode).compile()
+lib = GuppyLibrary.from_members(prep_zero, measure_z, decode, x, z, h, cx).compile()
 
 ops = OpReplacements().with_generated_decls(
     {
         ("guppyft.steane.ops", "prep_zero"): "guppyft.Steane.prep_zero",
         ("guppyft.steane.ops", "measure_z"): "guppyft.Steane.measure_z",
+        ("guppyft.steane.ops", "x"): "guppyft.Steane.x",
+        ("guppyft.steane.ops", "z"): "guppyft.Steane.z",
+        ("guppyft.steane.ops", "h"): "guppyft.Steane.h",
+        ("guppyft.steane.ops", "cx"): "guppyft.Steane.cx",
         ("guppyft.std.ops", "decode"): "guppyft.Steane.decode",
     }
 )
