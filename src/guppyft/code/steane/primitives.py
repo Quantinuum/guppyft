@@ -8,7 +8,7 @@ from guppylang.std import quantum as qlib
 from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.quantum import collect_measurements
 
-from guppyft.code.util import LogicalMeasurement, parity_check
+from guppyft.code.util import LogicalBlock, LogicalMeasurement, parity_check
 
 # ZZZZIII -> 0, 1, 2, 3
 # IZZIZZI -> 1, 2, 4, 5
@@ -20,17 +20,12 @@ stabilizer_indices = [
 ]
 
 
-@guppy.struct
-class SteaneBlock:
-    data_qs: array[qlib.qubit, 7]  # type: ignore[valid-type]
-
-
 @guppy
 @link_name("guppyft.Steane.prep_zero")
 @no_type_check
-def prep_zero() -> SteaneBlock:
+def prep_zero() -> LogicalBlock[7]:
     """Prepare Steane blk in the logical zero state."""
-    blk = SteaneBlock(array(qlib.qubit() for _ in range(7)))
+    blk = LogicalBlock(array(qlib.qubit() for _ in range(7)))
 
     plus_ids = array(0, 4, 6)
     for i in plus_ids:
@@ -55,7 +50,7 @@ def get_syndrome(data_bits: array[bool, 7]) -> array[bool, 3]:
 @guppy
 @link_name("guppyft.Steane.measure_z")
 @no_type_check
-def measure_z(blk: SteaneBlock @ owned) -> LogicalMeasurement[7]:
+def measure_z(blk: LogicalBlock[7] @ owned) -> LogicalMeasurement[7]:
     """Measure Steane block in the Z basis."""
     return LogicalMeasurement(qlib.measure_array(blk.data_qs))
 

@@ -5,7 +5,6 @@ from guppylang.std.platform import result
 from guppyft.encode import (
     implement_ops,
 )
-from guppyft.logical.std import decode
 from guppyft.logical.steane import Qubit, measure_z
 
 from .util import steane_spec
@@ -16,8 +15,7 @@ def test_qalloc_measure() -> None:
     @guppy
     def main() -> None:
         q = Qubit()
-        m = measure_z(q)
-        result("res", decode(m))
+        result("res", measure_z(q).decode())
 
     pkg = main.compile()
 
