@@ -200,9 +200,17 @@
           ],
           "output": [
             {
-              "t": "Sum",
-              "s": "Unit",
-              "size": 2
+              "t": "Opaque",
+              "extension": "guppyft.std.types",
+              "extension_version": "0.1.0",
+              "id": "logical_measurement",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 1
+                }
+              ],
+              "bound": "C"
             }
           ]
         }

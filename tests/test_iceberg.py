@@ -1,6 +1,5 @@
 from guppylang import guppy
 from guppylang.std.builtins import array, result
-from guppylang.std.quantum import collect_measurements
 from hugr.build.dfg import Dfg
 from hugr.ops import DFG, ExtOp
 from hugr.std.float import FLOAT_T
@@ -23,6 +22,7 @@ from guppyft.logical.iceberg import (
     zz_phase_between_blocks,
     zz_phase_dynq,
 )
+from guppyft.std import decode
 
 
 def test_hugr() -> None:
@@ -183,7 +183,7 @@ def test_guppy_bindings_smoke() -> None:
             maybe_m1_2.unwrap_nothing()
         result("s_z", s_z.read())
         result("s_x", s_x.read())
-        m0 = collect_measurements(measure_all(b0))
+        m0 = decode(measure_all(b0))
         result("m0_2", m0[2])
         discard(b1)
         maybe_mq0 = q0.try_measure_x()
