@@ -1,0 +1,83 @@
+import pytest
+from typing import no_type_check
+
+from guppylang import guppy
+from guppylang.std.quantum import qubit, x, y, z, h, s, sdg, cx, discard_array
+from guppylang.std.debug import state_output
+from guppylang.std.builtins import comptime, array
+from guppylang.std.qsystem.random import RNG
+
+from guppyft.verifier.verify import _invoke_selene_stim
+from guppyft.verifier.utils import (
+    stabilizerlist_to_signterms,
+)
+from guppyft.verifier.state_gen import gen_guppy_state_prep
+
+
+@pytest.mark.parametrize("seed", [42, 123, 456, 1234, 999])
+def test_arbitrary_stabilizer_state_generation(seed: int) -> None:
+    """
+    Generate an arbitrary stabilizer state and generate a guppy function that
+    prepares it. Then, check that the tableaus match.
+    """
+
+    n_qubits = 20
+
+    # Generate a random Clifford circuit in Guppy
+    @guppy
+    @no_type_check
+    def random_clifford_circuit() -> None:
+        rng = RNG(comptime(seed))
+
+        qs = array(qubit() for _ in range(comptime(n_qubits)))
+
+        for _ in range(comptime(n_qubits)): # As many layers as qubits
+            for i in range(comptime(n_qubits)):
+                pauli_gate = rng.random_int_bounded(4)
+                if pauli_gate == 1:
+                    x(qs[i])
+                elif pauli_gate == 2:
+                    y(qs[i])
+                elif pauli_gate == 3:
+                    z(qs[i])
+
+                clifford_gate = rng.random_int_bounded(4)
+                if clifford_gate == 1:
+                    s(qs[i])
+                if clifford_gate == 2:
+                    sdg(qs[i])
+                if clifford_gate == 3:
+                    h(qs[i])
+
+                target_qubit = rng.random_int_bounded(comptime(n_qubits))
+                if target_qubit != i:
+                    cx(qs[i], qs[target_qubit])
+
+        rng.discard()
+
+        state_output("original", qs)
+        discard_array(qs)
+
+    # Extract the stabilizer tableau
+    states_dict = _invoke_selene_stim(random_clifford_circuit, n_qubits)
+    stab_list = states_dict["original"].get_reduced_stabilizers()
+    original_tableau = stabilizerlist_to_signterms(stab_list)
+
+    # Generate a Guppy function that prepares the same stabilizer state
+    prep_func = gen_guppy_state_prep(original_tableau)
+    @guppy
+    @no_type_check
+    def automated_preparation() -> None:
+        qs = prep_func()
+        state_output("automated", qs)
+        discard_array(qs)
+
+    # Extract the stabilizer tableau
+    states_dict = _invoke_selene_stim(automated_preparation, n_qubits)
+    stab_list = states_dict["automated"].get_reduced_stabilizers()
+    automated_tableau = stabilizerlist_to_signterms(stab_list)
+
+    # Check they agree
+    original_tableau.canonicalize_all()
+    automated_tableau.canonicalize_all()
+    assert original_tableau == automated_tableau
