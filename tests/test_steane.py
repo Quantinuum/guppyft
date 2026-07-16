@@ -6,8 +6,8 @@ from hugr.tys import ExtType
 from tket.passes import InlineFunctions, NormalizeGuppy
 
 from guppyft.extensions import steane_ops, steane_types
-from guppyft.logical.std import decode
 from guppyft.logical.steane import Qubit, cx, prep_magic_for_t_like
+from guppyft.std import decode
 
 
 def test_hugr() -> None:

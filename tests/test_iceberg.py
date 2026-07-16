@@ -22,7 +22,7 @@ from guppyft.logical.iceberg import (
     zz_phase_between_blocks,
     zz_phase_dynq,
 )
-from guppyft.logical.std import decode
+from guppyft.std import decode
 
 
 def test_hugr() -> None:
