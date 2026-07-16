@@ -155,6 +155,7 @@ def _to_rs_hugr(
             )
 
 
+# TODO Implement ops should be a ComposablePass like ReplaceEncoder or NormalizeGuppy
 def _implement_ops(
     pkg: Package, ops: OpReplacements, tys: set[tuple[str, str]]
 ) -> Package:

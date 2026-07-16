@@ -35,7 +35,7 @@ class SteaneOpsExtension:
 
     def __call__(self) -> Extension:
         """Returns the Steane ops extension"""
-        return load_extension("guppyft.steane.ops")
+        return load_extension("guppyft.steane.ops", ["guppyft.std.types"])
 
     @functools.cached_property
     def prep_zero_def(self) -> OpDef:

@@ -110,6 +110,16 @@ impl SteaneOpDef {
     }
 }
 
+impl MakeRegisteredOp for SteaneOpDef {
+    fn extension_id(&self) -> ExtensionId {
+        EXTENSION_ID.to_owned()
+    }
+
+    fn extension_ref(&self) -> Arc<Extension> {
+        EXTENSION.clone()
+    }
+}
+
 /// Signature of an operation consisting only of logical qubits
 fn sig_qubits(n_qubits_in: usize, n_qubits_out: usize) -> SignatureFunc {
     Signature::new(
