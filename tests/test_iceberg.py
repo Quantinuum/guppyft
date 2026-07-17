@@ -23,6 +23,7 @@ from guppyft.logical.iceberg import (
     zz_phase_dynq,
 )
 
+
 def test_hugr() -> None:
     """Test that we can build a simple hugr out of Iceberg operations."""
     block6type = iceberg_types.iceberg_block(6)

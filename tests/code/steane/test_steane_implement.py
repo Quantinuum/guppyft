@@ -29,7 +29,7 @@ def test_x() -> None:
         result("res", measure_z(q).decode())
 
     pkg = main.compile()
-    phys_pkg = SteaneSpec(n_blocks=1).encode(pkg)
+    phys_pkg = SteaneSpec(n_blocks=1).implement_ops(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=7).run().collated_shots()
 
     assert res == [{"res": [[1]]}]
@@ -46,7 +46,7 @@ def test_h_z() -> None:
         result("res", measure_z(q).decode())
 
     pkg = main.compile()
-    phys_pkg = SteaneSpec(n_blocks=1).encode(pkg)
+    phys_pkg = SteaneSpec(n_blocks=1).implement_ops(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=7).run().collated_shots()
 
     assert res == [{"res": [[1]]}]
@@ -63,7 +63,7 @@ def test_cx() -> None:
         result("q1", measure_z(q1).decode())
 
     pkg = main.compile()
-    phys_pkg = SteaneSpec(n_blocks=2).encode(pkg)
+    phys_pkg = SteaneSpec(n_blocks=2).implement_ops(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=14).run().collated_shots()
 
     assert res == [{"q0": [[1]], "q1": [[1]]}]

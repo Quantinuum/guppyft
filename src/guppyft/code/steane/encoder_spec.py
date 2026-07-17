@@ -21,6 +21,7 @@ from guppyft.encode import (
     ReplaceEncoder,
     TyReplacements,
     encode,
+    implement_ops,
 )
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
@@ -30,10 +31,10 @@ from guppyft.globals import map_global, with_global
 class SteaneSpec:
     n_blocks: int
 
-    def gen_spec(self) -> EncoderSpec:
+    def gen_implement_spec(self) -> ImplementOpsSpec:
         # TODO STATE should be generic for all codes. The methods that are code specific
-        #   should be `@guppy.declare` and each code can provide an implementation to be
-        #   linked i.e. `allocate_next_addr`.
+        # should be `@guppy.declare` and each code can provide an implementation to be
+        # linked i.e. `allocate_next_addr`.
         @guppy.struct
         class STATE:
             blocks: array[Option[LogicalBlock[7]], comptime(self.n_blocks)]  # type: ignore[valid-type,type-arg]
@@ -242,9 +243,13 @@ class SteaneSpec:
             ]
         )
 
-        impl_spec = ImplementOpsSpec(
+        return ImplementOpsSpec(
             ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[lib]
         )
+
+    def gen_encoder_spec(self) -> EncoderSpec:
+
+        impl_spec = self.gen_implement_spec()
 
         ext = ExtensionRegistry.from_extensions(
             [steane_ops(), steane_types(), std_ops(), std_types()]
@@ -270,5 +275,9 @@ class SteaneSpec:
         return EncoderSpec(to_logical=std_encoder, implement_spec=impl_spec)
 
     def encode(self, pkg: Package) -> Package:
-        enc_spec = self.gen_spec()
+        enc_spec = self.gen_encoder_spec()
         return encode(pkg, enc_spec)
+
+    def implement_ops(self, pkg: Package) -> Package:
+        implement_spec = self.gen_implement_spec()
+        return implement_ops(pkg, implement_spec)
