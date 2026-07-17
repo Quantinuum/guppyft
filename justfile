@@ -23,12 +23,22 @@ test-rust *TEST_ARGS: _check_nextest_installed
 test-python *PYTEST_FLAGS:
     uv run pytest -n auto {{ PYTEST_FLAGS }}
 
-# Auto-fix lint issues that Ruff can safely rewrite.
-fix:
+# Auto-fix lint issues.
+fix: fix-rust fix-python
+# Auto-fix all rust clippy warnings.
+fix-rust:
+    uv run cargo clippy --all-targets --all-features --workspace --fix --allow-staged --allow-dirty
+# Auto-fix all python ruff warnings.
+fix-python:
     uv run ruff check --fix
 
+# Format the code.
+format: format-rust format-python
+# Format the rust code.
+format-rust:
+    uv run cargo fmt
 # Format the Python code with Ruff.
-format:
+format-python:
     uv run ruff format
 
 # Generate serialized declarations for the HUGR extensions
