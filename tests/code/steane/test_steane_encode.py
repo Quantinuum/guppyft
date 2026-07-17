@@ -2,8 +2,7 @@ from guppylang import guppy
 from guppylang.emulator import EmulatorBuilder
 from guppylang.std.quantum import measure, qubit
 
-from guppyft.encode import encode
-from tests.code.steane.util import enc_spec
+from guppyft.code.steane.encoder_spec import SteaneSpec
 
 
 def test_encoder() -> None:
@@ -18,7 +17,7 @@ def test_encoder() -> None:
         # result("res", res)
 
     pkg = main.compile()
-    phys_pkg = encode(pkg, spec=enc_spec)
+    phys_pkg = SteaneSpec(n_blocks=1).encode(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=7).run().collated_shots()
 
     assert res == [{}]

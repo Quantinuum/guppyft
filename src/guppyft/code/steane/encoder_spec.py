@@ -1,0 +1,260 @@
+from dataclasses import dataclass
+from typing import no_type_check
+
+from guppylang import guppy
+from guppylang.defs import GuppyFunctionDefinition
+from guppylang.library import GuppyLibrary, link_name
+from guppylang.std.builtins import array, comptime, owned
+from guppylang.std.collections import Stack
+from guppylang.std.option import Option, nothing, some
+from guppylang.std.platform import panic
+from hugr.ext import ExtensionRegistry
+from hugr.package import Package
+from hugr.std import _std_extensions
+
+from guppyft.code.steane.primitives import cx, decode, h, measure_z, prep_zero, x, z
+from guppyft.code.util import LogicalBlock, LogicalMeasurement
+from guppyft.encode import (
+    EncoderSpec,
+    ImplementOpsSpec,
+    OpReplacements,
+    ReplaceEncoder,
+    TyReplacements,
+    encode,
+)
+from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
+from guppyft.globals import map_global, with_global
+
+
+@dataclass
+class SteaneSpec:
+    n_blocks: int
+
+    def gen_spec(self) -> EncoderSpec:
+        # TODO STATE should be generic for all codes. The methods that are code specific
+        #   should be `@guppy.declare` and each code can provide an implementation to be
+        #   linked i.e. `allocate_next_addr`.
+        @guppy.struct
+        class STATE:
+            blocks: array[Option[LogicalBlock[7]], comptime(self.n_blocks)]  # type: ignore[valid-type,type-arg]
+            addr_stack: Stack[tuple[int, int], comptime(self.n_blocks)]  # type: ignore[valid-type,type-arg]
+
+            @guppy
+            def take_block(self, blk_id: int) -> LogicalBlock[7]:
+                return self.blocks[blk_id].take().unwrap()
+
+            @guppy
+            def put_block(self, blk_id: int, blk: LogicalBlock[7] @ owned) -> None:
+                self.blocks[blk_id].swap(some(blk)).unwrap_nothing()
+
+            @guppy
+            def free_addr(self, addr: tuple[int, int]) -> None:
+                self.addr_stack.push(addr)
+
+            @guppy
+            def allocate_next_addr(self: "STATE") -> tuple[int, int]:
+                if len(self.addr_stack) == 0:
+                    exit("allocate_next_addr: No more logical qubits to allocate")
+                next_addr = self.addr_stack.pop()
+
+                blk = self.blocks[next_addr[0]].take()
+
+                if blk.is_some():
+                    # Since Steane is k=1, blocks are either not allocated, or
+                    # completely filled, so this should never happen.
+                    panic("allocate_next_addr: Next block was not nothing.")
+
+                self.blocks[next_addr[0]].swap(blk).unwrap_nothing()
+
+                return next_addr
+
+        # TODO Defining the primitives to use the global state requires
+        # a lot of "boilerplate" code. We should provide helper methods
+        # to easily define these functions from the primitives. I think
+        # this could be replaced with `@custom_function` and a custom
+        # compiler.
+        @guppy
+        @link_name("guppyft.steane._prep_zero")
+        def _prep_zero() -> tuple[tuple[int, int]]:
+            @guppy
+            def _impl(state: STATE @ owned) -> tuple[STATE, tuple[int, int]]:
+                blk_id, qb_id = state.allocate_next_addr()
+                blk = prep_zero()
+                state.put_block(blk_id, blk)
+                return state, (blk_id, qb_id)
+
+            return map_global(_impl)
+
+        @guppy
+        @link_name("guppyft.steane._measure_z")
+        def _measure_z(q: tuple[int, int]) -> LogicalMeasurement[7]:
+            @guppy
+            def _impl(
+                state: STATE @ owned, q: tuple[int, int]
+            ) -> tuple[STATE, LogicalMeasurement[7]]:
+                blk_id, _ = q
+                blk = state.take_block(blk_id)
+
+                res = measure_z(blk)
+
+                state.free_addr(q)
+                return state, res
+
+            return map_global(_impl, q)
+
+        @guppy
+        @link_name("guppyft.steane._x")
+        def _x(q: tuple[int, int]) -> tuple[tuple[int, int]]:
+            @guppy
+            def _impl(
+                state: STATE @ owned, q: tuple[int, int]
+            ) -> tuple[STATE, tuple[int, int]]:
+                blk_id, _ = q
+                blk = state.take_block(blk_id)
+                x(blk)
+                state.put_block(blk_id, blk)
+                return state, q
+
+            return map_global(_impl, q)
+
+        @guppy
+        @link_name("guppyft.steane._z")
+        def _z(q: tuple[int, int]) -> tuple[tuple[int, int]]:
+            @guppy
+            def _impl(
+                state: STATE @ owned, q: tuple[int, int]
+            ) -> tuple[STATE, tuple[int, int]]:
+                blk_id, _ = q
+                blk = state.take_block(blk_id)
+                z(blk)
+                state.put_block(blk_id, blk)
+                return state, q
+
+            return map_global(_impl, q)
+
+        @guppy
+        @link_name("guppyft.steane._h")
+        def _h(q: tuple[int, int]) -> tuple[tuple[int, int]]:
+            @guppy
+            def _impl(
+                state: STATE @ owned, q: tuple[int, int]
+            ) -> tuple[STATE, tuple[int, int]]:
+                blk_id, _ = q
+                blk = state.take_block(blk_id)
+                h(blk)
+                state.put_block(blk_id, blk)
+                return state, q
+
+            return map_global(_impl, q)
+
+        @guppy
+        @link_name("guppyft.steane._cx")
+        def _cx(
+            ctl: tuple[int, int], tgt: tuple[int, int]
+        ) -> tuple[tuple[int, int], tuple[int, int]]:
+            @guppy
+            def _impl(
+                state: STATE @ owned, ctl: tuple[int, int], tgt: tuple[int, int]
+            ) -> tuple[STATE, tuple[int, int], tuple[int, int]]:
+                ctl_blk, tgt_blk = state.take_block(ctl[0]), state.take_block(tgt[0])
+
+                cx(ctl_blk, tgt_blk)
+
+                state.put_block(ctl[0], ctl_blk)
+                state.put_block(tgt[0], tgt_blk)
+                return state, ctl, tgt
+
+            return map_global(_impl, ctl, tgt)
+
+        @guppy.declare
+        @link_name("guppyft.steane.gen_state")
+        def state_gen_decl() -> STATE: ...
+        @guppy
+        @link_name("guppyft.steane.gen_state")
+        def state_gen() -> STATE:
+            return STATE(
+                array(
+                    nothing[LogicalBlock[7]]() for _ in range(comptime(self.n_blocks))
+                ),
+                Stack(
+                    array(some((blk, 1)) for blk in range(comptime(self.n_blocks))),
+                    comptime(self.n_blocks),
+                ),
+            )
+
+        @guppy.declare
+        @link_name("guppyft.steane.discard_state")
+        def state_discard_decl(state: "STATE" @ owned) -> None: ...
+        @guppy
+        @link_name("guppyft.steane.discard_state")
+        def state_discard(state: "STATE" @ owned) -> None:
+            for blk in state.blocks:
+                if blk.is_some():
+                    blk.unwrap().discard()
+                else:
+                    blk.unwrap_nothing()
+
+        def build_wrapper(
+            func: GuppyFunctionDefinition[[], None],
+        ) -> GuppyFunctionDefinition[[], None]:
+            @guppy
+            @no_type_check
+            def wrapper() -> None:
+                state = state_gen_decl()
+                state = with_global(state, func)
+                state_discard_decl(state)
+
+            return wrapper  # type: ignore[no-any-return]
+
+        lib = GuppyLibrary.from_members(
+            state_gen, state_discard, _prep_zero, _measure_z, decode, _x, _z, _h, _cx
+        ).compile()
+
+        ops = OpReplacements().with_generated_decls(
+            {
+                ("guppyft.steane.ops", "prep_zero"): "guppyft.steane._prep_zero",
+                ("guppyft.steane.ops", "measure_z"): "guppyft.steane._measure_z",
+                ("guppyft.steane.ops", "x"): "guppyft.steane._x",
+                ("guppyft.steane.ops", "z"): "guppyft.steane._z",
+                ("guppyft.steane.ops", "h"): "guppyft.steane._h",
+                ("guppyft.steane.ops", "cx"): "guppyft.steane._cx",
+                ("guppyft.std.ops", "decode"): "guppyft.Steane.decode",
+            }
+        )
+        tys = TyReplacements().with_types(
+            [
+                ("guppyft.steane.types", "qubit"),
+                ("guppyft.std.types", "logical_measurement"),
+            ]
+        )
+
+        impl_spec = ImplementOpsSpec(
+            ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[lib]
+        )
+
+        ext = ExtensionRegistry.from_extensions(
+            [steane_ops(), steane_types(), std_ops(), std_types()]
+        )
+        # TODO _std_extensions should not be necessary but seems to be
+        #  required for borrow_array when (de)serialising.
+        ext.extend(_std_extensions())
+
+        std_encoder = ReplaceEncoder(
+            # TODO This should probably use `OpReplacement` or some other dataclass
+            op_replacements={
+                ("tket.quantum", "QAlloc"): ("guppyft.steane.ops", "prep_zero", []),
+                ("tket.quantum", "MeasureFree"): (
+                    "guppyft.steane.ops",
+                    "measure_z",
+                    [],
+                ),
+                ("tket.measurement", "Read"): ("guppyft.std.ops", "decode", [1]),
+            },
+            extensions=ext,
+        )
+
+        return EncoderSpec(to_logical=std_encoder, implement_spec=impl_spec)
+
+    def encode(self, pkg: Package) -> Package:
+        enc_spec = self.gen_spec()
+        return encode(pkg, enc_spec)

@@ -2,12 +2,8 @@ from guppylang import guppy
 from guppylang.emulator import EmulatorBuilder
 from guppylang.std.platform import result
 
-from guppyft.encode import (
-    encode,
-)
+from guppyft.code.steane.encoder_spec import SteaneSpec
 from guppyft.logical.steane import Qubit, cx, h, measure_z, x, z
-
-from .util import enc_spec
 
 
 def test_qalloc_measure() -> None:
@@ -18,8 +14,7 @@ def test_qalloc_measure() -> None:
         result("res", measure_z(q).decode())
 
     pkg = main.compile()
-
-    phys_pkg = encode(pkg, enc_spec)
+    phys_pkg = SteaneSpec(n_blocks=1).encode(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=7).run().collated_shots()
 
     assert res == [{"res": [[0]]}]
@@ -34,8 +29,7 @@ def test_x() -> None:
         result("res", measure_z(q).decode())
 
     pkg = main.compile()
-
-    phys_pkg = encode(pkg, enc_spec)
+    phys_pkg = SteaneSpec(n_blocks=1).encode(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=7).run().collated_shots()
 
     assert res == [{"res": [[1]]}]
@@ -52,8 +46,7 @@ def test_h_z() -> None:
         result("res", measure_z(q).decode())
 
     pkg = main.compile()
-
-    phys_pkg = encode(pkg, enc_spec)
+    phys_pkg = SteaneSpec(n_blocks=1).encode(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=7).run().collated_shots()
 
     assert res == [{"res": [[1]]}]
@@ -70,8 +63,7 @@ def test_cx() -> None:
         result("q1", measure_z(q1).decode())
 
     pkg = main.compile()
-
-    phys_pkg = encode(pkg, enc_spec)
+    phys_pkg = SteaneSpec(n_blocks=2).encode(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=14).run().collated_shots()
 
     assert res == [{"q0": [[1]], "q1": [[1]]}]
