@@ -8,7 +8,7 @@ from guppylang.std import quantum as qlib
 from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.quantum import collect_measurements
 
-from guppyft.code.util import LogicalBlock, LogicalMeasurement, parity_check
+from guppyft.code.util import LogicalBlock, RawMeasurement, parity_check
 
 # ZZZZIII -> 0, 1, 2, 3
 # IZZIZZI -> 1, 2, 4, 5
@@ -50,15 +50,15 @@ def get_syndrome(data_bits: array[bool, 7]) -> array[bool, 3]:
 @guppy
 @link_name("guppyft.Steane.measure_z")
 @no_type_check
-def measure_z(blk: LogicalBlock[7] @ owned) -> LogicalMeasurement[7]:
+def measure_z(blk: LogicalBlock[7] @ owned) -> RawMeasurement[7]:
     """Measure Steane block in the Z basis."""
-    return LogicalMeasurement(qlib.measure_array(blk.data_qs))
+    return RawMeasurement(qlib.measure_array(blk.data_qs))
 
 
 @guppy
 @link_name("guppyft.Steane.decode")
 @no_type_check
-def decode(m: LogicalMeasurement[7] @ owned) -> array[bool, 1]:
+def decode(m: RawMeasurement[7] @ owned) -> array[bool, 1]:
     """Decode Steane measurement of logical block"""
     meas = collect_measurements(m.measurements)
     synds = get_syndrome(meas)

@@ -13,7 +13,7 @@ from hugr.package import Package
 from hugr.std import _std_extensions
 
 from guppyft.code.steane.primitives import cx, decode, h, measure_z, prep_zero, x, z
-from guppyft.code.util import LogicalBlock, LogicalMeasurement
+from guppyft.code.util import LogicalBlock, RawMeasurement
 from guppyft.encode import (
     EncoderSpec,
     ImplementOpsSpec,
@@ -93,11 +93,11 @@ class SteaneSpec:
         @guppy
         @no_type_check
         @link_name("guppyft.steane._measure_z")
-        def _measure_z(q: tuple[int, int]) -> LogicalMeasurement[7]:
+        def _measure_z(q: tuple[int, int]) -> RawMeasurement[7]:
             @guppy
             def _impl(
                 state: STATE @ owned, q: tuple[int, int]
-            ) -> tuple[STATE, LogicalMeasurement[7]]:
+            ) -> tuple[STATE, RawMeasurement[7]]:
                 blk_id, _ = q
                 blk = state.take_block(blk_id)
 

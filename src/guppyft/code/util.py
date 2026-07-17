@@ -30,7 +30,7 @@ class LogicalBlock(Generic[N]):  # type: ignore[misc]
 
 
 @guppy.struct
-class LogicalMeasurement(Generic[N]):  # type: ignore[misc]
+class RawMeasurement(Generic[N]):  # type: ignore[misc]
     measurements: array[Measurement, N]  # type: ignore[valid-type]
 
 
