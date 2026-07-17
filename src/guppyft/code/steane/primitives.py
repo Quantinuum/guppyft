@@ -21,9 +21,8 @@ stabilizer_indices = [
 
 
 @guppy
-@link_name("guppyft.Steane.prep_zero")
 @no_type_check
-def prep_zero() -> LogicalBlock[7]:
+def prep_zero_non_ft() -> LogicalBlock[7]:
     """Prepare Steane blk in the logical zero state."""
     blk = LogicalBlock(array(qlib.qubit() for _ in range(7)))
 
@@ -48,7 +47,6 @@ def get_syndrome(data_bits: array[bool, 7]) -> array[bool, 3]:
 
 
 @guppy
-@link_name("guppyft.Steane.measure_z")
 @no_type_check
 def measure_z(blk: LogicalBlock[7] @ owned) -> RawMeasurement[7]:
     """Measure Steane block in the Z basis."""
@@ -56,7 +54,7 @@ def measure_z(blk: LogicalBlock[7] @ owned) -> RawMeasurement[7]:
 
 
 @guppy
-@link_name("guppyft.Steane.decode")
+@link_name("guppyft.steane.decode")
 @no_type_check
 def decode(m: RawMeasurement[7] @ owned) -> array[bool, 1]:
     """Decode Steane measurement of logical block"""
@@ -71,7 +69,6 @@ def decode(m: RawMeasurement[7] @ owned) -> array[bool, 1]:
 # TODO Replace with Pauli frame tracking
 # https://github.com/quantinuum-dev/guppyft/issues/159
 @guppy
-@link_name("guppyft.Steane.x")
 @no_type_check
 def x(blk: LogicalBlock[7]) -> None:
     for i in range(7):
@@ -79,7 +76,6 @@ def x(blk: LogicalBlock[7]) -> None:
 
 
 @guppy
-@link_name("guppyft.Steane.z")
 @no_type_check
 def z(blk: LogicalBlock[7]) -> None:
     for i in range(7):
@@ -87,7 +83,6 @@ def z(blk: LogicalBlock[7]) -> None:
 
 
 @guppy
-@link_name("guppyft.Steane.h")
 @no_type_check
 def h(blk: LogicalBlock[7]) -> None:
     for i in range(7):
@@ -95,7 +90,6 @@ def h(blk: LogicalBlock[7]) -> None:
 
 
 @guppy
-@link_name("guppyft.Steane.cx")
 @no_type_check
 def cx(ctl: LogicalBlock[7], tgt: LogicalBlock[7]) -> None:
     for i in range(7):

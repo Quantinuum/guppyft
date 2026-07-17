@@ -12,7 +12,15 @@ from hugr.ext import ExtensionRegistry
 from hugr.package import Package
 from hugr.std import _std_extensions
 
-from guppyft.code.steane.primitives import cx, decode, h, measure_z, prep_zero, x, z
+from guppyft.code.steane.primitives import (
+    cx,
+    decode,
+    h,
+    measure_z,
+    prep_zero_non_ft,
+    x,
+    z,
+)
 from guppyft.code.util import LogicalBlock, RawMeasurement
 from guppyft.encode import (
     EncoderSpec,
@@ -80,12 +88,12 @@ class SteaneSpec:
         # compiler.
         @guppy
         @no_type_check
-        @link_name("guppyft.steane._prep_zero")
-        def _prep_zero() -> tuple[tuple[int, int]]:
+        @link_name("guppyft.steane._prep_zero_non_ft")
+        def _prep_zero_non_ft() -> tuple[tuple[int, int]]:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, tuple[int, int]]:
                 blk_id, qb_id = state.allocate_next_addr()
-                blk = prep_zero()
+                blk = prep_zero_non_ft()
                 state.put_block(blk_id, blk)
                 return state, (blk_id, qb_id)
 
@@ -222,18 +230,26 @@ class SteaneSpec:
             return wrapper  # type: ignore[no-any-return]
 
         lib = GuppyLibrary.from_members(
-            state_gen, state_discard, _prep_zero, _measure_z, decode, _x, _z, _h, _cx
+            state_gen,
+            state_discard,
+            _prep_zero_non_ft,
+            _measure_z,
+            decode,
+            _x,
+            _z,
+            _h,
+            _cx,
         ).compile()
 
         ops = OpReplacements().with_generated_decls(
             {
-                ("guppyft.steane.ops", "prep_zero"): "guppyft.steane._prep_zero",
+                ("guppyft.steane.ops", "prep_zero"): "guppyft.steane._prep_zero_non_ft",
                 ("guppyft.steane.ops", "measure_z"): "guppyft.steane._measure_z",
                 ("guppyft.steane.ops", "x"): "guppyft.steane._x",
                 ("guppyft.steane.ops", "z"): "guppyft.steane._z",
                 ("guppyft.steane.ops", "h"): "guppyft.steane._h",
                 ("guppyft.steane.ops", "cx"): "guppyft.steane._cx",
-                ("guppyft.std.ops", "decode"): "guppyft.Steane.decode",
+                ("guppyft.std.ops", "decode"): "guppyft.steane.decode",
             }
         )
         tys = TyReplacements().with_types(
