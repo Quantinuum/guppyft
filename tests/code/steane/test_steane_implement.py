@@ -14,7 +14,7 @@ def test_qalloc_measure() -> None:
         result("res", measure_z(q).decode())
 
     pkg = main.compile()
-    phys_pkg = SteaneSpec(n_blocks=1).encode(pkg)
+    phys_pkg = SteaneSpec(n_blocks=1).implement_ops(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=7).run().collated_shots()
 
     assert res == [{"res": [[0]]}]
