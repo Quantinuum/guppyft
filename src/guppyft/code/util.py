@@ -40,7 +40,9 @@ class GlobalState:
     addr_stack: Stack[tuple[int, int], 1]  # type: ignore[type-arg, valid-type]
 
     @guppy.declare
-    def allocate_blk_addr(self) -> tuple[int, int]: ...
+    def allocate_blk_addr(self) -> tuple[int, int]:  # type: ignore[empty-body]
+        pass
 
     @guppy.declare
-    def free_blk_addr(self, addr: tuple[int, int]) -> None: ...
+    def free_blk_addr(self, addr: tuple[int, int]) -> None:
+        pass

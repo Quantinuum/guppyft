@@ -40,18 +40,22 @@ class SteaneSpec:
             addr_stack: Stack[tuple[int, int], comptime(self.n_blocks)]  # type: ignore[valid-type,type-arg]
 
             @guppy
+            @no_type_check
             def take_block(self, blk_id: int) -> LogicalBlock[7]:
                 return self.blocks[blk_id].take().unwrap()
 
             @guppy
+            @no_type_check
             def put_block(self, blk_id: int, blk: LogicalBlock[7] @ owned) -> None:
                 self.blocks[blk_id].swap(some(blk)).unwrap_nothing()
 
             @guppy
+            @no_type_check
             def free_addr(self, addr: tuple[int, int]) -> None:
                 self.addr_stack.push(addr)
 
             @guppy
+            @no_type_check
             def allocate_next_addr(self: "STATE") -> tuple[int, int]:
                 if len(self.addr_stack) == 0:
                     exit("allocate_next_addr: No more logical qubits to allocate")
@@ -74,6 +78,7 @@ class SteaneSpec:
         # this could be replaced with `@custom_function` and a custom
         # compiler.
         @guppy
+        @no_type_check
         @link_name("guppyft.steane._prep_zero")
         def _prep_zero() -> tuple[tuple[int, int]]:
             @guppy
@@ -86,6 +91,7 @@ class SteaneSpec:
             return map_global(_impl)
 
         @guppy
+        @no_type_check
         @link_name("guppyft.steane._measure_z")
         def _measure_z(q: tuple[int, int]) -> LogicalMeasurement[7]:
             @guppy
@@ -103,6 +109,7 @@ class SteaneSpec:
             return map_global(_impl, q)
 
         @guppy
+        @no_type_check
         @link_name("guppyft.steane._x")
         def _x(q: tuple[int, int]) -> tuple[tuple[int, int]]:
             @guppy
@@ -118,6 +125,7 @@ class SteaneSpec:
             return map_global(_impl, q)
 
         @guppy
+        @no_type_check
         @link_name("guppyft.steane._z")
         def _z(q: tuple[int, int]) -> tuple[tuple[int, int]]:
             @guppy
@@ -133,6 +141,7 @@ class SteaneSpec:
             return map_global(_impl, q)
 
         @guppy
+        @no_type_check
         @link_name("guppyft.steane._h")
         def _h(q: tuple[int, int]) -> tuple[tuple[int, int]]:
             @guppy
@@ -148,6 +157,7 @@ class SteaneSpec:
             return map_global(_impl, q)
 
         @guppy
+        @no_type_check
         @link_name("guppyft.steane._cx")
         def _cx(
             ctl: tuple[int, int], tgt: tuple[int, int]
@@ -167,9 +177,11 @@ class SteaneSpec:
             return map_global(_impl, ctl, tgt)
 
         @guppy.declare
+        @no_type_check
         @link_name("guppyft.steane.gen_state")
         def state_gen_decl() -> STATE: ...
         @guppy
+        @no_type_check
         @link_name("guppyft.steane.gen_state")
         def state_gen() -> STATE:
             return STATE(
@@ -183,9 +195,11 @@ class SteaneSpec:
             )
 
         @guppy.declare
+        @no_type_check
         @link_name("guppyft.steane.discard_state")
         def state_discard_decl(state: "STATE" @ owned) -> None: ...
         @guppy
+        @no_type_check
         @link_name("guppyft.steane.discard_state")
         def state_discard(state: "STATE" @ owned) -> None:
             for blk in state.blocks:
