@@ -66,8 +66,6 @@ def decode(m: RawMeasurement[7] @ owned) -> array[bool, 1]:
     return array(logical_meas)
 
 
-# TODO Replace with Pauli frame tracking
-# https://github.com/quantinuum-dev/guppyft/issues/159
 @guppy
 @no_type_check
 def x(blk: LogicalBlock[7]) -> None:
