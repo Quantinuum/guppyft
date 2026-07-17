@@ -7,7 +7,6 @@ from tket.passes import InlineFunctions, NormalizeGuppy
 
 from guppyft.extensions import steane_ops, steane_types
 from guppyft.logical.steane import Qubit, cx, prep_magic_for_t_like
-from guppyft.std import decode
 
 
 def test_hugr() -> None:
@@ -78,7 +77,7 @@ def test_guppy_bindings_smoke() -> None:
         q1.free()
         magic = prep_magic_for_t_like()
         q0.inject_magic_for_t(magic)
-        result("q0", decode(q0.measure_z()))
+        result("q0", q0.measure_z().decode())
 
     pkg = main.compile()
     h = pkg.modules[0]
@@ -93,7 +92,7 @@ def test_guppy_hugr() -> None:
     def main() -> None:
         q = Qubit()
         q.h()
-        result("a", decode(q.measure_z()))
+        result("a", q.measure_z().decode())
 
     pkg = main.compile()
     h = pkg.modules[0]

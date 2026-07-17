@@ -22,8 +22,6 @@ from guppyft.logical.iceberg import (
     zz_phase_between_blocks,
     zz_phase_dynq,
 )
-from guppyft.std import decode
-
 
 def test_hugr() -> None:
     """Test that we can build a simple hugr out of Iceberg operations."""
@@ -183,7 +181,7 @@ def test_guppy_bindings_smoke() -> None:
             maybe_m1_2.unwrap_nothing()
         result("s_z", s_z.read())
         result("s_x", s_x.read())
-        m0 = decode(measure_all(b0))
+        m0 = measure_all(b0).decode()
         result("m0_2", m0[2])
         discard(b1)
         maybe_mq0 = q0.try_measure_x()
