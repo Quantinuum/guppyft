@@ -29,7 +29,7 @@ class LogicalBlock(Generic[N]):  # type: ignore[misc]
             discard(q)
 
 
-@guppy.struct
+@guppy.struct(frozen=True)
 class RawMeasurement(Generic[N]):  # type: ignore[misc]
     measurements: array[Measurement, N]  # type: ignore[valid-type]
 
