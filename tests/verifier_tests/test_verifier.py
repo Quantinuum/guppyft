@@ -13,45 +13,23 @@ from guppyft.verifier.verify import (
     pad_code_stabilizers,
 )
 
-from .ops import iceberg
-from .ops.bitflip import (
-    BIT_FLIP_DEF,
-    bit_flip_choi_state_double_block,
-    bit_flip_logical_identity_double_block,
-    bit_flip_physical_identity_double_block,
-)
-from .ops.steane import (
-    STEANE_DEF,
-    steane_choi_state,
-    steane_choi_state_double_block,
-    steane_logical_cx,
-    steane_logical_h,
-    steane_logical_identity,
-    steane_logical_identity_double_block,
-    steane_logical_s,
-    steane_logical_sdg,
-    steane_physical_cx,
-    steane_physical_h,
-    steane_physical_identity_double_block,
-    steane_physical_s,
-    steane_physical_sdg,
-)
+from .ops import bitflip, iceberg, steane
 
 
 def test_bell_state_stabilizers() -> None:
     stabilizer_terms = compute_stabilizers_single_block(
-        steane_logical_identity, default_choi_state_preparation, 1
+        steane.logical_identity, default_choi_state_preparation, 1
     )
     assert str(stabilizer_terms) == "(+1, X0 X1), (+1, Z0 Z1)"
 
 
 def test_s_state_stabilizers() -> None:
     terms_logical = compute_stabilizers_single_block(
-        steane_logical_s, default_choi_state_preparation, 1
+        steane.logical_s, default_choi_state_preparation, 1
     )
 
     terms_physical = compute_stabilizers_single_block(
-        steane_physical_s, default_choi_state_preparation, 7
+        steane.physical_s, default_choi_state_preparation, 7
     )
 
     assert str(terms_logical) == "(+1, X0 Y1), (+1, Z0 Z1)"
@@ -62,7 +40,7 @@ LOGICAL_STRINGSET = pauli.StringSet.from_cmpnts(pauli.Strings.from_str("X0 X1, Z
 
 
 def test_padding() -> None:
-    padded_steane_stabilizers = pad_code_stabilizers(STEANE_DEF, num_blocks=1)
+    padded_steane_stabilizers = pad_code_stabilizers(steane.STEANE_DEF, num_blocks=1)
     assert len(padded_steane_stabilizers) == 2 * (7 - 1)
     for g_tuple in padded_steane_stabilizers.to_strings().get_tuples():
         assert len(g_tuple) == 2 * 7
@@ -70,7 +48,7 @@ def test_padding() -> None:
 
 def test_logical_expansion() -> None:
     expanded_logicals = expand_logical_signterms(
-        LOGICAL_STRINGSET.to_strings().into(pauli.SignTerms), STEANE_DEF
+        LOGICAL_STRINGSET.to_strings().into(pauli.SignTerms), steane.STEANE_DEF
     )
     expanded_tuples = expanded_logicals.strings.get_tuples()
     zs = tuple([pauli.PauliMatrix.Z] * 14)
@@ -81,7 +59,7 @@ def test_logical_expansion() -> None:
 def test_entire_stabilizer_set() -> None:
     stab_set = get_expanded_stabilizer_set(
         LOGICAL_STRINGSET.to_strings().into(pauli.SignTerms),
-        STEANE_DEF,
+        steane.STEANE_DEF,
         num_blocks=1,
     )
     assert len(stab_set.strings.get_tuples()) == 14
@@ -92,10 +70,10 @@ def test_entire_stabilizer_set() -> None:
 
 def test_steane_h() -> None:
     sem, impl = compute_verification_signterms(
-        steane_logical_h,
-        steane_physical_h,
-        code_choi_state_function=steane_choi_state,
-        code_definition=STEANE_DEF,
+        steane.logical_h,
+        steane.physical_h,
+        code_choi_state_function=steane.choi_state,
+        code_definition=steane.STEANE_DEF,
     )
 
     assert sem == impl
@@ -122,10 +100,10 @@ def test_canonical() -> None:
 
 def test_steane_s() -> None:
     sem, impl = compute_verification_signterms(
-        steane_logical_s,
-        steane_physical_s,
-        code_choi_state_function=steane_choi_state,
-        code_definition=STEANE_DEF,
+        steane.logical_s,
+        steane.physical_s,
+        code_choi_state_function=steane.choi_state,
+        code_definition=steane.STEANE_DEF,
     )
 
     assert sem == impl
@@ -133,10 +111,10 @@ def test_steane_s() -> None:
 
 def test_steane_sdg() -> None:
     sem, impl = compute_verification_signterms(
-        steane_logical_sdg,
-        steane_physical_sdg,
-        code_choi_state_function=steane_choi_state,
-        code_definition=STEANE_DEF,
+        steane.logical_sdg,
+        steane.physical_sdg,
+        code_choi_state_function=steane.choi_state,
+        code_definition=steane.STEANE_DEF,
     )
 
     assert sem == impl
@@ -144,10 +122,10 @@ def test_steane_sdg() -> None:
 
 def test_steane_invalid_s() -> None:
     sem, impl = compute_verification_signterms(
-        steane_logical_s,
-        steane_physical_sdg,
-        code_choi_state_function=steane_choi_state,
-        code_definition=STEANE_DEF,
+        steane.logical_s,
+        steane.physical_sdg,
+        code_choi_state_function=steane.choi_state,
+        code_definition=steane.STEANE_DEF,
     )
 
     assert sem != impl
@@ -155,10 +133,10 @@ def test_steane_invalid_s() -> None:
 
 def test_steane_invalid_sdg() -> None:
     sem, impl = compute_verification_signterms(
-        steane_logical_sdg,
-        steane_physical_s,
-        code_choi_state_function=steane_choi_state,
-        code_definition=STEANE_DEF,
+        steane.logical_sdg,
+        steane.physical_s,
+        code_choi_state_function=steane.choi_state,
+        code_definition=steane.STEANE_DEF,
     )
 
     assert sem != impl
@@ -166,7 +144,7 @@ def test_steane_invalid_sdg() -> None:
 
 def test_compute_stabilizers_double_block() -> None:
     stabilizers = compute_stabilizers_double_block(
-        steane_logical_identity_double_block,
+        steane.logical_identity_double_block,
         default_choi_state_preparation_double_block,
         2,
     )
@@ -201,7 +179,7 @@ def test_compute_stabilizers_double_block() -> None:
         4,
     )
 
-    expanded_pauli_ops = expand_logical_signterms(stabilizers, STEANE_DEF)
+    expanded_pauli_ops = expand_logical_signterms(stabilizers, steane.STEANE_DEF)
     assert (
         str(expanded_pauli_ops)
         == "(+1, X0 X1 X2 X3 X4 X5 X6 X7 X8 X9 X10 X11 X12 X13),"
@@ -212,9 +190,11 @@ def test_compute_stabilizers_double_block() -> None:
 
 
 def test_stabilizer_padding_double_block() -> None:
-    padded_double_block_stabilizers = pad_code_stabilizers(STEANE_DEF, num_blocks=2)
+    padded_double_block_stabilizers = pad_code_stabilizers(
+        steane.STEANE_DEF, num_blocks=2
+    )
     assert len(padded_double_block_stabilizers) == 4 * (
-        STEANE_DEF.num_physical_qubits - STEANE_DEF.num_logical_qubits
+        steane.STEANE_DEF.num_physical_qubits - steane.STEANE_DEF.num_logical_qubits
     )
 
     assert (
@@ -236,30 +216,30 @@ def test_stabilizer_padding_double_block() -> None:
 
 def test_bit_flip_double_block_identity() -> None:
     sem, impl = compute_verification_signterms_double_block(
-        bit_flip_logical_identity_double_block,
-        bit_flip_physical_identity_double_block,
-        code_choi_state_function=bit_flip_choi_state_double_block,
-        code_definition=BIT_FLIP_DEF,
+        bitflip.logical_identity_double_block,
+        bitflip.physical_identity_double_block,
+        code_choi_state_function=bitflip.choi_state_double_block,
+        code_definition=bitflip.BIT_FLIP_DEF,
     )
     assert sem == impl
 
 
 def test_steane_double_block_identity() -> None:
     sem, impl = compute_verification_signterms_double_block(
-        steane_logical_identity_double_block,
-        steane_physical_identity_double_block,
-        code_choi_state_function=steane_choi_state_double_block,
-        code_definition=STEANE_DEF,
+        steane.logical_identity_double_block,
+        steane.physical_identity_double_block,
+        code_choi_state_function=steane.choi_state_double_block,
+        code_definition=steane.STEANE_DEF,
     )
     assert sem == impl
 
 
 def test_steane_cx() -> None:
     sem, impl = compute_verification_signterms_double_block(
-        steane_logical_cx,
-        steane_physical_cx,
-        code_choi_state_function=steane_choi_state_double_block,
-        code_definition=STEANE_DEF,
+        steane.logical_cx,
+        steane.physical_cx,
+        code_choi_state_function=steane.choi_state_double_block,
+        code_definition=steane.STEANE_DEF,
     )
     assert sem == impl
 
