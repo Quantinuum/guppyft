@@ -1,22 +1,21 @@
 from enum import Enum
-from typing import no_type_check
+from typing import Any, no_type_check
 
 from guppylang import guppy
-from guppylang.std.quantum import qubit, x, z, h, s, sdg, cz, measure_array
-from guppylang.std.builtins import array, comptime, result
 from guppylang.defs import GuppyFunctionDefinition
-
+from guppylang.std.builtins import array, comptime
+from guppylang.std.quantum import cz, h, qubit, sdg, z
+from zixy._zixy import SymplecticPart
 from zixy.qubit import pauli
 from zixy.qubit.clifford import GateList
-from zixy._zixy import SymplecticPart
 
 from guppyft.verifier.code import StabilizerCode
 from guppyft.verifier.expansion import get_expanded_stabilizer_set
-from guppyft.verifier.utils import SingleBlockUnitary, DoubleBlockUnitary, array_slicer
+from guppyft.verifier.utils import SingleBlockUnitary, array_slicer
 
 
 class SQClifford(Enum):
-    I = 0
+    I = 0  # noqa: E741
     H = 1
     S = 2
 
@@ -28,7 +27,7 @@ def gen_choi_state(
     code: StabilizerCode,
     clifford_func: SingleBlockUnitary,
     n_blocks: int,
-) -> GuppyFunctionDefinition:
+) -> GuppyFunctionDefinition[[], Any]:
     """Generate a Guppy function that prepares the Choi state of a single block
     Clifford unitary.
 
@@ -120,12 +119,12 @@ def gen_choi_state(
                 f"Currently only 1 or 2 code blocks are supported. Got {n_blocks=}."
             )
 
-    return choi_prep
+    return choi_prep  # type: ignore[no-any-return]
 
 
 def gen_guppy_state_prep(
     tableau: pauli.SignTerms,
-) -> GuppyFunctionDefinition[[], array[qubit, N]]:
+) -> GuppyFunctionDefinition[[], array[qubit, N]]:  # type: ignore[valid-type]
     """Generate a guppy function that prepares a stabilizer state for the given
     tableau.
 
@@ -179,7 +178,7 @@ def gen_guppy_state_prep(
 
         return qs
 
-    return stabilizer_state_prep
+    return stabilizer_state_prep  # type: ignore[no-any-return]
 
 
 def convert_to_graph_state(tableau: pauli.SignTerms) -> list[SQClifford]:
@@ -207,7 +206,9 @@ def convert_to_graph_state(tableau: pauli.SignTerms) -> list[SQClifford]:
     h_gates = GateList()
     current_string = 0
     for q in range(len(tableau.qubits)):
-        if tableau[current_string].string[q] in (pauli.X, pauli.Y):
+        term = tableau[current_string]
+        assert isinstance(term, pauli.SignTerm)
+        if term.string[q] in (pauli.X, pauli.Y):
             # This qubit is already solved for X/Y. It is guaranteed that
             # none of the other Pauli strings will have an X/Y on `q`
             current_string += 1
@@ -231,7 +232,9 @@ def convert_to_graph_state(tableau: pauli.SignTerms) -> list[SQClifford]:
     # Convert any Y into X by applying S gates
     s_gates = GateList()
     for q in all_q:
-        if tableau[q].string[q] == pauli.Y:
+        term = tableau[q]
+        assert isinstance(term, pauli.SignTerm)
+        if term.string[q] == pauli.Y:
             gates_to_apply[q] = SQClifford.S
             s_gates.s(q)
     tableau.conj_clifford_list(s_gates)

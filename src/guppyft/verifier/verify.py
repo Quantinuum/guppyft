@@ -1,22 +1,20 @@
-from typing import no_type_check
-
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.array import array
-from guppylang.std.builtins import Function, comptime
+from guppylang.std.builtins import comptime
 from guppylang.std.debug import state_output
-from guppylang.std.quantum import cx, discard_array, h, qubit
+from guppylang.std.quantum import discard_array, qubit
 from selene_sim.backends import Stim
 from selene_sim.build import build
 from selene_stim_plugin import SeleneStimState
 from zixy.qubit import pauli
 
 from guppyft.verifier.code import StabilizerCode
-from guppyft.verifier.state_gen import gen_choi_state
 from guppyft.verifier.expansion import get_expanded_stabilizer_set
+from guppyft.verifier.state_gen import gen_choi_state
 from guppyft.verifier.utils import (
-    SingleBlockUnitary,
     DoubleBlockUnitary,
+    SingleBlockUnitary,
     stabilizerlist_to_signterms,
 )
 
@@ -95,7 +93,7 @@ def compute_stabilizers_double_block(
     :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
 
-    choi_prep = gen_choi_state(code, clifford_func, 2)
+    choi_prep = gen_choi_state(code, clifford_func, 2)  # type: ignore[arg-type]
     n = code.num_physical_qubits
 
     @guppy

@@ -1,16 +1,15 @@
 from typing import Generic, Self, no_type_check
 
+from guppylang import guppy
+from guppylang.defs import GuppyFunctionDefinition
+from guppylang.std.builtins import array, comptime, owned
+from guppylang.std.collections import Queue, empty_queue
+from guppylang.std.num import nat
+from guppylang.std.option import nothing, some
+from guppylang.std.quantum import qubit
 from selene_stim_plugin.state import Pauli, Phase, Stabilizer, StabilizerList
 from zixy.container.coeffs import Sign
 from zixy.qubit import pauli
-
-from guppylang import guppy
-from guppylang.defs import GuppyFunctionDefinition
-from guppylang.std.quantum import qubit
-from guppylang.std.builtins import array, comptime, owned
-from guppylang.std.collections import Queue, empty_queue
-from guppylang.std.option import nothing, some
-from guppylang.std.num import nat
 
 N = guppy.nat_var("N")
 
@@ -80,8 +79,8 @@ T = guppy.type_var("T", copyable=False, droppable=False)
 
 @guppy.struct
 @no_type_check
-class ArraySlicer(Generic[T, N]):
-    queue: Queue[T, N]
+class ArraySlicer(Generic[T, N]):  # type: ignore[misc]
+    queue: Queue[T, N]  # type: ignore[type-arg, valid-type]
 
     @guppy
     @no_type_check

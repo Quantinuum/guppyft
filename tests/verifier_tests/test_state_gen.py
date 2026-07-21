@@ -1,23 +1,22 @@
-import pytest
 from typing import no_type_check
 
+import pytest
+from guppylang import guppy
+from guppylang.std.builtins import array, comptime
+from guppylang.std.debug import state_output
+from guppylang.std.qsystem.random import RNG
+from guppylang.std.quantum import cx, discard_array, h, qubit, s, sdg, x, y, z
 from zixy.qubit import pauli
 
-from guppylang import guppy
-from guppylang.std.quantum import qubit, x, y, z, h, s, sdg, cx, discard_array
-from guppylang.std.debug import state_output
-from guppylang.std.builtins import comptime, array
-from guppylang.std.qsystem.random import RNG
-
-from guppyft.verifier.verify import _invoke_selene_stim
-from guppyft.verifier.utils import (
-    stabilizerlist_to_signterms,
-)
 from guppyft.verifier.state_gen import (
     SQClifford,
     convert_to_graph_state,
     gen_guppy_state_prep,
 )
+from guppyft.verifier.utils import (
+    stabilizerlist_to_signterms,
+)
+from guppyft.verifier.verify import _invoke_selene_stim
 
 
 def test_graph_state_conversion_two_bell_pairs() -> None:

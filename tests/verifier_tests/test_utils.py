@@ -1,16 +1,15 @@
 from typing import no_type_check
 
+from guppylang import guppy
+from guppylang.std.builtins import array, result
+from guppylang.std.quantum import collect_measurements, measure_array, qubit
 from selene_stim_plugin.state import Stabilizer, StabilizerList
 from zixy.qubit import pauli
 
-from guppylang import guppy
-from guppylang.std.builtins import array
-from guppylang.std.quantum import qubit, measure_array, collect_measurements
-
 from guppyft.verifier.utils import (
+    array_slicer,
     selene_stabilizer_to_zixy_signterm,
     stabilizerlist_to_signterms,
-    array_slicer,
 )
 
 

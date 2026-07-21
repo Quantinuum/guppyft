@@ -2,7 +2,7 @@ from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.std.array import array
-from guppylang.std.quantum import cx, h, qubit
+from guppylang.std.quantum import qubit
 from zixy.qubit import pauli
 
 from guppyft.verifier.code import StabilizerCode
