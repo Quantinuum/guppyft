@@ -378,6 +378,15 @@ def test_iceberg_addressable_h() -> None:
     assert sem == impl
 
 
+def test_iceberg_double_h() -> None:
+    sem, impl = compute_verification_signterms(
+        iceberg.double_h_logical,
+        iceberg.double_h_physical,
+        iceberg.ICEBERG_DEF,
+    )
+    assert sem == impl
+
+
 def test_iceberg_transversal_cx() -> None:
     sem, impl = compute_verification_signterms_double_block(
         iceberg.transversal_cx_logical,

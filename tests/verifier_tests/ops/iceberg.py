@@ -180,17 +180,6 @@ def physical_identity_double_block(
     pass
 
 
-@guppy
-@no_type_check
-def non_ft_zero() -> array[qubit, 4]:
-    block = array(qubit() for _ in range(4))
-    h(block[2])
-    cx(block[2], block[1])
-    cx(block[2], block[3])
-    cx(block[1], block[0])
-    return block
-
-
 ICEBERG_GENERATORS = pauli.StringSet.from_cmpnts(
     pauli.Strings.from_str(
         "X0 X1 X2 X3, Z0 Z1 Z2 Z3",

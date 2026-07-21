@@ -24,12 +24,6 @@ def physical_identity_double_block(
     pass
 
 
-@guppy
-@no_type_check
-def non_ft_zero() -> array[qubit, 3]:
-    return array(qubit() for _ in range(3))
-
-
 BIT_FLIP_GENERATORS = pauli.StringSet.from_cmpnts(
     pauli.Strings.from_str("Z0 Z1, Z1 Z2", 3)
 )
