@@ -8,8 +8,8 @@ from .ops import steane
 
 def test_steane_single_block_identity() -> None:
     sem, impl = compute_verification_signterms(
-        steane.logical_identity,
-        steane.physical_identity,
+        steane.specify_identity,
+        steane.implement_identity,
         code_definition=steane.STEANE_DEF,
     )
     assert sem == impl
@@ -17,8 +17,8 @@ def test_steane_single_block_identity() -> None:
 
 def test_steane_double_block_identity() -> None:
     sem, impl = compute_verification_signterms_double_block(
-        steane.logical_identity_double_block,
-        steane.physical_identity_double_block,
+        steane.specify_identity_double_block,
+        steane.implement_identity_double_block,
         code_definition=steane.STEANE_DEF,
     )
     assert sem == impl
@@ -26,8 +26,8 @@ def test_steane_double_block_identity() -> None:
 
 def test_steane_h() -> None:
     sem, impl = compute_verification_signterms(
-        steane.logical_h,
-        steane.physical_h,
+        steane.specify_h,
+        steane.implement_h,
         code_definition=steane.STEANE_DEF,
     )
 
@@ -36,8 +36,8 @@ def test_steane_h() -> None:
 
 def test_steane_s() -> None:
     sem, impl = compute_verification_signterms(
-        steane.logical_s,
-        steane.physical_s,
+        steane.specify_s,
+        steane.implement_s,
         code_definition=steane.STEANE_DEF,
     )
 
@@ -46,8 +46,8 @@ def test_steane_s() -> None:
 
 def test_steane_sdg() -> None:
     sem, impl = compute_verification_signterms(
-        steane.logical_sdg,
-        steane.physical_sdg,
+        steane.specify_sdg,
+        steane.implement_sdg,
         code_definition=steane.STEANE_DEF,
     )
 
@@ -56,8 +56,8 @@ def test_steane_sdg() -> None:
 
 def test_steane_invalid_s() -> None:
     sem, impl = compute_verification_signterms(
-        steane.logical_s,
-        steane.physical_sdg,
+        steane.specify_s,
+        steane.implement_sdg,
         code_definition=steane.STEANE_DEF,
     )
 
@@ -66,8 +66,8 @@ def test_steane_invalid_s() -> None:
 
 def test_steane_invalid_sdg() -> None:
     sem, impl = compute_verification_signterms(
-        steane.logical_sdg,
-        steane.physical_s,
+        steane.specify_sdg,
+        steane.implement_s,
         code_definition=steane.STEANE_DEF,
     )
 
@@ -76,8 +76,8 @@ def test_steane_invalid_sdg() -> None:
 
 def test_steane_cx() -> None:
     sem, impl = compute_verification_signterms_double_block(
-        steane.logical_cx,
-        steane.physical_cx,
+        steane.specify_cx,
+        steane.implement_cx,
         code_definition=steane.STEANE_DEF,
     )
     assert sem == impl

@@ -42,13 +42,13 @@ CODE_DEF = StabilizerCode(
 
 @guppy
 @no_type_check
-def logical_identity(block: array[qubit, 2]) -> None:
+def specify_identity(block: array[qubit, 2]) -> None:
     pass
 
 
 @guppy
 @no_type_check
-def logical_identity_double_block(
+def specify_identity_double_block(
     first_block: array[qubit, 2], second_block: array[qubit, 2]
 ) -> None:
     pass
@@ -56,13 +56,13 @@ def logical_identity_double_block(
 
 @guppy
 @no_type_check
-def physical_identity(block: array[qubit, 4]) -> None:
+def implement_identity(block: array[qubit, 4]) -> None:
     pass
 
 
 @guppy
 @no_type_check
-def physical_identity_double_block(
+def implement_identity_double_block(
     first_block: array[qubit, 4], second_block: array[qubit, 4]
 ) -> None:
     pass
@@ -70,7 +70,7 @@ def physical_identity_double_block(
 
 @guppy
 @no_type_check
-def logical_row1(block: array[qubit, 2]) -> None:
+def specify_row1(block: array[qubit, 2]) -> None:
     """Table 2, row 1"""
     h(block[0])
     h(block[1])
@@ -79,7 +79,7 @@ def logical_row1(block: array[qubit, 2]) -> None:
 
 @guppy
 @no_type_check
-def physical_row1(block: array[qubit, 4]) -> None:
+def implement_row1(block: array[qubit, 4]) -> None:
     """Table 2, row 1"""
     h(block[2])
     h(block[3])
@@ -88,14 +88,14 @@ def physical_row1(block: array[qubit, 4]) -> None:
 
 @guppy
 @no_type_check
-def logical_row2(block: array[qubit, 2]) -> None:
+def specify_row2(block: array[qubit, 2]) -> None:
     """Table 2, row 2"""
     mem_swap(block[0], block[1])
 
 
 @guppy
 @no_type_check
-def physical_row2(block: array[qubit, 4]) -> None:
+def implement_row2(block: array[qubit, 4]) -> None:
     """Table 2, row 2"""
     for i in range(len(block)):
         h(block[i])
@@ -103,7 +103,7 @@ def physical_row2(block: array[qubit, 4]) -> None:
 
 @guppy
 @no_type_check
-def logical_row3(block: array[qubit, 2]) -> None:
+def specify_row3(block: array[qubit, 2]) -> None:
     """Table 2, row 3"""
     h(block[0])
     h(block[1])
@@ -118,7 +118,7 @@ def logical_row3(block: array[qubit, 2]) -> None:
 
 @guppy
 @no_type_check
-def physical_row3(block: array[qubit, 4]) -> None:
+def implement_row3(block: array[qubit, 4]) -> None:
     """Table 2, row 3"""
     h(block[1])
     h(block[3])
@@ -128,7 +128,7 @@ def physical_row3(block: array[qubit, 4]) -> None:
 
 @guppy
 @no_type_check
-def logical_row4(block: array[qubit, 2]) -> None:
+def specify_row4(block: array[qubit, 2]) -> None:
     """Table 2, row 4"""
     cx(block[0], block[1])
     mem_swap(block[0], block[1])
@@ -136,7 +136,7 @@ def logical_row4(block: array[qubit, 2]) -> None:
 
 @guppy
 @no_type_check
-def physical_row4_incorrect(block: array[qubit, 4]) -> None:
+def implement_row4_incorrect(block: array[qubit, 4]) -> None:
     """Table 2, row 4.
 
     This implementation is incorrect. It acts at it should on stabilizers and
@@ -154,7 +154,7 @@ def physical_row4_incorrect(block: array[qubit, 4]) -> None:
 
 @guppy
 @no_type_check
-def physical_row4_correct(block: array[qubit, 4]) -> None:
+def implement_row4_correct(block: array[qubit, 4]) -> None:
     """Correct implementation of Table 2, row 4."""
     h(block[0])
     sdg(block[0])
@@ -168,12 +168,12 @@ def physical_row4_correct(block: array[qubit, 4]) -> None:
 
 @guppy
 @no_type_check
-def logical_intra_cz(block: array[qubit, 2]) -> None:
+def specify_intra_cz(block: array[qubit, 2]) -> None:
     cz(block[0], block[1])
 
 
 @guppy
 @no_type_check
-def physical_intra_cz(block: array[qubit, 4]) -> None:
+def implement_intra_cz(block: array[qubit, 4]) -> None:
     """Derived by combining Table2's rows 1,2,3"""
     mem_swap(block[1], block[2])

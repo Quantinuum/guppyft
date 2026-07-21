@@ -8,8 +8,8 @@ from .ops import iceberg
 
 def test_single_block_iceberg_id_verification() -> None:
     sem, impl = compute_verification_signterms(
-        iceberg.logical_identity,
-        iceberg.physical_identity,
+        iceberg.specify_identity,
+        iceberg.implement_identity,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
@@ -17,8 +17,8 @@ def test_single_block_iceberg_id_verification() -> None:
 
 def test_double_block_iceberg_id() -> None:
     sem, impl = compute_verification_signterms_double_block(
-        iceberg.logical_identity_double_block,
-        iceberg.physical_identity_double_block,
+        iceberg.specify_identity_double_block,
+        iceberg.implement_identity_double_block,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
@@ -26,8 +26,8 @@ def test_double_block_iceberg_id() -> None:
 
 def test_iceberg_intrablock_cz() -> None:
     sem, impl = compute_verification_signterms(
-        iceberg.intra_block_cz_logical,
-        iceberg.intra_block_cz_physical,
+        iceberg.specify_intra_block_cz,
+        iceberg.implement_intra_block_cz,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
@@ -35,8 +35,8 @@ def test_iceberg_intrablock_cz() -> None:
 
 def test_iceberg_intrablock_cx() -> None:
     sem, impl = compute_verification_signterms(
-        iceberg.intra_block_cx_logical,
-        iceberg.intra_block_cx_physical,
+        iceberg.specify_intra_block_cx,
+        iceberg.implement_intra_block_cx,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
@@ -44,8 +44,8 @@ def test_iceberg_intrablock_cx() -> None:
 
 def test_iceberg_addressable_rz_half_pi() -> None:
     sem, impl = compute_verification_signterms(
-        iceberg.addressable_rz_half_pi_logical,
-        iceberg.addressable_rz_half_pi_physical,
+        iceberg.specify_addressable_rz_half_pi,
+        iceberg.implement_addressable_rz_half_pi,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
@@ -53,8 +53,8 @@ def test_iceberg_addressable_rz_half_pi() -> None:
 
 def test_iceberg_addressable_rx_half_pi() -> None:
     sem, impl = compute_verification_signterms(
-        iceberg.addressable_rx_half_pi_logical,
-        iceberg.addressable_rx_half_pi_physical,
+        iceberg.specify_addressable_rx_half_pi,
+        iceberg.implement_addressable_rx_half_pi,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
@@ -62,8 +62,8 @@ def test_iceberg_addressable_rx_half_pi() -> None:
 
 def test_iceberg_addressable_rx_minus_half_pi() -> None:
     sem, impl = compute_verification_signterms(
-        iceberg.addressable_rx_minus_half_pi_logical,
-        iceberg.addressable_rx_minus_half_pi_physical,
+        iceberg.specify_addressable_rx_minus_half_pi,
+        iceberg.implement_addressable_rx_minus_half_pi,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
@@ -71,8 +71,8 @@ def test_iceberg_addressable_rx_minus_half_pi() -> None:
 
 def test_iceberg_addressable_h() -> None:
     sem, impl = compute_verification_signterms(
-        iceberg.addressable_h_logical,
-        iceberg.addressable_h_physical,
+        iceberg.specify_addressable_h,
+        iceberg.implement_addressable_h,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
@@ -80,8 +80,8 @@ def test_iceberg_addressable_h() -> None:
 
 def test_iceberg_double_h() -> None:
     sem, impl = compute_verification_signterms(
-        iceberg.double_h_logical,
-        iceberg.double_h_physical,
+        iceberg.specify_double_h,
+        iceberg.implement_double_h,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
@@ -89,8 +89,8 @@ def test_iceberg_double_h() -> None:
 
 def test_iceberg_transversal_cx() -> None:
     sem, impl = compute_verification_signterms_double_block(
-        iceberg.transversal_cx_logical,
-        iceberg.transversal_cx_physical,
+        iceberg.specify_transversal_cx,
+        iceberg.implement_transversal_cx,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
@@ -98,8 +98,8 @@ def test_iceberg_transversal_cx() -> None:
 
 def test_iceberg_transversal_zzmax() -> None:
     sem, impl = compute_verification_signterms_double_block(
-        iceberg.interblock_zzmax_logical,
-        iceberg.interblock_zzmax_physical,
+        iceberg.specify_interblock_zzmax,
+        iceberg.implement_interblock_zzmax,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl

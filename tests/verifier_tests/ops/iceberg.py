@@ -50,37 +50,37 @@ ICEBERG_DEF = StabilizerCode(
 
 @guppy
 @no_type_check
-def logical_identity(block: array[qubit, 2]) -> None:
+def specify_identity(block: array[qubit, 2]) -> None:
     pass
 
 
 @guppy
 @no_type_check
-def physical_identity(block: array[qubit, 4]) -> None:
+def implement_identity(block: array[qubit, 4]) -> None:
     pass
 
 
 @guppy
 @no_type_check
-def intra_block_cx_logical(block: array[qubit, 2]) -> None:
+def specify_intra_block_cx(block: array[qubit, 2]) -> None:
     cx(block[0], block[1])
 
 
 @guppy
 @no_type_check
-def intra_block_cx_physical(block: array[qubit, 4]) -> None:
+def implement_intra_block_cx(block: array[qubit, 4]) -> None:
     mem_swap(block[3], block[1])
 
 
 @guppy
 @no_type_check
-def intra_block_cz_logical(block: array[qubit, 2]) -> None:
+def specify_intra_block_cz(block: array[qubit, 2]) -> None:
     cz(block[0], block[1])
 
 
 @guppy
 @no_type_check
-def intra_block_cz_physical(block: array[qubit, 4]) -> None:
+def implement_intra_block_cz(block: array[qubit, 4]) -> None:
     s(block[0])
     sdg(block[1])
     sdg(block[2])
@@ -89,40 +89,40 @@ def intra_block_cz_physical(block: array[qubit, 4]) -> None:
 
 @guppy
 @no_type_check
-def addressable_h_logical(block: array[qubit, 2]) -> None:
+def specify_addressable_h(block: array[qubit, 2]) -> None:
     h(block[1])
 
 
 # Technically this is -H due to the global phase difference between S/Rz and V/Rx.
 @guppy
 @no_type_check
-def addressable_h_physical(block: array[qubit, 4]) -> None:
-    addressable_rz_half_pi_physical(block)
-    addressable_rx_half_pi_physical(block)
-    addressable_rz_half_pi_physical(block)
+def implement_addressable_h(block: array[qubit, 4]) -> None:
+    implement_addressable_rz_half_pi(block)
+    implement_addressable_rx_half_pi(block)
+    implement_addressable_rz_half_pi(block)
 
 
 @guppy
 @no_type_check
-def addressable_rz_half_pi_logical(block: array[qubit, 2]) -> None:
+def specify_addressable_rz_half_pi(block: array[qubit, 2]) -> None:
     rz(block[1], pi / 2)
 
 
 @guppy
 @no_type_check
-def addressable_rz_half_pi_physical(block: array[qubit, 4]) -> None:
+def implement_addressable_rz_half_pi(block: array[qubit, 4]) -> None:
     zz_max(block[2], block[3])
 
 
 @guppy
 @no_type_check
-def addressable_rx_half_pi_logical(block: array[qubit, 2]) -> None:
+def specify_addressable_rx_half_pi(block: array[qubit, 2]) -> None:
     rx(block[1], pi / 2)
 
 
 @guppy
 @no_type_check
-def addressable_rx_half_pi_physical(block: array[qubit, 4]) -> None:
+def implement_addressable_rx_half_pi(block: array[qubit, 4]) -> None:
     h(block[0])
     h(block[2])
     zz_max(block[0], block[2])
@@ -132,13 +132,13 @@ def addressable_rx_half_pi_physical(block: array[qubit, 4]) -> None:
 
 @guppy
 @no_type_check
-def addressable_rx_minus_half_pi_logical(block: array[qubit, 2]) -> None:
+def specify_addressable_rx_minus_half_pi(block: array[qubit, 2]) -> None:
     rx(block[1], -pi / 2)
 
 
 @guppy
 @no_type_check
-def addressable_rx_minus_half_pi_physical(block: array[qubit, 4]) -> None:
+def implement_addressable_rx_minus_half_pi(block: array[qubit, 4]) -> None:
     h(block[0])
     h(block[2])
     zz_phase(block[0], block[2], -pi / 2)
@@ -148,14 +148,14 @@ def addressable_rx_minus_half_pi_physical(block: array[qubit, 4]) -> None:
 
 @guppy
 @no_type_check
-def double_h_logical(block: array[qubit, 2]) -> None:
+def specify_double_h(block: array[qubit, 2]) -> None:
     for i in range(2):
         h(block[i])
 
 
 @guppy
 @no_type_check
-def double_h_physical(block: array[qubit, 4]) -> None:
+def implement_double_h(block: array[qubit, 4]) -> None:
     for i in range(4):
         h(block[i])
     mem_swap(block[1], block[2])
@@ -163,7 +163,7 @@ def double_h_physical(block: array[qubit, 4]) -> None:
 
 @guppy
 @no_type_check
-def interblock_zzmax_logical(
+def specify_interblock_zzmax(
     first_block: array[qubit, 2],
     second_block: array[qubit, 2],
 ) -> None:
@@ -172,7 +172,7 @@ def interblock_zzmax_logical(
 
 @guppy
 @no_type_check
-def interblock_zzmax_physical(
+def implement_interblock_zzmax(
     first_block: array[qubit, 4],
     second_block: array[qubit, 4],
 ) -> None:
@@ -185,7 +185,7 @@ def interblock_zzmax_physical(
 
 @guppy
 @no_type_check
-def transversal_cx_logical(
+def specify_transversal_cx(
     first_block: array[qubit, 2], second_block: array[qubit, 2]
 ) -> None:
     for i in range(2):
@@ -194,7 +194,7 @@ def transversal_cx_logical(
 
 @guppy
 @no_type_check
-def transversal_cx_physical(
+def implement_transversal_cx(
     first_block: array[qubit, 4], second_block: array[qubit, 4]
 ) -> None:
     for i in range(4):
@@ -203,7 +203,7 @@ def transversal_cx_physical(
 
 @guppy
 @no_type_check
-def logical_identity_double_block(
+def specify_identity_double_block(
     first_block: array[qubit, 2], second_block: array[qubit, 2]
 ) -> None:
     pass
@@ -211,7 +211,7 @@ def logical_identity_double_block(
 
 @guppy
 @no_type_check
-def physical_identity_double_block(
+def implement_identity_double_block(
     first_block: array[qubit, 4], second_block: array[qubit, 4]
 ) -> None:
     pass

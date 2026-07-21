@@ -41,13 +41,13 @@ STEANE_DEF = StabilizerCode(
 
 @guppy
 @no_type_check
-def logical_identity(block: array[qubit, 1]) -> None:
+def specify_identity(block: array[qubit, 1]) -> None:
     pass
 
 
 @guppy
 @no_type_check
-def logical_identity_double_block(
+def specify_identity_double_block(
     first_block: array[qubit, 1], second_block: array[qubit, 1]
 ) -> None:
     pass
@@ -55,13 +55,13 @@ def logical_identity_double_block(
 
 @guppy
 @no_type_check
-def physical_identity(block: array[qubit, 7]) -> None:
+def implement_identity(block: array[qubit, 7]) -> None:
     pass
 
 
 @guppy
 @no_type_check
-def physical_identity_double_block(
+def implement_identity_double_block(
     first_block: array[qubit, 7], second_block: array[qubit, 7]
 ) -> None:
     pass
@@ -69,51 +69,51 @@ def physical_identity_double_block(
 
 @guppy
 @no_type_check
-def physical_h(block: array[qubit, 7]) -> None:
+def implement_h(block: array[qubit, 7]) -> None:
     for i in range(len(block)):
         h(block[i])
 
 
 @guppy
 @no_type_check
-def logical_h(block: array[qubit, 1]) -> None:
+def specify_h(block: array[qubit, 1]) -> None:
     h(block[0])
 
 
 @guppy
 @no_type_check
-def logical_s(block: array[qubit, 1]) -> None:
+def specify_s(block: array[qubit, 1]) -> None:
     s(block[0])
 
 
 @guppy
 @no_type_check
-def physical_s(block: array[qubit, 7]) -> None:
+def implement_s(block: array[qubit, 7]) -> None:
     for i in range(len(block)):
         sdg(block[i])
 
 
 @guppy
 @no_type_check
-def logical_sdg(block: array[qubit, 1]) -> None:
+def specify_sdg(block: array[qubit, 1]) -> None:
     sdg(block[0])
 
 
 @guppy
 @no_type_check
-def physical_sdg(block: array[qubit, 7]) -> None:
+def implement_sdg(block: array[qubit, 7]) -> None:
     for i in range(len(block)):
         s(block[i])
 
 
 @guppy
 @no_type_check
-def logical_cx(first_block: array[qubit, 1], second_block: array[qubit, 1]) -> None:
+def specify_cx(first_block: array[qubit, 1], second_block: array[qubit, 1]) -> None:
     cx(first_block[0], second_block[0])
 
 
 @guppy
 @no_type_check
-def physical_cx(first_block: array[qubit, 7], second_block: array[qubit, 7]) -> None:
+def implement_cx(first_block: array[qubit, 7], second_block: array[qubit, 7]) -> None:
     for i in range(len(first_block)):
         cx(first_block[i], second_block[i])
