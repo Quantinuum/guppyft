@@ -2,10 +2,22 @@ from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.std.array import array
-from guppylang.std.quantum import qubit
+from guppylang.std.quantum import cx, qubit, x
 from zixy.qubit import pauli
 
 from guppyft.verifier.code import StabilizerCode
+
+
+@guppy
+@no_type_check
+def logical_identity(block: array[qubit, 1]) -> None:
+    pass
+
+
+@guppy
+@no_type_check
+def physical_identity(block: array[qubit, 3]) -> None:
+    pass
 
 
 @guppy
@@ -22,6 +34,32 @@ def physical_identity_double_block(
     first_block: array[qubit, 3], second_block: array[qubit, 3]
 ) -> None:
     pass
+
+
+@guppy
+@no_type_check
+def logical_x(block: array[qubit, 1]) -> None:
+    x(block[0])
+
+
+@guppy
+@no_type_check
+def physical_x(block: array[qubit, 3]) -> None:
+    for i in range(len(block)):
+        x(block[i])
+
+
+@guppy
+@no_type_check
+def logical_cx(control_block: array[qubit, 1], target_block: array[qubit, 1]) -> None:
+    cx(control_block[0], target_block[0])
+
+
+@guppy
+@no_type_check
+def physical_cx(control_block: array[qubit, 3], target_block: array[qubit, 3]) -> None:
+    for i in range(len(control_block)):
+        cx(control_block[i], target_block[i])
 
 
 BIT_FLIP_GENERATORS = pauli.StringSet.from_cmpnts(
