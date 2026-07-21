@@ -5,7 +5,6 @@ from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.collections import Queue, empty_queue
 from guppylang.std.num import nat
-from guppylang.std.option import nothing, some
 from guppylang.std.quantum import qubit
 from selene_stim_plugin.state import Pauli, Phase, Stabilizer, StabilizerList
 from zixy.container.coeffs import Sign
@@ -80,24 +79,19 @@ T = guppy.type_var("T", copyable=False, droppable=False)
 @guppy.struct
 @no_type_check
 class ArraySlicer(Generic[T, N]):  # type: ignore[misc]
-    queue: Queue[T, N]  # type: ignore[type-arg, valid-type]
+    _queue: Queue[T, N]  # type: ignore[type-arg, valid-type]
 
     @guppy
     @no_type_check
     def discard_empty(self: Self @ owned) -> None:
-        self.queue.discard_empty()
+        self._queue.discard_empty()
 
     @guppy
     @no_type_check
     def take(self, n: nat @ comptime) -> array[T, "n"]:
-        if n > len(self.queue):
-            exit("Cannot take more qubits than are available in the slicer.")
-        slice = array(nothing[T]() for _ in range(n))
-        for i in range(n):
-            slice[i].swap(some(self.queue.pop())).unwrap_nothing()
-
-        clean_slice = array(q.unwrap() for q in slice)
-        return clean_slice
+        if n > len(self._queue):
+            exit("Cannot take more items than are available in the slicer.")
+        return array(self._queue.pop() for _ in range(n))
 
 
 @guppy
