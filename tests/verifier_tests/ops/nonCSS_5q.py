@@ -13,6 +13,27 @@ from zixy.qubit.pauli import X, Z
 
 from guppyft.verifier.code import StabilizerCode
 
+X_LOGICAL = pauli.String(5, (X, X, X, X, X))
+Z_LOGICAL = pauli.String(5, (Z, Z, Z, Z, Z))
+
+
+GENERATORS = pauli.StringSet.from_cmpnts(
+    pauli.Strings.from_str(
+        "Z0 Z1 X2 I3 X4, X0 Z1 Z2 X3 I4, I0 X1 Z2 Z3 X4, X0 I1 X2 Z3 Z4",
+        5,
+    )
+)
+
+
+CODE_DEF = StabilizerCode(
+    num_physical_qubits=5,
+    num_logical_qubits=1,
+    distance=3,
+    generators=GENERATORS,
+    x_logicals=X_LOGICAL.into(pauli.Strings),
+    z_logicals=Z_LOGICAL.into(pauli.Strings),
+)
+
 
 @guppy
 @no_type_check
@@ -154,25 +175,3 @@ def physical_cx(first_block: array[qubit, 5], second_block: array[qubit, 5]) -> 
     physical_h(second_block)
     physical_cz(first_block, second_block)
     physical_h(second_block)
-
-
-X_LOGICAL = pauli.String(5, (X, X, X, X, X))
-Z_LOGICAL = pauli.String(5, (Z, Z, Z, Z, Z))
-
-
-GENERATORS = pauli.StringSet.from_cmpnts(
-    pauli.Strings.from_str(
-        "Z0 Z1 X2 I3 X4, X0 Z1 Z2 X3 I4, I0 X1 Z2 Z3 X4, X0 I1 X2 Z3 Z4",
-        5,
-    )
-)
-
-
-CODE_DEF = StabilizerCode(
-    num_physical_qubits=5,
-    num_logical_qubits=1,
-    distance=3,
-    generators=GENERATORS,
-    x_logicals=X_LOGICAL.into(pauli.Strings),
-    z_logicals=Z_LOGICAL.into(pauli.Strings),
-)

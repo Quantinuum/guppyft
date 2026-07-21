@@ -10,6 +10,43 @@ from zixy.qubit import pauli
 
 from guppyft.verifier.code import StabilizerCode
 
+ICEBERG_GENERATORS = pauli.StringSet.from_cmpnts(
+    pauli.Strings.from_str(
+        "X0 X1 X2 X3, Z0 Z1 Z2 Z3",
+        4,
+    )
+)
+
+# IMPORTANT: Iceberg codeblock ordering
+
+# [top q1, q2, bottom]
+
+# ICEBERG_X_LOGICAL[0]: XI -> XXII
+# ICEBERG_X_LOGICAL[1]: IX -> XIXI
+
+ICEBERG_X_LOGICAL = pauli.Strings.from_str(
+    "X0 X1 I2 I3, X0 I1 X2 I3",
+    4,
+)
+
+# ICEBERG_Z_LOGICAL[0]: ZI -> IZIZ
+# ICEBERG_Z_LOGICAL[1]: IZ -> IIZZ
+
+ICEBERG_Z_LOGICAL = pauli.Strings.from_str(
+    "I0 Z1 I2 Z3, I0 I1 Z2 Z3",
+    4,
+)
+
+
+ICEBERG_DEF = StabilizerCode(
+    num_physical_qubits=4,
+    num_logical_qubits=2,
+    distance=2,
+    generators=ICEBERG_GENERATORS,
+    x_logicals=ICEBERG_X_LOGICAL,
+    z_logicals=ICEBERG_Z_LOGICAL,
+)
+
 
 @guppy
 @no_type_check
@@ -178,41 +215,3 @@ def physical_identity_double_block(
     first_block: array[qubit, 4], second_block: array[qubit, 4]
 ) -> None:
     pass
-
-
-ICEBERG_GENERATORS = pauli.StringSet.from_cmpnts(
-    pauli.Strings.from_str(
-        "X0 X1 X2 X3, Z0 Z1 Z2 Z3",
-        4,
-    )
-)
-
-# IMPORTANT: Iceberg codeblock ordering
-
-# [top q1, q2, bottom]
-
-# ICEBERG_X_LOGICAL[0]: XI -> XXII
-# ICEBERG_X_LOGICAL[1]: IX -> XIXI
-
-ICEBERG_X_LOGICAL = pauli.Strings.from_str(
-    "X0 X1 I2 I3, X0 I1 X2 I3",
-    4,
-)
-
-# ICEBERG_Z_LOGICAL[0]: ZI -> IZIZ
-# ICEBERG_Z_LOGICAL[1]: IZ -> IIZZ
-
-ICEBERG_Z_LOGICAL = pauli.Strings.from_str(
-    "I0 Z1 I2 Z3, I0 I1 Z2 Z3",
-    4,
-)
-
-
-ICEBERG_DEF = StabilizerCode(
-    num_physical_qubits=4,
-    num_logical_qubits=2,
-    distance=2,
-    generators=ICEBERG_GENERATORS,
-    x_logicals=ICEBERG_X_LOGICAL,
-    z_logicals=ICEBERG_Z_LOGICAL,
-)

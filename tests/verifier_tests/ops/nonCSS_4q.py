@@ -12,6 +12,33 @@ from zixy.qubit import pauli
 
 from guppyft.verifier.code import StabilizerCode
 
+Z_LOGICAL = pauli.Strings.from_str(
+    "I0 Z1 Z2 I3, Z0 I1 I2 Z3",
+    4,
+)
+X_LOGICAL = pauli.Strings.from_str(
+    "Z0 I1 X2 I3, I0 Z1 I2 X3",
+    4,
+)
+
+
+GENERATORS = pauli.StringSet.from_cmpnts(
+    pauli.Strings.from_str(
+        "X0 Z1 Z2 X3, Z0 X1 X2 Z3",
+        4,
+    )
+)
+
+
+CODE_DEF = StabilizerCode(
+    num_physical_qubits=4,
+    num_logical_qubits=2,
+    distance=2,
+    generators=GENERATORS,
+    x_logicals=X_LOGICAL,
+    z_logicals=Z_LOGICAL,
+)
+
 
 @guppy
 @no_type_check
@@ -150,31 +177,3 @@ def logical_intra_cz(block: array[qubit, 2]) -> None:
 def physical_intra_cz(block: array[qubit, 4]) -> None:
     """Derived by combining Table2's rows 1,2,3"""
     mem_swap(block[1], block[2])
-
-
-Z_LOGICAL = pauli.Strings.from_str(
-    "I0 Z1 Z2 I3, Z0 I1 I2 Z3",
-    4,
-)
-X_LOGICAL = pauli.Strings.from_str(
-    "Z0 I1 X2 I3, I0 Z1 I2 X3",
-    4,
-)
-
-
-GENERATORS = pauli.StringSet.from_cmpnts(
-    pauli.Strings.from_str(
-        "X0 Z1 Z2 X3, Z0 X1 X2 Z3",
-        4,
-    )
-)
-
-
-CODE_DEF = StabilizerCode(
-    num_physical_qubits=4,
-    num_logical_qubits=2,
-    distance=2,
-    generators=GENERATORS,
-    x_logicals=X_LOGICAL,
-    z_logicals=Z_LOGICAL,
-)
