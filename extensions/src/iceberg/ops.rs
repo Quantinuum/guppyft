@@ -18,23 +18,21 @@ use hugr::{
         },
     },
     ops::{ExtensionOp, OpName},
-    std_extensions::{
-        arithmetic::{float_types::float64_type, int_types::int_type},
-        collections::{array::ArrayKind, borrow_array::BorrowArray},
-    },
+    std_extensions::arithmetic::{float_types::float64_type, int_types::int_type},
     types::{FuncValueType, PolyFuncTypeRV, Signature, Type, TypeArg, type_param::TypeParam},
 };
 use strum::{EnumIter, EnumString, IntoStaticStr};
 use tket::extension::measurement::measurement_type;
 
-use crate::iceberg::types::{borrowed_block_tv, dynamic_logical_qubit_type};
+use crate::iceberg::types::{borrowed_block_tv, dynamic_logical_qubit_type, pre_block_tv};
+use crate::std::types::logical_measurement_tv;
 
 use super::types::block_tv;
 
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.iceberg.ops");
 /// Extension version.
-pub const VERSION: semver::Version = semver::Version::new(0, 1, 0);
+pub const VERSION: semver::Version = semver::Version::new(0, 1, 1);
 
 /// Logical Iceberg operations.
 ///
@@ -58,6 +56,10 @@ pub enum IcebergOpDef {
     x,
     /// X gate with dynamic index.
     x_d,
+    /// Y gate.
+    y,
+    /// Y gate with dynamic index.
+    y_d,
     /// Z gate.
     z,
     /// Z gate with dynamic index.
@@ -108,6 +110,10 @@ pub enum IcebergOpDef {
     rx,
     /// Rx gate with dynamic index.
     rx_d,
+    /// Ry gate.
+    ry,
+    /// Ry gate with dynamic index.
+    ry_d,
     /// Rz gate.
     rz,
     /// Rz gate with dynamic index.
@@ -148,14 +154,30 @@ pub enum IcebergOpDef {
     swap,
     /// Swap of two qubits within a block with dynamic indices.
     swap_d,
+    /// XXPhase gate involving two blocks.
+    xx_phase_between_blocks,
+    /// XXPhase gate involving two blocks with dynamic indices.
+    xx_phase_between_blocks_d,
+    /// YYPhase gate involving two blocks.
+    yy_phase_between_blocks,
+    /// YYPhase gate involving two blocks with dynamic indices.
+    yy_phase_between_blocks_d,
     /// ZZPhase gate involving two blocks.
     zz_phase_between_blocks,
     /// ZZPhase gate involving two blocks with dynamic indices.
     zz_phase_between_blocks_d,
+    /// CX gate involving two blocks.
+    cx_between_blocks,
+    /// CX gate involving two blocks with dynamic indices.
+    cx_between_blocks_d,
     /// CX gate applied transversally over two blocks.
     cx_transversal,
     /// Prepare the all-zero state on a block.
     alloc_zero,
+    /// Attempt to prepare the all-zero state on a block.
+    try_alloc_zero,
+    /// Check whether pre-block is in a logical state.
+    check_pre_block,
     /// Free a block.
     free,
     /// Syndrome measurement.
@@ -186,6 +208,10 @@ pub enum IcebergOpDef {
     ry_dynq,
     /// Rz gate on a dynamic logical qubit.
     rz_dynq,
+    /// XXPhase gate on two dynamic logical qubits.
+    xx_phase_dynq,
+    /// YYPhase gate on two dynamic logical qubits.
+    yy_phase_dynq,
     /// ZZPhase gate on two dynamic logical qubits.
     zz_phase_dynq,
     /// CX gate on two dynamic logical qubits.
@@ -335,16 +361,6 @@ impl ValidateJustArgs for InterBlockArgsValidator {
     }
 }
 
-/// Get an array-of-future-bool type with size corresponding to a type variable
-/// with a given ID.
-fn measurement_array_tv(var_id: usize) -> Type {
-    BorrowArray::ty_parametric(
-        TypeArg::new_var_use(var_id, TypeParam::max_nat_kind()),
-        measurement_type(),
-    )
-    .unwrap()
-}
-
 fn vec_of_blocks_and_angles(n_blocks: usize, n_angles: usize) -> Vec<Type> {
     let mut types: Vec<Type> = vec![block_tv(0); n_blocks];
     types.extend(vec![float64_type(); n_angles]);
@@ -410,6 +426,35 @@ fn sig_1_block_d(n_angles: usize, n_indices: usize) -> SignatureFunc {
     .into()
 }
 
+// Signature of a two-qubit gate between blocks, with a number of additional
+// angle inputs.
+fn sig_2q_phase(n_angles: usize) -> SignatureFunc {
+    CustomValidator::new(
+        PolyFuncTypeRV::new(
+            vec![TypeParam::max_nat_kind(); 3],
+            FuncValueType::new(
+                vec_of_blocks_and_angles(2, n_angles),
+                vec_of_blocks_and_angles(2, 0),
+            ),
+        ),
+        InterBlockArgsValidator {},
+    )
+    .into()
+}
+
+// Signature of a two-qubit gate between blocks, with a number of additional
+// angle inputs.
+fn sig_2q_phase_d(n_angles: usize) -> SignatureFunc {
+    PolyFuncTypeRV::new(
+        vec![TypeParam::max_nat_kind()],
+        FuncValueType::new(
+            vec_of_blocks_and_ints_and_angles(2, 2, n_angles),
+            vec_of_blocks_and_ints_and_angles(2, 0, 0),
+        ),
+    )
+    .into()
+}
+
 /// Signature of an operation that acts on a number of dynamic logical qubits
 /// with a number of additional angle qubits.
 fn sig_qubits_angles(n_qubits: usize, n_angles: usize) -> SignatureFunc {
@@ -451,6 +496,8 @@ impl MakeOpDef for IcebergOpDef {
         match self {
             x => sig_1_block(0, 1),
             x_d => sig_1_block_d(0, 1),
+            y => sig_1_block(0, 1),
+            y_d => sig_1_block_d(0, 1),
             z => sig_1_block(0, 1),
             z_d => sig_1_block_d(0, 1),
             xx => sig_1_block(0, 2),
@@ -476,6 +523,8 @@ impl MakeOpDef for IcebergOpDef {
             fan_in_d => sig_1_block_d(0, 1),
             rx => sig_1_block(1, 1),
             rx_d => sig_1_block_d(1, 1),
+            ry => sig_1_block(1, 1),
+            ry_d => sig_1_block_d(1, 1),
             rz => sig_1_block(1, 1),
             rz_d => sig_1_block_d(1, 1),
             all_rx => sig_1_block(1, 0),
@@ -496,25 +545,14 @@ impl MakeOpDef for IcebergOpDef {
             cx_d => sig_1_block_d(0, 2),
             swap => sig_1_block(0, 2),
             swap_d => sig_1_block_d(0, 2),
-            zz_phase_between_blocks => CustomValidator::new(
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_kind(); 3],
-                    FuncValueType::new(
-                        vec_of_blocks_and_angles(2, 1),
-                        vec_of_blocks_and_angles(2, 0),
-                    ),
-                ),
-                InterBlockArgsValidator {},
-            )
-            .into(),
-            zz_phase_between_blocks_d => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_kind()],
-                FuncValueType::new(
-                    vec_of_blocks_and_ints_and_angles(2, 2, 1),
-                    vec_of_blocks_and_ints_and_angles(2, 0, 0),
-                ),
-            )
-            .into(),
+            xx_phase_between_blocks => sig_2q_phase(1),
+            xx_phase_between_blocks_d => sig_2q_phase_d(1),
+            yy_phase_between_blocks => sig_2q_phase(1),
+            yy_phase_between_blocks_d => sig_2q_phase_d(1),
+            zz_phase_between_blocks => sig_2q_phase(1),
+            zz_phase_between_blocks_d => sig_2q_phase_d(1),
+            cx_between_blocks => sig_2q_phase(0),
+            cx_between_blocks_d => sig_2q_phase_d(0),
             cx_transversal => CustomValidator::new(
                 PolyFuncTypeRV::new(
                     vec![TypeParam::max_nat_kind()],
@@ -529,6 +567,25 @@ impl MakeOpDef for IcebergOpDef {
                     FuncValueType::new(
                         vec_of_blocks_and_angles(0, 0),
                         vec_of_blocks_and_angles(1, 0),
+                    ),
+                ),
+                ArgsValidator { n_idx: 0 },
+            )
+            .into(),
+            try_alloc_zero => CustomValidator::new(
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_kind()],
+                    FuncValueType::new(vec_of_blocks_and_angles(0, 0), vec![pre_block_tv(0)]),
+                ),
+                ArgsValidator { n_idx: 0 },
+            )
+            .into(),
+            check_pre_block => CustomValidator::new(
+                PolyFuncTypeRV::new(
+                    vec![TypeParam::max_nat_kind()],
+                    FuncValueType::new(
+                        vec![pre_block_tv(0)],
+                        vec![option_type([block_tv(0)]).into()],
                     ),
                 ),
                 ArgsValidator { n_idx: 0 },
@@ -561,7 +618,7 @@ impl MakeOpDef for IcebergOpDef {
                     vec![TypeParam::max_nat_kind()],
                     FuncValueType::new(
                         vec_of_blocks_and_angles(1, 0),
-                        vec![measurement_array_tv(0)],
+                        vec![logical_measurement_tv(0)],
                     ),
                 ),
                 ArgsValidator { n_idx: 0 },
@@ -613,6 +670,8 @@ impl MakeOpDef for IcebergOpDef {
             rx_dynq => sig_qubits_angles(1, 1),
             ry_dynq => sig_qubits_angles(1, 1),
             rz_dynq => sig_qubits_angles(1, 1),
+            xx_phase_dynq => sig_qubits_angles(2, 1),
+            yy_phase_dynq => sig_qubits_angles(2, 1),
             zz_phase_dynq => sig_qubits_angles(2, 1),
             cx_dynq => sig_qubits_angles(2, 0),
             try_measure_x_dynq => sig_qubit_meas(),
@@ -697,6 +756,7 @@ pub static EXTENSION: LazyLock<Arc<Extension>> = LazyLock::new(|| {
 
 #[cfg(test)]
 mod tests {
+    use hugr::extension::prelude::UnwrapBuilder;
     use hugr::{
         CircuitUnit, HugrView, Wire,
         builder::{
@@ -708,7 +768,6 @@ mod tests {
         package::Package,
         std_extensions::{
             arithmetic::{float_types::ConstF64, int_types::ConstInt},
-            collections::borrow_array::borrow_array_type,
             std_reg,
         },
         types::Signature,
@@ -716,6 +775,7 @@ mod tests {
 
     use crate::iceberg::types::EXTENSION as types_extension;
     use crate::iceberg::types::block_type;
+    use crate::std::types::logical_measurement_type;
 
     use super::*;
 
@@ -723,7 +783,7 @@ mod tests {
     fn test_iceberg_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.iceberg.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 74);
+        assert_eq!(EXTENSION.operations().count(), 88);
     }
 
     #[test]
@@ -972,10 +1032,37 @@ mod tests {
         let wires: Vec<Wire> = handle.outputs().collect();
         assert_eq!(wires.len(), 2);
         let freed_h = dfg_builder.add_dataflow_op(freeqb, [wires[1]]).unwrap();
-        assert!(freed_h.outputs().count() == 0);
+        assert_eq!(freed_h.outputs().count(), 0);
         let h = dfg_builder
             .finish_hugr_with_outputs([bool_wire_0, bool_wire_1, wires[0]])
             .unwrap();
+        h.validate().unwrap();
+    }
+
+    #[test]
+    fn test_try_alloc_measure() {
+        let tryalloczero = EXTENSION
+            .instantiate_extension_op("try_alloc_zero", [8.into()])
+            .unwrap();
+        let checkpreblock = EXTENSION
+            .instantiate_extension_op("check_pre_block", [8.into()])
+            .unwrap();
+        let free = EXTENSION
+            .instantiate_extension_op("free", [8.into()])
+            .unwrap();
+
+        let mut dfg_builder = DFGBuilder::new(Signature::new([], [])).unwrap();
+        let handle = dfg_builder.add_dataflow_op(tryalloczero, vec![]).unwrap();
+        let handle = dfg_builder
+            .add_dataflow_op(checkpreblock, handle.outputs())
+            .unwrap();
+        let [block_wire] = dfg_builder
+            .build_unwrap_sum(1, option_type([block_type(8)]), handle.out_wire(0))
+            .unwrap();
+        let handle = dfg_builder.add_dataflow_op(free, [block_wire]).unwrap();
+        let outs: Vec<Wire> = handle.outputs().collect();
+        assert!(outs.is_empty());
+        let h = dfg_builder.finish_hugr_with_outputs([]).unwrap();
         h.validate().unwrap();
     }
 
@@ -986,7 +1073,7 @@ mod tests {
             .unwrap();
         let mut dfg_builder = DFGBuilder::new(Signature::new(
             [block_type(4)],
-            [borrow_array_type(4, measurement_type())],
+            [logical_measurement_type(4)],
         ))
         .unwrap();
         let handle = dfg_builder

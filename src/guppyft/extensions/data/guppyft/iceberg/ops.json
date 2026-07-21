@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "name": "guppyft.iceberg.ops",
   "types": {},
   "operations": {
@@ -23,7 +23,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -50,7 +50,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -85,7 +85,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -125,7 +125,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -164,7 +164,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -191,7 +191,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -226,7 +226,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -266,7 +266,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -305,7 +305,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -324,7 +324,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -359,7 +359,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -391,7 +391,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -430,7 +430,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -449,7 +449,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -484,7 +484,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -516,7 +516,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -551,7 +551,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -570,7 +570,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -605,7 +605,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -632,7 +632,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -667,7 +667,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -694,7 +694,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -729,7 +729,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -756,7 +756,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -791,7 +791,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -810,7 +810,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -845,7 +845,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -864,7 +864,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -899,7 +899,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -918,7 +918,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -949,7 +949,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -976,7 +976,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1009,6 +1009,69 @@
       "signature": null,
       "binary": true
     },
+    "check_pre_block": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "check_pre_block",
+      "description": "Check whether pre-block is in a logical state.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "pre_block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [],
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.iceberg.types",
+                    "extension_version": "0.1.1",
+                    "id": "block",
+                    "args": [
+                      {
+                        "tya": "Variable",
+                        "idx": 0,
+                        "cached_decl": {
+                          "tp": "BoundedNat",
+                          "bound": null
+                        }
+                      }
+                    ],
+                    "bound": "A"
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "binary": true
+    },
     "cx": {
       "extension": "guppyft.iceberg.ops",
       "name": "cx",
@@ -1033,7 +1096,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1052,7 +1115,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1071,10 +1134,106 @@
       },
       "binary": true
     },
-    "cx_d": {
+    "cx_between_blocks": {
       "extension": "guppyft.iceberg.ops",
-      "name": "cx_d",
-      "description": "CX gate with dynamic indices.",
+      "name": "cx_between_blocks",
+      "description": "CX gate involving two blocks.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          },
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          },
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": true
+    },
+    "cx_between_blocks_d": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "cx_between_blocks_d",
+      "description": "CX gate involving two blocks with dynamic indices.",
       "signature": {
         "params": [
           {
@@ -1087,7 +1246,24 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1132,7 +1308,104 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "cx_d": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "cx_d",
+      "description": "CX gate with dynamic indices.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
               "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1162,7 +1435,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -1170,7 +1443,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -1180,7 +1453,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -1188,7 +1461,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -1214,7 +1487,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1231,7 +1504,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1250,7 +1523,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1267,7 +1540,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1306,7 +1579,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1325,7 +1598,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1360,7 +1633,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1392,7 +1665,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1431,7 +1704,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1450,7 +1723,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1485,7 +1758,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1517,7 +1790,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1552,7 +1825,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1583,7 +1856,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -1610,7 +1883,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1628,9 +1901,9 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "collections.borrow_arr",
-              "extension_version": "0.2.1",
-              "id": "borrow_array",
+              "extension": "guppyft.std.types",
+              "extension_version": "0.1.0",
+              "id": "logical_measurement",
               "args": [
                 {
                   "tya": "Variable",
@@ -1639,20 +1912,9 @@
                     "tp": "BoundedNat",
                     "bound": null
                   }
-                },
-                {
-                  "tya": "Type",
-                  "ty": {
-                    "t": "Opaque",
-                    "extension": "tket.measurement",
-                    "extension_version": "0.1.0",
-                    "id": "Measurement",
-                    "args": [],
-                    "bound": "C"
-                  }
                 }
               ],
-              "bound": "A"
+              "bound": "C"
             }
           ]
         }
@@ -1675,7 +1937,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1710,7 +1972,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1763,7 +2025,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1790,7 +2052,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1825,7 +2087,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1865,7 +2127,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -1895,7 +2157,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -1913,9 +2175,150 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "ry": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "ry",
+      "description": "Ry gate.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          },
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
+              "id": "float64",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": true
+    },
+    "ry_d": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "ry_d",
+      "description": "Ry gate with dynamic index.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
+              "id": "float64",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
               "bound": "A"
             }
           ]
@@ -1934,7 +2337,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -1952,7 +2355,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -1982,7 +2385,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2009,7 +2412,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2044,7 +2447,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2084,7 +2487,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2114,7 +2517,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -2132,7 +2535,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -2166,7 +2569,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2185,7 +2588,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2220,7 +2623,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2265,7 +2668,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2283,6 +2686,42 @@
         }
       },
       "binary": false
+    },
+    "try_alloc_zero": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "try_alloc_zero",
+      "description": "Attempt to prepare the all-zero state on a block.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "pre_block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": true
     },
     "try_measure_one_x": {
       "extension": "guppyft.iceberg.ops",
@@ -2304,7 +2743,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2340,7 +2779,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2375,7 +2814,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2424,7 +2863,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2463,7 +2902,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2499,7 +2938,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2534,7 +2973,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2583,7 +3022,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2613,7 +3052,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -2640,7 +3079,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -2661,7 +3100,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -2688,7 +3127,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -2718,7 +3157,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2737,7 +3176,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2772,7 +3211,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2804,7 +3243,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2834,7 +3273,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -2844,7 +3283,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -2874,7 +3313,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2893,7 +3332,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2928,7 +3367,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -2960,7 +3399,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3003,7 +3442,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3022,7 +3461,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3057,7 +3496,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3102,7 +3541,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3145,7 +3584,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3172,7 +3611,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3191,10 +3630,114 @@
       },
       "binary": true
     },
-    "xx_phase_d": {
+    "xx_phase_between_blocks": {
       "extension": "guppyft.iceberg.ops",
-      "name": "xx_phase_d",
-      "description": "XXPhase gate with dynamic indices.",
+      "name": "xx_phase_between_blocks",
+      "description": "XXPhase gate involving two blocks.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          },
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          },
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
+              "id": "float64",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": true
+    },
+    "xx_phase_between_blocks_d": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "xx_phase_between_blocks_d",
+      "description": "XXPhase gate involving two blocks with dynamic indices.",
       "signature": {
         "params": [
           {
@@ -3207,7 +3750,24 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3260,7 +3820,292 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "xx_phase_d": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "xx_phase_d",
+      "description": "XXPhase gate with dynamic indices.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
               "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
+              "id": "float64",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "xx_phase_dynq": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "xx_phase_dynq",
+      "description": "XXPhase gate on two dynamic logical qubits.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
+              "id": "float64",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "y": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "y",
+      "description": "Y gate.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          },
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": true
+    },
+    "y_d": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "y_d",
+      "description": "Y gate with dynamic index.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3290,7 +4135,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -3300,7 +4145,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -3334,7 +4179,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3353,7 +4198,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3388,7 +4233,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3433,7 +4278,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3476,7 +4321,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3503,7 +4348,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3522,10 +4367,114 @@
       },
       "binary": true
     },
-    "yy_phase_d": {
+    "yy_phase_between_blocks": {
       "extension": "guppyft.iceberg.ops",
-      "name": "yy_phase_d",
-      "description": "YYPhase gate with dynamic indices.",
+      "name": "yy_phase_between_blocks",
+      "description": "YYPhase gate involving two blocks.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          },
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          },
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
+              "id": "float64",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": true
+    },
+    "yy_phase_between_blocks_d": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "yy_phase_between_blocks_d",
+      "description": "YYPhase gate involving two blocks with dynamic indices.",
       "signature": {
         "params": [
           {
@@ -3538,7 +4487,24 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3591,7 +4557,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3603,6 +4569,166 @@
                   }
                 }
               ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "yy_phase_d": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "yy_phase_d",
+      "description": "YYPhase gate with dynamic indices.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
+              "id": "float64",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "yy_phase_dynq": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "yy_phase_dynq",
+      "description": "YYPhase gate on two dynamic logical qubits.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
+              "id": "float64",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "qubit",
+              "args": [],
               "bound": "A"
             }
           ]
@@ -3630,7 +4756,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3649,7 +4775,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3684,7 +4810,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3716,7 +4842,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3746,7 +4872,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -3756,7 +4882,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -3786,7 +4912,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3805,7 +4931,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3840,7 +4966,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3872,7 +4998,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3915,7 +5041,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3934,7 +5060,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -3969,7 +5095,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -4014,7 +5140,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -4057,7 +5183,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -4084,7 +5210,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -4127,7 +5253,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -4144,7 +5270,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -4171,7 +5297,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -4188,7 +5314,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -4223,7 +5349,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -4240,7 +5366,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -4293,7 +5419,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -4310,7 +5436,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -4345,7 +5471,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -4398,7 +5524,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "block",
               "args": [
                 {
@@ -4428,7 +5554,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -4436,7 +5562,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -4454,7 +5580,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -4462,7 +5588,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"

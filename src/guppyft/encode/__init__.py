@@ -6,12 +6,18 @@ from hugr.package import Package
 from hugr.passes.composable import ComposablePass
 from tket.passes import NormalizeGuppy
 
-from ._implement_ops import ImplementOpsSpec, OpReplacements, implement_ops
+from ._implement_ops import (
+    ImplementOpsSpec,
+    OpReplacements,
+    TyReplacements,
+    implement_ops,
+)
 
 __all__ = [
     "EncoderSpec",
     "ImplementOpsSpec",
     "OpReplacements",
+    "TyReplacements",
     "encode",
 ]
 
