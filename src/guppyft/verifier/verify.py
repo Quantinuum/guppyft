@@ -1,82 +1,26 @@
-from collections.abc import Callable
 from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.array import array
-from guppylang.std.builtins import Function
+from guppylang.std.builtins import Function, comptime
 from guppylang.std.debug import state_output
 from guppylang.std.quantum import cx, discard_array, h, qubit
 from selene_sim.backends import Stim
 from selene_sim.build import build
 from selene_stim_plugin import SeleneStimState
-from zixy.qubit import Qubits, pauli
+from zixy.qubit import pauli
 
 from guppyft.verifier.code import StabilizerCode
+from guppyft.verifier.state_gen import gen_choi_state
+from guppyft.verifier.expansion import get_expanded_stabilizer_set
 from guppyft.verifier.utils import (
+    SingleBlockUnitary,
+    DoubleBlockUnitary,
     stabilizerlist_to_signterms,
 )
 
 N = guppy.nat_var("N")
-
-
-type SingleBlockUnitary = GuppyFunctionDefinition[[array[qubit, N]], None]  # type: ignore[valid-type]
-type DoubleBlockUnitary = GuppyFunctionDefinition[
-    [array[qubit, N], array[qubit, N]], None  # type: ignore[valid-type]
-]
-
-
-type SingleBlockChoiStateFunction = Callable[
-    [SingleBlockUnitary], tuple[array[qubit, N], array[qubit, N]]  # type: ignore[valid-type]
-]
-
-
-type DoubleBlockChoiStateFunction = Callable[
-    [DoubleBlockUnitary],
-    tuple[array[qubit, N], array[qubit, N], array[qubit, N], array[qubit, N]],  # type: ignore[valid-type]
-]
-
-
-@guppy
-@no_type_check
-def default_choi_state_preparation(
-    unitary_func: Function[[array[qubit, N]], None],
-) -> tuple[array[qubit, N], array[qubit, N]]:
-    """Prepare a Choi state (unencoded) for a particular n-qubit unitary."""
-    control_block = array(qubit() for _ in range(N))
-    target_block = array(qubit() for _ in range(N))
-    for i in range(N):
-        h(control_block[i])
-        cx(control_block[i], target_block[i])
-
-    unitary_func(target_block)
-    return control_block, target_block
-
-
-@guppy
-@no_type_check
-def default_choi_state_preparation_double_block(
-    unitary_func: Function[[array[qubit, N], array[qubit, N]], None],
-) -> tuple[array[qubit, N], array[qubit, N], array[qubit, N], array[qubit, N]]:
-    """Prepare a Choi state (unencoded) for a particular 2n qubit unitary."""
-    first_control_block = array(qubit() for _ in range(N))
-    first_target_block = array(qubit() for _ in range(N))
-    second_control_block = array(qubit() for _ in range(N))
-    second_target_block = array(qubit() for _ in range(N))
-
-    for i in range(N):
-        h(first_control_block[i])
-        h(second_control_block[i])
-        cx(first_control_block[i], first_target_block[i])
-        cx(second_control_block[i], second_target_block[i])
-
-    unitary_func(first_target_block, second_target_block)
-    return (
-        first_control_block,
-        first_target_block,
-        second_control_block,
-        second_target_block,
-    )
 
 
 def _invoke_selene_stim(
@@ -91,23 +35,26 @@ def _invoke_selene_stim(
 
 
 def compute_stabilizers_single_block(
+    code: StabilizerCode,
     clifford_func: SingleBlockUnitary,
-    choi_state_preparation: SingleBlockChoiStateFunction,
     n_func_qubits: int,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation.
 
-    :param clifford_func: A Guppy function which implements a Clifford unitary.
-    :param choi_state_preparation: A Guppy function that takes an arbitrary
-      `clifford_func` and prepares a Choi state encoding the Clifford unitary.
+    :param code: The stabilizer code.
+    :param clifford_func: A Guppy function which implements a Clifford unitary
+        on a single code block.
     :param n_func_qubits: An upper bound for the number of qubits used in stabilizer
-    simulation.
+        simulation.
     :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
 
+    choi_prep = gen_choi_state(code, clifford_func, 1)
+    n = code.num_physical_qubits
+
     @guppy
     def main() -> None:
-        controls, targets = choi_state_preparation(clifford_func)
+        controls, targets = choi_prep[comptime(n)]()
 
         state_output("control", controls)
         state_output("target", targets)
@@ -133,28 +80,29 @@ def compute_stabilizers_single_block(
 
 
 def compute_stabilizers_double_block(
+    code: StabilizerCode,
     clifford_func: DoubleBlockUnitary,
-    choi_state_preparation_double_block: DoubleBlockChoiStateFunction,
     n_func_qubits: int,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation across
       two code blocks.
 
+    :param code: The stabilizer code.
     :param clifford_func: A Guppy function which implements a Clifford unitary
       across two code blocks.
-    :param choi_state_preparation: A Guppy function that takes an arbitrary
-      `clifford_func` and prepares a Choi state encoding the Clifford unitary.
     :param n_func_qubits: An upper bound for the number of qubits used in stabilizer
     simulation.
-    :param n_func_qubits: The number of qubits needed for clifford_func.
     :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
 
+    choi_prep = gen_choi_state(code, clifford_func, 2)
+    n = code.num_physical_qubits
+
     @guppy
     def main() -> None:
-        first_controls, first_targets, second_controls, second_targets = (
-            choi_state_preparation_double_block(clifford_func)
-        )
+        first_controls, first_targets, second_controls, second_targets = choi_prep[
+            comptime(n)
+        ]()
 
         state_output("controls1", first_controls)
         state_output("targets1", first_targets)
@@ -188,199 +136,6 @@ def compute_stabilizers_double_block(
     return stabilizerlist_to_signterms(stab_list)
 
 
-# TODO: refactor this function to made smarter use of zixy's implicit padding.
-# Using shift_pauli should help.
-# Also allow >2 codeblocks.
-def pad_code_stabilizers(code: StabilizerCode, num_blocks: int) -> pauli.StringSet:
-    """Returns a set of Stabilizers for each of the m codeblocks padded by
-      the identity.
-
-    For example, if we have two blocks of the steane code we have
-    (n-k) Pauli strings indexed from 0-6 with the identity on qubits 7-13 and
-    (n-k) Pauli strings indexed from 7-13 with the identity on qubits 0-6.
-    We get a set of pauli strings of size 2m(n-k).
-    The factor of 2 comes about because we are encoding an N qubit unitary
-      in a 2N qubit state by using map-state duality.
-
-    :param code: A StabilizerCode.
-    :param num_blocks: The number of code blocks.
-    :return: A set of Pauli strings made up of padded stabilizers
-      for each code block. Returns Pauli Strings for 2m blocks.
-    """
-    code_generators: pauli.StringSet = code.generators
-    generator_tuples = code_generators.to_strings().get_tuples()
-    padding = tuple([pauli.PauliMatrix.I for _ in range(code.num_physical_qubits)])
-    p0_padding = [g + padding for g in generator_tuples]
-    if num_blocks == 1:
-        p1_padding = [padding + g for g in generator_tuples]
-        combined = tuple(p0_padding + p1_padding)
-    elif num_blocks == 2:
-        p1_padding = [padding + g + 2 * padding for g in generator_tuples]
-        p2_padding = [padding * 2 + g + padding for g in generator_tuples]
-        p3_padding = [padding * 3 + g for g in generator_tuples]
-        combined = tuple(p0_padding + p1_padding + p2_padding + p3_padding)
-    else:
-        raise ValueError(
-            "Currently no more than two codeblocks are supported."
-            + f"Got argument num_blocks={num_blocks}."
-        )
-
-    return pauli.StringSet.from_iterable(
-        combined, 2 * num_blocks * code.num_physical_qubits
-    )
-
-
-def shift_pauli(pauli_op: pauli.String, offset: int, size: int) -> pauli.String:
-    """
-    Shift qubit indices of a String (to the right) by an offset.
-    """
-    pauli_dict = pauli_op.get_dict()
-    original_keys = list(pauli_dict.keys())
-    new_keys = [i + offset for i in original_keys]
-    new_pauli_dict = dict(zip(new_keys, pauli_dict.values(), strict=True))
-    return pauli.String(size, new_pauli_dict)
-
-
-def expand_pauli_term(
-    logical_term: pauli.SignTerm,
-    code: StabilizerCode,
-    num_blocks: int,
-) -> pauli.SignTerm:
-    """Expand a single logical Pauli term defined over multiple code blocks using
-      the definition of the logical operators for a particular StabilizerCode.
-
-    :param logical_term: The (signed) Pauli term to expand.
-    :param code: A stabilizer code with well defined [[n, k, d]] parameters
-      and logical operators.
-    :param num_blocks: The number of code blocks represented in the SignTerm.
-    :return: An expanded SignTerm which represents the physical implementation
-      of the logical term.
-    """
-
-    n = code.num_physical_qubits
-    k = code.num_logical_qubits
-    total_qubit_number = num_blocks * n
-
-    # "result_string" is a Pauli String which will store a single physical Pauli term
-    # possibly across multiple code blocks.
-    #  This String will be one term in the expanded tableau.
-    result_term = pauli.SignTerm(qubits=total_qubit_number)
-    result_sign = logical_term.coeff
-
-    for logical_qubit_index, logical_pauli in logical_term.string.get_dict().items():
-        # "non_identity_pauli_index" is the index we need to access to expand the
-        #  logical operators for a StabilizerCode.
-        # Consider StabilizerCode.x_logicals for the Iceberg code.
-        # 1. (XI -> XXII) non_identity_pauli_index=0, ICEBERG_DEF.x_logicals[0] = XXII
-        # 2. (IX -> XIXI) non_identity_pauli_index=1, ICEBERG_DEF.x_logicals[1] = XIXI
-        non_identity_pauli_index = logical_qubit_index % k
-
-        # logical_block_number tells us which logical code block a specific
-        #  (logical_qubit, logical_pauli) pair belongs to. If we had 4 logical qubit
-        #  (q0, q1, q2, q3) from two logical iceberg code blocks then (q0, q1) would
-        #  correspond to logical_block_number=0 and (q2, q3) would correspond
-        #  to logical_block_number=1.
-        logical_block_number = logical_qubit_index // k
-
-        # For each logical_pauli (PauliMatrix) term in logical_term we get the
-        #  corresponding physical Pauli by indexing into
-        # StabilizerCode.x_logicals/StabilizerCode.z_logicals using the
-        # "non_identity_pauli_index" index computed above.
-        match logical_pauli:
-            case pauli.PauliMatrix.X:
-                physical_pauli = pauli.SignTerm.from_str(
-                    str(code.x_logicals[non_identity_pauli_index])
-                )
-
-            case pauli.PauliMatrix.Y:
-                physical_pauli = pauli.SignTerm.from_str(
-                    str(code.y_logicals[non_identity_pauli_index])
-                )
-
-            case pauli.PauliMatrix.Z:
-                physical_pauli = pauli.SignTerm.from_str(
-                    str(code.z_logicals[non_identity_pauli_index])
-                )
-
-            case _:
-                raise ValueError(
-                    f"Can only expand X, Y and Z Paulis, got {logical_pauli}."
-                )
-
-        # "offset" tells us how we need to adjust the qubit indices of physical_pauli
-        # depending on which code block we are in. Suppose we had two Steane blocks
-        # with seven physical qubits each. If we expanded a logical Pauli in the second
-        #  logical block, then the appropriate "offset" would be (1*7) = 7.
-        offset = logical_block_number * n
-
-        shifted_string: pauli.String = shift_pauli(
-            physical_pauli.string, offset, size=total_qubit_number
-        )
-
-        # Get final expanded term by taking the product of num_blocks*k expanded terms.
-        result_term *= shifted_string
-        result_sign *= physical_pauli.coeff
-
-    return pauli.SignTerm.from_cmpnt_coeff(result_term.string, result_sign)
-
-
-def expand_logical_signterms(
-    logical_terms: pauli.SignTerms,
-    code: StabilizerCode,
-) -> pauli.SignTerms:
-    """Given a tableau made up of signed Paul terms, expand each term according
-      as prescribed by the logical operators of a StabilizerCode.
-
-    :param logical_terms: A tableau of signed Pauli terms to be expanded.
-    :param code: A stabilizer code with well defined [[n, k, d]] parameters
-      and logical operators.
-    :return: An expanded SignTerms tableau.
-    """
-    k = code.num_logical_qubits
-    num_blocks = len(logical_terms.qubits) // k
-
-    expanded_terms = pauli.SignTerms(
-        qubits=Qubits.from_count(num_blocks * code.num_physical_qubits)
-    )
-    # Expand the logical terms one-by-one using the logical operators
-    #  of the Stabilizer code.
-    for logical_term in logical_terms:
-        expanded = expand_pauli_term(
-            logical_term.into(pauli.SignTerm),
-            code,
-            num_blocks,
-        )
-
-        expanded_terms.append(expanded)
-    return expanded_terms
-
-
-def get_expanded_stabilizer_set(
-    signed_logical_paulis: pauli.SignTerms, code: StabilizerCode, num_blocks: int
-) -> pauli.SignTerms:
-    """Given a tableau of signed logical Pauli terms and a number of codeblocks(m),
-      expand the terms according to the logical operators of a StabilizerCode.
-        These expanded Paulis are also combined with the padded
-          Stabilizer generators to give 2mn terms in total.
-
-    :param signed_logical_paulis: A tableau of signed Pauli terms to be expanded.
-    :param code: A stabilizer code with well defined [[n, k, d]] parameters
-      and logical operators.
-    :param num_blocks: The number of code blocks represented in signed_logical_paulis.
-    :return: An expanded SignTerms tableau.
-    """
-
-    # Firstly, we expand the stabilizers of the choi state using the
-    # logical operators of the StabilizerCode
-    stabilizers: pauli.SignTerms = expand_logical_signterms(signed_logical_paulis, code)
-    # Secondly, we include the stabilizer generators for each code block.
-    padded_stabilizers: pauli.StringSet = pad_code_stabilizers(code, num_blocks)
-
-    for s in padded_stabilizers.to_strings():
-        stabilizers.append(s)
-    return stabilizers
-
-
 N_PHYSICAL = guppy.nat_var("N_PHYSICAL")
 K_LOGICAL = guppy.nat_var("K_LOGICAL")
 
@@ -400,10 +155,32 @@ type ImplementationCliffordUnitaryDouble = GuppyFunctionDefinition[
 ]
 
 
+def identity_code(k: int) -> StabilizerCode:
+    """Return a stabilizer code that encodes k logical qubits into k physical qubits.
+      This is the trivial code with distance 1.
+
+    :param k: The number of logical qubits to encode.
+    :return: A StabilizerCode instance representing the identity code.
+    """
+    x_logicals = pauli.Strings(k)
+    z_logicals = pauli.Strings(k)
+    for i in range(k):
+        x_logicals.append(pauli.String(k, {i: pauli.X}))
+        z_logicals.append(pauli.String(k, {i: pauli.Z}))
+
+    return StabilizerCode(
+        num_physical_qubits=k,
+        num_logical_qubits=k,
+        distance=1,
+        generators=pauli.StringSet(k),  # No stabilizers
+        x_logicals=x_logicals,
+        z_logicals=z_logicals,
+    )
+
+
 def compute_verification_signterms(
     semantic_function: SemanticCliffordUnitary,
     impl_function: ImplementationCliffordUnitary,
-    code_choi_state_function: SingleBlockChoiStateFunction,
     code_definition: StabilizerCode,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
     """Given a semantic Guppy function acting on k qubits and an impl Guppy function
@@ -414,8 +191,6 @@ def compute_verification_signterms(
       of a Clifford operator on k logical qubits.
     :param impl_function: A Guppy function for implementing
       the semantics on n physical qubits.
-    :param code_choi_state_function: A Guppy function that takes an arbitrary
-      `impl_function` and prepares a Choi state encoding the Clifford unitary.
     :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
       and logical operators.
     :return: A pair of Clifford tableaux made up of signed Pauli terms.
@@ -423,9 +198,9 @@ def compute_verification_signterms(
 
     # Get the 2k stabilizers for the 2k qubit Choi state encoding the logical operation.
     semantic_choi_stabilizers = compute_stabilizers_single_block(
+        identity_code(code_definition.num_logical_qubits),
         semantic_function,
-        choi_state_preparation=default_choi_state_preparation,
-        n_func_qubits=code_definition.num_logical_qubits,
+        code_definition.num_logical_qubits,
     )
 
     # Expand the 2k logical stabilizers to 2k stabilizers of size 2n.
@@ -438,8 +213,8 @@ def compute_verification_signterms(
 
     # Calculate the 2n stabilizers of the Choi state encoding the physical operation.
     implementation_stabilizers = compute_stabilizers_single_block(
+        code_definition,
         impl_function,
-        code_choi_state_function,
         code_definition.num_physical_qubits,
     )
 
@@ -453,7 +228,6 @@ def compute_verification_signterms(
 def compute_verification_signterms_double_block(
     semantic_function: SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitaryDouble,
-    code_choi_state_function: DoubleBlockChoiStateFunction,
     code_definition: StabilizerCode,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
     """Given a semantic Guppy function acting between two code blocks and an
@@ -463,10 +237,8 @@ def compute_verification_signterms_double_block(
 
     :param semantic_function: A Guppy function for semantic action
       of a Clifford operator on two code blocks.
-    :param impl_function A Guppy function for implementing
+    :param impl_function: A Guppy function for implementing
       the semantics on two code blocks.
-    :param code_choi_state_function: A Guppy function that takes an arbitrary
-      `impl_function` and prepares a Choi state encoding the Clifford unitary.
     :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
       and logical operators.
     :return: A pair of Clifford tableaux made up of signed Pauli terms.
@@ -474,9 +246,9 @@ def compute_verification_signterms_double_block(
 
     # Get the 4k stabilizers for the 4k qubit Choi state encoding the logical operation.
     semantic_choi_stabilizers = compute_stabilizers_double_block(
-        clifford_func=semantic_function,
-        choi_state_preparation_double_block=default_choi_state_preparation_double_block,
-        n_func_qubits=2 * code_definition.num_logical_qubits,
+        identity_code(code_definition.num_logical_qubits),
+        semantic_function,
+        2 * code_definition.num_logical_qubits,
     )
 
     # Expand the 4k logical stabilizers and combine them with the generators for each
@@ -487,8 +259,8 @@ def compute_verification_signterms_double_block(
 
     # Calculate the 4n stabilizers of the Choi state encoding the physical operation.
     implementation_stabilizers = compute_stabilizers_double_block(
+        code_definition,
         impl_function,
-        code_choi_state_function,
         2 * code_definition.num_physical_qubits,
     )
 

@@ -12,6 +12,8 @@ from guppylang.std.collections import Queue, empty_queue
 from guppylang.std.option import nothing, some
 from guppylang.std.num import nat
 
+N = guppy.nat_var("N")
+
 type SingleBlockUnitary = GuppyFunctionDefinition[[array[qubit, N]], None]  # type: ignore[valid-type]
 type DoubleBlockUnitary = GuppyFunctionDefinition[
     [array[qubit, N], array[qubit, N]], None  # type: ignore[valid-type]
@@ -74,6 +76,7 @@ def stabilizerlist_to_signterms(stab_list: StabilizerList) -> pauli.SignTerms:
 
 N = guppy.nat_var("N")
 T = guppy.type_var("T", copyable=False, droppable=False)
+
 
 @guppy.struct
 @no_type_check

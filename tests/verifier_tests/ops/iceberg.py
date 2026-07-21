@@ -3,7 +3,6 @@ from typing import no_type_check
 from guppylang import guppy
 from guppylang.std.angles import pi
 from guppylang.std.array import array
-from guppylang.std.builtins import Function
 from guppylang.std.mem import mem_swap
 from guppylang.std.qsystem.helios import zz_max, zz_phase
 from guppylang.std.quantum import cx, cz, h, qubit, rx, rz, s, sdg
@@ -190,48 +189,6 @@ def non_ft_zero() -> array[qubit, 4]:
     cx(block[2], block[3])
     cx(block[1], block[0])
     return block
-
-
-@guppy
-@no_type_check
-def choi_state(
-    unitary: Function[[array[qubit, 4]], None],
-) -> tuple[array[qubit, 4], array[qubit, 4]]:
-    control_block = non_ft_zero()
-    target_block = non_ft_zero()
-
-    double_h_physical(control_block)
-    transversal_cx_physical(control_block, target_block)
-
-    unitary(target_block)
-
-    return control_block, target_block
-
-
-@guppy
-@no_type_check
-def choi_state_double_block(
-    unitary: Function[[array[qubit, 4], array[qubit, 4]], None],
-) -> tuple[array[qubit, 4], array[qubit, 4], array[qubit, 4], array[qubit, 4]]:
-    first_control_block = non_ft_zero()
-    first_target_block = non_ft_zero()
-    second_control_block = non_ft_zero()
-    second_target_block = non_ft_zero()
-
-    double_h_physical(first_control_block)
-    double_h_physical(second_control_block)
-
-    transversal_cx_physical(first_control_block, first_target_block)
-    transversal_cx_physical(second_control_block, second_target_block)
-
-    unitary(first_target_block, second_target_block)
-
-    return (
-        first_control_block,
-        first_target_block,
-        second_control_block,
-        second_target_block,
-    )
 
 
 ICEBERG_GENERATORS = pauli.StringSet.from_cmpnts(

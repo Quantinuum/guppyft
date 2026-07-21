@@ -1,6 +1,8 @@
 import pytest
 from typing import no_type_check
 
+from zixy.qubit import pauli
+
 from guppylang import guppy
 from guppylang.std.quantum import qubit, x, y, z, h, s, sdg, cx, discard_array
 from guppylang.std.debug import state_output
@@ -11,7 +13,27 @@ from guppyft.verifier.verify import _invoke_selene_stim
 from guppyft.verifier.utils import (
     stabilizerlist_to_signterms,
 )
-from guppyft.verifier.state_gen import gen_guppy_state_prep
+from guppyft.verifier.state_gen import (
+    SQClifford,
+    convert_to_graph_state,
+    gen_guppy_state_prep,
+)
+
+
+def test_graph_state_conversion_two_bell_pairs() -> None:
+    """
+    Test that the graph state conversion works for two Bell pairs.
+    """
+    tableau = pauli.SignTerms(4)
+    tableau.append(pauli.SignTerm(4, {0: pauli.X, 2: pauli.X}))
+    tableau.append(pauli.SignTerm(4, {0: pauli.Z, 2: pauli.Z}))
+    tableau.append(pauli.SignTerm(4, {1: pauli.X, 3: pauli.X}))
+    tableau.append(pauli.SignTerm(4, {1: pauli.Z, 3: pauli.Z}))
+
+    sq_cliffords = convert_to_graph_state(tableau)
+
+    assert sq_cliffords == [SQClifford.I, SQClifford.I, SQClifford.H, SQClifford.H]
+    assert str(tableau) == "(+1, X0 Z2), (+1, X1 Z3), (+1, Z0 X2), (+1, Z1 X3)"
 
 
 @pytest.mark.parametrize("seed", [42, 123, 456, 1234, 999])
@@ -31,7 +53,7 @@ def test_arbitrary_stabilizer_state_generation(seed: int) -> None:
 
         qs = array(qubit() for _ in range(comptime(n_qubits)))
 
-        for _ in range(comptime(n_qubits)): # As many layers as qubits
+        for _ in range(comptime(n_qubits)):  # As many layers as qubits
             for i in range(comptime(n_qubits)):
                 pauli_gate = rng.random_int_bounded(4)
                 if pauli_gate == 1:
@@ -65,6 +87,7 @@ def test_arbitrary_stabilizer_state_generation(seed: int) -> None:
 
     # Generate a Guppy function that prepares the same stabilizer state
     prep_func = gen_guppy_state_prep(original_tableau)
+
     @guppy
     @no_type_check
     def automated_preparation() -> None:

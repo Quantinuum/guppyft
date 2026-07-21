@@ -11,9 +11,6 @@ from .verify import (
     compute_stabilizers_single_block,
     compute_verification_signterms,
     compute_verification_signterms_double_block,
-    expand_logical_signterms,
-    get_expanded_stabilizer_set,
-    pad_code_stabilizers,
 )
 
 __all__ = [

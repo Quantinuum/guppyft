@@ -6,8 +6,10 @@ from guppyft.verifier.verify import (
     compute_stabilizers_single_block,
     compute_verification_signterms,
     compute_verification_signterms_double_block,
-    default_choi_state_preparation,
-    default_choi_state_preparation_double_block,
+    identity_code,
+)
+
+from guppyft.verifier.expansion import (
     expand_logical_signterms,
     get_expanded_stabilizer_set,
     pad_code_stabilizers,
@@ -18,18 +20,18 @@ from .ops import bitflip, iceberg, steane
 
 def test_bell_state_stabilizers() -> None:
     stabilizer_terms = compute_stabilizers_single_block(
-        steane.logical_identity, default_choi_state_preparation, 1
+        identity_code(1), steane.logical_identity, 1
     )
     assert str(stabilizer_terms) == "(+1, X0 X1), (+1, Z0 Z1)"
 
 
 def test_s_state_stabilizers() -> None:
     terms_logical = compute_stabilizers_single_block(
-        steane.logical_s, default_choi_state_preparation, 1
+        identity_code(1), steane.logical_s, 1
     )
 
     terms_physical = compute_stabilizers_single_block(
-        steane.physical_s, default_choi_state_preparation, 7
+        steane.STEANE_DEF, steane.physical_s, 7
     )
 
     assert str(terms_logical) == "(+1, X0 Y1), (+1, Z0 Z1)"
@@ -72,7 +74,6 @@ def test_steane_h() -> None:
     sem, impl = compute_verification_signterms(
         steane.logical_h,
         steane.physical_h,
-        code_choi_state_function=steane.choi_state,
         code_definition=steane.STEANE_DEF,
     )
 
@@ -102,7 +103,6 @@ def test_steane_s() -> None:
     sem, impl = compute_verification_signterms(
         steane.logical_s,
         steane.physical_s,
-        code_choi_state_function=steane.choi_state,
         code_definition=steane.STEANE_DEF,
     )
 
@@ -113,7 +113,6 @@ def test_steane_sdg() -> None:
     sem, impl = compute_verification_signterms(
         steane.logical_sdg,
         steane.physical_sdg,
-        code_choi_state_function=steane.choi_state,
         code_definition=steane.STEANE_DEF,
     )
 
@@ -124,7 +123,6 @@ def test_steane_invalid_s() -> None:
     sem, impl = compute_verification_signterms(
         steane.logical_s,
         steane.physical_sdg,
-        code_choi_state_function=steane.choi_state,
         code_definition=steane.STEANE_DEF,
     )
 
@@ -135,7 +133,6 @@ def test_steane_invalid_sdg() -> None:
     sem, impl = compute_verification_signterms(
         steane.logical_sdg,
         steane.physical_s,
-        code_choi_state_function=steane.choi_state,
         code_definition=steane.STEANE_DEF,
     )
 
@@ -144,8 +141,8 @@ def test_steane_invalid_sdg() -> None:
 
 def test_compute_stabilizers_double_block() -> None:
     stabilizers = compute_stabilizers_double_block(
+        identity_code(1),
         steane.logical_identity_double_block,
-        default_choi_state_preparation_double_block,
         2,
     )
 
@@ -218,7 +215,6 @@ def test_bit_flip_double_block_identity() -> None:
     sem, impl = compute_verification_signterms_double_block(
         bitflip.logical_identity_double_block,
         bitflip.physical_identity_double_block,
-        code_choi_state_function=bitflip.choi_state_double_block,
         code_definition=bitflip.BIT_FLIP_DEF,
     )
     assert sem == impl
@@ -228,7 +224,6 @@ def test_steane_double_block_identity() -> None:
     sem, impl = compute_verification_signterms_double_block(
         steane.logical_identity_double_block,
         steane.physical_identity_double_block,
-        code_choi_state_function=steane.choi_state_double_block,
         code_definition=steane.STEANE_DEF,
     )
     assert sem == impl
@@ -238,7 +233,6 @@ def test_steane_cx() -> None:
     sem, impl = compute_verification_signterms_double_block(
         steane.logical_cx,
         steane.physical_cx,
-        code_choi_state_function=steane.choi_state_double_block,
         code_definition=steane.STEANE_DEF,
     )
     assert sem == impl
@@ -246,7 +240,7 @@ def test_steane_cx() -> None:
 
 def test_compute_stabilizers_single_block_iceberg_id() -> None:
     choi_stabilizers_before_expansion = compute_stabilizers_single_block(
-        iceberg.logical_identity, default_choi_state_preparation, 2
+        identity_code(2), iceberg.logical_identity, 2
     )
     assert (
         str(choi_stabilizers_before_expansion)
@@ -277,7 +271,6 @@ def test_single_block_iceberg_id_verification() -> None:
     sem, impl = compute_verification_signterms(
         iceberg.logical_identity,
         iceberg.physical_identity,
-        iceberg.choi_state,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
@@ -285,8 +278,8 @@ def test_single_block_iceberg_id_verification() -> None:
 
 def test_compute_stabilizers_double_block_iceberg_id() -> None:
     choi_stabilizers_before_expansion = compute_stabilizers_double_block(
+        identity_code(2),
         iceberg.logical_identity_double_block,
-        default_choi_state_preparation_double_block,
         4,
     )
     assert (
@@ -308,7 +301,6 @@ def test_double_block_iceberg_id() -> None:
     sem, impl = compute_verification_signterms_double_block(
         iceberg.logical_identity_double_block,
         iceberg.physical_identity_double_block,
-        iceberg.choi_state_double_block,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
@@ -316,8 +308,8 @@ def test_double_block_iceberg_id() -> None:
 
 def test_compute_stabilizers_intrablock_cx_iceberg() -> None:
     choi_stabilizers_before_expansion = compute_stabilizers_single_block(
+        identity_code(2),
         iceberg.intra_block_cx_logical,
-        default_choi_state_preparation,
         2,
     )
     assert (
@@ -337,7 +329,6 @@ def test_iceberg_intrablock_cz() -> None:
     sem, impl = compute_verification_signterms(
         iceberg.intra_block_cz_logical,
         iceberg.intra_block_cz_physical,
-        iceberg.choi_state,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
@@ -347,7 +338,6 @@ def test_iceberg_intrablock_cx() -> None:
     sem, impl = compute_verification_signterms(
         iceberg.intra_block_cx_logical,
         iceberg.intra_block_cx_physical,
-        iceberg.choi_state,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
@@ -357,7 +347,6 @@ def test_iceberg_addressable_rz_half_pi() -> None:
     sem, impl = compute_verification_signterms(
         iceberg.addressable_rz_half_pi_logical,
         iceberg.addressable_rz_half_pi_physical,
-        iceberg.choi_state,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
@@ -367,7 +356,6 @@ def test_iceberg_addressable_rx_half_pi() -> None:
     sem, impl = compute_verification_signterms(
         iceberg.addressable_rx_half_pi_logical,
         iceberg.addressable_rx_half_pi_physical,
-        iceberg.choi_state,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
@@ -377,7 +365,6 @@ def test_iceberg_addressable_rx_minus_half_pi() -> None:
     sem, impl = compute_verification_signterms(
         iceberg.addressable_rx_minus_half_pi_logical,
         iceberg.addressable_rx_minus_half_pi_physical,
-        iceberg.choi_state,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
@@ -387,7 +374,6 @@ def test_iceberg_addressable_h() -> None:
     sem, impl = compute_verification_signterms(
         iceberg.addressable_h_logical,
         iceberg.addressable_h_physical,
-        iceberg.choi_state,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
@@ -397,7 +383,6 @@ def test_iceberg_transversal_cx() -> None:
     sem, impl = compute_verification_signterms_double_block(
         iceberg.transversal_cx_logical,
         iceberg.transversal_cx_physical,
-        iceberg.choi_state_double_block,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
@@ -407,7 +392,6 @@ def test_iceberg_transversal_zzmax() -> None:
     sem, impl = compute_verification_signterms_double_block(
         iceberg.interblock_zzmax_logical,
         iceberg.interblock_zzmax_physical,
-        iceberg.choi_state_double_block,
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
