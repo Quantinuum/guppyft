@@ -12,13 +12,13 @@ from guppyft.verifier.code import StabilizerCode
 
 @guppy
 @no_type_check
-def steane_logical_identity(block: array[qubit, 1]) -> None:
+def logical_identity(block: array[qubit, 1]) -> None:
     pass
 
 
 @guppy
 @no_type_check
-def steane_logical_identity_double_block(
+def logical_identity_double_block(
     first_block: array[qubit, 1], second_block: array[qubit, 1]
 ) -> None:
     pass
@@ -26,13 +26,13 @@ def steane_logical_identity_double_block(
 
 @guppy
 @no_type_check
-def steane_physical_identity(block: array[qubit, 7]) -> None:
+def physical_identity(block: array[qubit, 7]) -> None:
     pass
 
 
 @guppy
 @no_type_check
-def steane_physical_identity_double_block(
+def physical_identity_double_block(
     first_block: array[qubit, 7], second_block: array[qubit, 7]
 ) -> None:
     pass
@@ -40,63 +40,59 @@ def steane_physical_identity_double_block(
 
 @guppy
 @no_type_check
-def steane_physical_h(block: array[qubit, 7]) -> None:
+def physical_h(block: array[qubit, 7]) -> None:
     for i in range(len(block)):
         h(block[i])
 
 
 @guppy
 @no_type_check
-def steane_logical_h(block: array[qubit, 1]) -> None:
+def logical_h(block: array[qubit, 1]) -> None:
     h(block[0])
 
 
 @guppy
 @no_type_check
-def steane_logical_s(block: array[qubit, 1]) -> None:
+def logical_s(block: array[qubit, 1]) -> None:
     s(block[0])
 
 
 @guppy
 @no_type_check
-def steane_physical_s(block: array[qubit, 7]) -> None:
+def physical_s(block: array[qubit, 7]) -> None:
     for i in range(len(block)):
         sdg(block[i])
 
 
 @guppy
 @no_type_check
-def steane_logical_sdg(block: array[qubit, 1]) -> None:
+def logical_sdg(block: array[qubit, 1]) -> None:
     sdg(block[0])
 
 
 @guppy
 @no_type_check
-def steane_physical_sdg(block: array[qubit, 7]) -> None:
+def physical_sdg(block: array[qubit, 7]) -> None:
     for i in range(len(block)):
         s(block[i])
 
 
 @guppy
 @no_type_check
-def steane_logical_cx(
-    first_block: array[qubit, 1], second_block: array[qubit, 1]
-) -> None:
+def logical_cx(first_block: array[qubit, 1], second_block: array[qubit, 1]) -> None:
     cx(first_block[0], second_block[0])
 
 
 @guppy
 @no_type_check
-def steane_physical_cx(
-    first_block: array[qubit, 7], second_block: array[qubit, 7]
-) -> None:
+def physical_cx(first_block: array[qubit, 7], second_block: array[qubit, 7]) -> None:
     for i in range(len(first_block)):
         cx(first_block[i], second_block[i])
 
 
 @guppy
 @no_type_check
-def steane_non_ft_zero() -> array[qubit, 7]:
+def non_ft_zero() -> array[qubit, 7]:
     """Non fault-tolerant zero state preparation."""
     block = array(qubit() for _ in range(7))
 
@@ -113,14 +109,14 @@ def steane_non_ft_zero() -> array[qubit, 7]:
 
 @guppy
 @no_type_check
-def steane_choi_state(
+def choi_state(
     unitary: Function[[array[qubit, 7]], None],
 ) -> tuple[array[qubit, 7], array[qubit, 7]]:
-    control_block = steane_non_ft_zero()
-    target_block = steane_non_ft_zero()
+    control_block = non_ft_zero()
+    target_block = non_ft_zero()
 
-    steane_physical_h(control_block)
-    steane_physical_cx(control_block, target_block)
+    physical_h(control_block)
+    physical_cx(control_block, target_block)
 
     unitary(target_block)
 
@@ -129,7 +125,7 @@ def steane_choi_state(
 
 @guppy
 @no_type_check
-def steane_choi_state_double_block(
+def choi_state_double_block(
     unitary: Function[[array[qubit, 7], array[qubit, 7]], None],
 ) -> tuple[
     array[qubit, 7],
@@ -137,16 +133,16 @@ def steane_choi_state_double_block(
     array[qubit, 7],
     array[qubit, 7],
 ]:
-    first_control_block = steane_non_ft_zero()
-    first_target_block = steane_non_ft_zero()
+    first_control_block = non_ft_zero()
+    first_target_block = non_ft_zero()
 
-    second_control_block = steane_non_ft_zero()
-    second_target_block = steane_non_ft_zero()
+    second_control_block = non_ft_zero()
+    second_target_block = non_ft_zero()
 
-    steane_physical_h(first_control_block)
-    steane_physical_cx(first_control_block, first_target_block)
-    steane_physical_h(second_control_block)
-    steane_physical_cx(second_control_block, second_target_block)
+    physical_h(first_control_block)
+    physical_cx(first_control_block, first_target_block)
+    physical_h(second_control_block)
+    physical_cx(second_control_block, second_target_block)
 
     # Apply unitary to the target blocks
     unitary(first_target_block, second_target_block)
@@ -171,7 +167,7 @@ STEANE_Z_LOGICAL = pauli.String(7, (Z, Z, Z, Z, Z, Z, Z))
 # Steane is self dual so the X stabilizers have the same indices.
 
 
-STEANE_STABILIZER_GENERATORS = pauli.StringSet.from_cmpnts(
+STEANE_GENERATORS = pauli.StringSet.from_cmpnts(
     pauli.Strings.from_str(
         "X0 X1 X2 X3 I4 I5 I6, I0 X1 X2 I3 X4 X5 I6, I0 I1 X2 X3 I4 X5 X6, "
         "Z0 Z1 Z2 Z3 I4 I5 I6, I0 Z1 Z2 I3 Z4 Z5 I6, I0 I1 Z2 Z3 I4 Z5 Z6",
@@ -180,11 +176,11 @@ STEANE_STABILIZER_GENERATORS = pauli.StringSet.from_cmpnts(
 )
 
 
-STEANE = StabilizerCode(
+STEANE_DEF = StabilizerCode(
     num_physical_qubits=7,
     num_logical_qubits=1,
     distance=3,
-    generators=STEANE_STABILIZER_GENERATORS,
+    generators=STEANE_GENERATORS,
     x_logicals=STEANE_X_LOGICAL.into(pauli.Strings),
     z_logicals=STEANE_Z_LOGICAL.into(pauli.Strings),
 )

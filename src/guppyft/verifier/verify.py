@@ -271,8 +271,8 @@ def expand_pauli_term(
         # "non_identity_pauli_index" is the index we need to access to expand the
         #  logical operators for a StabilizerCode.
         # Consider StabilizerCode.x_logicals for the Iceberg code.
-        # 1. (XI -> XXII) non_identity_pauli_index=0, ICEBERG_4_2_2.x_logicals[0] = XXII
-        # 2. (IX -> XIXI) non_identity_pauli_index=1, ICEBERG_4_2_2.x_logicals[1] = XIXI
+        # 1. (XI -> XXII) non_identity_pauli_index=0, ICEBERG_DEF.x_logicals[0] = XXII
+        # 2. (IX -> XIXI) non_identity_pauli_index=1, ICEBERG_DEF.x_logicals[1] = XIXI
         non_identity_pauli_index = logical_qubit_index % k
 
         # logical_block_number tells us which logical code block a specific
@@ -384,7 +384,9 @@ def get_expanded_stabilizer_set(
 N_PHYSICAL = guppy.nat_var("N_PHYSICAL")
 K_LOGICAL = guppy.nat_var("K_LOGICAL")
 
-type SemanticCliffordUnitary = GuppyFunctionDefinition[[array[qubit, K_LOGICAL]], None]  # type: ignore[valid-type]
+type SemanticCliffordUnitary = GuppyFunctionDefinition[
+    [array[qubit, K_LOGICAL]], None  # type: ignore[valid-type]
+]
 type ImplementationCliffordUnitary = GuppyFunctionDefinition[
     [array[qubit, N_PHYSICAL]], None  # type: ignore[valid-type]
 ]

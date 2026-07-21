@@ -11,7 +11,7 @@ from guppyft.verifier.code import StabilizerCode
 
 @guppy
 @no_type_check
-def bit_flip_logical_identity_double_block(
+def logical_identity_double_block(
     first_block: array[qubit, 1], second_block: array[qubit, 1]
 ) -> None:
     pass
@@ -19,7 +19,7 @@ def bit_flip_logical_identity_double_block(
 
 @guppy
 @no_type_check
-def bit_flip_physical_identity_double_block(
+def physical_identity_double_block(
     first_block: array[qubit, 3], second_block: array[qubit, 3]
 ) -> None:
     pass
@@ -27,21 +27,21 @@ def bit_flip_physical_identity_double_block(
 
 @guppy
 @no_type_check
-def bit_flip_non_ft_zero() -> array[qubit, 3]:
+def non_ft_zero() -> array[qubit, 3]:
     return array(qubit() for _ in range(3))
 
 
 @guppy
 @no_type_check
-def bit_flip_choi_state_double_block(
+def choi_state_double_block(
     unitary: Function[[array[qubit, 3], array[qubit, 3]], None],
 ) -> tuple[array[qubit, 3], array[qubit, 3], array[qubit, 3], array[qubit, 3]]:
 
-    first_control_block = bit_flip_non_ft_zero()
-    first_target_block = bit_flip_non_ft_zero()
+    first_control_block = non_ft_zero()
+    first_target_block = non_ft_zero()
 
-    second_control_block = bit_flip_non_ft_zero()
-    second_target_block = bit_flip_non_ft_zero()
+    second_control_block = non_ft_zero()
+    second_target_block = non_ft_zero()
 
     # First logical Bell pair
     # Apply logical H
@@ -73,15 +73,15 @@ def bit_flip_choi_state_double_block(
     )
 
 
-BIT_FLIP_CODE_GENERATORS = pauli.StringSet.from_cmpnts(
+BIT_FLIP_GENERATORS = pauli.StringSet.from_cmpnts(
     pauli.Strings.from_str("Z0 Z1, Z1 Z2", 3)
 )
 
-BIT_FLIP_CODE = StabilizerCode(
+BIT_FLIP_DEF = StabilizerCode(
     num_physical_qubits=3,
     num_logical_qubits=1,
     distance=1,
-    generators=BIT_FLIP_CODE_GENERATORS,
+    generators=BIT_FLIP_GENERATORS,
     x_logicals=pauli.String.from_str("X0 X1 X2").into(pauli.Strings),
     z_logicals=pauli.String.from_str("Z0 I1 I2").into(pauli.Strings),
 )
