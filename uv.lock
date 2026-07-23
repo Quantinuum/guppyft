@@ -152,7 +152,7 @@ requires-dist = [
     { name = "guppylang", specifier = ">=1.0.0rc2" },
     { name = "guppylang-internals", specifier = ">=1.0.0rc1" },
     { name = "hugr", specifier = ">=0.18.2" },
-    { name = "selene-core", specifier = "~=0.3.0a1" },
+    { name = "selene-core", specifier = "~=0.3.0" },
     { name = "selene-sim", specifier = "~=0.3.0a1" },
     { name = "tket", specifier = ">=0.15.2" },
     { name = "tket-exts", specifier = ">=0.14.0" },
@@ -956,7 +956,7 @@ wheels = [
 
 [[package]]
 name = "selene-core"
-version = "0.3.0a1"
+version = "0.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "hugr" },
@@ -971,7 +971,7 @@ dependencies = [
     { name = "ziglang" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9d/d9/a3d68dc9261df9c6f54d7fc8a268fc859b9b0b5b3e6adb7c35c6a83a80a6/selene_core-0.3.0a1-py3-none-any.whl", hash = "sha256:56159de25858054c1e44f3f9e00984aad2ac90173920e9deb75453327198531d", size = 35737, upload-time = "2026-06-12T15:15:52.681Z" },
+    { url = "https://files.pythonhosted.org/packages/55/f0/968a85bf4fddcbce0a14032d371819648a067880dc1ba7b5c89be1385ae4/selene_core-0.3.0-py3-none-any.whl", hash = "sha256:2a118cd5e30fe57ddf93ade785b952fda1cd56c7ce5aeaec9b0fcd324565f400", size = 41313, upload-time = "2026-07-22T16:22:34.379Z" },
 ]
 
 [[package]]
