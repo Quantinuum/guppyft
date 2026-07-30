@@ -1,7 +1,7 @@
 from typing import no_type_check
 
 from guppylang import guppy
-from guppylang.std.builtins import array, result
+from guppylang.std.builtins import array, output
 from guppylang.std.quantum import collect_measurements, measure_array, qubit
 from selene_stim_plugin.state import Stabilizer, StabilizerList
 from zixy.qubit import pauli
@@ -42,11 +42,11 @@ def test_partition_array_int() -> None:
         slice2 = slicer.take(2)
 
         if slice0[0] == 1 and slice0[1] == 2:
-            result("success", 0)
+            output("success", 0)
         if slice1[0] == 3 and slice1[1] == 4 and slice1[2] == 5:
-            result("success", 1)
+            output("success", 1)
         if slice2[0] == 6 and slice2[1] == 7:
-            result("success", 2)
+            output("success", 2)
 
     dict_results = main.emulator(n_qubits=1).run().collated_shots()
     assert dict_results[0]["success"] == [0, 1, 2]
@@ -65,9 +65,9 @@ def test_partition_array_qubit() -> None:
 
         slicer.discard_empty()
 
-        result("slice0", collect_measurements(measure_array(slice0)))
-        result("slice1", collect_measurements(measure_array(slice1)))
-        result("slice2", collect_measurements(measure_array(slice2)))
+        output("slice0", collect_measurements(measure_array(slice0)))
+        output("slice1", collect_measurements(measure_array(slice1)))
+        output("slice2", collect_measurements(measure_array(slice2)))
 
     dict_results = main.emulator(n_qubits=10).run().collated_shots()[0]
     assert dict_results["slice0"] == [[0, 0, 0, 0, 0]]
