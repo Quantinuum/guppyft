@@ -77,6 +77,7 @@ mod _bindings {
         // are written out as unresolved  `Custom` nodes, and the envelope doesn't
         // declare the new extensions as dependencies, so downstream consumers
         // can't resolve them.
+        // The following updates `hugr.extensions()`, solving this issue.
         hugr.resolve_extension_defs(&registry).map_err(|e| {
             PyValueError::new_err(format!("Could not resolve extensions after encoding: {e}"))
         })?;
