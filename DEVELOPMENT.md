@@ -1,6 +1,6 @@
 # Welcome to the guppyft development guide <!-- omit in toc -->
 
-This guide is intended to help you get started with developing guppylang.
+This guide is intended to help you get started with developing guppyft.
 
 If you find any errors or omissions in this document, please [open an issue](https://github.com/quantinuum-dev/guppyft/issues/new)!
 
