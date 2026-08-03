@@ -1,6 +1,6 @@
 # `guppyft`
 
-GuppyFt is an extension of the [Guppy](https://github.com/Quantinuum/guppylang) quantum programming language to aid
+GuppyFT is an extension of the [Guppy](https://github.com/Quantinuum/guppylang) quantum programming language to aid
 with writing, compiling and running fault-tolerant quantum programs.
 
 ## Installation
