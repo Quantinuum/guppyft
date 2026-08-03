@@ -24,9 +24,9 @@ classifiers = [
 ]
 
 dependencies = [
-    "guppylang>=1.0.0rc1",
+    "guppylang>=1.0.0rc2",
     "guppylang-internals>=1.0.0rc1",
-    "hugr>=0.18.2",
+    "hugr>=0.18.3",
     "tket>=0.15.2",
     "tket-exts>=0.14.0",
     # selene-sim~=0.3.0a1 is a dependency of guppylang. However, we need to specify  them
@@ -43,8 +43,8 @@ dev = [
     { include-group = "test" },
 ]
 lint = [
-    "pre-commit>=4.6.0,<5",
-    "ruff>=0.15.21",
+    "pre-commit>=4.6.1,<5",
+    "ruff>=0.15.22",
     "mypy>=2.3.0",
 ]
 test = [
