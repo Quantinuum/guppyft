@@ -2,7 +2,7 @@ from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.std.array import array
-from guppylang.std.quantum import cx, discard, h, qubit, s, sdg
+from guppylang.std.quantum import cx, discard, h, measure, qubit, s, sdg
 from zixy.qubit import pauli
 from zixy.qubit.pauli import X, Z
 
@@ -47,6 +47,13 @@ def specify_identity(block: array[qubit, 1]) -> None:
 
 @guppy
 @no_type_check
+def specify_identity_with_shor_extraction(block: array[qubit, 1]) -> None:
+    ancilla = qubit()
+    discard(ancilla)
+
+
+@guppy
+@no_type_check
 def specify_identity_double_block(
     first_block: array[qubit, 1], second_block: array[qubit, 1]
 ) -> None:
@@ -57,6 +64,16 @@ def specify_identity_double_block(
 @no_type_check
 def implement_identity(block: array[qubit, 7]) -> None:
     pass
+
+
+@guppy
+@no_type_check
+def implement_identity_with_shor_extraction(block: array[qubit, 7]) -> None:
+    # measure the ZZZZIII stabilizer
+    ancilla = qubit()
+    for i in array(0, 1, 2, 3):
+        cx(block[i], ancilla)
+    measure(ancilla)
 
 
 @guppy
