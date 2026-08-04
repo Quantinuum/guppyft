@@ -4,7 +4,7 @@ from hugr.build.dfg import Dfg
 from hugr.ops import DFG, ExtOp
 from hugr.std.float import FLOAT_T
 from hugr.tys import BoundedNatArg, ExtType
-from tket.passes import InlineFunctions, NormalizeGuppy
+from tket.passes import InlineFunctions, Normalize
 
 from guppyft.extensions import iceberg_ops, iceberg_types
 from guppyft.logical.iceberg import (
@@ -194,7 +194,7 @@ def test_guppy_bindings_smoke() -> None:
 
     pkg = main.compile()
     h = pkg.modules[0]
-    NormalizeGuppy()(h, inplace=True)
+    Normalize()(h, inplace=True)
     InlineFunctions()(h, inplace=True)
 
 
@@ -210,7 +210,7 @@ def test_guppy_hugr() -> None:
     pkg = main.compile()
     h = pkg.modules[0]
     InlineFunctions()(h, inplace=True)
-    NormalizeGuppy()(h, inplace=True)
+    Normalize()(h, inplace=True)
     entrypoint = h.entrypoint
     children = h.children(entrypoint)
     # When https://github.com/Quantinuum/tket2/issues/1691 is implemented, this

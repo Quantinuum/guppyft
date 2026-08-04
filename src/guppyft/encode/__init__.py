@@ -4,7 +4,7 @@ from guppylang.defs import GuppyFunctionDefinition
 from hugr.ops import Module
 from hugr.package import Package
 from hugr.passes.composable import ComposablePass
-from tket.passes import NormalizeGuppy
+from tket.passes import Normalize
 
 from ._encoder import ReplaceEncoder
 from ._implement_ops import (
@@ -59,7 +59,7 @@ def encode(
     :param hugr: The package to encode (or Guppy function for convenience).
     :param spec: See `EncoderSpec`.
     :param passes: Computational passes to run on the given package. Defaults to
-        one run of `NormalizeGuppy`.
+        one run of `Normalize`.
     :return: The encoded runnable package.
     """
 
@@ -72,7 +72,7 @@ def encode(
     )
 
     # 1. Passes with computational -> computational
-    for tket_pass in passes or [NormalizeGuppy()]:
+    for tket_pass in passes or [Normalize()]:
         tket_pass(hugr.modules[0], inplace=True)
 
     # 2. Lower computational -> logical
