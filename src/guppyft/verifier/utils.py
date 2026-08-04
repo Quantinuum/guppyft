@@ -16,6 +16,10 @@ type SingleBlockUnitary = GuppyFunctionDefinition[[array[qubit, N]], None]  # ty
 type DoubleBlockUnitary = GuppyFunctionDefinition[
     [array[qubit, N], array[qubit, N]], None  # type: ignore[valid-type]
 ]
+type SingleBlockState = GuppyFunctionDefinition[[], array[qubit, N]]  # type: ignore[valid-type]
+type DoubleBlockState = GuppyFunctionDefinition[
+    [], tuple[array[qubit, N], array[qubit, N]]
+]  # type: ignore[valid-type]
 
 
 def _convert_pauli(selene_pauli: Pauli) -> pauli.PauliMatrix:

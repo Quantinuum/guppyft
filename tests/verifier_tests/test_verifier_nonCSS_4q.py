@@ -1,6 +1,7 @@
 from guppyft.verifier.verify import (
     compute_verification_signterms,
     compute_verification_signterms_double_block,
+    compute_verification_signterms_single_block_state,
 )
 
 from .ops import nonCSS_4q
@@ -22,6 +23,33 @@ def test_double_block_nonCSS_4q_id() -> None:
         nonCSS_4q.CODE_DEF,
     )
     assert sem == impl
+
+
+def test_nonCSS_4q_zero_state() -> None:
+    sem, impl = compute_verification_signterms_single_block_state(
+        nonCSS_4q.specify_zero_state,
+        nonCSS_4q.implement_non_ft_zero_state,
+        nonCSS_4q.CODE_DEF,
+    )
+    assert sem == impl
+
+
+def test_nonCSS_4q_plus_state() -> None:
+    sem, impl = compute_verification_signterms_single_block_state(
+        nonCSS_4q.specify_plus_state,
+        nonCSS_4q.implement_non_ft_plus_state,
+        nonCSS_4q.CODE_DEF,
+    )
+    assert sem == impl
+
+
+def test_nonCSS_4q_zero_state_not_plus_state() -> None:
+    sem, impl = compute_verification_signterms_single_block_state(
+        nonCSS_4q.specify_zero_state,
+        nonCSS_4q.implement_non_ft_plus_state,
+        nonCSS_4q.CODE_DEF,
+    )
+    assert sem != impl
 
 
 def test_nonCSS_4q_row1() -> None:

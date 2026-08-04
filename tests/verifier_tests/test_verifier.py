@@ -18,7 +18,7 @@ LOGICAL_STRINGSET = pauli.StringSet.from_cmpnts(pauli.Strings.from_str("X0 X1, Z
 
 
 def test_padding() -> None:
-    padded_steane_stabilizers = pad_code_stabilizers(steane.STEANE_DEF, num_blocks=1)
+    padded_steane_stabilizers = pad_code_stabilizers(steane.STEANE_DEF, num_blocks=2)
     assert len(padded_steane_stabilizers) == 2 * (7 - 1)
     for g_tuple in padded_steane_stabilizers.to_strings().get_tuples():
         assert len(g_tuple) == 2 * 7
@@ -38,7 +38,7 @@ def test_entire_stabilizer_set() -> None:
     stab_set = get_expanded_stabilizer_set(
         LOGICAL_STRINGSET.to_strings().into(pauli.SignTerms),
         steane.STEANE_DEF,
-        num_blocks=1,
+        num_blocks=2,
     )
     assert len(stab_set.strings.get_tuples()) == 14
 
@@ -134,7 +134,7 @@ def test_compute_stabilizers_double_block() -> None:
 
 def test_stabilizer_padding_double_block() -> None:
     padded_double_block_stabilizers = pad_code_stabilizers(
-        steane.STEANE_DEF, num_blocks=2
+        steane.STEANE_DEF, num_blocks=4
     )
     assert len(padded_double_block_stabilizers) == 4 * (
         steane.STEANE_DEF.num_physical_qubits - steane.STEANE_DEF.num_logical_qubits
@@ -174,10 +174,10 @@ def test_compute_stabilizers_single_block_iceberg_id() -> None:
         == "(+1, X0 X1 X4 X5), (+1, Z1 Z3 Z5 Z7), (+1, X0 X2 X4 X6), (+1, Z2 Z3 Z6 Z7)"
     )
 
-    padded = pad_code_stabilizers(iceberg.ICEBERG_DEF, num_blocks=1)
+    padded = pad_code_stabilizers(iceberg.ICEBERG_DEF, num_blocks=2)
     assert str(padded) == "X0 X1 X2 X3, Z0 Z1 Z2 Z3, X4 X5 X6 X7, Z4 Z5 Z6 Z7"
     expanded_stabilizer_state_stabilizers = get_expanded_stabilizer_set(
-        choi_stabilizers_before_expansion, iceberg.ICEBERG_DEF, num_blocks=1
+        choi_stabilizers_before_expansion, iceberg.ICEBERG_DEF, num_blocks=2
     )
     assert (
         str(expanded_stabilizer_state_stabilizers)

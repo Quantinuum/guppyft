@@ -1,6 +1,7 @@
 from guppyft.verifier.verify import (
     compute_verification_signterms,
     compute_verification_signterms_double_block,
+    compute_verification_signterms_single_block_state,
 )
 
 from .ops import iceberg
@@ -22,6 +23,33 @@ def test_double_block_iceberg_id() -> None:
         iceberg.ICEBERG_DEF,
     )
     assert sem == impl
+
+
+def test_iceberg_zero_state() -> None:
+    sem, impl = compute_verification_signterms_single_block_state(
+        iceberg.specify_zero_state,
+        iceberg.implement_non_ft_zero_state,
+        iceberg.ICEBERG_DEF,
+    )
+    assert sem == impl
+
+
+def test_iceberg_plus_state() -> None:
+    sem, impl = compute_verification_signterms_single_block_state(
+        iceberg.specify_plus_state,
+        iceberg.implement_non_ft_plus_state,
+        iceberg.ICEBERG_DEF,
+    )
+    assert sem == impl
+
+
+def test_iceberg_zero_state_not_plus_state() -> None:
+    sem, impl = compute_verification_signterms_single_block_state(
+        iceberg.specify_zero_state,
+        iceberg.implement_non_ft_plus_state,
+        iceberg.ICEBERG_DEF,
+    )
+    assert sem != impl
 
 
 def test_iceberg_intrablock_cz() -> None:

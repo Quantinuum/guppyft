@@ -55,6 +55,45 @@ def specify_identity_double_block(
 
 @guppy
 @no_type_check
+def specify_zero_state() -> array[qubit, 1]:
+    return array(qubit())
+
+
+@guppy
+@no_type_check
+def implement_non_ft_zero_state() -> array[qubit, 7]:
+    """Non fault-tolerant zero state preparation."""
+    block = array(qubit() for _ in range(7))
+
+    plus_ids = array(0, 4, 6)
+    for i in plus_ids:
+        h(block[i])
+
+    cx_pairs = array((0, 1), (4, 5), (6, 3), (6, 5), (4, 2), (0, 3), (4, 1), (3, 2))
+    for c, t in cx_pairs:
+        cx(block[c], block[t])
+
+    return block
+
+
+@guppy
+@no_type_check
+def specify_plus_state() -> array[qubit, 1]:
+    q = qubit()
+    h(q)
+    return array(q)
+
+
+@guppy
+@no_type_check
+def implement_non_ft_plus_state() -> array[qubit, 7]:
+    block = implement_non_ft_zero_state()
+    implement_h(block)
+    return block
+
+
+@guppy
+@no_type_check
 def implement_identity(block: array[qubit, 7]) -> None:
     pass
 

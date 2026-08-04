@@ -12,6 +12,7 @@ from .verify import (
     compute_stabilizers_single_block,
     compute_verification_signterms,
     compute_verification_signterms_double_block,
+    compute_verification_signterms_single_block_state,
 )
 
 __all__ = [
@@ -21,6 +22,7 @@ __all__ = [
     "compute_stabilizers_single_block",
     "compute_verification_signterms",
     "compute_verification_signterms_double_block",
+    "compute_verification_signterms_single_block_state",
     "identity_code",
     "selene_stabilizer_to_zixy_signterm",
     "stabilizerlist_to_signterms",
