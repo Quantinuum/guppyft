@@ -13,16 +13,37 @@ from zixy.qubit.pauli import X, Z
 
 from guppyft.verifier.code import StabilizerCode
 
+X_LOGICAL = pauli.String(5, (X, X, X, X, X))
+Z_LOGICAL = pauli.String(5, (Z, Z, Z, Z, Z))
+
+
+GENERATORS = pauli.StringSet.from_cmpnts(
+    pauli.Strings.from_str(
+        "Z0 Z1 X2 I3 X4, X0 Z1 Z2 X3 I4, I0 X1 Z2 Z3 X4, X0 I1 X2 Z3 Z4",
+        5,
+    )
+)
+
+
+CODE_DEF = StabilizerCode(
+    num_physical_qubits=5,
+    num_logical_qubits=1,
+    distance=3,
+    generators=GENERATORS,
+    x_logicals=X_LOGICAL.into(pauli.Strings),
+    z_logicals=Z_LOGICAL.into(pauli.Strings),
+)
+
 
 @guppy
 @no_type_check
-def logical_identity(block: array[qubit, 1]) -> None:
+def specify_identity(block: array[qubit, 1]) -> None:
     pass
 
 
 @guppy
 @no_type_check
-def logical_identity_double_block(
+def specify_identity_double_block(
     first_block: array[qubit, 1], second_block: array[qubit, 1]
 ) -> None:
     pass
@@ -30,13 +51,13 @@ def logical_identity_double_block(
 
 @guppy
 @no_type_check
-def physical_identity(block: array[qubit, 5]) -> None:
+def implement_identity(block: array[qubit, 5]) -> None:
     pass
 
 
 @guppy
 @no_type_check
-def physical_identity_double_block(
+def implement_identity_double_block(
     first_block: array[qubit, 5], second_block: array[qubit, 5]
 ) -> None:
     pass
@@ -44,14 +65,14 @@ def physical_identity_double_block(
 
 @guppy
 @no_type_check
-def logical_k(block: array[qubit, 1]) -> None:
+def specify_k(block: array[qubit, 1]) -> None:
     h(block[0])
     s(block[0])
 
 
 @guppy
 @no_type_check
-def physical_k(block: array[qubit, 5]) -> None:
+def implement_k(block: array[qubit, 5]) -> None:
     """Fig 2(a)"""
     for i in range(len(block)):
         h(block[i])
@@ -60,14 +81,14 @@ def physical_k(block: array[qubit, 5]) -> None:
 
 @guppy
 @no_type_check
-def logical_kdg(block: array[qubit, 1]) -> None:
+def specify_kdg(block: array[qubit, 1]) -> None:
     sdg(block[0])
     h(block[0])
 
 
 @guppy
 @no_type_check
-def physical_kdg(block: array[qubit, 5]) -> None:
+def implement_kdg(block: array[qubit, 5]) -> None:
     """Dagger of Fig 2(a)"""
     for i in range(len(block)):
         sdg(block[i])
@@ -76,13 +97,13 @@ def physical_kdg(block: array[qubit, 5]) -> None:
 
 @guppy
 @no_type_check
-def logical_h(block: array[qubit, 1]) -> None:
+def specify_h(block: array[qubit, 1]) -> None:
     h(block[0])
 
 
 @guppy
 @no_type_check
-def physical_h(block: array[qubit, 5]) -> None:
+def implement_h(block: array[qubit, 5]) -> None:
     """Fig 2(b)"""
     for i in range(len(block)):
         h(block[i])
@@ -93,13 +114,13 @@ def physical_h(block: array[qubit, 5]) -> None:
 
 @guppy
 @no_type_check
-def logical_cz(first_block: array[qubit, 1], second_block: array[qubit, 1]) -> None:
+def specify_cz(first_block: array[qubit, 1], second_block: array[qubit, 1]) -> None:
     cz(first_block[0], second_block[0])
 
 
 @guppy
 @no_type_check
-def physical_cz(first_block: array[qubit, 5], second_block: array[qubit, 5]) -> None:
+def implement_cz(first_block: array[qubit, 5], second_block: array[qubit, 5]) -> None:
     """Fig 3"""
 
     h(first_block[0])
@@ -143,36 +164,14 @@ def physical_cz(first_block: array[qubit, 5], second_block: array[qubit, 5]) -> 
 
 @guppy
 @no_type_check
-def logical_cx(first_block: array[qubit, 1], second_block: array[qubit, 1]) -> None:
+def specify_cx(first_block: array[qubit, 1], second_block: array[qubit, 1]) -> None:
     cx(first_block[0], second_block[0])
 
 
 @guppy
 @no_type_check
-def physical_cx(first_block: array[qubit, 5], second_block: array[qubit, 5]) -> None:
+def implement_cx(first_block: array[qubit, 5], second_block: array[qubit, 5]) -> None:
     """Construct by composition"""
-    physical_h(second_block)
-    physical_cz(first_block, second_block)
-    physical_h(second_block)
-
-
-X_LOGICAL = pauli.String(5, (X, X, X, X, X))
-Z_LOGICAL = pauli.String(5, (Z, Z, Z, Z, Z))
-
-
-GENERATORS = pauli.StringSet.from_cmpnts(
-    pauli.Strings.from_str(
-        "Z0 Z1 X2 I3 X4, X0 Z1 Z2 X3 I4, I0 X1 Z2 Z3 X4, X0 I1 X2 Z3 Z4",
-        5,
-    )
-)
-
-
-CODE_DEF = StabilizerCode(
-    num_physical_qubits=5,
-    num_logical_qubits=1,
-    distance=3,
-    generators=GENERATORS,
-    x_logicals=X_LOGICAL.into(pauli.Strings),
-    z_logicals=Z_LOGICAL.into(pauli.Strings),
-)
+    implement_h(second_block)
+    implement_cz(first_block, second_block)
+    implement_h(second_block)

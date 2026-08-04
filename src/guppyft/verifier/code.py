@@ -52,11 +52,8 @@ class StabilizerCode:
                 f"got {len(self.z_logicals)}."
             )
 
-        all_stabilizer_generators_commute: bool = (
-            np.all(
-                self.generators.to_strings().into(pauli.Strings).compatibility_matrix()
-            )
-            == 1
+        all_stabilizer_generators_commute = np.all(
+            self.generators.to_strings().into(pauli.Strings).compatibility_matrix() == 1
         )
 
         if not all_stabilizer_generators_commute:

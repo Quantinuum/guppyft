@@ -8,87 +8,6 @@ from zixy.qubit.pauli import X, Z
 
 from guppyft.verifier.code import StabilizerCode
 
-
-@guppy
-@no_type_check
-def logical_identity(block: array[qubit, 1]) -> None:
-    pass
-
-
-@guppy
-@no_type_check
-def logical_identity_double_block(
-    first_block: array[qubit, 1], second_block: array[qubit, 1]
-) -> None:
-    pass
-
-
-@guppy
-@no_type_check
-def physical_identity(block: array[qubit, 7]) -> None:
-    pass
-
-
-@guppy
-@no_type_check
-def physical_identity_double_block(
-    first_block: array[qubit, 7], second_block: array[qubit, 7]
-) -> None:
-    pass
-
-
-@guppy
-@no_type_check
-def physical_h(block: array[qubit, 7]) -> None:
-    for i in range(len(block)):
-        h(block[i])
-
-
-@guppy
-@no_type_check
-def logical_h(block: array[qubit, 1]) -> None:
-    h(block[0])
-
-
-@guppy
-@no_type_check
-def logical_s(block: array[qubit, 1]) -> None:
-    s(block[0])
-
-
-@guppy
-@no_type_check
-def physical_s(block: array[qubit, 7]) -> None:
-    for i in range(len(block)):
-        sdg(block[i])
-
-
-@guppy
-@no_type_check
-def logical_sdg(block: array[qubit, 1]) -> None:
-    sdg(block[0])
-
-
-@guppy
-@no_type_check
-def physical_sdg(block: array[qubit, 7]) -> None:
-    for i in range(len(block)):
-        s(block[i])
-
-
-@guppy
-@no_type_check
-def logical_cx(first_block: array[qubit, 1], second_block: array[qubit, 1]) -> None:
-    cx(first_block[0], second_block[0])
-
-
-@guppy
-@no_type_check
-def physical_cx(first_block: array[qubit, 7], second_block: array[qubit, 7]) -> None:
-    for i in range(len(first_block)):
-        cx(first_block[i], second_block[i])
-
-
 STEANE_X_LOGICAL = pauli.String(7, (X, X, X, X, X, X, X))
 STEANE_Z_LOGICAL = pauli.String(7, (Z, Z, Z, Z, Z, Z, Z))
 
@@ -118,3 +37,83 @@ STEANE_DEF = StabilizerCode(
     x_logicals=STEANE_X_LOGICAL.into(pauli.Strings),
     z_logicals=STEANE_Z_LOGICAL.into(pauli.Strings),
 )
+
+
+@guppy
+@no_type_check
+def specify_identity(block: array[qubit, 1]) -> None:
+    pass
+
+
+@guppy
+@no_type_check
+def specify_identity_double_block(
+    first_block: array[qubit, 1], second_block: array[qubit, 1]
+) -> None:
+    pass
+
+
+@guppy
+@no_type_check
+def implement_identity(block: array[qubit, 7]) -> None:
+    pass
+
+
+@guppy
+@no_type_check
+def implement_identity_double_block(
+    first_block: array[qubit, 7], second_block: array[qubit, 7]
+) -> None:
+    pass
+
+
+@guppy
+@no_type_check
+def implement_h(block: array[qubit, 7]) -> None:
+    for i in range(len(block)):
+        h(block[i])
+
+
+@guppy
+@no_type_check
+def specify_h(block: array[qubit, 1]) -> None:
+    h(block[0])
+
+
+@guppy
+@no_type_check
+def specify_s(block: array[qubit, 1]) -> None:
+    s(block[0])
+
+
+@guppy
+@no_type_check
+def implement_s(block: array[qubit, 7]) -> None:
+    for i in range(len(block)):
+        sdg(block[i])
+
+
+@guppy
+@no_type_check
+def specify_sdg(block: array[qubit, 1]) -> None:
+    sdg(block[0])
+
+
+@guppy
+@no_type_check
+def implement_sdg(block: array[qubit, 7]) -> None:
+    for i in range(len(block)):
+        s(block[i])
+
+
+@guppy
+@no_type_check
+def specify_cx(first_block: array[qubit, 1], second_block: array[qubit, 1]) -> None:
+    cx(first_block[0], second_block[0])
+
+
+@guppy
+@no_type_check
+def implement_cx(first_block: array[qubit, 7], second_block: array[qubit, 7]) -> None:
+    for i in range(len(first_block)):
+        cx(first_block[i], second_block[i])
