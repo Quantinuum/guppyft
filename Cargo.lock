@@ -2172,9 +2172,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tket"
-version = "0.21.1"
+version = "0.21.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3a5f71311514d2e633b2b37d3bc4c4d04dd51bd6be42a0665bde9ff837f6654"
+checksum = "118f46fa4a3cf414af79c125e66a770f29fed3a799e02c5cca95789a56316d20"
 dependencies = [
  "ascent",
  "bytemuck",

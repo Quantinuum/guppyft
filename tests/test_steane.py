@@ -3,7 +3,7 @@ from guppylang.std.builtins import result
 from hugr.build.dfg import Dfg
 from hugr.ops import DFG
 from hugr.tys import ExtType
-from tket.passes import InlineFunctions, NormalizeGuppy
+from tket.passes import InlineFunctions, Normalize
 
 from guppyft.extensions import steane_ops, steane_types
 from guppyft.logical.steane import Qubit, cx, prep_magic_for_t_like
@@ -82,7 +82,7 @@ def test_guppy_bindings_smoke() -> None:
 
     pkg = main.compile()
     h = pkg.modules[0]
-    NormalizeGuppy()(h, inplace=True)
+    Normalize()(h, inplace=True)
     InlineFunctions()(h, inplace=True)
 
 
@@ -98,7 +98,7 @@ def test_guppy_hugr() -> None:
     pkg = main.compile()
     h = pkg.modules[0]
     InlineFunctions()(h, inplace=True)
-    NormalizeGuppy()(h, inplace=True)
+    Normalize()(h, inplace=True)
     entrypoint = h.entrypoint
     children = h.children(entrypoint)
     # When https://github.com/Quantinuum/tket2/issues/1691 is implemented, this
