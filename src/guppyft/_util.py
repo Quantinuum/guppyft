@@ -22,6 +22,7 @@ def get_link_name(func: GuppyFunctionDefinition[Any, Any]) -> str:
 
 
 # TODO This should be part of ExtensionRegistry definition in hugr-py
+# See https://github.com/Quantinuum/hugr/issues/3193
 def extension_registry_to_json(registry: ExtensionRegistry) -> str:
     """Serializes an `ExtensionRegistry` as a JSON array of extensions.
 

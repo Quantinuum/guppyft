@@ -4,7 +4,7 @@ from typing import Any, Self
 from hugr import Hugr
 from hugr.ext import ExtensionRegistry
 from hugr.passes.composable import ComposablePass, PassResult, implement_pass_run
-from hugr.passes.scope import GlobalScope, PassScope
+from hugr.passes.scope import PassScope
 
 from guppyft._bindings import RsHugr, _replace_encoder
 from guppyft._util import extension_registry_to_json
@@ -26,7 +26,6 @@ class ReplaceEncoder(ComposablePass):
     extensions: ExtensionRegistry | None = None
     """Optional JSON-encoded list of additional extension definitions, used to
     resolve target ops/types that are not already registered on the input Hugr."""
-    scope: PassScope = GlobalScope.PRESERVE_PUBLIC
 
     def run(self, hugr: Hugr[Any], *, inplace: bool = True) -> PassResult:
         return implement_pass_run(
@@ -38,7 +37,6 @@ class ReplaceEncoder(ComposablePass):
 
     def with_scope(self, scope: PassScope) -> Self:
         """Set the scope of this pass and return self."""
-        self.scope = scope
         return self
 
     def _run_encode(self, hugr: Hugr[Any], inplace: bool) -> PassResult:
