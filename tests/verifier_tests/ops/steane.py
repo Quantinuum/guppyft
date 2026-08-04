@@ -62,6 +62,16 @@ def specify_identity_double_block(
 
 @guppy
 @no_type_check
+def specify_identity_double_block_with_shor_extraction(
+    first_block: array[qubit, 1], second_block: array[qubit, 1]
+) -> None:
+    first_ancilla, second_ancilla = qubit(), qubit()
+    discard(first_ancilla)
+    discard(second_ancilla)
+
+
+@guppy
+@no_type_check
 def implement_identity(block: array[qubit, 7]) -> None:
     pass
 
@@ -82,6 +92,20 @@ def implement_identity_double_block(
     first_block: array[qubit, 7], second_block: array[qubit, 7]
 ) -> None:
     pass
+
+
+@guppy
+@no_type_check
+def implement_identity_double_block_with_shor_extraction(
+    first_block: array[qubit, 7], second_block: array[qubit, 7]
+) -> None:
+    first_ancilla, second_ancilla = qubit(), qubit()
+    for i in array(0, 1, 2, 3):
+        cx(first_block[i], first_ancilla)
+        cx(second_block[i], second_ancilla)
+
+    measure(first_ancilla)
+    measure(second_ancilla)
 
 
 @guppy
