@@ -2,7 +2,7 @@ from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.std.array import array
-from guppylang.std.quantum import cx, h, qubit, s, sdg
+from guppylang.std.quantum import cx, discard, h, qubit, s, sdg
 from zixy.qubit import pauli
 from zixy.qubit.pauli import X, Z
 
@@ -78,6 +78,23 @@ def implement_h(block: array[qubit, 7]) -> None:
 @no_type_check
 def specify_h(block: array[qubit, 1]) -> None:
     h(block[0])
+
+
+@guppy
+@no_type_check
+def implement_h_with_ancilla(block: array[qubit, 7]) -> None:
+    ancilla = qubit()
+    for i in range(len(block)):
+        h(block[i])
+    discard(ancilla)
+
+
+@guppy
+@no_type_check
+def specify_h_with_ancilla(block: array[qubit, 1]) -> None:
+    ancilla = qubit()
+    h(block[0])
+    discard(ancilla)
 
 
 @guppy

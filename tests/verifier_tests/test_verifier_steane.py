@@ -34,6 +34,16 @@ def test_steane_h() -> None:
     assert sem == impl
 
 
+def test_steane_h_with_ancilla() -> None:
+    sem, impl = compute_verification_signterms(
+        steane.specify_h_with_ancilla,
+        steane.implement_h_with_ancilla,
+        code_definition=steane.STEANE_DEF,
+        num_ancilla_qubits=1,
+    )
+    assert sem == impl
+
+
 def test_steane_s() -> None:
     sem, impl = compute_verification_signterms(
         steane.specify_s,
