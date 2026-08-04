@@ -91,7 +91,7 @@ class Qubit:
 @hugr_op(steane_op("free"))
 @no_type_check
 def free(qubit: "Qubit" @ owned) -> None:
-    """Free q qubit."""
+    """Free a qubit."""
 
 
 @hugr_op(steane_op("measure_z"))
