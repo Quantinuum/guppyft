@@ -157,6 +157,7 @@ def compute_verification_signterms(
     semantic_function: SemanticCliffordUnitary,
     impl_function: ImplementationCliffordUnitary,
     code_definition: StabilizerCode,
+    num_ancilla_qubits: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
     """Given a semantic Guppy function acting on k qubits and an impl Guppy function
       acting on n qubits, compute a pair of Clifford tableaux. If the implementation
@@ -175,7 +176,7 @@ def compute_verification_signterms(
     semantic_choi_stabilizers = compute_stabilizers_single_block(
         identity_code(code_definition.num_logical_qubits),
         semantic_function,
-        code_definition.num_logical_qubits,
+        code_definition.num_logical_qubits + num_ancilla_qubits,
     )
 
     # Expand the 2k logical stabilizers to 2k stabilizers of size 2n.
@@ -190,7 +191,7 @@ def compute_verification_signterms(
     implementation_stabilizers = compute_stabilizers_single_block(
         code_definition,
         impl_function,
-        code_definition.num_physical_qubits,
+        code_definition.num_physical_qubits + num_ancilla_qubits,
     )
 
     # Canonicalize both Clifford Tableaux so that we can test for equality.
@@ -204,6 +205,7 @@ def compute_verification_signterms_double_block(
     semantic_function: SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitaryDouble,
     code_definition: StabilizerCode,
+    num_ancilla_qubits: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
     """Given a semantic Guppy function acting between two code blocks and an
       impl Guppy function acting on n qubits compute a pair of Clifford tableaux.
@@ -223,7 +225,7 @@ def compute_verification_signterms_double_block(
     semantic_choi_stabilizers = compute_stabilizers_double_block(
         identity_code(code_definition.num_logical_qubits),
         semantic_function,
-        2 * code_definition.num_logical_qubits,
+        2 * (code_definition.num_logical_qubits + num_ancilla_qubits),
     )
 
     # Expand the 4k logical stabilizers and combine them with the generators for each
@@ -236,7 +238,7 @@ def compute_verification_signterms_double_block(
     implementation_stabilizers = compute_stabilizers_double_block(
         code_definition,
         impl_function,
-        2 * code_definition.num_physical_qubits,
+        2 * (code_definition.num_physical_qubits + num_ancilla_qubits),
     )
 
     # Canonicalize both Clifford Tableaux so that we can test for equality.
