@@ -25,6 +25,7 @@ classifiers = [
 
 dependencies = [
     "guppylang>=1.0.1",
+    "guppylang-internals>=1.0.1",
     "hugr>=0.18.3",
     "tket>=0.15.2",
     "tket-exts>=0.14.0",

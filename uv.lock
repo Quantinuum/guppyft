@@ -118,6 +118,7 @@ version = "0.0.1"
 source = { editable = "." }
 dependencies = [
     { name = "guppylang" },
+    { name = "guppylang-internals" },
     { name = "hugr" },
     { name = "selene-sim" },
     { name = "tket" },
@@ -148,6 +149,7 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "guppylang", specifier = ">=1.0.1" },
+    { name = "guppylang-internals", specifier = ">=1.0.1" },
     { name = "hugr", specifier = ">=0.18.3" },
     { name = "selene-sim", specifier = ">=0.3.0" },
     { name = "tket", specifier = ">=0.15.2" },
