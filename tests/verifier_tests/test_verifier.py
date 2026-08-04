@@ -1,6 +1,7 @@
 import numpy as np
 from zixy.qubit import pauli
 
+from guppyft.verifier.code import identity_code
 from guppyft.verifier.expansion import (
     expand_logical_signterms,
     get_expanded_stabilizer_set,
@@ -9,7 +10,6 @@ from guppyft.verifier.expansion import (
 from guppyft.verifier.verify import (
     compute_stabilizers_double_block,
     compute_stabilizers_single_block,
-    identity_code,
 )
 
 from .ops import iceberg, steane

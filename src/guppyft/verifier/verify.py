@@ -9,7 +9,7 @@ from selene_sim.build import build
 from selene_stim_plugin import SeleneStimState
 from zixy.qubit import pauli
 
-from guppyft.verifier.code import StabilizerCode
+from guppyft.verifier.code import StabilizerCode, identity_code
 from guppyft.verifier.expansion import get_expanded_stabilizer_set
 from guppyft.verifier.state_gen import gen_choi_state
 from guppyft.verifier.utils import (
@@ -151,29 +151,6 @@ type SemanticCliffordUnitaryDouble = GuppyFunctionDefinition[
 type ImplementationCliffordUnitaryDouble = GuppyFunctionDefinition[
     [array[qubit, N_PHYSICAL], array[qubit, N_PHYSICAL]], None  # type: ignore[valid-type]
 ]
-
-
-def identity_code(k: int) -> StabilizerCode:
-    """Return a stabilizer code that encodes k logical qubits into k physical qubits.
-      This is the trivial code with distance 1.
-
-    :param k: The number of logical qubits to encode.
-    :return: A StabilizerCode instance representing the identity code.
-    """
-    x_logicals = pauli.Strings(k)
-    z_logicals = pauli.Strings(k)
-    for i in range(k):
-        x_logicals.append(pauli.String(k, {i: pauli.X}))
-        z_logicals.append(pauli.String(k, {i: pauli.Z}))
-
-    return StabilizerCode(
-        num_physical_qubits=k,
-        num_logical_qubits=k,
-        distance=1,
-        generators=pauli.StringSet(k),  # No stabilizers
-        x_logicals=x_logicals,
-        z_logicals=z_logicals,
-    )
 
 
 def compute_verification_signterms(

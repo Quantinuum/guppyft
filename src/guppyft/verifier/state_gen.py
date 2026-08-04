@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, no_type_check
+from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -21,105 +21,6 @@ class SQClifford(Enum):
 
 
 N = guppy.nat_var("N")
-
-
-def gen_choi_state(
-    code: StabilizerCode,
-    clifford_func: SingleBlockUnitary,
-    n_blocks: int,
-) -> GuppyFunctionDefinition[[], Any]:
-    """Generate a Guppy function that prepares the Choi state of a single block
-    Clifford unitary.
-
-    :param code: The stabilizer code.
-    :param clifford_func: A Guppy function which implements a Clifford unitary
-        on a single code block.
-    :param n_blocks: The number of code blocks that the Clifford function
-        acts on.
-    :return: A Guppy function definition that prepares the Choi state on
-        `2*n_blocks` blocks.
-    """
-
-    k = code.num_logical_qubits
-    # First, produce the tableau of `k*n_blocks` Bell pairs
-    # The qubits are arranged in groups of size `k`:
-    #   (block0_input, block0_output, block1_input, block1_output, ...)
-    # Each Bell pair entangles the i-th qubits of blockj_input with blockj_output
-    unencoded_bell_bundle = pauli.SignTerms(2 * k * n_blocks)
-    for j in range(n_blocks):
-        for i in range(k):
-            # The stabilizers of the i-th Bell pair of block j are:
-            unencoded_bell_bundle.append(
-                pauli.SignTerm(
-                    2 * k * n_blocks,
-                    {2 * j * k + i: pauli.X, (2 * j + 1) * k + i: pauli.X},
-                )
-            )
-            unencoded_bell_bundle.append(
-                pauli.SignTerm(
-                    2 * k * n_blocks,
-                    {2 * j * k + i: pauli.Z, (2 * j + 1) * k + i: pauli.Z},
-                )
-            )
-
-    # Extend the tableau to physical qubits
-    encoded_bell_bundle = get_expanded_stabilizer_set(
-        unencoded_bell_bundle, code, n_blocks
-    )
-
-    # Generate the Guppy function that prepares the bundle of encoded Bell states
-    prep_func = gen_guppy_state_prep(encoded_bell_bundle)
-
-    # Slice array and apply the clifford_func to the target block
-    match n_blocks:
-        case 1:
-
-            @guppy
-            @no_type_check
-            def choi_prep[N: nat]() -> tuple[array[qubit, N], array[qubit, N]]:
-                # Prepare the Bell states
-                qs = prep_func()
-
-                # Slice into blocks
-                slicer = array_slicer(qs)
-                input_leg = slicer.take(comptime(N))
-                output_leg = slicer.take(comptime(N))
-                slicer.discard_empty()
-
-                # Apply the Clifford unitary to the output leg
-                clifford_func(output_leg)
-
-                return input_leg, output_leg
-
-        case 2:
-
-            @guppy
-            @no_type_check
-            def choi_prep[N: nat]() -> tuple[
-                array[qubit, N], array[qubit, N], array[qubit, N], array[qubit, N]
-            ]:
-                # Prepare the Bell states
-                qs = prep_func()
-
-                # Slice into blocks
-                slicer = array_slicer(qs)
-                input0_leg = slicer.take(comptime(N))
-                output0_leg = slicer.take(comptime(N))
-                input1_leg = slicer.take(comptime(N))
-                output1_leg = slicer.take(comptime(N))
-                slicer.discard_empty()
-
-                # Apply the Clifford unitary to the output legs
-                clifford_func(output0_leg, output1_leg)
-
-                return input0_leg, output0_leg, input1_leg, output1_leg
-
-        case _:
-            raise NotImplementedError(
-                f"Currently only 1 or 2 code blocks are supported. Got {n_blocks=}."
-            )
-
-    return choi_prep  # type: ignore[no-any-return]
 
 
 def gen_guppy_state_prep(
@@ -240,3 +141,103 @@ def convert_to_graph_state(tableau: pauli.SignTerms) -> list[SQClifford]:
     tableau.conj_clifford_list(s_gates)
 
     return gates_to_apply
+
+
+TWICE_NUM_BLOCKS = guppy.nat_var("TWICE_NUM_BLOCKS")
+
+
+def gen_choi_state(
+    code: StabilizerCode,
+    clifford_func: SingleBlockUnitary,
+    n_blocks: int,
+) -> GuppyFunctionDefinition[[], array[array[qubit, N], TWICE_NUM_BLOCKS]]:  # type: ignore[valid-type]
+    """Generate a Guppy function that prepares the Choi state of a single block
+    Clifford unitary.
+
+    :param code: The stabilizer code.
+    :param clifford_func: A Guppy function which implements a Clifford unitary
+        on a single code block.
+    :param n_blocks: The number of code blocks that the Clifford function
+        acts on.
+    :return: A Guppy function definition that prepares the Choi state on
+        `2*n_blocks` blocks.
+    """
+
+    k = code.num_logical_qubits
+    # First, produce the tableau of `k*n_blocks` Bell pairs
+    # The qubits are arranged in groups of size `k`:
+    #   (block0_input, block0_output, block1_input, block1_output, ...)
+    # Each Bell pair entangles the i-th qubits of blockj_input with blockj_output
+    unencoded_bell_bundle = pauli.SignTerms(2 * k * n_blocks)
+    for j in range(n_blocks):
+        for i in range(k):
+            # The stabilizers of the i-th Bell pair of block j are:
+            unencoded_bell_bundle.append(
+                pauli.SignTerm(
+                    2 * k * n_blocks,
+                    {2 * j * k + i: pauli.X, (2 * j + 1) * k + i: pauli.X},
+                )
+            )
+            unencoded_bell_bundle.append(
+                pauli.SignTerm(
+                    2 * k * n_blocks,
+                    {2 * j * k + i: pauli.Z, (2 * j + 1) * k + i: pauli.Z},
+                )
+            )
+
+    # Extend the tableau to physical qubits
+    encoded_bell_bundle = get_expanded_stabilizer_set(
+        unencoded_bell_bundle, code, n_blocks
+    )
+
+    # Generate the Guppy function that prepares the bundle of encoded Bell states
+    prep_func = gen_guppy_state_prep(encoded_bell_bundle)
+
+    # Slice array and apply the clifford_func to the target block
+    match n_blocks:
+        case 1:
+
+            @guppy
+            @no_type_check
+            def choi_prep[N: nat]() -> array[array[qubit, N], 2]:
+                # Prepare the Bell states
+                qs = prep_func()
+
+                # Slice into blocks
+                slicer = array_slicer(qs)
+                input_leg = slicer.take(comptime(N))
+                output_leg = slicer.take(comptime(N))
+                slicer.discard_empty()
+
+                # Apply the Clifford unitary to the output leg
+                clifford_func(output_leg)
+
+                return array(input_leg, output_leg)
+
+        case 2:
+
+            @guppy
+            @no_type_check
+            def choi_prep[N: nat]() -> array[array[qubit, N], 4]:
+                # Prepare the Bell states
+                qs = prep_func()
+
+                # Slice into blocks
+                slicer = array_slicer(qs)
+                input0_leg = slicer.take(comptime(N))
+                output0_leg = slicer.take(comptime(N))
+                input1_leg = slicer.take(comptime(N))
+                output1_leg = slicer.take(comptime(N))
+                slicer.discard_empty()
+
+                # Apply the Clifford unitary to the output legs
+                clifford_func(output0_leg, output1_leg)
+
+                return array(input0_leg, output0_leg, input1_leg, output1_leg)
+
+        case _:
+            raise NotImplementedError(
+                f"Currently only 1 or 2 code blocks are supported. Got {n_blocks=}."
+            )
+
+    return choi_prep  # type: ignore[no-any-return]

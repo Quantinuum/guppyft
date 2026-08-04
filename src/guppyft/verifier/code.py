@@ -58,3 +58,26 @@ class StabilizerCode:
 
         if not all_stabilizer_generators_commute:
             raise CodeDefinitionError("All of the stabilizer generators must commute!")
+
+
+def identity_code(k: int) -> StabilizerCode:
+    """Return a stabilizer code that encodes k logical qubits into k physical qubits.
+      This is the trivial code with distance 1.
+
+    :param k: The number of logical qubits to encode.
+    :return: A StabilizerCode instance representing the identity code.
+    """
+    x_logicals = pauli.Strings(k)
+    z_logicals = pauli.Strings(k)
+    for i in range(k):
+        x_logicals.append(pauli.String(k, {i: pauli.X}))
+        z_logicals.append(pauli.String(k, {i: pauli.Z}))
+
+    return StabilizerCode(
+        num_physical_qubits=k,
+        num_logical_qubits=k,
+        distance=1,
+        generators=pauli.StringSet(k),  # No stabilizers
+        x_logicals=x_logicals,
+        z_logicals=z_logicals,
+    )
