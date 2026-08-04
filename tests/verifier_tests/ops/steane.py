@@ -2,7 +2,6 @@ from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.std.array import array
-from guppylang.std.builtins import Function
 from guppylang.std.quantum import cx, h, qubit, s, sdg
 from zixy.qubit import pauli
 from zixy.qubit.pauli import X, Z
@@ -88,71 +87,6 @@ def logical_cx(first_block: array[qubit, 1], second_block: array[qubit, 1]) -> N
 def physical_cx(first_block: array[qubit, 7], second_block: array[qubit, 7]) -> None:
     for i in range(len(first_block)):
         cx(first_block[i], second_block[i])
-
-
-@guppy
-@no_type_check
-def non_ft_zero() -> array[qubit, 7]:
-    """Non fault-tolerant zero state preparation."""
-    block = array(qubit() for _ in range(7))
-
-    plus_ids = array(0, 4, 6)
-    for i in plus_ids:
-        h(block[i])
-
-    cx_pairs = array((0, 1), (4, 5), (6, 3), (6, 5), (4, 2), (0, 3), (4, 1), (3, 2))
-    for c, t in cx_pairs:
-        cx(block[c], block[t])
-
-    return block
-
-
-@guppy
-@no_type_check
-def choi_state(
-    unitary: Function[[array[qubit, 7]], None],
-) -> tuple[array[qubit, 7], array[qubit, 7]]:
-    control_block = non_ft_zero()
-    target_block = non_ft_zero()
-
-    physical_h(control_block)
-    physical_cx(control_block, target_block)
-
-    unitary(target_block)
-
-    return control_block, target_block
-
-
-@guppy
-@no_type_check
-def choi_state_double_block(
-    unitary: Function[[array[qubit, 7], array[qubit, 7]], None],
-) -> tuple[
-    array[qubit, 7],
-    array[qubit, 7],
-    array[qubit, 7],
-    array[qubit, 7],
-]:
-    first_control_block = non_ft_zero()
-    first_target_block = non_ft_zero()
-
-    second_control_block = non_ft_zero()
-    second_target_block = non_ft_zero()
-
-    physical_h(first_control_block)
-    physical_cx(first_control_block, first_target_block)
-    physical_h(second_control_block)
-    physical_cx(second_control_block, second_target_block)
-
-    # Apply unitary to the target blocks
-    unitary(first_target_block, second_target_block)
-
-    return (
-        first_control_block,
-        first_target_block,
-        second_control_block,
-        second_target_block,
-    )
 
 
 STEANE_X_LOGICAL = pauli.String(7, (X, X, X, X, X, X, X))

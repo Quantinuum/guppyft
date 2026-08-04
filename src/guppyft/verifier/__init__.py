@@ -1,6 +1,7 @@
 from .code import (
     CodeDefinitionError,
     StabilizerCode,
+    identity_code,
 )
 from .utils import (
     selene_stabilizer_to_zixy_signterm,
@@ -11,9 +12,6 @@ from .verify import (
     compute_stabilizers_single_block,
     compute_verification_signterms,
     compute_verification_signterms_double_block,
-    expand_logical_signterms,
-    get_expanded_stabilizer_set,
-    pad_code_stabilizers,
 )
 
 __all__ = [
@@ -25,6 +23,7 @@ __all__ = [
     "compute_verification_signterms_double_block",
     "expand_logical_signterms",
     "get_expanded_stabilizer_set",
+    "identity_code",
     "pad_code_stabilizers",
     "selene_stabilizer_to_zixy_signterm",
     "stabilizerlist_to_signterms",

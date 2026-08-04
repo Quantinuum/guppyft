@@ -1,6 +1,21 @@
+from typing import Generic, Self, no_type_check
+
+from guppylang import guppy
+from guppylang.defs import GuppyFunctionDefinition
+from guppylang.std.builtins import array, comptime, owned
+from guppylang.std.collections import Queue, empty_queue
+from guppylang.std.num import nat
+from guppylang.std.quantum import qubit
 from selene_stim_plugin.state import Pauli, Phase, Stabilizer, StabilizerList
 from zixy.container.coeffs import Sign
 from zixy.qubit import pauli
+
+N = guppy.nat_var("N")
+
+type SingleBlockUnitary = GuppyFunctionDefinition[[array[qubit, N]], None]  # type: ignore[valid-type]
+type DoubleBlockUnitary = GuppyFunctionDefinition[
+    [array[qubit, N], array[qubit, N]], None  # type: ignore[valid-type]
+]
 
 
 def _convert_pauli(selene_pauli: Pauli) -> pauli.PauliMatrix:
@@ -55,3 +70,34 @@ def stabilizerlist_to_signterms(stab_list: StabilizerList) -> pauli.SignTerms:
         term = selene_stabilizer_to_zixy_signterm(gen)
         sign_terms.append(term)
     return sign_terms
+
+
+N = guppy.nat_var("N")
+T = guppy.type_var("T", copyable=False, droppable=False)
+
+
+@guppy.struct
+@no_type_check
+class ArraySlicer(Generic[T, N]):  # type: ignore[misc]
+    _queue: Queue[T, N]  # type: ignore[type-arg, valid-type]
+
+    @guppy
+    @no_type_check
+    def discard_empty(self: Self @ owned) -> None:
+        self._queue.discard_empty()
+
+    @guppy
+    @no_type_check
+    def take(self, n: nat @ comptime) -> array[T, "n"]:
+        if n > len(self._queue):
+            exit("Cannot take more items than are available in the slicer.")
+        return array(self._queue.pop() for _ in range(n))
+
+
+@guppy
+@no_type_check
+def array_slicer(arr: array[T, N] @ owned) -> ArraySlicer[T, N]:
+    queue = empty_queue[T, N]()
+    for q in arr:
+        queue.push(q)
+    return ArraySlicer(queue)
