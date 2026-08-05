@@ -8,8 +8,8 @@ from guppyft.verifier.expansion import (
     pad_code_stabilizers,
 )
 from guppyft.verifier.verify import (
-    compute_stabilizers_double_block,
-    compute_stabilizers_single_block,
+    compute_stabilizers_double_block_unitary,
+    compute_stabilizers_single_block_unitary,
 )
 
 from .ops import iceberg, steane
@@ -66,18 +66,18 @@ def test_canonical() -> None:
 
 
 def test_bell_state_stabilizers() -> None:
-    stabilizer_terms = compute_stabilizers_single_block(
+    stabilizer_terms = compute_stabilizers_single_block_unitary(
         identity_code(1), steane.specify_identity, 1
     )
     assert str(stabilizer_terms) == "(+1, X0 X1), (+1, Z0 Z1)"
 
 
 def test_s_state_stabilizers() -> None:
-    terms_logical = compute_stabilizers_single_block(
+    terms_logical = compute_stabilizers_single_block_unitary(
         identity_code(1), steane.specify_s, 1
     )
 
-    terms_physical = compute_stabilizers_single_block(
+    terms_physical = compute_stabilizers_single_block_unitary(
         steane.STEANE_DEF, steane.implement_s, 7
     )
 
@@ -86,7 +86,7 @@ def test_s_state_stabilizers() -> None:
 
 
 def test_compute_stabilizers_double_block() -> None:
-    stabilizers = compute_stabilizers_double_block(
+    stabilizers = compute_stabilizers_double_block_unitary(
         identity_code(1),
         steane.specify_identity_double_block,
         2,
@@ -158,7 +158,7 @@ def test_stabilizer_padding_double_block() -> None:
 
 
 def test_compute_stabilizers_single_block_iceberg_id() -> None:
-    choi_stabilizers_before_expansion = compute_stabilizers_single_block(
+    choi_stabilizers_before_expansion = compute_stabilizers_single_block_unitary(
         identity_code(2), iceberg.specify_identity, 2
     )
     assert (
@@ -187,7 +187,7 @@ def test_compute_stabilizers_single_block_iceberg_id() -> None:
 
 
 def test_compute_stabilizers_double_block_iceberg_id() -> None:
-    choi_stabilizers_before_expansion = compute_stabilizers_double_block(
+    choi_stabilizers_before_expansion = compute_stabilizers_double_block_unitary(
         identity_code(2),
         iceberg.specify_identity_double_block,
         4,
@@ -208,7 +208,7 @@ def test_compute_stabilizers_double_block_iceberg_id() -> None:
 
 
 def test_compute_stabilizers_intrablock_cx_iceberg() -> None:
-    choi_stabilizers_before_expansion = compute_stabilizers_single_block(
+    choi_stabilizers_before_expansion = compute_stabilizers_single_block_unitary(
         identity_code(2),
         iceberg.specify_intra_block_cx,
         2,

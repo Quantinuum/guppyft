@@ -95,7 +95,7 @@ def compute_stabilizers_double_block_state(
     return stabilizerlist_to_signterms(stab_list)
 
 
-def compute_stabilizers_single_block(
+def compute_stabilizers_single_block_unitary(
     code: StabilizerCode,
     clifford_func: SingleBlockUnitary,
     n_func_qubits: int,
@@ -140,7 +140,7 @@ def compute_stabilizers_single_block(
     return stabilizerlist_to_signterms(stab_list)
 
 
-def compute_stabilizers_double_block(
+def compute_stabilizers_double_block_unitary(
     code: StabilizerCode,
     clifford_func: DoubleBlockUnitary,
     n_func_qubits: int,
@@ -181,7 +181,7 @@ def compute_stabilizers_double_block(
     states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(main, n_func_qubits)
 
     # Using a hack to get the state_output across four code blocks. See the
-    # comment in compute_stabilizers_single_block for more info.
+    # comment in compute_stabilizers_single_block_unitary for more info.
     total = states_dict["total"]
     control_qubits1 = states_dict["controls1"].specified_qubits
     target_qubits1 = states_dict["targets1"].specified_qubits
@@ -322,7 +322,7 @@ def compute_verification_signterms_double_block_state(
     return expanded_semantic_stabilizers, implementation_stabilizers
 
 
-def compute_verification_signterms(
+def compute_verification_signterms_single_block_unitary(
     semantic_function: SemanticCliffordUnitary,
     impl_function: ImplementationCliffordUnitary,
     code_definition: StabilizerCode,
@@ -343,7 +343,7 @@ def compute_verification_signterms(
     """
 
     # Get the 2k stabilizers for the 2k qubit Choi state encoding the logical operation.
-    semantic_choi_stabilizers = compute_stabilizers_single_block(
+    semantic_choi_stabilizers = compute_stabilizers_single_block_unitary(
         identity_code(code_definition.num_logical_qubits),
         semantic_function,
         code_definition.num_logical_qubits,
@@ -358,7 +358,7 @@ def compute_verification_signterms(
     )
 
     # Calculate the 2n stabilizers of the Choi state encoding the physical operation.
-    implementation_stabilizers = compute_stabilizers_single_block(
+    implementation_stabilizers = compute_stabilizers_single_block_unitary(
         code_definition,
         impl_function,
         code_definition.num_physical_qubits,
@@ -371,7 +371,7 @@ def compute_verification_signterms(
     return expanded_semantic_stabilizers, implementation_stabilizers
 
 
-def compute_verification_signterms_double_block(
+def compute_verification_signterms_double_block_unitary(
     semantic_function: SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitaryDouble,
     code_definition: StabilizerCode,
@@ -393,7 +393,7 @@ def compute_verification_signterms_double_block(
     """
 
     # Get the 4k stabilizers for the 4k qubit Choi state encoding the logical operation.
-    semantic_choi_stabilizers = compute_stabilizers_double_block(
+    semantic_choi_stabilizers = compute_stabilizers_double_block_unitary(
         identity_code(code_definition.num_logical_qubits),
         semantic_function,
         2 * code_definition.num_logical_qubits,
@@ -406,7 +406,7 @@ def compute_verification_signterms_double_block(
     )
 
     # Calculate the 4n stabilizers of the Choi state encoding the physical operation.
-    implementation_stabilizers = compute_stabilizers_double_block(
+    implementation_stabilizers = compute_stabilizers_double_block_unitary(
         code_definition,
         impl_function,
         2 * code_definition.num_physical_qubits,
