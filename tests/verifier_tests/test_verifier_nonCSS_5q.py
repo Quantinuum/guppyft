@@ -1,6 +1,7 @@
 from guppyft.verifier.verify import (
     compute_verification_signterms,
     compute_verification_signterms_double_block,
+    compute_verification_signterms_double_block_state,
     compute_verification_signterms_single_block_state,
 )
 
@@ -50,6 +51,15 @@ def test_nonCSS_5q_zero_state_not_plus_state() -> None:
         nonCSS_5q.CODE_DEF,
     )
     assert sem != impl
+
+
+def test_nonCSS_5q_bell_state() -> None:
+    sem, impl = compute_verification_signterms_double_block_state(
+        nonCSS_5q.specify_bell_state,
+        nonCSS_5q.implement_non_ft_bell_state,
+        nonCSS_5q.CODE_DEF,
+    )
+    assert sem == impl
 
 
 def test_nonCSS_5q_k() -> None:

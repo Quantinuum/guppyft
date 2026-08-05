@@ -1,6 +1,7 @@
 from guppyft.verifier.verify import (
     compute_verification_signterms,
     compute_verification_signterms_double_block,
+    compute_verification_signterms_double_block_state,
     compute_verification_signterms_single_block_state,
 )
 
@@ -50,6 +51,15 @@ def test_bit_flip_zero_state_not_plus_state() -> None:
         code_definition=bitflip.BIT_FLIP_DEF,
     )
     assert sem != impl
+
+
+def test_bit_flip_bell_state() -> None:
+    sem, impl = compute_verification_signterms_double_block_state(
+        bitflip.specify_bell_state,
+        bitflip.implement_non_ft_bell_state,
+        code_definition=bitflip.BIT_FLIP_DEF,
+    )
+    assert sem == impl
 
 
 def test_bit_flip_x() -> None:

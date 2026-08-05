@@ -112,6 +112,25 @@ def implement_non_ft_plus_state() -> array[qubit, 5]:
 
 @guppy
 @no_type_check
+def specify_bell_state() -> tuple[array[qubit, 1], array[qubit, 1]]:
+    q0 = qubit()
+    q1 = qubit()
+    h(q0)
+    cx(q0, q1)
+    return array(q0), array(q1)
+
+
+@guppy
+@no_type_check
+def implement_non_ft_bell_state() -> tuple[array[qubit, 5], array[qubit, 5]]:
+    block0 = implement_non_ft_plus_state()
+    block1 = implement_non_ft_zero_state()
+    implement_cx(block0, block1)
+    return block0, block1
+
+
+@guppy
+@no_type_check
 def specify_k(block: array[qubit, 1]) -> None:
     h(block[0])
     s(block[0])

@@ -1,6 +1,7 @@
 from guppyft.verifier.verify import (
     compute_verification_signterms,
     compute_verification_signterms_double_block,
+    compute_verification_signterms_double_block_state,
     compute_verification_signterms_single_block_state,
 )
 
@@ -50,6 +51,15 @@ def test_steane_zero_state_not_plus_state() -> None:
         code_definition=steane.STEANE_DEF,
     )
     assert sem != impl
+
+
+def test_steane_bell_state() -> None:
+    sem, impl = compute_verification_signterms_double_block_state(
+        steane.specify_bell_state,
+        steane.implement_non_ft_bell_state,
+        code_definition=steane.STEANE_DEF,
+    )
+    assert sem == impl
 
 
 def test_steane_h() -> None:
