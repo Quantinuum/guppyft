@@ -182,7 +182,7 @@ def compute_verification_signterms(
     semantic_choi_stabilizers = compute_stabilizers_single_block(
         identity_code(code_definition.num_logical_qubits),
         semantic_function,
-        code_definition.num_logical_qubits + num_ancilla_qubits,
+        2 * code_definition.num_logical_qubits + num_ancilla_qubits,
     )
 
     # Expand the 2k logical stabilizers to 2k stabilizers of size 2n.
