@@ -21,14 +21,14 @@ def pad_code_stabilizers(code: StabilizerCode, num_blocks: int) -> pauli.StringS
       for each code block. Returns Pauli Strings for m blocks.
     """
     code_generators: pauli.StringSet = code.generators
-    generator_tuples = code_generators.to_strings()
+    generator_strings = code_generators.to_strings()
     n = code.num_physical_qubits
 
     combined = []
     for i in range(num_blocks):
         combined += [
             shift_pauli(g.into(pauli.String), offset=i * n, size=num_blocks * n)
-            for g in generator_tuples
+            for g in generator_strings
         ]
 
     return pauli.StringSet.from_iterable(
