@@ -25,25 +25,25 @@ N = guppy.nat_var("N")
 
 def _invoke_selene_stim(
     main_function: GuppyFunctionDefinition[[], None],
-    n_func_qubits: int,
+    num_selene_qubits: int,
     seed: int = 123,
 ) -> dict[str, SeleneStimState]:
     instance = build(main_function.compile())
     seeded_stim_instance = Stim(random_seed=seed)
-    output = instance.run(simulator=seeded_stim_instance, n_qubits=2 * n_func_qubits)
+    output = instance.run(simulator=seeded_stim_instance, n_qubits=num_selene_qubits)
     return seeded_stim_instance.extract_states_dict(output)
 
 
 def compute_stabilizers_single_block_state(
     state_prep_func: SingleBlockState,
-    n_func_qubits: int,
+    num_selene_qubits: int,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation.
 
     :param state_prep_func: A Guppy function which prepares the stabilizer state
         on a single code block.
-    :param n_func_qubits: An upper bound for the number of qubits used in stabilizer
-        simulation.
+    :param num_selene_qubits: An upper bound for the number of qubits
+          used in state_prep_func.
     :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
 
@@ -53,7 +53,9 @@ def compute_stabilizers_single_block_state(
         state_output("total", block)
         discard_array(block)
 
-    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(main, n_func_qubits)
+    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
+        main, num_selene_qubits
+    )
 
     stab_list = states_dict["total"].get_reduced_stabilizers()
     return stabilizerlist_to_signterms(stab_list)
@@ -61,14 +63,14 @@ def compute_stabilizers_single_block_state(
 
 def compute_stabilizers_double_block_state(
     state_prep_func: DoubleBlockState,
-    n_func_qubits: int,
+    num_selene_qubits: int,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation.
 
     :param state_prep_func: A Guppy function which prepares the stabilizer state
         on two code blocks.
-    :param n_func_qubits: An upper bound for the number of qubits used in stabilizer
-        simulation.
+    :param num_selene_qubits: An upper bound for the number of qubits
+          used in state_prep_func.
     :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
 
@@ -82,7 +84,9 @@ def compute_stabilizers_double_block_state(
         discard_array(block0)
         discard_array(block1)
 
-    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(main, n_func_qubits)
+    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
+        main, num_selene_qubits
+    )
 
     # This is a hack so that we can get a state_output over both blocks
     total = states_dict["total"]
@@ -98,15 +102,15 @@ def compute_stabilizers_double_block_state(
 def compute_stabilizers_single_block_unitary(
     code: StabilizerCode,
     clifford_func: SingleBlockUnitary,
-    n_func_qubits: int,
+    num_selene_qubits: int,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation.
 
     :param code: The stabilizer code.
     :param clifford_func: A Guppy function which implements a Clifford unitary
         on a single code block.
-    :param n_func_qubits: An upper bound for the number of qubits used in stabilizer
-        simulation.
+    :param num_selene_qubits: An upper bound for the number of qubits
+      used in the choi state for clifford_func.
     :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
 
@@ -124,7 +128,9 @@ def compute_stabilizers_single_block_unitary(
         discard_array(controls)
         discard_array(targets)
 
-    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(main, n_func_qubits)
+    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
+        main, num_selene_qubits=num_selene_qubits
+    )
 
     # This is a hack so that we can get a state_output over both the
     #  control and target registers. Currently state result doesn't support passing
@@ -143,7 +149,7 @@ def compute_stabilizers_single_block_unitary(
 def compute_stabilizers_double_block_unitary(
     code: StabilizerCode,
     clifford_func: DoubleBlockUnitary,
-    n_func_qubits: int,
+    num_selene_qubits: int,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation across
       two code blocks.
@@ -151,8 +157,8 @@ def compute_stabilizers_double_block_unitary(
     :param code: The stabilizer code.
     :param clifford_func: A Guppy function which implements a Clifford unitary
       across two code blocks.
-    :param n_func_qubits: An upper bound for the number of qubits used in stabilizer
-    simulation.
+    :param num_selene_qubits: An upper bound for the number of qubits
+      used in the choi state for clifford_func.
     :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
 
@@ -178,7 +184,9 @@ def compute_stabilizers_double_block_unitary(
         discard_array(second_controls)
         discard_array(second_targets)
 
-    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(main, n_func_qubits)
+    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
+        main, num_selene_qubits
+    )
 
     # Using a hack to get the state_output across four code blocks. See the
     # comment in compute_stabilizers_single_block_unitary for more info.
@@ -236,6 +244,7 @@ def compute_verification_signterms_single_block_state(
     semantic_function: SemanticStabilizerState,
     impl_function: ImplementationStabilizerState,
     code_definition: StabilizerCode,
+    num_ancilla_qubits: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
     """Compute tableaux to verify correctness of stabilizer state preparation.
 
@@ -249,12 +258,14 @@ def compute_verification_signterms_single_block_state(
       the semantics on n physical qubits.
     :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
       and logical operators.
+    :param num_ancilla_qubits: The number of ancilla qubits used in the
+        implementation. Defaults to zero.
     :return: A pair of stabilizer tableaux made up of signed Pauli terms.
     """
     # Get the k stabilizers for the k qubit state.
     semantic_stabilizers = compute_stabilizers_single_block_state(
         semantic_function,
-        code_definition.num_logical_qubits,
+        code_definition.num_logical_qubits + num_ancilla_qubits,
     )
 
     # Expand the k logical stabilizers to k stabilizers of size n.
@@ -267,7 +278,7 @@ def compute_verification_signterms_single_block_state(
     # Calculate the n stabilizers of the physical state.
     implementation_stabilizers = compute_stabilizers_single_block_state(
         impl_function,
-        code_definition.num_physical_qubits,
+        code_definition.num_physical_qubits + num_ancilla_qubits,
     )
 
     # Canonicalize both tableaux so that we can test for equality.
@@ -281,6 +292,7 @@ def compute_verification_signterms_double_block_state(
     semantic_function: SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerStateDouble,
     code_definition: StabilizerCode,
+    num_ancilla_qubits: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
     """Compute tableaux to verify 2 block stabilizer state preparation.
 
@@ -294,12 +306,14 @@ def compute_verification_signterms_double_block_state(
       the semantics on 2n physical qubits.
     :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
       and logical operators.
+    :param num_ancilla_qubits: The number of ancilla qubits used in the
+        implementation. Defaults to zero.
     :return: A pair of stabilizer tableaux made up of signed Pauli terms.
     """
     # Get the 2k stabilizers for the 2k qubit state.
     semantic_stabilizers = compute_stabilizers_double_block_state(
         semantic_function,
-        2 * code_definition.num_logical_qubits,
+        2 * code_definition.num_logical_qubits + num_ancilla_qubits,
     )
 
     # Expand the 2k logical stabilizers to 2k stabilizers of size 2n.
@@ -309,10 +323,10 @@ def compute_verification_signterms_double_block_state(
         semantic_stabilizers, code_definition, num_blocks=2
     )
 
-    # Calculate the n stabilizers of the physical state.
+    # Calculate the 2n stabilizers of the physical state.
     implementation_stabilizers = compute_stabilizers_double_block_state(
         impl_function,
-        2 * code_definition.num_physical_qubits,
+        2 * code_definition.num_physical_qubits + num_ancilla_qubits,
     )
 
     # Canonicalize both tableaux so that we can test for equality.
@@ -326,6 +340,7 @@ def compute_verification_signterms_single_block_unitary(
     semantic_function: SemanticCliffordUnitary,
     impl_function: ImplementationCliffordUnitary,
     code_definition: StabilizerCode,
+    num_ancilla_qubits: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
     """Compute tableaux to verify correctness of Clifford unitary implementation.
 
@@ -339,6 +354,8 @@ def compute_verification_signterms_single_block_unitary(
       the semantics on n physical qubits.
     :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
       and logical operators.
+    :param num_ancilla_qubits: The number of ancilla qubits used in the
+        implementation. Defaults to zero.
     :return: A pair of Clifford tableaux made up of signed Pauli terms.
     """
 
@@ -346,7 +363,7 @@ def compute_verification_signterms_single_block_unitary(
     semantic_choi_stabilizers = compute_stabilizers_single_block_unitary(
         identity_code(code_definition.num_logical_qubits),
         semantic_function,
-        code_definition.num_logical_qubits,
+        num_selene_qubits=2 * (code_definition.num_logical_qubits) + num_ancilla_qubits,
     )
 
     # Expand the 2k logical stabilizers to 2k stabilizers of size 2n.
@@ -361,7 +378,8 @@ def compute_verification_signterms_single_block_unitary(
     implementation_stabilizers = compute_stabilizers_single_block_unitary(
         code_definition,
         impl_function,
-        code_definition.num_physical_qubits,
+        num_selene_qubits=2 * (code_definition.num_physical_qubits)
+        + num_ancilla_qubits,
     )
 
     # Canonicalize both Clifford Tableaux so that we can test for equality.
@@ -375,6 +393,7 @@ def compute_verification_signterms_double_block_unitary(
     semantic_function: SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitaryDouble,
     code_definition: StabilizerCode,
+    num_ancilla_qubits: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
     """Compute tableaux to verify correctness of 2 block Clifford unitary.
 
@@ -389,6 +408,8 @@ def compute_verification_signterms_double_block_unitary(
       the semantics on two code blocks.
     :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
       and logical operators.
+    :param num_ancilla_qubits: The number of ancilla qubits used in the
+        implementation. Defaults to zero.
     :return: A pair of Clifford tableaux made up of signed Pauli terms.
     """
 
@@ -396,7 +417,7 @@ def compute_verification_signterms_double_block_unitary(
     semantic_choi_stabilizers = compute_stabilizers_double_block_unitary(
         identity_code(code_definition.num_logical_qubits),
         semantic_function,
-        2 * code_definition.num_logical_qubits,
+        num_selene_qubits=4 * (code_definition.num_logical_qubits) + num_ancilla_qubits,
     )
 
     # Expand the 4k logical stabilizers and combine them with the generators for each
@@ -409,7 +430,8 @@ def compute_verification_signterms_double_block_unitary(
     implementation_stabilizers = compute_stabilizers_double_block_unitary(
         code_definition,
         impl_function,
-        2 * code_definition.num_physical_qubits,
+        num_selene_qubits=4 * (code_definition.num_physical_qubits)
+        + num_ancilla_qubits,
     )
 
     # Canonicalize both Clifford Tableaux so that we can test for equality.
