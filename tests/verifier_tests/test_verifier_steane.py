@@ -17,7 +17,7 @@ def test_steane_single_block_identity() -> None:
 
 def test_steane_single_block_identity_with_shor_extraction() -> None:
     sem, impl = compute_verification_signterms(
-        steane.specify_identity_with_shor_extraction,
+        steane.specify_identity,
         steane.implement_identity_with_shor_extraction,
         code_definition=steane.STEANE_DEF,
         num_ancilla_qubits=1,
@@ -27,7 +27,7 @@ def test_steane_single_block_identity_with_shor_extraction() -> None:
 
 def test_steane_double_block_identity_with_shor_extraction() -> None:
     sem, impl = compute_verification_signterms_double_block(
-        steane.specify_identity_double_block_with_shor_extraction,
+        steane.specify_identity_double_block,
         steane.implement_identity_double_block_with_shor_extraction,
         code_definition=steane.STEANE_DEF,
         num_ancilla_qubits=2,
@@ -56,7 +56,7 @@ def test_steane_h() -> None:
 
 def test_steane_h_with_ancilla() -> None:
     sem, impl = compute_verification_signterms(
-        steane.specify_h_with_ancilla,
+        steane.specify_h,
         steane.implement_h_with_ancilla,
         code_definition=steane.STEANE_DEF,
         num_ancilla_qubits=1,

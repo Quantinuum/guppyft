@@ -47,27 +47,10 @@ def specify_identity(block: array[qubit, 1]) -> None:
 
 @guppy
 @no_type_check
-def specify_identity_with_shor_extraction(block: array[qubit, 1]) -> None:
-    ancilla = qubit()
-    discard(ancilla)
-
-
-@guppy
-@no_type_check
 def specify_identity_double_block(
     first_block: array[qubit, 1], second_block: array[qubit, 1]
 ) -> None:
     pass
-
-
-@guppy
-@no_type_check
-def specify_identity_double_block_with_shor_extraction(
-    first_block: array[qubit, 1], second_block: array[qubit, 1]
-) -> None:
-    first_ancilla, second_ancilla = qubit(), qubit()
-    discard(first_ancilla)
-    discard(second_ancilla)
 
 
 @guppy
@@ -127,14 +110,6 @@ def implement_h_with_ancilla(block: array[qubit, 7]) -> None:
     ancilla = qubit()
     for i in range(len(block)):
         h(block[i])
-    discard(ancilla)
-
-
-@guppy
-@no_type_check
-def specify_h_with_ancilla(block: array[qubit, 1]) -> None:
-    ancilla = qubit()
-    h(block[0])
     discard(ancilla)
 
 
