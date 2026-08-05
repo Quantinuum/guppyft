@@ -30,7 +30,7 @@ def test_steane_double_block_identity_with_shor_extraction() -> None:
         steane.specify_identity_double_block_with_shor_extraction,
         steane.implement_identity_double_block_with_shor_extraction,
         code_definition=steane.STEANE_DEF,
-        num_ancilla_qubits=1,
+        num_ancilla_qubits=2,
     )
     assert sem == impl
 
