@@ -28,9 +28,7 @@ def _invoke_selene_stim(
 ) -> dict[str, SeleneStimState]:
     instance = build(main_function.compile())
     seeded_stim_instance = Stim(random_seed=seed)
-    output = instance.run(
-        simulator=seeded_stim_instance, n_qubits=2 * num_selene_qubits
-    )
+    output = instance.run(simulator=seeded_stim_instance, n_qubits=num_selene_qubits)
     return seeded_stim_instance.extract_states_dict(output)
 
 
@@ -44,8 +42,8 @@ def compute_stabilizers_single_block(
     :param code: The stabilizer code.
     :param clifford_func: A Guppy function which implements a Clifford unitary
         on a single code block.
-    :param num_selene_qubits: An upper bound for the number of qubits used in stabilizer
-        simulation.
+    :param num_selene_qubits: An upper bound for the number of qubits used
+      by clifford_func.
     :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
 
@@ -64,7 +62,7 @@ def compute_stabilizers_single_block(
         discard_array(targets)
 
     states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
-        main, num_selene_qubits
+        main, 2 * num_selene_qubits
     )
 
     # This is a hack so that we can get a state_output over both the
@@ -92,8 +90,8 @@ def compute_stabilizers_double_block(
     :param code: The stabilizer code.
     :param clifford_func: A Guppy function which implements a Clifford unitary
       across two code blocks.
-    :param num_selene_qubits: An upper bound for the number of qubits used in stabilizer
-    simulation.
+    :param num_selene_qubits: An upper bound for the number of qubits
+      used by clifford_func.
     :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
 
@@ -120,7 +118,7 @@ def compute_stabilizers_double_block(
         discard_array(second_targets)
 
     states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
-        main, num_selene_qubits
+        main, 2 * num_selene_qubits
     )
 
     # Using a hack to get the state_output across four code blocks. See the
@@ -182,7 +180,7 @@ def compute_verification_signterms(
     semantic_choi_stabilizers = compute_stabilizers_single_block(
         identity_code(code_definition.num_logical_qubits),
         semantic_function,
-        2 * code_definition.num_logical_qubits + num_ancilla_qubits,
+        num_selene_qubits=(2 * code_definition.num_logical_qubits) + num_ancilla_qubits,
     )
 
     # Expand the 2k logical stabilizers to 2k stabilizers of size 2n.
@@ -197,7 +195,8 @@ def compute_verification_signterms(
     implementation_stabilizers = compute_stabilizers_single_block(
         code_definition,
         impl_function,
-        code_definition.num_physical_qubits + num_ancilla_qubits,
+        num_selene_qubits=2 * (code_definition.num_physical_qubits)
+        + num_ancilla_qubits,
     )
 
     # Canonicalize both Clifford Tableaux so that we can test for equality.
@@ -231,7 +230,7 @@ def compute_verification_signterms_double_block(
     semantic_choi_stabilizers = compute_stabilizers_double_block(
         identity_code(code_definition.num_logical_qubits),
         semantic_function,
-        4 * code_definition.num_logical_qubits + num_ancilla_qubits,
+        num_selene_qubits=4 * (code_definition.num_logical_qubits) + num_ancilla_qubits,
     )
 
     # Expand the 4k logical stabilizers and combine them with the generators for each
@@ -244,7 +243,8 @@ def compute_verification_signterms_double_block(
     implementation_stabilizers = compute_stabilizers_double_block(
         code_definition,
         impl_function,
-        2 * (code_definition.num_physical_qubits + num_ancilla_qubits),
+        num_selene_qubits=4 * (code_definition.num_physical_qubits)
+        + num_ancilla_qubits,
     )
 
     # Canonicalize both Clifford Tableaux so that we can test for equality.
