@@ -231,7 +231,7 @@ def compute_verification_signterms_double_block(
     semantic_choi_stabilizers = compute_stabilizers_double_block(
         identity_code(code_definition.num_logical_qubits),
         semantic_function,
-        2 * (code_definition.num_logical_qubits + num_ancilla_qubits),
+        4 * code_definition.num_logical_qubits + num_ancilla_qubits,
     )
 
     # Expand the 4k logical stabilizers and combine them with the generators for each
