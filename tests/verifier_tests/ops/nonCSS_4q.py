@@ -70,6 +70,48 @@ def implement_identity_double_block(
 
 @guppy
 @no_type_check
+def specify_zero_state() -> array[qubit, 2]:
+    return array(qubit() for _ in range(2))
+
+
+@guppy
+@no_type_check
+def implement_non_ft_zero_state() -> array[qubit, 4]:
+    """Non fault-tolerant zero state preparation.
+
+    Not taken from any reference, derived in blackboard.
+    """
+    block = array(qubit() for _ in range(4))
+
+    h(block[0])
+    h(block[1])
+    cz(block[0], block[2])
+    cz(block[1], block[3])
+    cx(block[1], block[2])
+    cx(block[0], block[3])
+
+    return block
+
+
+@guppy
+@no_type_check
+def specify_plus_state() -> array[qubit, 2]:
+    qs = array(qubit() for _ in range(2))
+    for i in range(len(qs)):
+        h(qs[i])
+    return qs
+
+
+@guppy
+@no_type_check
+def implement_non_ft_plus_state() -> array[qubit, 4]:
+    block = implement_non_ft_zero_state()
+    implement_row1(block)
+    return block
+
+
+@guppy
+@no_type_check
 def specify_row1(block: array[qubit, 2]) -> None:
     """Table 2, row 1"""
     h(block[0])

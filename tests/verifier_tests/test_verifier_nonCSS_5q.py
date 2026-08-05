@@ -1,13 +1,15 @@
 from guppyft.verifier.verify import (
-    compute_verification_signterms,
-    compute_verification_signterms_double_block,
+    compute_verification_signterms_double_block_state,
+    compute_verification_signterms_double_block_unitary,
+    compute_verification_signterms_single_block_state,
+    compute_verification_signterms_single_block_unitary,
 )
 
 from .ops import nonCSS_5q
 
 
 def test_single_block_nonCSS_5q_id() -> None:
-    sem, impl = compute_verification_signterms(
+    sem, impl = compute_verification_signterms_single_block_unitary(
         nonCSS_5q.specify_identity,
         nonCSS_5q.implement_identity,
         nonCSS_5q.CODE_DEF,
@@ -16,7 +18,7 @@ def test_single_block_nonCSS_5q_id() -> None:
 
 
 def test_double_block_nonCSS_5q_id() -> None:
-    sem, impl = compute_verification_signterms_double_block(
+    sem, impl = compute_verification_signterms_double_block_unitary(
         nonCSS_5q.specify_identity_double_block,
         nonCSS_5q.implement_identity_double_block,
         nonCSS_5q.CODE_DEF,
@@ -24,8 +26,44 @@ def test_double_block_nonCSS_5q_id() -> None:
     assert sem == impl
 
 
+def test_nonCSS_5q_zero_state() -> None:
+    sem, impl = compute_verification_signterms_single_block_state(
+        nonCSS_5q.specify_zero_state,
+        nonCSS_5q.implement_non_ft_zero_state,
+        nonCSS_5q.CODE_DEF,
+    )
+    assert sem == impl
+
+
+def test_nonCSS_5q_plus_state() -> None:
+    sem, impl = compute_verification_signterms_single_block_state(
+        nonCSS_5q.specify_plus_state,
+        nonCSS_5q.implement_non_ft_plus_state,
+        nonCSS_5q.CODE_DEF,
+    )
+    assert sem == impl
+
+
+def test_nonCSS_5q_zero_state_not_plus_state() -> None:
+    sem, impl = compute_verification_signterms_single_block_state(
+        nonCSS_5q.specify_zero_state,
+        nonCSS_5q.implement_non_ft_plus_state,
+        nonCSS_5q.CODE_DEF,
+    )
+    assert sem != impl
+
+
+def test_nonCSS_5q_bell_state() -> None:
+    sem, impl = compute_verification_signterms_double_block_state(
+        nonCSS_5q.specify_bell_state,
+        nonCSS_5q.implement_non_ft_bell_state,
+        nonCSS_5q.CODE_DEF,
+    )
+    assert sem == impl
+
+
 def test_nonCSS_5q_k() -> None:
-    sem, impl = compute_verification_signterms(
+    sem, impl = compute_verification_signterms_single_block_unitary(
         nonCSS_5q.specify_k,
         nonCSS_5q.implement_k,
         nonCSS_5q.CODE_DEF,
@@ -34,7 +72,7 @@ def test_nonCSS_5q_k() -> None:
 
 
 def test_nonCSS_5q_kdg() -> None:
-    sem, impl = compute_verification_signterms(
+    sem, impl = compute_verification_signterms_single_block_unitary(
         nonCSS_5q.specify_kdg,
         nonCSS_5q.implement_kdg,
         nonCSS_5q.CODE_DEF,
@@ -43,7 +81,7 @@ def test_nonCSS_5q_kdg() -> None:
 
 
 def test_nonCSS_5q_different_k() -> None:
-    sem, impl = compute_verification_signterms(
+    sem, impl = compute_verification_signterms_single_block_unitary(
         nonCSS_5q.specify_k,
         nonCSS_5q.implement_kdg,
         nonCSS_5q.CODE_DEF,
@@ -52,7 +90,7 @@ def test_nonCSS_5q_different_k() -> None:
 
 
 def test_nonCSS_5q_h() -> None:
-    sem, impl = compute_verification_signterms(
+    sem, impl = compute_verification_signterms_single_block_unitary(
         nonCSS_5q.specify_h,
         nonCSS_5q.implement_h,
         nonCSS_5q.CODE_DEF,
@@ -61,7 +99,7 @@ def test_nonCSS_5q_h() -> None:
 
 
 def test_nonCSS_5q_k_not_h() -> None:
-    sem, impl = compute_verification_signterms(
+    sem, impl = compute_verification_signterms_single_block_unitary(
         nonCSS_5q.specify_h,
         nonCSS_5q.implement_k,
         nonCSS_5q.CODE_DEF,
@@ -70,7 +108,7 @@ def test_nonCSS_5q_k_not_h() -> None:
 
 
 def test_nonCSS_5q_cz() -> None:
-    sem, impl = compute_verification_signterms_double_block(
+    sem, impl = compute_verification_signterms_double_block_unitary(
         nonCSS_5q.specify_cz,
         nonCSS_5q.implement_cz,
         nonCSS_5q.CODE_DEF,
@@ -79,7 +117,7 @@ def test_nonCSS_5q_cz() -> None:
 
 
 def test_nonCSS_5q_cx() -> None:
-    sem, impl = compute_verification_signterms_double_block(
+    sem, impl = compute_verification_signterms_double_block_unitary(
         nonCSS_5q.specify_cx,
         nonCSS_5q.implement_cx,
         nonCSS_5q.CODE_DEF,
@@ -88,7 +126,7 @@ def test_nonCSS_5q_cx() -> None:
 
 
 def test_nonCSS_5q_cz_not_cx() -> None:
-    sem, impl = compute_verification_signterms_double_block(
+    sem, impl = compute_verification_signterms_double_block_unitary(
         nonCSS_5q.specify_cz,
         nonCSS_5q.implement_cx,
         nonCSS_5q.CODE_DEF,

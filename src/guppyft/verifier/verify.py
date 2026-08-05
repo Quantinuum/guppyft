@@ -13,7 +13,9 @@ from guppyft.verifier.code import StabilizerCode, identity_code
 from guppyft.verifier.expansion import get_expanded_stabilizer_set
 from guppyft.verifier.state_gen import gen_choi_state
 from guppyft.verifier.utils import (
+    DoubleBlockState,
     DoubleBlockUnitary,
+    SingleBlockState,
     SingleBlockUnitary,
     stabilizerlist_to_signterms,
 )
@@ -32,7 +34,72 @@ def _invoke_selene_stim(
     return seeded_stim_instance.extract_states_dict(output)
 
 
-def compute_stabilizers_single_block(
+def compute_stabilizers_single_block_state(
+    state_prep_func: SingleBlockState,
+    num_selene_qubits: int,
+) -> pauli.SignTerms:
+    """Compute the stabilizers of a Choi state encoding a Clifford operation.
+
+    :param state_prep_func: A Guppy function which prepares the stabilizer state
+        on a single code block.
+    :param num_selene_qubits: An upper bound for the number of qubits
+          used in state_prep_func.
+    :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
+    """
+
+    @guppy
+    def main() -> None:
+        block = state_prep_func()
+        state_output("total", block)
+        discard_array(block)
+
+    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
+        main, num_selene_qubits
+    )
+
+    stab_list = states_dict["total"].get_reduced_stabilizers()
+    return stabilizerlist_to_signterms(stab_list)
+
+
+def compute_stabilizers_double_block_state(
+    state_prep_func: DoubleBlockState,
+    num_selene_qubits: int,
+) -> pauli.SignTerms:
+    """Compute the stabilizers of a Choi state encoding a Clifford operation.
+
+    :param state_prep_func: A Guppy function which prepares the stabilizer state
+        on two code blocks.
+    :param num_selene_qubits: An upper bound for the number of qubits
+          used in state_prep_func.
+    :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
+    """
+
+    @guppy
+    def main() -> None:
+        block0, block1 = state_prep_func()
+        state_output("block0", block0)
+        state_output("block1", block1)
+        state_output("total", block0)
+
+        discard_array(block0)
+        discard_array(block1)
+
+    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
+        main, num_selene_qubits
+    )
+
+    # This is a hack so that we can get a state_output over both blocks
+    total = states_dict["total"]
+    b0_qubits = states_dict["block0"].specified_qubits
+    b1_qubits = states_dict["block1"].specified_qubits
+    total.specified_qubits = b0_qubits + b1_qubits
+    ########
+
+    stab_list = states_dict["total"].get_reduced_stabilizers()
+    return stabilizerlist_to_signterms(stab_list)
+
+
+def compute_stabilizers_single_block_unitary(
     code: StabilizerCode,
     clifford_func: SingleBlockUnitary,
     num_selene_qubits: int,
@@ -79,7 +146,7 @@ def compute_stabilizers_single_block(
     return stabilizerlist_to_signterms(stab_list)
 
 
-def compute_stabilizers_double_block(
+def compute_stabilizers_double_block_unitary(
     code: StabilizerCode,
     clifford_func: DoubleBlockUnitary,
     num_selene_qubits: int,
@@ -122,7 +189,7 @@ def compute_stabilizers_double_block(
     )
 
     # Using a hack to get the state_output across four code blocks. See the
-    # comment in compute_stabilizers_single_block for more info.
+    # comment in compute_stabilizers_single_block_unitary for more info.
     total = states_dict["total"]
     control_qubits1 = states_dict["controls1"].specified_qubits
     target_qubits1 = states_dict["targets1"].specified_qubits
@@ -141,6 +208,22 @@ def compute_stabilizers_double_block(
 N_PHYSICAL = guppy.nat_var("N_PHYSICAL")
 K_LOGICAL = guppy.nat_var("K_LOGICAL")
 
+type SemanticStabilizerState = GuppyFunctionDefinition[
+    [], array[qubit, K_LOGICAL]  # type: ignore[valid-type]
+]
+type ImplementationStabilizerState = GuppyFunctionDefinition[
+    [], array[qubit, N_PHYSICAL]  # type: ignore[valid-type]
+]
+
+
+type SemanticStabilizerStateDouble = GuppyFunctionDefinition[
+    [], tuple[array[qubit, K_LOGICAL], array[qubit, K_LOGICAL]]  # type: ignore[valid-type]
+]
+type ImplementationStabilizerStateDouble = GuppyFunctionDefinition[
+    [], tuple[array[qubit, N_PHYSICAL], array[qubit, N_PHYSICAL]]  # type: ignore[valid-type]
+]
+
+
 type SemanticCliffordUnitary = GuppyFunctionDefinition[
     [array[qubit, K_LOGICAL]], None  # type: ignore[valid-type]
 ]
@@ -157,15 +240,17 @@ type ImplementationCliffordUnitaryDouble = GuppyFunctionDefinition[
 ]
 
 
-def compute_verification_signterms(
-    semantic_function: SemanticCliffordUnitary,
-    impl_function: ImplementationCliffordUnitary,
+def compute_verification_signterms_single_block_state(
+    semantic_function: SemanticStabilizerState,
+    impl_function: ImplementationStabilizerState,
     code_definition: StabilizerCode,
     num_ancilla_qubits: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
-    """Given a semantic Guppy function acting on k qubits and an impl Guppy function
-      acting on n qubits, compute a pair of Clifford tableaux. If the implementation
-        of the semantic function is valid, the two tableaux will be equivalent.
+    """Compute tableaux to verify correctness of stabilizer state preparation.
+
+    Given a semantic Guppy function acting on k qubits and an impl Guppy function
+      acting on n qubits, compute a pair of stabilizer tableaux. If the implementation
+      of the semantic function is valid, the two tableaux will be equivalent.
 
     :param semantic_function: A Guppy function for semantic action
       of a Clifford operator on k logical qubits.
@@ -173,11 +258,109 @@ def compute_verification_signterms(
       the semantics on n physical qubits.
     :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
       and logical operators.
+    :param num_ancilla_qubits: The number of ancilla qubits used in the
+        implementation. Defaults to zero.
+    :return: A pair of stabilizer tableaux made up of signed Pauli terms.
+    """
+    # Get the k stabilizers for the k qubit state.
+    semantic_stabilizers = compute_stabilizers_single_block_state(
+        semantic_function,
+        code_definition.num_logical_qubits + num_ancilla_qubits,
+    )
+
+    # Expand the k logical stabilizers to k stabilizers of size n.
+    # We also add the (n-k) stabilizer generators of our code.
+    # We have k + (n-k) = n stabilizers in total.
+    expanded_semantic_stabilizers = get_expanded_stabilizer_set(
+        semantic_stabilizers, code_definition, num_blocks=1
+    )
+
+    # Calculate the n stabilizers of the physical state.
+    implementation_stabilizers = compute_stabilizers_single_block_state(
+        impl_function,
+        code_definition.num_physical_qubits + num_ancilla_qubits,
+    )
+
+    # Canonicalize both tableaux so that we can test for equality.
+    expanded_semantic_stabilizers.canonicalize_all()
+    implementation_stabilizers.canonicalize_all()
+
+    return expanded_semantic_stabilizers, implementation_stabilizers
+
+
+def compute_verification_signterms_double_block_state(
+    semantic_function: SemanticStabilizerStateDouble,
+    impl_function: ImplementationStabilizerStateDouble,
+    code_definition: StabilizerCode,
+    num_ancilla_qubits: int = 0,
+) -> tuple[pauli.SignTerms, pauli.SignTerms]:
+    """Compute tableaux to verify 2 block stabilizer state preparation.
+
+    Given a semantic Guppy function acting on 2k qubits and an impl Guppy function
+      acting on 2n qubits, compute a pair of stabilizer tableaux. If the implementation
+      of the semantic function is valid, the two tableaux will be equivalent.
+
+    :param semantic_function: A Guppy function for semantic action
+      of a Clifford operator on 2k logical qubits.
+    :param impl_function: A Guppy function for implementing
+      the semantics on 2n physical qubits.
+    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
+      and logical operators.
+    :param num_ancilla_qubits: The number of ancilla qubits used in the
+        implementation. Defaults to zero.
+    :return: A pair of stabilizer tableaux made up of signed Pauli terms.
+    """
+    # Get the 2k stabilizers for the 2k qubit state.
+    semantic_stabilizers = compute_stabilizers_double_block_state(
+        semantic_function,
+        2 * code_definition.num_logical_qubits + num_ancilla_qubits,
+    )
+
+    # Expand the 2k logical stabilizers to 2k stabilizers of size 2n.
+    # We also add the 2(n-k) stabilizer generators of our code.
+    # We have 2k + 2(n-k) = 2n stabilizers in total.
+    expanded_semantic_stabilizers = get_expanded_stabilizer_set(
+        semantic_stabilizers, code_definition, num_blocks=2
+    )
+
+    # Calculate the 2n stabilizers of the physical state.
+    implementation_stabilizers = compute_stabilizers_double_block_state(
+        impl_function,
+        2 * code_definition.num_physical_qubits + num_ancilla_qubits,
+    )
+
+    # Canonicalize both tableaux so that we can test for equality.
+    expanded_semantic_stabilizers.canonicalize_all()
+    implementation_stabilizers.canonicalize_all()
+
+    return expanded_semantic_stabilizers, implementation_stabilizers
+
+
+def compute_verification_signterms_single_block_unitary(
+    semantic_function: SemanticCliffordUnitary,
+    impl_function: ImplementationCliffordUnitary,
+    code_definition: StabilizerCode,
+    num_ancilla_qubits: int = 0,
+) -> tuple[pauli.SignTerms, pauli.SignTerms]:
+    """Compute tableaux to verify correctness of Clifford unitary implementation.
+
+    Given a semantic Guppy function acting on k qubits and an impl Guppy function
+      acting on n qubits, compute a pair of Clifford tableaux. If the implementation
+      of the semantic function is valid, the two tableaux will be equivalent.
+
+    :param semantic_function: A Guppy function for semantic action
+      of a Clifford operator on k logical qubits.
+    :param impl_function: A Guppy function for implementing
+      the semantics on n physical qubits.
+    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
+      and logical operators.
+    :param num_ancilla_qubits: The number of ancilla qubits used in the
+        implementation. Defaults to zero.
     :return: A pair of Clifford tableaux made up of signed Pauli terms.
     """
 
     # Get the 2k stabilizers for the 2k qubit Choi state encoding the logical operation.
-    semantic_choi_stabilizers = compute_stabilizers_single_block(
+    semantic_choi_stabilizers = compute_stabilizers_single_block_unitary(
         identity_code(code_definition.num_logical_qubits),
         semantic_function,
         num_selene_qubits=2 * (code_definition.num_logical_qubits) + num_ancilla_qubits,
@@ -188,11 +371,11 @@ def compute_verification_signterms(
     # For each code block there are (n-k) so 2 blocks give us 2(n-k).
     # We have 2k + 2(n-k) = 2n stabilizers in total.
     expanded_semantic_stabilizers = get_expanded_stabilizer_set(
-        semantic_choi_stabilizers, code_definition, num_blocks=1
+        semantic_choi_stabilizers, code_definition, num_blocks=2
     )
 
     # Calculate the 2n stabilizers of the Choi state encoding the physical operation.
-    implementation_stabilizers = compute_stabilizers_single_block(
+    implementation_stabilizers = compute_stabilizers_single_block_unitary(
         code_definition,
         impl_function,
         num_selene_qubits=2 * (code_definition.num_physical_qubits)
@@ -206,16 +389,18 @@ def compute_verification_signterms(
     return expanded_semantic_stabilizers, implementation_stabilizers
 
 
-def compute_verification_signterms_double_block(
+def compute_verification_signterms_double_block_unitary(
     semantic_function: SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitaryDouble,
     code_definition: StabilizerCode,
     num_ancilla_qubits: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
-    """Given a semantic Guppy function acting between two code blocks and an
+    """Compute tableaux to verify correctness of 2 block Clifford unitary.
+
+    Given a semantic Guppy function acting between two code blocks and an
       impl Guppy function acting on n qubits compute a pair of Clifford tableaux.
-        If the implementation of the semantic function is valid,
-          the two tableaux will be equivalent.
+      If the implementation of the semantic function is valid,
+      the two tableaux will be equivalent.
 
     :param semantic_function: A Guppy function for semantic action
       of a Clifford operator on two code blocks.
@@ -223,11 +408,13 @@ def compute_verification_signterms_double_block(
       the semantics on two code blocks.
     :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
       and logical operators.
+    :param num_ancilla_qubits: The number of ancilla qubits used in the
+        implementation. Defaults to zero.
     :return: A pair of Clifford tableaux made up of signed Pauli terms.
     """
 
     # Get the 4k stabilizers for the 4k qubit Choi state encoding the logical operation.
-    semantic_choi_stabilizers = compute_stabilizers_double_block(
+    semantic_choi_stabilizers = compute_stabilizers_double_block_unitary(
         identity_code(code_definition.num_logical_qubits),
         semantic_function,
         num_selene_qubits=4 * (code_definition.num_logical_qubits) + num_ancilla_qubits,
@@ -236,11 +423,11 @@ def compute_verification_signterms_double_block(
     # Expand the 4k logical stabilizers and combine them with the generators for each
     #  block. We obtain 4k + 4(n-k) = 4n stablizers in total.
     expanded_semantic_stabilizers = get_expanded_stabilizer_set(
-        semantic_choi_stabilizers, code_definition, num_blocks=2
+        semantic_choi_stabilizers, code_definition, num_blocks=4
     )
 
     # Calculate the 4n stabilizers of the Choi state encoding the physical operation.
-    implementation_stabilizers = compute_stabilizers_double_block(
+    implementation_stabilizers = compute_stabilizers_double_block_unitary(
         code_definition,
         impl_function,
         num_selene_qubits=4 * (code_definition.num_physical_qubits)

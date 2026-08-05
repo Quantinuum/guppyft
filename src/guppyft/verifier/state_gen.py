@@ -187,7 +187,7 @@ def gen_choi_state(
 
     # Extend the tableau to physical qubits
     encoded_bell_bundle = get_expanded_stabilizer_set(
-        unencoded_bell_bundle, code, n_blocks
+        unencoded_bell_bundle, code, 2 * n_blocks
     )
 
     # Generate the Guppy function that prepares the bundle of encoded Bell states

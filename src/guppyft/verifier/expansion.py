@@ -3,9 +3,6 @@ from zixy.qubit import Qubits, pauli
 from guppyft.verifier.code import StabilizerCode
 
 
-# TODO: refactor this function to made smarter use of zixy's implicit padding.
-# Using shift_pauli should help.
-# Also allow >2 codeblocks.
 def pad_code_stabilizers(code: StabilizerCode, num_blocks: int) -> pauli.StringSet:
     """Returns a set of Stabilizers for each of the m codeblocks padded by
       the identity.
@@ -13,35 +10,29 @@ def pad_code_stabilizers(code: StabilizerCode, num_blocks: int) -> pauli.StringS
     For example, if we have two blocks of the steane code we have
     (n-k) Pauli strings indexed from 0-6 with the identity on qubits 7-13 and
     (n-k) Pauli strings indexed from 7-13 with the identity on qubits 0-6.
-    We get a set of pauli strings of size 2m(n-k).
-    The factor of 2 comes about because we are encoding an N qubit unitary
-      in a 2N qubit state by using map-state duality.
+    We get a set of pauli strings of size m(n-k).
+
+    Note: Remember that when using Choi states (for unitary testing via map-duality),
+      a factor of 2 is needed in the number of codeblocks.
 
     :param code: A StabilizerCode.
     :param num_blocks: The number of code blocks.
     :return: A set of Pauli strings made up of padded stabilizers
-      for each code block. Returns Pauli Strings for 2m blocks.
+      for each code block. Returns Pauli Strings for m blocks.
     """
     code_generators: pauli.StringSet = code.generators
-    generator_tuples = code_generators.to_strings().get_tuples()
-    padding = tuple([pauli.PauliMatrix.I for _ in range(code.num_physical_qubits)])
-    p0_padding = [g + padding for g in generator_tuples]
-    if num_blocks == 1:
-        p1_padding = [padding + g for g in generator_tuples]
-        combined = tuple(p0_padding + p1_padding)
-    elif num_blocks == 2:
-        p1_padding = [padding + g + 2 * padding for g in generator_tuples]
-        p2_padding = [padding * 2 + g + padding for g in generator_tuples]
-        p3_padding = [padding * 3 + g for g in generator_tuples]
-        combined = tuple(p0_padding + p1_padding + p2_padding + p3_padding)
-    else:
-        raise ValueError(
-            "Currently no more than two codeblocks are supported."
-            + f"Got argument num_blocks={num_blocks}."
-        )
+    generator_strings = code_generators.to_strings()
+    n = code.num_physical_qubits
+
+    combined = []
+    for i in range(num_blocks):
+        combined += [
+            shift_pauli(g.into(pauli.String), offset=i * n, size=num_blocks * n)
+            for g in generator_strings
+        ]
 
     return pauli.StringSet.from_iterable(
-        combined, 2 * num_blocks * code.num_physical_qubits
+        combined, num_blocks * code.num_physical_qubits
     )
 
 
@@ -143,7 +134,7 @@ def expand_logical_signterms(
     logical_terms: pauli.SignTerms,
     code: StabilizerCode,
 ) -> pauli.SignTerms:
-    """Given a tableau made up of signed Paul terms, expand each term according
+    """Given a tableau made up of signed Pauli terms, expand each term according
       as prescribed by the logical operators of a StabilizerCode.
 
     :param logical_terms: A tableau of signed Pauli terms to be expanded.
@@ -176,7 +167,7 @@ def get_expanded_stabilizer_set(
     """Given a tableau of signed logical Pauli terms and a number of codeblocks(m),
       expand the terms according to the logical operators of a StabilizerCode.
         These expanded Paulis are also combined with the padded
-          Stabilizer generators to give 2mn terms in total.
+          Stabilizer generators to give mn terms in total.
 
     :param signed_logical_paulis: A tableau of signed Pauli terms to be expanded.
     :param code: A stabilizer code with well defined [[n, k, d]] parameters
@@ -185,7 +176,7 @@ def get_expanded_stabilizer_set(
     :return: An expanded SignTerms tableau.
     """
 
-    # Firstly, we expand the stabilizers of the choi state using the
+    # Firstly, we expand the stabilizers of the state using the
     # logical operators of the StabilizerCode
     stabilizers: pauli.SignTerms = expand_logical_signterms(signed_logical_paulis, code)
     # Secondly, we include the stabilizer generators for each code block.

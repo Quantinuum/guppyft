@@ -7,7 +7,7 @@ from typing import no_type_check
 from guppylang import guppy
 from guppylang.std.array import array
 from guppylang.std.mem import mem_swap
-from guppylang.std.quantum import cx, cz, h, qubit, s, sdg, y
+from guppylang.std.quantum import cx, cz, h, qubit, s, sdg, y, z
 from zixy.qubit import pauli
 from zixy.qubit.pauli import X, Z
 
@@ -61,6 +61,72 @@ def implement_identity_double_block(
     first_block: array[qubit, 5], second_block: array[qubit, 5]
 ) -> None:
     pass
+
+
+@guppy
+@no_type_check
+def specify_zero_state() -> array[qubit, 1]:
+    return array(qubit())
+
+
+@guppy
+@no_type_check
+def implement_non_ft_zero_state() -> array[qubit, 5]:
+    """Non fault-tolerant zero state preparation.
+
+    Not taken from any reference, derived in blackboard.
+    """
+    block = array(qubit() for _ in range(5))
+
+    for i in range(len(block)):
+        h(block[i])
+
+    minus_ids = array(0, 3)
+    for i in minus_ids:
+        z(block[i])
+
+    cz_pairs = array((0, 2), (0, 4), (1, 2), (1, 3), (1, 4), (2, 4), (3, 4))
+    for i, j in cz_pairs:
+        cz(block[i], block[j])
+
+    h(block[4])
+
+    return block
+
+
+@guppy
+@no_type_check
+def specify_plus_state() -> array[qubit, 1]:
+    q = qubit()
+    h(q)
+    return array(q)
+
+
+@guppy
+@no_type_check
+def implement_non_ft_plus_state() -> array[qubit, 5]:
+    block = implement_non_ft_zero_state()
+    implement_h(block)
+    return block
+
+
+@guppy
+@no_type_check
+def specify_bell_state() -> tuple[array[qubit, 1], array[qubit, 1]]:
+    q0 = qubit()
+    q1 = qubit()
+    h(q0)
+    cx(q0, q1)
+    return array(q0), array(q1)
+
+
+@guppy
+@no_type_check
+def implement_non_ft_bell_state() -> tuple[array[qubit, 5], array[qubit, 5]]:
+    block0 = implement_non_ft_plus_state()
+    block1 = implement_non_ft_zero_state()
+    implement_cx(block0, block1)
+    return block0, block1
 
 
 @guppy

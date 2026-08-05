@@ -62,6 +62,79 @@ def implement_identity(block: array[qubit, 4]) -> None:
 
 @guppy
 @no_type_check
+def specify_identity_double_block(
+    first_block: array[qubit, 2], second_block: array[qubit, 2]
+) -> None:
+    pass
+
+
+@guppy
+@no_type_check
+def implement_identity_double_block(
+    first_block: array[qubit, 4], second_block: array[qubit, 4]
+) -> None:
+    pass
+
+
+@guppy
+@no_type_check
+def specify_zero_state() -> array[qubit, 2]:
+    return array(qubit() for _ in range(2))
+
+
+@guppy
+@no_type_check
+def implement_non_ft_zero_state() -> array[qubit, 4]:
+    """Non fault-tolerant zero state preparation."""
+    block = array(qubit() for _ in range(4))
+
+    h(block[0])
+    cx(block[0], block[1])
+    cx(block[0], block[2])
+    cx(block[0], block[3])
+
+    return block
+
+
+@guppy
+@no_type_check
+def specify_plus_state() -> array[qubit, 2]:
+    qs = array(qubit() for _ in range(2))
+    for i in range(len(qs)):
+        h(qs[i])
+    return qs
+
+
+@guppy
+@no_type_check
+def implement_non_ft_plus_state() -> array[qubit, 4]:
+    block = implement_non_ft_zero_state()
+    implement_double_h(block)
+    return block
+
+
+@guppy
+@no_type_check
+def specify_bell_state() -> tuple[array[qubit, 2], array[qubit, 2]]:
+    first_block = array(qubit() for _ in range(2))
+    second_block = array(qubit() for _ in range(2))
+    for i in range(2):
+        h(first_block[i])
+        cx(first_block[i], second_block[i])
+    return first_block, second_block
+
+
+@guppy
+@no_type_check
+def implement_non_ft_bell_state() -> tuple[array[qubit, 4], array[qubit, 4]]:
+    first_block = implement_non_ft_plus_state()
+    second_block = implement_non_ft_zero_state()
+    implement_transversal_cx(first_block, second_block)
+    return first_block, second_block
+
+
+@guppy
+@no_type_check
 def specify_intra_block_cx(block: array[qubit, 2]) -> None:
     cx(block[0], block[1])
 
@@ -199,19 +272,3 @@ def implement_transversal_cx(
 ) -> None:
     for i in range(4):
         cx(first_block[i], second_block[i])
-
-
-@guppy
-@no_type_check
-def specify_identity_double_block(
-    first_block: array[qubit, 2], second_block: array[qubit, 2]
-) -> None:
-    pass
-
-
-@guppy
-@no_type_check
-def implement_identity_double_block(
-    first_block: array[qubit, 4], second_block: array[qubit, 4]
-) -> None:
-    pass
