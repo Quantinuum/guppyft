@@ -67,18 +67,20 @@ def test_canonical() -> None:
 
 def test_bell_state_stabilizers() -> None:
     stabilizer_terms = compute_stabilizers_single_block(
-        identity_code(1), steane.specify_identity, 1
+        code=identity_code(1),
+        clifford_func=steane.specify_identity,
+        num_selene_qubits=2,
     )
     assert str(stabilizer_terms) == "(+1, X0 X1), (+1, Z0 Z1)"
 
 
 def test_s_state_stabilizers() -> None:
     terms_logical = compute_stabilizers_single_block(
-        identity_code(1), steane.specify_s, 1
+        code=identity_code(1), clifford_func=steane.specify_s, num_selene_qubits=2
     )
 
     terms_physical = compute_stabilizers_single_block(
-        steane.STEANE_DEF, steane.implement_s, 7
+        steane.STEANE_DEF, steane.implement_s, 14
     )
 
     assert str(terms_logical) == "(+1, X0 Y1), (+1, Z0 Z1)"
@@ -87,9 +89,9 @@ def test_s_state_stabilizers() -> None:
 
 def test_compute_stabilizers_double_block() -> None:
     stabilizers = compute_stabilizers_double_block(
-        identity_code(1),
-        steane.specify_identity_double_block,
-        2,
+        code=identity_code(1),
+        clifford_func=steane.specify_identity_double_block,
+        num_selene_qubits=4,
     )
 
     assert stabilizers == pauli.SignTerms.from_iterable(
@@ -159,7 +161,7 @@ def test_stabilizer_padding_double_block() -> None:
 
 def test_compute_stabilizers_single_block_iceberg_id() -> None:
     choi_stabilizers_before_expansion = compute_stabilizers_single_block(
-        identity_code(2), iceberg.specify_identity, 2
+        identity_code(2), iceberg.specify_identity, 4
     )
     assert (
         str(choi_stabilizers_before_expansion)
@@ -190,7 +192,7 @@ def test_compute_stabilizers_double_block_iceberg_id() -> None:
     choi_stabilizers_before_expansion = compute_stabilizers_double_block(
         identity_code(2),
         iceberg.specify_identity_double_block,
-        4,
+        8,
     )
     assert (
         str(choi_stabilizers_before_expansion)
@@ -211,7 +213,7 @@ def test_compute_stabilizers_intrablock_cx_iceberg() -> None:
     choi_stabilizers_before_expansion = compute_stabilizers_single_block(
         identity_code(2),
         iceberg.specify_intra_block_cx,
-        2,
+        4,
     )
     assert (
         str(choi_stabilizers_before_expansion)

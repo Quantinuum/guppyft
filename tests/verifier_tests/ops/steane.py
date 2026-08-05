@@ -2,7 +2,7 @@ from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.std.array import array
-from guppylang.std.quantum import cx, h, qubit, s, sdg
+from guppylang.std.quantum import cx, discard, h, measure, qubit, s, sdg
 from zixy.qubit import pauli
 from zixy.qubit.pauli import X, Z
 
@@ -61,10 +61,34 @@ def implement_identity(block: array[qubit, 7]) -> None:
 
 @guppy
 @no_type_check
+def implement_identity_with_shor_extraction(block: array[qubit, 7]) -> None:
+    # measure the ZZZZIII stabilizer
+    ancilla = qubit()
+    for i in array(0, 1, 2, 3):
+        cx(block[i], ancilla)
+    measure(ancilla)
+
+
+@guppy
+@no_type_check
 def implement_identity_double_block(
     first_block: array[qubit, 7], second_block: array[qubit, 7]
 ) -> None:
     pass
+
+
+@guppy
+@no_type_check
+def implement_identity_double_block_with_shor_extraction(
+    first_block: array[qubit, 7], second_block: array[qubit, 7]
+) -> None:
+    first_ancilla, second_ancilla = qubit(), qubit()
+    for i in array(0, 1, 2, 3):
+        cx(first_block[i], first_ancilla)
+        cx(second_block[i], second_ancilla)
+
+    measure(first_ancilla)
+    measure(second_ancilla)
 
 
 @guppy
@@ -78,6 +102,15 @@ def implement_h(block: array[qubit, 7]) -> None:
 @no_type_check
 def specify_h(block: array[qubit, 1]) -> None:
     h(block[0])
+
+
+@guppy
+@no_type_check
+def implement_h_with_ancilla(block: array[qubit, 7]) -> None:
+    ancilla = qubit()
+    for i in range(len(block)):
+        h(block[i])
+    discard(ancilla)
 
 
 @guppy
