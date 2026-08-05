@@ -42,8 +42,8 @@ def compute_stabilizers_single_block(
     :param code: The stabilizer code.
     :param clifford_func: A Guppy function which implements a Clifford unitary
         on a single code block.
-    :param num_selene_qubits: An upper bound for the number of qubits used
-      by clifford_func.
+    :param num_selene_qubits: An upper bound for the number of qubits
+      used in the choi state for clifford_func.
     :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
 
@@ -62,7 +62,7 @@ def compute_stabilizers_single_block(
         discard_array(targets)
 
     states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
-        main, 2 * num_selene_qubits
+        main, num_selene_qubits=num_selene_qubits
     )
 
     # This is a hack so that we can get a state_output over both the
@@ -91,7 +91,7 @@ def compute_stabilizers_double_block(
     :param clifford_func: A Guppy function which implements a Clifford unitary
       across two code blocks.
     :param num_selene_qubits: An upper bound for the number of qubits
-      used by clifford_func.
+      used in the choi state for clifford_func.
     :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
 
@@ -118,7 +118,7 @@ def compute_stabilizers_double_block(
         discard_array(second_targets)
 
     states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
-        main, 2 * num_selene_qubits
+        main, num_selene_qubits
     )
 
     # Using a hack to get the state_output across four code blocks. See the
