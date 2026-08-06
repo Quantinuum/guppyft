@@ -10,41 +10,37 @@ from zixy.qubit import pauli
 
 from guppyft.verifier.code import StabilizerCode
 
-ICEBERG_GENERATORS = pauli.StringSet.from_cmpnts(
+GENERATORS = pauli.StringSet.from_cmpnts(
     pauli.Strings.from_str(
         "X0 X1 X2 X3, Z0 Z1 Z2 Z3",
         4,
     )
 )
 
-# IMPORTANT: Iceberg codeblock ordering
+# X_LOGICAL[0]: XI -> XXII
+# X_LOGICAL[1]: IX -> XIXI
 
-# [top q1, q2, bottom]
-
-# ICEBERG_X_LOGICAL[0]: XI -> XXII
-# ICEBERG_X_LOGICAL[1]: IX -> XIXI
-
-ICEBERG_X_LOGICAL = pauli.Strings.from_str(
+X_LOGICAL = pauli.Strings.from_str(
     "X0 X1 I2 I3, X0 I1 X2 I3",
     4,
 )
 
-# ICEBERG_Z_LOGICAL[0]: ZI -> IZIZ
-# ICEBERG_Z_LOGICAL[1]: IZ -> IIZZ
+# Z_LOGICAL[0]: ZI -> IZIZ
+# Z_LOGICAL[1]: IZ -> IIZZ
 
-ICEBERG_Z_LOGICAL = pauli.Strings.from_str(
+Z_LOGICAL = pauli.Strings.from_str(
     "I0 Z1 I2 Z3, I0 I1 Z2 Z3",
     4,
 )
 
 
-ICEBERG_DEF = StabilizerCode(
+CSS_4Q_DEF = StabilizerCode(
     num_physical_qubits=4,
     num_logical_qubits=2,
     distance=2,
-    generators=ICEBERG_GENERATORS,
-    x_logicals=ICEBERG_X_LOGICAL,
-    z_logicals=ICEBERG_Z_LOGICAL,
+    generators=GENERATORS,
+    x_logicals=X_LOGICAL,
+    z_logicals=Z_LOGICAL,
 )
 
 
@@ -184,6 +180,7 @@ def specify_addressable_rz_half_pi(block: array[qubit, 2]) -> None:
 @guppy
 @no_type_check
 def implement_addressable_rz_half_pi(block: array[qubit, 4]) -> None:
+    """Non FT"""
     zz_max(block[2], block[3])
 
 
@@ -196,6 +193,7 @@ def specify_addressable_rx_half_pi(block: array[qubit, 2]) -> None:
 @guppy
 @no_type_check
 def implement_addressable_rx_half_pi(block: array[qubit, 4]) -> None:
+    """Non FT"""
     h(block[0])
     h(block[2])
     zz_max(block[0], block[2])
@@ -212,6 +210,7 @@ def specify_addressable_rx_minus_half_pi(block: array[qubit, 2]) -> None:
 @guppy
 @no_type_check
 def implement_addressable_rx_minus_half_pi(block: array[qubit, 4]) -> None:
+    """Non FT"""
     h(block[0])
     h(block[2])
     zz_phase(block[0], block[2], -pi / 2)
@@ -249,6 +248,7 @@ def implement_interblock_zzmax(
     first_block: array[qubit, 4],
     second_block: array[qubit, 4],
 ) -> None:
+    """Non FT"""
     cx(first_block[2], second_block[2])
     cx(first_block[3], second_block[3])
     zz_max(second_block[2], second_block[3])

@@ -12,7 +12,7 @@ from guppyft.verifier.verify import (
     compute_stabilizers_single_block_unitary,
 )
 
-from .ops import iceberg, steane
+from .ops import css_4q, steane
 
 LOGICAL_STRINGSET = pauli.StringSet.from_cmpnts(pauli.Strings.from_str("X0 X1, Z0 Z1"))
 
@@ -159,9 +159,9 @@ def test_stabilizer_padding_double_block() -> None:
     )
 
 
-def test_compute_stabilizers_single_block_iceberg_id() -> None:
+def test_compute_stabilizers_single_block_css_4q_id() -> None:
     choi_stabilizers_before_expansion = compute_stabilizers_single_block_unitary(
-        identity_code(2), iceberg.specify_identity, 4
+        identity_code(2), css_4q.specify_identity, 4
     )
     assert (
         str(choi_stabilizers_before_expansion)
@@ -169,17 +169,17 @@ def test_compute_stabilizers_single_block_iceberg_id() -> None:
     )
 
     expanded = expand_logical_signterms(
-        choi_stabilizers_before_expansion, iceberg.ICEBERG_DEF
+        choi_stabilizers_before_expansion, css_4q.CSS_4Q_DEF
     )
     assert (
         str(expanded)
         == "(+1, X0 X1 X4 X5), (+1, Z1 Z3 Z5 Z7), (+1, X0 X2 X4 X6), (+1, Z2 Z3 Z6 Z7)"
     )
 
-    padded = pad_code_stabilizers(iceberg.ICEBERG_DEF, num_blocks=2)
+    padded = pad_code_stabilizers(css_4q.CSS_4Q_DEF, num_blocks=2)
     assert str(padded) == "X0 X1 X2 X3, Z0 Z1 Z2 Z3, X4 X5 X6 X7, Z4 Z5 Z6 Z7"
     expanded_stabilizer_state_stabilizers = get_expanded_stabilizer_set(
-        choi_stabilizers_before_expansion, iceberg.ICEBERG_DEF, num_blocks=2
+        choi_stabilizers_before_expansion, css_4q.CSS_4Q_DEF, num_blocks=2
     )
     assert (
         str(expanded_stabilizer_state_stabilizers)
@@ -188,10 +188,10 @@ def test_compute_stabilizers_single_block_iceberg_id() -> None:
     )
 
 
-def test_compute_stabilizers_double_block_iceberg_id() -> None:
+def test_compute_stabilizers_double_block_css_4q_id() -> None:
     choi_stabilizers_before_expansion = compute_stabilizers_double_block_unitary(
         identity_code(2),
-        iceberg.specify_identity_double_block,
+        css_4q.specify_identity_double_block,
         8,
     )
     assert (
@@ -200,7 +200,7 @@ def test_compute_stabilizers_double_block_iceberg_id() -> None:
         + " (+1, X4 X6), (+1, Z4 Z6), (+1, X5 X7), (+1, Z5 Z7)"
     )
     expanded = expand_logical_signterms(
-        choi_stabilizers_before_expansion, iceberg.ICEBERG_DEF
+        choi_stabilizers_before_expansion, css_4q.CSS_4Q_DEF
     )
     assert (
         str(expanded)
@@ -209,10 +209,10 @@ def test_compute_stabilizers_double_block_iceberg_id() -> None:
     )
 
 
-def test_compute_stabilizers_intrablock_cx_iceberg() -> None:
+def test_compute_stabilizers_intrablock_cx_css_4q() -> None:
     choi_stabilizers_before_expansion = compute_stabilizers_single_block_unitary(
         identity_code(2),
-        iceberg.specify_intra_block_cx,
+        css_4q.specify_intra_block_cx,
         4,
     )
     assert (
@@ -220,7 +220,7 @@ def test_compute_stabilizers_intrablock_cx_iceberg() -> None:
         == "(+1, X0 X2 X3), (+1, Z0 Z2), (+1, X1 X3), (+1, Z1 Z2 Z3)"
     )
     expanded = expand_logical_signterms(
-        choi_stabilizers_before_expansion, iceberg.ICEBERG_DEF
+        choi_stabilizers_before_expansion, css_4q.CSS_4Q_DEF
     )
     assert (
         str(expanded)

@@ -6,11 +6,7 @@ from guppyft.verifier.code import (
     StabilizerCode,
 )
 
-from .ops.iceberg import (
-    ICEBERG_GENERATORS,
-    ICEBERG_X_LOGICAL,
-    ICEBERG_Z_LOGICAL,
-)
+from .ops import css_4q
 from .ops.steane import STEANE_DEF
 
 
@@ -37,8 +33,8 @@ def test_code_validation() -> None:
             2,
             2,
             generators=fake_generators1,
-            x_logicals=ICEBERG_X_LOGICAL,
-            z_logicals=ICEBERG_Z_LOGICAL,
+            x_logicals=css_4q.X_LOGICAL,
+            z_logicals=css_4q.Z_LOGICAL,
         )
 
     fake_x_logicals = pauli.Strings.from_str(
@@ -54,9 +50,9 @@ def test_code_validation() -> None:
             4,
             2,
             2,
-            generators=ICEBERG_GENERATORS,
+            generators=css_4q.GENERATORS,
             x_logicals=fake_x_logicals,
-            z_logicals=ICEBERG_Z_LOGICAL,
+            z_logicals=css_4q.Z_LOGICAL,
         )
 
     fake_generators2 = pauli.StringSet.from_cmpnts(
@@ -74,6 +70,6 @@ def test_code_validation() -> None:
             2,
             2,
             generators=fake_generators2,
-            x_logicals=ICEBERG_X_LOGICAL,
-            z_logicals=ICEBERG_Z_LOGICAL,
+            x_logicals=css_4q.X_LOGICAL,
+            z_logicals=css_4q.Z_LOGICAL,
         )
