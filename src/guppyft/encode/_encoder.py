@@ -18,13 +18,11 @@ class ReplaceEncoder(ComposablePass):
     See `guppyft._bindings._replace_encoder` for details on the replacement semantics.
     """
 
-    op_replacements: dict[tuple[str, str], tuple[str, str, list[int | str | list[str]]]]
+    op_replacements: dict[tuple[str, str], tuple[str, str, list[int | str]]]
     """Maps each source `(extension_name, op_name)` pair (taking no type args)
     to a target `(extension_name, op_name, args)` triple, where `args` is the
-    list of type args used to instantiate the target op: each is an integer
-    (a `BoundedNat` arg), a string (a `String` arg), or a list of type names
-    (a `List` arg of `Type` terms, e.g. for a row-variable argument like
-    `decode`'s row-of-`Bool`s parameter)."""
+    list of type args (integers or strings) used to instantiate the target
+    op."""
     extensions: ExtensionRegistry | None = None
     """Optional JSON-encoded list of additional extension definitions, used to
     resolve target ops/types that are not already registered on the input Hugr."""

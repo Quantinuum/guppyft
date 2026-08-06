@@ -285,11 +285,7 @@ class SteaneSpec:
                     "measure_z",
                     [],
                 ),
-                ("tket.measurement", "Read"): (
-                    "guppyft.std.ops",
-                    "decode",
-                    [1, ["bool"]],
-                ),
+                ("tket.measurement", "Read"): ("guppyft.std.ops", "decode", [1]),
             },
             extensions=ext,
         )

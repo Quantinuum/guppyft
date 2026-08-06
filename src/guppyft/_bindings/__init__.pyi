@@ -38,9 +38,7 @@ def _implement_ops(
 
 def _replace_encoder(
         rs_hugr: RsHugr,
-        op_replacements: dict[
-            tuple[str, str], tuple[str, str, list[int | str | list[str]]]
-        ],
+        op_replacements: dict[tuple[str, str], tuple[str, str, list[int | str]]],
         extensions: str | None = None,
     ) -> None:
     """
@@ -49,10 +47,8 @@ def _replace_encoder(
     `op_replacements` maps each source `(extension_name, op_name)` pair (which
     must take no type args) to a target `(extension_name, op_name, args)`
     triple, where `args` is the (possibly empty) list of type args - each
-    either an `int` (a `BoundedNat` arg), a `str` (a `String` arg), or a
-    `list[str]` (a `List` arg of `Type` terms, one per type name - currently
-    only `"bool"` is supported - used for row-variable arguments such as
-    `decode`'s row-of-`Bool`s parameter) - used to instantiate the target op.
+    either an `int` (a `BoundedNat` arg) or a `str` (a `String` arg) - used to
+    instantiate the target op.
     `extensions` is an optional JSON-encoded list of additional extension
     definitions to use when resolving the source/target ops and types, for
     extensions not already registered on `rs_hugr`.

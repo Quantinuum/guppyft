@@ -77,7 +77,7 @@ def test_guppy_bindings_smoke() -> None:
         q1.free()
         magic = prep_magic_for_t_like()
         q0.inject_magic_for_t(magic)
-        result("q0", q0.measure_z().decode()[0])
+        result("q0", q0.measure_z().decode())
 
     pkg = main.compile()
     h = pkg.modules[0]
@@ -92,7 +92,7 @@ def test_guppy_hugr() -> None:
     def main() -> None:
         q = Qubit()
         q.h()
-        result("a", q.measure_z().decode()[0])
+        result("a", q.measure_z().decode())
 
     pkg = main.compile()
     h = pkg.modules[0]
@@ -110,8 +110,11 @@ def test_guppy_hugr() -> None:
         "guppyft.steane.ops.h",
         "guppyft.steane.ops.measure_z",
         "Output",
-        "guppyft.std.ops.decode<1, [Type(Bool)]>",
-        'tket.result.result_bool<"a">',
+        "guppyft.std.ops.decode<1>",
+        "collections.borrow_arr.clone<1, Type(Bool)>",
+        "collections.borrow_arr.to_array<1, Type(Bool)>",
+        'tket.result.result_array_bool<"a", 1>',
+        "tket.guppy.drop<Type(borrow_array<1, Type(Bool)>)>",
     }
     [h_node] = [child for child in children if "h" in h[child].op.name()]
     assert len(list(h.incoming_links(h_node))) == 1  # CallIndirect

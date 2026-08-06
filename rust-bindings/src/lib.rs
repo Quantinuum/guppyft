@@ -21,15 +21,11 @@ mod _bindings {
     use tket::passes::{ComposablePass, ReplaceTypes};
 
     /// A single [`hugr::types::TypeArg`] value as passed from Python, either an int
-    /// (mapped to a `BoundedNat` argument), a str (mapped to a `String` argument),
-    /// or a list of type names (mapped to a `List` argument of `Type` terms --
-    /// used for row-variable arguments such as `decode`'s row-of-`Bool`s
-    /// parameter). Currently, the only supported type name is `"bool"`.
+    /// (mapped to a `BoundedNat` argument) or a str (mapped to a `String` argument).
     #[derive(Debug, Clone, FromPyObject)]
     enum PyTypeArgValue {
         Int(u64),
         Str(String),
-        TypeList(Vec<String>),
     }
 
     #[pyfunction]
@@ -40,7 +36,6 @@ mod _bindings {
         extensions: Option<String>,
     ) -> PyResult<()> {
         use tket::hugr::extension::ExtensionRegistry;
-        use tket::hugr::extension::prelude::bool_t;
         use tket::hugr::types::TypeArg;
 
         let hugr = &mut rs_hugr.hugr;
@@ -65,22 +60,10 @@ mod _bindings {
             let type_args: Vec<TypeArg> = tgt_args
                 .iter()
                 .map(|arg: &PyTypeArgValue| match arg {
-                    PyTypeArgValue::Int(n) => Ok(TypeArg::from(*n)),
-                    PyTypeArgValue::Str(s) => Ok(TypeArg::from(s.clone())),
-                    PyTypeArgValue::TypeList(names) => {
-                        let elems: Result<Vec<TypeArg>, PyErr> = names
-                            .iter()
-                            .map(|name| match name.as_str() {
-                                "bool" => Ok(TypeArg::from(bool_t())),
-                                other => Err(PyValueError::new_err(format!(
-                                    "Unsupported type name in type list: '{other}'"
-                                ))),
-                            })
-                            .collect();
-                        Ok(TypeArg::new_list(elems?))
-                    }
+                    PyTypeArgValue::Int(n) => TypeArg::from(*n),
+                    PyTypeArgValue::Str(s) => TypeArg::from(s.clone()),
                 })
-                .collect::<PyResult<Vec<TypeArg>>>()?;
+                .collect();
             let tgt = lookup_op(&registry, tgt_ext, tgt_op, type_args)?;
             pass.set_replace_op(&src, NodeTemplate::SingleOp(tgt.into()));
         }
