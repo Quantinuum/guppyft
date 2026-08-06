@@ -6,41 +6,16 @@ from guppylang.std.array import array
 from guppylang.std.mem import mem_swap
 from guppylang.std.qsystem.helios import zz_max, zz_phase
 from guppylang.std.quantum import cx, cz, h, qubit, rx, rz, s, sdg
-from zixy.qubit import pauli
 
 from guppyft.verifier.code import StabilizerCode
 
-GENERATORS = pauli.StringSet.from_cmpnts(
-    pauli.Strings.from_str(
-        "X0 X1 X2 X3, Z0 Z1 Z2 Z3",
-        4,
-    )
-)
-
-# X_LOGICAL[0]: XI -> XXII
-# X_LOGICAL[1]: IX -> XIXI
-
-X_LOGICAL = pauli.Strings.from_str(
-    "X0 X1 I2 I3, X0 I1 X2 I3",
-    4,
-)
-
-# Z_LOGICAL[0]: ZI -> IZIZ
-# Z_LOGICAL[1]: IZ -> IIZZ
-
-Z_LOGICAL = pauli.Strings.from_str(
-    "I0 Z1 I2 Z3, I0 I1 Z2 Z3",
-    4,
-)
-
-
-CSS_4Q_DEF = StabilizerCode(
+CSS_4Q_DEF = StabilizerCode.from_strings(
     num_physical_qubits=4,
     num_logical_qubits=2,
     distance=2,
-    generators=GENERATORS,
-    x_logicals=X_LOGICAL,
-    z_logicals=Z_LOGICAL,
+    generators=["XXXX", "ZZZZ"],
+    x_logicals=["XXII", "XIXI"],
+    z_logicals=["IZIZ", "IIZZ"],
 )
 
 
