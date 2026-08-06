@@ -20,8 +20,9 @@ LOGICAL_STRINGSET = pauli.StringSet.from_cmpnts(pauli.Strings.from_str("X0 X1, Z
 def test_padding() -> None:
     padded_steane_stabilizers = pad_code_stabilizers(steane.STEANE_DEF, num_blocks=2)
     assert len(padded_steane_stabilizers) == 2 * (7 - 1)
-    for g_tuple in padded_steane_stabilizers.to_strings().get_tuples():
-        assert len(g_tuple) == 2 * 7
+    for g in padded_steane_stabilizers:
+        assert isinstance(g, pauli.SignTerm)
+        assert len(g.string.get_tuple()) == 2 * 7
 
 
 def test_logical_expansion() -> None:
@@ -142,16 +143,11 @@ def test_stabilizer_padding_double_block() -> None:
         steane.STEANE_DEF.num_physical_qubits - steane.STEANE_DEF.num_logical_qubits
     )
 
+    strings = padded_double_block_stabilizers.into(pauli.Strings)  # type: ignore[arg-type]
+    assert isinstance(strings, pauli.Strings)
+    assert np.all(strings.compatibility_matrix() == 1)
     assert (
-        np.all(
-            padded_double_block_stabilizers.to_strings()
-            .into(pauli.Strings)
-            .compatibility_matrix()
-        )
-        == 1
-    )
-    assert (
-        str(padded_double_block_stabilizers)
+        str(strings)
         == "X0 X1 X2 X3, X1 X2 X4 X5, X2 X3 X5 X6, Z0 Z1 Z2 Z3, Z1 Z2 Z4 Z5, Z2 Z3 Z5 Z6,"  # noqa: E501
         + " X7 X8 X9 X10, X8 X9 X11 X12, X9 X10 X12 X13, Z7 Z8 Z9 Z10, Z8 Z9 Z11 Z12, Z9 Z10 Z12 Z13,"  # noqa: E501
         + " X14 X15 X16 X17, X15 X16 X18 X19, X16 X17 X19 X20, Z14 Z15 Z16 Z17, Z15 Z16 Z18 Z19, Z16 Z17 Z19 Z20,"  # noqa: E501
@@ -177,7 +173,10 @@ def test_compute_stabilizers_single_block_css_4q_id() -> None:
     )
 
     padded = pad_code_stabilizers(css_4q.CSS_4Q_DEF, num_blocks=2)
-    assert str(padded) == "X0 X1 X2 X3, Z0 Z1 Z2 Z3, X4 X5 X6 X7, Z4 Z5 Z6 Z7"
+    assert (
+        str(padded)
+        == "(+1, X0 X1 X2 X3), (+1, Z0 Z1 Z2 Z3), (+1, X4 X5 X6 X7), (+1, Z4 Z5 Z6 Z7)"
+    )
     expanded_stabilizer_state_stabilizers = get_expanded_stabilizer_set(
         choi_stabilizers_before_expansion, css_4q.CSS_4Q_DEF, num_blocks=2
     )

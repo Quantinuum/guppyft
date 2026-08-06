@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from functools import cached_property
 
@@ -15,9 +17,9 @@ class StabilizerCode:
     num_physical_qubits: int
     num_logical_qubits: int
     distance: int
-    generators: pauli.StringSet
-    x_logicals: pauli.Strings
-    z_logicals: pauli.Strings
+    generators: pauli.SignTermSet
+    x_logicals: pauli.SignTerms
+    z_logicals: pauli.SignTerms
 
     @cached_property
     def y_logicals(self) -> pauli.SignTerms:
@@ -52,9 +54,8 @@ class StabilizerCode:
                 f"got {len(self.z_logicals)}."
             )
 
-        all_stabilizer_generators_commute = np.all(
-            self.generators.to_strings().into(pauli.Strings).compatibility_matrix() == 1
-        )
+        strings: pauli.Strings = self.generators.into(pauli.Strings)  # type: ignore[assignment, arg-type]
+        all_stabilizer_generators_commute = np.all(strings.compatibility_matrix() == 1)
 
         if not all_stabilizer_generators_commute:
             raise CodeDefinitionError("All of the stabilizer generators must commute!")
@@ -67,7 +68,7 @@ class StabilizerCode:
         generators: list[str],
         x_logicals: list[str],
         z_logicals: list[str],
-    ) -> "StabilizerCode":
+    ) -> StabilizerCode:
         """Helper to create a StabilizerCode from lists of Python strings.
 
         The strings must be defined over the alphabet {I, X, Y, Z} and must be
@@ -82,19 +83,19 @@ class StabilizerCode:
         :param z_logicals: A list of Z logical operators as Pauli strings.
         :return: A StabilizerCode instance representing the code.
         """
-        zixy_generators = pauli.StringSet(num_physical_qubits)
-        zixy_generators.insert_iterable(
-            _str_to_zixy(s, num_physical_qubits) for s in generators
+        zixy_generators = pauli.SignTermSet.from_iterable(
+            (_str_to_zixy(s, num_physical_qubits) for s in generators),
+            num_physical_qubits,
         )
 
-        zixy_x_logicals = pauli.Strings(num_physical_qubits)
-        zixy_x_logicals.append_iterable(
-            _str_to_zixy(s, num_physical_qubits) for s in x_logicals
+        zixy_x_logicals = pauli.SignTerms.from_iterable(
+            (_str_to_zixy(s, num_physical_qubits) for s in x_logicals),
+            num_physical_qubits,
         )
 
-        zixy_z_logicals = pauli.Strings(num_physical_qubits)
-        zixy_z_logicals.append_iterable(
-            _str_to_zixy(s, num_physical_qubits) for s in z_logicals
+        zixy_z_logicals = pauli.SignTerms.from_iterable(
+            (_str_to_zixy(s, num_physical_qubits) for s in z_logicals),
+            num_physical_qubits,
         )
 
         return StabilizerCode(
@@ -107,7 +108,7 @@ class StabilizerCode:
         )
 
 
-def _str_to_zixy(s: str, n: int) -> pauli.String:
+def _str_to_zixy(s: str, n: int) -> pauli.SignTerm:
     if s[0] not in "+-":
         s = "+" + s
 
@@ -122,7 +123,8 @@ def _str_to_zixy(s: str, n: int) -> pauli.String:
             f"Got string '{s}' with invalid characters."
         )
 
-    return pauli.String.from_str("".join(f"{c}{i} " for i, c in enumerate(s[1:])), n)
+    str = "".join(f"{c}{i} " for i, c in enumerate(s[1:]))
+    return pauli.SignTerm.from_str(f"({s[0]}1, {str})", n)
 
 
 def identity_code(k: int) -> StabilizerCode:
