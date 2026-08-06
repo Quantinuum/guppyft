@@ -17,7 +17,7 @@ def test_qalloc_measure() -> None:
     phys_pkg = SteaneSpec(n_blocks=1).implement_ops(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=7).run().collated_shots()
 
-    assert res == [{"res": [[0]]}]
+    assert res == [{"res": [0]}]
 
 
 def test_x() -> None:
@@ -32,7 +32,7 @@ def test_x() -> None:
     phys_pkg = SteaneSpec(n_blocks=1).implement_ops(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=7).run().collated_shots()
 
-    assert res == [{"res": [[1]]}]
+    assert res == [{"res": [1]}]
 
 
 def test_h_z() -> None:
@@ -49,7 +49,7 @@ def test_h_z() -> None:
     phys_pkg = SteaneSpec(n_blocks=1).implement_ops(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=7).run().collated_shots()
 
-    assert res == [{"res": [[1]]}]
+    assert res == [{"res": [1]}]
 
 
 def test_cx() -> None:
@@ -66,4 +66,4 @@ def test_cx() -> None:
     phys_pkg = SteaneSpec(n_blocks=2).implement_ops(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=14).run().collated_shots()
 
-    assert res == [{"q0": [[1]], "q1": [[1]]}]
+    assert res == [{"q0": [1], "q1": [1]}]
