@@ -56,14 +56,14 @@ def measure_z(blk: LogicalBlock[7] @ owned) -> RawMeasurement[7]:
 @guppy
 @link_name("guppyft.steane.decode")
 @no_type_check
-def decode(m: RawMeasurement[7] @ owned) -> array[bool, 1]:
+def decode(m: RawMeasurement[7] @ owned) -> bool:
     """Decode Steane measurement of logical block"""
     meas = collect_measurements(m.measurements)
     synds = get_syndrome(meas)
     logical_meas = parity_check(meas)
     logical_meas ^= synds[0] or synds[1] or synds[2]
 
-    return array(logical_meas)
+    return logical_meas
 
 
 @guppy

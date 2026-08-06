@@ -4,7 +4,7 @@ import functools
 
 from hugr.ext import Extension, OpDef, TypeDef
 from hugr.ops import ExtOp
-from hugr.tys import BoundedNatArg, ExtType
+from hugr.tys import Bool, BoundedNatArg, ExtType, ListArg, TypeTypeArg
 
 from guppyft.extensions._util import load_extension
 
@@ -30,4 +30,10 @@ class StdOpsExtension:
         return self().get_op("decode")
 
     def decode(self, k: int) -> ExtOp:
-        return self.decode_def.instantiate([BoundedNatArg(k)])
+        # `decode` takes both `k` (the receiver's size) and an explicit row
+        # of `k` `Bool` types (substituted into the tuple output's row
+        # variable) -- see `extensions/src/std/ops.rs` for why the tuple's
+        # arity can't be derived from `k` alone within the op's signature.
+        return self.decode_def.instantiate(
+            [BoundedNatArg(k), ListArg([TypeTypeArg(Bool)] * k)]
+        )

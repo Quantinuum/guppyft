@@ -11,13 +11,13 @@ def test_qalloc_measure() -> None:
     @guppy
     def main() -> None:
         q = Qubit()
-        result("res", measure_z(q).decode())
+        result("res", measure_z(q).decode()[0])
 
     pkg = main.compile()
     phys_pkg = SteaneSpec(n_blocks=1).implement_ops(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=7).run().collated_shots()
 
-    assert res == [{"res": [[0]]}]
+    assert res == [{"res": [0]}]
 
 
 def test_x() -> None:
@@ -26,13 +26,13 @@ def test_x() -> None:
     def main() -> None:
         q = Qubit()
         x(q)
-        result("res", measure_z(q).decode())
+        result("res", measure_z(q).decode()[0])
 
     pkg = main.compile()
     phys_pkg = SteaneSpec(n_blocks=1).implement_ops(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=7).run().collated_shots()
 
-    assert res == [{"res": [[1]]}]
+    assert res == [{"res": [1]}]
 
 
 def test_h_z() -> None:
@@ -43,13 +43,13 @@ def test_h_z() -> None:
         h(q)
         z(q)
         h(q)
-        result("res", measure_z(q).decode())
+        result("res", measure_z(q).decode()[0])
 
     pkg = main.compile()
     phys_pkg = SteaneSpec(n_blocks=1).implement_ops(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=7).run().collated_shots()
 
-    assert res == [{"res": [[1]]}]
+    assert res == [{"res": [1]}]
 
 
 def test_cx() -> None:
@@ -59,11 +59,11 @@ def test_cx() -> None:
         q0, q1 = Qubit(), Qubit()
         x(q0)
         cx(q0, q1)
-        result("q0", measure_z(q0).decode())
-        result("q1", measure_z(q1).decode())
+        result("q0", measure_z(q0).decode()[0])
+        result("q1", measure_z(q1).decode()[0])
 
     pkg = main.compile()
     phys_pkg = SteaneSpec(n_blocks=2).implement_ops(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=14).run().collated_shots()
 
-    assert res == [{"q0": [[1]], "q1": [[1]]}]
+    assert res == [{"q0": [1], "q1": [1]}]

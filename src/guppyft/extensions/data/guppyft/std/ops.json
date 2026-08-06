@@ -12,6 +12,13 @@
           {
             "tp": "BoundedNat",
             "bound": null
+          },
+          {
+            "tp": "List",
+            "param": {
+              "tp": "Type",
+              "b": "C"
+            }
           }
         ],
         "body": {
@@ -36,34 +43,14 @@
           ],
           "output": [
             {
-              "t": "Opaque",
-              "extension": "collections.borrow_arr",
-              "extension_version": "0.2.1",
-              "id": "borrow_array",
-              "args": [
-                {
-                  "tya": "Variable",
-                  "idx": 0,
-                  "cached_decl": {
-                    "tp": "BoundedNat",
-                    "bound": null
-                  }
-                },
-                {
-                  "tya": "Type",
-                  "ty": {
-                    "t": "Sum",
-                    "s": "Unit",
-                    "size": 2
-                  }
-                }
-              ],
-              "bound": "A"
+              "t": "R",
+              "i": 1,
+              "b": "C"
             }
           ]
         }
       },
-      "binary": false
+      "binary": true
     }
   }
 }
