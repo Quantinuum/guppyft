@@ -8,35 +8,16 @@ from guppylang import guppy
 from guppylang.std.array import array
 from guppylang.std.mem import mem_swap
 from guppylang.std.quantum import cx, cz, h, qubit, s, sdg
-from zixy.qubit import pauli
 
 from guppyft.verifier.code import StabilizerCode
 
-Z_LOGICAL = pauli.Strings.from_str(
-    "I0 Z1 Z2 I3, Z0 I1 I2 Z3",
-    4,
-)
-X_LOGICAL = pauli.Strings.from_str(
-    "Z0 I1 X2 I3, I0 Z1 I2 X3",
-    4,
-)
-
-
-GENERATORS = pauli.StringSet.from_cmpnts(
-    pauli.Strings.from_str(
-        "X0 Z1 Z2 X3, Z0 X1 X2 Z3",
-        4,
-    )
-)
-
-
-CODE_DEF = StabilizerCode(
+CODE_DEF = StabilizerCode.from_python_strings(
     num_physical_qubits=4,
     num_logical_qubits=2,
     distance=2,
-    generators=GENERATORS,
-    x_logicals=X_LOGICAL,
-    z_logicals=Z_LOGICAL,
+    generators=["XZZX", "ZXXZ"],
+    x_logicals=["ZIXI", "IZIX"],
+    z_logicals=["IZZI", "ZIIZ"],
 )
 
 

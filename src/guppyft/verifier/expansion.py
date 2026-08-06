@@ -3,7 +3,7 @@ from zixy.qubit import Qubits, pauli
 from guppyft.verifier.code import StabilizerCode
 
 
-def pad_code_stabilizers(code: StabilizerCode, num_blocks: int) -> pauli.StringSet:
+def pad_code_stabilizers(code: StabilizerCode, num_blocks: int) -> pauli.SignTermSet:
     """Returns a set of Stabilizers for each of the m codeblocks padded by
       the identity.
 
@@ -20,31 +20,30 @@ def pad_code_stabilizers(code: StabilizerCode, num_blocks: int) -> pauli.StringS
     :return: A set of Pauli strings made up of padded stabilizers
       for each code block. Returns Pauli Strings for m blocks.
     """
-    code_generators: pauli.StringSet = code.generators
-    generator_strings = code_generators.to_strings()
     n = code.num_physical_qubits
 
     combined = []
     for i in range(num_blocks):
         combined += [
-            shift_pauli(g.into(pauli.String), offset=i * n, size=num_blocks * n)
-            for g in generator_strings
+            shift_pauli(g, offset=i * n, size=num_blocks * n)  # type: ignore[arg-type]
+            for g in code.generators
         ]
 
-    return pauli.StringSet.from_iterable(
+    return pauli.SignTermSet.from_iterable(
         combined, num_blocks * code.num_physical_qubits
     )
 
 
-def shift_pauli(pauli_op: pauli.String, offset: int, size: int) -> pauli.String:
+def shift_pauli(pauli_op: pauli.SignTerm, offset: int, size: int) -> pauli.SignTerm:
     """
     Shift qubit indices of a String (to the right) by an offset.
     """
-    pauli_dict = pauli_op.get_dict()
+    pauli_dict = pauli_op.string.get_dict()
     original_keys = list(pauli_dict.keys())
     new_keys = [i + offset for i in original_keys]
     new_pauli_dict = dict(zip(new_keys, pauli_dict.values(), strict=True))
-    return pauli.String(size, new_pauli_dict)
+    shifted: pauli.SignTerm = pauli_op.coeff * pauli.String(size, new_pauli_dict)
+    return shifted
 
 
 def expand_pauli_term(
@@ -67,11 +66,10 @@ def expand_pauli_term(
     k = code.num_logical_qubits
     total_qubit_number = num_blocks * n
 
-    # "result_string" is a Pauli String which will store a single physical Pauli term
+    # "result_term" is a Pauli String which will store a single physical Pauli term
     # possibly across multiple code blocks.
-    #  This String will be one term in the expanded tableau.
+    #  This will be one term in the expanded tableau.
     result_term = pauli.SignTerm(qubits=total_qubit_number)
-    result_sign = logical_term.coeff
 
     for logical_qubit_index, logical_pauli in logical_term.string.get_dict().items():
         # "non_identity_pauli_index" is the index we need to access to expand the
@@ -94,19 +92,13 @@ def expand_pauli_term(
         # "non_identity_pauli_index" index computed above.
         match logical_pauli:
             case pauli.PauliMatrix.X:
-                physical_pauli = pauli.SignTerm.from_str(
-                    str(code.x_logicals[non_identity_pauli_index])
-                )
+                physical_pauli = code.x_logicals[non_identity_pauli_index]
 
             case pauli.PauliMatrix.Y:
-                physical_pauli = pauli.SignTerm.from_str(
-                    str(code.y_logicals[non_identity_pauli_index])
-                )
+                physical_pauli = code.y_logicals[non_identity_pauli_index]
 
             case pauli.PauliMatrix.Z:
-                physical_pauli = pauli.SignTerm.from_str(
-                    str(code.z_logicals[non_identity_pauli_index])
-                )
+                physical_pauli = code.z_logicals[non_identity_pauli_index]
 
             case _:
                 raise ValueError(
@@ -119,15 +111,14 @@ def expand_pauli_term(
         #  logical block, then the appropriate "offset" would be (1*7) = 7.
         offset = logical_block_number * n
 
-        shifted_string: pauli.String = shift_pauli(
-            physical_pauli.string, offset, size=total_qubit_number
-        )
+        shifted = shift_pauli(physical_pauli, offset, size=total_qubit_number)  # type: ignore[arg-type]
 
         # Get final expanded term by taking the product of num_blocks*k expanded terms.
-        result_term *= shifted_string
-        result_sign *= physical_pauli.coeff
+        result_term *= shifted
 
-    return pauli.SignTerm.from_cmpnt_coeff(result_term.string, result_sign)
+    result_term *= logical_term.coeff
+    assert isinstance(result_term, pauli.SignTerm)
+    return result_term
 
 
 def expand_logical_signterms(
@@ -151,8 +142,9 @@ def expand_logical_signterms(
     # Expand the logical terms one-by-one using the logical operators
     #  of the Stabilizer code.
     for logical_term in logical_terms:
+        assert isinstance(logical_term, pauli.SignTerm)
         expanded = expand_pauli_term(
-            logical_term.into(pauli.SignTerm),
+            logical_term,
             code,
             num_blocks,
         )
@@ -180,8 +172,8 @@ def get_expanded_stabilizer_set(
     # logical operators of the StabilizerCode
     stabilizers: pauli.SignTerms = expand_logical_signterms(signed_logical_paulis, code)
     # Secondly, we include the stabilizer generators for each code block.
-    padded_stabilizers: pauli.StringSet = pad_code_stabilizers(code, num_blocks)
+    padded_stabilizers: pauli.SignTermSet = pad_code_stabilizers(code, num_blocks)
 
-    for s in padded_stabilizers.to_strings():
+    for s in padded_stabilizers:
         stabilizers.append(s)
     return stabilizers

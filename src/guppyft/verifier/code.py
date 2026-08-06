@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from functools import cached_property
 
@@ -15,9 +17,9 @@ class StabilizerCode:
     num_physical_qubits: int
     num_logical_qubits: int
     distance: int
-    generators: pauli.StringSet
-    x_logicals: pauli.Strings
-    z_logicals: pauli.Strings
+    generators: pauli.SignTermSet
+    x_logicals: pauli.SignTerms
+    z_logicals: pauli.SignTerms
 
     @cached_property
     def y_logicals(self) -> pauli.SignTerms:
@@ -52,12 +54,80 @@ class StabilizerCode:
                 f"got {len(self.z_logicals)}."
             )
 
-        all_stabilizer_generators_commute = np.all(
-            self.generators.to_strings().into(pauli.Strings).compatibility_matrix() == 1
-        )
+        strings: pauli.Strings = self.generators.into(pauli.Strings)  # type: ignore[assignment, arg-type]
+        all_stabilizer_generators_commute = np.all(strings.compatibility_matrix() == 1)
 
         if not all_stabilizer_generators_commute:
             raise CodeDefinitionError("All of the stabilizer generators must commute!")
+
+    @staticmethod
+    def from_python_strings(
+        num_physical_qubits: int,
+        num_logical_qubits: int,
+        distance: int,
+        generators: list[str],
+        x_logicals: list[str],
+        z_logicals: list[str],
+    ) -> StabilizerCode:
+        """Helper to create a StabilizerCode from lists of Python strings.
+
+        The strings must be defined over the alphabet {I, X, Y, Z} and must be
+        of length equal to the number of physical qubits. A sign may be provided at
+        the front. If a string is missing a sign, it is assumed to be positive.
+
+        :param num_physical_qubits: The number of physical qubits in the code.
+        :param num_logical_qubits: The number of logical qubits in the code.
+        :param distance: The distance of the code.
+        :param generators: A list of stabilizer generators as Pauli strings.
+        :param x_logicals: A list of X logical operators as Pauli strings.
+        :param z_logicals: A list of Z logical operators as Pauli strings.
+        :return: A StabilizerCode instance representing the code.
+        """
+        zixy_generators = pauli.SignTermSet.from_iterable(
+            (_str_to_zixy(s, num_physical_qubits) for s in generators),
+            num_physical_qubits,
+        )
+
+        zixy_x_logicals = pauli.SignTerms.from_iterable(
+            (_str_to_zixy(s, num_physical_qubits) for s in x_logicals),
+            num_physical_qubits,
+        )
+
+        zixy_z_logicals = pauli.SignTerms.from_iterable(
+            (_str_to_zixy(s, num_physical_qubits) for s in z_logicals),
+            num_physical_qubits,
+        )
+
+        return StabilizerCode(
+            num_physical_qubits=num_physical_qubits,
+            num_logical_qubits=num_logical_qubits,
+            distance=distance,
+            generators=zixy_generators,
+            x_logicals=zixy_x_logicals,
+            z_logicals=zixy_z_logicals,
+        )
+
+
+def _str_to_zixy(s: str, n: int) -> pauli.SignTerm:
+    if s[0] not in "+-":
+        sign = "+"
+    else:
+        sign = s[0]
+        s = s[1:]  # Drop the sign, since it is in a separate variable
+
+    if len(s) != n:
+        raise CodeDefinitionError(
+            f"All Pauli strings must be of length {n}. "
+            f"Got string '{s}' of length {len(s)}."
+        )
+    if not all(c in "IXYZ" for c in s):
+        raise CodeDefinitionError(
+            f"All Pauli strings must be defined over the alphabet {{I, X, Y, Z}}. "
+            f"Got string '{s}' with invalid characters."
+        )
+
+    pauli_str = "".join(f"{c}{i} " for i, c in enumerate(s))
+    return pauli.SignTerm.from_str(f"({sign}1, {pauli_str})", n)
 
 
 def identity_code(k: int) -> StabilizerCode:
@@ -67,17 +137,11 @@ def identity_code(k: int) -> StabilizerCode:
     :param k: The number of logical qubits to encode.
     :return: A StabilizerCode instance representing the identity code.
     """
-    x_logicals = pauli.Strings(k)
-    z_logicals = pauli.Strings(k)
-    for i in range(k):
-        x_logicals.append(pauli.String(k, {i: pauli.X}))
-        z_logicals.append(pauli.String(k, {i: pauli.Z}))
-
-    return StabilizerCode(
+    return StabilizerCode.from_python_strings(
         num_physical_qubits=k,
         num_logical_qubits=k,
         distance=1,
-        generators=pauli.StringSet(k),  # No stabilizers
-        x_logicals=x_logicals,
-        z_logicals=z_logicals,
+        generators=[],
+        x_logicals=["I" * i + "X" + "I" * (k - i - 1) for i in range(k)],
+        z_logicals=["I" * i + "Z" + "I" * (k - i - 1) for i in range(k)],
     )

@@ -6,11 +6,6 @@ from guppyft.verifier.code import (
     StabilizerCode,
 )
 
-from .ops.iceberg import (
-    ICEBERG_GENERATORS,
-    ICEBERG_X_LOGICAL,
-    ICEBERG_Z_LOGICAL,
-)
 from .ops.steane import STEANE_DEF
 
 
@@ -21,59 +16,68 @@ def test_steane_y_logicals() -> None:
 
 def test_code_validation() -> None:
 
-    fake_generators1 = pauli.StringSet.from_cmpnts(
-        pauli.Strings.from_str(
-            "X0 X1 X2 X3, Z0 Z1 Z2 Z3, Y0, Z2 X1",
-            4,
-        )
-    )
     with pytest.raises(
         CodeDefinitionError,
         match=r"The number of stabilizer generators must equal n-k."
         + r" Got n=4, k=2 with 4 generators.",
     ):
-        StabilizerCode(
+        StabilizerCode.from_python_strings(
             4,
             2,
             2,
-            generators=fake_generators1,
-            x_logicals=ICEBERG_X_LOGICAL,
-            z_logicals=ICEBERG_Z_LOGICAL,
+            generators=["XXXX", "ZZZZ", "YIII", "IIXZ"],  # fake generators
+            x_logicals=["XXII", "XIXI"],
+            z_logicals=["IZIZ", "IIZZ"],
         )
-
-    fake_x_logicals = pauli.Strings.from_str(
-        "X0 X1 I2 I3, X0 I1 X2 X3, X0 X1 X2 I3",
-        4,
-    )
 
     with pytest.raises(
         CodeDefinitionError,
         match=r"Incorrect number of X logical operators: expected 2, got 3.",
     ):
-        StabilizerCode(
+        StabilizerCode.from_python_strings(
             4,
             2,
             2,
-            generators=ICEBERG_GENERATORS,
-            x_logicals=fake_x_logicals,
-            z_logicals=ICEBERG_Z_LOGICAL,
+            generators=["XXXX", "ZZZZ"],
+            x_logicals=["XXII", "XIXX", "XXXI"],  # fake x_logicals
+            z_logicals=["IZIZ", "IIZZ"],
         )
 
-    fake_generators2 = pauli.StringSet.from_cmpnts(
-        pauli.Strings.from_str(
-            "X0 X1 X2 X3, X0 Z1 Z2 Z3",
-            4,
-        )
-    )
     with pytest.raises(
         CodeDefinitionError,
         match="All of the stabilizer generators must commute!",
     ):
-        StabilizerCode(
+        StabilizerCode.from_python_strings(
             4,
             2,
             2,
-            generators=fake_generators2,
-            x_logicals=ICEBERG_X_LOGICAL,
-            z_logicals=ICEBERG_Z_LOGICAL,
+            generators=["XXXX", "XZZZ"],  # fake generators
+            x_logicals=["XXII", "XIXI"],
+            z_logicals=["IZIZ", "IIZZ"],
+        )
+
+    with pytest.raises(
+        CodeDefinitionError,
+        match="All Pauli strings must be of length",
+    ):
+        StabilizerCode.from_python_strings(
+            4,
+            2,
+            2,
+            generators=["XXXX", "ZZZZ"],
+            x_logicals=["XXII", "XIXI"],
+            z_logicals=["IZI", "IIZZ"],  # fake z_logical
+        )
+
+    with pytest.raises(
+        CodeDefinitionError,
+        match="All Pauli strings must be defined over the alphabet",
+    ):
+        StabilizerCode.from_python_strings(
+            4,
+            2,
+            2,
+            generators=["X_XX", "ZZZZ"],  # fake generators
+            x_logicals=["XXII", "XIXI"],
+            z_logicals=["IZIZ", "IIZZ"],
         )

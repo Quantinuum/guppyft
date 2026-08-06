@@ -11,13 +11,13 @@ BIT_FLIP_GENERATORS = pauli.StringSet.from_cmpnts(
     pauli.Strings.from_str("Z0 Z1, Z1 Z2", 3)
 )
 
-BIT_FLIP_DEF = StabilizerCode(
+BIT_FLIP_DEF = StabilizerCode.from_python_strings(
     num_physical_qubits=3,
     num_logical_qubits=1,
     distance=1,
-    generators=BIT_FLIP_GENERATORS,
-    x_logicals=pauli.String.from_str("X0 X1 X2").into(pauli.Strings),
-    z_logicals=pauli.String.from_str("Z0 I1 I2").into(pauli.Strings),
+    generators=["ZZI", "IZZ"],
+    x_logicals=["XXX"],
+    z_logicals=["ZII"],
 )
 
 
