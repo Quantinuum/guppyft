@@ -9,7 +9,7 @@ from guppylang.std.quantum import cx, cz, h, qubit, rx, rz, s, sdg
 
 from guppyft.verifier.code import StabilizerCode
 
-CSS_4Q_DEF = StabilizerCode.from_strings(
+CSS_4Q_DEF = StabilizerCode.from_python_strings(
     num_physical_qubits=4,
     num_logical_qubits=2,
     distance=2,

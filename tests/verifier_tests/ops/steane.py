@@ -6,7 +6,7 @@ from guppylang.std.quantum import cx, discard, h, measure, measure_array, qubit,
 
 from guppyft.verifier.code import StabilizerCode
 
-STEANE_DEF = StabilizerCode.from_strings(
+STEANE_DEF = StabilizerCode.from_python_strings(
     num_physical_qubits=7,
     num_logical_qubits=1,
     distance=3,

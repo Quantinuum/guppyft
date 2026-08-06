@@ -61,7 +61,7 @@ class StabilizerCode:
             raise CodeDefinitionError("All of the stabilizer generators must commute!")
 
     @staticmethod
-    def from_strings(
+    def from_python_strings(
         num_physical_qubits: int,
         num_logical_qubits: int,
         distance: int,
@@ -110,21 +110,24 @@ class StabilizerCode:
 
 def _str_to_zixy(s: str, n: int) -> pauli.SignTerm:
     if s[0] not in "+-":
-        s = "+" + s
+        sign = "+"
+    else:
+        sign = s[0]
+        s = s[1:]  # Drop the sign, since it is in a separate variable
 
-    if len(s) != n + 1:
+    if len(s) != n:
         raise CodeDefinitionError(
             f"All Pauli strings must be of length {n}. "
-            f"Got string '{s}' of length {len(s) - 1}."
+            f"Got string '{s}' of length {len(s)}."
         )
-    if not all(c in "IXYZ" for c in s[1:]):
+    if not all(c in "IXYZ" for c in s):
         raise CodeDefinitionError(
             f"All Pauli strings must be defined over the alphabet {{I, X, Y, Z}}. "
             f"Got string '{s}' with invalid characters."
         )
 
-    str = "".join(f"{c}{i} " for i, c in enumerate(s[1:]))
-    return pauli.SignTerm.from_str(f"({s[0]}1, {str})", n)
+    pauli_str = "".join(f"{c}{i} " for i, c in enumerate(s))
+    return pauli.SignTerm.from_str(f"({sign}1, {pauli_str})", n)
 
 
 def identity_code(k: int) -> StabilizerCode:
@@ -134,7 +137,7 @@ def identity_code(k: int) -> StabilizerCode:
     :param k: The number of logical qubits to encode.
     :return: A StabilizerCode instance representing the identity code.
     """
-    return StabilizerCode.from_strings(
+    return StabilizerCode.from_python_strings(
         num_physical_qubits=k,
         num_logical_qubits=k,
         distance=1,

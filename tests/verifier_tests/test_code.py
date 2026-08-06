@@ -21,7 +21,7 @@ def test_code_validation() -> None:
         match=r"The number of stabilizer generators must equal n-k."
         + r" Got n=4, k=2 with 4 generators.",
     ):
-        StabilizerCode.from_strings(
+        StabilizerCode.from_python_strings(
             4,
             2,
             2,
@@ -34,7 +34,7 @@ def test_code_validation() -> None:
         CodeDefinitionError,
         match=r"Incorrect number of X logical operators: expected 2, got 3.",
     ):
-        StabilizerCode.from_strings(
+        StabilizerCode.from_python_strings(
             4,
             2,
             2,
@@ -47,11 +47,37 @@ def test_code_validation() -> None:
         CodeDefinitionError,
         match="All of the stabilizer generators must commute!",
     ):
-        StabilizerCode.from_strings(
+        StabilizerCode.from_python_strings(
             4,
             2,
             2,
             generators=["XXXX", "XZZZ"],  # fake generators
+            x_logicals=["XXII", "XIXI"],
+            z_logicals=["IZIZ", "IIZZ"],
+        )
+
+    with pytest.raises(
+        CodeDefinitionError,
+        match="All Pauli strings must be of length",
+    ):
+        StabilizerCode.from_python_strings(
+            4,
+            2,
+            2,
+            generators=["XXXX", "ZZZZ"],
+            x_logicals=["XXII", "XIXI"],
+            z_logicals=["IZI", "IIZZ"],  # fake z_logical
+        )
+
+    with pytest.raises(
+        CodeDefinitionError,
+        match="All Pauli strings must be defined over the alphabet",
+    ):
+        StabilizerCode.from_python_strings(
+            4,
+            2,
+            2,
+            generators=["X_XX", "ZZZZ"],  # fake generators
             x_logicals=["XXII", "XIXI"],
             z_logicals=["IZIZ", "IIZZ"],
         )
