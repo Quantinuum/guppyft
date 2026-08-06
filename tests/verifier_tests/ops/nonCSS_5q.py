@@ -16,8 +16,8 @@ CODE_DEF = StabilizerCode.from_python_strings(
     num_logical_qubits=1,
     distance=3,
     generators=["ZZXIX", "XZZXI", "IXZZX", "XIXZZ"],
-    x_logicals=["XXXXX"],
-    z_logicals=["ZZZZZ"],
+    x_logicals=["-YIXIY"],
+    z_logicals=["-XIZIX"],
 )
 
 
