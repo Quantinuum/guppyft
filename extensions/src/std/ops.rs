@@ -1,16 +1,14 @@
 //! Extension providing standard ops for guppyft
 
-use crate::std::types::logical_measurement_tv;
+use crate::std::types::logical_measurement_type;
 use documented::DocumentedVariants;
 use hugr::Extension;
 use hugr::extension::prelude::bool_t;
 use hugr::extension::simple_op::{
     HasConcrete, MakeExtensionOp, MakeOpDef, MakeRegisteredOp, OpLoadError, try_from_name,
 };
-use hugr::extension::{ExtensionId, OpDef, SignatureError, SignatureFunc};
+use hugr::extension::{ExtensionId, OpDef, SignatureError, SignatureFromArgs, SignatureFunc};
 use hugr::ops::{ExtensionOp, OpName};
-use hugr::std_extensions::collections::array::ArrayKind;
-use hugr::std_extensions::collections::borrow_array::BorrowArray;
 use hugr::types::type_param::{TermKindError, TypeParam};
 use hugr::types::{FuncValueType, PolyFuncTypeRV, TypeArg};
 use std::sync::{Arc, LazyLock, Weak};
@@ -27,7 +25,7 @@ pub const VERSION: semver::Version = semver::Version::new(0, 1, 0);
 #[expect(non_camel_case_types)]
 #[non_exhaustive]
 pub enum StdOpDef {
-    /// decode measurement.
+    /// decode measurement
     decode,
 }
 
@@ -51,25 +49,37 @@ impl MakeOpDef for StdOpDef {
     fn init_signature(&self, _extension_ref: &Weak<Extension>) -> SignatureFunc {
         use StdOpDef::*;
         match self {
-            decode => PolyFuncTypeRV::new(
-                vec![TypeParam::max_nat_kind()],
-                FuncValueType::new(
-                    vec![logical_measurement_tv(0)],
-                    vec![
-                        BorrowArray::ty_parametric(
-                            TypeArg::new_var_use(0, TypeParam::max_nat_kind()),
-                            bool_t(),
-                        )
-                        .unwrap(),
-                    ],
-                ),
-            )
-            .into(),
+            decode => (*self).into(),
         }
     }
 
     fn description(&self) -> String {
         self.get_variant_docs().into()
+    }
+}
+
+/// Static parameter for decode op
+const STATIC_NAT_PARAM: &[TypeParam; 1] = &[TypeParam::max_nat_kind()];
+
+impl SignatureFromArgs for StdOpDef {
+    fn compute_signature(&self, arg_values: &[TypeArg]) -> Result<PolyFuncTypeRV, SignatureError> {
+        let [TypeArg::BoundedNat(n)] = *arg_values else {
+            return Err(SignatureError::InvalidTypeArgs);
+        };
+        let sig = match self {
+            StdOpDef::decode => PolyFuncTypeRV::new(
+                vec![],
+                FuncValueType::new(
+                    vec![logical_measurement_type(n)],
+                    vec![bool_t(); n as usize],
+                ),
+            ),
+        };
+        Ok(sig)
+    }
+
+    fn static_params(&self) -> &[TypeParam] {
+        STATIC_NAT_PARAM
     }
 }
 
@@ -164,10 +174,7 @@ mod tests {
                 .unwrap()
                 .signature()
                 .as_ref(),
-            &Signature::new(
-                [logical_measurement_type(2)],
-                [BorrowArray::ty(2, bool_t())]
-            )
+            &Signature::new([logical_measurement_type(2)], vec![bool_t(); 2])
         );
     }
 
@@ -181,10 +188,7 @@ mod tests {
         let mut foo = module_builder
             .define_function(
                 "foo",
-                Signature::new(
-                    vec![logical_measurement_type(2)],
-                    [BorrowArray::ty(2, bool_t())],
-                ),
+                Signature::new(vec![logical_measurement_type(2)], vec![bool_t(); 2]),
             )
             .unwrap();
         let outs = foo.add_dataflow_op(decode, foo.input_wires()).unwrap();
