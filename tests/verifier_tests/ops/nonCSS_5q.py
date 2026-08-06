@@ -9,7 +9,7 @@ from guppylang.std.array import array
 from guppylang.std.mem import mem_swap
 from guppylang.std.quantum import cx, cz, h, qubit, s, sdg, y, z
 
-from guppyft.verifier.code import StabilizerCode
+from guppyft.code_def import StabilizerCode
 
 CODE_DEF = StabilizerCode.from_python_strings(
     num_physical_qubits=5,

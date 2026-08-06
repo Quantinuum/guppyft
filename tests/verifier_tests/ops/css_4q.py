@@ -7,7 +7,7 @@ from guppylang.std.mem import mem_swap
 from guppylang.std.qsystem.helios import zz_max, zz_phase
 from guppylang.std.quantum import cx, cz, h, qubit, rx, rz, s, sdg
 
-from guppyft.verifier.code import StabilizerCode
+from guppyft.code_def import StabilizerCode
 
 CSS_4Q_DEF = StabilizerCode.from_python_strings(
     num_physical_qubits=4,

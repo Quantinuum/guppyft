@@ -1,6 +1,6 @@
 from zixy.qubit import Qubits, pauli
 
-from guppyft.verifier.code import StabilizerCode
+from guppyft.code_def import StabilizerCode
 
 
 def pad_code_stabilizers(code: StabilizerCode, num_blocks: int) -> pauli.SignTermSet:

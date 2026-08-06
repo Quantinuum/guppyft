@@ -5,7 +5,7 @@ from guppylang.std.array import array
 from guppylang.std.quantum import cx, h, qubit, x
 from zixy.qubit import pauli
 
-from guppyft.verifier.code import StabilizerCode
+from guppyft.code_def import StabilizerCode
 
 BIT_FLIP_GENERATORS = pauli.StringSet.from_cmpnts(
     pauli.Strings.from_str("Z0 Z1, Z1 Z2", 3)
