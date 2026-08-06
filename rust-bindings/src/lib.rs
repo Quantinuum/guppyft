@@ -11,7 +11,7 @@ use pyo3::pymodule;
 mod _bindings {
     #[pymodule_export]
     use crate::hugr::RsHugr;
-    use crate::util::lookup_op;
+    use crate::util::lookup_ext;
     use guppyft::implement_ops;
     use pyo3::exceptions::PyValueError;
     use pyo3::prelude::*;
@@ -53,19 +53,31 @@ mod _bindings {
         let mut pass = ReplaceTypes::new_empty();
 
         for ((src_ext, src_op), (tgt_ext, tgt_op, tgt_args)) in op_replacements.iter() {
-            let src = match lookup_op(&registry, src_ext, src_op, vec![]) {
-                Ok(op) => op,
-                Err(..) => continue,
+            let ext = match registry.get(src_ext) {
+                Some(e) => e,
+                None => continue,
             };
-            let type_args: Vec<TypeArg> = tgt_args
+            let Some(src_def) = ext.get_op(src_op) else {
+                continue;
+            };
+
+            // Resolve the target extension eagerly, so a missing extension is
+            // reported immediately rather than only once a matching node is
+            // found during `pass.run`.
+            let tgt_ext = lookup_ext(&registry, tgt_ext)?.clone();
+            let tgt_op = tgt_op.clone();
+            let tgt_args: Vec<TypeArg> = tgt_args
                 .iter()
-                .map(|arg: &PyTypeArgValue| match arg {
+                .map(|arg| match arg {
                     PyTypeArgValue::Int(n) => TypeArg::from(*n),
                     PyTypeArgValue::Str(s) => TypeArg::from(s.clone()),
                 })
                 .collect();
-            let tgt = lookup_op(&registry, tgt_ext, tgt_op, type_args)?;
-            pass.set_replace_op(&src, NodeTemplate::SingleOp(tgt.into()));
+
+            pass.set_replace_parametrized_op(src_def, move |_observed_args, _replace_types| {
+                let tgt = tgt_ext.instantiate_extension_op(&tgt_op, tgt_args.clone())?;
+                Ok(Some(NodeTemplate::SingleOp(tgt.into())))
+            });
         }
 
         pass.run(hugr)
