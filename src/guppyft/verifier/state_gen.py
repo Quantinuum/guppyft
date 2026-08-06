@@ -9,7 +9,7 @@ from zixy._zixy import SymplecticPart
 from zixy.qubit import pauli
 from zixy.qubit.clifford import GateList
 
-from guppyft.verifier.code import StabilizerCode
+from guppyft.code_def import StabilizerCode
 from guppyft.verifier.expansion import get_expanded_stabilizer_set
 from guppyft.verifier.utils import SingleBlockUnitary, array_slicer
 

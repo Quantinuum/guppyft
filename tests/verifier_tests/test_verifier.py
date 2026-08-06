@@ -1,7 +1,7 @@
 import numpy as np
 from zixy.qubit import pauli
 
-from guppyft.verifier.code import identity_code
+from guppyft.code_def import identity_code
 from guppyft.verifier.expansion import (
     expand_logical_signterms,
     get_expanded_stabilizer_set,

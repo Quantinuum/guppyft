@@ -9,7 +9,7 @@ from selene_sim.build import build
 from selene_stim_plugin import SeleneStimState
 from zixy.qubit import pauli
 
-from guppyft.verifier.code import StabilizerCode, identity_code
+from guppyft.code_def import StabilizerCode, identity_code
 from guppyft.verifier.expansion import get_expanded_stabilizer_set
 from guppyft.verifier.state_gen import gen_choi_state
 from guppyft.verifier.utils import (

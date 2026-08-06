@@ -1,7 +1,7 @@
 import pytest
 from zixy.qubit import pauli
 
-from guppyft.verifier.code import (
+from guppyft.code_def import (
     CodeDefinitionError,
     StabilizerCode,
 )

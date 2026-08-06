@@ -4,7 +4,7 @@ from guppylang import guppy
 from guppylang.std.array import array
 from guppylang.std.quantum import cx, discard, h, measure, measure_array, qubit, s, sdg
 
-from guppyft.verifier.code import StabilizerCode
+from guppyft.code_def import StabilizerCode
 
 STEANE_DEF = StabilizerCode.from_python_strings(
     num_physical_qubits=7,
