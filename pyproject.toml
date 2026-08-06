@@ -39,7 +39,7 @@ dev = [
 ]
 lint = [
     "pre-commit>=4.6.1,<5",
-    "ruff>=0.16.0",
+    "ruff>=0.16.1",
     "mypy>=2.3.0",
 ]
 test = [
