@@ -6,10 +6,18 @@ from guppyft.code_def import (
     StabilizerCode,
 )
 
-from .ops.steane import STEANE_DEF
-
 
 def test_steane_y_logicals() -> None:
+
+    STEANE_DEF = StabilizerCode.from_python_strings(
+        num_physical_qubits=7,
+        num_logical_qubits=1,
+        distance=3,
+        generators=["XXXXIII", "IXXIXXI", "IIXXIXX", "ZZZZIII", "IZZIZZI", "IIZZIZZ"],
+        x_logicals=["XXXXXXX"],
+        z_logicals=["ZZZZZZZ"],
+    )
+
     assert str(STEANE_DEF.y_logicals) == "(-1, Y0 Y1 Y2 Y3 Y4 Y5 Y6)"
     assert isinstance(STEANE_DEF.y_logicals, pauli.SignTerms)
 
