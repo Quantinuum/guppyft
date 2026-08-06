@@ -50,6 +50,39 @@
       },
       "binary": false
     },
+    "decode": {
+      "extension": "guppyft.steane.ops",
+      "name": "decode",
+      "description": "Decode",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.std.types",
+              "extension_version": "0.1.0",
+              "id": "logical_measurement",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 1
+                }
+              ],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Sum",
+              "s": "Unit",
+              "size": 2
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
     "free": {
       "extension": "guppyft.steane.ops",
       "name": "free",
