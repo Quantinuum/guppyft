@@ -13,7 +13,7 @@ use hugr::{
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.steane.types");
 /// Extension version.
-pub const VERSION: semver::Version = semver::Version::new(0, 1, 0);
+pub const VERSION: semver::Version = semver::Version::new(0, 1, 1);
 
 /// Type name for a Steane-encoded logical qubit.
 pub const QUBIT_TYPENAME: TypeName = TypeName::new_inline("qubit");

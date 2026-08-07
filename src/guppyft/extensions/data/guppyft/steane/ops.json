@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "name": "guppyft.steane.ops",
   "types": {},
   "operations": {
@@ -14,7 +14,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -22,7 +22,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -32,7 +32,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -40,7 +40,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -61,7 +61,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "measurement",
               "args": [],
               "bound": "C"
@@ -89,7 +89,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -111,7 +111,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -121,7 +121,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -142,7 +142,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -150,7 +150,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -160,7 +160,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -181,7 +181,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -189,7 +189,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -199,7 +199,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -220,7 +220,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -230,7 +230,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "measurement",
               "args": [],
               "bound": "C"
@@ -252,7 +252,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -274,7 +274,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -295,7 +295,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -305,7 +305,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -326,7 +326,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -336,7 +336,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -357,7 +357,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -365,7 +365,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -375,7 +375,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -383,7 +383,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -404,7 +404,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -414,7 +414,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -435,7 +435,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
@@ -445,7 +445,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "qubit",
               "args": [],
               "bound": "A"
