@@ -60,15 +60,10 @@
           "input": [
             {
               "t": "Opaque",
-              "extension": "guppyft.std.types",
+              "extension": "guppyft.steane.types",
               "extension_version": "0.1.0",
-              "id": "logical_measurement",
-              "args": [
-                {
-                  "tya": "BoundedNat",
-                  "n": 1
-                }
-              ],
+              "id": "measurement",
+              "args": [],
               "bound": "C"
             }
           ],
@@ -234,15 +229,10 @@
           "output": [
             {
               "t": "Opaque",
-              "extension": "guppyft.std.types",
+              "extension": "guppyft.steane.types",
               "extension_version": "0.1.0",
-              "id": "logical_measurement",
-              "args": [
-                {
-                  "tya": "BoundedNat",
-                  "n": 1
-                }
-              ],
+              "id": "measurement",
+              "args": [],
               "bound": "C"
             }
           ]

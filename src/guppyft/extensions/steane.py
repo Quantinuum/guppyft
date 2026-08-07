@@ -29,6 +29,19 @@ class SteaneTypesExtension:
         """A Steane logical qubit."""
         return self.steane_qubit_def.instantiate([])
 
+    @functools.cached_property
+    def steane_measurement_def(self) -> TypeDef:
+        """A Steane logical measurement type.
+
+        This is the generic type definition. For the instantiated type, see
+        `steane_measurement`.
+        """
+        return self().get_type("measurement")
+
+    def steane_measurement(self) -> ExtType:
+        """A Steane logical measurement."""
+        return self.steane_measurement_def.instantiate([])
+
 
 class SteaneOpsExtension:
     """Extension providing the Steane logical operations."""
@@ -72,6 +85,18 @@ class SteaneOpsExtension:
     def measure_z(self) -> ExtOp:
         """Destructive measurement of a logical qubit in the Z basis."""
         return self.measure_z_def.instantiate([])
+
+    @functools.cached_property
+    def decode_def(self) -> OpDef:
+        """Decode a measurement of a Steane logical qubit.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `decode`."""
+        return self().get_op("decode")
+
+    def decode(self) -> ExtOp:
+        """Decode a measurement of a Steane logical qubit."""
+        return self.decode_def.instantiate([])
 
     @functools.cached_property
     def x_def(self) -> OpDef:

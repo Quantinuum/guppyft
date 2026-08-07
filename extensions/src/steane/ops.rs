@@ -2,8 +2,7 @@
 
 use std::sync::{Arc, LazyLock, Weak};
 
-use crate::std::types::logical_measurement_type;
-use crate::steane::types::logical_qubit_type;
+use crate::steane::types::{logical_measurement_type, logical_qubit_type};
 use documented::DocumentedVariants;
 use hugr::extension::prelude::bool_t;
 use hugr::{
@@ -144,12 +143,11 @@ impl MakeOpDef for SteaneOpDef {
         match self {
             prep_zero => sig_qubits(0, 1),
             free => sig_qubits(1, 0),
-            measure_z => FuncValueType::new(
-                vec![logical_qubit_type()],
-                vec![logical_measurement_type(1)],
-            )
-            .into(),
-            decode => FuncValueType::new(vec![logical_measurement_type(1)], vec![bool_t()]).into(),
+            measure_z => {
+                FuncValueType::new(vec![logical_qubit_type()], vec![logical_measurement_type()])
+                    .into()
+            }
+            decode => FuncValueType::new(vec![logical_measurement_type()], vec![bool_t()]).into(),
             x => sig_qubits(1, 1),
             z => sig_qubits(1, 1),
             h => sig_qubits(1, 1),
@@ -248,11 +246,7 @@ mod tests {
         let mut module_builder = ModuleBuilder::new();
         let signature = Signature::new(
             vec![logical_qubit_type()],
-            vec![
-                bool_t(),
-                logical_qubit_type(),
-                logical_qubit_type(),
-            ],
+            vec![bool_t(), logical_qubit_type(), logical_qubit_type()],
         );
         let mut f_build = module_builder.define_function("main", signature)?;
 
@@ -261,7 +255,9 @@ mod tests {
 
         let handle = f_build.add_dataflow_op(prep_zero.clone(), vec![])?;
         let handle = f_build.add_dataflow_op(measure_z, handle.outputs())?;
-        let [bool_wire] = f_build.add_dataflow_op(decode, handle.outputs())?.outputs_arr();
+        let [bool_wire] = f_build
+            .add_dataflow_op(decode, handle.outputs())?
+            .outputs_arr();
 
         let [magic] = f_build
             .add_dataflow_op(prep_magic_for_t_like.clone(), vec![])?
