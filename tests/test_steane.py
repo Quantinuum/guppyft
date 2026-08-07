@@ -46,8 +46,9 @@ def test_exported_extensions() -> None:
     assert len(types_extn.operations) == 0
     assert types_extn.types == {
         "qubit": steane_types.steane_qubit_def,
+        "measurement": steane_types.steane_measurement_def,
     }
-    assert len(ops_extn.operations) == 13
+    assert len(ops_extn.operations) == 14
     for op_name, op_def in ops_extn.operations.items():
         assert op_def == steane_ops.__getattribute__(f"{op_name}_def")
 
@@ -55,7 +56,7 @@ def test_exported_extensions() -> None:
 def test_op_instantiations() -> None:
     ops_extn = steane_ops()
     # No operations take indices
-    assert len(ops_extn.operations) == 13
+    assert len(ops_extn.operations) == 14
     for op_name in ops_extn.operations:
         assert (
             steane_ops.__getattribute__(op_name)().op_def()
@@ -110,11 +111,8 @@ def test_guppy_hugr() -> None:
         "guppyft.steane.ops.h",
         "guppyft.steane.ops.measure_z",
         "Output",
-        "guppyft.std.ops.decode<1>",
-        "collections.borrow_arr.clone<1, Type(Bool)>",
-        "collections.borrow_arr.to_array<1, Type(Bool)>",
-        'tket.result.result_array_bool<"a", 1>',
-        "tket.guppy.drop<Type(borrow_array<1, Type(Bool)>)>",
+        "guppyft.steane.ops.decode",
+        'tket.result.result_bool<"a">',
     }
     [h_node] = [child for child in children if "h" in h[child].op.name()]
     assert len(list(h.incoming_links(h_node))) == 1  # CallIndirect

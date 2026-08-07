@@ -2,6 +2,16 @@
   "version": "0.1.0",
   "name": "guppyft.steane.types",
   "types": {
+    "measurement": {
+      "extension": "guppyft.steane.types",
+      "name": "measurement",
+      "params": [],
+      "description": "logical Steane measurement",
+      "bound": {
+        "b": "Explicit",
+        "bound": "C"
+      }
+    },
     "qubit": {
       "extension": "guppyft.steane.types",
       "name": "qubit",
