@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from typing import Generic, Self, no_type_check
 
 from guppylang import guppy
@@ -12,13 +13,13 @@ from zixy.qubit import pauli
 
 N = guppy.nat_var("N")
 
-type SingleBlockUnitary = GuppyFunctionDefinition[[array[qubit, N]], None]  # type: ignore[valid-type]
+type SingleBlockUnitary = GuppyFunctionDefinition[[Iterable[qubit]], None]
 type DoubleBlockUnitary = GuppyFunctionDefinition[
-    [array[qubit, N], array[qubit, N]], None  # type: ignore[valid-type]
+    [Iterable[qubit], Iterable[qubit]], None
 ]
-type SingleBlockState = GuppyFunctionDefinition[[], array[qubit, N]]  # type: ignore[valid-type]
+type SingleBlockState = GuppyFunctionDefinition[[], Iterable[qubit]]
 type DoubleBlockState = GuppyFunctionDefinition[
-    [], tuple[array[qubit, N], array[qubit, N]]  # type: ignore[valid-type]
+    [], tuple[Iterable[qubit], Iterable[qubit]]
 ]
 
 

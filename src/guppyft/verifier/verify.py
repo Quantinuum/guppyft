@@ -1,11 +1,10 @@
-from typing import no_type_check
+from collections.abc import Iterable
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.array import array
-from guppylang.std.builtins import ArrayIter, comptime
+from guppylang.std.builtins import comptime
 from guppylang.std.debug import state_output
-from guppylang.std.iter import SizedIter
 from guppylang.std.quantum import discard_array, qubit
 from selene_sim.backends import Stim
 from selene_sim.build import build
@@ -18,6 +17,7 @@ from guppyft.verifier.state_gen import gen_choi_state
 from guppyft.verifier.utils import (
     DoubleBlockState,
     DoubleBlockUnitary,
+    SingleBlockState,
     SingleBlockUnitary,
     stabilizerlist_to_signterms,
 )
@@ -34,8 +34,8 @@ def _invoke_selene_stim(
     return seeded_stim_instance.extract_states_dict(output)
 
 
-def compute_stabilizers_single_block_state[T: Iterable](
-    state_prep_func: GuppyFunctionDefinition[[], T],
+def compute_stabilizers_single_block_state(
+    state_prep_func: SingleBlockState,
     num_selene_qubits: int,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation.
@@ -210,48 +210,33 @@ N_PHYSICAL = guppy.nat_var("N_PHYSICAL")
 K_LOGICAL = guppy.nat_var("K_LOGICAL")
 
 
-@guppy.protocol
-class Iterable:
-    @guppy.require
-    @no_type_check
-    def __iter__(self) -> SizedIter[ArrayIter[qubit, N_PHYSICAL], N_PHYSICAL]: ...
-
-
-type SemanticStabilizerState = GuppyFunctionDefinition[
-    [], array[qubit, K_LOGICAL]  # type: ignore[valid-type]
-]
-type ImplementationStabilizerState = GuppyFunctionDefinition[
-    [], array[qubit, N_PHYSICAL]  # type: ignore[valid-type]
-]
+type SemanticStabilizerState = GuppyFunctionDefinition[[], Iterable[qubit]]
+type ImplementationStabilizerState = GuppyFunctionDefinition[[], Iterable[qubit]]
 
 
 type SemanticStabilizerStateDouble = GuppyFunctionDefinition[
-    [], tuple[array[qubit, K_LOGICAL], array[qubit, K_LOGICAL]]  # type: ignore[valid-type]
+    [], tuple[Iterable[qubit], Iterable[qubit]]
 ]
 type ImplementationStabilizerStateDouble = GuppyFunctionDefinition[
-    [], tuple[array[qubit, N_PHYSICAL], array[qubit, N_PHYSICAL]]  # type: ignore[valid-type]
+    [], tuple[Iterable[qubit], Iterable[qubit]]
 ]
 
 
-type SemanticCliffordUnitary = GuppyFunctionDefinition[
-    [array[qubit, K_LOGICAL]], None  # type: ignore[valid-type]
-]
-type ImplementationCliffordUnitary = GuppyFunctionDefinition[
-    [array[qubit, N_PHYSICAL]], None  # type: ignore[valid-type]
-]
+type SemanticCliffordUnitary = GuppyFunctionDefinition[[Iterable[qubit]], None]
+type ImplementationCliffordUnitary = GuppyFunctionDefinition[[Iterable[qubit]], None]
 
 
 type SemanticCliffordUnitaryDouble = GuppyFunctionDefinition[
-    [array[qubit, K_LOGICAL], array[qubit, K_LOGICAL]], None  # type: ignore[valid-type]
+    [Iterable[qubit], Iterable[qubit]], None
 ]
 type ImplementationCliffordUnitaryDouble = GuppyFunctionDefinition[
-    [array[qubit, N_PHYSICAL], array[qubit, N_PHYSICAL]], None  # type: ignore[valid-type]
+    [Iterable[qubit], Iterable[qubit]], None
 ]
 
 
-def compute_verification_signterms_single_block_state[T: Iterable](
+def compute_verification_signterms_single_block_state(
     semantic_function: SemanticStabilizerState,
-    impl_function: GuppyFunctionDefinition[[], T],
+    impl_function: ImplementationStabilizerState,
     code_definition: StabilizerCode,
     num_ancilla_qubits: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
