@@ -303,7 +303,7 @@ class SteaneSpec:
                     [],
                 ),
                 ("tket.quantum", "QFree"): ("guppyft.steane.ops", "free", []),
-                ("tket.measurement", "Read"): ("guppyft.std.ops", "decode", [1]),
+                ("tket.measurement", "Read"): ("guppyft.steane.ops", "decode", []),
             },
             extensions=ext,
         )

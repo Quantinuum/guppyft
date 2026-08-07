@@ -49,7 +49,14 @@ N = guppy.nat_var("N")
     params=[ConstParam(1, "k", NumericType(NumericType.Kind.Nat))],
 )
 class LogicalMeasurement(Generic[N]):  # type: ignore[misc]
-    @hugr_op(_std_op("decode"))
+    @guppy
     @no_type_check
     def decode(self: "LogicalMeasurement[N]") -> array[bool, N]:
         """Decode logical measurement"""
+        return decode(self)
+
+
+@hugr_op(_std_op("decode"))
+@no_type_check
+def decode(meas: LogicalMeasurement[N]) -> array[bool, N]:
+    """Decode logical measurement"""
