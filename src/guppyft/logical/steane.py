@@ -16,6 +16,7 @@ OPS_EXTN = steane_ops()
 TYPES_EXTN = steane_types()
 
 qubit_type = steane_types.steane_qubit()
+measurement_type = steane_types.steane_measurement()
 
 
 def steane_op(
@@ -25,6 +26,14 @@ def steane_op(
         return ExtOp(OPS_EXTN.get_op(op_name), ty, [arg.to_hugr(ctx) for arg in inst])
 
     return op
+
+
+@custom_type(measurement_type, copyable=True, droppable=True)
+class Measurement:
+    @hugr_op(steane_op("decode"))
+    @no_type_check
+    def decode(self: "Measurement") -> bool:
+        """Decode the measurement."""
 
 
 @custom_type(qubit_type, copyable=False, droppable=False)
@@ -91,7 +100,7 @@ class Qubit:
 @hugr_op(steane_op("free"))
 @no_type_check
 def free(qubit: "Qubit" @ owned) -> None:
-    """Free q qubit."""
+    """Free a qubit."""
 
 
 @hugr_op(steane_op("measure_z"))

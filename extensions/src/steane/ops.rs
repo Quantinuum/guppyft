@@ -5,6 +5,7 @@ use std::sync::{Arc, LazyLock, Weak};
 use crate::std::types::logical_measurement_type;
 use crate::steane::types::logical_qubit_type;
 use documented::DocumentedVariants;
+use hugr::extension::prelude::bool_t;
 use hugr::{
     Extension,
     extension::{
@@ -37,6 +38,8 @@ pub enum SteaneOpDef {
     free,
     /// Destructive measurement of a logical qubit in the Z basis.
     measure_z,
+    /// Decode
+    decode,
     /// X gate.
     x,
     /// Z gate.
@@ -146,6 +149,7 @@ impl MakeOpDef for SteaneOpDef {
                 vec![logical_measurement_type(1)],
             )
             .into(),
+            decode => FuncValueType::new(vec![logical_measurement_type(1)], vec![bool_t()]).into(),
             x => sig_qubits(1, 1),
             z => sig_qubits(1, 1),
             h => sig_qubits(1, 1),
@@ -191,7 +195,7 @@ mod tests {
     fn test_steane_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.steane.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 13);
+        assert_eq!(EXTENSION.operations().count(), 14);
     }
 
     #[test]
@@ -230,10 +234,11 @@ mod tests {
     }
 
     #[test]
-    fn test_prep_free_measure() -> Result<(), Box<dyn Error>> {
+    fn test_prep_free_measure_decode() -> Result<(), Box<dyn Error>> {
         let prep_zero = EXTENSION.instantiate_extension_op("prep_zero", [])?;
         let free = EXTENSION.instantiate_extension_op("free", [])?;
         let measure_z = EXTENSION.instantiate_extension_op("measure_z", [])?;
+        let decode = EXTENSION.instantiate_extension_op("decode", [])?;
         let prep_magic_for_t_like =
             EXTENSION.instantiate_extension_op("prep_magic_for_t_like", [])?;
         let inject_magic_for_t = EXTENSION.instantiate_extension_op("inject_magic_for_t", [])?;
@@ -243,11 +248,7 @@ mod tests {
         let mut module_builder = ModuleBuilder::new();
         let signature = Signature::new(
             vec![logical_qubit_type()],
-            vec![
-                logical_measurement_type(1),
-                logical_qubit_type(),
-                logical_qubit_type(),
-            ],
+            vec![bool_t(), logical_qubit_type(), logical_qubit_type()],
         );
         let mut f_build = module_builder.define_function("main", signature)?;
 
@@ -255,8 +256,9 @@ mod tests {
         assert_eq!(handle.outputs().count(), 0);
 
         let handle = f_build.add_dataflow_op(prep_zero.clone(), vec![])?;
+        let handle = f_build.add_dataflow_op(measure_z, handle.outputs())?;
         let [bool_wire] = f_build
-            .add_dataflow_op(measure_z, handle.outputs())?
+            .add_dataflow_op(decode, handle.outputs())?
             .outputs_arr();
 
         let [magic] = f_build

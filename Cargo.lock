@@ -851,6 +851,7 @@ name = "guppyft-bindings"
 version = "0.1.0"
 dependencies = [
  "derive_more 2.1.1",
+ "extensions",
  "guppyft",
  "pyo3",
  "tket",
