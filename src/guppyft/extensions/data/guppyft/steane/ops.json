@@ -61,7 +61,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "measurement",
               "args": [],
               "bound": "C"
@@ -230,7 +230,7 @@
             {
               "t": "Opaque",
               "extension": "guppyft.steane.types",
-              "extension_version": "0.1.0",
+              "extension_version": "0.1.1",
               "id": "measurement",
               "args": [],
               "bound": "C"
