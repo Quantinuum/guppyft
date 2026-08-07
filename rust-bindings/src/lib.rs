@@ -1,7 +1,6 @@
 //! Supporting Rust library for the Python bindings.
 
 mod hugr;
-mod util;
 
 use pyo3::pymodule;
 /// Python module containing the Rust bindings.
@@ -11,7 +10,6 @@ use pyo3::pymodule;
 mod _bindings {
     #[pymodule_export]
     use crate::hugr::RsHugr;
-    use crate::util::lookup_op;
     use guppyft::implement_ops;
     use pyo3::exceptions::PyValueError;
     use pyo3::prelude::*;
@@ -53,19 +51,37 @@ mod _bindings {
         let mut pass = ReplaceTypes::new_empty();
 
         for ((src_ext, src_op), (tgt_ext, tgt_op, tgt_args)) in op_replacements.iter() {
-            let src = match lookup_op(&registry, src_ext, src_op, vec![]) {
-                Ok(op) => op,
-                Err(..) => continue,
+            let ext = match registry.get(src_ext) {
+                Some(e) => e,
+                None => continue,
             };
-            let type_args: Vec<TypeArg> = tgt_args
+            let Some(src_def) = ext.get_op(src_op) else {
+                continue;
+            };
+
+            // Resolve the target extension eagerly, so a missing extension is
+            // reported immediately rather than only once a matching node is
+            // found during `pass.run`.
+            let tgt_ext = registry
+                .get(tgt_ext)
+                .ok_or_else(|| PyValueError::new_err(format!("Unknown extension: '{tgt_ext}'")))?
+                .clone();
+            let tgt_args: Vec<TypeArg> = tgt_args
                 .iter()
-                .map(|arg: &PyTypeArgValue| match arg {
+                .map(|arg| match arg {
                     PyTypeArgValue::Int(n) => TypeArg::from(*n),
                     PyTypeArgValue::Str(s) => TypeArg::from(s.clone()),
                 })
                 .collect();
-            let tgt = lookup_op(&registry, tgt_ext, tgt_op, type_args)?;
-            pass.set_replace_op(&src, NodeTemplate::SingleOp(tgt.into()));
+            let tgt = tgt_ext
+                .instantiate_extension_op(tgt_op, tgt_args.clone())
+                .map_err(|e| {
+                    PyValueError::new_err(format!("Could not instantiate extension op: {e}"))
+                })?;
+
+            pass.set_replace_parametrized_op(src_def, move |_, _| {
+                Ok(Some(NodeTemplate::SingleOp(tgt.clone().into())))
+            });
         }
 
         pass.run(hugr)
