@@ -55,8 +55,8 @@ body:
       description: Which component has the performance issue?
       multiple: true
       options:
-        - Guppy Compiler
-        - Standard library
+        - Encoder
+        - QECC Architecture
         - Other
     validations:
       required: true
