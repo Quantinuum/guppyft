@@ -1,8 +1,11 @@
+from typing import no_type_check
+
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.array import array
-from guppylang.std.builtins import comptime
+from guppylang.std.builtins import ArrayIter, comptime
 from guppylang.std.debug import state_output
+from guppylang.std.iter import SizedIter
 from guppylang.std.quantum import discard_array, qubit
 from selene_sim.backends import Stim
 from selene_sim.build import build
@@ -15,7 +18,6 @@ from guppyft.verifier.state_gen import gen_choi_state
 from guppyft.verifier.utils import (
     DoubleBlockState,
     DoubleBlockUnitary,
-    SingleBlockState,
     SingleBlockUnitary,
     stabilizerlist_to_signterms,
 )
@@ -32,8 +34,8 @@ def _invoke_selene_stim(
     return seeded_stim_instance.extract_states_dict(output)
 
 
-def compute_stabilizers_single_block_state(
-    state_prep_func: SingleBlockState,
+def compute_stabilizers_single_block_state[T: Iterable](
+    state_prep_func: GuppyFunctionDefinition[[], T],
     num_selene_qubits: int,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation.
@@ -48,8 +50,9 @@ def compute_stabilizers_single_block_state(
     @guppy
     def main() -> None:
         block = state_prep_func()
-        state_output("total", block)
-        discard_array(block)
+        block_arr = array(q for q in block)
+        state_output("total", block_arr)
+        discard_array(block_arr)
 
     states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
         main, num_selene_qubits
@@ -206,6 +209,14 @@ def compute_stabilizers_double_block_unitary(
 N_PHYSICAL = guppy.nat_var("N_PHYSICAL")
 K_LOGICAL = guppy.nat_var("K_LOGICAL")
 
+
+@guppy.protocol
+class Iterable:
+    @guppy.require
+    @no_type_check
+    def __iter__(self) -> SizedIter[ArrayIter[qubit, N_PHYSICAL], N_PHYSICAL]: ...
+
+
 type SemanticStabilizerState = GuppyFunctionDefinition[
     [], array[qubit, K_LOGICAL]  # type: ignore[valid-type]
 ]
@@ -238,9 +249,9 @@ type ImplementationCliffordUnitaryDouble = GuppyFunctionDefinition[
 ]
 
 
-def compute_verification_signterms_single_block_state(
+def compute_verification_signterms_single_block_state[T: Iterable](
     semantic_function: SemanticStabilizerState,
-    impl_function: ImplementationStabilizerState,
+    impl_function: GuppyFunctionDefinition[[], T],
     code_definition: StabilizerCode,
     num_ancilla_qubits: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
