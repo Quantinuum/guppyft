@@ -1,0 +1,249 @@
+from typing import no_type_check
+
+from guppylang import guppy
+from guppylang.std.angles import pi
+from guppylang.std.array import array
+from guppylang.std.mem import mem_swap
+from guppylang.std.qsystem.helios import zz_max, zz_phase
+from guppylang.std.quantum import cx, cz, h, qubit, rx, rz, s, sdg
+
+from guppyft.code_def import StabilizerCode
+
+CSS_4Q_DEF = StabilizerCode.from_python_strings(
+    num_physical_qubits=4,
+    num_logical_qubits=2,
+    distance=2,
+    generators=["XXXX", "ZZZZ"],
+    x_logicals=["XXII", "XIXI"],
+    z_logicals=["IZIZ", "IIZZ"],
+)
+
+
+@guppy
+@no_type_check
+def specify_identity(block: array[qubit, 2]) -> None:
+    pass
+
+
+@guppy
+@no_type_check
+def implement_identity(block: array[qubit, 4]) -> None:
+    pass
+
+
+@guppy
+@no_type_check
+def specify_identity_double_block(
+    first_block: array[qubit, 2], second_block: array[qubit, 2]
+) -> None:
+    pass
+
+
+@guppy
+@no_type_check
+def implement_identity_double_block(
+    first_block: array[qubit, 4], second_block: array[qubit, 4]
+) -> None:
+    pass
+
+
+@guppy
+@no_type_check
+def specify_zero_state() -> array[qubit, 2]:
+    return array(qubit() for _ in range(2))
+
+
+@guppy
+@no_type_check
+def implement_non_ft_zero_state() -> array[qubit, 4]:
+    """Non fault-tolerant zero state preparation."""
+    block = array(qubit() for _ in range(4))
+
+    h(block[0])
+    cx(block[0], block[1])
+    cx(block[0], block[2])
+    cx(block[0], block[3])
+
+    return block
+
+
+@guppy
+@no_type_check
+def specify_plus_state() -> array[qubit, 2]:
+    qs = array(qubit() for _ in range(2))
+    for i in range(len(qs)):
+        h(qs[i])
+    return qs
+
+
+@guppy
+@no_type_check
+def implement_non_ft_plus_state() -> array[qubit, 4]:
+    block = implement_non_ft_zero_state()
+    implement_double_h(block)
+    return block
+
+
+@guppy
+@no_type_check
+def specify_bell_state() -> tuple[array[qubit, 2], array[qubit, 2]]:
+    first_block = array(qubit() for _ in range(2))
+    second_block = array(qubit() for _ in range(2))
+    for i in range(2):
+        h(first_block[i])
+        cx(first_block[i], second_block[i])
+    return first_block, second_block
+
+
+@guppy
+@no_type_check
+def implement_non_ft_bell_state() -> tuple[array[qubit, 4], array[qubit, 4]]:
+    first_block = implement_non_ft_plus_state()
+    second_block = implement_non_ft_zero_state()
+    implement_transversal_cx(first_block, second_block)
+    return first_block, second_block
+
+
+@guppy
+@no_type_check
+def specify_intra_block_cx(block: array[qubit, 2]) -> None:
+    cx(block[0], block[1])
+
+
+@guppy
+@no_type_check
+def implement_intra_block_cx(block: array[qubit, 4]) -> None:
+    mem_swap(block[3], block[1])
+
+
+@guppy
+@no_type_check
+def specify_intra_block_cz(block: array[qubit, 2]) -> None:
+    cz(block[0], block[1])
+
+
+@guppy
+@no_type_check
+def implement_intra_block_cz(block: array[qubit, 4]) -> None:
+    s(block[0])
+    sdg(block[1])
+    sdg(block[2])
+    s(block[3])
+
+
+@guppy
+@no_type_check
+def specify_addressable_h(block: array[qubit, 2]) -> None:
+    h(block[1])
+
+
+# Technically this is -H due to the global phase difference between S/Rz and V/Rx.
+@guppy
+@no_type_check
+def implement_addressable_h(block: array[qubit, 4]) -> None:
+    implement_addressable_rz_half_pi(block)
+    implement_addressable_rx_half_pi(block)
+    implement_addressable_rz_half_pi(block)
+
+
+@guppy
+@no_type_check
+def specify_addressable_rz_half_pi(block: array[qubit, 2]) -> None:
+    rz(block[1], pi / 2)
+
+
+@guppy
+@no_type_check
+def implement_addressable_rz_half_pi(block: array[qubit, 4]) -> None:
+    """Non FT"""
+    zz_max(block[2], block[3])
+
+
+@guppy
+@no_type_check
+def specify_addressable_rx_half_pi(block: array[qubit, 2]) -> None:
+    rx(block[1], pi / 2)
+
+
+@guppy
+@no_type_check
+def implement_addressable_rx_half_pi(block: array[qubit, 4]) -> None:
+    """Non FT"""
+    h(block[0])
+    h(block[2])
+    zz_max(block[0], block[2])
+    h(block[0])
+    h(block[2])
+
+
+@guppy
+@no_type_check
+def specify_addressable_rx_minus_half_pi(block: array[qubit, 2]) -> None:
+    rx(block[1], -pi / 2)
+
+
+@guppy
+@no_type_check
+def implement_addressable_rx_minus_half_pi(block: array[qubit, 4]) -> None:
+    """Non FT"""
+    h(block[0])
+    h(block[2])
+    zz_phase(block[0], block[2], -pi / 2)
+    h(block[0])
+    h(block[2])
+
+
+@guppy
+@no_type_check
+def specify_double_h(block: array[qubit, 2]) -> None:
+    for i in range(2):
+        h(block[i])
+
+
+@guppy
+@no_type_check
+def implement_double_h(block: array[qubit, 4]) -> None:
+    for i in range(4):
+        h(block[i])
+    mem_swap(block[1], block[2])
+
+
+@guppy
+@no_type_check
+def specify_interblock_zzmax(
+    first_block: array[qubit, 2],
+    second_block: array[qubit, 2],
+) -> None:
+    zz_max(first_block[1], second_block[1])
+
+
+@guppy
+@no_type_check
+def implement_interblock_zzmax(
+    first_block: array[qubit, 4],
+    second_block: array[qubit, 4],
+) -> None:
+    """Non FT"""
+    cx(first_block[2], second_block[2])
+    cx(first_block[3], second_block[3])
+    zz_max(second_block[2], second_block[3])
+    cx(first_block[2], second_block[2])
+    cx(first_block[3], second_block[3])
+
+
+@guppy
+@no_type_check
+def specify_transversal_cx(
+    first_block: array[qubit, 2], second_block: array[qubit, 2]
+) -> None:
+    for i in range(2):
+        cx(first_block[i], second_block[i])
+
+
+@guppy
+@no_type_check
+def implement_transversal_cx(
+    first_block: array[qubit, 4], second_block: array[qubit, 4]
+) -> None:
+    for i in range(4):
+        cx(first_block[i], second_block[i])
