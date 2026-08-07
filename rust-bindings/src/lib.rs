@@ -1,7 +1,6 @@
 //! Supporting Rust library for the Python bindings.
 
 mod hugr;
-mod util;
 
 use pyo3::pymodule;
 /// Python module containing the Rust bindings.
@@ -11,7 +10,6 @@ use pyo3::pymodule;
 mod _bindings {
     #[pymodule_export]
     use crate::hugr::RsHugr;
-    use crate::util::lookup_ext;
     use guppyft::implement_ops;
     use pyo3::exceptions::PyValueError;
     use pyo3::prelude::*;
@@ -92,8 +90,10 @@ mod _bindings {
             // Resolve the target extension eagerly, so a missing extension is
             // reported immediately rather than only once a matching node is
             // found during `pass.run`.
-            let tgt_ext = lookup_ext(&registry, tgt_ext)?.clone();
-            let tgt_op = tgt_op.clone();
+            let tgt_ext = registry
+                .get(tgt_ext)
+                .ok_or_else(|| PyValueError::new_err(format!("Unknown extension: '{tgt_ext}'")))?
+                .clone();
             let tgt_args: Vec<TypeArg> = tgt_args
                 .iter()
                 .map(|arg| match arg {
@@ -101,10 +101,14 @@ mod _bindings {
                     PyTypeArgValue::Str(s) => TypeArg::from(s.clone()),
                 })
                 .collect();
+            let tgt = tgt_ext
+                .instantiate_extension_op(tgt_op, tgt_args.clone())
+                .map_err(|e| {
+                    PyValueError::new_err(format!("Could not instantiate extension op: {e}"))
+                })?;
 
-            pass.set_replace_parametrized_op(src_def, move |_observed_args, _replace_types| {
-                let tgt = tgt_ext.instantiate_extension_op(&tgt_op, tgt_args.clone())?;
-                Ok(Some(NodeTemplate::SingleOp(tgt.into())))
+            pass.set_replace_parametrized_op(src_def, move |_, _| {
+                Ok(Some(NodeTemplate::SingleOp(tgt.clone().into())))
             });
         }
 

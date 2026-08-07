@@ -121,6 +121,22 @@ class SteaneSpec:
 
         @guppy
         @no_type_check
+        @link_name("guppyft.steane._free")
+        def _free(q: tuple[int, int]) -> None:
+            @guppy
+            def _impl(state: STATE @ owned, q: tuple[int, int]) -> STATE:
+                blk_id, _ = q
+                blk = state.take_block(blk_id)
+
+                blk.discard()
+
+                state.free_addr(q)
+                return state
+
+            return map_global(_impl, q)
+
+        @guppy
+        @no_type_check
         @link_name("guppyft.steane._x")
         def _x(q: tuple[int, int]) -> tuple[tuple[int, int]]:
             @guppy
@@ -236,6 +252,7 @@ class SteaneSpec:
             state_discard,
             _prep_zero_non_ft,
             _measure_z,
+            _free,
             decode,
             _x,
             _z,
@@ -247,17 +264,18 @@ class SteaneSpec:
             {
                 ("guppyft.steane.ops", "prep_zero"): "guppyft.steane._prep_zero_non_ft",
                 ("guppyft.steane.ops", "measure_z"): "guppyft.steane._measure_z",
+                ("guppyft.steane.ops", "free"): "guppyft.steane._free",
                 ("guppyft.steane.ops", "x"): "guppyft.steane._x",
                 ("guppyft.steane.ops", "z"): "guppyft.steane._z",
                 ("guppyft.steane.ops", "h"): "guppyft.steane._h",
                 ("guppyft.steane.ops", "cx"): "guppyft.steane._cx",
-                ("guppyft.std.ops", "decode"): "guppyft.steane.decode",
+                ("guppyft.steane.ops", "decode"): "guppyft.steane.decode",
             }
         )
         tys = TyReplacements().with_types(
             [
                 ("guppyft.steane.types", "qubit"),
-                ("guppyft.std.types", "logical_measurement"),
+                ("guppyft.steane.types", "measurement"),
             ]
         )
 
@@ -272,12 +290,11 @@ class SteaneSpec:
         ext = ExtensionRegistry.from_extensions(
             [steane_ops(), steane_types(), std_ops(), std_types()]
         )
-        # TODO _std_extensions should not be necessary but seems to be
-        #  required for borrow_array when (de)serialising.
+        # `_std_extensions` should not be necessary but seems to be
+        #  required for `borrow_array` when (de)serialising.
         ext.extend(_std_extensions())
 
         std_encoder = ReplaceEncoder(
-            # TODO This should probably use `OpReplacement` or some other dataclass
             op_replacements={
                 ("tket.quantum", "QAlloc"): ("guppyft.steane.ops", "prep_zero", []),
                 ("tket.quantum", "MeasureFree"): (
@@ -285,6 +302,7 @@ class SteaneSpec:
                     "measure_z",
                     [],
                 ),
+                ("tket.quantum", "QFree"): ("guppyft.steane.ops", "free", []),
                 ("tket.measurement", "Read"): ("guppyft.std.ops", "decode", [1]),
             },
             extensions=ext,
