@@ -30,8 +30,8 @@ body:
       description: Which component should this feature be added to?
       multiple: true
       options:
-        - Guppy Compiler
-        - Standard library
+        - Encoder
+        - QECC Architecture
         - CI/Build System
         - Documentation
         - Other
