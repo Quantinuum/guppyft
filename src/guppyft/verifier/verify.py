@@ -20,8 +20,6 @@ from guppyft.verifier.utils import (
     stabilizerlist_to_signterms,
 )
 
-N = guppy.nat_var("N")
-
 
 def _invoke_selene_stim(
     main_function: GuppyFunctionDefinition[[], None],
