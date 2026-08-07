@@ -59,17 +59,14 @@ def _std_op(
 
 class _DecodeChecker(CustomCallChecker):
     def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
-        self_expr, self_ty = ExprSynthesizer(self.ctx).synthesize(args[0])
+        _, self_ty = ExprSynthesizer(self.ctx).synthesize(args[0])
         assert isinstance(self_ty, OpaqueType), type(self_ty)
         [k_arg] = self_ty.args
         assert isinstance(k_arg, ConstArg)
         assert isinstance(k_arg.const, ConstValue)
         n = k_arg.const.value
 
-        if n == 1:
-            out_ty = bool_type()
-        else:
-            out_ty = TupleType([bool_type()] * n)
+        out_ty = bool_type() if n == 1 else TupleType([bool_type()] * n)
 
         func_ty = FunctionType(
             inputs=[FuncInput(self_ty, InputFlags.NoFlags)],

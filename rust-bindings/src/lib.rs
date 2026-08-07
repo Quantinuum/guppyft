@@ -14,12 +14,9 @@ mod _bindings {
     use pyo3::exceptions::PyValueError;
     use pyo3::prelude::*;
     use std::collections::{BTreeMap, HashSet};
-    use tket::extension::measurement::measurement_type;
-    use tket::hugr::extension::prelude::qb_t;
     use tket::hugr::HugrView;
     use tket::passes::replace_types::NodeTemplate;
     use tket::passes::{ComposablePass, ReplaceTypes};
-    use extensions::std::types::logical_measurement_type;
 
     /// A single [`hugr::types::TypeArg`] value as passed from Python, either an int
     /// (mapped to a `BoundedNat` argument) or a str (mapped to a `String` argument).
@@ -126,8 +123,8 @@ mod _bindings {
             PyValueError::new_err(format!("Could not resolve extensions after encoding: {e}"))
         })?;
 
-        // hugr.validate()
-        //     .map_err(|e| PyValueError::new_err(format!("Encoded Hugr failed validation: {e}")))?;
+        hugr.validate()
+            .map_err(|e| PyValueError::new_err(format!("Encoded Hugr failed validation: {e}")))?;
 
         Ok(())
     }
