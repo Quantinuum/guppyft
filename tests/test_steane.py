@@ -111,7 +111,7 @@ def test_guppy_hugr() -> None:
         "guppyft.steane.ops.h",
         "guppyft.steane.ops.measure_z",
         "Output",
-        "guppyft.steane.ops.decode",
+        "guppyft.std.ops.decode",
         'tket.result.result_bool<"a">',
     }
     [h_node] = [child for child in children if "h" in h[child].op.name()]

@@ -2,7 +2,8 @@
 
 use std::sync::{Arc, LazyLock, Weak};
 
-use crate::steane::types::{logical_measurement_type, logical_qubit_type};
+use crate::std::types::logical_measurement_type;
+use crate::steane::types::logical_qubit_type;
 use documented::DocumentedVariants;
 use hugr::extension::prelude::bool_t;
 use hugr::{
@@ -143,11 +144,12 @@ impl MakeOpDef for SteaneOpDef {
         match self {
             prep_zero => sig_qubits(0, 1),
             free => sig_qubits(1, 0),
-            measure_z => {
-                FuncValueType::new(vec![logical_qubit_type()], vec![logical_measurement_type()])
-                    .into()
-            }
-            decode => FuncValueType::new(vec![logical_measurement_type()], vec![bool_t()]).into(),
+            measure_z => FuncValueType::new(
+                vec![logical_qubit_type()],
+                vec![logical_measurement_type(1)],
+            )
+            .into(),
+            decode => FuncValueType::new(vec![logical_measurement_type(1)], vec![bool_t()]).into(),
             x => sig_qubits(1, 1),
             z => sig_qubits(1, 1),
             h => sig_qubits(1, 1),

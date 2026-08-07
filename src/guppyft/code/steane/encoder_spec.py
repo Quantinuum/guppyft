@@ -269,13 +269,13 @@ class SteaneSpec:
                 ("guppyft.steane.ops", "z"): "guppyft.steane._z",
                 ("guppyft.steane.ops", "h"): "guppyft.steane._h",
                 ("guppyft.steane.ops", "cx"): "guppyft.steane._cx",
-                ("guppyft.steane.ops", "decode"): "guppyft.steane.decode",
+                ("guppyft.std.ops", "decode"): "guppyft.steane.decode",
             }
         )
         tys = TyReplacements().with_types(
             [
                 ("guppyft.steane.types", "qubit"),
-                ("guppyft.steane.types", "measurement"),
+                ("guppyft.std.types", "logical_measurement"),
             ]
         )
 

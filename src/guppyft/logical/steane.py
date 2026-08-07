@@ -10,6 +10,7 @@ from hugr import tys as ht
 from hugr.ops import DataflowOp, ExtOp
 
 from guppyft.extensions import steane_ops, steane_types
+from guppyft.std import LogicalMeasurement
 
 OPS_EXTN = steane_ops()
 TYPES_EXTN = steane_types()
@@ -49,7 +50,7 @@ class Qubit:
 
     @guppy
     @no_type_check
-    def measure_z(self: "Qubit" @ owned) -> Measurement:
+    def measure_z(self: "Qubit" @ owned) -> LogicalMeasurement[1]:
         """Destructive measurement of the qubit in the Z basis."""
         return measure_z(self)
 
@@ -104,7 +105,7 @@ def free(qubit: "Qubit" @ owned) -> None:
 
 @hugr_op(steane_op("measure_z"))
 @no_type_check
-def measure_z(self: "Qubit" @ owned) -> Measurement:
+def measure_z(self: "Qubit" @ owned) -> LogicalMeasurement[1]:
     """Destructive measurement of the qubit in the Z basis."""
 
 
