@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.0.2](https://github.com/quantinuum-dev/guppyft/compare/v0.0.1...v0.0.2) (2026-08-07)
+
+
+### Features
+
+* Add `LogicalMeasurement` type and `decode` op in `guppyft.std` extension ([#145](https://github.com/quantinuum-dev/guppyft/issues/145)) ([6fbbc45](https://github.com/quantinuum-dev/guppyft/commit/6fbbc4579f4bd9e2df24d9b38795031d51069026))
+* Add `PreBlock` type and ops to Iceberg extension and bindings ([#139](https://github.com/quantinuum-dev/guppyft/issues/139)) ([b44bdcf](https://github.com/quantinuum-dev/guppyft/commit/b44bdcfac52f04b6c54b672e9928e498a80f473f))
+* Add rust fix/format to justfile ([#162](https://github.com/quantinuum-dev/guppyft/issues/162)) ([8617618](https://github.com/quantinuum-dev/guppyft/commit/86176189918bf8c58236c847faee7a0838e9f6b1))
+* add verifier for logical Cliffords ([#52](https://github.com/quantinuum-dev/guppyft/issues/52)) ([e6b6c0a](https://github.com/quantinuum-dev/guppyft/commit/e6b6c0a8a7c5bc294f83eb297a29c8390b86137a))
+* Extensions for Steane logical ops and types ([#131](https://github.com/quantinuum-dev/guppyft/issues/131)) ([c7c7041](https://github.com/quantinuum-dev/guppyft/commit/c7c7041863b0937a15c174fcec647901497c20e3))
+
+
+### Bug Fixes
+
+* Fix guppy binding of BorrowedBlock ([#142](https://github.com/quantinuum-dev/guppyft/issues/142)) ([df32f7a](https://github.com/quantinuum-dev/guppyft/commit/df32f7a1399b6fab25379587de25c00c8a4709ac))
+
+
+### Documentation
+
+* Add development guide ([#163](https://github.com/quantinuum-dev/guppyft/issues/163)) ([342d568](https://github.com/quantinuum-dev/guppyft/commit/342d5689bc781538b9b424502b3e876e15ff93b8))
+
 ## 0.0.1 (2026-07-09)
 
 
