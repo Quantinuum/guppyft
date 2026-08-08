@@ -1,3 +1,5 @@
+from enum import Enum
+
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.array import array
@@ -284,6 +286,49 @@ def compute_verification_signterms_single_block_state(
     implementation_stabilizers.canonicalize_all()
 
     return expanded_semantic_stabilizers, implementation_stabilizers
+
+
+class BlockType(Enum):
+    SingleBlock = 1
+    DoubleBlock = 2
+
+
+def validate_stabilizer_state(
+    semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
+    impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
+    code_definition: StabilizerCode,
+    block_type: BlockType,
+    num_ancilla_qubits: int = 0,
+) -> bool:
+    match block_type:
+        case BlockType.SingleBlock:
+            sem, impl = compute_verification_signterms_single_block_state(
+                semantic_function, impl_function, code_definition, num_ancilla_qubits
+            )
+        case BlockType.DoubleBlock:
+            sem, impl = compute_verification_signterms_single_block_state(
+                semantic_function, impl_function, code_definition, num_ancilla_qubits
+            )
+    return sem == impl
+
+
+def validate_logical_clifford(
+    semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
+    impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
+    code_definition: StabilizerCode,
+    block_type: BlockType,
+    num_ancilla_qubits: int = 0,
+) -> bool:
+    match block_type:
+        case BlockType.SingleBlock:
+            sem, impl = compute_verification_signterms_single_block_unitary(
+                semantic_function, impl_function, code_definition, num_ancilla_qubits
+            )
+        case BlockType.DoubleBlock:
+            sem, impl = compute_verification_signterms_double_block_unitary(
+                semantic_function, impl_function, code_definition, num_ancilla_qubits
+            )
+    return sem == impl
 
 
 def compute_verification_signterms_double_block_state(

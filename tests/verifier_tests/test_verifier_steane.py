@@ -3,6 +3,8 @@ from guppyft.verifier.verify import (
     compute_verification_signterms_double_block_unitary,
     compute_verification_signterms_single_block_state,
     compute_verification_signterms_single_block_unitary,
+    validate_logical_clifford,
+    BlockType,
 )
 
 from .ops import steane
@@ -159,3 +161,10 @@ def test_steane_cx() -> None:
         code_definition=steane.STEANE_DEF,
     )
     assert sem == impl
+
+    assert validate_logical_clifford(
+        steane.specify_cx,
+        steane.implement_cx,
+        code_definition=steane.STEANE_DEF,
+        block_type=BlockType.DoubleBlock,
+    )
