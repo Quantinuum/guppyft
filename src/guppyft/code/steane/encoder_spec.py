@@ -1,23 +1,24 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.library import GuppyLibrary, link_name
 from guppylang.std.builtins import array, comptime, owned
-from guppylang.std.collections import Stack
+from guppylang.std.collections import Stack, empty_queue
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.platform import panic
 from hugr.ext import ExtensionRegistry
 from hugr.package import Package
 from hugr.std import _std_extensions
 
+from guppyft.code.factory import FactoryConf, StateFactory
 from guppyft.code.steane.primitives import (
     cx,
     decode,
     h,
     measure_z,
-    prep_zero_non_ft,
+    prep_zero_ft,
     x,
     z,
 )
@@ -37,7 +38,10 @@ from guppyft.globals import map_global, with_global
 
 @dataclass
 class SteaneSpec:
+    """Steane encoder spec"""
+
     n_blocks: int
+    zero_factory: FactoryConf = field(default_factory=lambda: FactoryConf(1, 5))
 
     def gen_implement_spec(self) -> ImplementOpsSpec:
         # TODO STATE should be generic for all codes. The methods that are code specific
@@ -48,6 +52,8 @@ class SteaneSpec:
         class STATE:
             blocks: array[Option[LogicalBlock[7]], comptime(self.n_blocks)]  # type: ignore[valid-type,type-arg]
             addr_stack: Stack[tuple[int, int], comptime(self.n_blocks)]  # type: ignore[valid-type,type-arg]
+
+            zero_state_factory: StateFactory[7, 1, comptime(self.zero_factory.size)]  # type: ignore[valid-type,type-arg]
 
             @guppy
             @no_type_check
@@ -90,12 +96,12 @@ class SteaneSpec:
         # See https://github.com/quantinuum-dev/guppyft/issues/161.
         @guppy
         @no_type_check
-        @link_name("guppyft.steane._prep_zero_non_ft")
-        def _prep_zero_non_ft() -> tuple[tuple[int, int]]:
+        @link_name("guppyft.steane._prep_zero")
+        def _prep_zero() -> tuple[tuple[int, int]]:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, tuple[int, int]]:
                 blk_id, qb_id = state.allocate_next_addr()
-                blk = prep_zero_non_ft()
+                blk = state.zero_state_factory.get_state()
                 state.put_block(blk_id, blk)
                 return state, (blk_id, qb_id)
 
@@ -219,6 +225,12 @@ class SteaneSpec:
                     array(some((blk, 1)) for blk in range(comptime(self.n_blocks))),
                     comptime(self.n_blocks),
                 ),
+                # Zero state factory
+                StateFactory(
+                    prep_zero_ft,
+                    comptime(self.zero_factory.max_attempts),
+                    empty_queue(),
+                ),
             )
 
         @guppy.declare
@@ -235,6 +247,8 @@ class SteaneSpec:
                 else:
                     blk.unwrap_nothing()
 
+            state.zero_state_factory.discard()
+
         def build_wrapper(
             func: GuppyFunctionDefinition[[], None],
         ) -> GuppyFunctionDefinition[[], None]:
@@ -250,7 +264,7 @@ class SteaneSpec:
         lib = GuppyLibrary.from_members(
             state_gen,
             state_discard,
-            _prep_zero_non_ft,
+            _prep_zero,
             _measure_z,
             _free,
             decode,
@@ -262,7 +276,7 @@ class SteaneSpec:
 
         ops = OpReplacements().with_generated_decls(
             {
-                ("guppyft.steane.ops", "prep_zero"): "guppyft.steane._prep_zero_non_ft",
+                ("guppyft.steane.ops", "prep_zero"): "guppyft.steane._prep_zero",
                 ("guppyft.steane.ops", "measure_z"): "guppyft.steane._measure_z",
                 ("guppyft.steane.ops", "free"): "guppyft.steane._free",
                 ("guppyft.steane.ops", "x"): "guppyft.steane._x",
