@@ -1,3 +1,12 @@
+import re
+from typing import no_type_check
+
+import pytest
+from guppylang import guppy
+from guppylang.std.builtins import array
+from guppylang.std.quantum import qubit
+from guppylang_internals.error import GuppyTypeError
+
 from guppyft.verifier.verify import (
     compute_verification_signterms_double_block_state,
     compute_verification_signterms_double_block_unitary,
@@ -55,6 +64,15 @@ def test_steane_zero_state() -> None:
     assert sem == impl
 
 
+def test_steane_zero_state_logical_block() -> None:
+    sem, impl = compute_verification_signterms_single_block_state(
+        steane.specify_zero_state,
+        steane.implement_non_ft_zero_state_logical_block,
+        code_definition=steane.STEANE_DEF,
+    )
+    assert sem == impl
+
+
 def test_steane_ft_zero_state() -> None:
     sem, impl = compute_verification_signterms_single_block_state(
         steane.specify_zero_state,
@@ -96,6 +114,16 @@ def test_steane_h() -> None:
     sem, impl = compute_verification_signterms_single_block_unitary(
         steane.specify_h,
         steane.implement_h,
+        code_definition=steane.STEANE_DEF,
+    )
+
+    assert sem == impl
+
+
+def test_steane_h_logical_block() -> None:
+    sem, impl = compute_verification_signterms_single_block_unitary(
+        steane.specify_h,
+        steane.implement_h_logical_block,
         code_definition=steane.STEANE_DEF,
     )
 
@@ -159,3 +187,34 @@ def test_steane_cx() -> None:
         code_definition=steane.STEANE_DEF,
     )
     assert sem == impl
+
+
+def test_steane_cx_logical_block() -> None:
+    sem, impl = compute_verification_signterms_double_block_unitary(
+        steane.specify_cx,
+        steane.implement_cx_logical_block,
+        code_definition=steane.STEANE_DEF,
+    )
+    assert sem == impl
+
+
+def test_steane_zero_state_non_iterable_struct() -> None:
+
+    @guppy.struct
+    class NonIterableBlock:
+        data_qs: array[qubit, 7]  # type: ignore[valid-type]
+
+    @guppy
+    @no_type_check
+    def implement_non_ft_zero_non_iterable_block() -> NonIterableBlock:
+        return NonIterableBlock(steane.implement_non_ft_zero_state())
+
+    with pytest.raises(
+        GuppyTypeError,
+        match=re.escape("Expression of type `NonIterableBlock` is not iterable"),
+    ):
+        compute_verification_signterms_single_block_state(
+            steane.specify_zero_state,
+            implement_non_ft_zero_non_iterable_block,
+            code_definition=steane.STEANE_DEF,
+        )

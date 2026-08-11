@@ -27,14 +27,14 @@ class LogicalBlock(Generic[N]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
-    def discard(self: "LogicalBlock[N]" @ owned) -> None:
+    def discard(self: LogicalBlock[N] @ owned) -> None:
         """Discard the logical block and all qubits in ``data_qs``."""
         for q in self.data_qs:
             discard(q)
 
     @guppy
     @no_type_check
-    def __iter__(self: "LogicalBlock[N]" @ owned) -> SizedIter[ArrayIter[qubit, N], N]:
+    def __iter__(self: LogicalBlock[N] @ owned) -> SizedIter[ArrayIter[qubit, N], N]:
         return array(q for q in self.data_qs).__iter__()
 
 

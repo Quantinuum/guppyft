@@ -17,7 +17,7 @@ T = guppy.type_var("T")
 
 
 @guppy.protocol
-class _GuppyIterable(Generic[T]):  # type: ignore[misc]
+class _GuppyIterable(Generic[T, N]):  # type: ignore[misc]
     @guppy.require
     @no_type_check
     def __iter__(self) -> SizedIter[ArrayIter[T, N], N]: ...
