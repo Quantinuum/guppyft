@@ -1,4 +1,6 @@
-from dataclasses import dataclass
+from collections import defaultdict
+from dataclasses import dataclass, field
+from enum import Enum
 from typing import no_type_check
 
 from guppylang import guppy
@@ -7,7 +9,7 @@ from guppylang.library import GuppyLibrary, link_name
 from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.collections import Stack
 from guppylang.std.option import Option, nothing, some
-from guppylang.std.platform import panic
+from guppylang.std.platform import panic, result
 from hugr.ext import ExtensionRegistry
 from hugr.package import Package
 from hugr.std import _std_extensions
@@ -35,9 +37,25 @@ from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
 
 
+class QECStyle(Enum):
+    Shor = 0
+    Knill = 1
+    Steane = 2
+
+
+@dataclass
+class QECPolicy:
+    style: QECStyle
+    threshold: int
+    costs: dict[str, int]
+
+
 @dataclass
 class SteaneSpec:
     n_blocks: int
+    qec_policy: QECPolicy = field(
+        default_factory=lambda: QECPolicy(QECStyle.Shor, 1, defaultdict())
+    )
 
     def gen_implement_spec(self) -> ImplementOpsSpec:
         # TODO STATE should be generic for all codes. The methods that are code specific
@@ -48,6 +66,7 @@ class SteaneSpec:
         class STATE:
             blocks: array[Option[LogicalBlock[7]], comptime(self.n_blocks)]  # type: ignore[valid-type,type-arg]
             addr_stack: Stack[tuple[int, int], comptime(self.n_blocks)]  # type: ignore[valid-type,type-arg]
+            qec_counter: array[int, comptime(self.n_blocks)]  # type: ignore[valid-type]
 
             @guppy
             @no_type_check
@@ -81,6 +100,30 @@ class SteaneSpec:
                 self.blocks[next_addr[0]].swap(blk).unwrap_nothing()
 
                 return next_addr
+
+            @guppy
+            @no_type_check
+            def qec_policy(
+                self,
+                blk_ids: array[int, N] @ owned,
+                op_cost: int,
+            ) -> None:
+                for i in blk_ids:
+                    self.qec_counter[i] = self.qec_counter[i] + op_cost
+
+                    if self.qec_counter[i] >= comptime(self.qec_policy.threshold):
+                        blk = self.take_block(i)
+
+                        qec_cycle(self, blk)
+
+                        self.put_block(i, blk)
+                        self.qec_counter[i] = 0
+
+        @guppy
+        @no_type_check
+        def qec_cycle(state: STATE, blk: LogicalBlock[7]) -> STATE:
+            result("qec_counter", state.qec_counter)
+            return state
 
         # TODO Defining the primitives to use the global state requires
         # a lot of "boilerplate" code. We should provide helper methods
@@ -219,6 +262,8 @@ class SteaneSpec:
                     array(some((blk, 1)) for blk in range(comptime(self.n_blocks))),
                     comptime(self.n_blocks),
                 ),
+                # qec_counter
+                array(0 for _ in range(comptime(self.n_blocks))),
             )
 
         @guppy.declare
