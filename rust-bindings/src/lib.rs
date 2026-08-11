@@ -13,7 +13,7 @@ mod _bindings {
     use guppyft::implement_ops;
     use pyo3::exceptions::PyValueError;
     use pyo3::prelude::*;
-    use std::collections::{BTreeMap, HashSet};
+    use std::collections::{BTreeMap, HashMap, HashSet};
     use tket::hugr::HugrView;
     use tket::passes::replace_types::NodeTemplate;
     use tket::passes::{ComposablePass, ReplaceTypes};
@@ -27,10 +27,11 @@ mod _bindings {
     }
 
     #[pyfunction]
-    #[pyo3(signature = (rs_hugr, op_replacements, extensions=None))]
+    #[pyo3(signature = (rs_hugr, op_replacements, ty_replacements, extensions=None))]
     fn _replace_encoder(
         rs_hugr: &mut RsHugr,
         op_replacements: BTreeMap<(String, String), (String, String, Vec<PyTypeArgValue>)>,
+        ty_replacements: HashMap<(String, String), (String, String)>,
         extensions: Option<String>,
     ) -> PyResult<()> {
         use tket::hugr::extension::ExtensionRegistry;
@@ -82,6 +83,32 @@ mod _bindings {
             pass.set_replace_parametrized_op(src_def, move |_, _| {
                 Ok(Some(NodeTemplate::SingleOp(tgt.clone().into())))
             });
+        }
+
+        for ((src_ext, src_ty), (tgt_ext, tgt_ty)) in ty_replacements.iter() {
+            let src_ext = match registry.get(src_ext) {
+                Some(e) => e,
+                None => continue,
+            };
+            let Some(src_def) = src_ext.get_type(src_ty) else {
+                continue;
+            };
+            let src = src_def
+                .instantiate([])
+                .map_err(|e| PyValueError::new_err(format!("Could not instantiate src ty: {e}")))?;
+
+            let tgt_ext = match registry.get(tgt_ext) {
+                Some(e) => e,
+                None => continue,
+            };
+            let Some(tgt_def) = tgt_ext.get_type(tgt_ty) else {
+                continue;
+            };
+            let tgt = tgt_def
+                .instantiate([])
+                .map_err(|e| PyValueError::new_err(format!("Could not instantiate tgt ty: {e}")))?;
+
+            pass.set_replace_type(src, tgt.into());
         }
 
         pass.run(hugr)

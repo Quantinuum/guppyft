@@ -2,7 +2,7 @@ import pytest
 from guppylang import guppy
 from guppylang.emulator import EmulatorBuilder
 from guppylang.std.platform import output
-from guppylang.std.quantum import discard, measure, qubit, y
+from guppylang.std.quantum import discard, measure, qubit, x, y
 from selene_hugr_qis_compiler import check_hugr
 
 from guppyft.code.steane.encoder_spec import SteaneSpec
@@ -68,3 +68,20 @@ def test_encoder_missing_op() -> None:
         ),
     ):
         SteaneSpec(n_blocks=1).encode(pkg)
+
+
+def test_encoder_control_flow() -> None:
+    @guppy
+    def main() -> None:
+        q0 = qubit()
+        q1 = qubit()
+        if not measure(q0).read():
+            x(q1)
+
+        output("q1", measure(q1).read())
+
+    pkg = main.compile()
+    phys_pkg = SteaneSpec(n_blocks=2).encode(pkg)
+    res = EmulatorBuilder().build(phys_pkg, n_qubits=20).run().collated_shots()
+
+    assert res == [{"q1": [1]}]

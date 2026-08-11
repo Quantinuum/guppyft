@@ -23,6 +23,7 @@ class ReplaceEncoder(ComposablePass):
     to a target `(extension_name, op_name, args)` triple, where `args` is the
     list of type args (integers or strings) used to instantiate the target
     op."""
+    ty_replacements: dict[tuple[str, str], tuple[str, str]]
     extensions: ExtensionRegistry | None = None
     """Optional JSON-encoded list of additional extension definitions, used to
     resolve target ops/types that are not already registered on the input Hugr."""
@@ -44,6 +45,8 @@ class ReplaceEncoder(ComposablePass):
             extension_registry_to_json(self.extensions) if self.extensions else None
         )
         rs_hugr = RsHugr.from_bytes(hugr.to_bytes())
-        _replace_encoder(rs_hugr, self.op_replacements, registry_str)
+        _replace_encoder(
+            rs_hugr, self.op_replacements, self.ty_replacements, registry_str
+        )
         new_hugr = Hugr.from_bytes(rs_hugr.to_bytes())
         return PassResult.for_pass(self, hugr=new_hugr, inplace=inplace, result=None)
