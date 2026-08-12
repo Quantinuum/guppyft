@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Self
 
 from hugr import Hugr
@@ -23,7 +23,9 @@ class ReplaceEncoder(ComposablePass):
     to a target `(extension_name, op_name, args)` triple, where `args` is the
     list of type args (integers or strings) used to instantiate the target
     op."""
-    ty_replacements: dict[tuple[str, str], tuple[str, str]] | None
+    ty_replacements: dict[tuple[str, str], tuple[str, str]] = field(
+        default_factory=dict
+    )
     """Optional mapping between src and tgt types to be replaced globally during
     encoding where types are provided in the form `(extension_name, ty_name)`.
     """
@@ -49,7 +51,7 @@ class ReplaceEncoder(ComposablePass):
         )
         rs_hugr = RsHugr.from_bytes(hugr.to_bytes())
         _replace_encoder(
-            rs_hugr, self.op_replacements, self.ty_replacements or {}, registry_str
+            rs_hugr, self.op_replacements, self.ty_replacements, registry_str
         )
         new_hugr = Hugr.from_bytes(rs_hugr.to_bytes())
         return PassResult.for_pass(self, hugr=new_hugr, inplace=inplace, result=None)
