@@ -297,7 +297,7 @@ class BlockType(Enum):
     DoubleBlock = 2
 
 
-def check_state_semantics(
+def check_stabilizer_state_semantics(
     semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
     code_definition: StabilizerCode,
@@ -326,7 +326,7 @@ def check_state_semantics(
         )
 
 
-def check_unitary_semantics(
+def check_clifford_semantics(
     semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
     code_definition: StabilizerCode,

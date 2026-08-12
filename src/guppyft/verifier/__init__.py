@@ -3,8 +3,8 @@ from .utils import (
     stabilizerlist_to_signterms,
 )
 from .verify import (
-    check_state_semantics,
-    check_unitary_semantics,
+    check_clifford_semantics,
+    check_stabilizer_state_semantics,
     compute_stabilizers_double_block_unitary,
     compute_stabilizers_single_block_unitary,
     compute_verification_signterms_double_block_state,
@@ -14,8 +14,8 @@ from .verify import (
 )
 
 __all__ = [
-    "check_state_semantics",
-    "check_unitary_semantics",
+    "check_clifford_semantics",
+    "check_stabilizer_state_semantics",
     "compute_stabilizers_double_block_unitary",
     "compute_stabilizers_single_block_unitary",
     "compute_verification_signterms_double_block_state",

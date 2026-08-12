@@ -3,7 +3,7 @@ import pytest
 from guppyft.verifier.verify import (
     BlockType,
     InvalidImplementationError,
-    check_unitary_semantics,
+    check_clifford_semantics,
     compute_verification_signterms_double_block_state,
     compute_verification_signterms_double_block_unitary,
     compute_verification_signterms_single_block_state,
@@ -159,7 +159,7 @@ def test_steane_invalid_sdg() -> None:
         InvalidImplementationError,
         match=r"The implementation does not match the specified semantics.",
     ):
-        check_unitary_semantics(
+        check_clifford_semantics(
             steane.specify_sdg,
             steane.implement_s,
             code_definition=steane.STEANE_DEF,
@@ -175,7 +175,7 @@ def test_steane_cx() -> None:
     )
     assert sem == impl
 
-    check_unitary_semantics(
+    check_clifford_semantics(
         steane.specify_cx,
         steane.implement_cx,
         code_definition=steane.STEANE_DEF,
