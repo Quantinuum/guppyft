@@ -1,6 +1,9 @@
+from collections.abc import Mapping
 from dataclasses import dataclass
+from typing import Any, Protocol
 
 from guppylang.defs import GuppyFunctionDefinition
+from hugr.metadata import Metadata
 from hugr.ops import Module
 from hugr.package import Package
 from hugr.passes.composable import ComposablePass
@@ -85,3 +88,26 @@ def encode(
 
     # 4. Lower logical -> physical
     return implement_ops(hugr, spec.implement_spec)
+
+
+class EncoderParams(Protocol):
+    def encoding(self) -> str:
+        """The encoding to annotate on a program."""
+
+    def params(self) -> Mapping[str, Any]:
+        """The parameters to annotate on a program. Implementations should return types
+        that support serialisation to JSON."""
+
+
+class _MetadataEncoding(Metadata[Mapping[str, Any]]):
+    """Metadata key for annotating parameters with which to encode a program."""
+
+    KEY = "guppyft.encoding"
+
+
+def annotate_encoding(pkg: Package, params: EncoderParams) -> None:
+    for hugr in pkg.modules:
+        hugr[hugr.module_root].metadata[_MetadataEncoding] = {
+            "encoding": params.encoding(),
+            "params": params.params(),
+        }
