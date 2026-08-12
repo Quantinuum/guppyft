@@ -13,8 +13,10 @@ mod _bindings {
     use guppyft::implement_ops;
     use pyo3::exceptions::PyValueError;
     use pyo3::prelude::*;
-    use std::collections::{BTreeMap, HashMap, HashSet};
+    use std::collections::{BTreeMap, HashSet};
     use tket::hugr::HugrView;
+    use tket::hugr::extension::ExtensionRegistry;
+    use tket::hugr::types::CustomType;
     use tket::passes::replace_types::NodeTemplate;
     use tket::passes::{ComposablePass, ReplaceTypes};
 
@@ -26,12 +28,35 @@ mod _bindings {
         Str(String),
     }
 
+    fn get_type_from_registry(
+        registry: &ExtensionRegistry,
+        ext_name: &str,
+        ty_name: &str,
+    ) -> Result<Option<CustomType>, PyErr> {
+        let ext = match registry.get(ext_name) {
+            Some(e) => e,
+            None => return Ok(None),
+        };
+        let Some(src_def) = ext.get_type(ty_name) else {
+            return Ok(None);
+        };
+        if !src_def.params().is_empty() {
+            return Err(PyValueError::new_err(format!(
+                "Generic types are not supported for type replacement: '{ext_name}.{ty_name}'",
+            )));
+        }
+        let src = src_def
+            .instantiate([])
+            .map_err(|e| PyValueError::new_err(format!("Could not instantiate src ty: {e}")))?;
+        Ok(Some(src))
+    }
+
     #[pyfunction]
     #[pyo3(signature = (rs_hugr, op_replacements, ty_replacements, extensions=None))]
     fn _replace_encoder(
         rs_hugr: &mut RsHugr,
         op_replacements: BTreeMap<(String, String), (String, String, Vec<PyTypeArgValue>)>,
-        ty_replacements: HashMap<(String, String), (String, String)>,
+        ty_replacements: BTreeMap<(String, String), (String, String)>,
         extensions: Option<String>,
     ) -> PyResult<()> {
         use tket::hugr::extension::ExtensionRegistry;
@@ -85,28 +110,15 @@ mod _bindings {
             });
         }
 
-        for ((src_ext, src_ty), (tgt_ext, tgt_ty)) in ty_replacements.iter() {
-            let src_ext = match registry.get(src_ext) {
-                Some(e) => e,
+        for ((src_ext_name, src_ty), (tgt_ext_name, tgt_ty)) in ty_replacements.iter() {
+            let src = match get_type_from_registry(&registry, src_ext_name, src_ty)? {
+                Some(ty) => ty,
                 None => continue,
             };
-            let Some(src_def) = src_ext.get_type(src_ty) else {
-                continue;
-            };
-            let src = src_def
-                .instantiate([])
-                .map_err(|e| PyValueError::new_err(format!("Could not instantiate src ty: {e}")))?;
-
-            let tgt_ext = match registry.get(tgt_ext) {
-                Some(e) => e,
+            let tgt = match get_type_from_registry(&registry, tgt_ext_name, tgt_ty)? {
+                Some(ty) => ty,
                 None => continue,
             };
-            let Some(tgt_def) = tgt_ext.get_type(tgt_ty) else {
-                continue;
-            };
-            let tgt = tgt_def
-                .instantiate([])
-                .map_err(|e| PyValueError::new_err(format!("Could not instantiate tgt ty: {e}")))?;
 
             pass.set_replace_type(src, tgt.into());
         }
