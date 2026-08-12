@@ -288,47 +288,70 @@ def compute_verification_signterms_single_block_state(
     return expanded_semantic_stabilizers, implementation_stabilizers
 
 
+class InvalidImplementationError(ValueError):
+    pass
+
+
 class BlockType(Enum):
     SingleBlock = 1
     DoubleBlock = 2
 
 
-def validate_stabilizer_state(
+def check_state_semantics(
     semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
     code_definition: StabilizerCode,
     block_type: BlockType,
     num_ancilla_qubits: int = 0,
-) -> bool:
+) -> None:
     match block_type:
         case BlockType.SingleBlock:
             sem, impl = compute_verification_signterms_single_block_state(
-                semantic_function, impl_function, code_definition, num_ancilla_qubits
+                semantic_function,  # type: ignore[arg-type]
+                impl_function,  # type: ignore[arg-type]
+                code_definition,
+                num_ancilla_qubits,
             )
         case BlockType.DoubleBlock:
             sem, impl = compute_verification_signterms_single_block_state(
-                semantic_function, impl_function, code_definition, num_ancilla_qubits
+                semantic_function,  # type: ignore[arg-type]
+                impl_function,  # type: ignore[arg-type]
+                code_definition,
+                num_ancilla_qubits,
             )
-    return sem == impl
+
+    if sem != impl:
+        raise InvalidImplementationError(
+            "The implementation does not match the specified semantics."
+        )
 
 
-def validate_logical_clifford(
+def check_unitary_semantics(
     semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
     code_definition: StabilizerCode,
     block_type: BlockType,
     num_ancilla_qubits: int = 0,
-) -> bool:
+) -> None:
     match block_type:
         case BlockType.SingleBlock:
             sem, impl = compute_verification_signterms_single_block_unitary(
-                semantic_function, impl_function, code_definition, num_ancilla_qubits
+                semantic_function,  # type: ignore[arg-type]
+                impl_function,  # type: ignore[arg-type]
+                code_definition,
+                num_ancilla_qubits,
             )
         case BlockType.DoubleBlock:
             sem, impl = compute_verification_signterms_double_block_unitary(
-                semantic_function, impl_function, code_definition, num_ancilla_qubits
+                semantic_function,  # type: ignore[arg-type]
+                impl_function,  # type: ignore[arg-type]
+                code_definition,
+                num_ancilla_qubits,
             )
-    return sem == impl
+    if sem != impl:
+        raise InvalidImplementationError(
+            "The implementation does not match the specified semantics."
+        )
 
 
 def compute_verification_signterms_double_block_state(
