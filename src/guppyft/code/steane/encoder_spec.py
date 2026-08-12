@@ -1,7 +1,8 @@
 from collections import defaultdict
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import no_type_check
+from typing import Any, no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -25,6 +26,7 @@ from guppyft.code.steane.primitives import (
 )
 from guppyft.code.util import LogicalBlock, RawMeasurement
 from guppyft.encode import (
+    EncoderParams,
     EncoderSpec,
     ImplementOpsSpec,
     OpReplacements,
@@ -35,6 +37,17 @@ from guppyft.encode import (
 )
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
+
+
+@dataclass(frozen=True, kw_only=True)
+class SteaneEncoderParams(EncoderParams):
+    n_blocks: int
+
+    def encoding(self) -> str:
+        return "steane"
+
+    def params(self) -> Mapping[str, Any]:
+        return {"n_blocks": self.n_blocks}
 
 
 class QECStyle(Enum):

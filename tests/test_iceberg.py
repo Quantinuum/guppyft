@@ -62,7 +62,7 @@ def test_exported_extensions() -> None:
         "block": iceberg_types.iceberg_block_def,
         "borrowed_block": iceberg_types.iceberg_borrowed_block_def,
         "pre_block": iceberg_types.iceberg_pre_block_def,
-        "qubit": iceberg_types.iceberg_qubit,
+        "qubit": iceberg_types.iceberg_qubit_def,
     }
     assert len(ops_extn.operations) == 88
     for op_name, op_def in ops_extn.operations.items():
