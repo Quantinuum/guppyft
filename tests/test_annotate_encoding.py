@@ -1,13 +1,14 @@
 from collections.abc import Mapping
 from typing import Any
 
+import pytest
 from hugr import Hugr
 from hugr.package import Package
 
 from guppyft.encode import EncoderParams, annotate_encoding
 
 
-def test_annotate_encoding_package() -> None:
+def test_annotate_encoding() -> None:
     hugr1 = Hugr[Any]()
     hugr2 = Hugr[Any]()
     pkg = Package([hugr1, hugr2])
@@ -43,3 +44,20 @@ def test_annotate_encoding_package() -> None:
         hugr1[hugr1.module_root].metadata["guppyft.encoding"]
         == hugr3[hugr3.module_root].metadata["guppyft.encoding"]
     )
+
+
+def test_annotate_encoding_not_json() -> None:
+    hugr = Hugr[Any]()
+
+    class FailingEncoderParams(EncoderParams):
+        def encoding(self) -> str:
+            return "my-failing-encoding"
+
+        def params(self) -> Mapping[str, Any]:
+            return {
+                # Functions cannot be serialised with the standard JSON encoder
+                "do-not": lambda x: x,
+            }
+
+    with pytest.raises(ValueError, match="Could not serialise parameters"):
+        annotate_encoding(hugr, FailingEncoderParams())

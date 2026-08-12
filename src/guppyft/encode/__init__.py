@@ -1,3 +1,4 @@
+import json
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any, Protocol
@@ -109,6 +110,11 @@ class _MetadataEncoding(Metadata[Mapping[str, Any]]):
 
 
 def annotate_encoding(hugr: Package | Hugr[Any], params: EncoderParams) -> None:
+    try:
+        json.dumps(params.params(), check_circular=True)
+    except TypeError as e:
+        raise ValueError("Could not serialise parameters") from e
+
     for module in hugr.modules if isinstance(hugr, Package) else [hugr]:
         module[module.module_root].metadata[_MetadataEncoding] = {
             "encoding": params.encoding(),
