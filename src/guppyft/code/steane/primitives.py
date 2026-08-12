@@ -9,6 +9,7 @@ from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.mem import mem_swap
 from guppylang.std.quantum import collect_measurements
 
+from guppyft.code._state_factory import PreBlock
 from guppyft.code.util import LogicalBlock, RawMeasurement, parity_check
 
 # ZZZZIII -> 0, 1, 2, 3
@@ -36,6 +37,21 @@ def prep_zero_non_ft() -> LogicalBlock[7]:
         qlib.cx(blk.data_qs[c], blk.data_qs[t])
 
     return blk
+
+
+@guppy
+@no_type_check
+def prep_zero_ft() -> PreBlock[7, 1]:
+    """Attempt fault-tolerant zero preparation state once."""
+    q = prep_zero_non_ft()
+
+    ancilla = qlib.qubit()
+    idxs = array(1, 3, 5)
+    for i in idxs:
+        qlib.cx(q.data_qs[i], ancilla)
+
+    flag_outcome = qlib.measure(ancilla)
+    return PreBlock[7, 1](q, array(flag_outcome))
 
 
 @guppy
