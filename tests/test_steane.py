@@ -3,7 +3,7 @@ from guppylang.std.builtins import result
 from hugr.build.dfg import Dfg
 from hugr.ops import DFG
 from hugr.tys import ExtType
-from tket.passes import InlineFunctions, NormalizeGuppy
+from tket.passes import InlineFunctions, Normalize
 
 from guppyft.extensions import steane_ops, steane_types
 from guppyft.logical.steane import Qubit, cx, prep_magic_for_t_like
@@ -46,8 +46,9 @@ def test_exported_extensions() -> None:
     assert len(types_extn.operations) == 0
     assert types_extn.types == {
         "qubit": steane_types.steane_qubit_def,
+        "measurement": steane_types.steane_measurement_def,
     }
-    assert len(ops_extn.operations) == 13
+    assert len(ops_extn.operations) == 14
     for op_name, op_def in ops_extn.operations.items():
         assert op_def == steane_ops.__getattribute__(f"{op_name}_def")
 
@@ -55,7 +56,7 @@ def test_exported_extensions() -> None:
 def test_op_instantiations() -> None:
     ops_extn = steane_ops()
     # No operations take indices
-    assert len(ops_extn.operations) == 13
+    assert len(ops_extn.operations) == 14
     for op_name in ops_extn.operations:
         assert (
             steane_ops.__getattribute__(op_name)().op_def()
@@ -77,11 +78,11 @@ def test_guppy_bindings_smoke() -> None:
         q1.free()
         magic = prep_magic_for_t_like()
         q0.inject_magic_for_t(magic)
-        result("q0", q0.measure_z())
+        result("q0", q0.measure_z().decode())
 
     pkg = main.compile()
     h = pkg.modules[0]
-    NormalizeGuppy()(h, inplace=True)
+    Normalize()(h, inplace=True)
     InlineFunctions()(h, inplace=True)
 
 
@@ -92,12 +93,12 @@ def test_guppy_hugr() -> None:
     def main() -> None:
         q = Qubit()
         q.h()
-        result("a", q.measure_z())
+        result("a", q.measure_z().decode())
 
     pkg = main.compile()
     h = pkg.modules[0]
     InlineFunctions()(h, inplace=True)
-    NormalizeGuppy()(h, inplace=True)
+    Normalize()(h, inplace=True)
     entrypoint = h.entrypoint
     children = h.children(entrypoint)
     # When https://github.com/Quantinuum/tket2/issues/1691 is implemented, this
@@ -109,8 +110,9 @@ def test_guppy_hugr() -> None:
         "guppyft.steane.ops.prep_zero",
         "guppyft.steane.ops.h",
         "guppyft.steane.ops.measure_z",
-        'tket.result.result_bool<"a">',
         "Output",
+        "guppyft.steane.ops.decode",
+        'tket.result.result_bool<"a">',
     }
     [h_node] = [child for child in children if "h" in h[child].op.name()]
     assert len(list(h.incoming_links(h_node))) == 1  # CallIndirect

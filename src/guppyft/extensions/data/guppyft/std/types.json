@@ -1,0 +1,22 @@
+{
+  "version": "0.1.0",
+  "name": "guppyft.std.types",
+  "types": {
+    "logical_measurement": {
+      "extension": "guppyft.std.types",
+      "name": "logical_measurement",
+      "params": [
+        {
+          "tp": "BoundedNat",
+          "bound": null
+        }
+      ],
+      "description": "logical measurement",
+      "bound": {
+        "b": "Explicit",
+        "bound": "C"
+      }
+    }
+  },
+  "operations": {}
+}

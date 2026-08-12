@@ -35,3 +35,21 @@ def _implement_ops(
     `replaceable_types` is a set of extension types that should be replaced by
     the corresponding types in the implementation HUGRs.
     """
+
+def _replace_encoder(
+        rs_hugr: RsHugr,
+        op_replacements: dict[tuple[str, str], tuple[str, str, list[int | str]]],
+        extensions: str | None = None,
+    ) -> None:
+    """
+    Replace extension ops and types in `rs_hugr` according to the given mappings.
+
+    `op_replacements` maps each source `(extension_name, op_name)` pair (which
+    must take no type args) to a target `(extension_name, op_name, args)`
+    triple, where `args` is the (possibly empty) list of type args - each
+    either an `int` (a `BoundedNat` arg) or a `str` (a `String` arg) - used to
+    instantiate the target op.
+    `extensions` is an optional JSON-encoded list of additional extension
+    definitions to use when resolving the source/target ops and types, for
+    extensions not already registered on `rs_hugr`.
+    """
