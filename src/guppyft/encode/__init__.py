@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Any, Protocol
 
 from guppylang.defs import GuppyFunctionDefinition
+from hugr import Hugr
 from hugr.metadata import Metadata
 from hugr.ops import Module
 from hugr.package import Package
@@ -107,9 +108,9 @@ class _MetadataEncoding(Metadata[Mapping[str, Any]]):
     KEY = "guppyft.encoding"
 
 
-def annotate_encoding(pkg: Package, params: EncoderParams) -> None:
-    for hugr in pkg.modules:
-        hugr[hugr.module_root].metadata[_MetadataEncoding] = {
+def annotate_encoding(hugr: Package | Hugr[Any], params: EncoderParams) -> None:
+    for module in hugr.modules if isinstance(hugr, Package) else [hugr]:
+        module[module.module_root].metadata[_MetadataEncoding] = {
             "encoding": params.encoding(),
             "params": params.params(),
         }
