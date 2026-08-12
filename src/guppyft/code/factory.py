@@ -53,7 +53,7 @@ class PreBlock(Generic[BLOCK_SIZE, N_FLAGS]):  # type: ignore[misc]
     @guppy
     @no_type_check
     def force_check(
-        self: PreBlock[BLOCK_SIZE, N_FLAGS] @ owned,
+        self: "PreBlock[BLOCK_SIZE, N_FLAGS]" @ owned,
     ) -> Option[LogicalBlock[BLOCK_SIZE]]:
         """If preparation was successful, return the block, otherwise return `nothing`.
 
