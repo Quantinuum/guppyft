@@ -37,12 +37,15 @@ from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
 
 
+@dataclass(frozen=True, kw_only=True)
 class SteaneEncoderParams(EncoderParams):
+    n_blocks: int
+
     def encoding(self) -> str:
         return "steane"
 
     def params(self) -> Mapping[str, Any]:
-        return {}
+        return {"n_blocks": self.n_blocks}
 
 
 @dataclass

@@ -79,9 +79,9 @@ def test_annotate_steane_encoding() -> None:
     hugr = Hugr[Any]()
     pkg = Package([hugr])
 
-    annotate_encoding(pkg, SteaneEncoderParams())
+    annotate_encoding(pkg, SteaneEncoderParams(n_blocks=4))
 
     assert hugr[hugr.module_root].metadata["guppyft.encoding"] == {
         "encoding": "steane",
-        "params": {},
+        "params": {"n_blocks": 4},
     }
