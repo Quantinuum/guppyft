@@ -32,7 +32,7 @@ mod _bindings {
         registry: &ExtensionRegistry,
         ext_name: &str,
         ty_name: &str,
-    ) -> Result<Option<CustomType>, PyErr> {
+    ) -> Result<Option<CustomType>, String> {
         let ext = match registry.get(ext_name) {
             Some(e) => e,
             None => return Ok(None),
@@ -41,13 +41,13 @@ mod _bindings {
             return Ok(None);
         };
         if !src_def.params().is_empty() {
-            return Err(PyValueError::new_err(format!(
-                "Generic types are not supported for type replacement: '{ext_name}.{ty_name}'",
-            )));
+            return Err(format!(
+                "Generic types are not supported for type replacement: '{ext_name}.{ty_name}'"
+            ));
         }
         let src = src_def
             .instantiate([])
-            .map_err(|e| PyValueError::new_err(format!("Could not instantiate src ty: {e}")))?;
+            .map_err(|e| format!("Could not instantiate src ty: {e}"))?;
         Ok(Some(src))
     }
 
@@ -111,13 +111,15 @@ mod _bindings {
         }
 
         for ((src_ext_name, src_ty), (tgt_ext_name, tgt_ty)) in ty_replacements.iter() {
-            let src = match get_type_from_registry(&registry, src_ext_name, src_ty)? {
-                Some(ty) => ty,
-                None => continue,
+            let Some(src) = get_type_from_registry(&registry, src_ext_name, src_ty)
+                .map_err(|e| PyValueError::new_err(format!("Error getting src ty: {e}")))?
+            else {
+                continue;
             };
-            let tgt = match get_type_from_registry(&registry, tgt_ext_name, tgt_ty)? {
-                Some(ty) => ty,
-                None => continue,
+            let Some(tgt) = get_type_from_registry(&registry, tgt_ext_name, tgt_ty)
+                .map_err(|e| PyValueError::new_err(format!("Error getting tgt ty: {e}")))?
+            else {
+                continue;
             };
 
             pass.set_replace_type(src, tgt.into());
