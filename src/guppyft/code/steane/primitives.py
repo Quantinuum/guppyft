@@ -99,6 +99,50 @@ def knill_qec_cycle(
 
 @guppy
 @no_type_check
+def steane_z_qec_cycle(q: LogicalBlock[7], zero_state: LogicalBlock[7] @ owned) -> None:
+    """Implements Z syndrome extraction via Steane with one-qubit teleportation.
+
+    Notes:
+        Assumes that the ancilla `zero_state` holds a logical zero state.
+    """
+    a = zero_state  # Rename to avoid confusion, since the state will change
+
+    # Convert to logical |+>
+    h(a)
+
+    # Swap the labels of `q` and `a` since the latter is where the information
+    # of `q` will end after teleportation
+    mem_swap(q, a)
+
+    # Apply one-qubit TP with physical measurements
+    cx(q, a)
+    if decode(measure_z(a)):
+        x(q)
+
+
+@guppy
+@no_type_check
+def steane_x_qec_cycle(q: LogicalBlock[7], zero_state: LogicalBlock[7] @ owned) -> None:
+    """Implements X syndrome extraction via Steane with one-qubit teleportation.
+
+    Notes:
+        Assumes that the ancilla `a` holds a logical zero state.
+    """
+    a = zero_state  # Rename to avoid confusion, since the state will change
+
+    # Swap the labels of `q` and `a` since the latter is where the information
+    # of `q` will end after teleportation
+    mem_swap(q, a)
+
+    # Apply one-qubit TP with physical measurements
+    cx(a, q)
+    h(a)
+    if decode(measure_z(a)):
+        z(q)
+
+
+@guppy
+@no_type_check
 def measure_z(blk: LogicalBlock[7] @ owned) -> RawMeasurement[7]:
     """Measure Steane block in the Z basis."""
     return RawMeasurement(qlib.measure_array(blk.data_qs))

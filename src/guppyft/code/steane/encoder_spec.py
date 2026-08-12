@@ -1,7 +1,7 @@
 from collections import defaultdict
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, auto
 from typing import Any, no_type_check
 
 from guppylang import guppy
@@ -23,6 +23,8 @@ from guppyft.code.steane.primitives import (
     knill_qec_cycle,
     measure_z,
     prep_zero_ft,
+    steane_x_qec_cycle,
+    steane_z_qec_cycle,
     x,
     z,
 )
@@ -68,9 +70,8 @@ class RUSStateFactoryConf:
 
 
 class QECStyle(Enum):
-    Shor = 0
-    Knill = 1
-    Steane = 2
+    Knill = auto()
+    Steane = auto()
 
 
 @dataclass
@@ -89,7 +90,7 @@ class SteaneSpec:
         default_factory=lambda: RUSStateFactoryConf(1, 5)
     )
     qec_policy: QECPolicy = field(
-        default_factory=lambda: QECPolicy(QECStyle.Shor, 1, defaultdict(int))
+        default_factory=lambda: QECPolicy(QECStyle.Steane, 1, defaultdict(int))
     )
 
     def gen_implement_spec(self) -> ImplementOpsSpec:
@@ -161,16 +162,26 @@ class SteaneSpec:
                         self.put_block(i, blk)
                         self.qec_counter[i] = 0
 
-        # match self.qec_policy.style:
-        #     case QECStyle.Knill:
+        match self.qec_policy.style:
+            case QECStyle.Knill:
 
-        @guppy
-        @no_type_check
-        def qec_cycle(state: STATE, q: LogicalBlock[7]) -> None:
-            # Allocate new blocks for the Bell state
-            ancilla0 = state.zero_state_factory.get_state()
-            ancilla1 = state.zero_state_factory.get_state()
-            knill_qec_cycle(q, ancilla0, ancilla1)
+                @guppy
+                @no_type_check
+                def qec_cycle(state: STATE, q: LogicalBlock[7]) -> None:
+                    # Allocate new blocks for the Bell state
+                    ancilla0 = state.zero_state_factory.get_state()
+                    ancilla1 = state.zero_state_factory.get_state()
+                    knill_qec_cycle(q, ancilla0, ancilla1)
+
+            case QECStyle.Steane:
+
+                @guppy
+                @no_type_check
+                def qec_cycle(state: STATE, q: LogicalBlock[7]) -> None:
+                    ancillaX = state.zero_state_factory.get_state()
+                    steane_x_qec_cycle(q, ancillaX)
+                    ancillaZ = state.zero_state_factory.get_state()
+                    steane_z_qec_cycle(q, ancillaZ)
 
         # TODO Defining the primitives to use the global state requires
         # a lot of "boilerplate" code. We should provide helper methods
