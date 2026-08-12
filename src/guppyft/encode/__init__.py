@@ -19,6 +19,7 @@ __all__ = [
     "OpReplacements",
     "TyReplacements",
     "encode",
+    "implement_ops",
 ]
 
 
