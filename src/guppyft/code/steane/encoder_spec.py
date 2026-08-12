@@ -22,7 +22,7 @@ from guppyft.code.steane.primitives import (
     measure_z,
     prep_zero_non_ft,
     x,
-    z,
+    z, knill_qec_cycle,
 )
 from guppyft.code.util import LogicalBlock, RawMeasurement
 from guppyft.encode import (
@@ -132,11 +132,15 @@ class SteaneSpec:
                         self.put_block(i, blk)
                         self.qec_counter[i] = 0
 
-        @guppy
-        @no_type_check
-        def qec_cycle(state: STATE, blk: LogicalBlock[7]) -> STATE:
-            result("qec_counter", state.qec_counter)
-            return state
+        match self.qec_policy.style:
+            case QECStyle.Knill:
+                @guppy
+                @no_type_check
+                def qec_cycle(state: STATE, q: LogicalBlock[7]) -> None:
+                    # Allocate new blocks for the Bell state
+                    ancilla0 = state.zero_state_factory.get_state()
+                    ancilla1 = state.zero_state_factory.get_state()
+                    knill_qec_cycle(q, ancilla0, ancilla1)
 
         # TODO Defining the primitives to use the global state requires
         # a lot of "boilerplate" code. We should provide helper methods
@@ -203,6 +207,9 @@ class SteaneSpec:
                 blk = state.take_block(blk_id)
                 x(blk)
                 state.put_block(blk_id, blk)
+
+                state.qec_policy(array(q), comptime(self.qec_policy.costs["X"]))
+
                 return state, q
 
             return map_global(_impl, q)
@@ -219,6 +226,9 @@ class SteaneSpec:
                 blk = state.take_block(blk_id)
                 z(blk)
                 state.put_block(blk_id, blk)
+
+                state.qec_policy(array(q), comptime(self.qec_policy.costs["Z"]))
+
                 return state, q
 
             return map_global(_impl, q)
@@ -235,6 +245,9 @@ class SteaneSpec:
                 blk = state.take_block(blk_id)
                 h(blk)
                 state.put_block(blk_id, blk)
+
+                state.qec_policy(array(q), comptime(self.qec_policy.costs["H"]))
+
                 return state, q
 
             return map_global(_impl, q)
@@ -255,6 +268,9 @@ class SteaneSpec:
 
                 state.put_block(ctl[0], ctl_blk)
                 state.put_block(tgt[0], tgt_blk)
+
+                state.qec_policy(array(ctl, tgt), comptime(self.qec_policy.costs["CX"]))
+
                 return state, ctl, tgt
 
             return map_global(_impl, ctl, tgt)

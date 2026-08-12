@@ -6,6 +6,7 @@ from guppylang import guppy
 from guppylang.library import link_name
 from guppylang.std import quantum as qlib
 from guppylang.std.builtins import array, comptime, owned
+from guppylang.std.mem import mem_swap
 from guppylang.std.quantum import collect_measurements
 
 from guppyft.code.util import LogicalBlock, RawMeasurement, parity_check
@@ -44,6 +45,40 @@ def get_syndrome(data_bits: array[bool, 7]) -> array[bool, 3]:
         parity_check(array(data_bits[i] for i in stab))
         for stab in comptime(stabilizer_indices)
     )
+
+
+@guppy
+@no_type_check
+def knill_qec_cycle(
+    q: LogicalBlock[7],
+    zero_state_0: LogicalBlock[7] @ owned,
+    zero_state_1: LogicalBlock[7] @ owned,
+) -> None:
+    """Implements Knill style syndrome extraction.
+
+    Notes:
+        Assumes that both ancilla qubits `zero_state_0` and `zero_state_1` hold logical
+        zero states.
+    """
+    # Rename to avoid confusion, since the state will change
+    a0 = zero_state_0
+    a1 = zero_state_1
+
+    # Generate a logical Bell state on the ancilla qubits
+    h(a0)
+    cx(a0, a1)
+
+    # Swap the labels of `q` and `a1` since the latter is where the information
+    # of `q` will end after teleportation
+    mem_swap(q, a1)
+
+    # Apply Bell measurement to complete the teleportation
+    cx(a1, a0)
+    h(a1)
+    if decode(measure_z(a0)):
+        x(q)
+    if decode(measure_z(a1)):
+        z(q)
 
 
 @guppy
