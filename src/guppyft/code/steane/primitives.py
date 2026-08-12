@@ -20,8 +20,6 @@ stabilizer_indices = [
     [2, 3, 5, 6],
 ]
 
-N_FLAGS = guppy.nat_var("N_FLAGS")
-
 
 @guppy
 @no_type_check
