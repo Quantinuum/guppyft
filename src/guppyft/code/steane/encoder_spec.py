@@ -86,11 +86,11 @@ class SteaneSpec:
     """Steane encoder spec"""
 
     n_blocks: int
-    zero_factory_conf: RUSStateFactoryConf = field(
-        default_factory=lambda: RUSStateFactoryConf(1, 5)
-    )
     qec_policy: QECPolicy = field(
         default_factory=lambda: QECPolicy(QECStyle.Steane, 1, defaultdict(int))
+    )
+    zero_factory_conf: RUSStateFactoryConf = field(
+        default_factory=lambda: RUSStateFactoryConf(1, 5)
     )
 
     def gen_implement_spec(self) -> ImplementOpsSpec:
