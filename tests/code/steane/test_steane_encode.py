@@ -75,6 +75,24 @@ def test_encoder_missing_op() -> None:
         SteaneSpec(n_blocks=1).encode(pkg)
 
 
+def test_encoder_control_flow() -> None:
+    @guppy
+    def main() -> None:
+        q0 = qubit()
+        if measure(q0).read():  # noqa: SIM108
+            q1 = qubit()
+        else:
+            q1 = qubit()
+
+        output("q1", measure(q1).read())
+
+    pkg = main.compile()
+    phys_pkg = SteaneSpec(n_blocks=2).encode(pkg)
+    res = EmulatorBuilder().build(phys_pkg, n_qubits=20).run().collated_shots()
+
+    assert res == [{"q1": [0]}]
+
+
 def test_annotate_steane_encoding() -> None:
     hugr = Hugr[Any]()
     pkg = Package([hugr])
