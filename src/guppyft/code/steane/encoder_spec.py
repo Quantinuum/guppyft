@@ -40,6 +40,8 @@ from guppyft.encode import (
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
 
+N = guppy.nat_var("N")
+
 
 @dataclass(frozen=True, kw_only=True)
 class SteaneEncoderParams(EncoderParams):
@@ -87,10 +89,13 @@ class SteaneSpec:
         default_factory=lambda: RUSStateFactoryConf(1, 5)
     )
     qec_policy: QECPolicy = field(
-        default_factory=lambda: QECPolicy(QECStyle.Shor, 1, defaultdict())
+        default_factory=lambda: QECPolicy(QECStyle.Shor, 1, defaultdict(int))
     )
 
     def gen_implement_spec(self) -> ImplementOpsSpec:
+
+        qec_policy = self.qec_policy
+
         # TODO STATE should be generic for all codes. The methods that are code specific
         # should be `@guppy.declare` and each code can provide an implementation to be
         # linked i.e. `allocate_next_addr`.
@@ -148,7 +153,7 @@ class SteaneSpec:
                 for i in blk_ids:
                     self.qec_counter[i] = self.qec_counter[i] + op_cost
 
-                    if self.qec_counter[i] >= comptime(self.qec_policy.threshold):
+                    if self.qec_counter[i] >= comptime(qec_policy.threshold):
                         blk = self.take_block(i)
 
                         qec_cycle(self, blk)
@@ -156,16 +161,16 @@ class SteaneSpec:
                         self.put_block(i, blk)
                         self.qec_counter[i] = 0
 
-        match self.qec_policy.style:
-            case QECStyle.Knill:
+        # match self.qec_policy.style:
+        #     case QECStyle.Knill:
 
-                @guppy
-                @no_type_check
-                def qec_cycle(state: STATE, q: LogicalBlock[7]) -> None:
-                    # Allocate new blocks for the Bell state
-                    ancilla0 = state.zero_state_factory.get_state()
-                    ancilla1 = state.zero_state_factory.get_state()
-                    knill_qec_cycle(q, ancilla0, ancilla1)
+        @guppy
+        @no_type_check
+        def qec_cycle(state: STATE, q: LogicalBlock[7]) -> None:
+            # Allocate new blocks for the Bell state
+            ancilla0 = state.zero_state_factory.get_state()
+            ancilla1 = state.zero_state_factory.get_state()
+            knill_qec_cycle(q, ancilla0, ancilla1)
 
         # TODO Defining the primitives to use the global state requires
         # a lot of "boilerplate" code. We should provide helper methods
@@ -233,7 +238,7 @@ class SteaneSpec:
                 x(blk)
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(q), comptime(self.qec_policy.costs["X"]))
+                state.qec_policy(array(blk_id), comptime(self.qec_policy.costs["X"]))
 
                 return state, q
 
@@ -252,7 +257,7 @@ class SteaneSpec:
                 z(blk)
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(q), comptime(self.qec_policy.costs["Z"]))
+                state.qec_policy(array(blk_id), comptime(self.qec_policy.costs["Z"]))
 
                 return state, q
 
@@ -271,7 +276,7 @@ class SteaneSpec:
                 h(blk)
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(q), comptime(self.qec_policy.costs["H"]))
+                state.qec_policy(array(blk_id), comptime(self.qec_policy.costs["H"]))
 
                 return state, q
 
@@ -294,7 +299,9 @@ class SteaneSpec:
                 state.put_block(ctl[0], ctl_blk)
                 state.put_block(tgt[0], tgt_blk)
 
-                state.qec_policy(array(ctl, tgt), comptime(self.qec_policy.costs["CX"]))
+                state.qec_policy(
+                    array(ctl[0], tgt[0]), comptime(self.qec_policy.costs["CX"])
+                )
 
                 return state, ctl, tgt
 
@@ -316,14 +323,14 @@ class SteaneSpec:
                     array(some((blk, 1)) for blk in range(comptime(self.n_blocks))),
                     comptime(self.n_blocks),
                 ),
+                # qec_counter
+                array(0 for _ in range(comptime(self.n_blocks))),
                 # Zero state factory
                 StateFactory(
                     prep_zero_ft,
                     comptime(self.zero_factory_conf.max_attempts),
                     empty_queue(),
                 ),
-                # qec_counter
-                array(0 for _ in range(comptime(self.n_blocks))),
             )
 
         @guppy.declare
