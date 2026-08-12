@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "name": "guppyft.iceberg.types",
   "types": {
     "block": {
@@ -27,6 +27,21 @@
         }
       ],
       "description": "borrowed logical Iceberg block",
+      "bound": {
+        "b": "Explicit",
+        "bound": "A"
+      }
+    },
+    "pre_block": {
+      "extension": "guppyft.iceberg.types",
+      "name": "pre_block",
+      "params": [
+        {
+          "tp": "BoundedNat",
+          "bound": null
+        }
+      ],
+      "description": "logical Iceberg pre-block",
       "bound": {
         "b": "Explicit",
         "bound": "A"

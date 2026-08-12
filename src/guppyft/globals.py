@@ -23,6 +23,7 @@ from guppylang_internals.decorator import custom_function
 from guppylang_internals.definition.custom import (
     CustomCallChecker,
     CustomInoutCallCompiler,
+    InputFlagDefaultMode,
 )
 from guppylang_internals.definition.value import CallReturnWires
 from guppylang_internals.error import GuppyTypeError
@@ -92,6 +93,10 @@ class _GlobalOpCompiler(CustomInoutCallCompiler):
 
 
 class _GlobalWithChecker(CustomCallChecker):
+    # `with_global` has variadic args, and its callback params can never be
+    # borrowed (enforced below), so all linear input args are consumed/owned.
+    input_flag_mode = InputFlagDefaultMode.OWNED
+
     @override
     def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
         _, global_ty = ExprSynthesizer(self.ctx).synthesize(args[0])
@@ -241,6 +246,10 @@ def _map_op_instantiate(
 
 
 class _GlobalMapChecker(CustomCallChecker):
+    # `map_global` has variadic args, and its callback params can never be
+    # borrowed (enforced below), so all linear input args are consumed/owned.
+    input_flag_mode = InputFlagDefaultMode.OWNED
+
     @override
     def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
         # First arg is the callback function

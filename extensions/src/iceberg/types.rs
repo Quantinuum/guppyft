@@ -24,13 +24,16 @@ use hugr::{
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.iceberg.types");
 /// Extension version.
-pub const VERSION: semver::Version = semver::Version::new(0, 1, 0);
+pub const VERSION: semver::Version = semver::Version::new(0, 1, 1);
 
 /// Type name for logical Iceberg block.
 pub const BLOCK_TYPENAME: TypeName = TypeName::new_inline("block");
 
 /// Type name for a "borrowed" logical Iceberg block.
 pub const BORROWED_BLOCK_TYPENAME: TypeName = TypeName::new_inline("borrowed_block");
+
+/// Type name for an Iceberg pre-block.
+pub const PRE_BLOCK_TYPENAME: TypeName = TypeName::new_inline("pre_block");
 
 /// Type name for an Iceberg-encoded logical qubit, either extracted from a
 /// block or dynamically allocated.
@@ -60,6 +63,23 @@ pub fn block_type(k_arg: impl Into<TypeArg>) -> Type {
 pub fn borrowed_block_type(k_arg: impl Into<TypeArg>) -> Type {
     CustomType::new(
         BORROWED_BLOCK_TYPENAME,
+        [k_arg.into()],
+        EXTENSION_ID,
+        VERSION,
+        TypeBound::Linear,
+        &Arc::<Extension>::downgrade(&EXTENSION),
+    )
+    .into()
+}
+
+/// Type of an Iceberg block of a given size that has not yet been verified to be
+/// in a logical state. This represents the state of a block after state preparation
+/// but before ancilla qubits have been measured to verify the preparation was successful.
+///
+/// * `k_arg` - The number of logical qubits in the code block.
+pub fn pre_block_type(k_arg: impl Into<TypeArg>) -> Type {
+    CustomType::new(
+        PRE_BLOCK_TYPENAME,
         [k_arg.into()],
         EXTENSION_ID,
         VERSION,
@@ -101,6 +121,15 @@ fn extension() -> Arc<Extension> {
                 BORROWED_BLOCK_TYPENAME,
                 vec![TypeParam::max_nat_kind()],
                 "borrowed logical Iceberg block".to_owned(),
+                TypeBound::Linear.into(),
+                extension_ref,
+            )
+            .unwrap();
+        extension
+            .add_type(
+                PRE_BLOCK_TYPENAME,
+                vec![TypeParam::max_nat_kind()],
+                "logical Iceberg pre-block".to_owned(),
                 TypeBound::Linear.into(),
                 extension_ref,
             )
@@ -150,6 +179,21 @@ pub fn borrowed_block_tv(var_id: usize) -> Type {
     )
 }
 
+/// Get an Iceberg pre-block type with size corresponding to a type
+/// variable with a given ID.
+pub fn pre_block_tv(var_id: usize) -> Type {
+    Type::new_extension(
+        EXTENSION
+            .get_type(&PRE_BLOCK_TYPENAME)
+            .unwrap()
+            .instantiate(vec![TypeArg::new_var_use(
+                var_id,
+                TypeParam::max_nat_kind(),
+            )])
+            .unwrap(),
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use hugr::{
@@ -164,7 +208,7 @@ mod tests {
     fn test_iceberg_types_extension() {
         let extn = extension();
         assert_eq!(extn.name() as &str, "guppyft.iceberg.types");
-        assert_eq!(extn.types().count(), 3);
+        assert_eq!(extn.types().count(), 4);
         assert_eq!(extn.operations().count(), 0);
     }
 
@@ -181,6 +225,12 @@ mod tests {
     }
 
     #[test]
+    fn test_iceberg_pre_block_type() {
+        let pre_block = pre_block_type(6);
+        assert!(!pre_block.copyable());
+    }
+
+    #[test]
     fn test_iceberg_qubit_type() {
         let qubit = dynamic_logical_qubit_type();
         assert!(!qubit.copyable());
@@ -190,9 +240,10 @@ mod tests {
     fn test_hugr() {
         let block = block_type(2);
         let bblock = borrowed_block_type(2);
+        let preblock = pre_block_type(2);
         let qubit = dynamic_logical_qubit_type();
         let mut module_builder = ModuleBuilder::new();
-        let signature = Signature::new_endo(vec![block, bblock, qubit]);
+        let signature = Signature::new_endo(vec![block, bblock, preblock, qubit]);
         let f_build = module_builder.define_function("main", signature).unwrap();
         let wires: Vec<_> = f_build.input_wires().collect();
         f_build.finish_with_outputs(wires).unwrap();
