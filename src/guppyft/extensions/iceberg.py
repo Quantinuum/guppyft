@@ -69,7 +69,11 @@ class IcebergTypesExtension:
 
     @functools.cached_property
     def iceberg_qubit_def(self) -> TypeDef:
-        """A "dynamic" logical qubit belonging to an unspecified block."""
+        """A "dynamic" logical qubit belonging to an unspecified block.
+
+        This is the generic type definition. For the instantiated type, see
+        `iceberg_qubit`.
+        """
         return self().get_type("qubit")
 
     def iceberg_qubit(self) -> ExtType:
