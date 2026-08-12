@@ -51,9 +51,13 @@ class IcebergTypesExtension:
         return self.iceberg_borrowed_block_def.instantiate([BoundedNatArg(k)])
 
     @functools.cached_property
-    def iceberg_qubit(self) -> TypeDef:
+    def iceberg_qubit_def(self) -> TypeDef:
         """A "dynamic" logical qubit belonging to an unspecified block."""
         return self().get_type("qubit")
+
+    def iceberg_qubit(self) -> ExtType:
+        """A "dynamic" logical qubit belonging to an unspecified block."""
+        return self.iceberg_qubit_def.instantiate([])
 
 
 class IcebergOpsExtension:
