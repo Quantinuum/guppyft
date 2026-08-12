@@ -20,7 +20,7 @@ def parity_check(data_bits: array[bool, N]) -> bool:
 @guppy
 @no_type_check
 def array_any(arr: array[bool, N]) -> bool:
-    for i in range(N):  # noqa: SIM110# `all` is not yet supported by Guppy
+    for i in range(N):  # noqa: SIM110 # `all` is not yet supported by Guppy
         if arr[i]:
             return True
     return False

@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Generic, no_type_check
 
 from guppylang import guppy
@@ -15,23 +14,10 @@ N_FLAGS = guppy.nat_var("N_FLAGS")
 BATCH_SIZE = guppy.nat_var("BATCH_SIZE")
 
 
-@dataclass(frozen=True)
-class FactoryConf:
-    """State factory configuration.
-
-    Attributes:
-        size: Maximum number of states to be produced in parallel.
-        max_attempts: Maximum number of repeat-until-success attempts.
-    """
-
-    size: int
-    max_attempts: int
-
-
 @guppy.struct
 @no_type_check
 class PreBlock(Generic[BLOCK_SIZE, N_FLAGS]):  # type: ignore[misc]
-    """Logical qubit that went through state preparation, but may not have succeeded.
+    """Logical block that went through state preparation, but may not have succeeded.
 
     The measurement outcomes specifying if it succeeded have not been read. Hence,
     the runtime is not blocked by measurements, allowing multiple state preparation to

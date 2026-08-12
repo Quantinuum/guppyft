@@ -8,7 +8,7 @@ from guppylang.std import quantum as qlib
 from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.quantum import collect_measurements
 
-from guppyft.code.factory import PreBlock
+from guppyft.code._state_factory import PreBlock
 from guppyft.code.util import LogicalBlock, RawMeasurement, parity_check
 
 # ZZZZIII -> 0, 1, 2, 3
