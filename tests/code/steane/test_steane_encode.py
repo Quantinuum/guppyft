@@ -1,11 +1,16 @@
+from typing import Any
+
 import pytest
 from guppylang import guppy
 from guppylang.emulator import EmulatorBuilder
 from guppylang.std.platform import output
 from guppylang.std.quantum import discard, measure, qubit, y
+from hugr import Hugr
+from hugr.package import Package
 from selene_hugr_qis_compiler import check_hugr
 
-from guppyft.code.steane.encoder_spec import SteaneSpec
+from guppyft.code.steane.encoder_spec import SteaneEncoderParams, SteaneSpec
+from guppyft.encode import annotate_encoding
 
 
 def test_encoder() -> None:
@@ -86,3 +91,15 @@ def test_encoder_control_flow() -> None:
     res = EmulatorBuilder().build(phys_pkg, n_qubits=20).run().collated_shots()
 
     assert res == [{"q1": [0]}]
+
+
+def test_annotate_steane_encoding() -> None:
+    hugr = Hugr[Any]()
+    pkg = Package([hugr])
+
+    annotate_encoding(pkg, SteaneEncoderParams(n_blocks=4))
+
+    assert hugr[hugr.module_root].metadata["guppyft.encoding"] == {
+        "encoding": "steane",
+        "params": {"n_blocks": 4},
+    }
