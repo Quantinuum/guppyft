@@ -98,7 +98,7 @@ class EncoderParams(Protocol):
         """The encoding to annotate on a program."""
 
     def params(self) -> Mapping[str, Any]:
-        """The parameters to annotate on a program. Implementations should return types
+        """The parameters to annotate on a program. Implementations should return values
         that support serialisation to JSON."""
 
 
