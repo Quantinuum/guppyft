@@ -77,8 +77,13 @@ class QECStyle(Enum):
 @dataclass
 class QECPolicy:
     style: QECStyle
-    threshold: int
-    costs: dict[str, int]
+    threshold: int = 1
+    costs: dict[str, int] = field(default_factory=lambda: defaultdict(int))
+
+    def set_cost(self, op: str, cost: int) -> None:
+        if cost < 0:
+            raise ValueError(f"Op cost cannot be negative: received {cost}")
+        self.costs[op] = cost
 
 
 @dataclass
@@ -89,9 +94,7 @@ class SteaneSpec:
     zero_factory_conf: RUSStateFactoryConf = field(
         default_factory=lambda: RUSStateFactoryConf(1, 5)
     )
-    qec_policy: QECPolicy = field(
-        default_factory=lambda: QECPolicy(QECStyle.Steane, 1, defaultdict(int))
-    )
+    qec_policy: QECPolicy = field(default_factory=lambda: QECPolicy(QECStyle.Steane))
 
     def gen_implement_spec(self) -> ImplementOpsSpec:
 
