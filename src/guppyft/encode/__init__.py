@@ -18,11 +18,13 @@ from ._implement_ops import (
 )
 
 __all__ = [
+    "EncoderParams",
     "EncoderSpec",
     "ImplementOpsSpec",
     "OpReplacements",
     "ReplaceEncoder",
     "TyReplacements",
+    "annotate_encoding",
     "encode",
     "implement_ops",
 ]
