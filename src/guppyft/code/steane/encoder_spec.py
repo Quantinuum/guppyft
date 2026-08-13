@@ -348,6 +348,10 @@ class SteaneSpec:
                 ),
                 ("tket.quantum", "QFree"): ("guppyft.steane.ops", "free", []),
                 ("tket.measurement", "Read"): ("guppyft.steane.ops", "decode", []),
+                ("tket.quantum", "H"): ("guppyft.steane.ops", "h", []),
+                ("tket.quantum", "Z"): ("guppyft.steane.ops", "z", []),
+                ("tket.quantum", "X"): ("guppyft.steane.ops", "x", []),
+                ("tket.quantum", "CX"): ("guppyft.steane.ops", "cx", []),
             },
             ty_replacements={
                 ("prelude", "qubit"): ("guppyft.steane.types", "qubit"),
