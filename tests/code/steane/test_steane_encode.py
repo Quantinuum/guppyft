@@ -4,7 +4,7 @@ import pytest
 from guppylang import guppy
 from guppylang.emulator import EmulatorBuilder
 from guppylang.std.platform import output
-from guppylang.std.quantum import discard, measure, qubit, y
+from guppylang.std.quantum import cx, discard, h, measure, qubit, x, y, z
 from hugr import Hugr
 from hugr.package import Package
 from selene_hugr_qis_compiler import check_hugr
@@ -17,15 +17,23 @@ def test_encoder() -> None:
 
     @guppy
     def main() -> None:
-        q = qubit()
-        r = measure(q).read()
-        output("res", r)
+        q0 = qubit()
+        q1 = qubit()
+        x(q0)
+        h(q1)
+        z(q1)
+        h(q1)
+        cx(q0, q1)
+        r0 = measure(q0).read()
+        r1 = measure(q1).read()
+        output("q0", r0)
+        output("q1", r1)
 
     pkg = main.compile()
-    phys_pkg = SteaneSpec(n_blocks=1).encode(pkg)
-    res = EmulatorBuilder().build(phys_pkg, n_qubits=8).run().collated_shots()
+    phys_pkg = SteaneSpec(n_blocks=2).encode(pkg)
+    res = EmulatorBuilder().build(phys_pkg, n_qubits=16).run().collated_shots()
 
-    assert res == [{"res": [0]}]
+    assert res == [{"q0": [1], "q1": [0]}]
 
 
 def test_encode_function_call() -> None:
