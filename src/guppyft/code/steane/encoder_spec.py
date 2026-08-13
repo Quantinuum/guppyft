@@ -91,11 +91,11 @@ class QECPolicy:
                Defaults to 0 for any op not explicitly set.
     """
 
-    style: QECStyle
+    style: QECStyle = QECStyle.Steane
     threshold: int = 1
-    costs: dict[str, int] = field(default_factory=lambda: defaultdict(int))
+    costs: dict[str, float] = field(default_factory=lambda: defaultdict(float))
 
-    def set_cost(self, op: str, cost: int) -> None:
+    def set_cost(self, op: str, cost: float) -> None:
         """Set the cost of an operation.
 
         Args:
@@ -115,7 +115,7 @@ class SteaneSpec:
     zero_factory_conf: RUSStateFactoryConf = field(
         default_factory=lambda: RUSStateFactoryConf(1, 5)
     )
-    qec_policy: QECPolicy = field(default_factory=lambda: QECPolicy(QECStyle.Steane))
+    qec_policy: QECPolicy = field(default_factory=lambda: QECPolicy())
 
     def gen_implement_spec(self) -> ImplementOpsSpec:
 
@@ -129,7 +129,7 @@ class SteaneSpec:
         class STATE:
             blocks: array[Option[LogicalBlock[7]], comptime(self.n_blocks)]  # type: ignore[valid-type,type-arg]
             addr_stack: Stack[tuple[int, int], comptime(self.n_blocks)]  # type: ignore[valid-type,type-arg]
-            qec_counter: array[int, comptime(self.n_blocks)]  # type: ignore[valid-type]
+            qec_counter: array[float, comptime(self.n_blocks)]  # type: ignore[valid-type]
 
             zero_state_factory: StateFactory[  # type: ignore[valid-type,type-arg]
                 7, 1, comptime(self.zero_factory_conf.size)
@@ -173,7 +173,7 @@ class SteaneSpec:
             def qec_policy(
                 self,
                 blk_ids: array[int, N] @ owned,
-                op_cost: int,
+                op_cost: float,
             ) -> None:
                 for i in blk_ids:
                     self.qec_counter[i] = self.qec_counter[i] + op_cost
@@ -184,7 +184,7 @@ class SteaneSpec:
                         qec_cycle(self, blk)
 
                         self.put_block(i, blk)
-                        self.qec_counter[i] = 0
+                        self.qec_counter[i] = 0.0
 
         match self.qec_policy.style:
             case QECStyle.Knill:
@@ -359,7 +359,7 @@ class SteaneSpec:
                     comptime(self.n_blocks),
                 ),
                 # qec_counter
-                array(0 for _ in range(comptime(self.n_blocks))),
+                array(0.0 for _ in range(comptime(self.n_blocks))),
                 # Zero state factory
                 StateFactory(
                     prep_zero_ft,
