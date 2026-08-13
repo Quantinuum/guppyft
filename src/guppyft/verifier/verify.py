@@ -354,7 +354,10 @@ def check_clifford_semantics(
                 num_ancilla_qubits,
             )
         case _:
-            raise TypeError("Unsupported number of parameters in semantic_function.")
+            raise TypeError(
+                "Unsupported number of code block parameters in semantic_function."
+                + f"Got {len(sem_signature.parameters)}, only 1 and 2 are supported."
+            )
 
     if sem != impl:
         raise InvalidImplementationError(
