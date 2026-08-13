@@ -70,17 +70,38 @@ class RUSStateFactoryConf:
 
 
 class QECStyle(Enum):
+    """The style of syndrome extraction to use during a QEC cycle."""
+
     Knill = auto()
     Steane = auto()
 
 
 @dataclass
 class QECPolicy:
+    """Policy to determine when QEC cycles are injected.
+
+    Each logical block accumulates a cost based on `costs`. Once a
+    block's accumulated cost reaches `threshold`, a QEC cycle of the given
+    `style` is performed on that block and its counter is reset.
+
+    Attributes:
+        style: The style of syndrome extraction to use (see `QECStyle`).
+        threshold: Threshold at which a QEC cycle is triggered.
+        costs: Mapping from operation name to its cost.
+               Defaults to 0 for any op not explicitly set.
+    """
+
     style: QECStyle
     threshold: int = 1
     costs: dict[str, int] = field(default_factory=lambda: defaultdict(int))
 
     def set_cost(self, op: str, cost: int) -> None:
+        """Set the cost of an operation.
+
+        Args:
+            op: Name of the operation.
+            cost: Non-negative cost to assign to the operation.
+        """
         if cost < 0:
             raise ValueError(f"Op cost cannot be negative: received {cost}")
         self.costs[op] = cost
