@@ -2,8 +2,10 @@ from typing import Generic, Self, no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
+from guppylang.std.array import ArrayIter
 from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.collections import Queue, empty_queue
+from guppylang.std.iter import SizedIter
 from guppylang.std.num import nat
 from guppylang.std.quantum import qubit
 from selene_stim_plugin.state import Pauli, Phase, Stabilizer, StabilizerList
@@ -11,14 +13,23 @@ from zixy.container.coeffs import Sign
 from zixy.qubit import pauli
 
 N = guppy.nat_var("N")
+T = guppy.type_var("T")
 
-type SingleBlockUnitary = GuppyFunctionDefinition[[array[qubit, N]], None]  # type: ignore[valid-type]
+
+@guppy.protocol
+class _GuppyIterable(Generic[T, N]):  # type: ignore[misc]
+    @guppy.require
+    @no_type_check
+    def __iter__(self) -> SizedIter[ArrayIter[T, N], N]: ...
+
+
+type SingleBlockUnitary = GuppyFunctionDefinition[[_GuppyIterable[qubit]], None]  # type: ignore[type-arg]
 type DoubleBlockUnitary = GuppyFunctionDefinition[
-    [array[qubit, N], array[qubit, N]], None  # type: ignore[valid-type]
+    [_GuppyIterable[qubit], _GuppyIterable[qubit]], None  # type: ignore[type-arg]
 ]
-type SingleBlockState = GuppyFunctionDefinition[[], array[qubit, N]]  # type: ignore[valid-type]
+type SingleBlockState = GuppyFunctionDefinition[[], _GuppyIterable[qubit]]  # type: ignore[type-arg]
 type DoubleBlockState = GuppyFunctionDefinition[
-    [], tuple[array[qubit, N], array[qubit, N]]  # type: ignore[valid-type]
+    [], tuple[_GuppyIterable[qubit], _GuppyIterable[qubit]]  # type: ignore[type-arg]
 ]
 
 

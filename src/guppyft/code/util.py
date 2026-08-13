@@ -1,7 +1,9 @@
 from typing import Generic, no_type_check
 
 from guppylang import guppy
+from guppylang.std.array import ArrayIter
 from guppylang.std.builtins import array, owned
+from guppylang.std.iter import SizedIter
 from guppylang.std.quantum import Measurement, discard, qubit
 
 N = guppy.nat_var("N")
@@ -34,10 +36,15 @@ class LogicalBlock(Generic[N]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
-    def discard(self: "LogicalBlock[N]" @ owned) -> None:
+    def discard(self: LogicalBlock[N] @ owned) -> None:
         """Discard the logical block and all qubits in ``data_qs``."""
         for q in self.data_qs:
             discard(q)
+
+    @guppy
+    @no_type_check
+    def __iter__(self: LogicalBlock[N] @ owned) -> SizedIter[ArrayIter[qubit, N], N]:
+        return array(q for q in self.data_qs).__iter__()
 
 
 @guppy

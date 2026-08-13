@@ -4,7 +4,9 @@ from guppylang import guppy
 from guppylang.std.array import array
 from guppylang.std.quantum import cx, discard, h, measure, measure_array, qubit, s, sdg
 
+from guppyft.code.util import LogicalBlock
 from guppyft.code_def import StabilizerCode
+from guppyft.verifier.utils import _GuppyIterable
 
 STEANE_DEF = StabilizerCode.from_python_strings(
     num_physical_qubits=7,
@@ -51,6 +53,12 @@ def implement_non_ft_zero_state() -> array[qubit, 7]:
         cx(block[c], block[t])
 
     return block
+
+
+@guppy
+@no_type_check
+def implement_non_ft_zero_state_logical_block() -> LogicalBlock[7]:
+    return LogicalBlock[7](implement_non_ft_zero_state())
 
 
 @guppy
@@ -155,6 +163,12 @@ def implement_h(block: array[qubit, 7]) -> None:
 
 @guppy
 @no_type_check
+def implement_h_logical_block(block: _GuppyIterable[qubit, 7]) -> None:
+    implement_h(block.data_qs)
+
+
+@guppy
+@no_type_check
 def specify_h(block: array[qubit, 1]) -> None:
     h(block[0])
 
@@ -205,3 +219,11 @@ def specify_cx(first_block: array[qubit, 1], second_block: array[qubit, 1]) -> N
 def implement_cx(first_block: array[qubit, 7], second_block: array[qubit, 7]) -> None:
     for i in range(len(first_block)):
         cx(first_block[i], second_block[i])
+
+
+@guppy
+@no_type_check
+def implement_cx_logical_block(
+    first_block: LogicalBlock[7], second_block: LogicalBlock[7]
+) -> None:
+    implement_cx(first_block.data_qs, second_block.data_qs)

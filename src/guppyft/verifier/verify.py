@@ -1,3 +1,5 @@
+from typing import no_type_check
+
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.array import array
@@ -17,6 +19,7 @@ from guppyft.verifier.utils import (
     DoubleBlockUnitary,
     SingleBlockState,
     SingleBlockUnitary,
+    _GuppyIterable,
     stabilizerlist_to_signterms,
 )
 
@@ -46,10 +49,12 @@ def compute_stabilizers_single_block_state(
     """
 
     @guppy
+    @no_type_check
     def main() -> None:
         block = state_prep_func()
-        state_output("total", block)
-        discard_array(block)
+        block_arr = array(q for q in block)
+        state_output("total", block_arr)
+        discard_array(block_arr)
 
     states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
         main, num_selene_qubits
@@ -206,35 +211,30 @@ def compute_stabilizers_double_block_unitary(
 N_PHYSICAL = guppy.nat_var("N_PHYSICAL")
 K_LOGICAL = guppy.nat_var("K_LOGICAL")
 
-type SemanticStabilizerState = GuppyFunctionDefinition[
-    [], array[qubit, K_LOGICAL]  # type: ignore[valid-type]
-]
-type ImplementationStabilizerState = GuppyFunctionDefinition[
-    [], array[qubit, N_PHYSICAL]  # type: ignore[valid-type]
-]
+
+type SemanticStabilizerState = GuppyFunctionDefinition[[], _GuppyIterable[qubit]]  # type: ignore[type-arg]
+type ImplementationStabilizerState = GuppyFunctionDefinition[[], _GuppyIterable[qubit]]  # type: ignore[type-arg]
 
 
 type SemanticStabilizerStateDouble = GuppyFunctionDefinition[
-    [], tuple[array[qubit, K_LOGICAL], array[qubit, K_LOGICAL]]  # type: ignore[valid-type]
+    [], tuple[_GuppyIterable[qubit], _GuppyIterable[qubit]]  # type: ignore[type-arg]
 ]
 type ImplementationStabilizerStateDouble = GuppyFunctionDefinition[
-    [], tuple[array[qubit, N_PHYSICAL], array[qubit, N_PHYSICAL]]  # type: ignore[valid-type]
+    [], tuple[_GuppyIterable[qubit], _GuppyIterable[qubit]]  # type: ignore[type-arg]
 ]
 
 
-type SemanticCliffordUnitary = GuppyFunctionDefinition[
-    [array[qubit, K_LOGICAL]], None  # type: ignore[valid-type]
-]
+type SemanticCliffordUnitary = GuppyFunctionDefinition[[_GuppyIterable[qubit]], None]  # type: ignore[type-arg]
 type ImplementationCliffordUnitary = GuppyFunctionDefinition[
-    [array[qubit, N_PHYSICAL]], None  # type: ignore[valid-type]
+    [_GuppyIterable[qubit]], None  # type: ignore[type-arg]
 ]
 
 
 type SemanticCliffordUnitaryDouble = GuppyFunctionDefinition[
-    [array[qubit, K_LOGICAL], array[qubit, K_LOGICAL]], None  # type: ignore[valid-type]
+    [_GuppyIterable[qubit], _GuppyIterable[qubit]], None  # type: ignore[type-arg]
 ]
 type ImplementationCliffordUnitaryDouble = GuppyFunctionDefinition[
-    [array[qubit, N_PHYSICAL], array[qubit, N_PHYSICAL]], None  # type: ignore[valid-type]
+    [_GuppyIterable[qubit], _GuppyIterable[qubit]], None  # type: ignore[type-arg]
 ]
 
 
