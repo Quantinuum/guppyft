@@ -1,4 +1,5 @@
-from enum import Enum
+import inspect
+from typing import get_origin
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -292,33 +293,32 @@ class InvalidImplementationError(ValueError):
     pass
 
 
-class BlockType(Enum):
-    SingleBlock = 1
-    DoubleBlock = 2
+def _is_double_block_state(func: GuppyFunctionDefinition) -> bool:  # type: ignore[type-arg]
+    """True if func's return annotation is a tuple (acts on two code blocks)."""
+    return_annotation = func.wrapped.python_func.__annotations__.get("return")  # type: ignore[attr-defined]
+    return get_origin(return_annotation) is tuple
 
 
 def check_stabilizer_state_semantics(
     semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
     code_definition: StabilizerCode,
-    block_type: BlockType,
     num_ancilla_qubits: int = 0,
 ) -> None:
-    match block_type:
-        case BlockType.SingleBlock:
-            sem, impl = compute_verification_signterms_single_block_state(
-                semantic_function,  # type: ignore[arg-type]
-                impl_function,  # type: ignore[arg-type]
-                code_definition,
-                num_ancilla_qubits,
-            )
-        case BlockType.DoubleBlock:
-            sem, impl = compute_verification_signterms_single_block_state(
-                semantic_function,  # type: ignore[arg-type]
-                impl_function,  # type: ignore[arg-type]
-                code_definition,
-                num_ancilla_qubits,
-            )
+    if _is_double_block_state(semantic_function):
+        sem, impl = compute_verification_signterms_double_block_state(
+            semantic_function,  # type: ignore[arg-type]
+            impl_function,  # type: ignore[arg-type]
+            code_definition,
+            num_ancilla_qubits,
+        )
+    else:
+        sem, impl = compute_verification_signterms_single_block_state(
+            semantic_function,  # type: ignore[arg-type]
+            impl_function,  # type: ignore[arg-type]
+            code_definition,
+            num_ancilla_qubits,
+        )
 
     if sem != impl:
         raise InvalidImplementationError(
@@ -330,24 +330,32 @@ def check_clifford_semantics(
     semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
     code_definition: StabilizerCode,
-    block_type: BlockType,
     num_ancilla_qubits: int = 0,
 ) -> None:
-    match block_type:
-        case BlockType.SingleBlock:
+    sem_signature = inspect.signature(semantic_function.wrapped.python_func)  # type: ignore[attr-defined]
+    impl_signature = inspect.signature(impl_function.wrapped.python_func)  # type: ignore[attr-defined]
+    if len(sem_signature.parameters) != len(impl_signature.parameters):
+        raise TypeError(
+            "semantic_function and impl_function have incompatible signatures"
+        )
+    match len(sem_signature.parameters):
+        case 1:
             sem, impl = compute_verification_signterms_single_block_unitary(
                 semantic_function,  # type: ignore[arg-type]
                 impl_function,  # type: ignore[arg-type]
                 code_definition,
                 num_ancilla_qubits,
             )
-        case BlockType.DoubleBlock:
+        case 2:
             sem, impl = compute_verification_signterms_double_block_unitary(
                 semantic_function,  # type: ignore[arg-type]
                 impl_function,  # type: ignore[arg-type]
                 code_definition,
                 num_ancilla_qubits,
             )
+        case _:
+            raise TypeError("Unsupported number of parameters in semantic_function.")
+
     if sem != impl:
         raise InvalidImplementationError(
             "The implementation does not match the specified semantics."

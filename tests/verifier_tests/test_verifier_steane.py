@@ -1,9 +1,9 @@
 import pytest
 
 from guppyft.verifier.verify import (
-    BlockType,
     InvalidImplementationError,
     check_clifford_semantics,
+    check_stabilizer_state_semantics,
     compute_verification_signterms_double_block_state,
     compute_verification_signterms_double_block_unitary,
     compute_verification_signterms_single_block_state,
@@ -58,6 +58,11 @@ def test_steane_zero_state() -> None:
         code_definition=steane.STEANE_DEF,
     )
     assert sem == impl
+    check_stabilizer_state_semantics(
+        steane.specify_zero_state,
+        steane.implement_non_ft_zero_state,
+        code_definition=steane.STEANE_DEF,
+    )
 
 
 def test_steane_ft_zero_state() -> None:
@@ -85,6 +90,7 @@ def test_steane_zero_state_not_plus_state() -> None:
         steane.implement_non_ft_plus_state,
         code_definition=steane.STEANE_DEF,
     )
+
     assert sem != impl
 
 
@@ -95,6 +101,12 @@ def test_steane_bell_state() -> None:
         code_definition=steane.STEANE_DEF,
     )
     assert sem == impl
+
+    check_stabilizer_state_semantics(
+        steane.specify_bell_state,
+        steane.implement_non_ft_bell_state,
+        code_definition=steane.STEANE_DEF,
+    )
 
 
 def test_steane_h() -> None:
@@ -163,7 +175,6 @@ def test_steane_invalid_sdg() -> None:
             steane.specify_sdg,
             steane.implement_s,
             code_definition=steane.STEANE_DEF,
-            block_type=BlockType.SingleBlock,
         )
 
 
@@ -179,5 +190,4 @@ def test_steane_cx() -> None:
         steane.specify_cx,
         steane.implement_cx,
         code_definition=steane.STEANE_DEF,
-        block_type=BlockType.DoubleBlock,
     )
