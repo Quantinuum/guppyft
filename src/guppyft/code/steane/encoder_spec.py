@@ -115,7 +115,7 @@ class SteaneSpec:
     zero_factory_conf: RUSStateFactoryConf = field(
         default_factory=lambda: RUSStateFactoryConf(1, 5)
     )
-    qec_policy: QECPolicy = field(default_factory=lambda: QECPolicy())
+    qec_policy: QECPolicy = field(default_factory=QECPolicy)
 
     def gen_implement_spec(self) -> ImplementOpsSpec:
 
