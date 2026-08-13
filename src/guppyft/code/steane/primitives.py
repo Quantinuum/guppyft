@@ -67,19 +67,15 @@ def get_syndrome(data_bits: array[bool, 7]) -> array[bool, 3]:
 @no_type_check
 def knill_qec_cycle(
     q: LogicalBlock[7],
-    zero_state_0: LogicalBlock[7] @ owned,
-    zero_state_1: LogicalBlock[7] @ owned,
+    a0: LogicalBlock[7] @ owned,
+    a1: LogicalBlock[7] @ owned,
 ) -> None:
     """Implements Knill style syndrome extraction.
 
     Notes:
-        Assumes that both ancilla qubits `zero_state_0` and `zero_state_1` hold logical
+        Assumes that both ancilla blocks `a0` and `a1` hold logical
         zero states.
     """
-    # Rename to avoid confusion, since the state will change
-    a0 = zero_state_0
-    a1 = zero_state_1
-
     # Generate a logical Bell state on the ancilla qubits
     h(a0)
     cx(a0, a1)
@@ -99,14 +95,12 @@ def knill_qec_cycle(
 
 @guppy
 @no_type_check
-def steane_z_qec_cycle(q: LogicalBlock[7], zero_state: LogicalBlock[7] @ owned) -> None:
+def steane_z_qec_cycle(q: LogicalBlock[7], a: LogicalBlock[7] @ owned) -> None:
     """Implements Z syndrome extraction via Steane with one-qubit teleportation.
 
     Notes:
-        Assumes that the ancilla `zero_state` holds a logical zero state.
+        Assumes that the ancilla block `a` holds a logical zero state.
     """
-    a = zero_state  # Rename to avoid confusion, since the state will change
-
     # Convert to logical |+>
     h(a)
 
@@ -122,14 +116,12 @@ def steane_z_qec_cycle(q: LogicalBlock[7], zero_state: LogicalBlock[7] @ owned) 
 
 @guppy
 @no_type_check
-def steane_x_qec_cycle(q: LogicalBlock[7], zero_state: LogicalBlock[7] @ owned) -> None:
+def steane_x_qec_cycle(q: LogicalBlock[7], a: LogicalBlock[7] @ owned) -> None:
     """Implements X syndrome extraction via Steane with one-qubit teleportation.
 
     Notes:
-        Assumes that the ancilla `a` holds a logical zero state.
+        Assumes that the ancilla block `a` holds a logical zero state.
     """
-    a = zero_state  # Rename to avoid confusion, since the state will change
-
     # Swap the labels of `q` and `a` since the latter is where the information
     # of `q` will end after teleportation
     mem_swap(q, a)
