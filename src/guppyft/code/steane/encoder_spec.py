@@ -1,5 +1,7 @@
+from collections import defaultdict
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from enum import Enum, auto
 from typing import Any, no_type_check
 
 from guppylang import guppy
@@ -18,8 +20,11 @@ from guppyft.code.steane.primitives import (
     cx,
     decode,
     h,
+    knill_qec_cycle,
     measure_z,
     prep_zero_ft,
+    steane_x_qec_cycle,
+    steane_z_qec_cycle,
     x,
     z,
 )
@@ -36,6 +41,8 @@ from guppyft.encode import (
 )
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
+
+N = guppy.nat_var("N")
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -62,6 +69,44 @@ class RUSStateFactoryConf:
     max_attempts: int
 
 
+class QECStyle(Enum):
+    """The style of syndrome extraction to use during a QEC cycle."""
+
+    Knill = auto()
+    Steane = auto()
+
+
+@dataclass
+class QECPolicy:
+    """Policy to determine when QEC cycles are injected.
+
+    Each logical block accumulates a cost based on `costs`. Once a
+    block's accumulated cost reaches `threshold`, a QEC cycle of the given
+    `style` is performed on that block and its counter is reset.
+
+    Attributes:
+        style: The style of syndrome extraction to use (see `QECStyle`).
+        threshold: Threshold at which a QEC cycle is triggered.
+        costs: Mapping from operation name to its cost.
+               Defaults to 0 for any op not explicitly set.
+    """
+
+    style: QECStyle = QECStyle.Steane
+    threshold: int = 1
+    costs: dict[str, float] = field(default_factory=lambda: defaultdict(float))
+
+    def set_cost(self, op: str, cost: float) -> None:
+        """Set the cost of an operation.
+
+        Args:
+            op: Name of the operation.
+            cost: Non-negative cost to assign to the operation.
+        """
+        if cost < 0:
+            raise ValueError(f"Op cost cannot be negative: received {cost}")
+        self.costs[op] = cost
+
+
 @dataclass
 class SteaneSpec:
     """Steane encoder spec"""
@@ -70,8 +115,12 @@ class SteaneSpec:
     zero_factory_conf: RUSStateFactoryConf = field(
         default_factory=lambda: RUSStateFactoryConf(1, 5)
     )
+    qec_policy: QECPolicy = field(default_factory=QECPolicy)
 
     def gen_implement_spec(self) -> ImplementOpsSpec:
+
+        qec_policy = self.qec_policy
+
         # TODO STATE should be generic for all codes. The methods that are code specific
         # should be `@guppy.declare` and each code can provide an implementation to be
         # linked i.e. `allocate_next_addr`.
@@ -80,6 +129,7 @@ class SteaneSpec:
         class STATE:
             blocks: array[Option[LogicalBlock[7]], comptime(self.n_blocks)]  # type: ignore[valid-type,type-arg]
             addr_stack: Stack[tuple[int, int], comptime(self.n_blocks)]  # type: ignore[valid-type,type-arg]
+            qec_counter: array[float, comptime(self.n_blocks)]  # type: ignore[valid-type]
 
             zero_state_factory: StateFactory[  # type: ignore[valid-type,type-arg]
                 7, 1, comptime(self.zero_factory_conf.size)
@@ -117,6 +167,45 @@ class SteaneSpec:
                 self.blocks[next_addr[0]].swap(blk).unwrap_nothing()
 
                 return next_addr
+
+            @guppy
+            @no_type_check
+            def qec_policy(
+                self,
+                blk_ids: array[int, N] @ owned,
+                op_cost: float,
+            ) -> None:
+                for i in blk_ids:
+                    self.qec_counter[i] = self.qec_counter[i] + op_cost
+
+                    if self.qec_counter[i] >= comptime(qec_policy.threshold):
+                        blk = self.take_block(i)
+
+                        qec_cycle(self, blk)
+
+                        self.put_block(i, blk)
+                        self.qec_counter[i] = 0.0
+
+        match self.qec_policy.style:
+            case QECStyle.Knill:
+
+                @guppy
+                @no_type_check
+                def qec_cycle(state: STATE, q: LogicalBlock[7]) -> None:
+                    # Allocate new blocks for the Bell state
+                    ancilla0 = state.zero_state_factory.get_state()
+                    ancilla1 = state.zero_state_factory.get_state()
+                    knill_qec_cycle(q, ancilla0, ancilla1)
+
+            case QECStyle.Steane:
+
+                @guppy
+                @no_type_check
+                def qec_cycle(state: STATE, q: LogicalBlock[7]) -> None:
+                    ancillaX = state.zero_state_factory.get_state()
+                    steane_x_qec_cycle(q, ancillaX)
+                    ancillaZ = state.zero_state_factory.get_state()
+                    steane_z_qec_cycle(q, ancillaZ)
 
         # TODO Defining the primitives to use the global state requires
         # a lot of "boilerplate" code. We should provide helper methods
@@ -183,6 +272,9 @@ class SteaneSpec:
                 blk = state.take_block(blk_id)
                 x(blk)
                 state.put_block(blk_id, blk)
+
+                state.qec_policy(array(blk_id), comptime(self.qec_policy.costs["X"]))
+
                 return state, q
 
             return map_global(_impl, q)
@@ -199,6 +291,9 @@ class SteaneSpec:
                 blk = state.take_block(blk_id)
                 z(blk)
                 state.put_block(blk_id, blk)
+
+                state.qec_policy(array(blk_id), comptime(self.qec_policy.costs["Z"]))
+
                 return state, q
 
             return map_global(_impl, q)
@@ -215,6 +310,9 @@ class SteaneSpec:
                 blk = state.take_block(blk_id)
                 h(blk)
                 state.put_block(blk_id, blk)
+
+                state.qec_policy(array(blk_id), comptime(self.qec_policy.costs["H"]))
+
                 return state, q
 
             return map_global(_impl, q)
@@ -235,6 +333,11 @@ class SteaneSpec:
 
                 state.put_block(ctl[0], ctl_blk)
                 state.put_block(tgt[0], tgt_blk)
+
+                state.qec_policy(
+                    array(ctl[0], tgt[0]), comptime(self.qec_policy.costs["CX"])
+                )
+
                 return state, ctl, tgt
 
             return map_global(_impl, ctl, tgt)
@@ -255,6 +358,8 @@ class SteaneSpec:
                     array(some((blk, 1)) for blk in range(comptime(self.n_blocks))),
                     comptime(self.n_blocks),
                 ),
+                # qec_counter
+                array(0.0 for _ in range(comptime(self.n_blocks))),
                 # Zero state factory
                 StateFactory(
                     prep_zero_ft,
