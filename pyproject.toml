@@ -28,7 +28,7 @@ dependencies = [
     "hugr>=0.18.3",
     "tket>=0.15.2",
     "tket-exts>=0.14.0",
-    "zixy~=0.3",
+    "zixy~=0.3.2",
     "selene-sim>=0.3.0",
 ]
 
