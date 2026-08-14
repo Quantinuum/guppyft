@@ -208,8 +208,16 @@ def implement_ops(
     @no_type_check
     def func_decl() -> None: ...
 
+    # We have to ensure the build wrapper is a function definition rather than a
+    # declaration, so that the package contains an entrypoint. Guppy compiles
+    # declarations to module-rooted HUGRs.
     wrapper = spec.build_wrapper(func_decl)
-    pkg: Package = wrapper.compile()
+
+    @guppy
+    def outer_wrapper() -> None:
+        wrapper()
+
+    pkg: Package = outer_wrapper.compile()
     pkg = pkg.link(hugr_pkg, *spec.libs)
     assert isinstance(pkg, Package)  # Assert type for type checker
 
