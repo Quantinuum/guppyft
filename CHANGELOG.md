@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.4](https://github.com/quantinuum-dev/guppyft/compare/v0.0.3...v0.0.4) (2026-08-14)
+
+
+### Features
+
+* Add QEC cycle policy to Steane architecture with Steane and Knill primitives ([#214](https://github.com/quantinuum-dev/guppyft/issues/214)) ([06205c9](https://github.com/quantinuum-dev/guppyft/commit/06205c98b59efacfcb415d2a944cb7565d68616b))
+* Reduce serialisation roundtrips in implement ops and offer serialised byte result ([#220](https://github.com/quantinuum-dev/guppyft/issues/220)) ([59c480d](https://github.com/quantinuum-dev/guppyft/commit/59c480d8b76e92ed6c383bcd4c673f2c8e343b8a))
+* Support more Steane operations during encoding ([#219](https://github.com/quantinuum-dev/guppyft/issues/219)) ([ece72a1](https://github.com/quantinuum-dev/guppyft/commit/ece72a1c96c9c6e219c55fa2e00b099c6f745e57))
+
+
+### Bug Fixes
+
+* Ensure build wrapper is a function definition ([#222](https://github.com/quantinuum-dev/guppyft/issues/222)) ([3b34c50](https://github.com/quantinuum-dev/guppyft/commit/3b34c50b30c92ef0bbeea033ca2bd79b6b2309f3))
+
 ## [0.0.3](https://github.com/quantinuum-dev/guppyft/compare/v0.0.2...v0.0.3) (2026-08-12)
 
 
