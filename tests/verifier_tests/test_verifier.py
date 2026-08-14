@@ -143,7 +143,7 @@ def test_stabilizer_padding_double_block() -> None:
         steane.STEANE_DEF.num_physical_qubits - steane.STEANE_DEF.num_logical_qubits
     )
 
-    strings = padded_double_block_stabilizers.into(pauli.Strings)  # type: ignore[arg-type]
+    strings = padded_double_block_stabilizers.into(pauli.Strings)
     assert isinstance(strings, pauli.Strings)
     assert np.all(strings.compatibility_matrix() == 1)
     assert (
