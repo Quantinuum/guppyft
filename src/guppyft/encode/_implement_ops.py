@@ -207,7 +207,7 @@ def implement_ops(
     # Reset entrypoint, marking module as non-executable, to avoid linking conflicts
     hugr.entrypoint = hugr.module_root
     # Run rewrite, replacing ops with function calls to the functions in `spec.ops`
-    hugr_pkg_bytes = _implement_ops(hugr_pkg.to_bytes(), spec.ops, spec.tys.tys)
+    hugr_pkg_bytes = _implement_ops(hugr.to_bytes(), spec.ops, spec.tys.tys)
 
     # Build, compile, and link wrapper program
     @guppy.declare
