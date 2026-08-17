@@ -8,9 +8,7 @@
     :nosignatures:
 
     guppyft
-```
 
-```{eval-rst}
 Indices and tables
 ~~~~~~~~~~~~~~~~~~
 

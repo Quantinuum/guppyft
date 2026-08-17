@@ -33,3 +33,11 @@ extensions = [
 
 # See https://github.com/quantinuum/guppylang/pull/1028
 autosummary_ignore_module_all = False  # Respect __all__ if specified
+
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "hugr": ("https://quantinuum.github.io/hugr/", None),
+    "zixy": ("https://quantinuum.github.io/zixy/", None),
+    "guppylang": ("https://docs.quantinuum.com/guppy/", None),
+}
