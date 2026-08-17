@@ -54,8 +54,7 @@ gen-extensions:
 build-docs:
     cd docs && uv run --group docs sphinx-build -b html . build
 
-
-serve-docs:
+serve-docs: build-docs
     npm exec serve docs/build
 
 clean-docs:
