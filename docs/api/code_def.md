@@ -1,8 +1,13 @@
 # guppyft.code_def
 
+
 ```{eval-rst}
-.. currentmodule:: guppyft.code_def
-.. autoclass:: StabilizerCode
-    :members:
-    :special-members:
+.. currentmodule:: guppyft
+.. autosummary::
+    :template: autosummary/module.rst
+    :toctree: generated
+    :recursive:
+    :nosignatures:
+
+    code_def
 ```

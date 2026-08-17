@@ -26,3 +26,10 @@ extensions = [
     "sphinx.ext.intersphinx",
     "quantinuum_sphinx",
 ]
+
+
+# Sphinx autosummary
+# https://www.sphinx-doc.org/en/master/usage/extensions/autosummary.html
+
+# See https://github.com/quantinuum/guppylang/pull/1028
+autosummary_ignore_module_all = False  # Respect __all__ if specified
