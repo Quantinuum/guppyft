@@ -52,7 +52,7 @@ gen-extensions:
 
 
 build-docs:
-    cd docs && uv run --group docs sphinx-build -b html . build
+    uv run --group docs sphinx-build -b html docs docs/build
 
 serve-docs: build-docs
     npm exec serve docs/build
