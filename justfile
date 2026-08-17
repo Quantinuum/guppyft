@@ -59,3 +59,4 @@ serve-docs: build-docs
 
 clean-docs:
     rm -rf docs/build
+    rm -rf docs/api/generated
