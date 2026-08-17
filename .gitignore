@@ -59,7 +59,8 @@ cover/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+docs/build/
+docs/api/generated
 
 # PyBuilder
 .pybuilder/
