@@ -49,3 +49,14 @@ format-python:
 # Generate serialized declarations for the HUGR extensions
 gen-extensions:
     cargo run -p extensions gen-extensions -o src/guppyft/extensions/data --unversioned
+
+
+build-docs:
+    cd docs && uv run --group docs sphinx-build -b html . build
+
+
+serve-docs:
+    npm exec serve docs/build
+
+clean-docs:
+    rm -rf docs/build
