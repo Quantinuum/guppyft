@@ -1,15 +1,13 @@
 # guppyft API
 
-```{toctree}
-:maxdepth: 1
+```{eval-rst}
+.. autosummary::
+    :template: autosummary/module.rst
+    :toctree: generated
+    :recursive:
+    :nosignatures:
 
-code_def.md
-code.md
-encode.md
-extensions.md
-logical.md
-verifier.md
-std.md
+    guppyft
 ```
 
 ```{eval-rst}
