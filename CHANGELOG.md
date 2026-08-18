@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.5](https://github.com/quantinuum-dev/guppyft/compare/v0.0.4...v0.0.5) (2026-08-18)
+
+
+### Features
+
+* Add fallible dynamic qubit allocation to Iceberg extension ([#227](https://github.com/quantinuum-dev/guppyft/issues/227)) ([0b72127](https://github.com/quantinuum-dev/guppyft/commit/0b72127d843f767228ddfac46c3ebf1b77f007d1))
+
 ## [0.0.4](https://github.com/quantinuum-dev/guppyft/compare/v0.0.3...v0.0.4) (2026-08-14)
 
 
