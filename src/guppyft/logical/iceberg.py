@@ -604,7 +604,7 @@ def try_measure_one_z(block: Block[N], i: int) -> Option[Measurement]:
 @hugr_op(iceberg_op("try_alloc_dynq"))
 @no_type_check
 def try_alloc_dynq() -> Option[Qubit]:
-    """Fallible allocation qubit in the zero state."""
+    """Fallible allocation of a qubit in the zero state."""
 
 
 @hugr_op(iceberg_op("free_dynq"))
