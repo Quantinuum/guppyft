@@ -18,11 +18,11 @@ itertools = "0.15.0"
 derive_more = { version = "2", features = ["display", "from"] }
 
 [patch.crates-io]
-hugr = { git = "https://github.com/quantinuum/hugr", rev = "601ee49d41b0e388e6d0dd7a52ce99e1b144e5ef" }
-hugr-core = { git = "https://github.com/quantinuum/hugr", rev = "601ee49d41b0e388e6d0dd7a52ce99e1b144e5ef" }
-hugr-cli = { git = "https://github.com/quantinuum/hugr", rev = "601ee49d41b0e388e6d0dd7a52ce99e1b144e5ef" }
-hugr-model = { git = "https://github.com/quantinuum/hugr", rev = "601ee49d41b0e388e6d0dd7a52ce99e1b144e5ef" }
-tket = { git = "https://github.com/quantinuum/tket2", rev = "b0325d3146f20c46722d993fc91dcb1705c871eb" }
+hugr = { git = "https://github.com/quantinuum/hugr", rev = "04272109903145df5901bb132ea9ca9c831446fb" }
+hugr-core = { git = "https://github.com/quantinuum/hugr", rev = "04272109903145df5901bb132ea9ca9c831446fb" }
+hugr-cli = { git = "https://github.com/quantinuum/hugr", rev = "04272109903145df5901bb132ea9ca9c831446fb" }
+hugr-model = { git = "https://github.com/quantinuum/hugr", rev = "04272109903145df5901bb132ea9ca9c831446fb" }
+tket = { git = "https://github.com/quantinuum/tket2", rev = "13dda8feee30ea43c850e347fcaf405002cb4436" }
 
 [profile.dev-py]
 inherits = "dev"
