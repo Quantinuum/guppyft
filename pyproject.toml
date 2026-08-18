@@ -63,7 +63,7 @@ module-name = "guppyft._bindings"
 python-source = "src/"
 manifest-path = "rust-bindings/Cargo.toml"
 features = ["pyo3/extension-module"] # skips linking against libpython.so
-profile = "dev-py" # See root Cargo.toml
+profile = "release-py" # See root Cargo.toml
 
 
 [tool.cibuildwheel]
