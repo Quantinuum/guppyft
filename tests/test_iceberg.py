@@ -64,7 +64,7 @@ def test_exported_extensions() -> None:
         "pre_block": iceberg_types.iceberg_pre_block_def,
         "qubit": iceberg_types.iceberg_qubit_def,
     }
-    assert len(ops_extn.operations) == 88
+    assert len(ops_extn.operations) == 89
     for op_name, op_def in ops_extn.operations.items():
         op_def_name = op_name if op_name.endswith("_dynq") else f"{op_name}_def"
         assert op_def == iceberg_ops.__getattribute__(op_def_name)

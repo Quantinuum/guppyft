@@ -1419,6 +1419,13 @@ class IcebergOpsExtension:
         """Allocate a dynamic logical qubit in the zero state."""
         return self().get_op("alloc_dynq")
 
+    # try_alloc_dynq
+
+    @functools.cached_property
+    def try_alloc_dynq(self) -> OpDef:
+        """Try to allocate a dynamic logical qubit in the zero state."""
+        return self().get_op("try_alloc_dynq")
+
     # free_dynq
 
     @functools.cached_property
