@@ -2175,7 +2175,7 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 [[package]]
 name = "tket"
 version = "0.21.2"
-source = "git+https://github.com/quantinuum/tket2?rev=b0325d3146f20c46722d993fc91dcb1705c871eb#b0325d3146f20c46722d993fc91dcb1705c871eb"
+source = "git+https://github.com/quantinuum/tket2?rev=176bb59b89eef5137e8e92b2fb8bcf7f13df415a#176bb59b89eef5137e8e92b2fb8bcf7f13df415a"
 dependencies = [
  "ascent",
  "bytemuck",

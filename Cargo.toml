@@ -22,7 +22,7 @@ hugr = { git = "https://github.com/quantinuum/hugr", rev = "601ee49d41b0e388e6d0
 hugr-core = { git = "https://github.com/quantinuum/hugr", rev = "601ee49d41b0e388e6d0dd7a52ce99e1b144e5ef" }
 hugr-cli = { git = "https://github.com/quantinuum/hugr", rev = "601ee49d41b0e388e6d0dd7a52ce99e1b144e5ef" }
 hugr-model = { git = "https://github.com/quantinuum/hugr", rev = "601ee49d41b0e388e6d0dd7a52ce99e1b144e5ef" }
-tket = { git = "https://github.com/quantinuum/tket2", rev = "b0325d3146f20c46722d993fc91dcb1705c871eb" }
+tket = { git = "https://github.com/quantinuum/tket2", rev = "176bb59b89eef5137e8e92b2fb8bcf7f13df415a" }
 
 [profile.dev-py]
 inherits = "dev"
