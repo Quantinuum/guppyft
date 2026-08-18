@@ -54,7 +54,7 @@ class StabilizerCode:
                 f"got {len(self.z_logicals)}."
             )
 
-        strings: pauli.Strings = self.generators.into(pauli.Strings)  # type: ignore[assignment, arg-type]
+        strings: pauli.Strings = self.generators.into(pauli.Strings)
         all_stabilizer_generators_commute = np.all(strings.compatibility_matrix() == 1)
 
         if not all_stabilizer_generators_commute:
