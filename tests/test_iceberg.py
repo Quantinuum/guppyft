@@ -19,6 +19,7 @@ from guppyft.logical.iceberg import (
     free_dynq,
     measure_all,
     restore,
+    try_alloc_dynq,
     zz_phase_between_blocks,
     zz_phase_dynq,
 )
@@ -174,6 +175,13 @@ def test_guppy_bindings_smoke() -> None:
         cx_between_blocks(b0, b1, 7, 3)
         zz_phase_between_blocks(b0, b1, 1, 0, 0.25)
         cx_transversal(b0, b1)
+        maybe_q1 = try_alloc_dynq()
+        if maybe_q1.is_some():
+            q1 = maybe_q1.unwrap()
+            cx_dynq(q0, q1)
+            free_dynq(q1)
+        else:
+            maybe_q1.unwrap_nothing()
         [s_z, s_x] = b0.measure_syndrome()
         maybe_m1_2 = b1.try_measure_one_x(2)
         if maybe_m1_2.is_some():
