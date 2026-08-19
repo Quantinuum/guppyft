@@ -55,7 +55,7 @@ build-docs:
     uv run --group docs sphinx-build -b html docs docs/build
 
 serve-docs: build-docs
-    npm exec serve docs/build
+    uv run python -m http.server -d docs/build/
 
 clean-docs:
     rm -rf docs/build
