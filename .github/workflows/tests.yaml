@@ -57,21 +57,35 @@ jobs:
       - name: Configure default rust toolchain
         run: rustup override set ${{steps.toolchain.outputs.name}}
       - uses: taiki-e/install-action@nextest
+      - uses: taiki-e/install-action@cargo-llvm-cov
       - name: Test with all features
         run: cargo nextest r --verbose --workspace --exclude guppyft-bindings --all-features
+      - name: Clean existing coverage data
+        run: cargo llvm-cov clean --workspace
+      - name: Generate coverage report
+        run: cargo llvm-cov --all-features report --codecov --output-path coverage.json
+      - name: Upload Rust coverage to codecov.io
+        uses: codecov/codecov-action@v7
+        with:
+          files: coverage.json
+          name: rust
+          flags: rust
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   check-py:
-    name: 🐍 Test Python code (${{ matrix.python-version }})
+    name: 🐍 Test Python code (${{ matrix.python-version.py }})
     needs: changes
     if: ${{ needs.changes.outputs.python == 'true' }}
     runs-on: ubuntu-latest
     env:
-      PYTHON_VERSION: ${{ matrix.python-version }}
+      PYTHON_VERSION: ${{ matrix.python-version.py }}
       LLVM_SYS_211_PREFIX: /usr/lib/llvm-21
 
     strategy:
       matrix:
-        python-version: [ "3.13", "3.14" ]
+        python-version:
+        - { py: "3.13", coverage: false }
+        - { py: "3.14", coverage: true }
       fail-fast: false
 
     steps:
@@ -89,7 +103,20 @@ jobs:
         run: uv sync --frozen --python ${{ env.PYTHON_VERSION }}
 
       - name: Run tests
+        if: ${{ !matrix.python-version.coverage }}
         run: uv run pytest -n auto
+
+      - name: Run Python tests with coverage
+        if: ${{ matrix.python-version.coverage }}
+        run: uv run pytest -n auto --cov=./ --cov-report-xml
+      - name: Upload Python coverage to codecov.io
+        if: ${{ matrix.python-version.coverage }}
+        uses: codecov/codecov-action@v7
+        with:
+          files: coverage.xml
+          name: python
+          flags: python
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   # Ensure that serialized extensions match rust implementation
   check-extensions:
