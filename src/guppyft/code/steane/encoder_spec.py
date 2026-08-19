@@ -1,8 +1,8 @@
 from collections import defaultdict
 from collections.abc import Mapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from enum import Enum, auto
-from typing import Any, no_type_check
+from typing import Any, Self, no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -133,19 +133,22 @@ class SteaneInstance:
         return emulator
 
 
+class SteaneFactory(Enum):
+    zero = auto()
+
+
 @dataclass(frozen=True, kw_only=True)
 class SteaneBuilder:
-    """Steane architecture builder class to create a `SteaneInstance`."""
+    """Steane architecture builder class for creating `SteaneInstance` objects."""
 
-    n_blocks: int
-    zero_factory_conf: RUSStateFactoryConf = field(
+    _zero_factory_conf: RUSStateFactoryConf = field(
         default_factory=lambda: RUSStateFactoryConf(1, 5)
     )
-    qec_policy: QECPolicy = field(default_factory=QECPolicy)
+    _qec_policy: QECPolicy = field(default_factory=QECPolicy)
 
-    def gen_implement_spec(self) -> ImplementOpsSpec:
+    def gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
 
-        qec_policy = self.qec_policy
+        qec_policy = self._qec_policy
 
         # TODO STATE should be generic for all codes. The methods that are code specific
         # should be `@guppy.declare` and each code can provide an implementation to be
@@ -153,12 +156,12 @@ class SteaneBuilder:
         # See https://github.com/quantinuum-dev/guppyft/issues/179
         @guppy.struct
         class STATE:
-            blocks: array[Option[LogicalBlock[7]], comptime(self.n_blocks)]  # type: ignore[valid-type,type-arg]
-            addr_stack: Stack[tuple[int, int], comptime(self.n_blocks)]  # type: ignore[valid-type,type-arg]
-            qec_counter: array[float, comptime(self.n_blocks)]  # type: ignore[valid-type]
+            blocks: array[Option[LogicalBlock[7]], comptime(n_blocks)]  # type: ignore[valid-type,type-arg]
+            addr_stack: Stack[tuple[int, int], comptime(n_blocks)]  # type: ignore[valid-type,type-arg]
+            qec_counter: array[float, comptime(n_blocks)]  # type: ignore[valid-type]
 
             zero_state_factory: StateFactory[  # type: ignore[valid-type,type-arg]
-                7, 1, comptime(self.zero_factory_conf.size)
+                7, 1, comptime(self._zero_factory_conf.size)
             ]
 
             @guppy
@@ -377,19 +380,17 @@ class SteaneBuilder:
         @link_name("guppyft.steane.gen_state")
         def state_gen() -> STATE:
             return STATE(
-                array(
-                    nothing[LogicalBlock[7]]() for _ in range(comptime(self.n_blocks))
-                ),
+                array(nothing[LogicalBlock[7]]() for _ in range(comptime(n_blocks))),
                 Stack(
-                    array(some((blk, 1)) for blk in range(comptime(self.n_blocks))),
-                    comptime(self.n_blocks),
+                    array(some((blk, 1)) for blk in range(comptime(n_blocks))),
+                    comptime(n_blocks),
                 ),
                 # qec_counter
-                array(0.0 for _ in range(comptime(self.n_blocks))),
+                array(0.0 for _ in range(comptime(n_blocks))),
                 # Zero state factory
                 StateFactory(
                     prep_zero_ft,
-                    comptime(self.zero_factory_conf.max_attempts),
+                    comptime(self._zero_factory_conf.max_attempts),
                     empty_queue(),
                 ),
             )
@@ -458,9 +459,9 @@ class SteaneBuilder:
             ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[lib]
         )
 
-    def gen_encoder_spec(self) -> EncoderSpec:
+    def gen_encoder_spec(self, n_blocks: int) -> EncoderSpec:
 
-        impl_spec = self.gen_implement_spec()
+        impl_spec = self.gen_implement_spec(n_blocks)
 
         ext = ExtensionRegistry.from_extensions(
             [steane_ops(), steane_types(), std_ops(), std_types()]
@@ -496,14 +497,18 @@ class SteaneBuilder:
 
         return EncoderSpec(to_logical=std_encoder, implement_spec=impl_spec)
 
-    def encode(self, pkg: Package) -> Package:
-        enc_spec = self.gen_encoder_spec()
-        return encode(pkg, enc_spec)
+    def with_qec_policy(self, qec_policy: QECPolicy) -> Self:
+        """Set the QEC policy."""
+        return replace(self, _qec_policy=qec_policy)
 
-    def implement_ops(self, pkg: Package) -> Package:
-        implement_spec = self.gen_implement_spec()
-        return implement_ops(pkg, implement_spec)
+    def with_factory_conf(
+        self, factory: SteaneFactory, factory_conf: RUSStateFactoryConf
+    ) -> Self:
+        """Set the state factory configuration."""
+        match factory:
+            case SteaneFactory.zero:
+                return replace(self, _zero_factory_conf=factory_conf)
 
-    def build(self) -> SteaneInstance:
-        encoder_spec = self.gen_encoder_spec()
+    def build(self, n_blocks: int) -> SteaneInstance:
+        encoder_spec = self.gen_encoder_spec(n_blocks)
         return SteaneInstance(_spec=encoder_spec)

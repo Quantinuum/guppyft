@@ -8,7 +8,13 @@ from hugr import Hugr
 from hugr.package import Package
 from selene_hugr_qis_compiler import check_hugr
 
-from guppyft.code.steane.encoder_spec import SteaneBuilder, SteaneEncoderParams
+from guppyft.code.steane.encoder_spec import (
+    QECPolicy,
+    RUSStateFactoryConf,
+    SteaneBuilder,
+    SteaneEncoderParams,
+    SteaneFactory,
+)
 from guppyft.encode import annotate_encoding
 
 
@@ -30,8 +36,8 @@ def test_encoder() -> None:
 
     pkg = main.compile()
     res = (
-        SteaneBuilder(n_blocks=2)
-        .build()
+        SteaneBuilder()
+        .build(n_blocks=2)
         .emulator(pkg, n_qubits=16)
         .run()
         .collated_shots()
@@ -59,13 +65,13 @@ def test_encode_function_call() -> None:
         pass
 
     pkg = main.compile()
-    phys_pkg = SteaneBuilder(n_blocks=1).build().encode(pkg)
+    phys_pkg = SteaneBuilder().build(n_blocks=1).encode(pkg)
 
     check_hugr(phys_pkg.to_bytes())
 
 
 def test_encoder_missing_op() -> None:
-    # `tket.quantum.y` has no replacement registered in `SteaneSpec`, so the encoder
+    # `tket.quantum.y` has no replacement registered in `SteaneBuilder`, so the encoder
     # leaves it untouched while everything else is lowered to logical qubits. This
     # mismatch causes `y`'s (unencoded) qubit port to be connected to an (encoded)
     # logical qubit port, which fails validation.
@@ -84,7 +90,35 @@ def test_encoder_missing_op() -> None:
             r"have incompatible kinds\. Cannot connect qubit to qubit\."
         ),
     ):
-        SteaneBuilder(n_blocks=1).build().encode(pkg)
+        SteaneBuilder().build(n_blocks=1).encode(pkg)
+
+
+def test_builder_methods() -> None:
+    @guppy
+    def main() -> None:
+        q = qubit()
+        x(q)
+        output("q", measure(q).read())
+
+    pkg = main.compile()
+
+    # Set policy
+    my_policy = QECPolicy(threshold=1)
+    my_policy.set_cost("X", 1.0)
+
+    my_factory_conf = RUSStateFactoryConf(1, 2)
+
+    res = (
+        SteaneBuilder()
+        .with_qec_policy(my_policy)
+        .with_factory_conf(SteaneFactory.zero, my_factory_conf)
+        .build(n_blocks=1)
+        .emulator(pkg, n_qubits=20)
+        .run()
+        .collated_shots()
+    )
+
+    assert res == [{"q": [1]}]
 
 
 def test_encoder_control_flow() -> None:
@@ -100,8 +134,8 @@ def test_encoder_control_flow() -> None:
 
     pkg = main.compile()
     res = (
-        SteaneBuilder(n_blocks=2)
-        .build()
+        SteaneBuilder()
+        .build(n_blocks=2)
         .emulator(pkg, n_qubits=20)
         .run()
         .collated_shots()
