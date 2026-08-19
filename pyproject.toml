@@ -38,6 +38,11 @@ dev = [
     { include-group = "lint" },
     { include-group = "test" },
 ]
+docs = [
+    "myst-nb>=1.4.0",
+    "quantinuum-sphinx>=1.11.2",
+    "sphinx>=9.1.0",
+]
 lint = [
     "pre-commit>=4.6.1,<5",
     "ruff>=0.16.2",
