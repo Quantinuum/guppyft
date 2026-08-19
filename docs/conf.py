@@ -10,7 +10,6 @@ html_theme_options = {
 html_show_sourcelink = False
 html_copy_source = False
 
-html_static_path = ["_static"]
 templates_path = ["_templates"]
 
 master_doc = "index"
