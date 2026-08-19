@@ -2,14 +2,13 @@ from typing import Any
 
 import pytest
 from guppylang import guppy
-from guppylang.emulator import EmulatorBuilder
 from guppylang.std.platform import output
 from guppylang.std.quantum import cx, discard, h, measure, qubit, x, y, z
 from hugr import Hugr
 from hugr.package import Package
 from selene_hugr_qis_compiler import check_hugr
 
-from guppyft.code.steane.encoder_spec import SteaneEncoderParams, SteaneSpec
+from guppyft.code.steane.encoder_spec import SteaneBuilder, SteaneEncoderParams
 from guppyft.encode import annotate_encoding
 
 
@@ -30,8 +29,13 @@ def test_encoder() -> None:
         output("q1", r1)
 
     pkg = main.compile()
-    phys_pkg = SteaneSpec(n_blocks=2).encode(pkg)
-    res = EmulatorBuilder().build(phys_pkg, n_qubits=16).run().collated_shots()
+    res = (
+        SteaneBuilder(n_blocks=2)
+        .build()
+        .emulator(pkg, n_qubits=16)
+        .run()
+        .collated_shots()
+    )
 
     assert res == [{"q0": [1], "q1": [0]}]
 
@@ -55,7 +59,7 @@ def test_encode_function_call() -> None:
         pass
 
     pkg = main.compile()
-    phys_pkg = SteaneSpec(n_blocks=1).encode(pkg)
+    phys_pkg = SteaneBuilder(n_blocks=1).build().encode(pkg)
 
     check_hugr(phys_pkg.to_bytes())
 
@@ -80,7 +84,7 @@ def test_encoder_missing_op() -> None:
             r"have incompatible kinds\. Cannot connect qubit to qubit\."
         ),
     ):
-        SteaneSpec(n_blocks=1).encode(pkg)
+        SteaneBuilder(n_blocks=1).build().encode(pkg)
 
 
 def test_encoder_control_flow() -> None:
@@ -95,8 +99,13 @@ def test_encoder_control_flow() -> None:
         output("q1", measure(q1).read())
 
     pkg = main.compile()
-    phys_pkg = SteaneSpec(n_blocks=2).encode(pkg)
-    res = EmulatorBuilder().build(phys_pkg, n_qubits=20).run().collated_shots()
+    res = (
+        SteaneBuilder(n_blocks=2)
+        .build()
+        .emulator(pkg, n_qubits=20)
+        .run()
+        .collated_shots()
+    )
 
     assert res == [{"q1": [0]}]
 

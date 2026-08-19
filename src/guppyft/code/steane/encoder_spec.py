@@ -6,6 +6,7 @@ from typing import Any, no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
+from guppylang.emulator import EmulatorBuilder, EmulatorInstance
 from guppylang.library import GuppyLibrary, link_name
 from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.collections import Stack, empty_queue
@@ -107,9 +108,34 @@ class QECPolicy:
         self.costs[op] = cost
 
 
-@dataclass
-class SteaneSpec:
-    """Steane encoder spec"""
+@dataclass(frozen=True)
+class SteaneInstance:
+    _spec: EncoderSpec
+
+    def encode(self, pkg: Package) -> Package:
+        return encode(pkg, self._spec)
+
+    def implement_ops(self, pkg: Package) -> Package:
+        return implement_ops(pkg, self._spec.implement_spec)
+
+    def emulator(
+        self,
+        pkg: Package,
+        n_qubits: int,
+        builder: EmulatorBuilder | None = None,
+    ) -> EmulatorInstance:
+        encoded_pkg = self.encode(pkg)
+        if builder is None:
+            builder = EmulatorBuilder()
+
+        emulator = builder.build(encoded_pkg, n_qubits)
+
+        return emulator
+
+
+@dataclass(frozen=True, kw_only=True)
+class SteaneBuilder:
+    """Steane architecture builder class to create a `SteaneInstance`."""
 
     n_blocks: int
     zero_factory_conf: RUSStateFactoryConf = field(
@@ -186,7 +212,7 @@ class SteaneSpec:
                         self.put_block(i, blk)
                         self.qec_counter[i] = 0.0
 
-        match self.qec_policy.style:
+        match qec_policy.style:
             case QECStyle.Knill:
 
                 @guppy
@@ -273,7 +299,7 @@ class SteaneSpec:
                 x(blk)
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(self.qec_policy.costs["X"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs["X"]))
 
                 return state, q
 
@@ -292,7 +318,7 @@ class SteaneSpec:
                 z(blk)
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(self.qec_policy.costs["Z"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs["Z"]))
 
                 return state, q
 
@@ -311,7 +337,7 @@ class SteaneSpec:
                 h(blk)
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(self.qec_policy.costs["H"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs["H"]))
 
                 return state, q
 
@@ -335,7 +361,7 @@ class SteaneSpec:
                 state.put_block(tgt[0], tgt_blk)
 
                 state.qec_policy(
-                    array(ctl[0], tgt[0]), comptime(self.qec_policy.costs["CX"])
+                    array(ctl[0], tgt[0]), comptime(qec_policy.costs["CX"])
                 )
 
                 return state, ctl, tgt
@@ -477,3 +503,7 @@ class SteaneSpec:
     def implement_ops(self, pkg: Package) -> Package:
         implement_spec = self.gen_implement_spec()
         return implement_ops(pkg, implement_spec)
+
+    def build(self) -> SteaneInstance:
+        encoder_spec = self.gen_encoder_spec()
+        return SteaneInstance(_spec=encoder_spec)
