@@ -30,7 +30,7 @@ extensions = [
 # Sphinx autosummary
 # https://www.sphinx-doc.org/en/master/usage/extensions/autosummary.html
 
-# See https://github.com/quantinuum/guppylang/pull/1028
+# __all__ dictates which classes and functions are documented for a module
 autosummary_ignore_module_all = False  # Respect __all__ if specified
 
 
