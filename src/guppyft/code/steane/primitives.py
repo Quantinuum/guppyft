@@ -56,6 +56,12 @@ def prep_zero_ft() -> PreBlock[7, 1]:
 
 @guppy
 @no_type_check
+def prep_magic_non_ft() -> PreBlock[1]:
+    """Prepare a Steane magic state."""
+
+
+@guppy
+@no_type_check
 def get_syndrome(data_bits: array[bool, 7]) -> array[bool, 3]:
     return array(
         parity_check(array(data_bits[i] for i in stab))
@@ -156,13 +162,23 @@ def decode(m: RawMeasurement[7] @ owned) -> bool:
 @guppy
 @no_type_check
 def x(blk: LogicalBlock[7]) -> None:
+    """Logical X gate on a Steane block."""
     for i in range(7):
         qlib.x(blk.data_qs[i])
 
 
 @guppy
 @no_type_check
+def y(blk: LogicalBlock[7]) -> None:
+    """Logical Y gate on a Steane block."""
+    for i in range(7):
+        qlib.y(blk.data_qs[i])
+
+
+@guppy
+@no_type_check
 def z(blk: LogicalBlock[7]) -> None:
+    """Logical Z gate on a Steane block."""
     for i in range(7):
         qlib.z(blk.data_qs[i])
 
@@ -170,12 +186,42 @@ def z(blk: LogicalBlock[7]) -> None:
 @guppy
 @no_type_check
 def h(blk: LogicalBlock[7]) -> None:
+    """Logical H gate on a Steane block."""
     for i in range(7):
         qlib.h(blk.data_qs[i])
 
 
 @guppy
 @no_type_check
+def s(blk: LogicalBlock[7]) -> None:
+    """Logical S gate on a Steane block."""
+    for i in range(7):
+        qlib.sdg(blk.data_qs[i])
+
+
+@guppy
+@no_type_check
+def sdg(blk: LogicalBlock[7]) -> None:
+    """Logical S dagger gate on a Steane block."""
+    for i in range(7):
+        qlib.s(blk.data_qs[i])
+
+
+@guppy
+@no_type_check
+def t(blk: LogicalBlock[7]) -> None:
+    """Logical T gate using teleportation/injection."""
+
+
+@guppy
+@no_type_check
+def tdg(blk: LogicalBlock[7]) -> None:
+    """Logical T dagger gate using teleportation/injection."""
+
+
+@guppy
+@no_type_check
 def cx(ctl: LogicalBlock[7], tgt: LogicalBlock[7]) -> None:
+    """Logical CX gate between two Steane blocks."""
     for i in range(7):
         qlib.cx(ctl.data_qs[i], tgt.data_qs[i])
