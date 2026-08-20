@@ -25,7 +25,7 @@ classifiers = [
 
 dependencies = [
     "guppylang>=1.0.1",
-    "hugr>=0.18.3",
+    "hugr>=0.18.4",
     "tket>=0.15.2",
     "tket-exts>=0.14.0",
     "zixy~=0.3.2",
@@ -37,6 +37,11 @@ dev = [
     "maturin>=1.14.0,<2",
     { include-group = "lint" },
     { include-group = "test" },
+]
+docs = [
+    "myst-nb>=1.4.0",
+    "quantinuum-sphinx>=1.11.2",
+    "sphinx>=9.1.0",
 ]
 lint = [
     "pre-commit>=4.6.1,<5",
