@@ -110,12 +110,16 @@ class QECPolicy:
 
 @dataclass(frozen=True)
 class SteaneInstance:
+    """A Steane architecture instance built by `SteaneBuilder.build`."""
+
     _spec: EncoderSpec
 
     def encode(self, pkg: Package) -> Package:
+        """Encode a computational package with the Steane instance."""
         return encode(pkg, self._spec)
 
     def implement_ops(self, pkg: Package) -> Package:
+        """Implement logical ops in `pkg` using this instance's op implementations."""
         return implement_ops(pkg, self._spec.implement_spec)
 
     def emulator(
@@ -124,6 +128,13 @@ class SteaneInstance:
         n_qubits: int,
         builder: EmulatorBuilder | None = None,
     ) -> EmulatorInstance:
+        """Encode a hugr Package and build an emulator for it.
+
+        Args:
+            pkg: The computational hugr package.
+            n_qubits: Number of physical qubits available to the emulator.
+            builder: Optional `EmulatorBuilder` to use; defaults to a new one.
+        """
         encoded_pkg = self.encode(pkg)
         if builder is None:
             builder = EmulatorBuilder()
@@ -131,10 +142,6 @@ class SteaneInstance:
         emulator = builder.build(encoded_pkg, n_qubits)
 
         return emulator
-
-
-class SteaneFactory(Enum):
-    zero = auto()
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -147,6 +154,8 @@ class SteaneBuilder:
     _qec_policy: QECPolicy = field(default_factory=QECPolicy)
 
     def gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
+        """Generate the `ImplementOpsSpec` providing Steane implementations of
+        logical ops for a program using `n_blocks` logical blocks."""
 
         qec_policy = self._qec_policy
 
@@ -460,6 +469,8 @@ class SteaneBuilder:
         )
 
     def gen_encoder_spec(self, n_blocks: int) -> EncoderSpec:
+        """Generate the full `EncoderSpec` (logical encoding + op implementations)
+        for a program using `n_blocks` logical blocks."""
 
         impl_spec = self.gen_implement_spec(n_blocks)
 
@@ -501,14 +512,11 @@ class SteaneBuilder:
         """Set the QEC policy."""
         return replace(self, _qec_policy=qec_policy)
 
-    def with_factory_conf(
-        self, factory: SteaneFactory, factory_conf: RUSStateFactoryConf
-    ) -> Self:
-        """Set the state factory configuration."""
-        match factory:
-            case SteaneFactory.zero:
-                return replace(self, _zero_factory_conf=factory_conf)
+    def with_zero_factory_conf(self, factory_conf: RUSStateFactoryConf) -> Self:
+        """Set the zero state factory configuration."""
+        return replace(self, _zero_factory_conf=factory_conf)
 
     def build(self, n_blocks: int) -> SteaneInstance:
+        """Build a `SteaneInstance` configured for `n_blocks` logical blocks."""
         encoder_spec = self.gen_encoder_spec(n_blocks)
         return SteaneInstance(_spec=encoder_spec)
