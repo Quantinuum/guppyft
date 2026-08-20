@@ -303,22 +303,30 @@ def check_stabilizer_state_semantics(
     # Check if return annotation is a tuple (acts on two code blocks).
     # Determine whether semantic_function is a SemanticStabilizerStateDouble or not.
     if get_origin(sem_return_annotation) is tuple:
-        sem, impl = compute_verification_signterms_double_block_state(
-            semantic_function,  # type: ignore[arg-type]
-            impl_function,  # type: ignore[arg-type]
-            code_definition,
-            num_ancilla_qubits,
+        sem_stabilizers, impl_stabilizers = (
+            compute_verification_signterms_double_block_state(
+                semantic_function,  # type: ignore[arg-type]
+                impl_function,  # type: ignore[arg-type]
+                code_definition,
+                num_ancilla_qubits,
+            )
         )
     else:
         # Here our semantic function is a single block state preparation.
-        sem, impl = compute_verification_signterms_single_block_state(
-            semantic_function,  # type: ignore[arg-type]
-            impl_function,  # type: ignore[arg-type]
-            code_definition,
-            num_ancilla_qubits,
+        sem_stabilizers, impl_stabilizers = (
+            compute_verification_signterms_single_block_state(
+                semantic_function,  # type: ignore[arg-type]
+                impl_function,  # type: ignore[arg-type]
+                code_definition,
+                num_ancilla_qubits,
+            )
         )
 
-    return sem == impl
+    # Canonicalize both Clifford Tableaux so that we can test for equality.
+    sem_stabilizers.canonicalize_all()
+    impl_stabilizers.canonicalize_all()
+
+    return sem_stabilizers == impl_stabilizers
 
 
 def check_clifford_semantics(
@@ -335,18 +343,22 @@ def check_clifford_semantics(
         )
     match len(sem_signature.parameters):
         case 1:
-            sem, impl = compute_verification_signterms_single_block_unitary(
-                semantic_function,  # type: ignore[arg-type]
-                impl_function,  # type: ignore[arg-type]
-                code_definition,
-                num_ancilla_qubits,
+            sem_stabilizers, impl_stabilizers = (
+                compute_verification_signterms_single_block_unitary(
+                    semantic_function,  # type: ignore[arg-type]
+                    impl_function,  # type: ignore[arg-type]
+                    code_definition,
+                    num_ancilla_qubits,
+                )
             )
         case 2:
-            sem, impl = compute_verification_signterms_double_block_unitary(
-                semantic_function,  # type: ignore[arg-type]
-                impl_function,  # type: ignore[arg-type]
-                code_definition,
-                num_ancilla_qubits,
+            sem_stabilizers, impl_stabilizers = (
+                compute_verification_signterms_double_block_unitary(
+                    semantic_function,  # type: ignore[arg-type]
+                    impl_function,  # type: ignore[arg-type]
+                    code_definition,
+                    num_ancilla_qubits,
+                )
             )
         case _:
             raise TypeError(
@@ -354,7 +366,11 @@ def check_clifford_semantics(
                 + f"Got {len(sem_signature.parameters)}, only 1 and 2 are supported."
             )
 
-    return sem == impl
+    # Canonicalize both Clifford Tableaux so that we can test for equality.
+    sem_stabilizers.canonicalize_all()
+    impl_stabilizers.canonicalize_all()
+
+    return sem_stabilizers == impl_stabilizers
 
 
 def compute_verification_signterms_double_block_state(
@@ -450,11 +466,9 @@ def compute_verification_signterms_single_block_unitary(
         num_selene_qubits=2 * (code_definition.num_physical_qubits)
         + num_ancilla_qubits,
     )
-
-    # Canonicalize both Clifford Tableaux so that we can test for equality.
-    expanded_semantic_stabilizers.canonicalize_all()
-    implementation_stabilizers.canonicalize_all()
-
+    # Return the two stabilizer tableaux. Note that we will need to canonicalize
+    # the tableaux before we can test for equality.
+    # See the check_clifford_semantics function.
     return expanded_semantic_stabilizers, implementation_stabilizers
 
 
@@ -502,9 +516,7 @@ def compute_verification_signterms_double_block_unitary(
         num_selene_qubits=4 * (code_definition.num_physical_qubits)
         + num_ancilla_qubits,
     )
-
-    # Canonicalize both Clifford Tableaux so that we can test for equality.
-    expanded_semantic_stabilizers.canonicalize_all()
-    implementation_stabilizers.canonicalize_all()
-
+    # Return the two stabilizer tableaux. Note that we will need to canonicalize
+    # the tableaux before we can test for equality.
+    # See the check_stabilizer_state_semantics function.
     return expanded_semantic_stabilizers, implementation_stabilizers
