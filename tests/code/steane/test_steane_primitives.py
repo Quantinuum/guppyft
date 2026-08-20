@@ -15,7 +15,7 @@ from guppyft.code.steane.primitives import (
 )
 from guppyft.code.util import LogicalBlock
 from guppyft.code_def import StabilizerCode
-from guppyft.verifier import compute_verification_signterms_single_block_unitary
+from guppyft.verifier import check_clifford_semantics
 
 STEANE_DEF = StabilizerCode.from_python_strings(
     num_physical_qubits=7,
@@ -64,13 +64,12 @@ def test_knill_qec_without_errors() -> None:
     def impl_func(block: array[qubit, 7]) -> None:
         with_owned(block, knill_qec)
 
-    sem, impl = compute_verification_signterms_single_block_unitary(
+    assert check_clifford_semantics(
         specify_identity,
         impl_func,
         code_definition=STEANE_DEF,
         impl_num_ancillas=14,
     )
-    assert sem == impl
 
 
 @pytest.mark.parametrize("error_loc", [0, 1, 2, 3, 4, 5, 6])
@@ -98,13 +97,12 @@ def test_knill_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
     def impl_func(block: array[qubit, 7]) -> None:
         with_owned(block, knill_qec)
 
-    sem, impl = compute_verification_signterms_single_block_unitary(
+    assert check_clifford_semantics(
         specify_identity,
         impl_func,
         code_definition=STEANE_DEF,
         impl_num_ancillas=14,
     )
-    assert sem == impl
 
 
 def test_steane_qec_without_errors() -> None:
@@ -130,13 +128,12 @@ def test_steane_qec_without_errors() -> None:
     def impl_func(block: array[qubit, 7]) -> None:
         with_owned(block, steane_qec)
 
-    sem, impl = compute_verification_signterms_single_block_unitary(
+    assert check_clifford_semantics(
         specify_identity,
         impl_func,
         code_definition=STEANE_DEF,
         impl_num_ancillas=7,
     )
-    assert sem == impl
 
 
 @pytest.mark.parametrize("error_loc", [0, 1, 2, 3, 4, 5, 6])
@@ -165,10 +162,9 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
     def impl_func(block: array[qubit, 7]) -> None:
         with_owned(block, steane_qec)
 
-    sem, impl = compute_verification_signterms_single_block_unitary(
+    assert check_clifford_semantics(
         specify_identity,
         impl_func,
         code_definition=STEANE_DEF,
         impl_num_ancillas=7,
     )
-    assert sem == impl
