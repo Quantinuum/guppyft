@@ -3,10 +3,9 @@ from typing import get_args, get_origin
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
-from guppylang.std.array import array
 from guppylang.std.builtins import comptime
 from guppylang.std.debug import state_output
-from guppylang.std.quantum import discard_array, qubit
+from guppylang.std.quantum import discard_array
 from selene_sim.backends import Stim
 from selene_sim.build import build
 from selene_stim_plugin import SeleneStimState
@@ -18,6 +17,14 @@ from guppyft.verifier.state_gen import gen_choi_state
 from guppyft.verifier.utils import (
     DoubleBlockState,
     DoubleBlockUnitary,
+    ImplementationCliffordUnitary,
+    ImplementationCliffordUnitaryDouble,
+    ImplementationStabilizerState,
+    ImplementationStabilizerStateDouble,
+    SemanticCliffordUnitary,
+    SemanticCliffordUnitaryDouble,
+    SemanticStabilizerState,
+    SemanticStabilizerStateDouble,
     SingleBlockState,
     SingleBlockUnitary,
     stabilizerlist_to_signterms,
@@ -206,41 +213,6 @@ def compute_stabilizers_double_block_unitary(
     return stabilizerlist_to_signterms(stab_list)
 
 
-N_PHYSICAL = guppy.nat_var("N_PHYSICAL")
-K_LOGICAL = guppy.nat_var("K_LOGICAL")
-
-type SemanticStabilizerState = GuppyFunctionDefinition[
-    [], array[qubit, K_LOGICAL]  # type: ignore[valid-type]
-]
-type ImplementationStabilizerState = GuppyFunctionDefinition[
-    [], array[qubit, N_PHYSICAL]  # type: ignore[valid-type]
-]
-
-
-type SemanticStabilizerStateDouble = GuppyFunctionDefinition[
-    [], tuple[array[qubit, K_LOGICAL], array[qubit, K_LOGICAL]]  # type: ignore[valid-type]
-]
-type ImplementationStabilizerStateDouble = GuppyFunctionDefinition[
-    [], tuple[array[qubit, N_PHYSICAL], array[qubit, N_PHYSICAL]]  # type: ignore[valid-type]
-]
-
-
-type SemanticCliffordUnitary = GuppyFunctionDefinition[
-    [array[qubit, K_LOGICAL]], None  # type: ignore[valid-type]
-]
-type ImplementationCliffordUnitary = GuppyFunctionDefinition[
-    [array[qubit, N_PHYSICAL]], None  # type: ignore[valid-type]
-]
-
-
-type SemanticCliffordUnitaryDouble = GuppyFunctionDefinition[
-    [array[qubit, K_LOGICAL], array[qubit, K_LOGICAL]], None  # type: ignore[valid-type]
-]
-type ImplementationCliffordUnitaryDouble = GuppyFunctionDefinition[
-    [array[qubit, N_PHYSICAL], array[qubit, N_PHYSICAL]], None  # type: ignore[valid-type]
-]
-
-
 def compute_verification_signterms_single_block_state(
     semantic_function: SemanticStabilizerState,
     impl_function: ImplementationStabilizerState,
@@ -336,60 +308,6 @@ def check_stabilizer_state_semantics(
         case 2:
             sem_stabilizers, impl_stabilizers = (
                 compute_verification_signterms_double_block_state(
-                    semantic_function,  # type: ignore[arg-type]
-                    impl_function,  # type: ignore[arg-type]
-                    code_definition,
-                    impl_num_ancillas,
-                )
-            )
-        case _:
-            raise TypeError(
-                "Unsupported number of code block parameters in semantic_function."
-                + f"Got {num_blocks} blocks. Only 1 and 2 are supported."
-            )
-
-    # Canonicalize both Clifford Tableaux so that we can test for equality.
-    sem_stabilizers.canonicalize_all()
-    impl_stabilizers.canonicalize_all()
-
-    return sem_stabilizers == impl_stabilizers
-
-
-def _count_blocks_unitary(
-    semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
-    impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
-) -> int:
-    sem_signature = inspect.signature(semantic_function.wrapped.python_func)  # type: ignore[attr-defined]
-    impl_signature = inspect.signature(impl_function.wrapped.python_func)  # type: ignore[attr-defined]
-    if len(sem_signature.parameters) != len(impl_signature.parameters):
-        raise TypeError(
-            "semantic_function and impl_function have incompatible signatures"
-        )
-    num_blocks = len(sem_signature.parameters)
-    return num_blocks
-
-
-def check_clifford_semantics(
-    semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
-    impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
-    code_definition: StabilizerCode,
-    impl_num_ancillas: int = 0,
-) -> bool:
-    # Check whether input is a SemanticCliffordUnitary or SemanticCliffordUnitaryDouble.
-    num_blocks = _count_blocks_unitary(semantic_function, impl_function)
-    match num_blocks:
-        case 1:
-            sem_stabilizers, impl_stabilizers = (
-                compute_verification_signterms_single_block_unitary(
-                    semantic_function,  # type: ignore[arg-type]
-                    impl_function,  # type: ignore[arg-type]
-                    code_definition,
-                    impl_num_ancillas,
-                )
-            )
-        case 2:
-            sem_stabilizers, impl_stabilizers = (
-                compute_verification_signterms_double_block_unitary(
                     semantic_function,  # type: ignore[arg-type]
                     impl_function,  # type: ignore[arg-type]
                     code_definition,
@@ -550,3 +468,57 @@ def compute_verification_signterms_double_block_unitary(
     # the tableaux before we can test for equality.
     # See the check_stabilizer_state_semantics function.
     return expanded_semantic_stabilizers, implementation_stabilizers
+
+
+def _count_blocks_unitary(
+    semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
+    impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
+) -> int:
+    sem_signature = inspect.signature(semantic_function.wrapped.python_func)  # type: ignore[attr-defined]
+    impl_signature = inspect.signature(impl_function.wrapped.python_func)  # type: ignore[attr-defined]
+    if len(sem_signature.parameters) != len(impl_signature.parameters):
+        raise TypeError(
+            "semantic_function and impl_function have incompatible signatures"
+        )
+    num_blocks = len(sem_signature.parameters)
+    return num_blocks
+
+
+def check_clifford_semantics(
+    semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
+    impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
+    code_definition: StabilizerCode,
+    impl_num_ancillas: int = 0,
+) -> bool:
+    # Check whether input is a SemanticCliffordUnitary or SemanticCliffordUnitaryDouble.
+    num_blocks = _count_blocks_unitary(semantic_function, impl_function)
+    match num_blocks:
+        case 1:
+            sem_stabilizers, impl_stabilizers = (
+                compute_verification_signterms_single_block_unitary(
+                    semantic_function,  # type: ignore[arg-type]
+                    impl_function,  # type: ignore[arg-type]
+                    code_definition,
+                    impl_num_ancillas,
+                )
+            )
+        case 2:
+            sem_stabilizers, impl_stabilizers = (
+                compute_verification_signterms_double_block_unitary(
+                    semantic_function,  # type: ignore[arg-type]
+                    impl_function,  # type: ignore[arg-type]
+                    code_definition,
+                    impl_num_ancillas,
+                )
+            )
+        case _:
+            raise TypeError(
+                "Unsupported number of code block parameters in semantic_function."
+                + f"Got {num_blocks} blocks. Only 1 and 2 are supported."
+            )
+
+    # Canonicalize both Clifford Tableaux so that we can test for equality.
+    sem_stabilizers.canonicalize_all()
+    impl_stabilizers.canonicalize_all()
+
+    return sem_stabilizers == impl_stabilizers

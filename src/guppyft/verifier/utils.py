@@ -21,6 +21,40 @@ type DoubleBlockState = GuppyFunctionDefinition[
     [], tuple[array[qubit, N], array[qubit, N]]  # type: ignore[valid-type]
 ]
 
+N_PHYSICAL = guppy.nat_var("N_PHYSICAL")
+K_LOGICAL = guppy.nat_var("K_LOGICAL")
+
+type SemanticStabilizerState = GuppyFunctionDefinition[
+    [], array[qubit, K_LOGICAL]  # type: ignore[valid-type]
+]
+type ImplementationStabilizerState = GuppyFunctionDefinition[
+    [], array[qubit, N_PHYSICAL]  # type: ignore[valid-type]
+]
+
+
+type SemanticStabilizerStateDouble = GuppyFunctionDefinition[
+    [], tuple[array[qubit, K_LOGICAL], array[qubit, K_LOGICAL]]  # type: ignore[valid-type]
+]
+type ImplementationStabilizerStateDouble = GuppyFunctionDefinition[
+    [], tuple[array[qubit, N_PHYSICAL], array[qubit, N_PHYSICAL]]  # type: ignore[valid-type]
+]
+
+
+type SemanticCliffordUnitary = GuppyFunctionDefinition[
+    [array[qubit, K_LOGICAL]], None  # type: ignore[valid-type]
+]
+type ImplementationCliffordUnitary = GuppyFunctionDefinition[
+    [array[qubit, N_PHYSICAL]], None  # type: ignore[valid-type]
+]
+
+
+type SemanticCliffordUnitaryDouble = GuppyFunctionDefinition[
+    [array[qubit, K_LOGICAL], array[qubit, K_LOGICAL]], None  # type: ignore[valid-type]
+]
+type ImplementationCliffordUnitaryDouble = GuppyFunctionDefinition[
+    [array[qubit, N_PHYSICAL], array[qubit, N_PHYSICAL]], None  # type: ignore[valid-type]
+]
+
 
 def _convert_pauli(selene_pauli: Pauli) -> pauli.PauliMatrix:
     "Convert a selene_stim_plugin.state.Pauli to a zixy.qubit.pauli.PauliMatrix."
