@@ -1,5 +1,5 @@
 import inspect
-from typing import get_origin
+from typing import get_args, get_origin
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -303,7 +303,15 @@ def _count_blocks_state(
             raise TypeError(
                 "semantic_function and impl_function have incompatible signatures"
             )
+        # Get the size of the tuple used in the return type. Assumes fixed size.
+        size = len(get_args(sem_return_annotation))
+        if size > 2:
+            raise TypeError(
+                "semantic_function has an unsupported return type."
+                f" Only tuples of length two are supported. Got {size}."
+            )
         return 2
+    # If the state prep function does not return a tuple, it represents a single block.
     else:
         return 1
 
@@ -528,7 +536,7 @@ def compute_verification_signterms_double_block_unitary(
     )
 
     # Expand the 4k logical stabilizers and combine them with the generators for each
-    #  block. We obtain 4k + 4(n-k) = 4n stablizers in total.
+    #  block. We obtain 4k + 4(n-k) = 4n stabilizers in total.
     expanded_semantic_stabilizers = get_expanded_stabilizer_set(
         semantic_choi_stabilizers, code_definition, num_blocks=4
     )
