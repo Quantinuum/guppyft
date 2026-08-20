@@ -304,7 +304,7 @@ def check_stabilizer_state_semantics(
     impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
     code_definition: StabilizerCode,
     num_ancilla_qubits: int = 0,
-) -> None:
+) -> bool:
     if _is_double_block_state(semantic_function):
         sem, impl = compute_verification_signterms_double_block_state(
             semantic_function,  # type: ignore[arg-type]
@@ -320,10 +320,7 @@ def check_stabilizer_state_semantics(
             num_ancilla_qubits,
         )
 
-    if sem != impl:
-        raise InvalidImplementationError(
-            "The implementation does not match the specified semantics."
-        )
+    return sem == impl
 
 
 def check_clifford_semantics(
@@ -331,7 +328,7 @@ def check_clifford_semantics(
     impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
     code_definition: StabilizerCode,
     num_ancilla_qubits: int = 0,
-) -> None:
+) -> bool:
     sem_signature = inspect.signature(semantic_function.wrapped.python_func)  # type: ignore[attr-defined]
     impl_signature = inspect.signature(impl_function.wrapped.python_func)  # type: ignore[attr-defined]
     if len(sem_signature.parameters) != len(impl_signature.parameters):
@@ -359,10 +356,7 @@ def check_clifford_semantics(
                 + f"Got {len(sem_signature.parameters)}, only 1 and 2 are supported."
             )
 
-    if sem != impl:
-        raise InvalidImplementationError(
-            "The implementation does not match the specified semantics."
-        )
+    return sem == impl
 
 
 def compute_verification_signterms_double_block_state(
