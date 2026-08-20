@@ -13,6 +13,7 @@ from guppyft.code.steane.encoder_spec import (
     RUSStateFactoryConf,
     SteaneBuilder,
     SteaneEncoderParams,
+    SteaneFactory,
 )
 from guppyft.encode import annotate_encoding
 
@@ -104,12 +105,12 @@ def test_builder_methods() -> None:
     my_policy = QECPolicy(threshold=1)
     my_policy.set_cost("X", 1.0)
 
-    my_factory_conf = RUSStateFactoryConf(1, 2)
+    zero_factory_conf = RUSStateFactoryConf(1, 2)
 
     res = (
         SteaneBuilder()
         .with_qec_policy(my_policy)
-        .with_zero_factory_conf(my_factory_conf)
+        .with_factory_conf(SteaneFactory.zero, zero_factory_conf)
         .build(n_blocks=1)
         .emulator(pkg, n_qubits=20)
         .run()

@@ -66,8 +66,21 @@ class RUSStateFactoryConf:
         max_attempts: Maximum number of repeat-until-success attempts.
     """
 
-    size: int
-    max_attempts: int
+    size: int = 1
+    max_attempts: int = 5
+
+
+class SteaneFactory(Enum):
+    """Identifies Steane state factories."""
+
+    zero = auto()
+
+
+@dataclass(frozen=True, kw_only=True)
+class SteaneFactoryConf:
+    """Configuration for each of the Steane state factories."""
+
+    zero: RUSStateFactoryConf = field(default_factory=RUSStateFactoryConf)
 
 
 class QECStyle(Enum):
@@ -148,9 +161,7 @@ class SteaneInstance:
 class SteaneBuilder:
     """Steane architecture builder class for creating `SteaneInstance` objects."""
 
-    _zero_factory_conf: RUSStateFactoryConf = field(
-        default_factory=lambda: RUSStateFactoryConf(1, 5)
-    )
+    _factory_confs: SteaneFactoryConf = field(default_factory=SteaneFactoryConf)
     _qec_policy: QECPolicy = field(default_factory=QECPolicy)
 
     def gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
@@ -170,7 +181,7 @@ class SteaneBuilder:
             qec_counter: array[float, comptime(n_blocks)]  # type: ignore[valid-type]
 
             zero_state_factory: StateFactory[  # type: ignore[valid-type,type-arg]
-                7, 1, comptime(self._zero_factory_conf.size)
+                7, 1, comptime(self._factory_confs.zero.size)
             ]
 
             @guppy
@@ -399,7 +410,7 @@ class SteaneBuilder:
                 # Zero state factory
                 StateFactory(
                     prep_zero_ft,
-                    comptime(self._zero_factory_conf.max_attempts),
+                    comptime(self._factory_confs.zero.max_attempts),
                     empty_queue(),
                 ),
             )
@@ -512,9 +523,18 @@ class SteaneBuilder:
         """Set the QEC policy."""
         return replace(self, _qec_policy=qec_policy)
 
-    def with_zero_factory_conf(self, factory_conf: RUSStateFactoryConf) -> Self:
-        """Set the zero state factory configuration."""
-        return replace(self, _zero_factory_conf=factory_conf)
+    def with_factory_conf(
+        self, factory: SteaneFactory, conf: RUSStateFactoryConf
+    ) -> Self:
+        """Set the state factory configuration.
+
+        Args:
+            factory: Factory to set the configuration.
+            conf: RUS configuration for state factory.
+        """
+        return replace(
+            self, _factory_confs=replace(self._factory_confs, **{factory.name: conf})
+        )
 
     def build(self, n_blocks: int) -> SteaneInstance:
         """Build a `SteaneInstance` configured for `n_blocks` logical blocks."""
