@@ -70,14 +70,8 @@ class RUSStateFactoryConf:
     max_attempts: int = 5
 
 
-class SteaneFactory(Enum):
-    """Identifies Steane state factories."""
-
-    zero = auto()
-
-
 @dataclass(frozen=True, kw_only=True)
-class SteaneFactoryConf:
+class _SteaneFactoryConf:
     """Configuration for each of the Steane state factories."""
 
     zero: RUSStateFactoryConf = field(default_factory=RUSStateFactoryConf)
@@ -161,10 +155,10 @@ class SteaneInstance:
 class SteaneBuilder:
     """Steane architecture builder class for creating `SteaneInstance` objects."""
 
-    _factory_confs: SteaneFactoryConf = field(default_factory=SteaneFactoryConf)
+    _factory_confs: _SteaneFactoryConf = field(default_factory=_SteaneFactoryConf)
     _qec_policy: QECPolicy = field(default_factory=QECPolicy)
 
-    def gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
+    def _gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
         """Generate the `ImplementOpsSpec` providing Steane implementations of
         logical ops for a program using `n_blocks` logical blocks."""
 
@@ -479,11 +473,11 @@ class SteaneBuilder:
             ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[lib]
         )
 
-    def gen_encoder_spec(self, n_blocks: int) -> EncoderSpec:
+    def _gen_encoder_spec(self, n_blocks: int) -> EncoderSpec:
         """Generate the full `EncoderSpec` (logical encoding + op implementations)
         for a program using `n_blocks` logical blocks."""
 
-        impl_spec = self.gen_implement_spec(n_blocks)
+        impl_spec = self._gen_implement_spec(n_blocks)
 
         ext = ExtensionRegistry.from_extensions(
             [steane_ops(), steane_types(), std_ops(), std_types()]
@@ -523,20 +517,14 @@ class SteaneBuilder:
         """Set the QEC policy."""
         return replace(self, _qec_policy=qec_policy)
 
-    def with_factory_conf(
-        self, factory: SteaneFactory, conf: RUSStateFactoryConf
-    ) -> Self:
-        """Set the state factory configuration.
-
-        Args:
-            factory: Factory to set the configuration.
-            conf: RUS configuration for state factory.
-        """
+    def with_zero_factory_conf(self, conf: RUSStateFactoryConf) -> Self:
+        """Set the zero state factory configuration."""
         return replace(
-            self, _factory_confs=replace(self._factory_confs, **{factory.name: conf})
+            self,
+            _factory_confs=replace(self._factory_confs, zero=conf),
         )
 
     def build(self, n_blocks: int) -> SteaneInstance:
         """Build a `SteaneInstance` configured for `n_blocks` logical blocks."""
-        encoder_spec = self.gen_encoder_spec(n_blocks)
+        encoder_spec = self._gen_encoder_spec(n_blocks)
         return SteaneInstance(_spec=encoder_spec)
