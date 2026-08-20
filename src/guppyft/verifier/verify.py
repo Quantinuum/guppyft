@@ -282,10 +282,6 @@ def compute_verification_signterms_single_block_state(
         code_definition.num_physical_qubits + num_ancilla_qubits,
     )
 
-    # Canonicalize both tableaux so that we can test for equality.
-    expanded_semantic_stabilizers.canonicalize_all()
-    implementation_stabilizers.canonicalize_all()
-
     return expanded_semantic_stabilizers, implementation_stabilizers
 
 
@@ -445,10 +441,6 @@ def compute_verification_signterms_double_block_state(
         impl_function,
         2 * code_definition.num_physical_qubits + num_ancilla_qubits,
     )
-
-    # Canonicalize both tableaux so that we can test for equality.
-    expanded_semantic_stabilizers.canonicalize_all()
-    implementation_stabilizers.canonicalize_all()
 
     return expanded_semantic_stabilizers, implementation_stabilizers
 
