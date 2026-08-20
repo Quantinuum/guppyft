@@ -66,15 +66,15 @@ class RUSStateFactoryConf:
         max_attempts: Maximum number of repeat-until-success attempts.
     """
 
-    size: int = 1
-    max_attempts: int = 5
+    size: int
+    max_attempts: int
 
 
 @dataclass(frozen=True, kw_only=True)
 class _SteaneFactoryConf:
     """Configuration for each of the Steane state factories."""
 
-    zero: RUSStateFactoryConf = field(default_factory=RUSStateFactoryConf)
+    zero: RUSStateFactoryConf = field(default_factory=lambda: RUSStateFactoryConf(1, 5))
 
 
 class QECStyle(Enum):
