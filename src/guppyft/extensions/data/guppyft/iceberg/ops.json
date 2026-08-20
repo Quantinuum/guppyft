@@ -1,5 +1,5 @@
 {
-  "version": "0.1.1",
+  "version": "0.1.2",
   "name": "guppyft.iceberg.ops",
   "types": {},
   "operations": {
@@ -2681,6 +2681,37 @@
                 }
               ],
               "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "try_alloc_dynq": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "try_alloc_dynq",
+      "description": "Try to allocate a dynamic logical qubit in the zero state.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [],
+          "output": [
+            {
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [],
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.iceberg.types",
+                    "extension_version": "0.1.1",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  }
+                ]
+              ]
             }
           ]
         }

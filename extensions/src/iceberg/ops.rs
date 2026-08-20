@@ -32,7 +32,7 @@ use super::types::block_tv;
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.iceberg.ops");
 /// Extension version.
-pub const VERSION: semver::Version = semver::Version::new(0, 1, 1);
+pub const VERSION: semver::Version = semver::Version::new(0, 1, 2);
 
 /// Logical Iceberg operations.
 ///
@@ -194,6 +194,8 @@ pub enum IcebergOpDef {
     try_measure_one_z_d,
     /// Allocate a dynamic logical qubit in the zero state.
     alloc_dynq,
+    /// Try to allocate a dynamic logical qubit in the zero state.
+    try_alloc_dynq,
     /// Free a dynamic logical qubit.
     free_dynq,
     /// X gate on a dynamic logical qubit.
@@ -663,6 +665,11 @@ impl MakeOpDef for IcebergOpDef {
             )
             .into(),
             alloc_dynq => Signature::new(vec![], vec![dynamic_logical_qubit_type()]).into(),
+            try_alloc_dynq => Signature::new(
+                vec![],
+                vec![option_type(vec![dynamic_logical_qubit_type()]).into()],
+            )
+            .into(),
             free_dynq => Signature::new(vec![dynamic_logical_qubit_type()], vec![]).into(),
             x_dynq => sig_qubits_angles(1, 0),
             y_dynq => sig_qubits_angles(1, 0),
@@ -783,7 +790,7 @@ mod tests {
     fn test_iceberg_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.iceberg.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 88);
+        assert_eq!(EXTENSION.operations().count(), 89);
     }
 
     #[test]
@@ -1060,6 +1067,28 @@ mod tests {
             .build_unwrap_sum(1, option_type([block_type(8)]), handle.out_wire(0))
             .unwrap();
         let handle = dfg_builder.add_dataflow_op(free, [block_wire]).unwrap();
+        let outs: Vec<Wire> = handle.outputs().collect();
+        assert!(outs.is_empty());
+        let h = dfg_builder.finish_hugr_with_outputs([]).unwrap();
+        h.validate().unwrap();
+    }
+
+    #[test]
+    fn test_try_alloc_dynq() {
+        let tryallocdynq = EXTENSION
+            .instantiate_extension_op("try_alloc_dynq", [])
+            .unwrap();
+        let freedynq = EXTENSION.instantiate_extension_op("free_dynq", []).unwrap();
+        let mut dfg_builder = DFGBuilder::new(Signature::new([], [])).unwrap();
+        let handle = dfg_builder.add_dataflow_op(tryallocdynq, vec![]).unwrap();
+        let [handle] = dfg_builder
+            .build_unwrap_sum(
+                1,
+                option_type([dynamic_logical_qubit_type()]),
+                handle.out_wire(0),
+            )
+            .unwrap();
+        let handle = dfg_builder.add_dataflow_op(freedynq, [handle]).unwrap();
         let outs: Vec<Wire> = handle.outputs().collect();
         assert!(outs.is_empty());
         let h = dfg_builder.finish_hugr_with_outputs([]).unwrap();

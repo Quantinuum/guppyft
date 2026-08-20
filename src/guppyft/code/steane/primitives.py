@@ -6,8 +6,10 @@ from guppylang import guppy
 from guppylang.library import link_name
 from guppylang.std import quantum as qlib
 from guppylang.std.builtins import array, comptime, owned
+from guppylang.std.mem import mem_swap
 from guppylang.std.quantum import collect_measurements
 
+from guppyft.code._state_factory import PreBlock
 from guppyft.code.util import LogicalBlock, RawMeasurement, parity_check
 
 # ZZZZIII -> 0, 1, 2, 3
@@ -39,11 +41,96 @@ def prep_zero_non_ft() -> LogicalBlock[7]:
 
 @guppy
 @no_type_check
+def prep_zero_ft() -> PreBlock[7, 1]:
+    """Attempt fault-tolerant zero preparation state once."""
+    q = prep_zero_non_ft()
+
+    ancilla = qlib.qubit()
+    idxs = array(1, 3, 5)
+    for i in idxs:
+        qlib.cx(q.data_qs[i], ancilla)
+
+    flag_outcome = qlib.measure(ancilla)
+    return PreBlock[7, 1](q, array(flag_outcome))
+
+
+@guppy
+@no_type_check
 def get_syndrome(data_bits: array[bool, 7]) -> array[bool, 3]:
     return array(
         parity_check(array(data_bits[i] for i in stab))
         for stab in comptime(stabilizer_indices)
     )
+
+
+@guppy
+@no_type_check
+def knill_qec_cycle(
+    q: LogicalBlock[7],
+    a0: LogicalBlock[7] @ owned,
+    a1: LogicalBlock[7] @ owned,
+) -> None:
+    """Implements Knill style syndrome extraction.
+
+    Notes:
+        Assumes that both ancilla blocks `a0` and `a1` hold logical
+        zero states.
+    """
+    # Generate a logical Bell state on the ancilla qubits
+    h(a0)
+    cx(a0, a1)
+
+    # Swap the labels of `q` and `a1` since the latter is where the information
+    # of `q` will end after teleportation
+    mem_swap(q, a1)
+
+    # Apply Bell measurement to complete the teleportation
+    cx(a1, a0)
+    h(a1)
+    if decode(measure_z(a0)):
+        x(q)
+    if decode(measure_z(a1)):
+        z(q)
+
+
+@guppy
+@no_type_check
+def steane_z_qec_cycle(q: LogicalBlock[7], a: LogicalBlock[7] @ owned) -> None:
+    """Implements Z syndrome extraction via Steane with one-qubit teleportation.
+
+    Notes:
+        Assumes that the ancilla block `a` holds a logical zero state.
+    """
+    # Convert to logical |+>
+    h(a)
+
+    # Swap the labels of `q` and `a` since the latter is where the information
+    # of `q` will end after teleportation
+    mem_swap(q, a)
+
+    # Apply one-qubit TP with physical measurements
+    cx(q, a)
+    if decode(measure_z(a)):
+        x(q)
+
+
+@guppy
+@no_type_check
+def steane_x_qec_cycle(q: LogicalBlock[7], a: LogicalBlock[7] @ owned) -> None:
+    """Implements X syndrome extraction via Steane with one-qubit teleportation.
+
+    Notes:
+        Assumes that the ancilla block `a` holds a logical zero state.
+    """
+    # Swap the labels of `q` and `a` since the latter is where the information
+    # of `q` will end after teleportation
+    mem_swap(q, a)
+
+    # Apply one-qubit TP with physical measurements
+    cx(a, q)
+    h(a)
+    if decode(measure_z(a)):
+        z(q)
 
 
 @guppy

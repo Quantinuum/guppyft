@@ -15,6 +15,8 @@ mod _bindings {
     use pyo3::prelude::*;
     use std::collections::{BTreeMap, HashSet};
     use tket::hugr::HugrView;
+    use tket::hugr::extension::ExtensionRegistry;
+    use tket::hugr::types::CustomType;
     use tket::passes::replace_types::NodeTemplate;
     use tket::passes::{ComposablePass, ReplaceTypes};
 
@@ -26,11 +28,35 @@ mod _bindings {
         Str(String),
     }
 
+    fn get_type_from_registry(
+        registry: &ExtensionRegistry,
+        ext_name: &str,
+        ty_name: &str,
+    ) -> Result<Option<CustomType>, String> {
+        let ext = match registry.get(ext_name) {
+            Some(e) => e,
+            None => return Ok(None),
+        };
+        let Some(src_def) = ext.get_type(ty_name) else {
+            return Ok(None);
+        };
+        if !src_def.params().is_empty() {
+            return Err(format!(
+                "Generic types are not supported for type replacement: '{ext_name}.{ty_name}'"
+            ));
+        }
+        let src = src_def
+            .instantiate([])
+            .map_err(|e| format!("Could not instantiate src ty: {e}"))?;
+        Ok(Some(src))
+    }
+
     #[pyfunction]
-    #[pyo3(signature = (rs_hugr, op_replacements, extensions=None))]
+    #[pyo3(signature = (rs_hugr, op_replacements, ty_replacements, extensions=None))]
     fn _replace_encoder(
         rs_hugr: &mut RsHugr,
         op_replacements: BTreeMap<(String, String), (String, String, Vec<PyTypeArgValue>)>,
+        ty_replacements: BTreeMap<(String, String), (String, String)>,
         extensions: Option<String>,
     ) -> PyResult<()> {
         use tket::hugr::extension::ExtensionRegistry;
@@ -82,6 +108,21 @@ mod _bindings {
             pass.set_replace_parametrized_op(src_def, move |_, _| {
                 Ok(Some(NodeTemplate::SingleOp(tgt.clone().into())))
             });
+        }
+
+        for ((src_ext_name, src_ty), (tgt_ext_name, tgt_ty)) in ty_replacements.iter() {
+            let Some(src) = get_type_from_registry(&registry, src_ext_name, src_ty)
+                .map_err(|e| PyValueError::new_err(format!("Error getting src ty: {e}")))?
+            else {
+                continue;
+            };
+            let Some(tgt) = get_type_from_registry(&registry, tgt_ext_name, tgt_ty)
+                .map_err(|e| PyValueError::new_err(format!("Error getting tgt ty: {e}")))?
+            else {
+                continue;
+            };
+
+            pass.set_replace_type(src, tgt.into());
         }
 
         pass.run(hugr)

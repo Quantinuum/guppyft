@@ -1,6 +1,6 @@
 from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass, field
-from typing import Any, Self, no_type_check
+from typing import Any, Literal, Self, no_type_check, overload
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -9,7 +9,7 @@ from hugr import Hugr
 from hugr.build import DefinitionBuilder
 from hugr.ext import TypeDef
 from hugr.ops import FuncDecl, FuncDefn
-from hugr.package import Package
+from hugr.package import Package, link_packages
 from hugr.tys import ExtType, Type
 from tket.extensions import measurement
 
@@ -156,9 +156,9 @@ def _to_rs_hugr(
 
 
 def _implement_ops(
-    pkg: Package, ops: OpReplacements, tys: set[tuple[str, str]]
-) -> Package:
-    rs_hugr = RsHugr.from_bytes(pkg.modules[0].to_bytes())
+    pkg_bytes: bytes, ops: OpReplacements, tys: set[tuple[str, str]]
+) -> bytes:
+    rs_hugr = RsHugr.from_bytes(pkg_bytes)
 
     rs_ops = {
         key: (
@@ -170,13 +170,20 @@ def _implement_ops(
 
     _implement_ops_binding(rs_hugr, rs_ops, tys)
 
-    return Package.from_bytes(rs_hugr.to_bytes())
+    return rs_hugr.to_bytes()
 
 
+@overload
 def implement_ops(
-    hugr_pkg: Package,
-    spec: ImplementOpsSpec,
-) -> Package:
+    hugr_pkg: Package, spec: ImplementOpsSpec, *, as_bytes: Literal[False] = False
+) -> Package: ...
+@overload
+def implement_ops(
+    hugr_pkg: Package, spec: ImplementOpsSpec, *, as_bytes: Literal[True]
+) -> bytes: ...
+def implement_ops(
+    hugr_pkg: Package, spec: ImplementOpsSpec, *, as_bytes: bool = False
+) -> Package | bytes:
     """
     Enriches the given package using the given spec by replacing all operations in the
     program with function calls to the functions in `spec.ops`.
@@ -200,7 +207,7 @@ def implement_ops(
     # Reset entrypoint, marking module as non-executable, to avoid linking conflicts
     hugr.entrypoint = hugr.module_root
     # Run rewrite, replacing ops with function calls to the functions in `spec.ops`
-    hugr_pkg = _implement_ops(hugr_pkg, spec.ops, spec.tys.tys)
+    hugr_pkg_bytes = _implement_ops(hugr.to_bytes(), spec.ops, spec.tys.tys)
 
     # Build, compile, and link wrapper program
     @guppy.declare
@@ -208,9 +215,21 @@ def implement_ops(
     @no_type_check
     def func_decl() -> None: ...
 
+    # We have to ensure the build wrapper is a function definition rather than a
+    # declaration, so that the package contains an entrypoint. Guppy compiles
+    # declarations to module-rooted HUGRs.
     wrapper = spec.build_wrapper(func_decl)
-    pkg: Package = wrapper.compile()
-    pkg = pkg.link(hugr_pkg, *spec.libs)
-    assert isinstance(pkg, Package)  # Assert type for type checker
 
-    return pkg
+    @guppy
+    def outer_wrapper() -> None:
+        wrapper()
+
+    pkg: Package = outer_wrapper.compile()
+    pkg_bytes = link_packages(
+        pkg.to_bytes(), hugr_pkg_bytes, *[lib.to_bytes() for lib in spec.libs]
+    )
+
+    if as_bytes:
+        return pkg_bytes
+
+    return Package.from_bytes(pkg_bytes)

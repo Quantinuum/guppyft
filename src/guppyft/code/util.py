@@ -17,6 +17,15 @@ def parity_check(data_bits: array[bool, N]) -> bool:
     return out
 
 
+@guppy
+@no_type_check
+def array_any(arr: array[bool, N]) -> bool:
+    for i in range(N):  # noqa: SIM110 # `all` is not yet supported by Guppy
+        if arr[i]:
+            return True
+    return False
+
+
 @guppy.struct
 class LogicalBlock(Generic[N]):  # type: ignore[misc]
     """A logical block of ``N`` physical qubits."""
@@ -29,6 +38,16 @@ class LogicalBlock(Generic[N]):  # type: ignore[misc]
         """Discard the logical block and all qubits in ``data_qs``."""
         for q in self.data_qs:
             discard(q)
+
+
+@guppy
+@no_type_check
+def qalloc_dirty() -> LogicalBlock[N]:
+    """Allocate resources for a codeblock, but the qubits are not in a valid logical
+    state."""
+    return LogicalBlock(
+        array(qubit() for _ in range(N)),
+    )
 
 
 @guppy.struct(frozen=True)

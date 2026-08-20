@@ -111,7 +111,7 @@ def compute_stabilizers_single_block_unitary(
     :param clifford_func: A Guppy function which implements a Clifford unitary
         on a single code block.
     :param num_selene_qubits: An upper bound for the number of qubits
-      used in the choi state for clifford_func.
+      used in the Choi state for clifford_func.
     :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
 
@@ -159,7 +159,7 @@ def compute_stabilizers_double_block_unitary(
     :param clifford_func: A Guppy function which implements a Clifford unitary
       across two code blocks.
     :param num_selene_qubits: An upper bound for the number of qubits
-      used in the choi state for clifford_func.
+      used in the Choi state for clifford_func.
     :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
 

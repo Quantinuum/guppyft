@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.0.5](https://github.com/quantinuum-dev/guppyft/compare/v0.0.4...v0.0.5) (2026-08-18)
+
+
+### Features
+
+* Add fallible dynamic qubit allocation to Iceberg extension ([#227](https://github.com/quantinuum-dev/guppyft/issues/227)) ([0b72127](https://github.com/quantinuum-dev/guppyft/commit/0b72127d843f767228ddfac46c3ebf1b77f007d1))
+
+## [0.0.4](https://github.com/quantinuum-dev/guppyft/compare/v0.0.3...v0.0.4) (2026-08-14)
+
+
+### Features
+
+* Add QEC cycle policy to Steane architecture with Steane and Knill primitives ([#214](https://github.com/quantinuum-dev/guppyft/issues/214)) ([06205c9](https://github.com/quantinuum-dev/guppyft/commit/06205c98b59efacfcb415d2a944cb7565d68616b))
+* Reduce serialisation roundtrips in implement ops and offer serialised byte result ([#220](https://github.com/quantinuum-dev/guppyft/issues/220)) ([59c480d](https://github.com/quantinuum-dev/guppyft/commit/59c480d8b76e92ed6c383bcd4c673f2c8e343b8a))
+* Support more Steane operations during encoding ([#219](https://github.com/quantinuum-dev/guppyft/issues/219)) ([ece72a1](https://github.com/quantinuum-dev/guppyft/commit/ece72a1c96c9c6e219c55fa2e00b099c6f745e57))
+
+
+### Bug Fixes
+
+* Ensure build wrapper is a function definition ([#222](https://github.com/quantinuum-dev/guppyft/issues/222)) ([3b34c50](https://github.com/quantinuum-dev/guppyft/commit/3b34c50b30c92ef0bbeea033ca2bd79b6b2309f3))
+
+## [0.0.3](https://github.com/quantinuum-dev/guppyft/compare/v0.0.2...v0.0.3) (2026-08-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* Add type replacements input to replace encoder ([#211](https://github.com/quantinuum-dev/guppyft/issues/211))
+* Add convenience instantiation to Iceberg qubit type ([#208](https://github.com/quantinuum-dev/guppyft/issues/208))
+
+### Features
+
+* Add convenience instantiation to Iceberg qubit type ([#208](https://github.com/quantinuum-dev/guppyft/issues/208)) ([b1f2341](https://github.com/quantinuum-dev/guppyft/commit/b1f2341f19342d78c23f91210dc9b6399121cefe))
+* Add decode op and measurement type to Steane extensions ([#194](https://github.com/quantinuum-dev/guppyft/issues/194)) ([bddb7d0](https://github.com/quantinuum-dev/guppyft/commit/bddb7d0cd093071604058707c23c8893b961e2ed))
+* Add encoder spec and encoding pass for Steane architecture ([#158](https://github.com/quantinuum-dev/guppyft/issues/158)) ([e9eb7d3](https://github.com/quantinuum-dev/guppyft/commit/e9eb7d3c352af7d46adc5a4f297519f44bc42905))
+* Add state factories and use for Steane zero state ([#209](https://github.com/quantinuum-dev/guppyft/issues/209)) ([63e0a55](https://github.com/quantinuum-dev/guppyft/commit/63e0a557e42d02e9fec107881558a49469d72ae4))
+* Add type replacements input to replace encoder ([#211](https://github.com/quantinuum-dev/guppyft/issues/211)) ([88e8fb5](https://github.com/quantinuum-dev/guppyft/commit/88e8fb59de7066f46486a45d651a9cae4f408d20))
+* Annotate encoding for packages ([#210](https://github.com/quantinuum-dev/guppyft/issues/210)) ([51fa095](https://github.com/quantinuum-dev/guppyft/commit/51fa09592f511cf28d8d0e84de0dc46d8b6144bc))
+
 ## [0.0.2](https://github.com/quantinuum-dev/guppyft/compare/v0.0.1...v0.0.2) (2026-08-07)
 
 

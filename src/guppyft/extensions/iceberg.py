@@ -68,9 +68,17 @@ class IcebergTypesExtension:
         return self.iceberg_pre_block_def.instantiate([BoundedNatArg(k)])
 
     @functools.cached_property
-    def iceberg_qubit(self) -> TypeDef:
-        """A "dynamic" logical qubit belonging to an unspecified block."""
+    def iceberg_qubit_def(self) -> TypeDef:
+        """A "dynamic" logical qubit belonging to an unspecified block.
+
+        This is the generic type definition. For the instantiated type, see
+        `iceberg_qubit`.
+        """
         return self().get_type("qubit")
+
+    def iceberg_qubit(self) -> ExtType:
+        """A "dynamic" logical qubit belonging to an unspecified block."""
+        return self.iceberg_qubit_def.instantiate([])
 
 
 class IcebergOpsExtension:
@@ -1410,6 +1418,13 @@ class IcebergOpsExtension:
     def alloc_dynq(self) -> OpDef:
         """Allocate a dynamic logical qubit in the zero state."""
         return self().get_op("alloc_dynq")
+
+    # try_alloc_dynq
+
+    @functools.cached_property
+    def try_alloc_dynq(self) -> OpDef:
+        """Try to allocate a dynamic logical qubit in the zero state."""
+        return self().get_op("try_alloc_dynq")
 
     # free_dynq
 

@@ -39,6 +39,7 @@ def _implement_ops(
 def _replace_encoder(
         rs_hugr: RsHugr,
         op_replacements: dict[tuple[str, str], tuple[str, str, list[int | str]]],
+        ty_replacements: dict[tuple[str, str], tuple[str, str]],
         extensions: str | None = None,
     ) -> None:
     """
