@@ -42,6 +42,7 @@ docs = [
     "myst-nb>=1.4.0",
     "quantinuum-sphinx>=1.11.2",
     "sphinx>=9.1.0",
+    "ipykernel"
 ]
 lint = [
     "pre-commit>=4.6.1,<5",
