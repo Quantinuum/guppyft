@@ -289,38 +289,60 @@ def compute_verification_signterms_single_block_state(
     return expanded_semantic_stabilizers, implementation_stabilizers
 
 
+def _count_blocks_state(
+    semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
+    impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
+) -> int:
+    # Get the return type of semantic_function.
+    sem_return_annotation = inspect.signature(
+        semantic_function.wrapped.python_func  # type: ignore[attr-defined]
+    ).return_annotation
+
+    impl_return_annotation = inspect.signature(
+        impl_function.wrapped.python_func  # type: ignore[attr-defined]
+    ).return_annotation
+
+    if get_origin(sem_return_annotation) is tuple:
+        if get_origin(impl_return_annotation) is not tuple:
+            raise TypeError(
+                "semantic_function and impl_function have incompatible signatures"
+            )
+        return 2
+    else:
+        return 1
+
+
 def check_stabilizer_state_semantics(
     semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
     code_definition: StabilizerCode,
     num_ancilla_qubits: int = 0,
 ) -> bool:
-    # Get the return type of semantic_function.
-    sem_return_annotation = inspect.signature(
-        semantic_function.wrapped.python_func  # type: ignore[attr-defined]
-    ).return_annotation
-
-    # Check if return annotation is a tuple (acts on two code blocks).
-    # Determine whether semantic_function is a SemanticStabilizerStateDouble or not.
-    if get_origin(sem_return_annotation) is tuple:
-        sem_stabilizers, impl_stabilizers = (
-            compute_verification_signterms_double_block_state(
-                semantic_function,  # type: ignore[arg-type]
-                impl_function,  # type: ignore[arg-type]
-                code_definition,
-                num_ancilla_qubits,
+    num_blocks = _count_blocks_state(semantic_function, impl_function)
+    match num_blocks:
+        case 1:
+            sem_stabilizers, impl_stabilizers = (
+                compute_verification_signterms_single_block_state(
+                    semantic_function,  # type: ignore[arg-type]
+                    impl_function,  # type: ignore[arg-type]
+                    code_definition,
+                    num_ancilla_qubits,
+                )
             )
-        )
-    else:
-        # Here our semantic function is a single block state preparation.
-        sem_stabilizers, impl_stabilizers = (
-            compute_verification_signterms_single_block_state(
-                semantic_function,  # type: ignore[arg-type]
-                impl_function,  # type: ignore[arg-type]
-                code_definition,
-                num_ancilla_qubits,
+        case 2:
+            sem_stabilizers, impl_stabilizers = (
+                compute_verification_signterms_double_block_state(
+                    semantic_function,  # type: ignore[arg-type]
+                    impl_function,  # type: ignore[arg-type]
+                    code_definition,
+                    num_ancilla_qubits,
+                )
             )
-        )
+        case _:
+            raise TypeError(
+                "Unsupported number of code block parameters in semantic_function."
+                + f"Got {num_blocks} blocks. Only 1 and 2 are supported."
+            )
 
     # Canonicalize both Clifford Tableaux so that we can test for equality.
     sem_stabilizers.canonicalize_all()
@@ -329,19 +351,29 @@ def check_stabilizer_state_semantics(
     return sem_stabilizers == impl_stabilizers
 
 
-def check_clifford_semantics(
+def _count_blocks_unitary(
     semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
-    code_definition: StabilizerCode,
-    num_ancilla_qubits: int = 0,
-) -> bool:
+) -> int:
     sem_signature = inspect.signature(semantic_function.wrapped.python_func)  # type: ignore[attr-defined]
     impl_signature = inspect.signature(impl_function.wrapped.python_func)  # type: ignore[attr-defined]
     if len(sem_signature.parameters) != len(impl_signature.parameters):
         raise TypeError(
             "semantic_function and impl_function have incompatible signatures"
         )
-    match len(sem_signature.parameters):
+    num_blocks = len(sem_signature.parameters)
+    return num_blocks
+
+
+def check_clifford_semantics(
+    semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
+    impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
+    code_definition: StabilizerCode,
+    num_ancilla_qubits: int = 0,
+) -> bool:
+    # Check whether input is a SemanticCliffordUnitary or SemanticCliffordUnitaryDouble.
+    num_blocks = _count_blocks_unitary(semantic_function, impl_function)
+    match num_blocks:
         case 1:
             sem_stabilizers, impl_stabilizers = (
                 compute_verification_signterms_single_block_unitary(
@@ -363,7 +395,7 @@ def check_clifford_semantics(
         case _:
             raise TypeError(
                 "Unsupported number of code block parameters in semantic_function."
-                + f"Got {len(sem_signature.parameters)}, only 1 and 2 are supported."
+                + f"Got {num_blocks} blocks. Only 1 and 2 are supported."
             )
 
     # Canonicalize both Clifford Tableaux so that we can test for equality.
