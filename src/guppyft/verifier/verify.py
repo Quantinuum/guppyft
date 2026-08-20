@@ -245,7 +245,7 @@ def compute_verification_signterms_single_block_state(
     semantic_function: SemanticStabilizerState,
     impl_function: ImplementationStabilizerState,
     code_definition: StabilizerCode,
-    num_ancilla_qubits: int = 0,
+    impl_num_ancillas: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
     """Compute tableaux to verify correctness of stabilizer state preparation.
 
@@ -259,14 +259,14 @@ def compute_verification_signterms_single_block_state(
       the semantics on n physical qubits.
     :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
       and logical operators.
-    :param num_ancilla_qubits: The number of ancilla qubits used in the
+    :param impl_num_ancillas: The number of ancilla qubits used in the
         implementation. Defaults to zero.
     :return: A pair of stabilizer tableaux made up of signed Pauli terms.
     """
     # Get the k stabilizers for the k qubit state.
     semantic_stabilizers = compute_stabilizers_single_block_state(
         semantic_function,
-        code_definition.num_logical_qubits + num_ancilla_qubits,
+        code_definition.num_logical_qubits + impl_num_ancillas,
     )
 
     # Expand the k logical stabilizers to k stabilizers of size n.
@@ -279,7 +279,7 @@ def compute_verification_signterms_single_block_state(
     # Calculate the n stabilizers of the physical state.
     implementation_stabilizers = compute_stabilizers_single_block_state(
         impl_function,
-        code_definition.num_physical_qubits + num_ancilla_qubits,
+        code_definition.num_physical_qubits + impl_num_ancillas,
     )
 
     return expanded_semantic_stabilizers, implementation_stabilizers
@@ -320,7 +320,7 @@ def check_stabilizer_state_semantics(
     semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
     code_definition: StabilizerCode,
-    num_ancilla_qubits: int = 0,
+    impl_num_ancillas: int = 0,
 ) -> bool:
     num_blocks = _count_blocks_state(semantic_function, impl_function)
     match num_blocks:
@@ -330,7 +330,7 @@ def check_stabilizer_state_semantics(
                     semantic_function,  # type: ignore[arg-type]
                     impl_function,  # type: ignore[arg-type]
                     code_definition,
-                    num_ancilla_qubits,
+                    impl_num_ancillas,
                 )
             )
         case 2:
@@ -339,7 +339,7 @@ def check_stabilizer_state_semantics(
                     semantic_function,  # type: ignore[arg-type]
                     impl_function,  # type: ignore[arg-type]
                     code_definition,
-                    num_ancilla_qubits,
+                    impl_num_ancillas,
                 )
             )
         case _:
@@ -373,7 +373,7 @@ def check_clifford_semantics(
     semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
     code_definition: StabilizerCode,
-    num_ancilla_qubits: int = 0,
+    impl_num_ancillas: int = 0,
 ) -> bool:
     # Check whether input is a SemanticCliffordUnitary or SemanticCliffordUnitaryDouble.
     num_blocks = _count_blocks_unitary(semantic_function, impl_function)
@@ -384,7 +384,7 @@ def check_clifford_semantics(
                     semantic_function,  # type: ignore[arg-type]
                     impl_function,  # type: ignore[arg-type]
                     code_definition,
-                    num_ancilla_qubits,
+                    impl_num_ancillas,
                 )
             )
         case 2:
@@ -393,7 +393,7 @@ def check_clifford_semantics(
                     semantic_function,  # type: ignore[arg-type]
                     impl_function,  # type: ignore[arg-type]
                     code_definition,
-                    num_ancilla_qubits,
+                    impl_num_ancillas,
                 )
             )
         case _:
@@ -413,7 +413,7 @@ def compute_verification_signterms_double_block_state(
     semantic_function: SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerStateDouble,
     code_definition: StabilizerCode,
-    num_ancilla_qubits: int = 0,
+    impl_num_ancillas: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
     """Compute tableaux to verify 2 block stabilizer state preparation.
 
@@ -427,14 +427,14 @@ def compute_verification_signterms_double_block_state(
       the semantics on 2n physical qubits.
     :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
       and logical operators.
-    :param num_ancilla_qubits: The number of ancilla qubits used in the
+    :param impl_num_ancillas: The number of ancilla qubits used in the
         implementation. Defaults to zero.
     :return: A pair of stabilizer tableaux made up of signed Pauli terms.
     """
     # Get the 2k stabilizers for the 2k qubit state.
     semantic_stabilizers = compute_stabilizers_double_block_state(
         semantic_function,
-        2 * code_definition.num_logical_qubits + num_ancilla_qubits,
+        2 * code_definition.num_logical_qubits + impl_num_ancillas,
     )
 
     # Expand the 2k logical stabilizers to 2k stabilizers of size 2n.
@@ -447,7 +447,7 @@ def compute_verification_signterms_double_block_state(
     # Calculate the 2n stabilizers of the physical state.
     implementation_stabilizers = compute_stabilizers_double_block_state(
         impl_function,
-        2 * code_definition.num_physical_qubits + num_ancilla_qubits,
+        2 * code_definition.num_physical_qubits + impl_num_ancillas,
     )
 
     return expanded_semantic_stabilizers, implementation_stabilizers
@@ -457,7 +457,7 @@ def compute_verification_signterms_single_block_unitary(
     semantic_function: SemanticCliffordUnitary,
     impl_function: ImplementationCliffordUnitary,
     code_definition: StabilizerCode,
-    num_ancilla_qubits: int = 0,
+    impl_num_ancillas: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
     """Compute tableaux to verify correctness of Clifford unitary implementation.
 
@@ -471,7 +471,7 @@ def compute_verification_signterms_single_block_unitary(
       the semantics on n physical qubits.
     :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
       and logical operators.
-    :param num_ancilla_qubits: The number of ancilla qubits used in the
+    :param impl_num_ancillas: The number of ancilla qubits used in the
         implementation. Defaults to zero.
     :return: A pair of Clifford tableaux made up of signed Pauli terms.
     """
@@ -480,7 +480,7 @@ def compute_verification_signterms_single_block_unitary(
     semantic_choi_stabilizers = compute_stabilizers_single_block_unitary(
         identity_code(code_definition.num_logical_qubits),
         semantic_function,
-        num_selene_qubits=2 * (code_definition.num_logical_qubits) + num_ancilla_qubits,
+        num_selene_qubits=2 * (code_definition.num_logical_qubits) + impl_num_ancillas,
     )
 
     # Expand the 2k logical stabilizers to 2k stabilizers of size 2n.
@@ -495,8 +495,7 @@ def compute_verification_signterms_single_block_unitary(
     implementation_stabilizers = compute_stabilizers_single_block_unitary(
         code_definition,
         impl_function,
-        num_selene_qubits=2 * (code_definition.num_physical_qubits)
-        + num_ancilla_qubits,
+        num_selene_qubits=2 * (code_definition.num_physical_qubits) + impl_num_ancillas,
     )
     # Return the two stabilizer tableaux. Note that we will need to canonicalize
     # the tableaux before we can test for equality.
@@ -508,7 +507,7 @@ def compute_verification_signterms_double_block_unitary(
     semantic_function: SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitaryDouble,
     code_definition: StabilizerCode,
-    num_ancilla_qubits: int = 0,
+    impl_num_ancillas: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
     """Compute tableaux to verify correctness of 2 block Clifford unitary.
 
@@ -523,7 +522,7 @@ def compute_verification_signterms_double_block_unitary(
       the semantics on two code blocks.
     :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
       and logical operators.
-    :param num_ancilla_qubits: The number of ancilla qubits used in the
+    :param impl_num_ancillas: The number of ancilla qubits used in the
         implementation. Defaults to zero.
     :return: A pair of Clifford tableaux made up of signed Pauli terms.
     """
@@ -532,7 +531,7 @@ def compute_verification_signterms_double_block_unitary(
     semantic_choi_stabilizers = compute_stabilizers_double_block_unitary(
         identity_code(code_definition.num_logical_qubits),
         semantic_function,
-        num_selene_qubits=4 * (code_definition.num_logical_qubits) + num_ancilla_qubits,
+        num_selene_qubits=4 * (code_definition.num_logical_qubits) + impl_num_ancillas,
     )
 
     # Expand the 4k logical stabilizers and combine them with the generators for each
@@ -545,8 +544,7 @@ def compute_verification_signterms_double_block_unitary(
     implementation_stabilizers = compute_stabilizers_double_block_unitary(
         code_definition,
         impl_function,
-        num_selene_qubits=4 * (code_definition.num_physical_qubits)
-        + num_ancilla_qubits,
+        num_selene_qubits=4 * (code_definition.num_physical_qubits) + impl_num_ancillas,
     )
     # Return the two stabilizer tableaux. Note that we will need to canonicalize
     # the tableaux before we can test for equality.

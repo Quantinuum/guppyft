@@ -68,7 +68,7 @@ def test_knill_qec_without_errors() -> None:
         specify_identity,
         impl_func,
         code_definition=STEANE_DEF,
-        num_ancilla_qubits=14,
+        impl_num_ancillas=14,
     )
     assert sem == impl
 
@@ -102,7 +102,7 @@ def test_knill_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
         specify_identity,
         impl_func,
         code_definition=STEANE_DEF,
-        num_ancilla_qubits=14,
+        impl_num_ancillas=14,
     )
     assert sem == impl
 
@@ -134,7 +134,7 @@ def test_steane_qec_without_errors() -> None:
         specify_identity,
         impl_func,
         code_definition=STEANE_DEF,
-        num_ancilla_qubits=7,
+        impl_num_ancillas=7,
     )
     assert sem == impl
 
@@ -169,6 +169,6 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
         specify_identity,
         impl_func,
         code_definition=STEANE_DEF,
-        num_ancilla_qubits=7,
+        impl_num_ancillas=7,
     )
     assert sem == impl
