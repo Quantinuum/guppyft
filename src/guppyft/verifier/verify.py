@@ -289,23 +289,20 @@ def compute_verification_signterms_single_block_state(
     return expanded_semantic_stabilizers, implementation_stabilizers
 
 
-class InvalidImplementationError(ValueError):
-    pass
-
-
-def _is_double_block_state(func: GuppyFunctionDefinition) -> bool:  # type: ignore[type-arg]
-    """True if func's return annotation is a tuple (acts on two code blocks)."""
-    return_annotation = func.wrapped.python_func.__annotations__.get("return")  # type: ignore[attr-defined]
-    return get_origin(return_annotation) is tuple
-
-
 def check_stabilizer_state_semantics(
     semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
     code_definition: StabilizerCode,
     num_ancilla_qubits: int = 0,
 ) -> bool:
-    if _is_double_block_state(semantic_function):
+    # Get the return type of semantic_function.
+    sem_return_annotation = inspect.signature(
+        semantic_function.wrapped.python_func  # type: ignore[attr-defined]
+    ).return_annotation
+
+    # Check if return annotation is a tuple (acts on two code blocks).
+    # Determine whether semantic_function is a SemanticStabilizerStateDouble or not.
+    if get_origin(sem_return_annotation) is tuple:
         sem, impl = compute_verification_signterms_double_block_state(
             semantic_function,  # type: ignore[arg-type]
             impl_function,  # type: ignore[arg-type]
@@ -313,6 +310,7 @@ def check_stabilizer_state_semantics(
             num_ancilla_qubits,
         )
     else:
+        # Here our semantic function is a single block state preparation.
         sem, impl = compute_verification_signterms_single_block_state(
             semantic_function,  # type: ignore[arg-type]
             impl_function,  # type: ignore[arg-type]
