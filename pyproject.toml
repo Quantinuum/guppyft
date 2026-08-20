@@ -44,9 +44,9 @@ docs = [
     "sphinx>=9.1.0",
 ]
 lint = [
-    "pre-commit>=4.6.1,<5",
-    "ruff>=0.16.2",
-    "mypy>=2.3.0",
+    "pre-commit>=4.6.2,<5",
+    "ruff>=0.16.3",
+    "mypy>=2.3.1",
 ]
 test = [
     "pytest>=9.1.0",
