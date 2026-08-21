@@ -25,7 +25,7 @@ Steane code example
     from guppylang.std.quantum import qubit, h
 
     from guppyft.code_def import StabilizerCode
-    from guppyft.verifier import valid_clifford implementation
+    from guppyft.verifier import valid_clifford_implementation
 
     STEANE_DEF = StabilizerCode.from_python_strings(
         num_physical_qubits=7,
