@@ -1,0 +1,110 @@
+{
+  "version": "0.1.0",
+  "name": "guppyft.c4.ops",
+  "types": {},
+  "operations": {
+    "decode": {
+      "extension": "guppyft.c4.ops",
+      "name": "decode",
+      "description": "Decode a measurement on a C4 block",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.c4.types",
+              "extension_version": "0.1.0",
+              "id": "measurement",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Sum",
+              "s": "Unit",
+              "size": 2
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "free": {
+      "extension": "guppyft.c4.ops",
+      "name": "free",
+      "description": "Free a logical C4 block",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.c4.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": []
+        }
+      },
+      "binary": false
+    },
+    "measure_all": {
+      "extension": "guppyft.c4.ops",
+      "name": "measure_all",
+      "description": "Destructively measure a C4 block in the Z basis",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.c4.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.c4.types",
+              "extension_version": "0.1.0",
+              "id": "measurement",
+              "args": [],
+              "bound": "C"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "prep_all_zero": {
+      "extension": "guppyft.c4.ops",
+      "name": "prep_all_zero",
+      "description": "Prepare a C4 block in the all-zero logical state.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.c4.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    }
+  }
+}

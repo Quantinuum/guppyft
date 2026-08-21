@@ -1,0 +1,27 @@
+{
+  "version": "0.1.0",
+  "name": "guppyft.c4.types",
+  "types": {
+    "block": {
+      "extension": "guppyft.c4.types",
+      "name": "block",
+      "params": [],
+      "description": "C4 logical block",
+      "bound": {
+        "b": "Explicit",
+        "bound": "A"
+      }
+    },
+    "measurement": {
+      "extension": "guppyft.c4.types",
+      "name": "measurement",
+      "params": [],
+      "description": "C4 logical measurement",
+      "bound": {
+        "b": "Explicit",
+        "bound": "C"
+      }
+    }
+  },
+  "operations": {}
+}
