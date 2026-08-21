@@ -219,7 +219,7 @@ def compute_tableaux_single_block_state(
     code_definition: StabilizerCode,
     impl_num_ancillas: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
-    """Compute tableaux to verify correctness of stabilizer state preparation.
+    """Compute a tableaux pair for Pauli eigenstate preparation over one code block.
 
     Given a semantic Guppy function acting on k qubits and an impl Guppy function
     acting on n qubits, compute a pair of stabilizer tableaux. Note that we will need
@@ -263,7 +263,7 @@ def compute_tableaux_double_block_state(
     code_definition: StabilizerCode,
     impl_num_ancillas: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
-    """Compute tableaux to verify 2 block stabilizer state preparation.
+    """Compute a tableaux pair for Pauli eigenstate preparation over two code blocks.
 
     Given a semantic Guppy function acting on 2k qubits and an impl Guppy function
       acting on 2n qubits, compute a pair of stabilizer tableaux. Note that we will need
@@ -339,6 +339,21 @@ def valid_pauli_eigenstate_preparation(
     code_definition: StabilizerCode,
     impl_num_ancillas: int = 0,
 ) -> bool:
+    """Checks whether impl_function prepares the state specified by semantic function.
+
+    Can check implementations logical Pauli eigenstate preparation
+      across one or two code blocks.
+
+    :param semantic_function: A Guppy function for semantic action
+      of Pauli eigenstate preparation over one or two code blocks.
+    :param impl_function: A Guppy function for preparing the logical eigenstate
+      over one or two code blocks.
+    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
+      and logical operators.
+    :param impl_num_ancillas: The number of ancilla qubits used in the
+        implementation. Defaults to zero.
+    :return: A Boolean indicating whether the state preparation is valid.
+    """
     num_blocks = _count_blocks_state(semantic_function, impl_function)
     match num_blocks:
         case 1:
@@ -374,7 +389,7 @@ def compute_tableaux_single_block_unitary(
     code_definition: StabilizerCode,
     impl_num_ancillas: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
-    """Compute tableaux to verify correctness of Clifford unitary implementation.
+    """Compute a pair of tableaux for a logical Clifford on a single code block.
 
     Given a semantic Guppy function acting on k qubits and an impl Guppy function
       acting on n qubits, compute a pair of Clifford tableaux. Note that we will need to
@@ -421,7 +436,7 @@ def compute_tableaux_double_block_unitary(
     code_definition: StabilizerCode,
     impl_num_ancillas: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
-    """Compute tableaux towards verifying the correctness of 2 block Clifford unitary.
+    """Compute a pair of tableaux for a logical Clifford across two code blocks.
 
     Given a semantic Guppy function acting between two code blocks and an
       impl Guppy function acting on n qubits compute a pair of Clifford tableaux.
@@ -481,6 +496,20 @@ def valid_clifford_implementation(
     code_definition: StabilizerCode,
     impl_num_ancillas: int = 0,
 ) -> bool:
+    """Checks whether impl_function is a valid implementation of semantic_function.
+
+    Can check implementations of Clifford semantics across one or two code blocks.
+
+    :param semantic_function: A Guppy function for semantic action
+      of a Clifford operator on one or two code blocks.
+    :param impl_function: A Guppy function for implementing
+      the semantics on one or two code blocks.
+    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
+      and logical operators.
+    :param impl_num_ancillas: The number of ancilla qubits used in the
+        implementation. Defaults to zero.
+    :return: A Boolean indicating whether the implementation is valid.
+    """
     # Check whether input is a SemanticCliffordUnitary or SemanticCliffordUnitaryDouble.
     num_blocks = _count_blocks_unitary(semantic_function, impl_function)
     match num_blocks:

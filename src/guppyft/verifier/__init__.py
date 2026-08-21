@@ -1,3 +1,5 @@
+"""Tools for verifying the correctness of logical Clifford gadgets."""
+
 from .utils import (
     selene_stabilizer_to_zixy_signterm,
     stabilizerlist_to_signterms,
