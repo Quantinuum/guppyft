@@ -115,12 +115,9 @@ mod _bindings {
             let Some(src_def) = registry.get(src_ext).and_then(|e| e.get_op(src_op)) else {
                 continue;
             };
-            let template_hugr = replacement_hugr.hugr.clone();
-            pass.set_replace_parametrized_op(src_def, move |_, _| {
-                Ok(Some(NodeTemplate::CompoundOp(Box::new(
-                    template_hugr.clone(),
-                ))))
-            });
+            let node_template = NodeTemplate::call_to_function(replacement_hugr.hugr.clone(), &[])
+                .map_err(|e| PyValueError::new_err(format!("Error  {e}")))?;
+            pass.set_replace_parametrized_op(src_def, move |_, _| Ok(Some(node_template.clone())));
         }
 
         for ((src_ext_name, src_ty), (tgt_ext_name, tgt_ty)) in ty_replacements.iter() {

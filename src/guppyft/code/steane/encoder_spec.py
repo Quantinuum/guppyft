@@ -282,19 +282,14 @@ class SteaneBuilder:
 
             return map_global(_impl)
 
+        # Note: During the `implement_ops` pass, the type replacements
+        # must be consistent across all ops. Therefore, the prep state
+        # cannot return a LogicalBlock as expected, and must instead
+        # follow the pattern of returning `tuple[int,int]`.
         @guppy
         @no_type_check
         @link_name("guppyft.steane._prep_magic_for_t_like")
         def _prep_magic_for_t_like() -> tuple[tuple[int, int]]:
-            # @guppy
-            # def _impl(
-            #     state: STATE @ owned
-            # ) -> tuple[STATE, LogicalBlock[7]]:
-            #     blk = state.magic_state_factory.get_state()
-            #
-            #     return state, blk
-            #
-            # return map_global(_impl)
             return ((0, 0),)
 
         @guppy
@@ -448,7 +443,7 @@ class SteaneBuilder:
         @guppy
         @no_type_check
         @link_name("guppyft.steane._inject_t")
-        def _t(q: tuple[int, int], a: tuple[int, int]) -> tuple[tuple[int, int]]:
+        def _inject_t(q: tuple[int, int], a: tuple[int, int]) -> tuple[tuple[int, int]]:
             @guppy
             def _impl(
                 state: STATE @ owned, q: tuple[int, int]
@@ -468,7 +463,9 @@ class SteaneBuilder:
         @guppy
         @no_type_check
         @link_name("guppyft.steane._inject_tdg")
-        def _tdg(q: tuple[int, int]) -> tuple[tuple[int, int]]:
+        def _inject_tdg(
+            q: tuple[int, int], a: tuple[int, int]
+        ) -> tuple[tuple[int, int]]:
             @guppy
             def _impl(
                 state: STATE @ owned, q: tuple[int, int]
@@ -583,8 +580,8 @@ class SteaneBuilder:
             _h,
             _s,
             _sdg,
-            _t,
-            _tdg,
+            _inject_t,
+            _inject_tdg,
             _cx,
         ).compile()
 
@@ -594,7 +591,6 @@ class SteaneBuilder:
                 ("guppyft.steane.ops", "measure_z"): "guppyft.steane._measure_z",
                 ("guppyft.steane.ops", "free"): "guppyft.steane._free",
                 ("guppyft.steane.ops", "x"): "guppyft.steane._x",
-                ("guppyft.steane.ops", "y"): "guppyft.steane._y",
                 ("guppyft.steane.ops", "z"): "guppyft.steane._z",
                 ("guppyft.steane.ops", "h"): "guppyft.steane._h",
                 ("guppyft.steane.ops", "s"): "guppyft.steane._s",
@@ -652,7 +648,6 @@ class SteaneBuilder:
                 ("tket.quantum", "H"): ("guppyft.steane.ops", "h", []),
                 ("tket.quantum", "Z"): ("guppyft.steane.ops", "z", []),
                 ("tket.quantum", "X"): ("guppyft.steane.ops", "x", []),
-                # ("tket.quantum", "Y"): ("guppyft.steane.ops", "y", []),
                 ("tket.quantum", "S"): ("guppyft.steane.ops", "s", []),
                 ("tket.quantum", "Sdg"): ("guppyft.steane.ops", "sdg", []),
                 ("tket.quantum", "CX"): ("guppyft.steane.ops", "cx", []),

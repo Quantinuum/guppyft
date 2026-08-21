@@ -154,12 +154,22 @@ def test_annotate_steane_encoding() -> None:
     }
 
 
-def test_steane_t_encoder() -> None:
+def test_t_encoder_smoke() -> None:
     @guppy
     def main() -> None:
         q = qubit()
         t(q)
+        discard(q)
+        q = qubit()
         tdg(q)
         discard(q)
 
-    SteaneBuilder().build(n_blocks=1).encode(main.compile())
+    res = (
+        SteaneBuilder()
+        .build(n_blocks=1)
+        .emulator(main.compile(), n_qubits=16)
+        .run()
+        .collated_shots()
+    )
+
+    assert res == [{}]

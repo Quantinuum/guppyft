@@ -150,7 +150,7 @@ def inject_magic_for_t(qubit: "Qubit", magic: "Qubit" @ owned) -> None:
     """Perform a T gate by injecting a magic state."""
 
 
-@hugr_op(steane_op("inject_magic_for_t"))
+@hugr_op(steane_op("inject_magic_for_tdg"))
 @no_type_check
 def inject_magic_for_tdg(qubit: "Qubit", magic: "Qubit" @ owned) -> None:
     """Perform a Tdg gate by injecting a magic state."""
@@ -179,4 +179,4 @@ def t(q: Qubit) -> None:
 def tdg(q: Qubit) -> None:
     """Implement a Tdg gate using magic state injection."""
     a = prep_magic_for_t_like()
-    inject_magic_for_t(q, a)
+    inject_magic_for_tdg(q, a)
