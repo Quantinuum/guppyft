@@ -222,8 +222,8 @@ def compute_tableaux_single_block_state(
     """Compute tableaux to verify correctness of stabilizer state preparation.
 
     Given a semantic Guppy function acting on k qubits and an impl Guppy function
-      acting on n qubits, compute a pair of stabilizer tableaux. If the implementation
-      of the semantic function is valid, the two tableaux will be equivalent.
+    acting on n qubits, compute a pair of stabilizer tableaux. Note that we will need
+    to canonicalize with SignTerms.canonicalize_all() before we can check for equality.
 
     :param semantic_function: A Guppy function for semantic action
       of a Clifford operator on k logical qubits.
@@ -252,6 +252,50 @@ def compute_tableaux_single_block_state(
     implementation_stabilizers = compute_stabilizers_single_block_state(
         impl_function,
         code_definition.num_physical_qubits + impl_num_ancillas,
+    )
+
+    return expanded_semantic_stabilizers, implementation_stabilizers
+
+
+def compute_tableaux_double_block_state(
+    semantic_function: SemanticStabilizerStateDouble,
+    impl_function: ImplementationStabilizerStateDouble,
+    code_definition: StabilizerCode,
+    impl_num_ancillas: int = 0,
+) -> tuple[pauli.SignTerms, pauli.SignTerms]:
+    """Compute tableaux to verify 2 block stabilizer state preparation.
+
+    Given a semantic Guppy function acting on 2k qubits and an impl Guppy function
+      acting on 2n qubits, compute a pair of stabilizer tableaux. Note that we will need
+    to canonicalize with SignTerms.canonicalize_all() before we can check for equality.
+
+    :param semantic_function: A Guppy function for semantic action
+      of a Clifford operator on 2k logical qubits.
+    :param impl_function: A Guppy function for implementing
+      the semantics on 2n physical qubits.
+    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
+      and logical operators.
+    :param impl_num_ancillas: The number of ancilla qubits used in the
+        implementation. Defaults to zero.
+    :return: A pair of stabilizer tableaux made up of signed Pauli terms.
+    """
+    # Get the 2k stabilizers for the 2k qubit state.
+    semantic_stabilizers = compute_stabilizers_double_block_state(
+        semantic_function,
+        2 * code_definition.num_logical_qubits + impl_num_ancillas,
+    )
+
+    # Expand the 2k logical stabilizers to 2k stabilizers of size 2n.
+    # We also add the 2(n-k) stabilizer generators of our code.
+    # We have 2k + 2(n-k) = 2n stabilizers in total.
+    expanded_semantic_stabilizers = get_expanded_stabilizer_set(
+        semantic_stabilizers, code_definition, num_blocks=2
+    )
+
+    # Calculate the 2n stabilizers of the physical state.
+    implementation_stabilizers = compute_stabilizers_double_block_state(
+        impl_function,
+        2 * code_definition.num_physical_qubits + impl_num_ancillas,
     )
 
     return expanded_semantic_stabilizers, implementation_stabilizers
@@ -324,50 +368,6 @@ def valid_pauli_eigenstate_preparation(
     return sem_stabilizers == impl_stabilizers
 
 
-def compute_tableaux_double_block_state(
-    semantic_function: SemanticStabilizerStateDouble,
-    impl_function: ImplementationStabilizerStateDouble,
-    code_definition: StabilizerCode,
-    impl_num_ancillas: int = 0,
-) -> tuple[pauli.SignTerms, pauli.SignTerms]:
-    """Compute tableaux to verify 2 block stabilizer state preparation.
-
-    Given a semantic Guppy function acting on 2k qubits and an impl Guppy function
-      acting on 2n qubits, compute a pair of stabilizer tableaux. Note that we will need
-    to canonicalize with SignTerms.canonicalize_all() before we can check for equality.
-
-    :param semantic_function: A Guppy function for semantic action
-      of a Clifford operator on 2k logical qubits.
-    :param impl_function: A Guppy function for implementing
-      the semantics on 2n physical qubits.
-    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
-      and logical operators.
-    :param impl_num_ancillas: The number of ancilla qubits used in the
-        implementation. Defaults to zero.
-    :return: A pair of stabilizer tableaux made up of signed Pauli terms.
-    """
-    # Get the 2k stabilizers for the 2k qubit state.
-    semantic_stabilizers = compute_stabilizers_double_block_state(
-        semantic_function,
-        2 * code_definition.num_logical_qubits + impl_num_ancillas,
-    )
-
-    # Expand the 2k logical stabilizers to 2k stabilizers of size 2n.
-    # We also add the 2(n-k) stabilizer generators of our code.
-    # We have 2k + 2(n-k) = 2n stabilizers in total.
-    expanded_semantic_stabilizers = get_expanded_stabilizer_set(
-        semantic_stabilizers, code_definition, num_blocks=2
-    )
-
-    # Calculate the 2n stabilizers of the physical state.
-    implementation_stabilizers = compute_stabilizers_double_block_state(
-        impl_function,
-        2 * code_definition.num_physical_qubits + impl_num_ancillas,
-    )
-
-    return expanded_semantic_stabilizers, implementation_stabilizers
-
-
 def compute_tableaux_single_block_unitary(
     semantic_function: SemanticCliffordUnitary,
     impl_function: ImplementationCliffordUnitary,
@@ -412,9 +412,6 @@ def compute_tableaux_single_block_unitary(
         impl_function,
         num_selene_qubits=2 * (code_definition.num_physical_qubits) + impl_num_ancillas,
     )
-    # Return the two stabilizer tableaux. Note that we will need to canonicalize
-    # the tableaux before we can test for equality.
-    # See the valid_clifford_implementation function.
     return expanded_semantic_stabilizers, implementation_stabilizers
 
 
@@ -461,9 +458,6 @@ def compute_tableaux_double_block_unitary(
         impl_function,
         num_selene_qubits=4 * (code_definition.num_physical_qubits) + impl_num_ancillas,
     )
-    # Return the two stabilizer tableaux. Note that we will need to canonicalize
-    # the tableaux before we can test for equality.
-    # See the valid_pauli_eigenstate_preparation function.
     return expanded_semantic_stabilizers, implementation_stabilizers
 
 
