@@ -5,9 +5,9 @@ from typing import no_type_check
 from guppylang import guppy
 from guppylang.library import link_name
 from guppylang.std import quantum as qlib
+from guppylang.std.angles import pi
 from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.mem import mem_swap
-from guppylang.std.quantum import collect_measurements
 
 from guppyft.code._state_factory import PreBlock
 from guppyft.code.util import LogicalBlock, RawMeasurement, parity_check
@@ -56,8 +56,124 @@ def prep_zero_ft() -> PreBlock[7, 1]:
 
 @guppy
 @no_type_check
-def prep_magic_non_ft() -> PreBlock[1]:
-    """Prepare a Steane magic state."""
+def measure_H_operator(blk: LogicalBlock[7]) -> array[qlib.Measurement, 2]:
+    """Fault-tolerant measurement of the logical H operator on a Steane block."""
+    # Prepare Bell state ancilla
+    a = array(qlib.qubit() for _ in range(2))
+    qlib.h(a[0])
+    qlib.cx(a[0], a[1])
+
+    # Apply controlled-H gates
+    for tgt in range(7):
+        qlib.ch(
+            a[tgt % 2],  # Alternate control qubit for parallelisation
+            blk.data_qs[tgt],
+        )
+
+    # Measure ancilla
+    qlib.cx(a[0], a[1])
+    qlib.h(a[0])
+    return qlib.measure_array(a)
+
+
+@guppy
+@no_type_check
+def prep_h_non_ft() -> PreBlock[7, 2]:
+    """Non-fault-tolerant preparation of an |H> = Ry(pi/4)|0> magic state on
+    a Steane block.
+
+    Using Fig. 3b from "Minimizing resource overheads for fault-tolerant
+    preparation of encoded states of the Steane code" 10.1038/srep19578.
+    """
+    # Create block with physical qubits in the all-zero state
+    blk = LogicalBlock(array(qlib.qubit() for _ in range(7)))
+    # Prepare qubit `1` in the |H> = Ry(pi/4)|0> state
+    qlib.ry(blk.data_qs[1], pi / 4)
+    # Prepare qubits that start in |+> state.
+    qlib.h(blk.data_qs[0])
+    qlib.h(blk.data_qs[4])
+    qlib.h(blk.data_qs[6])
+    # Apply the CNOTs
+    cx_pairs = array(
+        (1, 3),
+        (1, 5),
+        (0, 1),
+        (6, 2),
+        (4, 5),
+        (0, 3),
+        (4, 2),
+        (6, 5),
+        (0, 2),
+        (4, 1),
+        (6, 3),
+    )
+    for ctl, tgt in cx_pairs:
+        qlib.cx(blk.data_qs[ctl], blk.data_qs[tgt])
+
+    m = measure_H_operator(blk)
+
+    return PreBlock(blk, m)
+
+
+@guppy
+@no_type_check
+def prep_t_state_ft() -> PreBlock[7, 2]:
+    """Attempt to prepare an Rz(pi/4)|+> logical state on a Steane block."""
+    # Attempt |H> = Ry(pi/4)|0> state preparation
+    preblock = prep_h_non_ft()
+    # Convert to Rz(pi/4)|+> state
+    sdg(preblock.logical_block)
+    h(preblock.logical_block)
+
+    return preblock
+
+
+@guppy
+@no_type_check
+def _inject_t_non_deterministically(
+    blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned
+) -> bool:
+    """Inject T gate, but do not apply corrections.
+
+    Note:
+        Assumes `t_state` is a logical Rz(pi/4)|+> magic state.
+    """
+    a = t_state  # Rename to avoid confusion, since the state will change
+    # Inject (via teleportation)
+    cx(a, blk)
+    # SWAP logical information, so that we can complete the TP by destructively
+    # measuring the resource (which we own)
+    mem_swap(a, blk)
+    return decode(measure_z(a))
+
+
+@guppy
+@no_type_check
+def t(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
+    """Apply T gate via injection.
+
+    Note:
+        Assumes `t_state` is a logical Rz(pi/4)|+> magic state.
+    """
+    meas = _inject_t_non_deterministically(blk, t_state)
+    if meas:
+        x(blk)
+        s(blk)
+
+
+@guppy
+@no_type_check
+def tdg(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
+    """Apply Tdg gate via injection.
+
+    Note:
+        Assumes `t_state` is a logical Rz(pi/4)|+> magic state.
+    """
+    meas = _inject_t_non_deterministically(blk, t_state)
+    if meas:
+        x(blk)
+    else:
+        sdg(blk)
 
 
 @guppy
@@ -151,7 +267,7 @@ def measure_z(blk: LogicalBlock[7] @ owned) -> RawMeasurement[7]:
 @no_type_check
 def decode(m: RawMeasurement[7] @ owned) -> bool:
     """Decode Steane measurement of logical block"""
-    meas = collect_measurements(m.measurements)
+    meas = qlib.collect_measurements(m.measurements)
     synds = get_syndrome(meas)
     logical_meas = parity_check(meas)
     logical_meas ^= synds[0] or synds[1] or synds[2]
@@ -205,18 +321,6 @@ def sdg(blk: LogicalBlock[7]) -> None:
     """Logical S dagger gate on a Steane block."""
     for i in range(7):
         qlib.s(blk.data_qs[i])
-
-
-@guppy
-@no_type_check
-def t(blk: LogicalBlock[7]) -> None:
-    """Logical T gate using teleportation/injection."""
-
-
-@guppy
-@no_type_check
-def tdg(blk: LogicalBlock[7]) -> None:
-    """Logical T dagger gate using teleportation/injection."""
 
 
 @guppy

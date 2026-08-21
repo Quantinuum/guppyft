@@ -5,6 +5,7 @@ from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.builtins import array
 from guppylang.std.lang import comptime
+from guppylang.std.platform import output
 from guppylang.std.quantum import cx, qubit, s, sdg, x, y, z
 
 from guppyft.code.steane import primitives as steane_primitives
@@ -223,3 +224,21 @@ def test_steane_2q_primitives(
         code_definition=STEANE_DEF,
     )
     assert sem == impl
+
+
+def test_t_gate() -> None:
+
+    @guppy
+    def test() -> None:
+        blk = steane_primitives.prep_zero_non_ft()
+        steane_primitives.h(blk)
+        for _ in range(4):
+            a = steane_primitives.prep_t_state_ft().force_check().unwrap()
+            steane_primitives.t(blk, a)
+        steane_primitives.h(blk)
+        res = steane_primitives.measure_z(blk)
+        output("res", steane_primitives.decode(res))
+
+    res = test.emulator(n_qubits=20).run().collated_shots()
+
+    assert res == [{"res": [1]}]
