@@ -17,6 +17,8 @@ fn main() -> Result<()> {
                 extensions::helix::ops::EXTENSION.to_owned(),
                 extensions::std::types::EXTENSION.to_owned(),
                 extensions::std::ops::EXTENSION.to_owned(),
+                extensions::c4::types::EXTENSION.to_owned(),
+                extensions::c4::ops::EXTENSION.to_owned(),
             ]);
 
             args.run_dump(&reg)?;
