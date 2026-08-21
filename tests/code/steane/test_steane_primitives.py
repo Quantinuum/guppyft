@@ -5,7 +5,7 @@ from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.builtins import array
 from guppylang.std.lang import comptime
-from guppylang.std.quantum import cx, qubit, s, sdg, x, y, z
+from guppylang.std.quantum import cx, h, qubit, s, sdg, x, y, z
 
 from guppyft.code.steane import primitives as steane_primitives
 from guppyft.code.steane.primitives import (
@@ -156,6 +156,7 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
         (x, steane_primitives.x),
         (y, steane_primitives.y),
         (z, steane_primitives.z),
+        (h, steane_primitives.h),
         (s, steane_primitives.s),
         (sdg, steane_primitives.sdg),
     ],
