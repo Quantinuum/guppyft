@@ -15,7 +15,7 @@ from guppyft.code.steane.primitives import (
 )
 from guppyft.code.util import LogicalBlock
 from guppyft.code_def import StabilizerCode
-from guppyft.verifier import check_clifford_semantics
+from guppyft.verifier import valid_clifford_implementation
 
 STEANE_DEF = StabilizerCode.from_python_strings(
     num_physical_qubits=7,
@@ -64,7 +64,7 @@ def test_knill_qec_without_errors() -> None:
     def impl_func(block: array[qubit, 7]) -> None:
         with_owned(block, knill_qec)
 
-    assert check_clifford_semantics(
+    assert valid_clifford_implementation(
         specify_identity,
         impl_func,
         code_definition=STEANE_DEF,
@@ -97,7 +97,7 @@ def test_knill_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
     def impl_func(block: array[qubit, 7]) -> None:
         with_owned(block, knill_qec)
 
-    assert check_clifford_semantics(
+    assert valid_clifford_implementation(
         specify_identity,
         impl_func,
         code_definition=STEANE_DEF,
@@ -128,7 +128,7 @@ def test_steane_qec_without_errors() -> None:
     def impl_func(block: array[qubit, 7]) -> None:
         with_owned(block, steane_qec)
 
-    assert check_clifford_semantics(
+    assert valid_clifford_implementation(
         specify_identity,
         impl_func,
         code_definition=STEANE_DEF,
@@ -162,7 +162,7 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
     def impl_func(block: array[qubit, 7]) -> None:
         with_owned(block, steane_qec)
 
-    assert check_clifford_semantics(
+    assert valid_clifford_implementation(
         specify_identity,
         impl_func,
         code_definition=STEANE_DEF,

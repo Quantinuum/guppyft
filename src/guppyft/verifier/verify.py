@@ -213,7 +213,7 @@ def compute_stabilizers_double_block_unitary(
     return stabilizerlist_to_signterms(stab_list)
 
 
-def compute_verification_signterms_single_block_state(
+def compute_tableaux_single_block_state(
     semantic_function: SemanticStabilizerState,
     impl_function: ImplementationStabilizerState,
     code_definition: StabilizerCode,
@@ -257,6 +257,7 @@ def compute_verification_signterms_single_block_state(
     return expanded_semantic_stabilizers, implementation_stabilizers
 
 
+# TODO: can we clean up this nasty signature hacking function?
 def _count_blocks_state(
     semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
@@ -288,7 +289,7 @@ def _count_blocks_state(
         return 1
 
 
-def check_stabilizer_state_semantics(
+def valid_pauli_eigenstate_preparation(
     semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
     code_definition: StabilizerCode,
@@ -297,22 +298,18 @@ def check_stabilizer_state_semantics(
     num_blocks = _count_blocks_state(semantic_function, impl_function)
     match num_blocks:
         case 1:
-            sem_stabilizers, impl_stabilizers = (
-                compute_verification_signterms_single_block_state(
-                    semantic_function,  # type: ignore[arg-type]
-                    impl_function,  # type: ignore[arg-type]
-                    code_definition,
-                    impl_num_ancillas,
-                )
+            sem_stabilizers, impl_stabilizers = compute_tableaux_single_block_state(
+                semantic_function,  # type: ignore[arg-type]
+                impl_function,  # type: ignore[arg-type]
+                code_definition,
+                impl_num_ancillas,
             )
         case 2:
-            sem_stabilizers, impl_stabilizers = (
-                compute_verification_signterms_double_block_state(
-                    semantic_function,  # type: ignore[arg-type]
-                    impl_function,  # type: ignore[arg-type]
-                    code_definition,
-                    impl_num_ancillas,
-                )
+            sem_stabilizers, impl_stabilizers = compute_tableaux_double_block_state(
+                semantic_function,  # type: ignore[arg-type]
+                impl_function,  # type: ignore[arg-type]
+                code_definition,
+                impl_num_ancillas,
             )
         case _:
             raise TypeError(
@@ -327,7 +324,7 @@ def check_stabilizer_state_semantics(
     return sem_stabilizers == impl_stabilizers
 
 
-def compute_verification_signterms_double_block_state(
+def compute_tableaux_double_block_state(
     semantic_function: SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerStateDouble,
     code_definition: StabilizerCode,
@@ -336,8 +333,8 @@ def compute_verification_signterms_double_block_state(
     """Compute tableaux to verify 2 block stabilizer state preparation.
 
     Given a semantic Guppy function acting on 2k qubits and an impl Guppy function
-      acting on 2n qubits, compute a pair of stabilizer tableaux. If the implementation
-      of the semantic function is valid, the two tableaux will be equivalent.
+      acting on 2n qubits, compute a pair of stabilizer tableaux. Note that we will need
+    to canonicalize with SignTerms.canonicalize_all() before we can check for equality.
 
     :param semantic_function: A Guppy function for semantic action
       of a Clifford operator on 2k logical qubits.
@@ -371,7 +368,7 @@ def compute_verification_signterms_double_block_state(
     return expanded_semantic_stabilizers, implementation_stabilizers
 
 
-def compute_verification_signterms_single_block_unitary(
+def compute_tableaux_single_block_unitary(
     semantic_function: SemanticCliffordUnitary,
     impl_function: ImplementationCliffordUnitary,
     code_definition: StabilizerCode,
@@ -380,8 +377,8 @@ def compute_verification_signterms_single_block_unitary(
     """Compute tableaux to verify correctness of Clifford unitary implementation.
 
     Given a semantic Guppy function acting on k qubits and an impl Guppy function
-      acting on n qubits, compute a pair of Clifford tableaux. If the implementation
-      of the semantic function is valid, the two tableaux will be equivalent.
+      acting on n qubits, compute a pair of Clifford tableaux. Note that we will need to
+    canonicalize with SignTerms.canonicalize_all() before we can check for equality.
 
     :param semantic_function: A Guppy function for semantic action
       of a Clifford operator on k logical qubits.
@@ -417,22 +414,22 @@ def compute_verification_signterms_single_block_unitary(
     )
     # Return the two stabilizer tableaux. Note that we will need to canonicalize
     # the tableaux before we can test for equality.
-    # See the check_clifford_semantics function.
+    # See the valid_clifford_implementation function.
     return expanded_semantic_stabilizers, implementation_stabilizers
 
 
-def compute_verification_signterms_double_block_unitary(
+def compute_tableaux_double_block_unitary(
     semantic_function: SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitaryDouble,
     code_definition: StabilizerCode,
     impl_num_ancillas: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
-    """Compute tableaux to verify correctness of 2 block Clifford unitary.
+    """Compute tableaux towards verifying the correctness of 2 block Clifford unitary.
 
     Given a semantic Guppy function acting between two code blocks and an
       impl Guppy function acting on n qubits compute a pair of Clifford tableaux.
-      If the implementation of the semantic function is valid,
-      the two tableaux will be equivalent.
+    Note that we will need to canonicalize with SignTerms.canonicalize_all() before
+      we can check for equality.
 
     :param semantic_function: A Guppy function for semantic action
       of a Clifford operator on two code blocks.
@@ -466,7 +463,7 @@ def compute_verification_signterms_double_block_unitary(
     )
     # Return the two stabilizer tableaux. Note that we will need to canonicalize
     # the tableaux before we can test for equality.
-    # See the check_stabilizer_state_semantics function.
+    # See the valid_pauli_eigenstate_preparation function.
     return expanded_semantic_stabilizers, implementation_stabilizers
 
 
@@ -484,7 +481,7 @@ def _count_blocks_unitary(
     return num_blocks
 
 
-def check_clifford_semantics(
+def valid_clifford_implementation(
     semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
     code_definition: StabilizerCode,
@@ -494,22 +491,18 @@ def check_clifford_semantics(
     num_blocks = _count_blocks_unitary(semantic_function, impl_function)
     match num_blocks:
         case 1:
-            sem_stabilizers, impl_stabilizers = (
-                compute_verification_signterms_single_block_unitary(
-                    semantic_function,  # type: ignore[arg-type]
-                    impl_function,  # type: ignore[arg-type]
-                    code_definition,
-                    impl_num_ancillas,
-                )
+            sem_stabilizers, impl_stabilizers = compute_tableaux_single_block_unitary(
+                semantic_function,  # type: ignore[arg-type]
+                impl_function,  # type: ignore[arg-type]
+                code_definition,
+                impl_num_ancillas,
             )
         case 2:
-            sem_stabilizers, impl_stabilizers = (
-                compute_verification_signterms_double_block_unitary(
-                    semantic_function,  # type: ignore[arg-type]
-                    impl_function,  # type: ignore[arg-type]
-                    code_definition,
-                    impl_num_ancillas,
-                )
+            sem_stabilizers, impl_stabilizers = compute_tableaux_double_block_unitary(
+                semantic_function,  # type: ignore[arg-type]
+                impl_function,  # type: ignore[arg-type]
+                code_definition,
+                impl_num_ancillas,
             )
         case _:
             raise TypeError(
