@@ -11,6 +11,8 @@ from zixy.container.coeffs import Sign
 from zixy.qubit import pauli
 
 N = guppy.nat_var("N")
+N_PHYSICAL = guppy.nat_var("N_PHYSICAL")
+K_LOGICAL = guppy.nat_var("K_LOGICAL")
 
 type SingleBlockUnitary = GuppyFunctionDefinition[[array[qubit, N]], None]  # type: ignore[valid-type]
 type DoubleBlockUnitary = GuppyFunctionDefinition[
@@ -20,9 +22,6 @@ type SingleBlockState = GuppyFunctionDefinition[[], array[qubit, N]]  # type: ig
 type DoubleBlockState = GuppyFunctionDefinition[
     [], tuple[array[qubit, N], array[qubit, N]]  # type: ignore[valid-type]
 ]
-
-N_PHYSICAL = guppy.nat_var("N_PHYSICAL")
-K_LOGICAL = guppy.nat_var("K_LOGICAL")
 
 type SemanticStabilizerState = GuppyFunctionDefinition[
     [], array[qubit, K_LOGICAL]  # type: ignore[valid-type]
