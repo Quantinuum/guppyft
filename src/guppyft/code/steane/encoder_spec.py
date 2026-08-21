@@ -23,6 +23,7 @@ from guppyft.code.steane.primitives import (
     h,
     knill_qec_cycle,
     measure_z,
+    prep_h_non_ft,
     prep_zero_ft,
     s,
     sdg,
@@ -47,6 +48,7 @@ from guppyft.encode import (
 )
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
+from guppyft.logical import steane as steane_logical
 
 N = guppy.nat_var("N")
 
@@ -186,7 +188,7 @@ class SteaneBuilder:
                 7, 1, comptime(self._factory_confs.zero.size)
             ]
             magic_state_factory: StateFactory[  # type: ignore[valid-type,type-arg]
-                7, 5, comptime(self._factory_confs.magic.size)
+                7, 2, comptime(self._factory_confs.magic.size)
             ]
 
             @guppy
@@ -279,6 +281,21 @@ class SteaneBuilder:
                 return state, (blk_id, qb_id)
 
             return map_global(_impl)
+
+        @guppy
+        @no_type_check
+        @link_name("guppyft.steane._prep_magic_for_t_like")
+        def _prep_magic_for_t_like() -> tuple[tuple[int, int]]:
+            # @guppy
+            # def _impl(
+            #     state: STATE @ owned
+            # ) -> tuple[STATE, LogicalBlock[7]]:
+            #     blk = state.magic_state_factory.get_state()
+            #
+            #     return state, blk
+            #
+            # return map_global(_impl)
+            return ((0, 0),)
 
         @guppy
         @no_type_check
@@ -430,8 +447,8 @@ class SteaneBuilder:
 
         @guppy
         @no_type_check
-        @link_name("guppyft.steane._t")
-        def _t(q: tuple[int, int]) -> tuple[tuple[int, int]]:
+        @link_name("guppyft.steane._inject_t")
+        def _t(q: tuple[int, int], a: tuple[int, int]) -> tuple[tuple[int, int]]:
             @guppy
             def _impl(
                 state: STATE @ owned, q: tuple[int, int]
@@ -450,7 +467,7 @@ class SteaneBuilder:
 
         @guppy
         @no_type_check
-        @link_name("guppyft.steane._tdg")
+        @link_name("guppyft.steane._inject_tdg")
         def _tdg(q: tuple[int, int]) -> tuple[tuple[int, int]]:
             @guppy
             def _impl(
@@ -515,6 +532,12 @@ class SteaneBuilder:
                     comptime(self._factory_confs.zero.max_attempts),
                     empty_queue(),
                 ),
+                # Magic state factory
+                StateFactory(
+                    prep_h_non_ft,
+                    comptime(self._factory_confs.magic.max_attempts),
+                    empty_queue(),
+                ),
             )
 
         @guppy.declare
@@ -532,6 +555,7 @@ class SteaneBuilder:
                     blk.unwrap_nothing()
 
             state.zero_state_factory.discard()
+            state.magic_state_factory.discard()
 
         def build_wrapper(
             func: GuppyFunctionDefinition[[], None],
@@ -549,6 +573,7 @@ class SteaneBuilder:
             state_gen,
             state_discard,
             _prep_zero,
+            _prep_magic_for_t_like,
             _measure_z,
             _free,
             decode,
@@ -574,6 +599,10 @@ class SteaneBuilder:
                 ("guppyft.steane.ops", "h"): "guppyft.steane._h",
                 ("guppyft.steane.ops", "s"): "guppyft.steane._s",
                 ("guppyft.steane.ops", "sdg"): "guppyft.steane._sdg",
+                (
+                    "guppyft.steane.ops",
+                    "prep_magic_for_t_like",
+                ): "guppyft.steane._prep_magic_for_t_like",
                 (
                     "guppyft.steane.ops",
                     "inject_magic_for_t",
@@ -623,10 +652,14 @@ class SteaneBuilder:
                 ("tket.quantum", "H"): ("guppyft.steane.ops", "h", []),
                 ("tket.quantum", "Z"): ("guppyft.steane.ops", "z", []),
                 ("tket.quantum", "X"): ("guppyft.steane.ops", "x", []),
-                ("tket.quantum", "Y"): ("guppyft.steane.ops", "y", []),
+                # ("tket.quantum", "Y"): ("guppyft.steane.ops", "y", []),
                 ("tket.quantum", "S"): ("guppyft.steane.ops", "s", []),
                 ("tket.quantum", "Sdg"): ("guppyft.steane.ops", "sdg", []),
                 ("tket.quantum", "CX"): ("guppyft.steane.ops", "cx", []),
+            },
+            compound_op_replacements={
+                ("tket.quantum", "T"): steane_logical.t,
+                ("tket.quantum", "Tdg"): steane_logical.tdg,
             },
             ty_replacements={
                 ("prelude", "qubit"): ("guppyft.steane.types", "qubit"),

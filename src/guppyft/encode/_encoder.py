@@ -1,6 +1,8 @@
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any, Self
 
+from guppylang.defs import GuppyFunctionDefinition
 from hugr import Hugr
 from hugr.ext import ExtensionRegistry
 from hugr.passes.composable import ComposablePass, PassResult, implement_pass_run
@@ -23,6 +25,11 @@ class ReplaceEncoder(ComposablePass):
     to a target `(extension_name, op_name, args)` triple, where `args` is the
     list of type args (integers or strings) used to instantiate the target
     op."""
+    compound_op_replacements: dict[
+        tuple[str, str], Hugr[Any] | Callable[[Any], Any]
+    ] = field(default_factory=dict)
+    """Maps each source `(extension_name, op_name)` pair (taking no type args)
+    to a target HUGR or GuppyFunctionDefinition."""
     ty_replacements: dict[tuple[str, str], tuple[str, str]] = field(
         default_factory=dict
     )
@@ -50,8 +57,29 @@ class ReplaceEncoder(ComposablePass):
             extension_registry_to_json(self.extensions) if self.extensions else None
         )
         rs_hugr = RsHugr.from_bytes(hugr.to_bytes())
+        rs_compound_op_replacements = {
+            op: _to_rs_hugr(repl) for op, repl in self.compound_op_replacements.items()
+        }
         _replace_encoder(
-            rs_hugr, self.op_replacements, self.ty_replacements, registry_str
+            rs_hugr,
+            self.op_replacements,
+            rs_compound_op_replacements,
+            self.ty_replacements,
+            registry_str,
         )
         new_hugr = Hugr.from_bytes(rs_hugr.to_bytes())
         return PassResult.for_pass(self, hugr=new_hugr, inplace=inplace, result=None)
+
+
+def _to_rs_hugr(repl: Hugr[Any] | Callable[[Any], Any]) -> RsHugr:
+    """Converts a compound op replacement (either a raw `Hugr` or a
+    `GuppyFunctionDefinition`) into an `RsHugr` for passing to the Rust binding."""
+    match repl:
+        case GuppyFunctionDefinition():
+            return RsHugr.from_bytes(repl.compile_function().modules[0].to_bytes())
+        case Hugr():
+            return RsHugr.from_bytes(repl.to_bytes())
+        case _:
+            raise TypeError(
+                f"Expected Hugr or GuppyFunctionDefinition, got {type(repl)}: {repl}"
+            )

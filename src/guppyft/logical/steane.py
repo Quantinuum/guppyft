@@ -166,3 +166,17 @@ def cx(q0: "Qubit", q1: "Qubit") -> None:
 @no_type_check
 def swap(q0: "Qubit", q1: "Qubit") -> None:
     """SWAP gate."""
+
+
+@guppy
+def t(q: Qubit) -> None:
+    """Implement a T gate using magic state injection."""
+    a = prep_magic_for_t_like()
+    inject_magic_for_t(q, a)
+
+
+@guppy
+def tdg(q: Qubit) -> None:
+    """Implement a Tdg gate using magic state injection."""
+    a = prep_magic_for_t_like()
+    inject_magic_for_t(q, a)

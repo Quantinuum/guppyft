@@ -52,10 +52,11 @@ mod _bindings {
     }
 
     #[pyfunction]
-    #[pyo3(signature = (rs_hugr, op_replacements, ty_replacements, extensions=None))]
+    #[pyo3(signature = (rs_hugr, op_replacements, compound_op_replacements, ty_replacements, extensions=None))]
     fn _replace_encoder(
         rs_hugr: &mut RsHugr,
         op_replacements: BTreeMap<(String, String), (String, String, Vec<PyTypeArgValue>)>,
+        compound_op_replacements: BTreeMap<(String, String), RsHugr>,
         ty_replacements: BTreeMap<(String, String), (String, String)>,
         extensions: Option<String>,
     ) -> PyResult<()> {
@@ -107,6 +108,18 @@ mod _bindings {
 
             pass.set_replace_parametrized_op(src_def, move |_, _| {
                 Ok(Some(NodeTemplate::SingleOp(tgt.clone().into())))
+            });
+        }
+
+        for ((src_ext, src_op), replacement_hugr) in compound_op_replacements.iter() {
+            let Some(src_def) = registry.get(src_ext).and_then(|e| e.get_op(src_op)) else {
+                continue;
+            };
+            let template_hugr = replacement_hugr.hugr.clone();
+            pass.set_replace_parametrized_op(src_def, move |_, _| {
+                Ok(Some(NodeTemplate::CompoundOp(Box::new(
+                    template_hugr.clone(),
+                ))))
             });
         }
 

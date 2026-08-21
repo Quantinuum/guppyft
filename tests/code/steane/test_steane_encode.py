@@ -3,7 +3,7 @@ from typing import Any
 import pytest
 from guppylang import guppy
 from guppylang.std.platform import output
-from guppylang.std.quantum import cx, discard, h, measure, qubit, x, y, z
+from guppylang.std.quantum import cx, discard, h, measure, qubit, t, tdg, x, y, z
 from hugr import Hugr
 from hugr.package import Package
 from selene_hugr_qis_compiler import check_hugr
@@ -152,3 +152,14 @@ def test_annotate_steane_encoding() -> None:
         "encoding": "steane",
         "params": {"n_blocks": 4},
     }
+
+
+def test_steane_t_encoder() -> None:
+    @guppy
+    def main() -> None:
+        q = qubit()
+        t(q)
+        tdg(q)
+        discard(q)
+
+    SteaneBuilder().build(n_blocks=1).encode(main.compile())
