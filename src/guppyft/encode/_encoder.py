@@ -40,6 +40,14 @@ class ReplaceEncoder(ComposablePass):
     """Optional JSON-encoded list of additional extension definitions, used to
     resolve target ops/types that are not already registered on the input Hugr."""
 
+    def __post_init__(self) -> None:
+        duplicates = self.op_replacements.keys() & self.compound_op_replacements.keys()
+        if duplicates:
+            raise ValueError(
+                "Duplicate op replacement(s) found in both `op_replacements` and "
+                f"`compound_op_replacements`: {sorted(duplicates)}"
+            )
+
     def run(self, hugr: Hugr[Any], *, inplace: bool = True) -> PassResult:
         return implement_pass_run(
             self,
