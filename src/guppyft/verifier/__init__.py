@@ -15,6 +15,9 @@ Verifying Cliffords with :py:func:`valid_clifford_implementation`
 
 The same features are available for :py:func:`valid_pauli_eigenstate_preparation`.
 
+Steane code example
+===================
+
 .. code-block:: python
 
     from guppylang import guppy
