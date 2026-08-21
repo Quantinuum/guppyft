@@ -7,5 +7,7 @@ pub mod steane;
 
 pub mod std;
 
+pub mod c4;
+
 #[cfg(feature = "cli")]
 pub mod cli;
