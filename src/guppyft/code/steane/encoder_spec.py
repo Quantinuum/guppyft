@@ -290,7 +290,7 @@ class SteaneBuilder:
         @no_type_check
         @link_name("guppyft.steane._prep_magic_for_t_like")
         def _prep_magic_for_t_like() -> tuple[tuple[int, int]]:
-            return ((0, 0),)
+            return ((-1, -1),)
 
         @guppy
         @no_type_check
