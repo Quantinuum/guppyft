@@ -77,6 +77,13 @@ class _SteaneFactoryConf:
     zero: RUSStateFactoryConf = field(default_factory=RUSStateFactoryConf)
 
 
+@dataclass(frozen=True, kw_only=True)
+class _SteaneFactoryConf:
+    """Configuration for each of the Steane state factories."""
+
+    zero: RUSStateFactoryConf = field(default_factory=lambda: RUSStateFactoryConf(1, 5))
+
+
 class QECStyle(Enum):
     """The style of syndrome extraction to use during a QEC cycle."""
 
