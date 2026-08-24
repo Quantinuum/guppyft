@@ -151,7 +151,7 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
 
 
 @pytest.mark.parametrize(
-    ("phys_def", "logical_def"),
+    ("specify_def", "implement_def"),
     [
         (x, steane_primitives.x),
         (y, steane_primitives.y),
@@ -162,20 +162,20 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
     ],
 )
 def test_steane_1q_primitives(
-    phys_def: GuppyFunctionDefinition[[Any], None],
-    logical_def: GuppyFunctionDefinition[[Any], None],
+    specify_def: GuppyFunctionDefinition[[Any], None],
+    implement_def: GuppyFunctionDefinition[[Any], None],
 ) -> None:
 
     @guppy
     @no_type_check
     def specify_func(q: array[qubit, 1]) -> None:
-        phys_def(q[0])
+        specify_def(q[0])
 
     @guppy
     @no_type_check
     def impl_func(arr: array[qubit, 7]) -> None:
         block = LogicalBlock(array(arr.take(i) for i in range(7)))
-        logical_def(block)
+        implement_def(block)
         for i in range(7):
             arr.put(block.data_qs.take(i), i)
         block.discard()
@@ -189,20 +189,20 @@ def test_steane_1q_primitives(
 
 
 @pytest.mark.parametrize(
-    ("phys_def", "logical_def"),
+    ("specify_def", "implement_def"),
     [
         (cx, steane_primitives.cx),
     ],
 )
 def test_steane_2q_primitives(
-    phys_def: GuppyFunctionDefinition[[Any], None],
-    logical_def: GuppyFunctionDefinition[[Any], None],
+    specify_def: GuppyFunctionDefinition[[Any], None],
+    implement_def: GuppyFunctionDefinition[[Any], None],
 ) -> None:
 
     @guppy
     @no_type_check
     def specify_func(q0: array[qubit, 1], q1: array[qubit, 1]) -> None:
-        phys_def(q0[0], q1[0])
+        specify_def(q0[0], q1[0])
 
     @guppy
     @no_type_check
@@ -210,7 +210,7 @@ def test_steane_2q_primitives(
         blk0 = LogicalBlock(array(arr0.take(i) for i in range(7)))
         blk1 = LogicalBlock(array(arr1.take(i) for i in range(7)))
 
-        logical_def(blk0, blk1)
+        implement_def(blk0, blk1)
 
         for i in range(7):
             arr0.put(blk0.data_qs.take(i), i)
