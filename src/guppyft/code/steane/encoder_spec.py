@@ -2,7 +2,7 @@ from collections import defaultdict
 from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from enum import Enum, auto
-from typing import Any, Self, no_type_check
+from typing import Any, Self, cast, no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -123,11 +123,30 @@ class SteaneInstance:
 
     def encode(self, pkg: Package) -> Package:
         """Encode a computational package with the Steane instance."""
+        self.check_encoding(pkg)
         return encode(pkg, self._spec)
 
     def implement_ops(self, pkg: Package) -> Package:
         """Implement logical ops in `pkg` using this instance's op implementations."""
         return implement_ops(pkg, self._spec.implement_spec)
+
+    def check_encoding(self, hugr: Package) -> None:
+        """Check that a HUGR package can be encoded.
+
+        Note: this test is limited to the `tket.quantum` extension.
+        """
+        encoder_pass = cast("ReplaceEncoder", self._spec.to_logical)
+
+        for node, data in hugr.modules[0].nodes():
+            op_qual_name = data.op.name()
+            if "tket.quantum" in op_qual_name:
+                op_name = op_qual_name.split(".")[-1]
+
+                if ("tket.quantum", op_name) not in encoder_pass.op_replacements:
+                    raise ValueError(
+                        f"Error encoding `{op_qual_name}` at node {node}. "
+                        "Operation not yet supported during encoding."
+                    )
 
     def emulator(
         self,
