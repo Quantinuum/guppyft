@@ -24,9 +24,12 @@ from guppyft.code.steane.primitives import (
     knill_qec_cycle,
     measure_z,
     prep_zero_ft,
+    s,
+    sdg,
     steane_x_qec_cycle,
     steane_z_qec_cycle,
     x,
+    y,
     z,
 )
 from guppyft.code.util import LogicalBlock, RawMeasurement
@@ -324,6 +327,25 @@ class SteaneBuilder:
 
         @guppy
         @no_type_check
+        @link_name("guppyft.steane._y")
+        def _y(q: tuple[int, int]) -> tuple[tuple[int, int]]:
+            @guppy
+            def _impl(
+                state: STATE @ owned, q: tuple[int, int]
+            ) -> tuple[STATE, tuple[int, int]]:
+                blk_id, _ = q
+                blk = state.take_block(blk_id)
+                y(blk)
+                state.put_block(blk_id, blk)
+
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs["Y"]))
+
+                return state, q
+
+            return map_global(_impl, q)
+
+        @guppy
+        @no_type_check
         @link_name("guppyft.steane._z")
         def _z(q: tuple[int, int]) -> tuple[tuple[int, int]]:
             @guppy
@@ -355,6 +377,44 @@ class SteaneBuilder:
                 state.put_block(blk_id, blk)
 
                 state.qec_policy(array(blk_id), comptime(qec_policy.costs["H"]))
+
+                return state, q
+
+            return map_global(_impl, q)
+
+        @guppy
+        @no_type_check
+        @link_name("guppyft.steane._s")
+        def _s(q: tuple[int, int]) -> tuple[tuple[int, int]]:
+            @guppy
+            def _impl(
+                state: STATE @ owned, q: tuple[int, int]
+            ) -> tuple[STATE, tuple[int, int]]:
+                blk_id, _ = q
+                blk = state.take_block(blk_id)
+                s(blk)
+                state.put_block(blk_id, blk)
+
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs["S"]))
+
+                return state, q
+
+            return map_global(_impl, q)
+
+        @guppy
+        @no_type_check
+        @link_name("guppyft.steane._sdg")
+        def _sdg(q: tuple[int, int]) -> tuple[tuple[int, int]]:
+            @guppy
+            def _impl(
+                state: STATE @ owned, q: tuple[int, int]
+            ) -> tuple[STATE, tuple[int, int]]:
+                blk_id, _ = q
+                blk = state.take_block(blk_id)
+                sdg(blk)
+                state.put_block(blk_id, blk)
+
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs["Sdg"]))
 
                 return state, q
 
@@ -445,8 +505,11 @@ class SteaneBuilder:
             _free,
             decode,
             _x,
+            _y,
             _z,
             _h,
+            _s,
+            _sdg,
             _cx,
         ).compile()
 
@@ -456,8 +519,11 @@ class SteaneBuilder:
                 ("guppyft.steane.ops", "measure_z"): "guppyft.steane._measure_z",
                 ("guppyft.steane.ops", "free"): "guppyft.steane._free",
                 ("guppyft.steane.ops", "x"): "guppyft.steane._x",
+                ("guppyft.steane.ops", "y"): "guppyft.steane._y",
                 ("guppyft.steane.ops", "z"): "guppyft.steane._z",
                 ("guppyft.steane.ops", "h"): "guppyft.steane._h",
+                ("guppyft.steane.ops", "s"): "guppyft.steane._s",
+                ("guppyft.steane.ops", "sdg"): "guppyft.steane._sdg",
                 ("guppyft.steane.ops", "cx"): "guppyft.steane._cx",
                 ("guppyft.steane.ops", "decode"): "guppyft.steane.decode",
             }
@@ -496,9 +562,12 @@ class SteaneBuilder:
                 ),
                 ("tket.quantum", "QFree"): ("guppyft.steane.ops", "free", []),
                 ("tket.measurement", "Read"): ("guppyft.steane.ops", "decode", []),
-                ("tket.quantum", "H"): ("guppyft.steane.ops", "h", []),
-                ("tket.quantum", "Z"): ("guppyft.steane.ops", "z", []),
                 ("tket.quantum", "X"): ("guppyft.steane.ops", "x", []),
+                ("tket.quantum", "Y"): ("guppyft.steane.ops", "y", []),
+                ("tket.quantum", "Z"): ("guppyft.steane.ops", "z", []),
+                ("tket.quantum", "H"): ("guppyft.steane.ops", "h", []),
+                ("tket.quantum", "S"): ("guppyft.steane.ops", "s", []),
+                ("tket.quantum", "Sdg"): ("guppyft.steane.ops", "sdg", []),
                 ("tket.quantum", "CX"): ("guppyft.steane.ops", "cx", []),
             },
             ty_replacements={

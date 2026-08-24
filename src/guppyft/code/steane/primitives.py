@@ -7,7 +7,6 @@ from guppylang.library import link_name
 from guppylang.std import quantum as qlib
 from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.mem import mem_swap
-from guppylang.std.quantum import collect_measurements
 
 from guppyft.code._state_factory import PreBlock
 from guppyft.code.util import LogicalBlock, RawMeasurement, parity_check
@@ -145,7 +144,7 @@ def measure_z(blk: LogicalBlock[7] @ owned) -> RawMeasurement[7]:
 @no_type_check
 def decode(m: RawMeasurement[7] @ owned) -> bool:
     """Decode Steane measurement of logical block"""
-    meas = collect_measurements(m.measurements)
+    meas = qlib.collect_measurements(m.measurements)
     synds = get_syndrome(meas)
     logical_meas = parity_check(meas)
     logical_meas ^= synds[0] or synds[1] or synds[2]
@@ -156,13 +155,26 @@ def decode(m: RawMeasurement[7] @ owned) -> bool:
 @guppy
 @no_type_check
 def x(blk: LogicalBlock[7]) -> None:
+    """Logical X gate on a Steane block."""
     for i in range(7):
         qlib.x(blk.data_qs[i])
 
 
 @guppy
 @no_type_check
+def y(blk: LogicalBlock[7]) -> None:
+    """Logical Y gate on a Steane block."""
+    # Note:
+    # This actually implements a logical -Y gate but as it is a global phase
+    # it does not matter here.
+    for i in range(7):
+        qlib.y(blk.data_qs[i])
+
+
+@guppy
+@no_type_check
 def z(blk: LogicalBlock[7]) -> None:
+    """Logical Z gate on a Steane block."""
     for i in range(7):
         qlib.z(blk.data_qs[i])
 
@@ -170,12 +182,30 @@ def z(blk: LogicalBlock[7]) -> None:
 @guppy
 @no_type_check
 def h(blk: LogicalBlock[7]) -> None:
+    """Logical H gate on a Steane block."""
     for i in range(7):
         qlib.h(blk.data_qs[i])
 
 
 @guppy
 @no_type_check
+def s(blk: LogicalBlock[7]) -> None:
+    """Logical S gate on a Steane block."""
+    for i in range(7):
+        qlib.sdg(blk.data_qs[i])
+
+
+@guppy
+@no_type_check
+def sdg(blk: LogicalBlock[7]) -> None:
+    """Logical S dagger gate on a Steane block."""
+    for i in range(7):
+        qlib.s(blk.data_qs[i])
+
+
+@guppy
+@no_type_check
 def cx(ctl: LogicalBlock[7], tgt: LogicalBlock[7]) -> None:
+    """Logical CX gate between two Steane blocks."""
     for i in range(7):
         qlib.cx(ctl.data_qs[i], tgt.data_qs[i])

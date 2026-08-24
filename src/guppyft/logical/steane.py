@@ -61,6 +61,12 @@ class Qubit:
 
     @guppy
     @no_type_check
+    def y(self: "Qubit") -> None:
+        """Y gate."""
+        y(self)
+
+    @guppy
+    @no_type_check
     def z(self: "Qubit") -> None:
         """Z gate."""
         z(self)
@@ -112,6 +118,12 @@ def measure_z(self: "Qubit" @ owned) -> Measurement:
 @no_type_check
 def x(qubit: Qubit) -> None:
     """X gate."""
+
+
+@hugr_op(steane_op("y"))
+@no_type_check
+def y(qubit: Qubit) -> None:
+    """Y gate."""
 
 
 @hugr_op(steane_op("z"))
