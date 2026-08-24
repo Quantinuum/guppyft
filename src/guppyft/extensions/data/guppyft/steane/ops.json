@@ -1,5 +1,5 @@
 {
-  "version": "0.1.1",
+  "version": "0.1.2",
   "name": "guppyft.steane.ops",
   "types": {},
   "operations": {
@@ -424,10 +424,41 @@
       },
       "binary": false
     },
+    "y": {
+      "extension": "guppyft.steane.ops",
+      "name": "y",
+      "description": "Z gate.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.steane.types",
+              "extension_version": "0.1.1",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.steane.types",
+              "extension_version": "0.1.1",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
     "z": {
       "extension": "guppyft.steane.ops",
       "name": "z",
-      "description": "Z gate.",
+      "description": "Y gate.",
       "signature": {
         "params": [],
         "body": {
