@@ -3,6 +3,7 @@ name = "guppyft"
 version = "0.0.5"
 description = "Tools for fault-tolerant quantum computing in the Guppy language"
 requires-python = ">=3.13,<4"
+readme = "README.md"
 license = { file = "LICENCE" }
 authors = [
     { name = "TKET development team", email = "tket-support@quantinuum.com" },
