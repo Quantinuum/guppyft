@@ -287,6 +287,9 @@ def x(blk: LogicalBlock[7]) -> None:
 @no_type_check
 def y(blk: LogicalBlock[7]) -> None:
     """Logical Y gate on a Steane block."""
+    # Note:
+    # This actually implements a logical -Y gate but as it is a global phase
+    # it does not matter here.
     for i in range(7):
         qlib.y(blk.data_qs[i])
 

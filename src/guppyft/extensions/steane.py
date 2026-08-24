@@ -111,6 +111,18 @@ class SteaneOpsExtension:
         return self.x_def.instantiate([])
 
     @functools.cached_property
+    def y_def(self) -> OpDef:
+        """Apply a Y gate to one qubit.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `y`."""
+        return self().get_op("y")
+
+    def y(self) -> ExtOp:
+        """Apply an Y gate to one qubit."""
+        return self.y_def.instantiate([])
+
+    @functools.cached_property
     def z_def(self) -> OpDef:
         """Apply a Z gate to one qubit.
 
