@@ -11,6 +11,7 @@ from guppylang.std.quantum import cx, h, qubit, s, sdg, x, y, z
 from guppyft.code.steane import primitives as steane_primitives
 from guppyft.code.steane.primitives import (
     knill_qec_cycle,
+    measure_syndromes,
     prep_zero_non_ft,
     steane_x_qec_cycle,
     steane_z_qec_cycle,
@@ -147,6 +148,28 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
         impl_func,
         code_definition=STEANE_DEF,
         num_ancilla_qubits=7,
+    )
+    assert sem == impl
+
+
+def test_steane_measure_syndromes() -> None:
+
+    @guppy
+    @no_type_check
+    def impl_func(arr: array[qubit, 7]) -> None:
+        block = LogicalBlock(array(arr.take(i) for i in range(7)))
+
+        measure_syndromes(block)
+
+        for i in range(7):
+            arr.put(block.data_qs.take(i), i)
+        block.discard()
+
+    sem, impl = compute_verification_signterms_single_block_unitary(
+        specify_identity,
+        impl_func,
+        code_definition=STEANE_DEF,
+        num_ancilla_qubits=3,
     )
     assert sem == impl
 

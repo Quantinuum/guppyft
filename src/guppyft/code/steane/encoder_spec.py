@@ -188,7 +188,7 @@ class SteaneBuilder:
                 7, 1, comptime(self._factory_confs.zero.size)
             ]
             magic_state_factory: StateFactory[  # type: ignore[valid-type,type-arg]
-                7, 2, comptime(self._factory_confs.magic.size)
+                7, 8, comptime(self._factory_confs.magic.size)
             ]
 
             @guppy

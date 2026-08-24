@@ -56,6 +56,67 @@ def prep_zero_ft() -> PreBlock[7, 1]:
 
 @guppy
 @no_type_check
+def _syndrome_helper(
+    a: array[qlib.qubit, 3],
+    blk: LogicalBlock[7],
+    idx: tuple[int, int, int],
+    reverse_cx: bool,
+) -> None:
+    """Helper function to perform the cx operations during syndrome extraction."""
+
+    if reverse_cx:
+        qlib.cx(blk[idx[0]], a[0])
+        qlib.cx(a[1], blk[idx[1]])
+        qlib.cx(a[2], blk[idx[2]])
+    else:
+        qlib.cx(a[0], blk[idx[0]])
+        qlib.cx(blk[idx[1]], a[1])
+        qlib.cx(blk[idx[2]], a[2])
+
+
+@guppy
+@no_type_check
+def measure_syndromes(blk: LogicalBlock[7]) -> array[qlib.Measurement, 6]:
+    """Syndrome measurement using Figure 5. from Reichardt arXiv:1804.06995.
+
+    Qubit index mapping: [0, 4, 1, 6, 3, 5, 2]
+    """
+
+    # Prepare ancilla state
+    a_xzz = array(qlib.qubit() for _ in range(3))
+    qlib.h(a_xzz[0])
+
+    _syndrome_helper(a_xzz, blk, (3, 2, 5), False)
+    qlib.cx(a_xzz[0], a_xzz[2])
+    _syndrome_helper(a_xzz, blk, (0, 3, 4), False)
+    _syndrome_helper(a_xzz, blk, (1, 6, 2), False)
+    qlib.cx(a_xzz[0], a_xzz[1])
+    _syndrome_helper(a_xzz, blk, (2, 5, 1), False)
+
+    qlib.h(a_xzz[0])
+    m_xzz = qlib.measure_array(a_xzz)
+
+    # Prepare ancilla state
+    a_zxx = array(qlib.qubit() for _ in range(3))
+    qlib.h(a_zxx[1])
+    qlib.h(a_zxx[2])
+
+    _syndrome_helper(a_zxx, blk, (3, 2, 5), True)
+    qlib.cx(a_zxx[2], a_zxx[0])
+    _syndrome_helper(a_zxx, blk, (0, 3, 4), True)
+    _syndrome_helper(a_zxx, blk, (1, 6, 2), True)
+    qlib.cx(a_zxx[1], a_zxx[0])
+    _syndrome_helper(a_zxx, blk, (2, 5, 1), True)
+
+    qlib.h(a_zxx[1])
+    qlib.h(a_zxx[2])
+    m_zxx = qlib.measure_array(a_zxx)
+
+    return array(m_xzz[0], m_xzz[1], m_xzz[2], m_zxx[0], m_zxx[1], m_zxx[2])
+
+
+@guppy
+@no_type_check
 def measure_H_operator(blk: LogicalBlock[7]) -> array[qlib.Measurement, 2]:
     """Fault-tolerant measurement of the logical H operator on a Steane block."""
     # Prepare Bell state ancilla
@@ -67,7 +128,7 @@ def measure_H_operator(blk: LogicalBlock[7]) -> array[qlib.Measurement, 2]:
     for tgt in range(7):
         qlib.ch(
             a[tgt % 2],  # Alternate control qubit for parallelisation
-            blk.data_qs[tgt],
+            blk[tgt],
         )
 
     # Measure ancilla
@@ -78,7 +139,7 @@ def measure_H_operator(blk: LogicalBlock[7]) -> array[qlib.Measurement, 2]:
 
 @guppy
 @no_type_check
-def prep_h_non_ft() -> PreBlock[7, 2]:
+def prep_h_non_ft() -> PreBlock[7, 8]:
     """Non-fault-tolerant preparation of an |H> = Ry(pi/4)|0> magic state on
     a Steane block.
 
@@ -110,14 +171,20 @@ def prep_h_non_ft() -> PreBlock[7, 2]:
     for ctl, tgt in cx_pairs:
         qlib.cx(blk.data_qs[ctl], blk.data_qs[tgt])
 
-    m = measure_H_operator(blk)
+    m_h = measure_H_operator(blk)
+
+    m_syn = measure_syndromes(blk)
+
+    m = array(
+        m_h[0], m_h[1], m_syn[0], m_syn[1], m_syn[2], m_syn[3], m_syn[4], m_syn[5]
+    )
 
     return PreBlock(blk, m)
 
 
 @guppy
 @no_type_check
-def prep_t_state_ft() -> PreBlock[7, 2]:
+def prep_t_state_ft() -> PreBlock[7, 8]:
     """Attempt to prepare an Rz(pi/4)|+> logical state on a Steane block."""
     # Attempt |H> = Ry(pi/4)|0> state preparation
     preblock = prep_h_non_ft()

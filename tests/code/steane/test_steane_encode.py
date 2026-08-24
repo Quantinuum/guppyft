@@ -201,7 +201,7 @@ def test_t_encoder_smoke() -> None:
     res = (
         SteaneBuilder()
         .build(n_blocks=1)
-        .emulator(main.compile(), n_qubits=16)
+        .emulator(main.compile(), n_qubits=17)
         .run()
         .collated_shots()
     )
