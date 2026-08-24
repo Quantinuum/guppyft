@@ -17,8 +17,7 @@ from guppyft.code.steane.primitives import (
 from guppyft.code.util import LogicalBlock
 from guppyft.code_def import StabilizerCode
 from guppyft.verifier import (
-    compute_verification_signterms_double_block_unitary,
-    compute_verification_signterms_single_block_unitary,
+    valid_clifford_implementation,
 )
 
 STEANE_DEF = StabilizerCode.from_python_strings(
@@ -138,7 +137,12 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
             arr.put(block.data_qs.take(i), i)
         block.discard()
 
-    assert sem == impl
+    assert valid_clifford_implementation(
+        specify_identity,
+        impl_func,
+        code_definition=STEANE_DEF,
+        impl_num_ancillas=7,
+    )
 
 
 @pytest.mark.parametrize(
@@ -171,12 +175,7 @@ def test_steane_1q_primitives(
             arr.put(block.data_qs.take(i), i)
         block.discard()
 
-    sem, impl = compute_verification_signterms_single_block_unitary(
-        specify_func,
-        impl_func,
-        code_definition=STEANE_DEF,
-    )
-    assert sem == impl
+    assert valid_clifford_implementation(specify_func, impl_func, STEANE_DEF)
 
 
 @pytest.mark.parametrize(
@@ -209,9 +208,4 @@ def test_steane_2q_primitives(
         blk0.discard()
         blk1.discard()
 
-    sem, impl = compute_verification_signterms_double_block_unitary(
-        specify_func,
-        impl_func,
-        code_definition=STEANE_DEF,
-    )
-    assert sem == impl
+    assert valid_clifford_implementation(specify_func, impl_func, STEANE_DEF)
