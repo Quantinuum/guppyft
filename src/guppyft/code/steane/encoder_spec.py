@@ -227,7 +227,7 @@ class SteaneBuilder:
                     if self.qec_counter[i] >= comptime(qec_policy.threshold):
                         blk = self.take_block(i)
 
-                        qec_cycle(self, blk)
+                        qec_cycle_def(self, blk)
 
                         self.put_block(i, blk)
                         self.qec_counter[i] = 0.0
@@ -237,7 +237,7 @@ class SteaneBuilder:
 
                 @guppy
                 @no_type_check
-                def qec_cycle(state: STATE, q: LogicalBlock[7]) -> None:
+                def qec_cycle_def(state: STATE, q: LogicalBlock[7]) -> None:
                     # Allocate new blocks for the Bell state
                     ancilla0 = state.zero_state_factory.get_state()
                     ancilla1 = state.zero_state_factory.get_state()
@@ -247,11 +247,33 @@ class SteaneBuilder:
 
                 @guppy
                 @no_type_check
-                def qec_cycle(state: STATE, q: LogicalBlock[7]) -> None:
+                def qec_cycle_def(state: STATE, q: LogicalBlock[7]) -> None:
                     ancillaX = state.zero_state_factory.get_state()
                     steane_x_qec_cycle(q, ancillaX)
                     ancillaZ = state.zero_state_factory.get_state()
                     steane_z_qec_cycle(q, ancillaZ)
+
+        @guppy
+        @no_type_check
+        @link_name("guppyft.steane._qec_cycle")
+        def _qec_cycle(q: tuple[int, int]) -> tuple[tuple[int, int]]:
+
+            @guppy
+            @no_type_check
+            def _impl(
+                state: STATE @ owned, q: tuple[int, int]
+            ) -> tuple[STATE, tuple[int, int]]:
+                blk_id, _ = q
+                blk = state.take_block(blk_id)
+
+                qec_cycle_def(state, blk)
+
+                state.put_block(blk_id, blk)
+                state.qec_counter[blk_id] = 0.0
+
+                return state, q
+
+            return (q,)
 
         # TODO Defining the primitives to use the global state requires
         # a lot of "boilerplate" code. We should provide helper methods
@@ -500,6 +522,7 @@ class SteaneBuilder:
         lib = GuppyLibrary.from_members(
             state_gen,
             state_discard,
+            _qec_cycle,
             _prep_zero,
             _measure_z,
             _free,
@@ -517,6 +540,7 @@ class SteaneBuilder:
             {
                 ("guppyft.steane.ops", "prep_zero"): "guppyft.steane._prep_zero",
                 ("guppyft.steane.ops", "measure_z"): "guppyft.steane._measure_z",
+                ("guppyft.steane.ops", "qec_cycle"): "guppyft.steane._qec_cycle",
                 ("guppyft.steane.ops", "free"): "guppyft.steane._free",
                 ("guppyft.steane.ops", "x"): "guppyft.steane._x",
                 ("guppyft.steane.ops", "y"): "guppyft.steane._y",
