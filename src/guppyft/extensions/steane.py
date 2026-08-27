@@ -174,7 +174,7 @@ class SteaneOpsExtension:
 
     @functools.cached_property
     def sdg_def(self) -> OpDef:
-        """Apply an Sdg gate to one qubit. Rotation angle is given in half-turns.
+        """Apply an Sdg gate to one qubit
 
         This is the generic operation definition. For the instantiated operation, see
         `sdg`."""
