@@ -281,6 +281,9 @@ class SteaneBuilder:
                 blk_id, qb_id = state.allocate_next_addr()
                 blk = state.zero_state_factory.get_state()
                 state.put_block(blk_id, blk)
+
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs["Prep_zero"]))
+
                 return state, (blk_id, qb_id)
 
             return map_global(_impl)
@@ -294,6 +297,9 @@ class SteaneBuilder:
                 blk_id, qb_id = state.allocate_next_addr()
                 blk = state.magic_state_factory.get_state()
                 state.put_block(blk_id, blk)
+
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs["Prep_T"]))
+
                 return state, (blk_id, qb_id)
 
             return map_global(_impl)
