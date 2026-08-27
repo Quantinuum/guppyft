@@ -189,7 +189,7 @@ def _prep_h_non_ft() -> LogicalBlock[7]:
 
 @guppy.comptime
 @no_type_check
-def prep_h_ft() -> PreBlock[7, 8]:
+def _prep_h_ft() -> PreBlock[7, 8]:
     """Fault-tolerant preparation of an |H> = Ry(pi/4)|0> magic state on
     a Steane block.
 
@@ -212,7 +212,7 @@ def prep_h_ft() -> PreBlock[7, 8]:
 def prep_t_state_ft() -> PreBlock[7, 8]:
     """Attempt to prepare a T|+> logical state on a Steane block."""
     # Attempt |H> = Ry(pi/4)|0> state preparation
-    preblock = prep_h_ft()
+    preblock = _prep_h_ft()
     # Convert to Rz(pi/4)|+> state
     sdg(preblock.logical_block)
     h(preblock.logical_block)
