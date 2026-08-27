@@ -39,7 +39,7 @@ pub enum SteaneOpDef {
     measure_z,
     /// Decode
     decode,
-    /// Attempt a QEC cycle on logical qubit
+    /// Perform a QEC cycle on logical qubit
     qec_cycle,
     /// X gate.
     x,
