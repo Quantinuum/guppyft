@@ -4,9 +4,15 @@ import functools
 
 from hugr.ext import Extension, OpDef, TypeDef
 from hugr.ops import ExtOp
-from hugr.tys import BoundedNatArg, ExtType
+from hugr.std.float import FLOAT_T
+from hugr.std.int import int_t
+from hugr.tys import BoundedNatArg, ExtType, FunctionType, Option
+from tket_exts import measurement
 
 from ._util import load_extension
+
+IDX_T = int_t(6)
+MEAS_T = measurement.measurement_t
 
 
 class IcebergTypesExtension:
@@ -81,6 +87,10 @@ class IcebergTypesExtension:
         return self.iceberg_qubit_def.instantiate([])
 
 
+ICEBERG_TYPES = IcebergTypesExtension()
+DYNQ_T = ICEBERG_TYPES.iceberg_qubit()
+
+
 class IcebergOpsExtension:
     """Extension providing the Iceberg logical operations."""
 
@@ -105,7 +115,11 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             i: The index of the logical qubit.
         """
-        return self.x_def.instantiate([BoundedNatArg(k), BoundedNatArg(i)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.x_def.instantiate(
+            args=[BoundedNatArg(k), BoundedNatArg(i)],
+            concrete_signature=FunctionType([block_type], [block_type]),
+        )
 
     @functools.cached_property
     def x_d_def(self) -> OpDef:
@@ -121,7 +135,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.x_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.x_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, IDX_T], [block_type]),
+        )
 
     # y
 
@@ -140,7 +158,11 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             i: The index of the logical qubit.
         """
-        return self.y_def.instantiate([BoundedNatArg(k), BoundedNatArg(i)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.y_def.instantiate(
+            args=[BoundedNatArg(k), BoundedNatArg(i)],
+            concrete_signature=FunctionType([block_type], [block_type]),
+        )
 
     @functools.cached_property
     def y_d_def(self) -> OpDef:
@@ -156,7 +178,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.y_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.y_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, IDX_T], [block_type]),
+        )
 
     # z
 
@@ -175,7 +201,11 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             i: The index of the logical qubit.
         """
-        return self.z_def.instantiate([BoundedNatArg(k), BoundedNatArg(i)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.z_def.instantiate(
+            args=[BoundedNatArg(k), BoundedNatArg(i)],
+            concrete_signature=FunctionType([block_type], [block_type]),
+        )
 
     @functools.cached_property
     def z_d_def(self) -> OpDef:
@@ -191,7 +221,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.z_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.z_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, IDX_T], [block_type]),
+        )
 
     # xx
 
@@ -211,8 +245,10 @@ class IcebergOpsExtension:
             i: The index of the first logical qubit.
             j: The index of the second logical qubit.
         """
+        block_type = ICEBERG_TYPES.iceberg_block(k)
         return self.xx_def.instantiate(
-            [BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)]
+            args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
+            concrete_signature=FunctionType([block_type], [block_type]),
         )
 
     @functools.cached_property
@@ -229,7 +265,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.xx_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.xx_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, IDX_T, IDX_T], [block_type]),
+        )
 
     # yy
 
@@ -249,8 +289,10 @@ class IcebergOpsExtension:
             i: The index of the first logical qubit.
             j: The index of the second logical qubit.
         """
+        block_type = ICEBERG_TYPES.iceberg_block(k)
         return self.yy_def.instantiate(
-            [BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)]
+            args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
+            concrete_signature=FunctionType([block_type], [block_type]),
         )
 
     @functools.cached_property
@@ -267,7 +309,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.yy_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.yy_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, IDX_T, IDX_T], [block_type]),
+        )
 
     # zz
 
@@ -287,8 +333,10 @@ class IcebergOpsExtension:
             i: The index of the first logical qubit.
             j: The index of the second logical qubit.
         """
+        block_type = ICEBERG_TYPES.iceberg_block(k)
         return self.zz_def.instantiate(
-            [BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)]
+            args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
+            concrete_signature=FunctionType([block_type], [block_type]),
         )
 
     @functools.cached_property
@@ -305,7 +353,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.zz_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.zz_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, IDX_T, IDX_T], [block_type]),
+        )
 
     # all_but_one_x
 
@@ -324,7 +376,11 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             i: The index of the logical qubit omitted.
         """
-        return self.all_but_one_x_def.instantiate([BoundedNatArg(k), BoundedNatArg(i)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.all_but_one_x_def.instantiate(
+            args=[BoundedNatArg(k), BoundedNatArg(i)],
+            concrete_signature=FunctionType([block_type], [block_type]),
+        )
 
     @functools.cached_property
     def all_but_one_x_d_def(self) -> OpDef:
@@ -340,7 +396,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.all_but_one_x_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.all_but_one_x_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, IDX_T], [block_type]),
+        )
 
     # all_but_one_z
 
@@ -359,7 +419,11 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             i: The index of the logical qubit omitted.
         """
-        return self.all_but_one_z_def.instantiate([BoundedNatArg(k), BoundedNatArg(i)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.all_but_one_z_def.instantiate(
+            args=[BoundedNatArg(k), BoundedNatArg(i)],
+            concrete_signature=FunctionType([block_type], [block_type]),
+        )
 
     @functools.cached_property
     def all_but_one_z_d_def(self) -> OpDef:
@@ -375,7 +439,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.all_but_one_z_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.all_but_one_z_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, IDX_T], [block_type]),
+        )
 
     # all_x
 
@@ -393,7 +461,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.all_x_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.all_x_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type], [block_type]),
+        )
 
     # all_y
 
@@ -411,7 +483,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.all_y_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.all_y_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type], [block_type]),
+        )
 
     # all_z
 
@@ -429,7 +505,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.all_z_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.all_z_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type], [block_type]),
+        )
 
     # x_with_all_but_one_z
 
@@ -448,8 +528,10 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             i: The index of the logical qubit.
         """
+        block_type = ICEBERG_TYPES.iceberg_block(k)
         return self.x_with_all_but_one_z_def.instantiate(
-            [BoundedNatArg(k), BoundedNatArg(i)]
+            args=[BoundedNatArg(k), BoundedNatArg(i)],
+            concrete_signature=FunctionType([block_type], [block_type]),
         )
 
     @functools.cached_property
@@ -466,7 +548,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.x_with_all_but_one_z_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.x_with_all_but_one_z_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, IDX_T], [block_type]),
+        )
 
     # z_with_all_but_one_x
 
@@ -485,8 +571,10 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             i: The index of the logical qubit.
         """
+        block_type = ICEBERG_TYPES.iceberg_block(k)
         return self.z_with_all_but_one_x_def.instantiate(
-            [BoundedNatArg(k), BoundedNatArg(i)]
+            args=[BoundedNatArg(k), BoundedNatArg(i)],
+            concrete_signature=FunctionType([block_type], [block_type]),
         )
 
     @functools.cached_property
@@ -503,7 +591,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.z_with_all_but_one_x_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.z_with_all_but_one_x_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, IDX_T], [block_type]),
+        )
 
     # fan_out
 
@@ -522,7 +614,11 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             i: The index of the logical qubit.
         """
-        return self.fan_out_def.instantiate([BoundedNatArg(k), BoundedNatArg(i)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.fan_out_def.instantiate(
+            args=[BoundedNatArg(k), BoundedNatArg(i)],
+            concrete_signature=FunctionType([block_type], [block_type]),
+        )
 
     @functools.cached_property
     def fan_out_d_def(self) -> OpDef:
@@ -538,7 +634,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.fan_out_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.fan_out_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, IDX_T], [block_type]),
+        )
 
     # fan_in
 
@@ -557,7 +657,11 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             i: The index of the logical qubit.
         """
-        return self.fan_in_def.instantiate([BoundedNatArg(k), BoundedNatArg(i)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.fan_in_def.instantiate(
+            args=[BoundedNatArg(k), BoundedNatArg(i)],
+            concrete_signature=FunctionType([block_type], [block_type]),
+        )
 
     @functools.cached_property
     def fan_in_d_def(self) -> OpDef:
@@ -573,7 +677,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.fan_in_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.fan_in_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, IDX_T], [block_type]),
+        )
 
     # rx
 
@@ -592,7 +700,11 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             i: The index of the logical qubit.
         """
-        return self.rx_def.instantiate([BoundedNatArg(k), BoundedNatArg(i)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.rx_def.instantiate(
+            args=[BoundedNatArg(k), BoundedNatArg(i)],
+            concrete_signature=FunctionType([block_type, FLOAT_T], [block_type]),
+        )
 
     @functools.cached_property
     def rx_d_def(self) -> OpDef:
@@ -608,7 +720,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.rx_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.rx_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, IDX_T, FLOAT_T], [block_type]),
+        )
 
     # ry
 
@@ -627,7 +743,11 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             i: The index of the logical qubit.
         """
-        return self.ry_def.instantiate([BoundedNatArg(k), BoundedNatArg(i)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.ry_def.instantiate(
+            args=[BoundedNatArg(k), BoundedNatArg(i)],
+            concrete_signature=FunctionType([block_type, FLOAT_T], [block_type]),
+        )
 
     @functools.cached_property
     def ry_d_def(self) -> OpDef:
@@ -643,7 +763,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.ry_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.ry_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, IDX_T, FLOAT_T], [block_type]),
+        )
 
     # rz
 
@@ -662,7 +786,11 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             i: The index of the logical qubit.
         """
-        return self.rz_def.instantiate([BoundedNatArg(k), BoundedNatArg(i)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.rz_def.instantiate(
+            args=[BoundedNatArg(k), BoundedNatArg(i)],
+            concrete_signature=FunctionType([block_type, FLOAT_T], [block_type]),
+        )
 
     @functools.cached_property
     def rz_d_def(self) -> OpDef:
@@ -678,7 +806,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.rz_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.rz_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, IDX_T, FLOAT_T], [block_type]),
+        )
 
     # all_rx
 
@@ -696,7 +828,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.all_rx_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.all_rx_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, FLOAT_T], [block_type]),
+        )
 
     # all_ry
 
@@ -714,7 +850,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.all_ry_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.all_ry_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, FLOAT_T], [block_type]),
+        )
 
     # all_rz
 
@@ -732,7 +872,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.all_rz_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.all_rz_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, FLOAT_T], [block_type]),
+        )
 
     # all_but_one_rx
 
@@ -751,7 +895,11 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             i: The index of the logical qubit omitted.
         """
-        return self.all_but_one_rx_def.instantiate([BoundedNatArg(k), BoundedNatArg(i)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.all_but_one_rx_def.instantiate(
+            args=[BoundedNatArg(k), BoundedNatArg(i)],
+            concrete_signature=FunctionType([block_type, FLOAT_T], [block_type]),
+        )
 
     @functools.cached_property
     def all_but_one_rx_d_def(self) -> OpDef:
@@ -767,7 +915,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.all_but_one_rx_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.all_but_one_rx_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, IDX_T, FLOAT_T], [block_type]),
+        )
 
     # all_but_one_rz
 
@@ -786,7 +938,11 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             i: The index of the logical qubit omitted.
         """
-        return self.all_but_one_rz_def.instantiate([BoundedNatArg(k), BoundedNatArg(i)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.all_but_one_rz_def.instantiate(
+            args=[BoundedNatArg(k), BoundedNatArg(i)],
+            concrete_signature=FunctionType([block_type, FLOAT_T], [block_type]),
+        )
 
     @functools.cached_property
     def all_but_one_rz_d_def(self) -> OpDef:
@@ -802,7 +958,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.all_but_one_rz_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.all_but_one_rz_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, IDX_T, FLOAT_T], [block_type]),
+        )
 
     # all_h
 
@@ -820,7 +980,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.all_h_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.all_h_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type], [block_type]),
+        )
 
     # xx_phase
 
@@ -840,8 +1004,10 @@ class IcebergOpsExtension:
             i: The index of the first logical qubit.
             j: The index of the second logical qubit.
         """
+        block_type = ICEBERG_TYPES.iceberg_block(k)
         return self.xx_phase_def.instantiate(
-            [BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)]
+            args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
+            concrete_signature=FunctionType([block_type, FLOAT_T], [block_type]),
         )
 
     @functools.cached_property
@@ -858,7 +1024,13 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.xx_phase_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.xx_phase_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [block_type, IDX_T, IDX_T, FLOAT_T], [block_type]
+            ),
+        )
 
     # yy_phase
 
@@ -878,8 +1050,10 @@ class IcebergOpsExtension:
             i: The index of the first logical qubit.
             j: The index of the second logical qubit.
         """
+        block_type = ICEBERG_TYPES.iceberg_block(k)
         return self.yy_phase_def.instantiate(
-            [BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)]
+            args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
+            concrete_signature=FunctionType([block_type, FLOAT_T], [block_type]),
         )
 
     @functools.cached_property
@@ -896,7 +1070,13 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.yy_phase_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.yy_phase_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [block_type, IDX_T, IDX_T, FLOAT_T], [block_type]
+            ),
+        )
 
     # zz_phase
 
@@ -916,8 +1096,10 @@ class IcebergOpsExtension:
             i: The index of the first logical qubit.
             j: The index of the second logical qubit.
         """
+        block_type = ICEBERG_TYPES.iceberg_block(k)
         return self.zz_phase_def.instantiate(
-            [BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)]
+            args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
+            concrete_signature=FunctionType([block_type, FLOAT_T], [block_type]),
         )
 
     @functools.cached_property
@@ -934,7 +1116,13 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.zz_phase_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.zz_phase_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [block_type, IDX_T, IDX_T, FLOAT_T], [block_type]
+            ),
+        )
 
     # cx
 
@@ -954,8 +1142,10 @@ class IcebergOpsExtension:
             i: The index of the first logical qubit.
             j: The index of the second logical qubit.
         """
+        block_type = ICEBERG_TYPES.iceberg_block(k)
         return self.cx_def.instantiate(
-            [BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)]
+            args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
+            concrete_signature=FunctionType([block_type], [block_type]),
         )
 
     @functools.cached_property
@@ -972,7 +1162,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.cx_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.cx_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, IDX_T, IDX_T], [block_type]),
+        )
 
     # swap
 
@@ -992,8 +1186,10 @@ class IcebergOpsExtension:
             i: The index of the first logical qubit.
             j: The index of the second logical qubit.
         """
+        block_type = ICEBERG_TYPES.iceberg_block(k)
         return self.swap_def.instantiate(
-            [BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)]
+            args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
+            concrete_signature=FunctionType([block_type], [block_type]),
         )
 
     @functools.cached_property
@@ -1010,7 +1206,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.swap_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.swap_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type, IDX_T, IDX_T], [block_type]),
+        )
 
     # xx_phase_between_blocks
 
@@ -1030,8 +1230,12 @@ class IcebergOpsExtension:
             i: The index of the logical qubit in the first block.
             j: The index of the logical qubit in the second block.
         """
+        block_type = ICEBERG_TYPES.iceberg_block(k)
         return self.xx_phase_between_blocks_def.instantiate(
-            [BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)]
+            args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
+            concrete_signature=FunctionType(
+                [block_type, block_type, FLOAT_T], [block_type, block_type]
+            ),
         )
 
     @functools.cached_property
@@ -1050,7 +1254,14 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the blocks.
         """
-        return self.xx_phase_between_blocks_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.xx_phase_between_blocks_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [block_type, block_type, IDX_T, IDX_T, FLOAT_T],
+                [block_type, block_type],
+            ),
+        )
 
     # yy_phase_between_blocks
 
@@ -1070,8 +1281,12 @@ class IcebergOpsExtension:
             i: The index of the logical qubit in the first block.
             j: The index of the logical qubit in the second block.
         """
+        block_type = ICEBERG_TYPES.iceberg_block(k)
         return self.yy_phase_between_blocks_def.instantiate(
-            [BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)]
+            args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
+            concrete_signature=FunctionType(
+                [block_type, block_type, FLOAT_T], [block_type, block_type]
+            ),
         )
 
     @functools.cached_property
@@ -1090,7 +1305,14 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the blocks.
         """
-        return self.yy_phase_between_blocks_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.yy_phase_between_blocks_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [block_type, block_type, IDX_T, IDX_T, FLOAT_T],
+                [block_type, block_type],
+            ),
+        )
 
     # zz_phase_between_blocks
 
@@ -1110,8 +1332,12 @@ class IcebergOpsExtension:
             i: The index of the logical qubit in the first block.
             j: The index of the logical qubit in the second block.
         """
+        block_type = ICEBERG_TYPES.iceberg_block(k)
         return self.zz_phase_between_blocks_def.instantiate(
-            [BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)]
+            args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
+            concrete_signature=FunctionType(
+                [block_type, block_type, FLOAT_T], [block_type, block_type]
+            ),
         )
 
     @functools.cached_property
@@ -1130,7 +1356,14 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the blocks.
         """
-        return self.zz_phase_between_blocks_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.zz_phase_between_blocks_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [block_type, block_type, IDX_T, IDX_T, FLOAT_T],
+                [block_type, block_type],
+            ),
+        )
 
     # cx_between_blocks
 
@@ -1150,8 +1383,12 @@ class IcebergOpsExtension:
             i: The index of the logical qubit in the first block.
             j: The index of the logical qubit in the second block.
         """
+        block_type = ICEBERG_TYPES.iceberg_block(k)
         return self.cx_between_blocks_def.instantiate(
-            [BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)]
+            args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
+            concrete_signature=FunctionType(
+                [block_type, block_type], [block_type, block_type]
+            ),
         )
 
     @functools.cached_property
@@ -1170,7 +1407,13 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the blocks.
         """
-        return self.cx_between_blocks_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.cx_between_blocks_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [block_type, block_type, IDX_T, IDX_T], [block_type, block_type]
+            ),
+        )
 
     # cx_transversal
 
@@ -1188,7 +1431,13 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the blocks.
         """
-        return self.cx_transversal_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.cx_transversal_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [block_type, block_type], [block_type, block_type]
+            ),
+        )
 
     # alloc_zero
 
@@ -1206,7 +1455,10 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.alloc_zero_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.alloc_zero_def.instantiate(
+            args=[BoundedNatArg(k)], concrete_signature=FunctionType([], [block_type])
+        )
 
     # try_alloc_zero
 
@@ -1224,7 +1476,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.try_alloc_zero_def.instantiate([BoundedNatArg(k)])
+        preblock_type = ICEBERG_TYPES.iceberg_pre_block(k)
+        return self.try_alloc_zero_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([], [preblock_type]),
+        )
 
     # check_pre_block
 
@@ -1242,7 +1498,12 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.check_pre_block_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        preblock_type = ICEBERG_TYPES.iceberg_pre_block(k)
+        return self.check_pre_block_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([preblock_type], [Option(block_type)]),
+        )
 
     # free
 
@@ -1260,7 +1521,10 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.free_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.free_def.instantiate(
+            args=[BoundedNatArg(k)], concrete_signature=FunctionType([block_type], [])
+        )
 
     # measure_syndrome
 
@@ -1278,7 +1542,11 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.measure_syndrome_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.measure_syndrome_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type], [block_type, MEAS_T, MEAS_T]),
+        )
 
     # measure_all
 
@@ -1296,7 +1564,15 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.measure_all_def.instantiate([BoundedNatArg(k)])
+        # Cannot import at top of file as it creates a circular import.
+        from guppyft.extensions import std_types
+
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        lmeas_type = std_types.logical_measurement(k)
+        return self.measure_all_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType([block_type], [lmeas_type]),
+        )
 
     # try_measure_one_x
 
@@ -1325,8 +1601,10 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             i: The index of the logical qubit.
         """
+        block_type = ICEBERG_TYPES.iceberg_block(k)
         return self.try_measure_one_x_def.instantiate(
-            [BoundedNatArg(k), BoundedNatArg(i)]
+            args=[BoundedNatArg(k), BoundedNatArg(i)],
+            concrete_signature=FunctionType([block_type], [block_type, Option(MEAS_T)]),
         )
 
     @functools.cached_property
@@ -1353,7 +1631,13 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.try_measure_one_x_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.try_measure_one_x_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [block_type, IDX_T], [block_type, Option(MEAS_T)]
+            ),
+        )
 
     # try_measure_one_z
 
@@ -1382,8 +1666,10 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             i: The index of the logical qubit.
         """
+        block_type = ICEBERG_TYPES.iceberg_block(k)
         return self.try_measure_one_z_def.instantiate(
-            [BoundedNatArg(k), BoundedNatArg(i)]
+            args=[BoundedNatArg(k), BoundedNatArg(i)],
+            concrete_signature=FunctionType([block_type], [block_type, Option(MEAS_T)]),
         )
 
     @functools.cached_property
@@ -1410,7 +1696,13 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        return self.try_measure_one_z_d_def.instantiate([BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        return self.try_measure_one_z_d_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [block_type, IDX_T], [block_type, Option(MEAS_T)]
+            ),
+        )
 
     # alloc_dynq
 
@@ -1536,7 +1828,15 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             m: The number of logical qubits to borrow.
         """
-        return self.borrow_def.instantiate([BoundedNatArg(m), BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        bblock_type = ICEBERG_TYPES.iceberg_borrowed_block(k)
+        return self.borrow_def.instantiate(
+            args=[BoundedNatArg(m), BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [block_type] + [IDX_T] * m,  # type: ignore[arg-type]
+                [bblock_type] + [DYNQ_T] * m,  # type: ignore[arg-type]
+            ),
+        )
 
     # borrow_more
 
@@ -1545,7 +1845,7 @@ class IcebergOpsExtension:
         """Extraction of dynamic logical qubits from an already-borrowed block.
 
         This is the generic operation definition. For the instantiated operation, see
-        `borrow+more`."""
+        `borrow_more`."""
         return self().get_op("borrow_more")
 
     def borrow_more(self, k: int, m: int) -> ExtOp:
@@ -1555,7 +1855,14 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             m: The number of logical qubits to borrow.
         """
-        return self.borrow_more_def.instantiate([BoundedNatArg(m), BoundedNatArg(k)])
+        bblock_type = ICEBERG_TYPES.iceberg_borrowed_block(k)
+        return self.borrow_more_def.instantiate(
+            args=[BoundedNatArg(m), BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [bblock_type] + [IDX_T] * m,  # type: ignore[arg-type]
+                [bblock_type] + [DYNQ_T] * m,  # type: ignore[arg-type]
+            ),
+        )
 
     # restore_some
 
@@ -1574,7 +1881,14 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             m: The number of logical qubits to restore.
         """
-        return self.restore_some_def.instantiate([BoundedNatArg(m), BoundedNatArg(k)])
+        bblock_type = ICEBERG_TYPES.iceberg_borrowed_block(k)
+        return self.restore_some_def.instantiate(
+            args=[BoundedNatArg(m), BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [bblock_type] + [DYNQ_T] * m,  # type: ignore[arg-type]
+                [bblock_type],
+            ),
+        )
 
     # restore
 
@@ -1593,4 +1907,9 @@ class IcebergOpsExtension:
             k: The number of logical qubits encoded in the block.
             m: The number of logical qubits to restore.
         """
-        return self.restore_def.instantiate([BoundedNatArg(m), BoundedNatArg(k)])
+        block_type = ICEBERG_TYPES.iceberg_block(k)
+        bblock_type = ICEBERG_TYPES.iceberg_borrowed_block(k)
+        return self.restore_def.instantiate(
+            args=[BoundedNatArg(m), BoundedNatArg(k)],
+            concrete_signature=FunctionType([bblock_type] + [DYNQ_T] * m, [block_type]),  # type: ignore[arg-type]
+        )
