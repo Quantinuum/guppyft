@@ -55,6 +55,12 @@ class Qubit:
 
     @guppy
     @no_type_check
+    def qec_cycle(self: "Qubit") -> None:
+        """Perform a QEC cycle on a qubit."""
+        qec_cycle(self)
+
+    @guppy
+    @no_type_check
     def x(self: "Qubit") -> None:
         """X gate."""
         x(self)
@@ -110,8 +116,14 @@ def free(qubit: "Qubit" @ owned) -> None:
 
 @hugr_op(steane_op("measure_z"))
 @no_type_check
-def measure_z(self: "Qubit" @ owned) -> Measurement:
+def measure_z(qubit: "Qubit" @ owned) -> Measurement:
     """Destructive measurement of the qubit in the Z basis."""
+
+
+@hugr_op(steane_op("qec_cycle"))
+@no_type_check
+def qec_cycle(qubit: Qubit) -> None:
+    """Perform a QEC cycle on a qubit."""
 
 
 @hugr_op(steane_op("x"))
