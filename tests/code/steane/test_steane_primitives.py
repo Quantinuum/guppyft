@@ -10,8 +10,8 @@ from guppylang.std.quantum import cx, h, qubit, s, sdg, x, y, z
 
 from guppyft.code.steane import primitives as steane_primitives
 from guppyft.code.steane.primitives import (
+    _measure_syndromes,
     knill_qec_cycle,
-    measure_syndromes,
     prep_zero_non_ft,
     steane_x_qec_cycle,
     steane_z_qec_cycle,
@@ -159,7 +159,7 @@ def test_steane_measure_syndromes() -> None:
     def impl_func(arr: array[qubit, 7]) -> None:
         block = LogicalBlock(array(arr.take(i) for i in range(7)))
 
-        measure_syndromes(block)
+        _measure_syndromes(block)
 
         for i in range(7):
             arr.put(block.data_qs.take(i), i)
@@ -258,7 +258,7 @@ def test_t_gate() -> None:
         steane_primitives.h(blk)
         for _ in range(4):
             a = steane_primitives.prep_t_state_ft().force_check().unwrap()
-            steane_primitives.t(blk, a)
+            steane_primitives.inject_magic_for_t(blk, a)
         steane_primitives.h(blk)
         res = steane_primitives.measure_z(blk)
         output("res", steane_primitives.decode(res))

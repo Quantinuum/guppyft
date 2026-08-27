@@ -76,7 +76,7 @@ def _syndrome_helper(
 
 @guppy
 @no_type_check
-def measure_syndromes(blk: LogicalBlock[7]) -> array[qlib.Measurement, 6]:
+def _measure_syndromes(blk: LogicalBlock[7]) -> array[qlib.Measurement, 6]:
     """Syndrome measurement using Figure 5. from Reichardt arXiv:1804.06995.
 
     Qubit index mapping: [0, 4, 1, 6, 3, 5, 2]
@@ -116,8 +116,16 @@ def measure_syndromes(blk: LogicalBlock[7]) -> array[qlib.Measurement, 6]:
 
 
 @guppy
+def _phys_controlled_h(ctl: qlib.qubit, tgt: qlib.qubit) -> None:
+    """Implements controlled-H gate between physical qubits."""
+    qlib.ry(tgt, -pi / 4)
+    qlib.cz(ctl, tgt)
+    qlib.ry(tgt, pi / 4)
+
+
+@guppy
 @no_type_check
-def measure_H_operator(blk: LogicalBlock[7]) -> array[qlib.Measurement, 2]:
+def _measure_h_operator(blk: LogicalBlock[7]) -> array[qlib.Measurement, 2]:
     """Fault-tolerant measurement of the logical H operator on a Steane block."""
     # Prepare Bell state ancilla
     a = array(qlib.qubit() for _ in range(2))
@@ -126,7 +134,7 @@ def measure_H_operator(blk: LogicalBlock[7]) -> array[qlib.Measurement, 2]:
 
     # Apply controlled-H gates
     for tgt in range(7):
-        qlib.ch(
+        _phys_controlled_h(
             a[tgt % 2],  # Alternate control qubit for parallelisation
             blk[tgt],
         )
@@ -137,44 +145,61 @@ def measure_H_operator(blk: LogicalBlock[7]) -> array[qlib.Measurement, 2]:
     return qlib.measure_array(a)
 
 
-@guppy
+@guppy.comptime
 @no_type_check
-def prep_h_non_ft() -> PreBlock[7, 8]:
+def _prep_h_non_ft() -> LogicalBlock[7]:
     """Non-fault-tolerant preparation of an |H> = Ry(pi/4)|0> magic state on
     a Steane block.
 
     Using Fig. 3b from "Minimizing resource overheads for fault-tolerant
     preparation of encoded states of the Steane code" 10.1038/srep19578.
+
+    To match with our definition of the code stabilizers, we relabel qubits
+    from Fig 3b from top to bottom as: [1, 0, 4, 5, 2, 6, 3]
     """
-    # Create block with physical qubits in the all-zero state
-    blk = LogicalBlock(array(qlib.qubit() for _ in range(7)))
+
+    relabel = [1, 0, 4, 5, 2, 6, 3]
+
+    arr = array(qlib.qubit() for _ in range(7))
     # Prepare qubit `1` in the |H> = Ry(pi/4)|0> state
-    qlib.ry(blk.data_qs[1], pi / 4)
+    qlib.ry(arr[relabel[0]], pi / 4)  # 1
     # Prepare qubits that start in |+> state.
-    qlib.h(blk.data_qs[0])
-    qlib.h(blk.data_qs[4])
-    qlib.h(blk.data_qs[6])
+    qlib.h(arr[relabel[1]])  # 0
+    qlib.h(arr[relabel[2]])  # 4
+    qlib.h(arr[relabel[5]])  # 6
     # Apply the CNOTs
     cx_pairs = array(
-        (1, 3),
-        (1, 5),
-        (0, 1),
-        (6, 2),
-        (4, 5),
+        (0, 6),
         (0, 3),
-        (4, 2),
-        (6, 5),
-        (0, 2),
-        (4, 1),
-        (6, 3),
+        (1, 0),
+        (5, 4),
+        (2, 3),
+        (1, 6),
+        (2, 4),
+        (5, 3),
+        (1, 4),
+        (2, 0),
+        (5, 6),
     )
     for ctl, tgt in cx_pairs:
-        qlib.cx(blk.data_qs[ctl], blk.data_qs[tgt])
+        qlib.cx(arr[relabel[ctl]], arr[relabel[tgt]])
 
-    m_h = measure_H_operator(blk)
+    return LogicalBlock(arr)
 
-    m_syn = measure_syndromes(blk)
 
+@guppy.comptime
+@no_type_check
+def prep_h_ft() -> PreBlock[7, 8]:
+    """Fault-tolerant preparation of an |H> = Ry(pi/4)|0> magic state on
+    a Steane block.
+
+    Using Fig. 3b from "Minimizing resource overheads for fault-tolerant
+    preparation of encoded states of the Steane code" 10.1038/srep19578.
+    """
+
+    blk = _prep_h_non_ft()
+    m_h = _measure_h_operator(blk)
+    m_syn = _measure_syndromes(blk)
     m = array(
         m_h[0], m_h[1], m_syn[0], m_syn[1], m_syn[2], m_syn[3], m_syn[4], m_syn[5]
     )
@@ -185,9 +210,9 @@ def prep_h_non_ft() -> PreBlock[7, 8]:
 @guppy
 @no_type_check
 def prep_t_state_ft() -> PreBlock[7, 8]:
-    """Attempt to prepare an Rz(pi/4)|+> logical state on a Steane block."""
+    """Attempt to prepare a T|+> logical state on a Steane block."""
     # Attempt |H> = Ry(pi/4)|0> state preparation
-    preblock = prep_h_non_ft()
+    preblock = prep_h_ft()
     # Convert to Rz(pi/4)|+> state
     sdg(preblock.logical_block)
     h(preblock.logical_block)
@@ -203,7 +228,7 @@ def _inject_t_non_deterministically(
     """Inject T gate, but do not apply corrections.
 
     Note:
-        Assumes `t_state` is a logical Rz(pi/4)|+> magic state.
+        Assumes `t_state` is a logical T|+> magic state.
     """
     a = t_state  # Rename to avoid confusion, since the state will change
     # Inject (via teleportation)
@@ -216,7 +241,7 @@ def _inject_t_non_deterministically(
 
 @guppy
 @no_type_check
-def t(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
+def inject_magic_for_t(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
     """Apply T gate via injection.
 
     Note:
@@ -230,7 +255,9 @@ def t(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
 
 @guppy
 @no_type_check
-def tdg(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
+def inject_magic_for_tdg(
+    blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned
+) -> None:
     """Apply Tdg gate via injection.
 
     Note:
