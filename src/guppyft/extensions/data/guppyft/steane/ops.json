@@ -315,6 +315,45 @@
       },
       "binary": false
     },
+    "rz": {
+      "extension": "guppyft.steane.ops",
+      "name": "rz",
+      "description": "Rz gate",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.steane.types",
+              "extension_version": "0.1.1",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.steane.types",
+              "extension_version": "0.1.1",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
     "s": {
       "extension": "guppyft.steane.ops",
       "name": "s",

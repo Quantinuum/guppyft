@@ -1,4 +1,5 @@
 from guppylang import guppy
+from guppylang.std.angles import pi
 from guppylang.std.builtins import result
 from hugr.build.dfg import Dfg
 from hugr.ops import DFG
@@ -48,7 +49,7 @@ def test_exported_extensions() -> None:
         "qubit": steane_types.steane_qubit_def,
         "measurement": steane_types.steane_measurement_def,
     }
-    assert len(ops_extn.operations) == 16
+    assert len(ops_extn.operations) == 17
     for op_name, op_def in ops_extn.operations.items():
         assert op_def == steane_ops.__getattribute__(f"{op_name}_def")
 
@@ -56,7 +57,7 @@ def test_exported_extensions() -> None:
 def test_op_instantiations() -> None:
     ops_extn = steane_ops()
     # No operations take indices
-    assert len(ops_extn.operations) == 16
+    assert len(ops_extn.operations) == 17
     for op_name in ops_extn.operations:
         assert (
             steane_ops.__getattribute__(op_name)().op_def()
@@ -74,6 +75,7 @@ def test_guppy_bindings_smoke() -> None:
         q0 = Qubit()
         q0.x()
         q1 = Qubit()
+        q1.rz(pi / 2)
         cx(q0, q1)
         q1.free()
         magic = prep_magic_for_t_like()

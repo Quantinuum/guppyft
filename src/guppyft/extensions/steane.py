@@ -48,7 +48,9 @@ class SteaneOpsExtension:
 
     def __call__(self) -> Extension:
         """Returns the Steane ops extension"""
-        return load_extension("guppyft.steane.ops", ["guppyft.std.types"])
+        return load_extension(
+            "guppyft.steane.ops", ["guppyft.std.types", "guppyft.steane.types"]
+        )
 
     @functools.cached_property
     def prep_zero_def(self) -> OpDef:
@@ -172,7 +174,7 @@ class SteaneOpsExtension:
 
     @functools.cached_property
     def sdg_def(self) -> OpDef:
-        """Apply an Sdg gate to one qubit.
+        """Apply an Sdg gate to one qubit. Rotation angle is given in half-turns.
 
         This is the generic operation definition. For the instantiated operation, see
         `sdg`."""
@@ -181,6 +183,18 @@ class SteaneOpsExtension:
     def sdg(self) -> ExtOp:
         """Apply an Sdg gate to one qubit."""
         return self.sdg_def.instantiate([])
+
+    @functools.cached_property
+    def rz_def(self) -> OpDef:
+        """Apply an Rz gate to one qubit. Rotation angle is given in half-turns.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `rz`."""
+        return self().get_op("rz")
+
+    def rz(self) -> ExtOp:
+        """Apply an Rz gate to one qubit. Rotation angle is given in half-turns."""
+        return self.rz_def.instantiate([])
 
     @functools.cached_property
     def prep_magic_for_t_like_def(self) -> OpDef:
