@@ -8,20 +8,27 @@ use hugr::{
     extension::SignatureError,
     hugr::{ValidationError, hugrmut::HugrMut},
     ops::ExtensionOp,
-    ops::{DataflowOpTrait, OpType, handle::NodeHandle as _},
+    ops::{DataflowOpTrait, OpType, handle::NodeHandle},
     types::{PolyFuncType, Type, TypeRow},
 };
+use hugr_core::builder::{DFGBuilder, Dataflow, DataflowHugr};
 use hugr_core::extension::ExtensionId;
+use hugr_core::extension::prelude::{option_type, usize_t};
+use hugr_core::extension::simple_op::MakeOpDef;
 use hugr_core::hugr::internal::HugrMutInternals;
 use hugr_core::hugr::linking::NodeLinkingError;
 use hugr_core::ops::{Call, OpName};
 use hugr_core::std_extensions::collections::array::Array;
-use hugr_core::std_extensions::collections::borrow_array::BorrowArray;
-use hugr_core::types::{SumType, Transformable, TypeArg, TypeName};
+use hugr_core::std_extensions::collections::borrow_array::{
+    self, BArrayOpBuilder, BArrayOpDef, BorrowArray, borrow_array_type,
+};
+use hugr_core::types::{Signature, SumType, Transformable, TypeArg, TypeName};
 use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::hash_map::Entry;
 use std::collections::{BTreeMap, HashMap, HashSet};
+use tket::passes::replace_types::LinearizeError::NestedTemplateError;
+use tket::passes::replace_types::{Linearizer, NodeTemplate};
 use tket::passes::utils::unpack_container::type_unpack::array_args;
 use tket::passes::{
     ComposablePass, PassScope, RemoveDeadFuncsError, ReplaceTypes, WithScope,
@@ -298,6 +305,8 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
             );
         }
 
+        register_borrow_array_get_replacement(&mut type_replacer);
+
         Self {
             hugr,
             type_replacer,
@@ -440,4 +449,76 @@ impl<'a, H: HugrMut<Node = Node>> ImplementOpsState<'a, H> {
 
         Ok(())
     }
+}
+
+fn register_borrow_array_get_replacement(type_replacer: &mut ReplaceTypes) {
+    let get_def = borrow_array::EXTENSION
+        .get_op(&BArrayOpDef::get.opdef_id())
+        .unwrap()
+        .as_ref();
+
+    // Registering the physical replacement for `get` is necessary because `get`'s
+    // declared kind requires a `Type[Copyable]` element argument: once the element
+    // type has been substituted for a (Linear-bound) `borrow_array`, the generic
+    // fallback in `ReplaceTypes` would fail to rebuild the node. We instead rebuild
+    // `get` using `borrow`/`return` (which work for any, including Linear, element
+    // types) plus a Linearizer-provided copy to preserve "read without consuming"
+    // semantics.
+    type_replacer.set_replace_parametrized_op(get_def, move |args, rt| {
+        let [size_arg, elem_arg] = args else {
+            return Ok(None);
+        };
+        let elem_ty = Type::try_from(elem_arg.clone()).map_err(SignatureError::from)?;
+        if elem_ty.copyable() {
+            // `get`'s declared kind only breaks when the element type stops being
+            // Copyable; if it's still Copyable (e.g. one Copyable type replaced by
+            // another), leave `get` untouched — rebuilding it here would fail, since
+            // the Linearizer refuses to synthesize copy ops for Copyable types.
+            return Ok(None);
+        }
+        let size = size_arg
+            .as_nat()
+            .expect("borrow_array size argument must be a nat");
+
+        let map_build_err =
+            |e: BuildError| NestedTemplateError(Box::new(elem_ty.clone()), Box::new(e));
+
+        let arr_ty = borrow_array_type(size, elem_ty.clone());
+        let mut dfb = DFGBuilder::new(Signature::new(
+            vec![arr_ty.clone(), usize_t()],
+            vec![option_type(vec![elem_ty.clone()]).into(), arr_ty.clone()],
+        ))
+        .map_err(map_build_err)?;
+        let [arr, idx] = dfb.input_wires_arr();
+
+        // Take the (now Linear) element out at runtime `idx`.
+        let (arr_taken, elem) = dfb
+            .add_borrow_array_borrow(elem_ty.clone(), size, arr, idx)
+            .map_err(map_build_err)?;
+
+        // Duplicate it via whatever copy/discard op the Linearizer knows for
+        // `elem_ty`, rather than hardcoding a clone op, so this composes with any
+        // custom copy/discard handlers registered for nested types.
+        let [copy0, copy1] = rt
+            .get_linearizer()
+            .copy_discard_op(&elem_ty, 2)?
+            .add(&mut dfb, [elem])
+            .map_err(map_build_err)?
+            .outputs()
+            .to_array();
+
+        // Put one copy back where it was taken from.
+        let arr_out = dfb
+            .add_borrow_array_return(elem_ty.clone(), size, arr_taken, idx, copy0)
+            .map_err(map_build_err)?;
+        // Wrap the other copy as `Some(elem)`, matching the original `get`'s output.
+        let sum = dfb
+            .make_sum(1, [vec![].into(), vec![elem_ty.clone()].into()], [copy1])
+            .map_err(map_build_err)?;
+
+        let hugr = dfb
+            .finish_hugr_with_outputs([sum, arr_out])
+            .map_err(map_build_err)?;
+        Ok(Some(NodeTemplate::CompoundOp(Box::new(hugr))))
+    });
 }
