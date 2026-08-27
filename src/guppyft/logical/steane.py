@@ -153,7 +153,8 @@ def sdg(qubit: "Qubit") -> None:
 @hugr_op(steane_op("prep_magic_for_t_like"))
 @no_type_check
 def prep_magic_for_t_like() -> "Qubit":
-    """Prepare a magic state that can be used to inject T and Tdg."""
+    """Prepare a magic state that can be used to produce T|+> states
+    for T and Tdg injection."""
 
 
 @hugr_op(steane_op("inject_magic_for_t"))

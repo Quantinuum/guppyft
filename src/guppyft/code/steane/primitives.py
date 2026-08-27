@@ -54,27 +54,27 @@ def prep_zero_ft() -> PreBlock[7, 1]:
     return PreBlock[7, 1](q, array(flag_outcome))
 
 
-@guppy
+@guppy.comptime
 @no_type_check
 def _syndrome_helper(
     a: array[qlib.qubit, 3],
     blk: LogicalBlock[7],
-    idx: tuple[int, int, int],
-    reverse_cx: bool,
+    idx: tuple[int, int, int] @ comptime,
+    reverse_cx: bool @ comptime,
 ) -> None:
     """Helper function to perform the cx operations during syndrome extraction."""
 
     if reverse_cx:
-        qlib.cx(blk[idx[0]], a[0])
-        qlib.cx(a[1], blk[idx[1]])
-        qlib.cx(a[2], blk[idx[2]])
+        qlib.cx(blk.data_qs[idx[0]], a[0])
+        qlib.cx(a[1], blk.data_qs[idx[1]])
+        qlib.cx(a[2], blk.data_qs[idx[2]])
     else:
-        qlib.cx(a[0], blk[idx[0]])
-        qlib.cx(blk[idx[1]], a[1])
-        qlib.cx(blk[idx[2]], a[2])
+        qlib.cx(a[0], blk.data_qs[idx[0]])
+        qlib.cx(blk.data_qs[idx[1]], a[1])
+        qlib.cx(blk.data_qs[idx[2]], a[2])
 
 
-@guppy
+@guppy.comptime
 @no_type_check
 def _measure_syndromes(blk: LogicalBlock[7]) -> array[qlib.Measurement, 6]:
     """Syndrome measurement using Figure 5. from Reichardt arXiv:1804.06995."""
@@ -244,7 +244,7 @@ def inject_magic_for_t(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -
     """Apply T gate via injection.
 
     Note:
-        Assumes `t_state` is a logical Rz(pi/4)|+> magic state.
+        Assumes `t_state` is a logical T|+> magic state.
     """
     meas = _inject_t_non_deterministically(blk, t_state)
     if meas:
@@ -260,7 +260,7 @@ def inject_magic_for_tdg(
     """Apply Tdg gate via injection.
 
     Note:
-        Assumes `t_state` is a logical Rz(pi/4)|+> magic state.
+        Assumes `t_state` is a logical T|+> magic state.
     """
     meas = _inject_t_non_deterministically(blk, t_state)
     if meas:

@@ -153,6 +153,10 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
 
 
 def test_steane_measure_syndromes() -> None:
+    # Note: While `_measure_syndromes` is a private function, it is used
+    # as part of magic state preparation which is non-Clifford and not
+    # exhaustively tested. This test is included to validate the Clifford
+    # components on its own.
 
     @guppy
     @no_type_check

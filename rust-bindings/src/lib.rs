@@ -111,22 +111,22 @@ mod _bindings {
             });
         }
 
-        for ((src_ext, src_op), replacement_hugr) in compound_op_replacements.iter() {
-            let Some(src_def) = registry.get(src_ext).and_then(|e| e.get_op(src_op)) else {
+        for ((src_ext, src_op), replacement_hugr) in compound_op_replacements.into_iter() {
+            let Some(src_def) = registry.get(&src_ext).and_then(|e| e.get_op(&src_op)) else {
                 continue;
             };
-            let node_template = NodeTemplate::call_to_function(replacement_hugr.hugr.clone(), &[])
-                .map_err(|e| PyValueError::new_err(format!("Error  {e}")))?;
+            let node_template = NodeTemplate::call_to_function(replacement_hugr.hugr, &[])
+                .map_err(|e| PyValueError::new_err(format!("Error {e}")))?;
             pass.set_replace_parametrized_op(src_def, move |_, _| Ok(Some(node_template.clone())));
         }
 
-        for ((src_ext_name, src_ty), (tgt_ext_name, tgt_ty)) in ty_replacements.iter() {
-            let Some(src) = get_type_from_registry(&registry, src_ext_name, src_ty)
+        for ((src_ext_name, src_ty), (tgt_ext_name, tgt_ty)) in ty_replacements.into_iter() {
+            let Some(src) = get_type_from_registry(&registry, &src_ext_name, &src_ty)
                 .map_err(|e| PyValueError::new_err(format!("Error getting src ty: {e}")))?
             else {
                 continue;
             };
-            let Some(tgt) = get_type_from_registry(&registry, tgt_ext_name, tgt_ty)
+            let Some(tgt) = get_type_from_registry(&registry, &tgt_ext_name, &tgt_ty)
                 .map_err(|e| PyValueError::new_err(format!("Error getting tgt ty: {e}")))?
             else {
                 continue;

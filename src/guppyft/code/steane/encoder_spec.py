@@ -469,7 +469,7 @@ class SteaneBuilder:
                 state.put_block(blk_id, blk)
                 state.free_addr(a)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["T"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs["Inject_T"]))
 
                 return state, q
 
@@ -483,19 +483,22 @@ class SteaneBuilder:
         ) -> tuple[tuple[int, int]]:
             @guppy
             def _impl(
-                state: STATE @ owned, q: tuple[int, int]
+                state: STATE @ owned, q: tuple[int, int], a: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
                 blk = state.take_block(blk_id)
-                resource = state.magic_state_factory.get_state()
+                resource = state.take_block(a[0])
                 inject_magic_for_tdg(blk, resource)
                 state.put_block(blk_id, blk)
+                state.free_addr(a)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["Tdg"]))
+                state.qec_policy(
+                    array(blk_id), comptime(qec_policy.costs["Inject_Tdg"])
+                )
 
                 return state, q
 
-            return map_global(_impl, q)
+            return map_global(_impl, q, a)
 
         @guppy
         @no_type_check
@@ -694,6 +697,13 @@ class SteaneBuilder:
         return replace(
             self,
             _factory_confs=replace(self._factory_confs, zero=conf),
+        )
+
+    def with_magic_factory_conf(self, conf: RUSStateFactoryConf) -> Self:
+        """Set the magic state factory configuration."""
+        return replace(
+            self,
+            _factory_confs=replace(self._factory_confs, magic=conf),
         )
 
     def build(self, n_blocks: int) -> SteaneInstance:
