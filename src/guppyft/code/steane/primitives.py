@@ -77,21 +77,20 @@ def _syndrome_helper(
 @guppy
 @no_type_check
 def _measure_syndromes(blk: LogicalBlock[7]) -> array[qlib.Measurement, 6]:
-    """Syndrome measurement using Figure 5. from Reichardt arXiv:1804.06995.
+    """Syndrome measurement using Figure 5. from Reichardt arXiv:1804.06995."""
 
-    Qubit index mapping: [0, 4, 1, 6, 3, 5, 2]
-    """
+    relabel = array(0, 4, 1, 6, 3, 5, 2)
 
     # Prepare ancilla state
     a_xzz = array(qlib.qubit() for _ in range(3))
     qlib.h(a_xzz[0])
 
-    _syndrome_helper(a_xzz, blk, (3, 2, 5), False)
+    _syndrome_helper(a_xzz, blk, (relabel[4], relabel[6], relabel[5]), False)
     qlib.cx(a_xzz[0], a_xzz[2])
-    _syndrome_helper(a_xzz, blk, (0, 3, 4), False)
-    _syndrome_helper(a_xzz, blk, (1, 6, 2), False)
+    _syndrome_helper(a_xzz, blk, (relabel[0], relabel[4], relabel[1]), False)
+    _syndrome_helper(a_xzz, blk, (relabel[2], relabel[3], relabel[6]), False)
     qlib.cx(a_xzz[0], a_xzz[1])
-    _syndrome_helper(a_xzz, blk, (2, 5, 1), False)
+    _syndrome_helper(a_xzz, blk, (relabel[6], relabel[5], relabel[2]), False)
 
     qlib.h(a_xzz[0])
     m_xzz = qlib.measure_array(a_xzz)
@@ -101,12 +100,12 @@ def _measure_syndromes(blk: LogicalBlock[7]) -> array[qlib.Measurement, 6]:
     qlib.h(a_zxx[1])
     qlib.h(a_zxx[2])
 
-    _syndrome_helper(a_zxx, blk, (3, 2, 5), True)
+    _syndrome_helper(a_zxx, blk, (relabel[4], relabel[6], relabel[5]), True)
     qlib.cx(a_zxx[2], a_zxx[0])
-    _syndrome_helper(a_zxx, blk, (0, 3, 4), True)
-    _syndrome_helper(a_zxx, blk, (1, 6, 2), True)
+    _syndrome_helper(a_zxx, blk, (relabel[0], relabel[4], relabel[1]), True)
+    _syndrome_helper(a_zxx, blk, (relabel[2], relabel[3], relabel[6]), True)
     qlib.cx(a_zxx[1], a_zxx[0])
-    _syndrome_helper(a_zxx, blk, (2, 5, 1), True)
+    _syndrome_helper(a_zxx, blk, (relabel[6], relabel[5], relabel[2]), True)
 
     qlib.h(a_zxx[1])
     qlib.h(a_zxx[2])
@@ -158,7 +157,7 @@ def _prep_h_non_ft() -> LogicalBlock[7]:
     from Fig 3b from top to bottom as: [1, 0, 4, 5, 2, 6, 3]
     """
 
-    relabel = [1, 0, 4, 5, 2, 6, 3]
+    relabel = array(1, 0, 4, 5, 2, 6, 3)
 
     arr = array(qlib.qubit() for _ in range(7))
     # Prepare qubit `1` in the |H> = Ry(pi/4)|0> state
