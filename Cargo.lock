@@ -2173,8 +2173,7 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 [[package]]
 name = "tket"
 version = "0.21.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "118f46fa4a3cf414af79c125e66a770f29fed3a799e02c5cca95789a56316d20"
+source = "git+https://github.com/quantinuum/tket2?branch=hs%2Ffeat%2Freplace-types-array-helper#9e1df0e5c013a965754abd5cfc6a4bc8dff7ff48"
 dependencies = [
  "ascent",
  "bytemuck",
