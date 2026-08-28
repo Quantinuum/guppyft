@@ -58,7 +58,7 @@ jobs:
         run: rustup override set ${{steps.toolchain.outputs.name}}
       - uses: taiki-e/install-action@nextest
       - name: Test with all features
-        run: cargo nextest r --verbose --workspace --exclude guppyft-bindings --all-features
+        run: cargo nextest r --verbose --workspace --all-features
 
   check-py:
     name: 🐍 Test Python code (${{ matrix.python-version }})

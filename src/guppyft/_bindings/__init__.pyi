@@ -1,4 +1,4 @@
-"""Typing stubs for the bindings defined in the `rust-bindings` crate."""
+"""Typing stubs for the bindings defined in the `rust::bindings` crate."""
 
 from hugr.envelope import EnvelopeConfig
 

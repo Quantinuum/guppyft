@@ -9,10 +9,6 @@
   "packages": {
     ".": {
       "release-type": "python",
-      "extra-files": [
-        "encoder-bindings/Cargo.toml",
-        "encoder-rs/Cargo.toml"
-      ],
       "exclude-paths": [
         "tests"
       ]
