@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.0.6](https://github.com/quantinuum-dev/guppyft/compare/v0.0.5...v0.0.6) (2026-08-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* Add Steane op for invoking QEC cycles ([#255](https://github.com/quantinuum-dev/guppyft/issues/255))
+* Rework Steane spec to builder pattern and add methods for QEC policy and state factories ([#238](https://github.com/quantinuum-dev/guppyft/issues/238))
+
+### Features
+
+* Add Steane op for invoking QEC cycles ([#255](https://github.com/quantinuum-dev/guppyft/issues/255)) ([1a8bca3](https://github.com/quantinuum-dev/guppyft/commit/1a8bca3cf395a1dd1ed3e90dce60d58321f3fb03))
+* Add Y, S, Sdg to Steane architecture and test all primitives with verifier ([#245](https://github.com/quantinuum-dev/guppyft/issues/245)) ([f7796f3](https://github.com/quantinuum-dev/guppyft/commit/f7796f3821dfc8d92fed0f04a209d635963d4064))
+* Instantiate concrete signatures in Iceberg Python bindings ([#259](https://github.com/quantinuum-dev/guppyft/issues/259)) ([3f93314](https://github.com/quantinuum-dev/guppyft/commit/3f933149f84a6bb2af6371994e80e205d89cb6b9))
+* Rework Steane spec to builder pattern and add methods for QEC policy and state factories ([#238](https://github.com/quantinuum-dev/guppyft/issues/238)) ([6d20da5](https://github.com/quantinuum-dev/guppyft/commit/6d20da5a102db637a656c894aaba096f8b782218))
+
+
+### Documentation
+
+* Add sphinx API docs ([#226](https://github.com/quantinuum-dev/guppyft/issues/226)) ([e833d78](https://github.com/quantinuum-dev/guppyft/commit/e833d78b1d89eb49d647b9611cd9bb995449a852))
+
 ## [0.0.5](https://github.com/quantinuum-dev/guppyft/compare/v0.0.4...v0.0.5) (2026-08-18)
 
 
