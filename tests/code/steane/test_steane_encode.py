@@ -16,6 +16,8 @@ from guppylang.std.quantum import (
     rz,
     s,
     sdg,
+    t,
+    tdg,
     x,
     y,
     z,
@@ -200,3 +202,24 @@ def test_collect_measurement_encode() -> None:
         output("qbs", collect_measurements(measure_array(qbs)))
 
     SteaneBuilder().build(n_blocks=2).encode(main.compile())
+
+
+def test_t_encoder_smoke() -> None:
+    @guppy
+    def main() -> None:
+        q = qubit()
+        t(q)
+        discard(q)
+        q = qubit()
+        tdg(q)
+        discard(q)
+
+    res = (
+        SteaneBuilder()
+        .build(n_blocks=2)
+        .emulator(main.compile(), n_qubits=17)
+        .run()
+        .collated_shots()
+    )
+
+    assert res == [{}]
