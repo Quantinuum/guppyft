@@ -1,16 +1,15 @@
-//! Supporting Rust library for the Python bindings.
-
 mod hugr;
 
 use pyo3::pymodule;
+
 /// Python module containing the Rust bindings.
 ///
 /// The definitions here should be reflected in the `src/guppyft/_bindings/__init__.pyi` type stubs.
 #[pymodule]
 mod _bindings {
     #[pymodule_export]
-    use crate::hugr::RsHugr;
-    use guppyft::implement_ops;
+    use super::hugr::RsHugr;
+    use crate::implement_ops;
     use pyo3::exceptions::PyValueError;
     use pyo3::prelude::*;
     use std::collections::{BTreeMap, HashSet};
