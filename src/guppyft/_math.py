@@ -9,8 +9,7 @@ Original contribution: @vvandaele (Vivien Vandaele)
 
 from typing import no_type_check
 
-from guppylang import comptime, guppy
-from guppylang.std.builtins import array, nat
+from guppylang import guppy
 
 
 @guppy
@@ -27,22 +26,6 @@ def get_bit(k: int, i: int) -> bool:
 
     """
     return ((k >> i) & 1) == 1
-
-
-@guppy
-@no_type_check
-def get_bits(k: int, length: nat @ comptime) -> "array[bool, length]":  # noqa: F821
-    """Get the first n (little endian) bits of integer k.
-
-    Args:
-        k: Integer value.
-        length: length of the bitstring to be returned
-
-    Returns:
-        array[bool, length]: little endian bits representing the integer k
-
-    """
-    return array(get_bit(k, i) for i in range(length))
 
 
 @guppy
