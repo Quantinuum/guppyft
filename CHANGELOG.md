@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.0.7](https://github.com/quantinuum-dev/guppyft/compare/v0.0.6...v0.0.7) (2026-08-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* Add compound op replacements to ReplaceEncoder and implement t/tdg in Steane architecture ([#247](https://github.com/quantinuum-dev/guppyft/issues/247))
+
+### Features
+
+* Add compound op replacements to ReplaceEncoder and implement t/tdg in Steane architecture ([#247](https://github.com/quantinuum-dev/guppyft/issues/247)) ([7cc15a4](https://github.com/quantinuum-dev/guppyft/commit/7cc15a47a31bd240996551763f107065e02a0194))
+
+
+### Bug Fixes
+
+* Fix signature of try_measure_one_* instantiations ([#266](https://github.com/quantinuum-dev/guppyft/issues/266)) ([754d580](https://github.com/quantinuum-dev/guppyft/commit/754d58091e15c25f6ad5d101ac44848d853483fe))
+
 ## [0.0.6](https://github.com/quantinuum-dev/guppyft/compare/v0.0.5...v0.0.6) (2026-08-28)
 
 
