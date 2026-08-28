@@ -2,8 +2,23 @@ from typing import Any
 
 import pytest
 from guppylang import guppy
+from guppylang.std.angles import pi
 from guppylang.std.platform import output
-from guppylang.std.quantum import cx, discard, h, measure, qubit, x, y, z
+from guppylang.std.quantum import (
+    cx,
+    discard,
+    h,
+    measure,
+    qubit,
+    rz,
+    s,
+    sdg,
+    t,
+    tdg,
+    x,
+    y,
+    z,
+)
 from hugr import Hugr
 from hugr.package import Package
 from selene_hugr_qis_compiler import check_hugr
@@ -45,6 +60,25 @@ def test_encoder() -> None:
     assert res == [{"q0": [1], "q1": [0]}]
 
 
+def test_encoder_smoke() -> None:
+
+    @guppy
+    def main() -> None:
+        q0 = qubit()
+        q1 = qubit()
+        x(q0)
+        y(q0)
+        z(q0)
+        h(q0)
+        s(q0)
+        sdg(q0)
+        cx(q0, q1)
+        output("q0", measure(q0).read())
+        discard(q1)
+
+    SteaneBuilder().build(n_blocks=2).emulator(main.compile(), n_qubits=16).run()
+
+
 def test_encode_function_call() -> None:
     # `foo` is a public function, so the `ReplaceEncoder` pass (which defaults to
     # `GlobalScope.PRESERVE_PUBLIC`) should in principle leave its interface/behaviour
@@ -70,21 +104,21 @@ def test_encode_function_call() -> None:
 
 
 def test_encoder_missing_op() -> None:
-    # `tket.quantum.y` has no replacement registered in `SteaneBuilder`, so the encoder
+    # `tket.quantum.rz` has no replacement registered in `SteaneBuilder`, so the encoder
     # leaves it untouched while everything else is lowered to logical qubits. This
-    # mismatch causes `y`'s (unencoded) qubit port to be connected to an (encoded)
+    # mismatch causes `rz`'s (unencoded) qubit port to be connected to an (encoded)
     # logical qubit port, which fails validation.
     @guppy
     def main() -> None:
         q = qubit()
-        y(q)
+        rz(q, pi / 2)
         discard(q)
 
     pkg = main.compile()
     with pytest.raises(
         ValueError,
         match=(
-            r"Error encoding `tket.quantum.Y` at node Node\(5\). "
+            r"Error encoding `tket.quantum.Y` at node Node\(7\). "
             r"Operation not yet supported during encoding."
         ),
     ):
@@ -151,3 +185,24 @@ def test_annotate_steane_encoding() -> None:
         "encoding": "steane",
         "params": {"n_blocks": 4},
     }
+
+
+def test_t_encoder_smoke() -> None:
+    @guppy
+    def main() -> None:
+        q = qubit()
+        t(q)
+        discard(q)
+        q = qubit()
+        tdg(q)
+        discard(q)
+
+    res = (
+        SteaneBuilder()
+        .build(n_blocks=2)
+        .emulator(main.compile(), n_qubits=17)
+        .run()
+        .collated_shots()
+    )
+
+    assert res == [{}]

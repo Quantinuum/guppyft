@@ -1,8 +1,9 @@
 [project]
 name = "guppyft"
-version = "0.0.5"
+version = "0.0.7"
 description = "Tools for fault-tolerant quantum computing in the Guppy language"
 requires-python = ">=3.13,<4"
+readme = "README.md"
 license = { file = "LICENCE" }
 authors = [
     { name = "TKET development team", email = "tket-support@quantinuum.com" },
@@ -25,7 +26,7 @@ classifiers = [
 
 dependencies = [
     "guppylang>=1.0.1",
-    "hugr>=0.18.4",
+    "hugr>=0.18.5",
     "tket>=0.15.2",
     "tket-exts>=0.14.0",
     "zixy~=0.3.2",
@@ -40,12 +41,12 @@ dev = [
 ]
 docs = [
     "myst-nb>=1.4.0",
-    "quantinuum-sphinx>=1.11.2",
+    "quantinuum-sphinx>=1.11.3",
     "sphinx>=9.1.0",
 ]
 lint = [
     "pre-commit>=4.6.2,<5",
-    "ruff>=0.16.3",
+    "ruff>=0.16.4",
     "mypy>=2.3.1",
 ]
 test = [

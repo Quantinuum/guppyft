@@ -55,9 +55,21 @@ class Qubit:
 
     @guppy
     @no_type_check
+    def qec_cycle(self: "Qubit") -> None:
+        """Perform a QEC cycle on a qubit."""
+        qec_cycle(self)
+
+    @guppy
+    @no_type_check
     def x(self: "Qubit") -> None:
         """X gate."""
         x(self)
+
+    @guppy
+    @no_type_check
+    def y(self: "Qubit") -> None:
+        """Y gate."""
+        y(self)
 
     @guppy
     @no_type_check
@@ -104,14 +116,26 @@ def free(qubit: "Qubit" @ owned) -> None:
 
 @hugr_op(steane_op("measure_z"))
 @no_type_check
-def measure_z(self: "Qubit" @ owned) -> Measurement:
+def measure_z(qubit: "Qubit" @ owned) -> Measurement:
     """Destructive measurement of the qubit in the Z basis."""
+
+
+@hugr_op(steane_op("qec_cycle"))
+@no_type_check
+def qec_cycle(qubit: Qubit) -> None:
+    """Perform a QEC cycle on a qubit."""
 
 
 @hugr_op(steane_op("x"))
 @no_type_check
 def x(qubit: Qubit) -> None:
     """X gate."""
+
+
+@hugr_op(steane_op("y"))
+@no_type_check
+def y(qubit: Qubit) -> None:
+    """Y gate."""
 
 
 @hugr_op(steane_op("z"))
@@ -141,7 +165,8 @@ def sdg(qubit: "Qubit") -> None:
 @hugr_op(steane_op("prep_magic_for_t_like"))
 @no_type_check
 def prep_magic_for_t_like() -> "Qubit":
-    """Prepare a magic state that can be used to produce T-like states (T and Tdg)."""
+    """Prepare a magic state that can be used to produce T|+> states
+    for T and Tdg injection."""
 
 
 @hugr_op(steane_op("inject_magic_for_t"))
@@ -150,7 +175,7 @@ def inject_magic_for_t(qubit: "Qubit", magic: "Qubit" @ owned) -> None:
     """Perform a T gate by injecting a magic state."""
 
 
-@hugr_op(steane_op("inject_magic_for_t"))
+@hugr_op(steane_op("inject_magic_for_tdg"))
 @no_type_check
 def inject_magic_for_tdg(qubit: "Qubit", magic: "Qubit" @ owned) -> None:
     """Perform a Tdg gate by injecting a magic state."""
@@ -166,3 +191,17 @@ def cx(q0: "Qubit", q1: "Qubit") -> None:
 @no_type_check
 def swap(q0: "Qubit", q1: "Qubit") -> None:
     """SWAP gate."""
+
+
+@guppy
+def t(q: Qubit) -> None:
+    """Implement a T gate using magic state injection."""
+    a = prep_magic_for_t_like()
+    inject_magic_for_t(q, a)
+
+
+@guppy
+def tdg(q: Qubit) -> None:
+    """Implement a Tdg gate using magic state injection."""
+    a = prep_magic_for_t_like()
+    inject_magic_for_tdg(q, a)

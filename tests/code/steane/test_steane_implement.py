@@ -67,3 +67,17 @@ def test_cx() -> None:
     res = EmulatorBuilder().build(phys_pkg, n_qubits=18).run().collated_shots()
 
     assert res == [{"q0": [1], "q1": [1]}]
+
+
+def test_qec_cycle() -> None:
+
+    @guppy
+    def main() -> None:
+        q = Qubit()
+        q.qec_cycle()
+        result("q", q.measure_z().decode())
+
+    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(main.compile())
+    res = EmulatorBuilder().build(phys_pkg, n_qubits=10).run().collated_shots()
+
+    assert res == [{"q": [0]}]

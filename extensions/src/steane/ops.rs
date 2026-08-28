@@ -22,7 +22,7 @@ use strum::{EnumIter, EnumString, IntoStaticStr};
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.steane.ops");
 /// Extension version.
-pub const VERSION: semver::Version = semver::Version::new(0, 1, 1);
+pub const VERSION: semver::Version = semver::Version::new(0, 1, 2);
 
 /// Logical Steane operations.
 #[derive(
@@ -39,9 +39,13 @@ pub enum SteaneOpDef {
     measure_z,
     /// Decode
     decode,
+    /// Perform a QEC cycle on logical qubit
+    qec_cycle,
     /// X gate.
     x,
     /// Z gate.
+    y,
+    /// Y gate.
     z,
     /// H gate.
     h,
@@ -148,7 +152,11 @@ impl MakeOpDef for SteaneOpDef {
                     .into()
             }
             decode => FuncValueType::new(vec![logical_measurement_type()], vec![bool_t()]).into(),
+            qec_cycle => {
+                FuncValueType::new(vec![logical_qubit_type()], vec![logical_qubit_type()]).into()
+            }
             x => sig_qubits(1, 1),
+            y => sig_qubits(1, 1),
             z => sig_qubits(1, 1),
             h => sig_qubits(1, 1),
             s => sig_qubits(1, 1),
@@ -193,7 +201,7 @@ mod tests {
     fn test_steane_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.steane.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 14);
+        assert_eq!(EXTENSION.operations().count(), 16);
     }
 
     #[test]
@@ -218,6 +226,7 @@ mod tests {
         let mut linear = f_build.as_circuit(wires);
         linear
             .append(EXTENSION.instantiate_extension_op("x", [])?, [0])?
+            .append(EXTENSION.instantiate_extension_op("y", [])?, [0])?
             .append(EXTENSION.instantiate_extension_op("z", [])?, [0])?
             .append(EXTENSION.instantiate_extension_op("h", [])?, [0])?
             .append(EXTENSION.instantiate_extension_op("s", [])?, [0])?
