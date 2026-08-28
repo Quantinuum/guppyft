@@ -1564,7 +1564,6 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
         """
-        # Cannot import at top of file as it creates a circular import.
         from guppyft.extensions import std_types
 
         block_type = ICEBERG_TYPES.iceberg_block(k)
