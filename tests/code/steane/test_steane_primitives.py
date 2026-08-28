@@ -5,10 +5,12 @@ from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.builtins import array
 from guppylang.std.lang import comptime
+from guppylang.std.platform import output
 from guppylang.std.quantum import cx, h, qubit, s, sdg, x, y, z
 
 from guppyft.code.steane import primitives as steane_primitives
 from guppyft.code.steane.primitives import (
+    _measure_syndromes,
     knill_qec_cycle,
     prep_zero_non_ft,
     steane_x_qec_cycle,
@@ -150,6 +152,32 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
     assert sem == impl
 
 
+def test_steane_measure_syndromes() -> None:
+    # Note: While `_measure_syndromes` is a private function, it is used
+    # as part of magic state preparation which is non-Clifford and not
+    # exhaustively tested. This test is included to validate the Clifford
+    # components on its own.
+
+    @guppy
+    @no_type_check
+    def impl_func(arr: array[qubit, 7]) -> None:
+        block = LogicalBlock(array(arr.take(i) for i in range(7)))
+
+        _measure_syndromes(block)
+
+        for i in range(7):
+            arr.put(block.data_qs.take(i), i)
+        block.discard()
+
+    sem, impl = compute_verification_signterms_single_block_unitary(
+        specify_identity,
+        impl_func,
+        code_definition=STEANE_DEF,
+        num_ancilla_qubits=3,
+    )
+    assert sem == impl
+
+
 @pytest.mark.parametrize(
     ("specify_def", "implement_def"),
     [
@@ -224,3 +252,21 @@ def test_steane_2q_primitives(
         code_definition=STEANE_DEF,
     )
     assert sem == impl
+
+
+def test_t_gate() -> None:
+
+    @guppy
+    def test() -> None:
+        blk = steane_primitives.prep_zero_non_ft()
+        steane_primitives.h(blk)
+        for _ in range(4):
+            a = steane_primitives.prep_t_state_ft().force_check().unwrap()
+            steane_primitives.inject_magic_for_t(blk, a)
+        steane_primitives.h(blk)
+        res = steane_primitives.measure_z(blk)
+        output("res", steane_primitives.decode(res))
+
+    res = test.emulator(n_qubits=20).run().collated_shots()
+
+    assert res == [{"res": [1]}]
