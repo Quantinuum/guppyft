@@ -76,7 +76,9 @@ class ReplaceEncoder(ComposablePass):
                     return RsHugr.from_bytes(
                         repl.compile_function().modules[0].to_bytes()
                     )
-                case Hugr() | Package():
+                case Package():
+                    return RsHugr.from_bytes(repl.modules[0].to_bytes())
+                case Hugr():
                     return RsHugr.from_bytes(repl.to_bytes())
                 case _:
                     raise TypeError(
