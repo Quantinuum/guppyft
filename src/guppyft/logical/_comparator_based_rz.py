@@ -14,13 +14,14 @@ from typing import no_type_check
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.angles import angle
-from guppylang.std.builtins import Function, array, comptime, nat, output
+from guppylang.std.builtins import Function, array, comptime, nat
 from guppylang.std.lang import Drop
 from guppylang.std.quantum import (
     cx,
     cz,
+    discard_array,
     h,
-    measure_array,
+    measure,
     project_z,
     qubit,
     s,
@@ -274,20 +275,17 @@ class ComparatorBasedRz[
             self.comparator.compose(a_reg, b_reg, target, k)
             s(target)
             self.inverse_comparator.compose(a_reg, b_reg, target, k)
-            measure_array(b_reg)
+            discard_array(b_reg)
 
             for i in range(n):
                 h(a_reg[i])
 
-            a_measurements = measure_array(a_reg)
             all_zero = True
-            for i in range(n):
-                if a_measurements[i].read():
+            for q in a_reg:
+                if measure(q).read():
                     all_zero = False
-                    break
 
             if all_zero:
-                output("attempts", attempts)
                 break
             z(target)
 

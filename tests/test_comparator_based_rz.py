@@ -107,8 +107,8 @@ def test_comparator_based_rz_replay(theta: float) -> None:
 
     n_shots = 5
     # attempts fail k times and then succeed
-    fail = [False] * (2 * n - 3) + [True]
-    desired_measurements = [fail * k + [False] * (2 * n - 2) for k in range(n_shots)]
+    fail = [False] * (n - 1) + [True]
+    desired_measurements = [fail * k + [False] * n for k in range(n_shots)]
 
     rus_replay_sim = QuantumReplay(simulator=Quest(), measurements=desired_measurements)
     em_result = (

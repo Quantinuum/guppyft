@@ -699,6 +699,8 @@ class SteaneBuilder:
             compound_op_replacements={
                 ("tket.quantum", "T"): steane_logical.t,
                 ("tket.quantum", "Tdg"): steane_logical.tdg,
+                ("tket.quantum", "CZ"): steane_logical.cz,
+                ("tket.quantum", "Toffoli"): steane_logical.toffoli,
             },
             ty_replacements={
                 ("prelude", "qubit"): ("guppyft.steane.types", "qubit"),
