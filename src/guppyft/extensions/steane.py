@@ -233,6 +233,18 @@ class SteaneOpsExtension:
         return self.cx_def.instantiate([])
 
     @functools.cached_property
+    def cz_def(self) -> OpDef:
+        """Apply a CZ gate to two qubits.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `cz`."""
+        return self().get_op("cz")
+
+    def cz(self) -> ExtOp:
+        """Apply a CZ gate to two qubits."""
+        return self.cz_def.instantiate([])
+
+    @functools.cached_property
     def swap_def(self) -> OpDef:
         """Apply a SWAP gate to two qubits.
 

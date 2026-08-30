@@ -1,5 +1,5 @@
 {
-  "version": "0.1.2",
+  "version": "0.1.3",
   "name": "guppyft.steane.ops",
   "types": {},
   "operations": {
@@ -7,6 +7,53 @@
       "extension": "guppyft.steane.ops",
       "name": "cx",
       "description": "CX gate.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.steane.types",
+              "extension_version": "0.1.1",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.steane.types",
+              "extension_version": "0.1.1",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.steane.types",
+              "extension_version": "0.1.1",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.steane.types",
+              "extension_version": "0.1.1",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "cz": {
+      "extension": "guppyft.steane.ops",
+      "name": "cz",
+      "description": "CZ gate.",
       "signature": {
         "params": [],
         "body": {

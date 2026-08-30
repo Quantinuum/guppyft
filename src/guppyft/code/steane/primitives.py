@@ -425,3 +425,11 @@ def cx(ctl: LogicalBlock[7], tgt: LogicalBlock[7]) -> None:
     """Logical CX gate between two Steane blocks."""
     for i in range(7):
         qlib.cx(ctl.data_qs[i], tgt.data_qs[i])
+
+
+@guppy
+@no_type_check
+def cz(q0: LogicalBlock[7], q1: LogicalBlock[7]) -> None:
+    """Logical CZ gate between two Steane blocks."""
+    for i in range(7):
+        qlib.cz(q0.data_qs[i], q1.data_qs[i])

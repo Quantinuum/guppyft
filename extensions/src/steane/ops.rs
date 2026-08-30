@@ -22,7 +22,7 @@ use strum::{EnumIter, EnumString, IntoStaticStr};
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.steane.ops");
 /// Extension version.
-pub const VERSION: semver::Version = semver::Version::new(0, 1, 2);
+pub const VERSION: semver::Version = semver::Version::new(0, 1, 3);
 
 /// Logical Steane operations.
 #[derive(
@@ -61,6 +61,8 @@ pub enum SteaneOpDef {
     inject_magic_for_tdg,
     /// CX gate.
     cx,
+    /// CZ gate.
+    cz,
     /// Swap of two qubits.
     swap,
 }
@@ -165,6 +167,7 @@ impl MakeOpDef for SteaneOpDef {
             inject_magic_for_t => sig_qubits(2, 1),
             inject_magic_for_tdg => sig_qubits(2, 1),
             cx => sig_qubits(2, 2),
+            cz => sig_qubits(2, 2),
             swap => sig_qubits(2, 2),
         }
     }
@@ -201,7 +204,7 @@ mod tests {
     fn test_steane_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.steane.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 16);
+        assert_eq!(EXTENSION.operations().count(), 17);
     }
 
     #[test]
@@ -232,6 +235,7 @@ mod tests {
             .append(EXTENSION.instantiate_extension_op("s", [])?, [0])?
             .append(EXTENSION.instantiate_extension_op("sdg", [])?, [0])?
             .append(EXTENSION.instantiate_extension_op("cx", [])?, [0, 1])?
+            .append(EXTENSION.instantiate_extension_op("cz", [])?, [0, 1])?
             .append(EXTENSION.instantiate_extension_op("swap", [])?, [0, 1])?;
         let outs = linear.finish();
         f_build.finish_with_outputs(outs)?;

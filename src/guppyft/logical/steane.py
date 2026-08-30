@@ -187,6 +187,12 @@ def cx(q0: "Qubit", q1: "Qubit") -> None:
     """CX gate."""
 
 
+@hugr_op(steane_op("cz"))
+@no_type_check
+def cz(q0: "Qubit", q1: "Qubit") -> None:
+    """CZ gate."""
+
+
 @hugr_op(steane_op("swap"))
 @no_type_check
 def swap(q0: "Qubit", q1: "Qubit") -> None:
@@ -205,17 +211,3 @@ def tdg(q: Qubit) -> None:
     """Implement a Tdg gate using magic state injection."""
     a = prep_magic_for_t_like()
     inject_magic_for_tdg(q, a)
-
-
-@guppy
-@no_type_check
-def cz(q0: Qubit, q1: Qubit) -> None:
-    """Implement a CZ gate."""
-    # TODO: This should be a primitive of the code
-
-
-@guppy
-@no_type_check
-def toffoli(c0: Qubit, c1: Qubit, t: Qubit) -> None:
-    """Implement a Toffoli gate via decomposition into 8 T gates."""
-    # TODO: Implement Toffoli decomposition using T gates
