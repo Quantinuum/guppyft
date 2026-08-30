@@ -39,9 +39,9 @@ from guppyft._math import floor, get_bit, tan
 @guppy
 @no_type_check
 def temp_and_uncompute(q_0: qubit, q_1: qubit, target_q: qubit) -> None:
-    """Uncompute the logical AND operation.
+    """Uncompute the temporary AND operation.
 
-    This function reverses the effects of the logical AND operation
+    This function reverses the effects of the AND operation
     applied to the input qubits and the target qubit. It is equivalent to
     measurement based uncomputation as described in Fig 4.
     https://arxiv.org/pdf/1805.03662. The qubit must be discarded after use.
@@ -53,7 +53,9 @@ def temp_and_uncompute(q_0: qubit, q_1: qubit, target_q: qubit) -> None:
 
     """
     h(target_q)
-    # TODO: project_z is wasteful in a QEC setting
+    # TODO: project_z is wasteful in a QEC setting, since measurements of
+    # blocks are destructive. Hence, `project_z` causes the block to be
+    # prepared again in the |0> state, but this is discarded immediately after.
     if project_z(target_q).read():
         cz(q_0, q_1)
 
