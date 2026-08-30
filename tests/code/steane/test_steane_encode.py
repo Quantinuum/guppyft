@@ -11,7 +11,6 @@ from guppylang.std.quantum import (
     h,
     measure,
     qubit,
-    rx,
     rz,
     s,
     sdg,
@@ -115,7 +114,7 @@ def test_encoder_missing_op() -> None:
     @guppy
     def main() -> None:
         q = qubit()
-        rx(q, pi / 2)
+        rz(q, pi / 2)
         discard(q)
 
     pkg = main.compile()
@@ -239,6 +238,7 @@ def test_realtime_rz_encoder() -> None:
     pkg = main.compile()
     res = (
         SteaneBuilder()
+        .with_rz_synth_precision(epsilon)
         .build(n_blocks=n_blocks)
         .emulator(pkg, n_qubits=7 * n_blocks + 6)
         .with_simulator(Coinflip(bias=0.0))
