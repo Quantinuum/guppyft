@@ -2,14 +2,57 @@ from dataclasses import dataclass, field
 from typing import Any, Self
 
 from guppylang.defs import GuppyFunctionDefinition
-from hugr import Hugr
+from guppylang.std.angles import angle
+from guppylang.std.quantum import qubit
+from hugr import Hugr, ops, tys
+from hugr.build import Module
 from hugr.ext import ExtensionRegistry
 from hugr.package import Package
 from hugr.passes.composable import ComposablePass, PassResult, implement_pass_run
 from hugr.passes.scope import PassScope
+from hugr.std.float import FLOAT_T
+from tket_exts import rotation
 
 from guppyft._bindings import RsHugr, _replace_encoder
 from guppyft._util import extension_registry_to_json
+
+
+def compile_rotation_func(
+    angle_function: GuppyFunctionDefinition[[qubit, angle], None],
+) -> Hugr[Any]:
+    """Compile an angle-based Guppy function for a TKET rotation operation.
+
+    Guppy functions receive angles as `Tuple(float64)`, while TKET rotation
+    operations receive the opaque `tket.rotation.rotation` type. The returned
+    HUGR unwraps the rotation to half-turns before calling `angle_function`.
+    """
+    fn_hugr = angle_function.compile_function().modules[0]
+    orig_func_defn_node = fn_hugr.entrypoint
+    orig_func_defn_op = fn_hugr.entrypoint_op()
+    angle_type = tys.Tuple(FLOAT_T)
+
+    if not isinstance(orig_func_defn_op, ops.FuncDefn):
+        raise TypeError("The angle_function must compile to a function definition")
+    if not orig_func_defn_op.inputs or orig_func_defn_op.inputs[-1] != angle_type:
+        raise ValueError(
+            "The angle_function must take a guppylang.std.angles.angle "
+            "as its final argument"
+        )
+
+    # Create a wrapper function that takes a TKET rotation and converts it
+    # to an angle type before calling `angle_function`.
+    wrapper = Module(fn_hugr).define_function(
+        f"{orig_func_defn_op.f_name}_wrapper",
+        [*orig_func_defn_op.inputs[:-1], rotation.rotation],
+    )
+
+    *args, rotation_arg = wrapper.inputs()
+    halfturns = wrapper.add_op(rotation.to_halfturns, rotation_arg).out(0)
+    angle = wrapper.add_op(ops.MakeTuple([FLOAT_T]), halfturns).out(0)
+    call_node = wrapper.call(orig_func_defn_node, *args, angle)
+    wrapper.set_outputs(*call_node.outputs())
+    fn_hugr.entrypoint = wrapper.parent_node
+    return fn_hugr
 
 
 @dataclass

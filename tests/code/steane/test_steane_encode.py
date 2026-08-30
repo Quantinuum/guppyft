@@ -10,7 +10,7 @@ from guppylang.std.quantum import (
     h,
     measure,
     qubit,
-    rz,
+    rx,
     s,
     sdg,
     t,
@@ -104,14 +104,14 @@ def test_encode_function_call() -> None:
 
 
 def test_encoder_missing_op() -> None:
-    # `tket.quantum.rz` has no replacement registered in `SteaneBuilder`, so the encoder
+    # `tket.quantum.rx` has no replacement registered in `SteaneBuilder`, so the encoder
     # leaves it untouched while everything else is lowered to logical qubits. This
-    # mismatch causes `rz`'s (unencoded) qubit port to be connected to an (encoded)
+    # mismatch causes `rx`'s (unencoded) qubit port to be connected to an (encoded)
     # logical qubit port, which fails validation.
     @guppy
     def main() -> None:
         q = qubit()
-        rz(q, pi / 2)
+        rx(q, pi / 2)
         discard(q)
 
     pkg = main.compile()

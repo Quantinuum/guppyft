@@ -43,12 +43,14 @@ from guppyft.encode import (
     OpReplacements,
     ReplaceEncoder,
     TyReplacements,
+    compile_rotation_func,
     encode,
     implement_ops,
 )
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
 from guppyft.logical import steane as steane_logical
+from guppyft.logical._comparator_based_rz import comparator_based_rz_cascade
 
 N = guppy.nat_var("N")
 
@@ -678,6 +680,16 @@ class SteaneBuilder:
         #  required for `borrow_array` when (de)serialising.
         ext.extend(_std_extensions())
 
+        rz_decomposer = ReplaceEncoder(
+            op_replacements={},
+            compound_op_replacements={
+                ("tket.quantum", "Rz"): compile_rotation_func(
+                    comparator_based_rz_cascade(0.01)
+                ),
+            },
+            extensions=ext,
+        )
+
         std_encoder = ReplaceEncoder(
             op_replacements={
                 ("tket.quantum", "QAlloc"): ("guppyft.steane.ops", "prep_zero", []),
@@ -712,7 +724,9 @@ class SteaneBuilder:
             extensions=ext,
         )
 
-        return EncoderSpec(to_logical=std_encoder, implement_spec=impl_spec)
+        return EncoderSpec(
+            to_logical=rz_decomposer.then(std_encoder), implement_spec=impl_spec
+        )
 
     def with_qec_policy(self, qec_policy: QECPolicy) -> Self:
         """Set the QEC policy."""

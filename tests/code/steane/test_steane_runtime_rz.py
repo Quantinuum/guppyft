@@ -6,8 +6,8 @@ from guppylang.std.platform import output
 from guppylang.std.quantum import (
     discard,
     h,
-    rz,
     qubit,
+    rz,
 )
 from selene_sim import Coinflip
 
@@ -47,6 +47,7 @@ def test_encode_rz_decomposition() -> None:
     )
 
     assert res == [{"success": [1]}]
+
 
 def test_encode_rz_directly() -> None:
 
