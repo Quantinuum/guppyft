@@ -7,6 +7,7 @@ we find the right place for this to live (see issue: TODO).
 Reference: https://arxiv.org/pdf/2404.05618
 Original contribution: @vvandaele (Vivien Vandaele)
 """
+# mypy: ignore-errors
 
 from math import ceil, log2
 from typing import no_type_check

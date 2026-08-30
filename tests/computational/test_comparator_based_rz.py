@@ -12,7 +12,7 @@ from guppylang import comptime, guppy
 from guppylang.std.angles import angle
 from guppylang.std.debug import state_output
 from guppylang.std.quantum import discard, h, qubit, toffoli
-from selene_sim import QuantumReplay, Quest
+from selene_sim.backends.bundled_simulators import QuantumReplay, Quest
 
 from guppyft.computational._comparator_based_rz import (
     ComparatorBasedRz,
