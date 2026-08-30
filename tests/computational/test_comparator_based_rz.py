@@ -14,7 +14,7 @@ from guppylang.std.debug import state_output
 from guppylang.std.quantum import discard, h, qubit, toffoli
 from selene_sim import QuantumReplay, Quest
 
-from guppyft.logical._comparator_based_rz import (
+from guppyft.computational._comparator_based_rz import (
     ComparatorBasedRz,
     ConstantComparatorCascade,
     comparator_based_rz_cascade,

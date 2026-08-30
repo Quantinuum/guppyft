@@ -38,6 +38,7 @@ from guppyft.code.steane.primitives import (
 )
 from guppyft.code.util import LogicalBlock, RawMeasurement
 from guppyft.computational import clifford_t_decomp
+from guppyft.computational._comparator_based_rz import comparator_based_rz_cascade
 from guppyft.encode import (
     EncoderParams,
     EncoderSpec,
@@ -52,7 +53,6 @@ from guppyft.encode import (
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
 from guppyft.logical import steane as steane_logical
-from guppyft.logical._comparator_based_rz import comparator_based_rz_cascade
 
 N = guppy.nat_var("N")
 
@@ -712,7 +712,7 @@ class SteaneBuilder:
             compound_op_replacements={
                 ("tket.quantum", "Toffoli"): clifford_t_decomp.toffoli,
                 ("tket.quantum", "Rz"): compile_rotation_func(
-                    comparator_based_rz_cascade(0.01)
+                    comparator_based_rz_cascade(0.01)  # TODO: Make configurable
                 ),
             },
             extensions=ext,

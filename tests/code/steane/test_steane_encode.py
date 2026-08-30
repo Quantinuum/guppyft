@@ -12,6 +12,7 @@ from guppylang.std.quantum import (
     measure,
     qubit,
     rx,
+    rz,
     s,
     sdg,
     t,
@@ -23,6 +24,7 @@ from guppylang.std.quantum import (
 from hugr import Hugr
 from hugr.package import Package
 from selene_hugr_qis_compiler import check_hugr
+from selene_sim.backends.bundled_simulators import Coinflip
 
 from guppyft.code.steane.encoder_spec import (
     QECPolicy,
@@ -209,3 +211,39 @@ def test_t_encoder_smoke() -> None:
     )
 
     assert res == [{}]
+
+
+def test_realtime_rz_encoder() -> None:
+    from guppylang.std.qsystem.random import RNG
+
+    from guppyft.computational._comparator_based_rz import (
+        n_comparator_based_rz_cascade_ancillas,
+    )
+
+    epsilon = 0.01
+
+    @guppy
+    def main() -> None:
+        rng = RNG(1234)
+
+        target = qubit()
+        h(target)
+        rz(target, rng.random_angle())
+        discard(target)
+        output("success", 1)
+
+        rng.discard()
+
+    # Original block + one block for magic + ancilla space for Rz
+    n_blocks = 1 + 1 + n_comparator_based_rz_cascade_ancillas(epsilon)
+    pkg = main.compile()
+    res = (
+        SteaneBuilder()
+        .build(n_blocks=n_blocks)
+        .emulator(pkg, n_qubits=7 * n_blocks + 6)
+        .with_simulator(Coinflip(bias=0.0))
+        .run()
+        .collated_shots()
+    )
+
+    assert res == [{"success": [1]}]
