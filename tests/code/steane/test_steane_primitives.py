@@ -164,13 +164,9 @@ def test_steane_measure_syndromes() -> None:
             arr.put(block.data_qs.take(i), i)
         block.discard()
 
-    sem, impl = compute_verification_signterms_single_block_unitary(
-        specify_identity,
-        impl_func,
-        code_definition=STEANE_DEF,
-        num_ancilla_qubits=3,
+    assert valid_clifford_implementation(
+        specify_identity, impl_func, STEANE_DEF, impl_num_ancillas=3
     )
-    assert sem == impl
 
 
 @pytest.mark.parametrize(
