@@ -52,7 +52,7 @@ def decompose_rz(method: RzDecomposer, epsilon: float) -> ComposablePass:
     """
     match method:
         case RzDecomposer.GRIDSYNTH:
-            # TODO: See
+            # TODO: See https://github.com/quantinuum-dev/guppyft/issues/262
             raise NotImplementedError
         case RzDecomposer.COMPARATOR_BASED:
             return ReplaceEncoder(

@@ -2,7 +2,8 @@
 
 This is a duplicate of the `comparator_based_rz.py` module in guppy-algos.
 This is a temporary solution to avoid circular imports. We will remove when
-we find the right place for this to live (see issue: TODO).
+we find the right place for this to live
+See: https://github.com/quantinuum-dev/guppyft/issues/272.
 
 Reference: https://arxiv.org/pdf/2404.05618
 Original contribution: @vvandaele (Vivien Vandaele)
