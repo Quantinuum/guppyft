@@ -1,5 +1,5 @@
 from collections.abc import Callable, Sequence
-from typing import Generic, TypeVar, no_type_check
+from typing import Generic, no_type_check
 
 from guppylang import guppy
 from guppylang.std.builtins import array
@@ -31,10 +31,7 @@ def _iceberg_op(
     return op
 
 
-T = TypeVar("T")
-
-
-def _custom_block_type(block_ty_def: TypeDef) -> Callable[[type[T]], type[T]]:
+def _custom_block_type[T](block_ty_def: TypeDef) -> Callable[[type[T]], type[T]]:
     def to_hugr_ty(args: Sequence[Argument], ctx: ToHugrContext) -> ht.Type:
         [k_arg] = args
         assert isinstance(k_arg, ConstArg)
