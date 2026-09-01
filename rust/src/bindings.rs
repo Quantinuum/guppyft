@@ -53,7 +53,7 @@ mod _bindings {
 
     #[pyfunction]
     #[pyo3(signature = (rs_hugr, op_replacements, compound_op_replacements, ty_replacements, extensions=None))]
-    fn _replace_encoder(
+    fn _replacement_compiler_impl(
         rs_hugr: &mut RsHugr,
         op_replacements: BTreeMap<(String, String), (String, String, Vec<PyTypeArgValue>)>,
         compound_op_replacements: BTreeMap<(String, String), RsHugr>,
