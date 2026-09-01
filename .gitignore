@@ -61,6 +61,8 @@ cover/
 # Sphinx documentation
 docs/build/
 docs/api/generated
+docs/jupyter_execute
+docs/.jupyter_cache
 
 # PyBuilder
 .pybuilder/
