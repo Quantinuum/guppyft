@@ -4,7 +4,21 @@ import pytest
 from guppylang import guppy
 from guppylang.std.angles import pi
 from guppylang.std.platform import output
-from guppylang.std.quantum import cx, discard, h, measure, qubit, rz, s, sdg, x, y, z
+from guppylang.std.quantum import (
+    cx,
+    discard,
+    h,
+    measure,
+    qubit,
+    rz,
+    s,
+    sdg,
+    t,
+    tdg,
+    x,
+    y,
+    z,
+)
 from hugr import Hugr
 from hugr.package import Package
 from selene_hugr_qis_compiler import check_hugr
@@ -172,3 +186,24 @@ def test_annotate_steane_encoding() -> None:
         "encoding": "steane",
         "params": {"n_blocks": 4},
     }
+
+
+def test_t_encoder_smoke() -> None:
+    @guppy
+    def main() -> None:
+        q = qubit()
+        t(q)
+        discard(q)
+        q = qubit()
+        tdg(q)
+        discard(q)
+
+    res = (
+        SteaneBuilder()
+        .build(n_blocks=2)
+        .emulator(main.compile(), n_qubits=17)
+        .run()
+        .collated_shots()
+    )
+
+    assert res == [{}]

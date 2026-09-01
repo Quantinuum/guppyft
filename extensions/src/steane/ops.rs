@@ -39,6 +39,8 @@ pub enum SteaneOpDef {
     measure_z,
     /// Decode
     decode,
+    /// Perform a QEC cycle on logical qubit
+    qec_cycle,
     /// X gate.
     x,
     /// Z gate.
@@ -150,6 +152,9 @@ impl MakeOpDef for SteaneOpDef {
                     .into()
             }
             decode => FuncValueType::new(vec![logical_measurement_type()], vec![bool_t()]).into(),
+            qec_cycle => {
+                FuncValueType::new(vec![logical_qubit_type()], vec![logical_qubit_type()]).into()
+            }
             x => sig_qubits(1, 1),
             y => sig_qubits(1, 1),
             z => sig_qubits(1, 1),
@@ -196,7 +201,7 @@ mod tests {
     fn test_steane_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.steane.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 15);
+        assert_eq!(EXTENSION.operations().count(), 16);
     }
 
     #[test]

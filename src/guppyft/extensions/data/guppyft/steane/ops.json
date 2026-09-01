@@ -284,6 +284,37 @@
       },
       "binary": false
     },
+    "qec_cycle": {
+      "extension": "guppyft.steane.ops",
+      "name": "qec_cycle",
+      "description": "Perform a QEC cycle on logical qubit",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.steane.types",
+              "extension_version": "0.1.1",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.steane.types",
+              "extension_version": "0.1.1",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
     "s": {
       "extension": "guppyft.steane.ops",
       "name": "s",

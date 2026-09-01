@@ -38,6 +38,16 @@ class LogicalBlock(Generic[N]):  # type: ignore[misc]
         """Discard the logical block and all qubits in ``data_qs``."""
         discard_array(self.data_qs)
 
+    @guppy
+    @no_type_check
+    def __getitem__(self, idx: int) -> qubit:
+        return self.data_qs.take(idx)
+
+    @guppy
+    @no_type_check
+    def __setitem__(self, idx: int, value: qubit @ owned) -> None:
+        self.data_qs.put(value, idx)
+
 
 @guppy
 @no_type_check

@@ -52,10 +52,11 @@ mod _bindings {
     }
 
     #[pyfunction]
-    #[pyo3(signature = (rs_hugr, op_replacements, ty_replacements, extensions=None))]
+    #[pyo3(signature = (rs_hugr, op_replacements, compound_op_replacements, ty_replacements, extensions=None))]
     fn _replace_encoder(
         rs_hugr: &mut RsHugr,
         op_replacements: BTreeMap<(String, String), (String, String, Vec<PyTypeArgValue>)>,
+        compound_op_replacements: BTreeMap<(String, String), RsHugr>,
         ty_replacements: BTreeMap<(String, String), (String, String)>,
         extensions: Option<String>,
     ) -> PyResult<()> {
@@ -110,13 +111,22 @@ mod _bindings {
             });
         }
 
-        for ((src_ext_name, src_ty), (tgt_ext_name, tgt_ty)) in ty_replacements.iter() {
-            let Some(src) = get_type_from_registry(&registry, src_ext_name, src_ty)
+        for ((src_ext, src_op), replacement_hugr) in compound_op_replacements.into_iter() {
+            let Some(src_def) = registry.get(&src_ext).and_then(|e| e.get_op(&src_op)) else {
+                continue;
+            };
+            let node_template = NodeTemplate::call_to_function(replacement_hugr.hugr, &[])
+                .map_err(|e| PyValueError::new_err(format!("Error {e}")))?;
+            pass.set_replace_parametrized_op(src_def, move |_, _| Ok(Some(node_template.clone())));
+        }
+
+        for ((src_ext_name, src_ty), (tgt_ext_name, tgt_ty)) in ty_replacements.into_iter() {
+            let Some(src) = get_type_from_registry(&registry, &src_ext_name, &src_ty)
                 .map_err(|e| PyValueError::new_err(format!("Error getting src ty: {e}")))?
             else {
                 continue;
             };
-            let Some(tgt) = get_type_from_registry(&registry, tgt_ext_name, tgt_ty)
+            let Some(tgt) = get_type_from_registry(&registry, &tgt_ext_name, &tgt_ty)
                 .map_err(|e| PyValueError::new_err(format!("Error getting tgt ty: {e}")))?
             else {
                 continue;

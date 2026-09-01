@@ -87,6 +87,18 @@ class SteaneOpsExtension:
         return self.measure_z_def.instantiate([])
 
     @functools.cached_property
+    def qec_cycle_def(self) -> OpDef:
+        """Perform a QEC cycle on a logical qubit.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `qec_cycle`."""
+        return self().get_op("qec_cycle")
+
+    def qec_cycle(self) -> ExtOp:
+        """Perform a QEC cycle on a logical qubit."""
+        return self.qec_cycle_def.instantiate([])
+
+    @functools.cached_property
     def decode_def(self) -> OpDef:
         """Decode a measurement of a Steane logical qubit.
 
