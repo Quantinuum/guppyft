@@ -77,16 +77,6 @@ class RUSStateFactoryConf:
     max_attempts: int
 
 
-@dataclass(frozen=True, kw_only=True)
-class _SteaneFactoryConf:
-    """Configuration for each of the Steane state factories."""
-
-    zero: RUSStateFactoryConf = field(default_factory=lambda: RUSStateFactoryConf(1, 5))
-    magic: RUSStateFactoryConf = field(
-        default_factory=lambda: RUSStateFactoryConf(1, 5)
-    )
-
-
 class QECStyle(Enum):
     """The style of syndrome extraction to use during a QEC cycle."""
 
@@ -165,7 +155,12 @@ class SteaneInstance:
 class SteaneBuilder:
     """Steane architecture builder class for creating `SteaneInstance` objects."""
 
-    _factory_confs: _SteaneFactoryConf = field(default_factory=_SteaneFactoryConf)
+    _zero_factory_conf: RUSStateFactoryConf = field(
+        default_factory=lambda: RUSStateFactoryConf(1, 5)
+    )
+    _magic_factory_conf: RUSStateFactoryConf = field(
+        default_factory=lambda: RUSStateFactoryConf(1, 5)
+    )
     _qec_policy: QECPolicy = field(default_factory=QECPolicy)
 
     def _gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
@@ -718,17 +713,11 @@ class SteaneBuilder:
 
     def with_zero_factory_conf(self, conf: RUSStateFactoryConf) -> Self:
         """Set the zero state factory configuration."""
-        return replace(
-            self,
-            _factory_confs=replace(self._factory_confs, zero=conf),
-        )
+        return replace(self, _zero_factory_conf=conf)
 
     def with_magic_factory_conf(self, conf: RUSStateFactoryConf) -> Self:
         """Set the magic state factory configuration."""
-        return replace(
-            self,
-            _factory_confs=replace(self._factory_confs, magic=conf),
-        )
+        return replace(self, _magic_factory_conf=conf)
 
     def build(self, n_blocks: int) -> SteaneInstance:
         """Build a `SteaneInstance` configured for `n_blocks` logical blocks."""
