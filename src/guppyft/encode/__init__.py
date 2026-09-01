@@ -11,7 +11,7 @@ from hugr.package import Package
 from hugr.passes.composable import ComposablePass
 from tket.passes import Normalize
 
-from ._encoder import ReplaceEncoder, compile_rotation_func
+from ._encoder import ReplaceEncoder
 from ._implement_ops import (
     ImplementOpsSpec,
     OpReplacements,
@@ -27,7 +27,6 @@ __all__ = [
     "ReplaceEncoder",
     "TyReplacements",
     "annotate_encoding",
-    "compile_rotation_func",
     "encode",
     "implement_ops",
 ]

@@ -37,8 +37,6 @@ from guppyft.code.steane.primitives import (
     z,
 )
 from guppyft.code.util import LogicalBlock, RawMeasurement
-from guppyft.computational import clifford_t_decomp
-from guppyft.computational._comparator_based_rz import comparator_based_rz_cascade
 from guppyft.encode import (
     EncoderParams,
     EncoderSpec,
@@ -46,7 +44,6 @@ from guppyft.encode import (
     OpReplacements,
     ReplaceEncoder,
     TyReplacements,
-    compile_rotation_func,
     encode,
     implement_ops,
 )
@@ -171,7 +168,6 @@ class SteaneBuilder:
 
     _factory_confs: _SteaneFactoryConf = field(default_factory=_SteaneFactoryConf)
     _qec_policy: QECPolicy = field(default_factory=QECPolicy)
-    _rz_synth_precision: float | None = field(default=None)
 
     def _gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
         """Generate the `ImplementOpsSpec` providing Steane implementations of
@@ -708,23 +704,6 @@ class SteaneBuilder:
         #  required for `borrow_array` when (de)serialising.
         ext.extend(_std_extensions())
 
-        # Determine how to decompose computational gates into a gateset
-        # amenable to encoding
-        gate_decomposer = ReplaceEncoder(
-            op_replacements={},
-            compound_op_replacements={
-                ("tket.quantum", "Toffoli"): clifford_t_decomp.toffoli,
-            },
-            extensions=ext,
-        )
-        # If Rz synthesis precision is specified, add a replacement for Rz gates
-        if self._rz_synth_precision is not None:
-            gate_decomposer.compound_op_replacements[("tket.quantum", "Rz")] = (
-                compile_rotation_func(
-                    comparator_based_rz_cascade(self._rz_synth_precision)
-                )
-            )
-
         # Determine how to encode computational gates with logical gates
         std_encoder = ReplaceEncoder(
             op_replacements={
@@ -759,9 +738,7 @@ class SteaneBuilder:
             extensions=ext,
         )
 
-        return EncoderSpec(
-            to_logical=gate_decomposer.then(std_encoder), implement_spec=impl_spec
-        )
+        return EncoderSpec(to_logical=std_encoder, implement_spec=impl_spec)
 
     def with_qec_policy(self, qec_policy: QECPolicy) -> Self:
         """Set the QEC policy."""
@@ -780,12 +757,6 @@ class SteaneBuilder:
             self,
             _factory_confs=replace(self._factory_confs, magic=conf),
         )
-
-    def with_rz_synth_precision(self, epsilon: float) -> Self:
-        """Set the precision for Rz synthesis."""
-        if epsilon <= 0:
-            raise ValueError("Rz synthesis precision must be positive")
-        return replace(self, _rz_synth_precision=epsilon)
 
     def build(self, n_blocks: int) -> SteaneInstance:
         """Build a `SteaneInstance` configured for `n_blocks` logical blocks."""

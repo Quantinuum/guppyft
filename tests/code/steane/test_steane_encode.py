@@ -31,6 +31,11 @@ from guppyft.code.steane.encoder_spec import (
     SteaneBuilder,
     SteaneEncoderParams,
 )
+from guppyft.computational.decomposition import (
+    RzDecomposer,
+    decompose_rz,
+    decompose_toffoli,
+)
 from guppyft.encode import annotate_encoding
 
 
@@ -215,11 +220,8 @@ def test_t_encoder_smoke() -> None:
 def test_realtime_rz_encoder() -> None:
     from guppylang.std.qsystem.random import RNG
 
-    from guppyft.computational._comparator_based_rz import (
-        n_comparator_based_rz_cascade_ancillas,
-    )
-
     epsilon = 0.01
+    method = RzDecomposer.COMPARATOR_BASED
 
     @guppy
     def main() -> None:
@@ -233,12 +235,15 @@ def test_realtime_rz_encoder() -> None:
 
         rng.discard()
 
-    # Original block + one block for magic + ancilla space for Rz
-    n_blocks = 1 + 1 + n_comparator_based_rz_cascade_ancillas(epsilon)
     pkg = main.compile()
+    gate_decomposer = decompose_rz(method, epsilon).then(decompose_toffoli())
+    gate_decomposer.run(pkg.modules[0], inplace=True)
+
+    # Original block + one block for magic + ancilla space for Rz
+    n_blocks = 1 + 1 + method.num_ancilla(epsilon)
+
     res = (
         SteaneBuilder()
-        .with_rz_synth_precision(epsilon)
         .build(n_blocks=n_blocks)
         .emulator(pkg, n_qubits=7 * n_blocks + 6)
         .with_simulator(Coinflip(bias=0.0))
