@@ -151,7 +151,7 @@ class SteaneInstance:
         return emulator
 
 
-@dataclass(frozen=True, kw_only=True, init=False)
+@dataclass(frozen=True, kw_only=True)
 class SteaneBuilder:
     """Steane architecture builder class for creating `SteaneInstance` objects."""
 
