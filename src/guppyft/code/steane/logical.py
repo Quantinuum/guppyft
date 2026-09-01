@@ -11,23 +11,19 @@ from hugr.ops import DataflowOp, ExtOp
 
 from guppyft.extensions import steane_ops, steane_types
 
-OPS_EXTN = steane_ops()
-TYPES_EXTN = steane_types()
-
-qubit_type = steane_types.steane_qubit()
-measurement_type = steane_types.steane_measurement()
+_OPS_EXTN = steane_ops()
 
 
 def steane_op(
     op_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], DataflowOp]:
     def op(ty: ht.FunctionType, inst: Inst, ctx: ToHugrContext) -> DataflowOp:
-        return ExtOp(OPS_EXTN.get_op(op_name), ty, [arg.to_hugr(ctx) for arg in inst])
+        return ExtOp(_OPS_EXTN.get_op(op_name), ty, [arg.to_hugr(ctx) for arg in inst])
 
     return op
 
 
-@custom_type(measurement_type, copyable=True, droppable=True)
+@custom_type(steane_types.steane_measurement(), copyable=True, droppable=True)
 class Measurement:
     @hugr_op(steane_op("decode"))
     @no_type_check
@@ -35,7 +31,7 @@ class Measurement:
         """Decode the measurement."""
 
 
-@custom_type(qubit_type, copyable=False, droppable=False)
+@custom_type(steane_types.steane_qubit(), copyable=False, droppable=False)
 class Qubit:
     @hugr_op(steane_op("prep_zero"))
     @no_type_check
