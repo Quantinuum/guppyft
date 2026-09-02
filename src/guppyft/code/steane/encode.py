@@ -134,10 +134,7 @@ class SteaneInstance:
 
     def check_encodable(self, hugr: Package) -> None:
         """Check that a HUGR package can be encoded, raising an error if that is not the
-        case.
-
-        Note: This test only applies to operations from the `tket.quantum` extension.
-        """
+        case."""
         assert self._spec.compile is not None
         if (error := self._spec.compile.check_compilable(hugr)) is not None:
             raise error

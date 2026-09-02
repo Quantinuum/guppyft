@@ -23,9 +23,18 @@ class LogicalCompiler(Protocol):
     def compile(self, pkg: Package) -> Package: ...
 
     def can_compile(self, pkg: Package) -> bool:
+        """Whether the given package can be compiled with this compiler.
+
+        Note: This function returning positively is not a guarantee that the encoding
+        will work without fail."""
         return self.check_compilable(pkg) is None
 
-    def check_compilable(self, pkg: Package) -> UncompilableError | None: ...
+    def check_compilable(self, pkg: Package) -> UncompilableError | None:
+        """Report errors that the compiler can also project will happen when run on the
+        given package.
+
+        Note: This function returning `None` is not a guarantee that the encoding will
+        work without fail."""
 
 
 @dataclass(frozen=True)
