@@ -11,17 +11,19 @@ from hugr.package import Package
 from hugr.passes.composable import ComposablePass
 from tket.passes import Normalize
 
+from ._compile import ReplacementCompiler
 from ._implement_ops import (
+    ImplementOps,
     ImplementOpsSpec,
     OpReplacements,
     TyReplacements,
     implement_ops,
 )
-from ._to_logical import ReplacementCompiler
 
 __all__ = [
+    "EncodeSpec",
     "EncoderParams",
-    "EncoderSpec",
+    "ImplementOps",
     "ImplementOpsSpec",
     "OpReplacements",
     "ReplacementCompiler",
@@ -33,22 +35,21 @@ __all__ = [
 
 
 @dataclass(frozen=True, kw_only=True)
-class EncoderSpec:
-    """A QEC-code-specific specification for the encoder, usually produced by code
-    architectures."""
+class EncodeSpec:
+    """A QEC-code-specific collection of passes that together fully encode a
+    computation."""
 
-    to_logical: ComposablePass | None = None
-    """Pass to lower the computation to a logical level, defaults to the identity
-    without static qubit allocation."""
+    compile: ComposablePass | None = None
+    """Pass to lower the computation to a logical level."""
     logical_passes: list[ComposablePass] | None = None
     """Additional passes to run on the logical HUGR."""
-    implement_spec: ImplementOpsSpec
-    """How to implement logical operations. Passed to the implement ops pass."""
+    implement_ops: ImplementOps | None = None
+    """Lowers the logical computation to a physical level."""
 
 
 def encode(
     hugr: Package | GuppyFunctionDefinition[[], None],
-    spec: EncoderSpec,
+    spec: EncodeSpec,
     *,
     passes: list[ComposablePass] | None = None,
 ) -> Package:
@@ -83,15 +84,17 @@ def encode(
         tket_pass(hugr.modules[0], inplace=True)
 
     # 2. Lower computational -> logical
-    if spec.to_logical is not None:
-        spec.to_logical(hugr.modules[0], inplace=True)
+    if spec.compile is not None:
+        spec.compile(hugr.modules[0], inplace=True)
 
     # 3. Passes with logical -> logical
     for tket_pass in spec.logical_passes or []:
         tket_pass(hugr.modules[0], inplace=True)
 
     # 4. Lower logical -> physical
-    return implement_ops(hugr, spec.implement_spec)
+    if spec.implement_ops is not None:
+        hugr = spec.implement_ops(hugr, as_bytes=False)
+    return hugr
 
 
 class EncoderParams(Protocol):
