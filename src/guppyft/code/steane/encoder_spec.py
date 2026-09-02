@@ -151,17 +151,17 @@ class SteaneInstance:
         return emulator
 
 
-@dataclass(frozen=True, kw_only=True, init=False)
+@dataclass(frozen=True, kw_only=True)
 class SteaneBuilder:
     """Steane architecture builder class for creating `SteaneInstance` objects."""
 
     _zero_factory_conf: RUSStateFactoryConf = field(
-        default_factory=lambda: RUSStateFactoryConf(1, 5)
+        default_factory=lambda: RUSStateFactoryConf(1, 5), init=False
     )
     _magic_factory_conf: RUSStateFactoryConf = field(
-        default_factory=lambda: RUSStateFactoryConf(1, 5)
+        default_factory=lambda: RUSStateFactoryConf(1, 5), init=False
     )
-    _qec_policy: QECPolicy = field(default_factory=QECPolicy)
+    _qec_policy: QECPolicy = field(default_factory=QECPolicy, init=False)
 
     def _gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
         """Generate the `ImplementOpsSpec` providing Steane implementations of
