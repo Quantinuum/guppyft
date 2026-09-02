@@ -54,19 +54,23 @@ def encode(
 ) -> Package:
     """
     Encodes the given package (or Guppy function, directly compiled to a package for
-    convenience) by applying four stages: 1. Run the given computational passes,
-    2. lower the operations in the package to logical operations and potentially perform
-    static optimisations (e.g. resolving some qubit address assignments statically),
-    3. running additional logical passes (e.g. inserting additional QEC cycles), and
+    convenience) by applying four stages:
+
+    1. running the given computational passes;
+    2. lowering the operations in the package to logical operations and
+       potentially performing static optimisations (e.g. resolving some qubit
+       address assignments statically);
+    3. running additional logical passes (e.g. inserting additional QEC cycles);
+       and
     4. implementing the logical operations with physical gates.
 
     The returned runnable package is guaranteed to be semantically equivalent to the
     given one.
 
     :param hugr: The package to encode (or Guppy function for convenience).
-    :param spec: See `EncoderSpec`.
+    :param spec: See ``EncoderSpec``.
     :param passes: Computational passes to run on the given package. Defaults to
-        one run of `Normalize`.
+        one run of ``Normalize``.
     :return: The encoded runnable package.
     """
 
