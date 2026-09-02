@@ -228,7 +228,13 @@ def implement_ops(
 class ImplementOps:
     _runner: Callable[[Package, bool], Package]
 
-    def __call__(self, pkg: Package, as_bytes: bool = False) -> Package:
+    @overload
+    def __call__(
+        self, pkg: Package, *, as_bytes: Literal[False] = False
+    ) -> Package: ...
+    @overload
+    def __call__(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    def __call__(self, pkg: Package, as_bytes: bool = False) -> Package | bytes:
         return self._runner(pkg, as_bytes)
 
     @staticmethod
