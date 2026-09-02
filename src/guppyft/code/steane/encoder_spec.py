@@ -41,7 +41,7 @@ from guppyft.encode import (
     EncoderSpec,
     ImplementOpsSpec,
     OpReplacements,
-    ReplaceEncoder,
+    ReplacementCompiler,
     TyReplacements,
     encode,
     implement_ops,
@@ -679,7 +679,7 @@ class SteaneBuilder:
         #  required for `borrow_array` when (de)serialising.
         ext.extend(_std_extensions())
 
-        std_encoder = ReplaceEncoder(
+        logical_compiler = ReplacementCompiler(
             op_replacements={
                 ("tket.quantum", "QAlloc"): ("guppyft.steane.ops", "prep_zero", []),
                 ("tket.quantum", "MeasureFree"): (
@@ -711,7 +711,7 @@ class SteaneBuilder:
             extensions=ext,
         )
 
-        return EncoderSpec(to_logical=std_encoder, implement_spec=impl_spec)
+        return EncoderSpec(to_logical=logical_compiler, implement_spec=impl_spec)
 
     def with_qec_policy(self, qec_policy: QECPolicy) -> Self:
         """Set the QEC policy."""

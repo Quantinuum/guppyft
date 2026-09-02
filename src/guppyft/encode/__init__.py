@@ -11,20 +11,20 @@ from hugr.package import Package
 from hugr.passes.composable import ComposablePass
 from tket.passes import Normalize
 
-from ._encoder import ReplaceEncoder
 from ._implement_ops import (
     ImplementOpsSpec,
     OpReplacements,
     TyReplacements,
     implement_ops,
 )
+from ._to_logical import ReplacementCompiler
 
 __all__ = [
     "EncoderParams",
     "EncoderSpec",
     "ImplementOpsSpec",
     "OpReplacements",
-    "ReplaceEncoder",
+    "ReplacementCompiler",
     "TyReplacements",
     "annotate_encoding",
     "encode",
