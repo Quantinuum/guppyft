@@ -124,12 +124,23 @@ class SteaneInstance:
 
     def encode(self, pkg: Package) -> Package:
         """Encode a computational package with the Steane instance."""
+        self.check_encodable(pkg)
         return encode(pkg, self._spec)
 
     def implement_ops(self, pkg: Package) -> Package:
         """Implement logical ops in `pkg` using this instance's op implementations."""
         assert self._spec.implement_ops is not None
         return self._spec.implement_ops(pkg)
+
+    def check_encodable(self, hugr: Package) -> None:
+        """Check that a HUGR package can be encoded, raising an error if that is not the
+        case.
+
+        Note: This test only applies to operations from the `tket.quantum` extension.
+        """
+        assert self._spec.compile is not None
+        if (error := self._spec.compile.check_compilable(hugr)) is not None:
+            raise ValueError("Cannot encode package with Steane") from error
 
     def emulator(
         self,
