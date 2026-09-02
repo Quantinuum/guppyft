@@ -140,7 +140,7 @@ class SteaneInstance:
         """
         assert self._spec.compile is not None
         if (error := self._spec.compile.check_compilable(hugr)) is not None:
-            raise ValueError("Cannot encode package with Steane") from error
+            raise error
 
     def emulator(
         self,
