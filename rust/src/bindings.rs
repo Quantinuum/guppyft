@@ -170,19 +170,14 @@ mod _bindings {
 
         let ty_hashset = replaceable_types
             .iter()
-            .map(|(ext_str, ty_str)| {
-                let ext = hugr.extensions().get(ext_str).ok_or_else(|| {
-                    PyValueError::new_err(format!(
-                        "Unknown extension in ty_replacements: '{ext_str}'"
-                    ))
-                })?;
-
+            .filter_map(|(ext_str, ty_str)| {
+                let ext = hugr.extensions().get(ext_str)?;
                 let ty = ext.get_type(ty_str).ok_or_else(|| {
                     PyValueError::new_err(format!(
                         "Unknown type in ty_replacements: '{ext_str}.{ty_str}'"
                     ))
-                })?;
-                Ok((ty.extension_id().clone(), ty.name().clone()))
+                });
+                Some(ty.map(|ty| (ty.extension_id().clone(), ty.name().clone())))
             })
             .collect::<PyResult<HashSet<_>>>()?;
 
