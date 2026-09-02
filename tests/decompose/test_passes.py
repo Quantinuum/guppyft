@@ -7,7 +7,7 @@ from guppylang.std.angles import pi
 from guppylang.std.builtins import output
 from guppylang.std.quantum import h, measure, qubit, rz, toffoli, x
 
-from guppyft.computational.decomposition import (
+from guppyft.decompose import (
     RzDecomposer,
     decompose_rz,
     decompose_toffoli,

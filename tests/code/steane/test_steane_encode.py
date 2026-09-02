@@ -31,7 +31,7 @@ from guppyft.code.steane.encoder_spec import (
     SteaneBuilder,
     SteaneEncoderParams,
 )
-from guppyft.computational.decomposition import (
+from guppyft.decompose import (
     RzDecomposer,
     decompose_rz,
     decompose_toffoli,

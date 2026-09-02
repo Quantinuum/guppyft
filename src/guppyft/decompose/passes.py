@@ -12,7 +12,7 @@ from hugr.std import _std_extensions
 from hugr.std.float import FLOAT_T
 from tket_exts import rotation
 
-from guppyft.computational._comparator_based_rz import (
+from guppyft.decompose._comparator_based_rz import (
     comparator_based_rz_cascade,
     n_comparator_based_rz_cascade_ancillas,
 )
