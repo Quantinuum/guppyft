@@ -217,6 +217,21 @@ def test_t_encoder_smoke() -> None:
     assert res == [{}]
 
 
+def test_encode_classical() -> None:
+    @guppy
+    def main() -> None:
+        pass
+
+    res = (
+        SteaneBuilder()
+        .build(n_blocks=1)
+        .emulator(main.compile(), n_qubits=1)
+        .run()
+        .collated_shots()
+    )
+    assert res == [{}]
+
+
 def test_realtime_rz_encoder() -> None:
     from guppylang.std.qsystem.random import RNG
 
