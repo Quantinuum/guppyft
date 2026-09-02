@@ -13,6 +13,7 @@ from guppylang.std.collections import Stack, empty_queue
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.platform import panic
 from hugr.ext import ExtensionRegistry
+from hugr.ops import ExtOp
 from hugr.package import Package
 from hugr.std import _std_extensions
 
@@ -134,7 +135,7 @@ class SteaneInstance:
 
     def encode(self, pkg: Package) -> Package:
         """Encode a computational package with the Steane instance."""
-        self.check_encoding(pkg)
+        self.check_encodable(pkg)
         return encode(pkg, self._spec)
 
     def implement_ops(self, pkg: Package) -> Package:
@@ -142,23 +143,27 @@ class SteaneInstance:
         assert self._spec.implement_ops is not None
         return self._spec.implement_ops(pkg)
 
-    def check_encoding(self, hugr: Package) -> None:
-        """Check that a HUGR package can be encoded.
+    def check_encodable(self, hugr: Package) -> None:
+        """Check that a HUGR package can be encoded, raising an error if that is not the
+        case.
 
-        Note: this test is limited to the `tket.quantum` extension.
+        Note: This test only applies to operations from the `tket.quantum` extension.
         """
-        encoder_pass = cast("ReplaceEncoder", self._spec.to_logical)
+        encoder_pass = cast("ReplacementCompiler", self._spec.compile)
 
         for node, data in hugr.modules[0].nodes():
-            op_qual_name = data.op.name()
-            if "tket.quantum" in op_qual_name:
-                op_name = op_qual_name.split(".")[-1]
+            if not isinstance(data.op, ExtOp):
+                continue
 
-                if ("tket.quantum", op_name) not in encoder_pass.op_replacements:
-                    raise ValueError(
-                        f"Error encoding `{op_qual_name}` at node {node}. "
-                        "Operation not yet supported during encoding."
-                    )
+            op_def = data.op.op_def()
+            if (
+                op_def.get_extension().name == "tket.quantum"
+                and ("tket.quantum", op_def.name) not in encoder_pass.op_replacements
+            ):
+                raise ValueError(
+                    f"Error encoding `{op_def.qualified_name()}` at node {node}. "
+                    "Operation not yet supported during encoding."
+                )
 
     def emulator(
         self,
