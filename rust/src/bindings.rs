@@ -172,16 +172,12 @@ mod _bindings {
             .iter()
             .filter_map(|(ext_str, ty_str)| {
                 let ext = hugr.extensions().get(ext_str)?;
-
-                let ty = match ext.get_type(ty_str).ok_or_else(|| {
+                let ty = ext.get_type(ty_str).ok_or_else(|| {
                     PyValueError::new_err(format!(
                         "Unknown type in ty_replacements: '{ext_str}.{ty_str}'"
                     ))
-                }) {
-                    Ok(ty) => ty,
-                    Err(e) => return Some(Err(e)),
-                };
-                Some(Ok((ty.extension_id().clone(), ty.name().clone())))
+                });
+                Some(ty.map(|ty| (ty.extension_id().clone(), ty.name().clone())))
             })
             .collect::<PyResult<HashSet<_>>>()?;
 
