@@ -43,7 +43,7 @@ docs = [
     "myst-nb>=1.4.0",
     "quantinuum-sphinx>=1.11.3",
     "sphinx>=9.1.0",
-    "ipykernel"
+    "ipykernel",
     "sphinx-tabs>=3.5.0",
 ]
 lint = [
