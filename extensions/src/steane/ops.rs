@@ -22,7 +22,7 @@ use strum::{EnumIter, EnumString, IntoStaticStr};
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.steane.ops");
 /// Extension version.
-pub const VERSION: semver::Version = semver::Version::new(0, 1, 3);
+pub const VERSION: semver::Version = semver::Version::new(0, 2, 0);
 
 /// Logical Steane operations.
 #[derive(
