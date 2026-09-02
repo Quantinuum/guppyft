@@ -16,7 +16,7 @@ from guppyft.computational._comparator_based_rz import (
     comparator_based_rz_cascade,
     n_comparator_based_rz_cascade_ancillas,
 )
-from guppyft.encode import ReplaceEncoder
+from guppyft.encode import ReplacementCompiler
 
 
 class RzDecomposer(Enum):
@@ -55,7 +55,7 @@ def decompose_rz(method: RzDecomposer, epsilon: float) -> ComposablePass:
             # TODO: See https://github.com/quantinuum-dev/guppyft/issues/262
             raise NotImplementedError
         case RzDecomposer.COMPARATOR_BASED:
-            return ReplaceEncoder(
+            return ReplacementCompiler(
                 op_replacements={},
                 compound_op_replacements={
                     ("tket.quantum", "Rz"): _compile_rotation_func(
@@ -93,7 +93,7 @@ def decompose_toffoli() -> ComposablePass:
         tdg(ctrl1)
         cx(ctrl0, ctrl1)
 
-    return ReplaceEncoder(
+    return ReplacementCompiler(
         op_replacements={},
         compound_op_replacements={("tket.quantum", "Toffoli"): toffoli},
     )

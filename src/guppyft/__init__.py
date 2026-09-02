@@ -1,1 +1,1 @@
-__version__ = "0.0.6"  # Updated by release-please
+__version__ = "0.0.7"  # Updated by release-please

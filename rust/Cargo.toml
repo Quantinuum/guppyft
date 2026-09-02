@@ -6,6 +6,9 @@ rust-version.workspace = true
 edition.workspace = true
 publish = false
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [lints.rust]
 missing_docs = "warn"
 
@@ -15,3 +18,9 @@ hugr = { workspace = true }
 hugr-core = { workspace = true }
 itertools = { workspace = true }
 derive_more = { workspace = true }
+
+pyo3 = { version = "0.29.0", features = ["extension-module", "abi3-py310", "anyhow"], optional = true }
+
+[features]
+default = []
+py = ["dep:pyo3"]

@@ -3,7 +3,7 @@ from guppylang.emulator import EmulatorBuilder
 from guppylang.std.platform import result
 
 from guppyft.code.steane.encoder_spec import SteaneBuilder
-from guppyft.logical.steane import Qubit, cx, h, measure_z, x, z
+from guppyft.code.steane.logical import Qubit, cx, h, measure_z, x, z
 
 
 def test_qalloc_measure() -> None:

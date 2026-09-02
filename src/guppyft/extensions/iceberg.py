@@ -1616,7 +1616,7 @@ class IcebergOpsExtension:
         return self.try_measure_one_x_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i)],
             concrete_signature=FunctionType(
-                [block_type], [block_type, Option(_MEAS_T)]
+                [block_type], [Option(_MEAS_T), block_type]
             ),
         )
 
@@ -1648,7 +1648,7 @@ class IcebergOpsExtension:
         return self.try_measure_one_x_d_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
-                [block_type, _IDX_T], [block_type, Option(_MEAS_T)]
+                [block_type, _IDX_T], [Option(_MEAS_T), block_type]
             ),
         )
 
@@ -1683,7 +1683,7 @@ class IcebergOpsExtension:
         return self.try_measure_one_z_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i)],
             concrete_signature=FunctionType(
-                [block_type], [block_type, Option(_MEAS_T)]
+                [block_type], [Option(_MEAS_T), block_type]
             ),
         )
 
@@ -1715,7 +1715,7 @@ class IcebergOpsExtension:
         return self.try_measure_one_z_d_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
-                [block_type, _IDX_T], [block_type, Option(_MEAS_T)]
+                [block_type, _IDX_T], [Option(_MEAS_T), block_type]
             ),
         )
 

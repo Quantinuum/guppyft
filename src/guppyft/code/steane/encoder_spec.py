@@ -42,14 +42,15 @@ from guppyft.encode import (
     EncoderSpec,
     ImplementOpsSpec,
     OpReplacements,
-    ReplaceEncoder,
+    ReplacementCompiler,
     TyReplacements,
     encode,
     implement_ops,
 )
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
-from guppyft.logical import steane as steane_logical
+
+from . import logical as steane_logical
 
 N = guppy.nat_var("N")
 
@@ -704,8 +705,7 @@ class SteaneBuilder:
         #  required for `borrow_array` when (de)serialising.
         ext.extend(_std_extensions())
 
-        # Determine how to encode computational gates with logical gates
-        std_encoder = ReplaceEncoder(
+        logical_compiler = ReplacementCompiler(
             op_replacements={
                 ("tket.quantum", "QAlloc"): ("guppyft.steane.ops", "prep_zero", []),
                 ("tket.quantum", "MeasureFree"): (
@@ -738,7 +738,7 @@ class SteaneBuilder:
             extensions=ext,
         )
 
-        return EncoderSpec(to_logical=std_encoder, implement_spec=impl_spec)
+        return EncoderSpec(to_logical=logical_compiler, implement_spec=impl_spec)
 
     def with_qec_policy(self, qec_policy: QECPolicy) -> Self:
         """Set the QEC policy."""

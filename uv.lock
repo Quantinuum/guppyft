@@ -537,7 +537,7 @@ wheels = [
 
 [[package]]
 name = "guppyft"
-version = "0.0.6"
+version = "0.0.7"
 source = { editable = "." }
 dependencies = [
     { name = "guppylang" },
@@ -562,6 +562,7 @@ docs = [
     { name = "myst-nb" },
     { name = "quantinuum-sphinx" },
     { name = "sphinx" },
+    { name = "sphinx-tabs" },
 ]
 lint = [
     { name = "mypy" },
@@ -598,6 +599,7 @@ docs = [
     { name = "myst-nb", specifier = ">=1.4.0" },
     { name = "quantinuum-sphinx", specifier = ">=1.11.3" },
     { name = "sphinx", specifier = ">=9.1.0" },
+    { name = "sphinx-tabs", specifier = ">=3.5.0" },
 ]
 lint = [
     { name = "mypy", specifier = ">=2.3.1" },
@@ -2244,6 +2246,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/98/0b/a866924ded68efec7a1759587a4e478aec7559d8165fac8b2ad1c0e774d6/sphinx_basic_ng-1.0.0b2.tar.gz", hash = "sha256:9ec55a47c90c8c002b5960c57492ec3021f5193cb26cebc2dc4ea226848651c9", size = 20736, upload-time = "2023-07-08T18:40:54.166Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/3c/dd/018ce05c532a22007ac58d4f45232514cd9d6dd0ee1dc374e309db830983/sphinx_basic_ng-1.0.0b2-py3-none-any.whl", hash = "sha256:eb09aedbabfb650607e9b4b68c9d240b90b1e1be221d6ad71d61c52e29f7932b", size = 22496, upload-time = "2023-07-08T18:40:52.659Z" },
+]
+
+[[package]]
+name = "sphinx-tabs"
+version = "3.5.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "docutils" },
+    { name = "pygments" },
+    { name = "sphinx" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ce/30/ca5b0de830f369968d8e3483dd45a8908fd10169c05cd9837f0bd075982e/sphinx_tabs-3.5.0.tar.gz", hash = "sha256:91dba1187e4c35fd37380a56ac228bbd54c6c649b2351829f3bf033718277537", size = 17006, upload-time = "2026-03-03T23:00:30.404Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2e/45/6adc5efeb19fd5fed4027e520b5c668ce58236a2b271ade5533c4c116276/sphinx_tabs-3.5.0-py3-none-any.whl", hash = "sha256:154be49de4d5c8249ea08c5d9bf88ca8f9c31e00a178305a93cbc33e000339e5", size = 9871, upload-time = "2026-03-03T23:00:28.89Z" },
 ]
 
 [[package]]
