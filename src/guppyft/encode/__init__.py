@@ -11,7 +11,7 @@ from hugr.package import Package
 from hugr.passes.composable import ComposablePass
 from tket.passes import Normalize
 
-from ._compile import ReplacementCompiler
+from ._compile import LogicalCompiler, ReplacementCompiler, UncompilableError
 from ._implement_ops import (
     ImplementOps,
     ImplementOpsSpec,
@@ -25,9 +25,11 @@ __all__ = [
     "EncoderParams",
     "ImplementOps",
     "ImplementOpsSpec",
+    "LogicalCompiler",
     "OpReplacements",
     "ReplacementCompiler",
     "TyReplacements",
+    "UncompilableError",
     "annotate_encoding",
     "encode",
     "implement_ops",
@@ -39,7 +41,7 @@ class EncodeSpec:
     """A QEC-code-specific collection of passes that together fully encode a
     computation."""
 
-    compile: ComposablePass | None = None
+    compile: LogicalCompiler | None = None
     """Pass to lower the computation to a logical level."""
     logical_passes: list[ComposablePass] | None = None
     """Additional passes to run on the logical HUGR."""
@@ -85,7 +87,7 @@ def encode(
 
     # 2. Lower computational -> logical
     if spec.compile is not None:
-        spec.compile(hugr.modules[0], inplace=True)
+        hugr = spec.compile(hugr)
 
     # 3. Passes with logical -> logical
     for tket_pass in spec.logical_passes or []:

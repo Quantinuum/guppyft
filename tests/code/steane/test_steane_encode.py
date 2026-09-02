@@ -23,7 +23,7 @@ from hugr import Hugr
 from hugr.package import Package
 from selene_hugr_qis_compiler import check_hugr
 
-from guppyft.code.steane.encoder_spec import (
+from guppyft.code.steane.encode import (
     QECPolicy,
     RUSStateFactoryConf,
     SteaneBuilder,

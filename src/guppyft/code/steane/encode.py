@@ -2,7 +2,7 @@ from collections import defaultdict
 from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from enum import Enum, auto
-from typing import Any, Self, cast, no_type_check
+from typing import Any, Self, no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -13,7 +13,6 @@ from guppylang.std.collections import Stack, empty_queue
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.platform import panic
 from hugr.ext import ExtensionRegistry
-from hugr.ops import ExtOp
 from hugr.package import Package
 from hugr.std import _std_extensions
 
@@ -149,21 +148,9 @@ class SteaneInstance:
 
         Note: This test only applies to operations from the `tket.quantum` extension.
         """
-        encoder_pass = cast("ReplacementCompiler", self._spec.compile)
-
-        for node, data in hugr.modules[0].nodes():
-            if not isinstance(data.op, ExtOp):
-                continue
-
-            op_def = data.op.op_def()
-            if (
-                op_def.get_extension().name == "tket.quantum"
-                and ("tket.quantum", op_def.name) not in encoder_pass.op_replacements
-            ):
-                raise ValueError(
-                    f"Error encoding `{op_def.qualified_name()}` at node {node}. "
-                    "Operation not yet supported during encoding."
-                )
+        assert self._spec.compile is not None
+        if (error := self._spec.compile.check_compilable(hugr)) is not None:
+            raise ValueError("Cannot encode package with Steane") from error
 
     def emulator(
         self,

@@ -17,6 +17,8 @@ from guppyft._bindings import RsHugr
 from guppyft._bindings import _implement_ops as _implement_ops_binding
 from guppyft._util import get_link_name
 
+from ._util import to_rs_hugr
+
 
 class OpReplacements:
     ops: dict[
@@ -140,21 +142,6 @@ class ImplementOpsSpec:
     """Additional libraries required to run the transformed program."""
 
 
-def _to_rs_hugr(
-    func_opt: GuppyFunctionDefinition[Any, Any] | Hugr[Any],
-) -> RsHugr:
-    match func_opt:
-        case GuppyFunctionDefinition():
-            return RsHugr.from_bytes(func_opt.compile_function().modules[0].to_bytes())
-        case Hugr():
-            return RsHugr.from_bytes(func_opt.to_bytes())
-        case _:
-            raise TypeError(
-                f"Expected GuppyFunctionDefinition or Hugr, "
-                f"got {type(func_opt)}: {func_opt}"
-            )
-
-
 def _implement_ops(
     pkg_bytes: bytes, ops: OpReplacements, tys: set[tuple[str, str]]
 ) -> bytes:
@@ -162,7 +149,7 @@ def _implement_ops(
 
     rs_ops = {
         key: (
-            func_opt if func_opt is None else _to_rs_hugr(func_opt),
+            func_opt if func_opt is None else to_rs_hugr(func_opt),
             name,
         )
         for key, (func_opt, name) in ops
