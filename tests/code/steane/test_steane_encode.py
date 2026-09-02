@@ -118,8 +118,9 @@ def test_encoder_missing_op() -> None:
     with pytest.raises(
         ValueError,
         match=(
-            r"Error encoding `tket.quantum.Y` at node Node\(7\). "
-            r"Operation not yet supported during encoding."
+            r"Encoded Hugr failed validation: Connected ports "
+            r"Port\(Outgoing, 0\) in Node\(4\) and Port\(Incoming, 0\) in Node\(7\) "
+            r"have incompatible kinds\. Cannot connect qubit to qubit\."
         ),
     ):
         SteaneBuilder().build(n_blocks=1).encode(pkg)
