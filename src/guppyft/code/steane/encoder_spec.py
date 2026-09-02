@@ -38,17 +38,18 @@ from guppyft.code.steane.primitives import (
 from guppyft.code.util import LogicalBlock, RawMeasurement
 from guppyft.encode import (
     EncoderParams,
-    EncoderSpec,
+    EncodeSpec,
+    ImplementOps,
     ImplementOpsSpec,
     OpReplacements,
-    ReplaceEncoder,
+    ReplacementCompiler,
     TyReplacements,
     encode,
-    implement_ops,
 )
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
-from guppyft.logical import steane as steane_logical
+
+from . import logical as steane_logical
 
 N = guppy.nat_var("N")
 
@@ -129,7 +130,7 @@ class QECPolicy:
 class SteaneInstance:
     """A Steane architecture instance built by `SteaneBuilder.build`."""
 
-    _spec: EncoderSpec
+    _spec: EncodeSpec
 
     def encode(self, pkg: Package) -> Package:
         """Encode a computational package with the Steane instance."""
@@ -138,7 +139,8 @@ class SteaneInstance:
 
     def implement_ops(self, pkg: Package) -> Package:
         """Implement logical ops in `pkg` using this instance's op implementations."""
-        return implement_ops(pkg, self._spec.implement_spec)
+        assert self._spec.implement_ops is not None
+        return self._spec.implement_ops(pkg)
 
     def check_encoding(self, hugr: Package) -> None:
         """Check that a HUGR package can be encoded.
@@ -684,7 +686,7 @@ class SteaneBuilder:
             ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[lib]
         )
 
-    def _gen_encoder_spec(self, n_blocks: int) -> EncoderSpec:
+    def _gen_encoder_spec(self, n_blocks: int) -> EncodeSpec:
         """Generate the full `EncoderSpec` (logical encoding + op implementations)
         for a program using `n_blocks` logical blocks."""
 
@@ -697,7 +699,7 @@ class SteaneBuilder:
         #  required for `borrow_array` when (de)serialising.
         ext.extend(_std_extensions())
 
-        std_encoder = ReplaceEncoder(
+        logical_compiler = ReplacementCompiler(
             op_replacements={
                 ("tket.quantum", "QAlloc"): ("guppyft.steane.ops", "prep_zero", []),
                 ("tket.quantum", "MeasureFree"): (
@@ -729,7 +731,9 @@ class SteaneBuilder:
             extensions=ext,
         )
 
-        return EncoderSpec(to_logical=std_encoder, implement_spec=impl_spec)
+        return EncodeSpec(
+            compile=logical_compiler, implement_ops=ImplementOps.for_spec(impl_spec)
+        )
 
     def with_qec_policy(self, qec_policy: QECPolicy) -> Self:
         """Set the QEC policy."""

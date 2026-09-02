@@ -190,6 +190,8 @@ def implement_ops(
 
     :param hugr_pkg: A package containing a single module.
     :param spec: The spec for the encoding. See `EnrichmentSpec` for details.
+    :param as_bytes: Whether to return bytes instead of the Package, skipping the final
+        deserialisation.
     :return: The enriched function as an executable HUGR package.
     """
     assert len(hugr_pkg.modules) == 1
@@ -233,3 +235,23 @@ def implement_ops(
         return pkg_bytes
 
     return Package.from_bytes(pkg_bytes)
+
+
+@dataclass(frozen=True)
+class ImplementOps:
+    _runner: Callable[[Package, bool], Package]
+
+    def __call__(self, pkg: Package, as_bytes: bool = False) -> Package:
+        return self._runner(pkg, as_bytes)
+
+    @staticmethod
+    def for_spec(spec: ImplementOpsSpec) -> "ImplementOps":
+        return ImplementOps.for_spec_generator(lambda _: spec)
+
+    @staticmethod
+    def for_spec_generator(
+        spec_gen: Callable[[Package], ImplementOpsSpec],
+    ) -> "ImplementOps":
+        return ImplementOps(
+            lambda pkg, as_bytes: implement_ops(pkg, spec_gen(pkg), as_bytes=as_bytes)  # type: ignore[call-overload]
+        )

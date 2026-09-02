@@ -22,7 +22,7 @@ test: test-rust test-python
 
 # Run the Rust tests.
 test-rust *TEST_ARGS: _check_nextest_installed
-    uv run cargo nextest r --workspace --exclude guppyft-bindings --all-features {{ TEST_ARGS }}
+    uv run cargo nextest r --workspace {{ TEST_ARGS }}
 
 # Run the Python tests.
 test-python *PYTEST_FLAGS:
