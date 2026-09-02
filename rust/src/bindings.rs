@@ -16,7 +16,7 @@ mod _bindings {
     use std::collections::{BTreeMap, HashSet};
     use tket::hugr::HugrView;
     use tket::hugr::extension::ExtensionRegistry;
-    use tket::hugr::types::CustomType;
+    use tket::hugr::types::{CustomType, TypeArg};
     use tket::passes::replace_types::NodeTemplate;
     use tket::passes::{ComposablePass, ReplaceTypes};
 
@@ -60,9 +60,6 @@ mod _bindings {
         ty_replacements: BTreeMap<(String, String), (String, String)>,
         extensions: Option<String>,
     ) -> PyResult<()> {
-        use tket::hugr::extension::ExtensionRegistry;
-        use tket::hugr::types::TypeArg;
-
         let hugr = &mut rs_hugr.hugr;
 
         // Build a registry extending the hugr extensions with any additional extensions provided.
