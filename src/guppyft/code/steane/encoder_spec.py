@@ -79,16 +79,6 @@ class RUSStateFactoryConf:
     max_attempts: int
 
 
-@dataclass(frozen=True, kw_only=True)
-class _SteaneFactoryConf:
-    """Configuration for each of the Steane state factories."""
-
-    zero: RUSStateFactoryConf = field(default_factory=lambda: RUSStateFactoryConf(1, 5))
-    magic: RUSStateFactoryConf = field(
-        default_factory=lambda: RUSStateFactoryConf(1, 5)
-    )
-
-
 class QECStyle(Enum):
     """The style of syndrome extraction to use during a QEC cycle."""
 
@@ -167,7 +157,12 @@ class SteaneInstance:
 class SteaneBuilder:
     """Steane architecture builder class for creating `SteaneInstance` objects."""
 
-    _factory_confs: _SteaneFactoryConf = field(default_factory=_SteaneFactoryConf)
+    _zero_factory_conf: RUSStateFactoryConf = field(
+        default_factory=lambda: RUSStateFactoryConf(1, 5)
+    )
+    _magic_factory_conf: RUSStateFactoryConf = field(
+        default_factory=lambda: RUSStateFactoryConf(1, 5)
+    )
     _qec_policy: QECPolicy = field(default_factory=QECPolicy)
 
     def _gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
@@ -187,10 +182,10 @@ class SteaneBuilder:
             qec_counter: array[float, comptime(n_blocks)]  # type: ignore[valid-type]
 
             zero_state_factory: StateFactory[  # type: ignore[valid-type,type-arg]
-                7, 1, comptime(self._factory_confs.zero.size)
+                7, 1, comptime(self._zero_factory_conf.size)
             ]
             magic_state_factory: StateFactory[  # type: ignore[valid-type,type-arg]
-                7, 8, comptime(self._factory_confs.magic.size)
+                7, 8, comptime(self._magic_factory_conf.size)
             ]
 
             @guppy
@@ -591,13 +586,13 @@ class SteaneBuilder:
                 # Zero state factory
                 StateFactory(
                     prep_zero_ft,
-                    comptime(self._factory_confs.zero.max_attempts),
+                    comptime(self._zero_factory_conf.max_attempts),
                     empty_queue(),
                 ),
                 # Magic state factory
                 StateFactory(
                     prep_t_state_ft,
-                    comptime(self._factory_confs.magic.max_attempts),
+                    comptime(self._magic_factory_conf.max_attempts),
                     empty_queue(),
                 ),
             )
@@ -746,17 +741,11 @@ class SteaneBuilder:
 
     def with_zero_factory_conf(self, conf: RUSStateFactoryConf) -> Self:
         """Set the zero state factory configuration."""
-        return replace(
-            self,
-            _factory_confs=replace(self._factory_confs, zero=conf),
-        )
+        return replace(self, _zero_factory_conf=conf)
 
     def with_magic_factory_conf(self, conf: RUSStateFactoryConf) -> Self:
         """Set the magic state factory configuration."""
-        return replace(
-            self,
-            _factory_confs=replace(self._factory_confs, magic=conf),
-        )
+        return replace(self, _magic_factory_conf=conf)
 
     def build(self, n_blocks: int) -> SteaneInstance:
         """Build a `SteaneInstance` configured for `n_blocks` logical blocks."""
