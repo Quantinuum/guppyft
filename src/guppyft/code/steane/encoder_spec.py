@@ -180,10 +180,10 @@ class SteaneBuilder:
             qec_counter: array[float, comptime(n_blocks)]  # type: ignore[valid-type]
 
             zero_state_factory: StateFactory[  # type: ignore[valid-type,type-arg]
-                7, 1, comptime(self._factory_confs.zero.size)
+                7, 1, comptime(self._zero_factory_conf.size)
             ]
             magic_state_factory: StateFactory[  # type: ignore[valid-type,type-arg]
-                7, 8, comptime(self._factory_confs.magic.size)
+                7, 8, comptime(self._magic_factory_conf.size)
             ]
 
             @guppy
@@ -561,13 +561,13 @@ class SteaneBuilder:
                 # Zero state factory
                 StateFactory(
                     prep_zero_ft,
-                    comptime(self._factory_confs.zero.max_attempts),
+                    comptime(self._zero_factory_conf.max_attempts),
                     empty_queue(),
                 ),
                 # Magic state factory
                 StateFactory(
                     prep_t_state_ft,
-                    comptime(self._factory_confs.magic.max_attempts),
+                    comptime(self._magic_factory_conf.max_attempts),
                     empty_queue(),
                 ),
             )
