@@ -22,7 +22,7 @@ use strum::{EnumIter, EnumString, IntoStaticStr};
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.steane.ops");
 /// Extension version.
-pub const VERSION: semver::Version = semver::Version::new(0, 1, 2);
+pub const VERSION: semver::Version = semver::Version::new(0, 1, 3);
 
 /// Logical Steane operations.
 #[derive(
@@ -54,11 +54,11 @@ pub enum SteaneOpDef {
     /// S dagger gate.
     sdg,
     /// Prepare a magic state that can be used to produce T-like states (T and Tdg).
-    prep_magic_for_t_like,
+    prep_t_state,
     /// Perform a T gate by injecting a magic state.
-    inject_magic_for_t,
+    inject_t,
     /// Perform a Tdg gate by injecting a magic state.
-    inject_magic_for_tdg,
+    inject_tdg,
     /// CX gate.
     cx,
     /// Swap of two qubits.
@@ -161,9 +161,9 @@ impl MakeOpDef for SteaneOpDef {
             h => sig_qubits(1, 1),
             s => sig_qubits(1, 1),
             sdg => sig_qubits(1, 1),
-            prep_magic_for_t_like => sig_qubits(0, 1),
-            inject_magic_for_t => sig_qubits(2, 1),
-            inject_magic_for_tdg => sig_qubits(2, 1),
+            prep_t_state => sig_qubits(0, 1),
+            inject_t => sig_qubits(2, 1),
+            inject_tdg => sig_qubits(2, 1),
             cx => sig_qubits(2, 2),
             swap => sig_qubits(2, 2),
         }
@@ -246,11 +246,9 @@ mod tests {
         let free = EXTENSION.instantiate_extension_op("free", [])?;
         let measure_z = EXTENSION.instantiate_extension_op("measure_z", [])?;
         let decode = EXTENSION.instantiate_extension_op("decode", [])?;
-        let prep_magic_for_t_like =
-            EXTENSION.instantiate_extension_op("prep_magic_for_t_like", [])?;
-        let inject_magic_for_t = EXTENSION.instantiate_extension_op("inject_magic_for_t", [])?;
-        let inject_magic_for_tdg =
-            EXTENSION.instantiate_extension_op("inject_magic_for_tdg", [])?;
+        let prep_t_state = EXTENSION.instantiate_extension_op("prep_t_state", [])?;
+        let inject_t = EXTENSION.instantiate_extension_op("inject_t", [])?;
+        let inject_tdg = EXTENSION.instantiate_extension_op("inject_tdg", [])?;
 
         let mut module_builder = ModuleBuilder::new();
         let signature = Signature::new(
@@ -269,21 +267,19 @@ mod tests {
             .outputs_arr();
 
         let [magic] = f_build
-            .add_dataflow_op(prep_magic_for_t_like.clone(), vec![])?
+            .add_dataflow_op(prep_t_state.clone(), vec![])?
             .outputs_arr();
         let [qubit_1] = f_build
             .add_dataflow_op(prep_zero.clone(), vec![])?
             .outputs_arr();
         let [qubit_1] = f_build
-            .add_dataflow_op(inject_magic_for_t, vec![qubit_1, magic])?
+            .add_dataflow_op(inject_t, vec![qubit_1, magic])?
             .outputs_arr();
 
-        let [magic] = f_build
-            .add_dataflow_op(prep_magic_for_t_like, vec![])?
-            .outputs_arr();
+        let [magic] = f_build.add_dataflow_op(prep_t_state, vec![])?.outputs_arr();
         let [qubit_2] = f_build.add_dataflow_op(prep_zero, vec![])?.outputs_arr();
         let [qubit_2] = f_build
-            .add_dataflow_op(inject_magic_for_tdg, vec![qubit_2, magic])?
+            .add_dataflow_op(inject_tdg, vec![qubit_2, magic])?
             .outputs_arr();
 
         f_build.finish_with_outputs([bool_wire, qubit_1, qubit_2])?;

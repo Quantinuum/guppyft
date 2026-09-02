@@ -1,5 +1,5 @@
 {
-  "version": "0.1.2",
+  "version": "0.1.3",
   "name": "guppyft.steane.ops",
   "types": {},
   "operations": {
@@ -131,9 +131,9 @@
       },
       "binary": false
     },
-    "inject_magic_for_t": {
+    "inject_t": {
       "extension": "guppyft.steane.ops",
-      "name": "inject_magic_for_t",
+      "name": "inject_t",
       "description": "Perform a T gate by injecting a magic state.",
       "signature": {
         "params": [],
@@ -170,9 +170,9 @@
       },
       "binary": false
     },
-    "inject_magic_for_tdg": {
+    "inject_tdg": {
       "extension": "guppyft.steane.ops",
-      "name": "inject_magic_for_tdg",
+      "name": "inject_tdg",
       "description": "Perform a Tdg gate by injecting a magic state.",
       "signature": {
         "params": [],
@@ -240,9 +240,9 @@
       },
       "binary": false
     },
-    "prep_magic_for_t_like": {
+    "prep_t_state": {
       "extension": "guppyft.steane.ops",
-      "name": "prep_magic_for_t_like",
+      "name": "prep_t_state",
       "description": "Prepare a magic state that can be used to produce T-like states (T and Tdg).",
       "signature": {
         "params": [],
