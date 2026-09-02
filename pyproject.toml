@@ -44,6 +44,7 @@ docs = [
     "quantinuum-sphinx>=1.11.3",
     "sphinx>=9.1.0",
     "ipykernel"
+    "sphinx-tabs>=3.5.0",
 ]
 lint = [
     "pre-commit>=4.6.2,<5",
@@ -68,8 +69,8 @@ build-backend = "maturin"
 [tool.maturin]
 module-name = "guppyft._bindings"
 python-source = "src/"
-manifest-path = "rust-bindings/Cargo.toml"
-features = ["pyo3/extension-module"] # skips linking against libpython.so
+manifest-path = "rust/Cargo.toml"
+features = ["py"] # skips linking against libpython.so
 profile = "dev-py" # See root Cargo.toml
 
 
