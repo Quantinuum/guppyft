@@ -240,7 +240,7 @@ def _inject_t_non_deterministically(
 
 @guppy
 @no_type_check
-def inject_magic_for_t(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
+def inject_t(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
     """Apply T gate via injection.
 
     Note:
@@ -254,9 +254,7 @@ def inject_magic_for_t(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -
 
 @guppy
 @no_type_check
-def inject_magic_for_tdg(
-    blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned
-) -> None:
+def inject_tdg(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
     """Apply Tdg gate via injection.
 
     Note:

@@ -262,7 +262,7 @@ def test_t_gate() -> None:
         steane_primitives.h(blk)
         for _ in range(4):
             a = steane_primitives.prep_t_state_ft().force_check().unwrap()
-            steane_primitives.inject_magic_for_t(blk, a)
+            steane_primitives.inject_t(blk, a)
         steane_primitives.h(blk)
         res = steane_primitives.measure_z(blk)
         output("res", steane_primitives.decode(res))
