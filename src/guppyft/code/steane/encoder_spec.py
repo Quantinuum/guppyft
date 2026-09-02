@@ -156,12 +156,12 @@ class SteaneBuilder:
     """Steane architecture builder class for creating `SteaneInstance` objects."""
 
     _zero_factory_conf: RUSStateFactoryConf = field(
-        default_factory=lambda: RUSStateFactoryConf(1, 5), init=False
+        default_factory=lambda: RUSStateFactoryConf(1, 5)
     )
     _magic_factory_conf: RUSStateFactoryConf = field(
-        default_factory=lambda: RUSStateFactoryConf(1, 5), init=False
+        default_factory=lambda: RUSStateFactoryConf(1, 5)
     )
-    _qec_policy: QECPolicy = field(default_factory=QECPolicy, init=False)
+    _qec_policy: QECPolicy = field(default_factory=QECPolicy)
 
     def _gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
         """Generate the `ImplementOpsSpec` providing Steane implementations of
