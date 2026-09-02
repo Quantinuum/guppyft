@@ -48,7 +48,8 @@ from guppyft.encode import (
 )
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
-from guppyft.logical import steane as steane_logical
+
+from . import logical as steane_logical
 
 N = guppy.nat_var("N")
 

@@ -6,8 +6,7 @@ from hugr.std.float import FLOAT_T
 from hugr.tys import BoundedNatArg, ExtType
 from tket.passes import InlineFunctions, Normalize
 
-from guppyft.extensions import iceberg_ops, iceberg_types
-from guppyft.logical.iceberg import (
+from guppyft.code.iceberg.logical import (
     Block,
     PreBlock,
     Qubit,
@@ -23,6 +22,7 @@ from guppyft.logical.iceberg import (
     zz_phase_between_blocks,
     zz_phase_dynq,
 )
+from guppyft.extensions import iceberg_ops, iceberg_types
 
 
 def test_hugr() -> None:
