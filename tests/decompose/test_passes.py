@@ -7,11 +7,7 @@ from guppylang.std.angles import pi
 from guppylang.std.builtins import output
 from guppylang.std.quantum import h, measure, qubit, rz, toffoli, x
 
-from guppyft.decompose import (
-    RzDecomposer,
-    decompose_rz,
-    decompose_toffoli,
-)
+from guppyft.decompose import ComparatorRzDecomposer, ToffoliDecomposer
 
 
 @pytest.mark.parametrize(
@@ -38,7 +34,7 @@ def test_decompose_toffoli(
         output("target", measure(target).read())
 
     pkg = main.compile()
-    decompose_toffoli().run(pkg.modules[0], inplace=True)
+    ToffoliDecomposer().run(pkg.modules[0], inplace=True)
 
     shots = EmulatorBuilder().build(pkg, n_qubits=3).run().collated_shots()
 
@@ -51,19 +47,7 @@ def test_decompose_toffoli(
     ]
 
 
-@pytest.mark.parametrize(
-    "method",
-    [
-        pytest.param(
-            RzDecomposer.GRIDSYNTH,
-            marks=pytest.mark.xfail(reason="Not currently supported"),
-        ),
-        RzDecomposer.COMPARATOR_BASED,
-    ],
-)
-def test_decompose_rz(method: RzDecomposer) -> None:
-    epsilon = 0.01
-    n_ancillas = method.num_ancilla(epsilon)
+def test_decompose_rz() -> None:
 
     @guppy
     def main() -> None:
@@ -77,11 +61,12 @@ def test_decompose_rz(method: RzDecomposer) -> None:
         output("q", measure(q).read())
 
     pkg = main.with_minimal_opt().compile()
-    decompose_rz(method, epsilon).run(pkg.modules[0], inplace=True)
+    rz_decomposer = ComparatorRzDecomposer(epsilon=0.01)
+    rz_decomposer.run(pkg.modules[0], inplace=True)
 
     shots = (
         EmulatorBuilder()
-        .build(pkg, n_qubits=1 + n_ancillas)
+        .build(pkg, n_qubits=1 + rz_decomposer.num_ancilla())
         .with_shots(10)
         .run()
         .collated_counts()

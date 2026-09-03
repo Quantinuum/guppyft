@@ -1,7 +1,6 @@
-from ._passes import RzDecomposer, decompose_rz, decompose_toffoli
+from ._passes import ComparatorRzDecomposer, ToffoliDecomposer
 
 __all__ = [
-    "RzDecomposer",
-    "decompose_rz",
-    "decompose_toffoli",
+    "ComparatorRzDecomposer",
+    "ToffoliDecomposer",
 ]

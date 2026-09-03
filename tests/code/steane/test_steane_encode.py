@@ -4,6 +4,7 @@ import pytest
 from guppylang import guppy
 from guppylang.std.angles import pi
 from guppylang.std.platform import output
+from guppylang.std.qsystem.random import RNG
 from guppylang.std.quantum import (
     cx,
     cz,
@@ -31,11 +32,7 @@ from guppyft.code.steane.encode import (
     SteaneBuilder,
     SteaneEncoderParams,
 )
-from guppyft.decompose import (
-    RzDecomposer,
-    decompose_rz,
-    decompose_toffoli,
-)
+from guppyft.decompose import ComparatorRzDecomposer, ToffoliDecomposer
 from guppyft.encode import UncompilableError, annotate_encoding
 
 
@@ -228,10 +225,6 @@ def test_encode_classical() -> None:
 
 
 def test_realtime_rz_encoder() -> None:
-    from guppylang.std.qsystem.random import RNG
-
-    epsilon = 0.01
-    method = RzDecomposer.COMPARATOR_BASED
 
     @guppy
     def main() -> None:
@@ -246,11 +239,12 @@ def test_realtime_rz_encoder() -> None:
         rng.discard()
 
     pkg = main.compile()
-    gate_decomposer = decompose_rz(method, epsilon).then(decompose_toffoli())
-    gate_decomposer.run(pkg.modules[0], inplace=True)
+
+    rz_decomposer = ComparatorRzDecomposer(epsilon=0.01)
+    rz_decomposer.then(ToffoliDecomposer()).run(pkg.modules[0], inplace=True)
 
     # Original block + one block for magic + ancilla space for Rz
-    n_blocks = 1 + 1 + method.num_ancilla(epsilon)
+    n_blocks = 1 + 1 + rz_decomposer.num_ancilla()
 
     res = (
         SteaneBuilder()

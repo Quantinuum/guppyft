@@ -1,4 +1,4 @@
-from enum import Enum, auto
+from dataclasses import dataclass
 from typing import Any, no_type_check
 
 from guppylang import guppy
@@ -7,7 +7,8 @@ from guppylang.std.angles import angle
 from guppylang.std.quantum import cx, h, qubit, t, tdg
 from hugr import Hugr, ops, tys
 from hugr.build import Module
-from hugr.passes.composable import ComposablePass
+from hugr.passes.composable import ComposablePass, PassResult, implement_pass_run
+from hugr.passes.scope import PassScope
 from hugr.std import _std_extensions
 from hugr.std.float import FLOAT_T
 from tket_exts import rotation
@@ -19,84 +20,91 @@ from guppyft.decompose._comparator_based_rz import (
 from guppyft.encode import ReplacementCompiler
 
 
-class RzDecomposer(Enum):
-    """Approximate methods for Rz decomposition."""
-
-    GRIDSYNTH = auto()
-    """Decomposes Rz gates with statically known angles into a sequence
-    of Clifford+T gates. See https://arxiv.org/abs/1403.2975."""
-
-    COMPARATOR_BASED = auto()
+@dataclass(frozen=True, kw_only=True)
+class ComparatorRzDecomposer(ComposablePass):
     """Decomposes Rz gates using $2*ceil(log2(1/epsilon))$ ancilla qubits via
     comparators and repeat-until-success. Introduces Toffoli gates.
     Can be used to decompose angles at runtime.
     See https://arxiv.org/pdf/2404.05618."""
 
-    def num_ancilla(self, epsilon: float) -> int:
+    epsilon: float
+
+    def num_ancilla(self) -> int:
         """Number of ancilla qubits required for the target precision (epsilon)."""
-        match self:
-            case RzDecomposer.GRIDSYNTH:
-                return 0
-            case RzDecomposer.COMPARATOR_BASED:
-                return n_comparator_based_rz_cascade_ancillas(epsilon)
-            case _:
-                raise ValueError(f"Unsupported Rz decomposition method: {self}")
+        return n_comparator_based_rz_cascade_ancillas(self.epsilon)
+
+    def run(self, hugr: Hugr[Any], *, inplace: bool = True) -> PassResult:
+        return implement_pass_run(
+            self,
+            hugr=hugr,
+            inplace=inplace,
+            copy_call=lambda _hugr: self._run_impl(_hugr),
+        )
+
+    def _run_impl(self, hugr: Hugr[Any]) -> PassResult:
+        compiler = ReplacementCompiler(
+            op_replacements={},
+            compound_op_replacements={
+                ("tket.quantum", "Rz"): _compile_rotation_func(
+                    comparator_based_rz_cascade(self.epsilon)
+                )
+            },
+            extensions=_std_extensions(),
+        )
+        [module] = compiler.compile(hugr.to_package()).modules
+
+        return PassResult(hugr=module, inplace=False)
+
+    def with_scope(self, scope: PassScope) -> ComposablePass:
+        return self
 
 
-def decompose_rz(method: RzDecomposer, epsilon: float) -> ComposablePass:
-    """Returns a pass that decomposes Rz gates using the specified epsilon.
-
-    Args:
-        method: The Rz decomposition method to use.
-        epsilon: The desired approximation accuracy for the decomposition.
-    """
-    match method:
-        case RzDecomposer.GRIDSYNTH:
-            # TODO: See https://github.com/quantinuum-dev/guppyft/issues/262
-            raise NotImplementedError
-        case RzDecomposer.COMPARATOR_BASED:
-            return ReplacementCompiler(
-                op_replacements={},
-                compound_op_replacements={
-                    ("tket.quantum", "Rz"): _compile_rotation_func(
-                        comparator_based_rz_cascade(epsilon)
-                    )
-                },
-                extensions=_std_extensions(),
-            )
-        case _:
-            raise ValueError(f"Unsupported Rz decomposition method: {method}")
+@guppy
+@no_type_check
+def _toffoli_decomposition(ctrl0: qubit, ctrl1: qubit, target: qubit) -> None:
+    h(target)
+    cx(ctrl1, target)
+    tdg(target)
+    cx(ctrl0, target)
+    t(target)
+    cx(ctrl1, target)
+    tdg(target)
+    cx(ctrl0, target)
+    t(ctrl1)
+    t(target)
+    h(target)
+    cx(ctrl0, ctrl1)
+    t(ctrl0)
+    tdg(ctrl1)
+    cx(ctrl0, ctrl1)
 
 
-def decompose_toffoli() -> ComposablePass:
-    """Returns a pass that decomposes Toffoli gates into Clifford+T gates.
+@dataclass(frozen=True)
+class ToffoliDecomposer(ComposablePass):
+    """Decomposes Toffoli gates into Clifford+T gates. Each Toffoli uses 7 T gates."""
 
-    Each Toffoli uses 7 T gates.
-    """
+    def run(self, hugr: Hugr[Any], *, inplace: bool = True) -> PassResult:
+        return implement_pass_run(
+            self,
+            hugr=hugr,
+            inplace=inplace,
+            copy_call=lambda _hugr: self._run_impl(_hugr),
+        )
 
-    @guppy
-    @no_type_check
-    def toffoli(ctrl0: qubit, ctrl1: qubit, target: qubit) -> None:
-        h(target)
-        cx(ctrl1, target)
-        tdg(target)
-        cx(ctrl0, target)
-        t(target)
-        cx(ctrl1, target)
-        tdg(target)
-        cx(ctrl0, target)
-        t(ctrl1)
-        t(target)
-        h(target)
-        cx(ctrl0, ctrl1)
-        t(ctrl0)
-        tdg(ctrl1)
-        cx(ctrl0, ctrl1)
+    def _run_impl(self, hugr: Hugr[Any]) -> PassResult:
+        compiler = ReplacementCompiler(
+            op_replacements={},
+            compound_op_replacements={
+                ("tket.quantum", "Toffoli"): _toffoli_decomposition
+            },
+            extensions=_std_extensions(),
+        )
+        [module] = compiler.compile(hugr.to_package()).modules
 
-    return ReplacementCompiler(
-        op_replacements={},
-        compound_op_replacements={("tket.quantum", "Toffoli"): toffoli},
-    )
+        return PassResult(hugr=module, inplace=False)
+
+    def with_scope(self, scope: PassScope) -> ComposablePass:
+        return self
 
 
 def _compile_rotation_func(
