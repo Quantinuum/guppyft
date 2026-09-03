@@ -27,7 +27,7 @@ jobs:
     name: Check lock files
     runs-on: ubuntu-latest
     env:
-      PYTHON_VERSION: 3.13
+      PYTHON_VERSION: 3.12
 
     steps:
       - uses: actions/checkout@v7
@@ -55,7 +55,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [ "3.13", "3.14" ]
+        python-version: [ "3.12", "3.14" ]
       fail-fast: false
 
     steps:
