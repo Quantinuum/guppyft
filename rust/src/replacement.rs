@@ -76,7 +76,6 @@ impl ReplacementCompiler {
         if let Some(additional_extensions) = self.additional_extensions {
             registry.extend(additional_extensions);
         }
-        let registry_clone = registry.clone(); // TODO remove this?
 
         let mut replacer = ReplaceTypes::new_empty();
         for ((src_ext, src_op), (tgt_ext, tgt_op, tgt_args)) in self.op_replacements.into_iter() {
@@ -144,16 +143,6 @@ impl ReplacementCompiler {
             )?;
         }
         op_replacer.finish()?;
-
-        // `ReplaceTypes` swaps in ops/types from `registry` but does not update
-        // the Hugr extension registry (`hugr.extensions()`), which is what
-        // gets used when serializing. Without this, the newly-introduced ops/types
-        // are written out as unresolved `Custom` nodes, and the envelope doesn't
-        // declare the new extensions as dependencies, so downstream consumers
-        // can't resolve them.
-        // The following updates `hugr.extensions()`, solving this issue.
-        hugr.resolve_extension_defs(&registry_clone)
-            .map_err(ReplacementCompilerError::PostResolveExtensionsError)?;
 
         hugr.validate()?;
         Ok(())
