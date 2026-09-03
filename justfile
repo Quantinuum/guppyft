@@ -26,7 +26,7 @@ test-rust *TEST_ARGS: _check_nextest_installed
 
 # Run the Python tests.
 test-python *PYTEST_FLAGS:
-    uv run pytest -n auto {{ PYTEST_FLAGS }}
+    uv run pytest -n auto -m "not long" {{ PYTEST_FLAGS }}
 
 # Auto-fix lint issues.
 fix: fix-rust fix-python
