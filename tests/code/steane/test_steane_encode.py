@@ -25,7 +25,7 @@ from hugr.package import Package
 from selene_hugr_qis_compiler import check_hugr
 from selene_sim.backends.bundled_simulators import Coinflip
 
-from guppyft.code.steane.encoder_spec import (
+from guppyft.code.steane.encode import (
     QECPolicy,
     RUSStateFactoryConf,
     SteaneBuilder,
@@ -36,7 +36,7 @@ from guppyft.decompose import (
     decompose_rz,
     decompose_toffoli,
 )
-from guppyft.encode import annotate_encoding
+from guppyft.encode import UncompilableError, annotate_encoding
 
 
 def test_encoder() -> None:
@@ -112,10 +112,6 @@ def test_encode_function_call() -> None:
 
 
 def test_encoder_missing_op() -> None:
-    # `tket.quantum.rz` has no replacement registered in `SteaneBuilder`, so the encoder
-    # leaves it untouched while everything else is lowered to logical qubits. This
-    # mismatch causes `rz`'s (unencoded) qubit port to be connected to an (encoded)
-    # logical qubit port, which fails validation.
     @guppy
     def main() -> None:
         q = qubit()
@@ -124,11 +120,10 @@ def test_encoder_missing_op() -> None:
 
     pkg = main.compile()
     with pytest.raises(
-        ValueError,
+        UncompilableError,
         match=(
-            r"Encoded Hugr failed validation: Connected ports "
-            r"Port\(Outgoing, 0\) in Node\(4\) and Port\(Incoming, 0\) in Node\(7\) "
-            r"have incompatible kinds\. Cannot connect qubit to qubit\."
+            r"Error encoding `tket.quantum.Rz` at node Node\(7\). "
+            r"Operation not yet supported during encoding."
         ),
     ):
         SteaneBuilder().build(n_blocks=1).encode(pkg)

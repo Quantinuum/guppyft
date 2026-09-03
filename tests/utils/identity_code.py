@@ -11,7 +11,7 @@ from guppylang.std.option import Option, nothing, some
 from guppylang.std.qsystem.helios import zz_phase
 from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
 
-from guppyft.encode import EncoderSpec, ImplementOpsSpec, OpReplacements
+from guppyft.encode import EncodeSpec, ImplementOps, ImplementOpsSpec, OpReplacements
 from guppyft.globals import map_global, with_global
 
 N = guppy.nat_var("N")
@@ -21,7 +21,7 @@ def identity_code_spec(
     n_qubits: int,
     qec_budget: int = 1,
     costs: dict[str, int] | None = None,
-) -> EncoderSpec:
+) -> EncodeSpec:
 
     if costs is None:
         costs = defaultdict(int)
@@ -309,8 +309,8 @@ def identity_code_spec(
 
         return wrapper  # type: ignore[no-any-return]
 
-    return EncoderSpec(
-        implement_spec=ImplementOpsSpec(
-            ops=ops, build_wrapper=build_wrapper, libs=[lib]
+    return EncodeSpec(
+        implement_ops=ImplementOps.for_spec(
+            ImplementOpsSpec(ops=ops, build_wrapper=build_wrapper, libs=[lib])
         )
     )

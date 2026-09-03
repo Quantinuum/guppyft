@@ -93,15 +93,15 @@ class Qubit:
 
     @guppy
     @no_type_check
-    def inject_magic_for_t(self: "Qubit", magic: "Qubit" @ owned) -> None:
+    def inject_t(self: "Qubit", magic: "Qubit" @ owned) -> None:
         """Perform a T gate by injecting a magic state."""
-        inject_magic_for_t(self, magic)
+        inject_t(self, magic)
 
     @guppy
     @no_type_check
-    def inject_magic_for_tdg(self: "Qubit", magic: "Qubit" @ owned) -> None:
+    def inject_tdg(self: "Qubit", magic: "Qubit" @ owned) -> None:
         """Perform a Tdg gate by injecting a magic state."""
-        inject_magic_for_tdg(self, magic)
+        inject_tdg(self, magic)
 
 
 @hugr_op(steane_op("free"))
@@ -158,22 +158,22 @@ def sdg(qubit: "Qubit") -> None:
     """Sdg gate."""
 
 
-@hugr_op(steane_op("prep_magic_for_t_like"))
+@hugr_op(steane_op("prep_t_state"))
 @no_type_check
-def prep_magic_for_t_like() -> "Qubit":
+def prep_t_state() -> "Qubit":
     """Prepare a magic state that can be used to produce T|+> states
     for T and Tdg injection."""
 
 
-@hugr_op(steane_op("inject_magic_for_t"))
+@hugr_op(steane_op("inject_t"))
 @no_type_check
-def inject_magic_for_t(qubit: "Qubit", magic: "Qubit" @ owned) -> None:
+def inject_t(qubit: "Qubit", magic: "Qubit" @ owned) -> None:
     """Perform a T gate by injecting a magic state."""
 
 
-@hugr_op(steane_op("inject_magic_for_tdg"))
+@hugr_op(steane_op("inject_tdg"))
 @no_type_check
-def inject_magic_for_tdg(qubit: "Qubit", magic: "Qubit" @ owned) -> None:
+def inject_tdg(qubit: "Qubit", magic: "Qubit" @ owned) -> None:
     """Perform a Tdg gate by injecting a magic state."""
 
 
@@ -198,12 +198,12 @@ def swap(q0: "Qubit", q1: "Qubit") -> None:
 @guppy
 def t(q: Qubit) -> None:
     """Implement a T gate using magic state injection."""
-    a = prep_magic_for_t_like()
-    inject_magic_for_t(q, a)
+    a = prep_t_state()
+    inject_t(q, a)
 
 
 @guppy
 def tdg(q: Qubit) -> None:
     """Implement a Tdg gate using magic state injection."""
-    a = prep_magic_for_t_like()
-    inject_magic_for_tdg(q, a)
+    a = prep_t_state()
+    inject_tdg(q, a)

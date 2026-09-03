@@ -22,8 +22,8 @@ from guppyft.code.steane.primitives import (
     cz,
     decode,
     h,
-    inject_magic_for_t,
-    inject_magic_for_tdg,
+    inject_t,
+    inject_tdg,
     knill_qec_cycle,
     measure_z,
     prep_t_state_ft,
@@ -39,13 +39,13 @@ from guppyft.code.steane.primitives import (
 from guppyft.code.util import LogicalBlock, RawMeasurement
 from guppyft.encode import (
     EncoderParams,
-    EncoderSpec,
+    EncodeSpec,
+    ImplementOps,
     ImplementOpsSpec,
     OpReplacements,
     ReplacementCompiler,
     TyReplacements,
     encode,
-    implement_ops,
 )
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
@@ -121,15 +121,27 @@ class QECPolicy:
 class SteaneInstance:
     """A Steane architecture instance built by `SteaneBuilder.build`."""
 
-    _spec: EncoderSpec
+    _spec: EncodeSpec
 
     def encode(self, pkg: Package) -> Package:
         """Encode a computational package with the Steane instance."""
+        self.check_may_encode(pkg)
         return encode(pkg, self._spec)
 
     def implement_ops(self, pkg: Package) -> Package:
         """Implement logical ops in `pkg` using this instance's op implementations."""
-        return implement_ops(pkg, self._spec.implement_spec)
+        assert self._spec.implement_ops is not None
+        return self._spec.implement_ops(pkg)
+
+    def check_may_encode(self, hugr: Package) -> None:
+        """Check whether any issues can be detected that would arise when trying to
+        encode the given package, e.g. the package containing unsupported gates.
+
+        Note that this function returning without error is not a guarantee that a
+        subsequent call to `encode` will succeed."""
+        assert self._spec.compile is not None
+        if (error := self._spec.compile.check_may_compile(hugr)) is not None:
+            raise error
 
     def emulator(
         self,
@@ -309,8 +321,8 @@ class SteaneBuilder:
 
         @guppy
         @no_type_check
-        @link_name("guppyft.steane._prep_magic_for_t_like")
-        def _prep_magic_for_t_like() -> tuple[tuple[int, int]]:
+        @link_name("guppyft.steane._prep_t_state")
+        def _prep_t_state() -> tuple[tuple[int, int]]:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, tuple[int, int]]:
                 blk_id, qb_id = state.allocate_next_addr()
@@ -473,10 +485,8 @@ class SteaneBuilder:
 
         @guppy
         @no_type_check
-        @link_name("guppyft.steane._inject_magic_for_t")
-        def _inject_magic_for_t(
-            q: tuple[int, int], a: tuple[int, int]
-        ) -> tuple[tuple[int, int]]:
+        @link_name("guppyft.steane._inject_t")
+        def _inject_t(q: tuple[int, int], a: tuple[int, int]) -> tuple[tuple[int, int]]:
             @guppy
             def _impl(
                 state: STATE @ owned, q: tuple[int, int], a: tuple[int, int]
@@ -484,7 +494,7 @@ class SteaneBuilder:
                 blk_id, _ = q
                 blk = state.take_block(blk_id)
                 resource = state.take_block(a[0])
-                inject_magic_for_t(blk, resource)
+                inject_t(blk, resource)
                 state.put_block(blk_id, blk)
                 state.free_addr(a)
 
@@ -496,8 +506,8 @@ class SteaneBuilder:
 
         @guppy
         @no_type_check
-        @link_name("guppyft.steane._inject_magic_for_tdg")
-        def _inject_magic_for_tdg(
+        @link_name("guppyft.steane._inject_tdg")
+        def _inject_tdg(
             q: tuple[int, int], a: tuple[int, int]
         ) -> tuple[tuple[int, int]]:
             @guppy
@@ -507,7 +517,7 @@ class SteaneBuilder:
                 blk_id, _ = q
                 blk = state.take_block(blk_id)
                 resource = state.take_block(a[0])
-                inject_magic_for_tdg(blk, resource)
+                inject_tdg(blk, resource)
                 state.put_block(blk_id, blk)
                 state.free_addr(a)
 
@@ -631,7 +641,7 @@ class SteaneBuilder:
             state_discard,
             _qec_cycle,
             _prep_zero,
-            _prep_magic_for_t_like,
+            _prep_t_state,
             _measure_z,
             _free,
             decode,
@@ -641,8 +651,8 @@ class SteaneBuilder:
             _h,
             _s,
             _sdg,
-            _inject_magic_for_t,
-            _inject_magic_for_tdg,
+            _inject_t,
+            _inject_tdg,
             _cx,
             _cz,
         ).compile()
@@ -661,16 +671,16 @@ class SteaneBuilder:
                 ("guppyft.steane.ops", "sdg"): "guppyft.steane._sdg",
                 (
                     "guppyft.steane.ops",
-                    "prep_magic_for_t_like",
-                ): "guppyft.steane._prep_magic_for_t_like",
+                    "prep_t_state",
+                ): "guppyft.steane._prep_t_state",
                 (
                     "guppyft.steane.ops",
-                    "inject_magic_for_t",
-                ): "guppyft.steane._inject_magic_for_t",
+                    "inject_t",
+                ): "guppyft.steane._inject_t",
                 (
                     "guppyft.steane.ops",
-                    "inject_magic_for_tdg",
-                ): "guppyft.steane._inject_magic_for_tdg",
+                    "inject_tdg",
+                ): "guppyft.steane._inject_tdg",
                 ("guppyft.steane.ops", "cx"): "guppyft.steane._cx",
                 ("guppyft.steane.ops", "cz"): "guppyft.steane._cz",
                 ("guppyft.steane.ops", "decode"): "guppyft.steane.decode",
@@ -687,7 +697,7 @@ class SteaneBuilder:
             ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[lib]
         )
 
-    def _gen_encoder_spec(self, n_blocks: int) -> EncoderSpec:
+    def _gen_encoder_spec(self, n_blocks: int) -> EncodeSpec:
         """Generate the full `EncoderSpec` (logical encoding + op implementations)
         for a program using `n_blocks` logical blocks."""
 
@@ -733,7 +743,9 @@ class SteaneBuilder:
             extensions=ext,
         )
 
-        return EncoderSpec(to_logical=logical_compiler, implement_spec=impl_spec)
+        return EncodeSpec(
+            compile=logical_compiler, implement_ops=ImplementOps.for_spec(impl_spec)
+        )
 
     def with_qec_policy(self, qec_policy: QECPolicy) -> Self:
         """Set the QEC policy."""
