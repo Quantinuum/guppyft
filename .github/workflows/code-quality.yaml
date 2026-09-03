@@ -47,16 +47,10 @@ jobs:
         run: cargo update -w --locked
 
   check-py:
-    name: 🐍 Check Python code (${{ matrix.python-version }})
+    name: 🐍 Check Python code
     runs-on: ubuntu-latest
     env:
-      PYTHON_VERSION: ${{ matrix.python-version }}
       LLVM_SYS_211_PREFIX: /usr/lib/llvm-21
-
-    strategy:
-      matrix:
-        python-version: [ "3.13", "3.14" ]
-      fail-fast: false
 
     steps:
       - uses: actions/checkout@v7
@@ -70,7 +64,7 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: uv sync --frozen --python ${{ env.PYTHON_VERSION }}
+        run: uv sync --frozen --python 3.14
 
       - name: Check formatting with ruff
         run: |
