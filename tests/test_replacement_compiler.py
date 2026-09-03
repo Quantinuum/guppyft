@@ -46,4 +46,4 @@ def test_replace_with_wrapped() -> None:
         output("q", measure(q).read())
 
     pkg = main.with_minimal_opt().compile()
-    compiler.run(pkg.modules[0], inplace=True)
+    compiler.compile(pkg)  # Smoke test

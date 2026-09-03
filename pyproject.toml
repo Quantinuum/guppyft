@@ -2,7 +2,7 @@
 name = "guppyft"
 version = "0.0.7"
 description = "Tools for fault-tolerant quantum computing in the Guppy language"
-requires-python = ">=3.13,<4"
+requires-python = ">=3.12,<4"
 readme = "README.md"
 license = { file = "LICENCE" }
 authors = [
