@@ -11,7 +11,7 @@ from hugr.package import Package
 from hugr.passes.composable import ComposablePass
 from tket.passes import Normalize
 
-from ._compile import LogicalCompiler, ReplacementCompiler
+from ._compile import LogicalCompiler, ReplacementCompiler, UncompilableError
 from ._implement_ops import (
     ImplementOps,
     ImplementOpsSpec,
@@ -29,6 +29,7 @@ __all__ = [
     "OpReplacements",
     "ReplacementCompiler",
     "TyReplacements",
+    "UncompilableError",
     "annotate_encoding",
     "encode",
     "implement_ops",

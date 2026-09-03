@@ -4,6 +4,7 @@ from typing import Any, Protocol
 from guppylang.defs import GuppyFunctionDefinition
 from hugr import Hugr
 from hugr.ext import ExtensionRegistry
+from hugr.ops import ExtOp
 from hugr.package import Package
 
 from guppyft._bindings import _replacement_compiler_impl
@@ -11,11 +12,26 @@ from guppyft._util import extension_registry_to_json
 from guppyft.encode._util import to_rs_hugr
 
 
+class UncompilableError(Exception):
+    pass
+
+
 class LogicalCompiler(Protocol):
     def __call__(self, pkg: Package) -> Package:
         return self.compile(pkg)
 
     def compile(self, pkg: Package) -> Package: ...
+
+    def may_compile(self, pkg: Package) -> bool:
+        """Refer to `self.check_may_compile` for details."""
+        return self.check_may_compile(pkg) is None
+
+    def check_may_compile(self, pkg: Package) -> UncompilableError | None:
+        """Check whether any issues can be detected that would arise when trying to
+        compile the given package, e.g. the package containing unsupported gates.
+
+        Note that this function returning without error is not a guarantee that a
+        subsequent call to `encode` will succeed."""
 
 
 @dataclass(frozen=True)
@@ -60,6 +76,24 @@ class ReplacementCompiler(LogicalCompiler):
                     f"Package replacement for op {op} must contain exactly one "
                     f"module, got {len(repl.modules)}"
                 )
+
+    def check_may_compile(self, pkg: Package) -> UncompilableError | None:
+        assert len(pkg.modules) == 1
+        for node, data in pkg.modules[0].nodes():
+            if not isinstance(data.op, ExtOp):
+                continue
+
+            op_def = data.op.op_def()
+            if (
+                op_def.get_extension().name == "tket.quantum"
+                and ("tket.quantum", op_def.name) not in self.op_replacements
+                and ("tket.quantum", op_def.name) not in self.compound_op_replacements
+            ):
+                return UncompilableError(
+                    f"Error encoding `{op_def.qualified_name()}` at node {node}. "
+                    "Operation not yet supported during encoding."
+                )
+        return None
 
     def compile(self, pkg: Package) -> Package:
         rs_hugr = to_rs_hugr(pkg)
