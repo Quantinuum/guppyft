@@ -21,8 +21,8 @@ from guppyft.code.steane.primitives import (
     cx,
     decode,
     h,
-    inject_magic_for_t,
-    inject_magic_for_tdg,
+    inject_t,
+    inject_tdg,
     knill_qec_cycle,
     measure_z,
     prep_t_state_ft,
@@ -309,8 +309,8 @@ class SteaneBuilder:
 
         @guppy
         @no_type_check
-        @link_name("guppyft.steane._prep_magic_for_t_like")
-        def _prep_magic_for_t_like() -> tuple[tuple[int, int]]:
+        @link_name("guppyft.steane._prep_t_state")
+        def _prep_t_state() -> tuple[tuple[int, int]]:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, tuple[int, int]]:
                 blk_id, qb_id = state.allocate_next_addr()
@@ -473,10 +473,8 @@ class SteaneBuilder:
 
         @guppy
         @no_type_check
-        @link_name("guppyft.steane._inject_magic_for_t")
-        def _inject_magic_for_t(
-            q: tuple[int, int], a: tuple[int, int]
-        ) -> tuple[tuple[int, int]]:
+        @link_name("guppyft.steane._inject_t")
+        def _inject_t(q: tuple[int, int], a: tuple[int, int]) -> tuple[tuple[int, int]]:
             @guppy
             def _impl(
                 state: STATE @ owned, q: tuple[int, int], a: tuple[int, int]
@@ -484,7 +482,7 @@ class SteaneBuilder:
                 blk_id, _ = q
                 blk = state.take_block(blk_id)
                 resource = state.take_block(a[0])
-                inject_magic_for_t(blk, resource)
+                inject_t(blk, resource)
                 state.put_block(blk_id, blk)
                 state.free_addr(a)
 
@@ -496,8 +494,8 @@ class SteaneBuilder:
 
         @guppy
         @no_type_check
-        @link_name("guppyft.steane._inject_magic_for_tdg")
-        def _inject_magic_for_tdg(
+        @link_name("guppyft.steane._inject_tdg")
+        def _inject_tdg(
             q: tuple[int, int], a: tuple[int, int]
         ) -> tuple[tuple[int, int]]:
             @guppy
@@ -507,7 +505,7 @@ class SteaneBuilder:
                 blk_id, _ = q
                 blk = state.take_block(blk_id)
                 resource = state.take_block(a[0])
-                inject_magic_for_tdg(blk, resource)
+                inject_tdg(blk, resource)
                 state.put_block(blk_id, blk)
                 state.free_addr(a)
 
@@ -608,7 +606,7 @@ class SteaneBuilder:
             state_discard,
             _qec_cycle,
             _prep_zero,
-            _prep_magic_for_t_like,
+            _prep_t_state,
             _measure_z,
             _free,
             decode,
@@ -618,8 +616,8 @@ class SteaneBuilder:
             _h,
             _s,
             _sdg,
-            _inject_magic_for_t,
-            _inject_magic_for_tdg,
+            _inject_t,
+            _inject_tdg,
             _cx,
         ).compile()
 
@@ -637,16 +635,16 @@ class SteaneBuilder:
                 ("guppyft.steane.ops", "sdg"): "guppyft.steane._sdg",
                 (
                     "guppyft.steane.ops",
-                    "prep_magic_for_t_like",
-                ): "guppyft.steane._prep_magic_for_t_like",
+                    "prep_t_state",
+                ): "guppyft.steane._prep_t_state",
                 (
                     "guppyft.steane.ops",
-                    "inject_magic_for_t",
-                ): "guppyft.steane._inject_magic_for_t",
+                    "inject_t",
+                ): "guppyft.steane._inject_t",
                 (
                     "guppyft.steane.ops",
-                    "inject_magic_for_tdg",
-                ): "guppyft.steane._inject_magic_for_tdg",
+                    "inject_tdg",
+                ): "guppyft.steane._inject_tdg",
                 ("guppyft.steane.ops", "cx"): "guppyft.steane._cx",
                 ("guppyft.steane.ops", "decode"): "guppyft.steane.decode",
             }
