@@ -124,7 +124,7 @@ class SteaneInstance:
 
     def encode(self, pkg: Package) -> Package:
         """Encode a computational package with the Steane instance."""
-        self.check_encodable(pkg)
+        self.check_may_encode(pkg)
         return encode(pkg, self._spec)
 
     def implement_ops(self, pkg: Package) -> Package:
@@ -132,11 +132,14 @@ class SteaneInstance:
         assert self._spec.implement_ops is not None
         return self._spec.implement_ops(pkg)
 
-    def check_encodable(self, hugr: Package) -> None:
-        """Check that a HUGR package can be encoded, raising an error if that is not the
-        case."""
+    def check_may_encode(self, hugr: Package) -> None:
+        """Check whether any issues can be detected that would arise when trying to
+        encode the given package, e.g. the package containing unsupported gates.
+
+        Note that this function returning without error is not a guarantee that a
+        subsequent call to `encode` will succeed."""
         assert self._spec.compile is not None
-        if (error := self._spec.compile.check_compilable(hugr)) is not None:
+        if (error := self._spec.compile.check_may_compile(hugr)) is not None:
             raise error
 
     def emulator(

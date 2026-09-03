@@ -22,19 +22,16 @@ class LogicalCompiler(Protocol):
 
     def compile(self, pkg: Package) -> Package: ...
 
-    def can_compile(self, pkg: Package) -> bool:
-        """Whether the given package can be compiled with this compiler.
+    def may_compile(self, pkg: Package) -> bool:
+        """Refer to `self.check_may_compile` for details."""
+        return self.check_may_compile(pkg) is None
 
-        Note: This function returning positively is not a guarantee that the encoding
-        will work without fail."""
-        return self.check_compilable(pkg) is None
+    def check_may_compile(self, pkg: Package) -> UncompilableError | None:
+        """Check whether any issues can be detected that would arise when trying to
+        compile the given package, e.g. the package containing unsupported gates.
 
-    def check_compilable(self, pkg: Package) -> UncompilableError | None:
-        """Report errors that the compiler can also project will happen when run on the
-        given package.
-
-        Note: This function returning `None` is not a guarantee that the encoding will
-        work without fail."""
+        Note that this function returning without error is not a guarantee that a
+        subsequent call to `encode` will succeed."""
 
 
 @dataclass(frozen=True)
@@ -80,7 +77,7 @@ class ReplacementCompiler(LogicalCompiler):
                     f"module, got {len(repl.modules)}"
                 )
 
-    def check_compilable(self, pkg: Package) -> UncompilableError | None:
+    def check_may_compile(self, pkg: Package) -> UncompilableError | None:
         assert len(pkg.modules) == 1
         for node, data in pkg.modules[0].nodes():
             if not isinstance(data.op, ExtOp):
