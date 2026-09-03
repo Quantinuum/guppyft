@@ -8,7 +8,7 @@ from hugr.package import Package
 from hugr.passes.composable import ComposablePass, PassResult, implement_pass_run
 from hugr.passes.scope import PassScope
 
-from guppyft._bindings import RsHugr, _replacement_compiler_impl
+from guppyft._bindings import RsHugr, _run_replacement_compiler
 from guppyft._util import extension_registry_to_json
 
 
@@ -17,7 +17,7 @@ class ReplacementCompiler(ComposablePass):
     """A composable pass that replaces extension ops in a `Hugr` according to the given
     mappings.
 
-    See `guppyft._bindings._replacement_compiler_impl` for semantic details.
+    See `guppyft._bindings._run_replacement_compiler` for semantic details.
     """
 
     op_replacements: dict[tuple[str, str], tuple[str, str, list[int | str]]]
@@ -93,7 +93,7 @@ class ReplacementCompiler(ComposablePass):
         rs_compound_op_replacements = {
             op: to_rs_hugr(repl) for op, repl in self.compound_op_replacements.items()
         }
-        _replacement_compiler_impl(
+        _run_replacement_compiler(
             rs_hugr,
             self.op_replacements,
             rs_compound_op_replacements,
