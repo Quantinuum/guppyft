@@ -224,7 +224,7 @@ def test_encode_classical() -> None:
 @pytest.mark.long
 def test_steane_encode_suite(request: pytest.FixtureRequest) -> None:
     root_dir = request.config.rootpath
-    hugr_dir = root_dir / "tests" / "test-hugrs" / "guppylang-test-exports"
+    hugr_dir = root_dir / "tests" / "resources" / "hugrs" / "guppylang-test-exports"
     for fname in Path.iterdir(hugr_dir):
         fpath = hugr_dir / fname
         with Path.open(fpath, "rb") as f:
