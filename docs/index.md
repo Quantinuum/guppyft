@@ -74,7 +74,7 @@ Notice that our teleportation program is written using only `guppylang` operatio
 We can now select the QEC code architecture that we would like to use to encode our program. In this example, we will use the Steane architecture available in {py:mod}`guppyft.code.steane`. We can define an instance of the architecture using {py:class}`guppyft.code.steane.encoder_spec.SteaneBuilder` by providing the number of logical blocks, `n_blocks`, available during execution. In our case, we need 3 blocks for our teleportation program.
 
 ```{code-cell} ipython3
-from guppyft.code.steane.encoder_spec import SteaneBuilder
+from guppyft.code.steane.encode import SteaneBuilder
 
 steane = SteaneBuilder().build(n_blocks=3)
 ```
