@@ -33,22 +33,18 @@ mod _bindings {
         ext_name: &str,
         ty_name: &str,
     ) -> Result<Option<CustomType>, String> {
-        let ext = match registry.get(ext_name) {
-            Some(e) => e,
-            None => return Ok(None),
-        };
-        let Some(src_def) = ext.get_type(ty_name) else {
+        let Some(ty_def) = registry.get(ext_name).and_then(|e| e.get_type(ty_name)) else {
             return Ok(None);
         };
-        if !src_def.params().is_empty() {
+        if !ty_def.params().is_empty() {
             return Err(format!(
                 "Generic types are not supported for type replacement: '{ext_name}.{ty_name}'"
             ));
         }
-        let src = src_def
+        let ty = ty_def
             .instantiate([])
-            .map_err(|e| format!("Could not instantiate src ty: {e}"))?;
-        Ok(Some(src))
+            .map_err(|e| format!("Could not instantiate ty: {e}"))?;
+        Ok(Some(ty))
     }
 
     #[pyfunction]
@@ -74,31 +70,28 @@ mod _bindings {
 
         let mut pass = ReplaceTypes::new_empty();
 
-        for ((src_ext, src_op), (tgt_ext, tgt_op, tgt_args)) in op_replacements.iter() {
-            let ext = match registry.get(src_ext) {
-                Some(e) => e,
-                None => continue,
-            };
-            let Some(src_def) = ext.get_op(src_op) else {
+        for ((src_ext, src_op), (tgt_ext, tgt_op, tgt_args)) in op_replacements.into_iter() {
+            let Some(src_def) = registry.get(&src_ext).and_then(|e| e.get_op(&src_op)) else {
                 continue;
             };
 
             // Resolve the target extension eagerly, so a missing extension is
             // reported immediately rather than only once a matching node is
             // found during `pass.run`.
-            let tgt_ext = registry
-                .get(tgt_ext)
-                .ok_or_else(|| PyValueError::new_err(format!("Unknown extension: '{tgt_ext}'")))?
-                .clone();
+            let Some(tgt_ext) = registry.get(&tgt_ext) else {
+                Err(PyValueError::new_err(format!(
+                    "Unknown extension: '{tgt_ext}'"
+                )))?
+            };
             let tgt_args: Vec<TypeArg> = tgt_args
-                .iter()
+                .into_iter()
                 .map(|arg| match arg {
-                    PyTypeArgValue::Int(n) => TypeArg::from(*n),
-                    PyTypeArgValue::Str(s) => TypeArg::from(s.clone()),
+                    PyTypeArgValue::Int(n) => TypeArg::from(n),
+                    PyTypeArgValue::Str(s) => TypeArg::from(s),
                 })
                 .collect();
             let tgt = tgt_ext
-                .instantiate_extension_op(tgt_op, tgt_args.clone())
+                .instantiate_extension_op(&tgt_op, tgt_args)
                 .map_err(|e| {
                     PyValueError::new_err(format!("Could not instantiate extension op: {e}"))
                 })?;
