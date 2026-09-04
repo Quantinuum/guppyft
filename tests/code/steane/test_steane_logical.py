@@ -48,7 +48,7 @@ def test_exported_extensions() -> None:
         "qubit": steane_types.steane_qubit_def,
         "measurement": steane_types.steane_measurement_def,
     }
-    assert len(ops_extn.operations) == 16
+    assert len(ops_extn.operations) == 17
     for op_name, op_def in ops_extn.operations.items():
         assert op_def == steane_ops.__getattribute__(f"{op_name}_def")
 
@@ -56,7 +56,7 @@ def test_exported_extensions() -> None:
 def test_op_instantiations() -> None:
     ops_extn = steane_ops()
     # No operations take indices
-    assert len(ops_extn.operations) == 16
+    assert len(ops_extn.operations) == 17
     for op_name in ops_extn.operations:
         assert (
             steane_ops.__getattribute__(op_name)().op_def()

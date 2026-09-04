@@ -18,6 +18,7 @@ from hugr.std import _std_extensions
 from guppyft.code._state_factory import StateFactory
 from guppyft.code.steane.primitives import (
     cx,
+    cz,
     decode,
     h,
     inject_t,
@@ -559,6 +560,29 @@ class SteaneBuilder:
 
             return map_global(_impl, ctl, tgt)
 
+        @guppy
+        @no_type_check
+        @link_name("guppyft.steane._cz")
+        def _cz(
+            q0: tuple[int, int], q1: tuple[int, int]
+        ) -> tuple[tuple[int, int], tuple[int, int]]:
+            @guppy
+            def _impl(
+                state: STATE @ owned, q0: tuple[int, int], q1: tuple[int, int]
+            ) -> tuple[STATE, tuple[int, int], tuple[int, int]]:
+                blk0, blk1 = state.take_block(q0[0]), state.take_block(q1[0])
+
+                cz(blk0, blk1)
+
+                state.put_block(q0[0], blk0)
+                state.put_block(q1[0], blk1)
+
+                state.qec_policy(array(q0[0], q1[0]), comptime(qec_policy.costs["CZ"]))
+
+                return state, q0, q1
+
+            return map_global(_impl, q0, q1)
+
         @guppy.declare
         @no_type_check
         @link_name("guppyft.steane.gen_state")
@@ -636,6 +660,7 @@ class SteaneBuilder:
             _inject_t,
             _inject_tdg,
             _cx,
+            _cz,
         ).compile()
 
         ops = OpReplacements().with_generated_decls(
@@ -663,6 +688,7 @@ class SteaneBuilder:
                     "inject_tdg",
                 ): "guppyft.steane._inject_tdg",
                 ("guppyft.steane.ops", "cx"): "guppyft.steane._cx",
+                ("guppyft.steane.ops", "cz"): "guppyft.steane._cz",
                 ("guppyft.steane.ops", "decode"): "guppyft.steane.decode",
             }
         )
@@ -707,6 +733,7 @@ class SteaneBuilder:
                 ("tket.quantum", "S"): ("guppyft.steane.ops", "s", []),
                 ("tket.quantum", "Sdg"): ("guppyft.steane.ops", "sdg", []),
                 ("tket.quantum", "CX"): ("guppyft.steane.ops", "cx", []),
+                ("tket.quantum", "CZ"): ("guppyft.steane.ops", "cz", []),
             },
             compound_op_replacements={
                 ("tket.quantum", "T"): steane_logical.t,
