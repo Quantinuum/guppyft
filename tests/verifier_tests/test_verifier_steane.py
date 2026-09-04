@@ -1,6 +1,6 @@
 from guppyft.verifier.verify import (
     valid_clifford_implementation,
-    valid_pauli_eigenstate_preparation,
+    valid_stabilizer_state_preparation,
 )
 
 from .ops import steane
@@ -41,12 +41,12 @@ def test_steane_double_block_identity() -> None:
 
 
 def test_steane_zero_state() -> None:
-    assert valid_pauli_eigenstate_preparation(
+    assert valid_stabilizer_state_preparation(
         steane.specify_zero_state,
         steane.implement_non_ft_zero_state,
         code_definition=steane.STEANE_DEF,
     )
-    assert valid_pauli_eigenstate_preparation(
+    assert valid_stabilizer_state_preparation(
         steane.specify_zero_state,
         steane.implement_non_ft_zero_state,
         code_definition=steane.STEANE_DEF,
@@ -54,7 +54,7 @@ def test_steane_zero_state() -> None:
 
 
 def test_steane_ft_zero_state() -> None:
-    assert valid_pauli_eigenstate_preparation(
+    assert valid_stabilizer_state_preparation(
         steane.specify_zero_state,
         steane.implement_ft_zero_state,
         code_definition=steane.STEANE_DEF,
@@ -63,7 +63,7 @@ def test_steane_ft_zero_state() -> None:
 
 
 def test_steane_plus_state() -> None:
-    assert valid_pauli_eigenstate_preparation(
+    assert valid_stabilizer_state_preparation(
         steane.specify_plus_state,
         steane.implement_non_ft_plus_state,
         code_definition=steane.STEANE_DEF,
@@ -71,7 +71,7 @@ def test_steane_plus_state() -> None:
 
 
 def test_steane_zero_state_not_plus_state() -> None:
-    assert not valid_pauli_eigenstate_preparation(
+    assert not valid_stabilizer_state_preparation(
         steane.specify_zero_state,
         steane.implement_non_ft_plus_state,
         code_definition=steane.STEANE_DEF,
@@ -79,7 +79,7 @@ def test_steane_zero_state_not_plus_state() -> None:
 
 
 def test_steane_bell_state() -> None:
-    assert valid_pauli_eigenstate_preparation(
+    assert valid_stabilizer_state_preparation(
         steane.specify_bell_state,
         steane.implement_non_ft_bell_state,
         code_definition=steane.STEANE_DEF,

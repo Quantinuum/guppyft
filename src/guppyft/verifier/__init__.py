@@ -13,7 +13,7 @@ Verifying Cliffords with :py:func:`valid_clifford_implementation`
 * Works for non-CSS codes (e.g. the :math:`[[5, 1, 3]]` code)
 * Ancilla qubits can be used in the implementation
 
-The same features are available for :py:func:`valid_pauli_eigenstate_preparation`.
+The same features are available for :py:func:`valid_stabilizer_state_preparation`.
 
 Steane code example
 ===================
@@ -62,7 +62,7 @@ from .verify import (
     compute_tableaux_single_block_state,
     compute_tableaux_single_block_unitary,
     valid_clifford_implementation,
-    valid_pauli_eigenstate_preparation,
+    valid_stabilizer_state_preparation,
 )
 
 __all__ = [
@@ -75,5 +75,5 @@ __all__ = [
     "selene_stabilizer_to_zixy_signterm",
     "stabilizerlist_to_signterms",
     "valid_clifford_implementation",
-    "valid_pauli_eigenstate_preparation",
+    "valid_stabilizer_state_preparation",
 ]

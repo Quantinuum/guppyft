@@ -1,6 +1,6 @@
 from guppyft.verifier.verify import (
     valid_clifford_implementation,
-    valid_pauli_eigenstate_preparation,
+    valid_stabilizer_state_preparation,
 )
 
 from .ops import nonCSS_5q
@@ -23,7 +23,7 @@ def test_double_block_nonCSS_5q_id() -> None:
 
 
 def test_nonCSS_5q_zero_state() -> None:
-    assert valid_pauli_eigenstate_preparation(
+    assert valid_stabilizer_state_preparation(
         nonCSS_5q.specify_zero_state,
         nonCSS_5q.implement_non_ft_zero_state,
         nonCSS_5q.CODE_DEF,
@@ -31,7 +31,7 @@ def test_nonCSS_5q_zero_state() -> None:
 
 
 def test_nonCSS_5q_plus_state() -> None:
-    assert valid_pauli_eigenstate_preparation(
+    assert valid_stabilizer_state_preparation(
         nonCSS_5q.specify_plus_state,
         nonCSS_5q.implement_non_ft_plus_state,
         nonCSS_5q.CODE_DEF,
@@ -39,7 +39,7 @@ def test_nonCSS_5q_plus_state() -> None:
 
 
 def test_nonCSS_5q_zero_state_not_plus_state() -> None:
-    assert not valid_pauli_eigenstate_preparation(
+    assert not valid_stabilizer_state_preparation(
         nonCSS_5q.specify_zero_state,
         nonCSS_5q.implement_non_ft_plus_state,
         nonCSS_5q.CODE_DEF,
@@ -47,7 +47,7 @@ def test_nonCSS_5q_zero_state_not_plus_state() -> None:
 
 
 def test_nonCSS_5q_bell_state() -> None:
-    assert valid_pauli_eigenstate_preparation(
+    assert valid_stabilizer_state_preparation(
         nonCSS_5q.specify_bell_state,
         nonCSS_5q.implement_non_ft_bell_state,
         nonCSS_5q.CODE_DEF,

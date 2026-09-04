@@ -333,7 +333,7 @@ def _count_blocks_state(
         return 1
 
 
-def valid_pauli_eigenstate_preparation(
+def valid_stabilizer_state_preparation(
     semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
     code_definition: StabilizerCode,

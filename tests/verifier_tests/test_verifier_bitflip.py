@@ -1,6 +1,6 @@
 from guppyft.verifier.verify import (
     valid_clifford_implementation,
-    valid_pauli_eigenstate_preparation,
+    valid_stabilizer_state_preparation,
 )
 
 from .ops import bitflip
@@ -23,7 +23,7 @@ def test_bit_flip_double_block_identity() -> None:
 
 
 def test_bit_flip_zero_state() -> None:
-    assert valid_pauli_eigenstate_preparation(
+    assert valid_stabilizer_state_preparation(
         bitflip.specify_zero_state,
         bitflip.implement_non_ft_zero_state,
         code_definition=bitflip.BIT_FLIP_DEF,
@@ -31,7 +31,7 @@ def test_bit_flip_zero_state() -> None:
 
 
 def test_bit_flip_plus_state() -> None:
-    assert valid_pauli_eigenstate_preparation(
+    assert valid_stabilizer_state_preparation(
         bitflip.specify_plus_state,
         bitflip.implement_non_ft_plus_state,
         code_definition=bitflip.BIT_FLIP_DEF,
@@ -39,7 +39,7 @@ def test_bit_flip_plus_state() -> None:
 
 
 def test_bit_flip_zero_state_not_plus_state() -> None:
-    assert not valid_pauli_eigenstate_preparation(
+    assert not valid_stabilizer_state_preparation(
         bitflip.specify_zero_state,
         bitflip.implement_non_ft_plus_state,
         code_definition=bitflip.BIT_FLIP_DEF,
@@ -47,7 +47,7 @@ def test_bit_flip_zero_state_not_plus_state() -> None:
 
 
 def test_bit_flip_bell_state() -> None:
-    assert valid_pauli_eigenstate_preparation(
+    assert valid_stabilizer_state_preparation(
         bitflip.specify_bell_state,
         bitflip.implement_non_ft_bell_state,
         code_definition=bitflip.BIT_FLIP_DEF,
