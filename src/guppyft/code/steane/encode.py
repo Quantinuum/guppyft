@@ -99,6 +99,7 @@ class OperationCosts:
     inject_t: float = 0.0
     inject_tdg: float = 0.0
     cx: float = 0.0
+    cz: float = 0.0
 
     def __setattr__(self, key: str, value: Any) -> None:
         if not hasattr(self, key):
@@ -577,7 +578,7 @@ class SteaneBuilder:
                 state.put_block(q0[0], blk0)
                 state.put_block(q1[0], blk1)
 
-                state.qec_policy(array(q0[0], q1[0]), comptime(qec_policy.costs["CZ"]))
+                state.qec_policy(array(q0[0], q1[0]), comptime(qec_policy.costs.cz))
 
                 return state, q0, q1
 
