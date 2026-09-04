@@ -85,30 +85,6 @@ class QECStyle(Enum):
     Steane = auto()
 
 
-class OperationCosts:
-    """Configuration for operation costs. Used e.g. for applying QEC cycles."""
-
-    prep_zero: float = 0.0
-    prep_t: float = 0.0
-    x: float = 0.0
-    y: float = 0.0
-    z: float = 0.0
-    h: float = 0.0
-    s: float = 0.0
-    sdg: float = 0.0
-    inject_t: float = 0.0
-    inject_tdg: float = 0.0
-    cx: float = 0.0
-    cz: float = 0.0
-
-    def __setattr__(self, key: str, value: Any) -> None:
-        if not hasattr(self, key):
-            raise KeyError(f"Unknown cost key: {key}")
-        if value < 0:
-            raise ValueError(f"Op cost cannot be negative: received {value}")
-        super().__setattr__(key, value)
-
-
 @dataclass
 class QECPolicy:
     """Policy to determine when QEC cycles are injected.
@@ -122,6 +98,29 @@ class QECPolicy:
         threshold: Threshold at which a QEC cycle is triggered.
         costs: See `OperationCosts`.
     """
+
+    class OperationCosts:
+        """Configuration for operation costs. Used e.g. for applying QEC cycles."""
+
+        prep_zero: float = 0.0
+        prep_t: float = 0.0
+        x: float = 0.0
+        y: float = 0.0
+        z: float = 0.0
+        h: float = 0.0
+        s: float = 0.0
+        sdg: float = 0.0
+        inject_t: float = 0.0
+        inject_tdg: float = 0.0
+        cx: float = 0.0
+        cz: float = 0.0
+
+        def __setattr__(self, key: str, value: Any) -> None:
+            if not hasattr(self, key):
+                raise KeyError(f"Unknown cost key: {key}")
+            if value < 0:
+                raise ValueError(f"Op cost cannot be negative: received {value}")
+            super().__setattr__(key, value)
 
     style: QECStyle = QECStyle.Steane
     threshold: int = 1
