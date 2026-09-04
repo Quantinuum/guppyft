@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.0.8](https://github.com/quantinuum-dev/guppyft/compare/v0.0.7...v0.0.8) (2026-09-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* Avoid magic strings when setting QEC policy operation costs ([#301](https://github.com/quantinuum-dev/guppyft/issues/301))
+* Support Hugr content reactive implement ops passes ([#279](https://github.com/quantinuum-dev/guppyft/issues/279))
+* Rename Steane magic preparation and injection to reduce verbosity ([#286](https://github.com/quantinuum-dev/guppyft/issues/286))
+* Inline state factory conf for the Steane code ([#277](https://github.com/quantinuum-dev/guppyft/issues/277))
+* Rename replace encoder to replacement compiler ([#276](https://github.com/quantinuum-dev/guppyft/issues/276))
+* Move logical operations into code-first modules and reduce their API ([#274](https://github.com/quantinuum-dev/guppyft/issues/274))
+
+### Features
+
+* Check ability to encode / compile before running ([#281](https://github.com/quantinuum-dev/guppyft/issues/281)) ([6a53c77](https://github.com/quantinuum-dev/guppyft/commit/6a53c77de2906fb0e6756c061cc8d3a038f7ec00))
+* Support CZ gate in Steane code ([#297](https://github.com/quantinuum-dev/guppyft/issues/297)) ([e1d2b00](https://github.com/quantinuum-dev/guppyft/commit/e1d2b008c73701e58fdcc6839d90b9fca5b60dde))
+* Support Hugr content reactive implement ops passes ([#279](https://github.com/quantinuum-dev/guppyft/issues/279)) ([3c720d4](https://github.com/quantinuum-dev/guppyft/commit/3c720d47379b47c354f81cb9dcfc4a86474eea2c))
+
+
+### Bug Fixes
+
+* Filter type replacements by extensions carried in the encoded hugr ([#275](https://github.com/quantinuum-dev/guppyft/issues/275)) ([dc9e05d](https://github.com/quantinuum-dev/guppyft/commit/dc9e05d82387f764d46fba7435f2ca7485c7479b))
+
+
+### Documentation
+
+* Add landing page with getting started example ([#267](https://github.com/quantinuum-dev/guppyft/issues/267)) ([a2a9c70](https://github.com/quantinuum-dev/guppyft/commit/a2a9c70ac23f9c4fb758d3a8a0273ff711073d54))
+* Improve formatting and grammar in `encode()` docstring ([#284](https://github.com/quantinuum-dev/guppyft/issues/284)) ([2fdbb74](https://github.com/quantinuum-dev/guppyft/commit/2fdbb74abe67a0f940c5a2c70828363b7b5d7dd4))
+
+
+### Code Refactoring
+
+* Avoid magic strings when setting QEC policy operation costs ([#301](https://github.com/quantinuum-dev/guppyft/issues/301)) ([6e5ad26](https://github.com/quantinuum-dev/guppyft/commit/6e5ad2660cdf60d1da7d67f6034e4d7de299a7b5))
+* Inline state factory conf for the Steane code ([#277](https://github.com/quantinuum-dev/guppyft/issues/277)) ([72fb199](https://github.com/quantinuum-dev/guppyft/commit/72fb1999a73fa6d53a8001155168c489888ee61c))
+* Move logical operations into code-first modules and reduce their API ([#274](https://github.com/quantinuum-dev/guppyft/issues/274)) ([62a3b35](https://github.com/quantinuum-dev/guppyft/commit/62a3b355c7806d881a4a8755b8c060c28c598ff7))
+* Rename replace encoder to replacement compiler ([#276](https://github.com/quantinuum-dev/guppyft/issues/276)) ([035b360](https://github.com/quantinuum-dev/guppyft/commit/035b360c9a62a844c06647c4c56a37b6a0164f8c))
+* Rename Steane magic preparation and injection to reduce verbosity ([#286](https://github.com/quantinuum-dev/guppyft/issues/286)) ([914f199](https://github.com/quantinuum-dev/guppyft/commit/914f1992b45180e2e07bed3a3f35558113c3af32))
+
 ## [0.0.7](https://github.com/quantinuum-dev/guppyft/compare/v0.0.6...v0.0.7) (2026-08-28)
 
 
