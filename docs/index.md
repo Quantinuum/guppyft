@@ -17,11 +17,11 @@ kernelspec:
 api/api.md
 ```
 
-GuppyFT is an extension of the [guppylang](https://github.com/Quantinuum/guppylang) quantum programming language to enable fault-tolerant quantum programs.
+Guppy FT is an extension of the [guppylang](https://github.com/Quantinuum/guppylang) quantum programming language to enable fault-tolerant quantum programs.
 
 ## Installation
 
-As a Python package, [GuppyFT](https://pypi.org/project/guppyft/) can be installed from PyPI using `pip` or `uv`.
+As a Python package, [Guppy FT](https://pypi.org/project/guppyft/) can be installed from PyPI using `pip` or `uv`.
 
 ```{eval-rst}
 .. tabs::
@@ -35,11 +35,23 @@ As a Python package, [GuppyFT](https://pypi.org/project/guppyft/) can be install
       uv add guppyft
 ```
 
-The source for GuppyFT is available on [GitHub](https://github.com/quantinuum/guppyft/). If you have a feature request or think you have found a bug, feel free to raise a [GitHub issue](https://github.com/quantinuum/guppyft/issues).
+The source for Guppy FT is available on [GitHub](https://github.com/quantinuum/guppyft/). If you have a feature request or think you have found a bug, feel free to raise a [GitHub issue](https://github.com/quantinuum/guppyft/issues).
+
+## Naming convention
+
+In Guppy FT, we refer to a QEC architecture as the combination of a QEC code
+definition, its collection of logical gadgets and their implementation, the
+compilation passes that let users encode their programs automatically, and
+any code-specific policies used to manage resources at runtime, for instance
+automated QEC insertion and state factories.
+
+Furthermore, the goal of Guppy FT is to provide tools for two kinds
+of users
+
 
 ## Example: Encoding with Steane
 
-Let's demonstrate automatic encoding using GuppyFT. We begin by writing our quantum program in Guppy. At this stage, we are writing a _computational_ program that is QEC-agnostic. For this example, we use the quantum teleportation primitive.
+Let's demonstrate automatic encoding using Guppy FT. We begin by writing our quantum program in Guppy. At this stage, we are writing a _computational_ program that is QEC-agnostic. For this example, we use the quantum teleportation primitive.
 
 ```{code-cell} ipython3
 from guppylang import guppy
