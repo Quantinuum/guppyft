@@ -136,7 +136,7 @@ def test_builder_methods() -> None:
     pkg = main.compile()
 
     my_policy = QECPolicy(threshold=1)
-    my_policy.set_cost("X", 1.0)
+    my_policy.costs.x = 1.0
 
     zero_factory_conf = RUSStateFactoryConf(1, 2)
 
