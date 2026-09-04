@@ -25,9 +25,9 @@ classifiers = [
 ]
 
 dependencies = [
-    "guppylang>=1.0.1",
+    "guppylang>=1.0.2",
     "hugr>=0.18.5",
-    "tket>=0.15.2",
+    "tket>=0.15.7",
     "tket-exts>=0.14.0",
     "zixy~=0.3.2",
     "selene-sim>=0.3.0",
@@ -47,7 +47,7 @@ docs = [
 ]
 lint = [
     "pre-commit>=4.6.2,<5",
-    "ruff>=0.16.4",
+    "ruff>=0.16.5",
     "mypy>=2.3.1",
 ]
 test = [
