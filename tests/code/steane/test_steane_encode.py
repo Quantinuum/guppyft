@@ -6,6 +6,7 @@ from guppylang.std.angles import pi
 from guppylang.std.platform import output
 from guppylang.std.quantum import (
     cx,
+    cz,
     discard,
     h,
     measure,
@@ -73,6 +74,7 @@ def test_encoder_smoke() -> None:
         s(q0)
         sdg(q0)
         cx(q0, q1)
+        cz(q0, q1)
         output("q0", measure(q0).read())
         discard(q1)
 
