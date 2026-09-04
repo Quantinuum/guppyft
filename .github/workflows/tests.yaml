@@ -71,7 +71,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [ "3.13", "3.14" ]
+        python-version: [ "3.12", "3.14" ]
       fail-fast: false
 
     steps:
@@ -128,7 +128,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.13"
+          python-version: "3.12"
 
       - name: Check if extension versions are updated
         run: python ./.github/scripts/check_extension_versions.py
