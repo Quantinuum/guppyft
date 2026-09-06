@@ -1,4 +1,3 @@
-from collections import defaultdict
 from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from enum import Enum, auto
@@ -19,10 +18,11 @@ from hugr.std import _std_extensions
 from guppyft.code._state_factory import StateFactory
 from guppyft.code.steane.primitives import (
     cx,
+    cz,
     decode,
     h,
-    inject_magic_for_t,
-    inject_magic_for_tdg,
+    inject_t,
+    inject_tdg,
     knill_qec_cycle,
     measure_z,
     prep_t_state_ft,
@@ -38,17 +38,18 @@ from guppyft.code.steane.primitives import (
 from guppyft.code.util import LogicalBlock, RawMeasurement
 from guppyft.encode import (
     EncoderParams,
-    EncoderSpec,
+    EncodeSpec,
+    ImplementOps,
     ImplementOpsSpec,
     OpReplacements,
-    ReplaceEncoder,
+    ReplacementCompiler,
     TyReplacements,
     encode,
-    implement_ops,
 )
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
-from guppyft.logical import steane as steane_logical
+
+from . import logical as steane_logical
 
 N = guppy.nat_var("N")
 
@@ -77,16 +78,6 @@ class RUSStateFactoryConf:
     max_attempts: int
 
 
-@dataclass(frozen=True, kw_only=True)
-class _SteaneFactoryConf:
-    """Configuration for each of the Steane state factories."""
-
-    zero: RUSStateFactoryConf = field(default_factory=lambda: RUSStateFactoryConf(1, 5))
-    magic: RUSStateFactoryConf = field(
-        default_factory=lambda: RUSStateFactoryConf(1, 5)
-    )
-
-
 class QECStyle(Enum):
     """The style of syndrome extraction to use during a QEC cycle."""
 
@@ -105,39 +96,62 @@ class QECPolicy:
     Attributes:
         style: The style of syndrome extraction to use (see `QECStyle`).
         threshold: Threshold at which a QEC cycle is triggered.
-        costs: Mapping from operation name to its cost.
-               Defaults to 0 for any op not explicitly set.
+        costs: See `OperationCosts`.
     """
+
+    class OperationCosts:
+        """Configuration for operation costs. Used e.g. for applying QEC cycles."""
+
+        prep_zero: float = 0.0
+        prep_t: float = 0.0
+        x: float = 0.0
+        y: float = 0.0
+        z: float = 0.0
+        h: float = 0.0
+        s: float = 0.0
+        sdg: float = 0.0
+        inject_t: float = 0.0
+        inject_tdg: float = 0.0
+        cx: float = 0.0
+        cz: float = 0.0
+
+        def __setattr__(self, key: str, value: Any) -> None:
+            if not hasattr(self, key):
+                raise KeyError(f"Unknown cost key: {key}")
+            if value < 0:
+                raise ValueError(f"Op cost cannot be negative: received {value}")
+            super().__setattr__(key, value)
 
     style: QECStyle = QECStyle.Steane
     threshold: int = 1
-    costs: dict[str, float] = field(default_factory=lambda: defaultdict(float))
-
-    def set_cost(self, op: str, cost: float) -> None:
-        """Set the cost of an operation.
-
-        Args:
-            op: Name of the operation.
-            cost: Non-negative cost to assign to the operation.
-        """
-        if cost < 0:
-            raise ValueError(f"Op cost cannot be negative: received {cost}")
-        self.costs[op] = cost
+    costs: OperationCosts = field(default_factory=OperationCosts)
 
 
 @dataclass(frozen=True)
 class SteaneInstance:
     """A Steane architecture instance built by `SteaneBuilder.build`."""
 
-    _spec: EncoderSpec
+    _spec: EncodeSpec
 
     def encode(self, pkg: Package) -> Package:
         """Encode a computational package with the Steane instance."""
+        self.check_may_encode(pkg)
         return encode(pkg, self._spec)
 
     def implement_ops(self, pkg: Package) -> Package:
         """Implement logical ops in `pkg` using this instance's op implementations."""
-        return implement_ops(pkg, self._spec.implement_spec)
+        assert self._spec.implement_ops is not None
+        return self._spec.implement_ops(pkg)
+
+    def check_may_encode(self, hugr: Package) -> None:
+        """Check whether any issues can be detected that would arise when trying to
+        encode the given package, e.g. the package containing unsupported gates.
+
+        Note that this function returning without error is not a guarantee that a
+        subsequent call to `encode` will succeed."""
+        assert self._spec.compile is not None
+        if (error := self._spec.compile.check_may_compile(hugr)) is not None:
+            raise error
 
     def emulator(
         self,
@@ -165,7 +179,12 @@ class SteaneInstance:
 class SteaneBuilder:
     """Steane architecture builder class for creating `SteaneInstance` objects."""
 
-    _factory_confs: _SteaneFactoryConf = field(default_factory=_SteaneFactoryConf)
+    _zero_factory_conf: RUSStateFactoryConf = field(
+        default_factory=lambda: RUSStateFactoryConf(1, 5)
+    )
+    _magic_factory_conf: RUSStateFactoryConf = field(
+        default_factory=lambda: RUSStateFactoryConf(1, 5)
+    )
     _qec_policy: QECPolicy = field(default_factory=QECPolicy)
 
     def _gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
@@ -185,10 +204,10 @@ class SteaneBuilder:
             qec_counter: array[float, comptime(n_blocks)]  # type: ignore[valid-type]
 
             zero_state_factory: StateFactory[  # type: ignore[valid-type,type-arg]
-                7, 1, comptime(self._factory_confs.zero.size)
+                7, 1, comptime(self._zero_factory_conf.size)
             ]
             magic_state_factory: StateFactory[  # type: ignore[valid-type,type-arg]
-                7, 8, comptime(self._factory_confs.magic.size)
+                7, 8, comptime(self._magic_factory_conf.size)
             ]
 
             @guppy
@@ -304,7 +323,7 @@ class SteaneBuilder:
                 blk = state.zero_state_factory.get_state()
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["Prep_zero"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.prep_zero))
 
                 return state, (blk_id, qb_id)
 
@@ -312,15 +331,15 @@ class SteaneBuilder:
 
         @guppy
         @no_type_check
-        @link_name("guppyft.steane._prep_magic_for_t_like")
-        def _prep_magic_for_t_like() -> tuple[tuple[int, int]]:
+        @link_name("guppyft.steane._prep_t_state")
+        def _prep_t_state() -> tuple[tuple[int, int]]:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, tuple[int, int]]:
                 blk_id, qb_id = state.allocate_next_addr()
                 blk = state.magic_state_factory.get_state()
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["Prep_T"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.prep_t))
 
                 return state, (blk_id, qb_id)
 
@@ -373,7 +392,7 @@ class SteaneBuilder:
                 x(blk)
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["X"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.x))
 
                 return state, q
 
@@ -392,7 +411,7 @@ class SteaneBuilder:
                 y(blk)
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["Y"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.y))
 
                 return state, q
 
@@ -411,7 +430,7 @@ class SteaneBuilder:
                 z(blk)
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["Z"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.z))
 
                 return state, q
 
@@ -430,7 +449,7 @@ class SteaneBuilder:
                 h(blk)
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["H"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.h))
 
                 return state, q
 
@@ -449,7 +468,7 @@ class SteaneBuilder:
                 s(blk)
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["S"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.s))
 
                 return state, q
 
@@ -468,7 +487,7 @@ class SteaneBuilder:
                 sdg(blk)
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["Sdg"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.sdg))
 
                 return state, q
 
@@ -476,10 +495,8 @@ class SteaneBuilder:
 
         @guppy
         @no_type_check
-        @link_name("guppyft.steane._inject_magic_for_t")
-        def _inject_magic_for_t(
-            q: tuple[int, int], a: tuple[int, int]
-        ) -> tuple[tuple[int, int]]:
+        @link_name("guppyft.steane._inject_t")
+        def _inject_t(q: tuple[int, int], a: tuple[int, int]) -> tuple[tuple[int, int]]:
             @guppy
             def _impl(
                 state: STATE @ owned, q: tuple[int, int], a: tuple[int, int]
@@ -487,11 +504,11 @@ class SteaneBuilder:
                 blk_id, _ = q
                 blk = state.take_block(blk_id)
                 resource = state.take_block(a[0])
-                inject_magic_for_t(blk, resource)
+                inject_t(blk, resource)
                 state.put_block(blk_id, blk)
                 state.free_addr(a)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["Inject_T"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.inject_t))
 
                 return state, q
 
@@ -499,8 +516,8 @@ class SteaneBuilder:
 
         @guppy
         @no_type_check
-        @link_name("guppyft.steane._inject_magic_for_tdg")
-        def _inject_magic_for_tdg(
+        @link_name("guppyft.steane._inject_tdg")
+        def _inject_tdg(
             q: tuple[int, int], a: tuple[int, int]
         ) -> tuple[tuple[int, int]]:
             @guppy
@@ -510,13 +527,11 @@ class SteaneBuilder:
                 blk_id, _ = q
                 blk = state.take_block(blk_id)
                 resource = state.take_block(a[0])
-                inject_magic_for_tdg(blk, resource)
+                inject_tdg(blk, resource)
                 state.put_block(blk_id, blk)
                 state.free_addr(a)
 
-                state.qec_policy(
-                    array(blk_id), comptime(qec_policy.costs["Inject_Tdg"])
-                )
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.inject_tdg))
 
                 return state, q
 
@@ -539,13 +554,34 @@ class SteaneBuilder:
                 state.put_block(ctl[0], ctl_blk)
                 state.put_block(tgt[0], tgt_blk)
 
-                state.qec_policy(
-                    array(ctl[0], tgt[0]), comptime(qec_policy.costs["CX"])
-                )
+                state.qec_policy(array(ctl[0], tgt[0]), comptime(qec_policy.costs.cx))
 
                 return state, ctl, tgt
 
             return map_global(_impl, ctl, tgt)
+
+        @guppy
+        @no_type_check
+        @link_name("guppyft.steane._cz")
+        def _cz(
+            q0: tuple[int, int], q1: tuple[int, int]
+        ) -> tuple[tuple[int, int], tuple[int, int]]:
+            @guppy
+            def _impl(
+                state: STATE @ owned, q0: tuple[int, int], q1: tuple[int, int]
+            ) -> tuple[STATE, tuple[int, int], tuple[int, int]]:
+                blk0, blk1 = state.take_block(q0[0]), state.take_block(q1[0])
+
+                cz(blk0, blk1)
+
+                state.put_block(q0[0], blk0)
+                state.put_block(q1[0], blk1)
+
+                state.qec_policy(array(q0[0], q1[0]), comptime(qec_policy.costs.cz))
+
+                return state, q0, q1
+
+            return map_global(_impl, q0, q1)
 
         @guppy.declare
         @no_type_check
@@ -566,13 +602,13 @@ class SteaneBuilder:
                 # Zero state factory
                 StateFactory(
                     prep_zero_ft,
-                    comptime(self._factory_confs.zero.max_attempts),
+                    comptime(self._zero_factory_conf.max_attempts),
                     empty_queue(),
                 ),
                 # Magic state factory
                 StateFactory(
                     prep_t_state_ft,
-                    comptime(self._factory_confs.magic.max_attempts),
+                    comptime(self._magic_factory_conf.max_attempts),
                     empty_queue(),
                 ),
             )
@@ -611,7 +647,7 @@ class SteaneBuilder:
             state_discard,
             _qec_cycle,
             _prep_zero,
-            _prep_magic_for_t_like,
+            _prep_t_state,
             _measure_z,
             _free,
             decode,
@@ -621,9 +657,10 @@ class SteaneBuilder:
             _h,
             _s,
             _sdg,
-            _inject_magic_for_t,
-            _inject_magic_for_tdg,
+            _inject_t,
+            _inject_tdg,
             _cx,
+            _cz,
         ).compile()
 
         ops = OpReplacements().with_generated_decls(
@@ -640,17 +677,18 @@ class SteaneBuilder:
                 ("guppyft.steane.ops", "sdg"): "guppyft.steane._sdg",
                 (
                     "guppyft.steane.ops",
-                    "prep_magic_for_t_like",
-                ): "guppyft.steane._prep_magic_for_t_like",
+                    "prep_t_state",
+                ): "guppyft.steane._prep_t_state",
                 (
                     "guppyft.steane.ops",
-                    "inject_magic_for_t",
-                ): "guppyft.steane._inject_magic_for_t",
+                    "inject_t",
+                ): "guppyft.steane._inject_t",
                 (
                     "guppyft.steane.ops",
-                    "inject_magic_for_tdg",
-                ): "guppyft.steane._inject_magic_for_tdg",
+                    "inject_tdg",
+                ): "guppyft.steane._inject_tdg",
                 ("guppyft.steane.ops", "cx"): "guppyft.steane._cx",
+                ("guppyft.steane.ops", "cz"): "guppyft.steane._cz",
                 ("guppyft.steane.ops", "decode"): "guppyft.steane.decode",
             }
         )
@@ -665,7 +703,7 @@ class SteaneBuilder:
             ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[lib]
         )
 
-    def _gen_encoder_spec(self, n_blocks: int) -> EncoderSpec:
+    def _gen_encoder_spec(self, n_blocks: int) -> EncodeSpec:
         """Generate the full `EncoderSpec` (logical encoding + op implementations)
         for a program using `n_blocks` logical blocks."""
 
@@ -678,7 +716,7 @@ class SteaneBuilder:
         #  required for `borrow_array` when (de)serialising.
         ext.extend(_std_extensions())
 
-        std_encoder = ReplaceEncoder(
+        logical_compiler = ReplacementCompiler(
             op_replacements={
                 ("tket.quantum", "QAlloc"): ("guppyft.steane.ops", "prep_zero", []),
                 ("tket.quantum", "MeasureFree"): (
@@ -695,6 +733,7 @@ class SteaneBuilder:
                 ("tket.quantum", "S"): ("guppyft.steane.ops", "s", []),
                 ("tket.quantum", "Sdg"): ("guppyft.steane.ops", "sdg", []),
                 ("tket.quantum", "CX"): ("guppyft.steane.ops", "cx", []),
+                ("tket.quantum", "CZ"): ("guppyft.steane.ops", "cz", []),
             },
             compound_op_replacements={
                 ("tket.quantum", "T"): steane_logical.t,
@@ -710,7 +749,9 @@ class SteaneBuilder:
             extensions=ext,
         )
 
-        return EncoderSpec(to_logical=std_encoder, implement_spec=impl_spec)
+        return EncodeSpec(
+            compile=logical_compiler, implement_ops=ImplementOps.for_spec(impl_spec)
+        )
 
     def with_qec_policy(self, qec_policy: QECPolicy) -> Self:
         """Set the QEC policy."""
@@ -718,17 +759,11 @@ class SteaneBuilder:
 
     def with_zero_factory_conf(self, conf: RUSStateFactoryConf) -> Self:
         """Set the zero state factory configuration."""
-        return replace(
-            self,
-            _factory_confs=replace(self._factory_confs, zero=conf),
-        )
+        return replace(self, _zero_factory_conf=conf)
 
     def with_magic_factory_conf(self, conf: RUSStateFactoryConf) -> Self:
         """Set the magic state factory configuration."""
-        return replace(
-            self,
-            _factory_confs=replace(self._factory_confs, magic=conf),
-        )
+        return replace(self, _magic_factory_conf=conf)
 
     def build(self, n_blocks: int) -> SteaneInstance:
         """Build a `SteaneInstance` configured for `n_blocks` logical blocks."""

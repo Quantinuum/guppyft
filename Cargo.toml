@@ -2,7 +2,6 @@
 resolver = "2"
 members = [
     "rust",
-    "rust-bindings",
     "extensions",
 ]
 
@@ -15,7 +14,7 @@ tket = { git = "https://github.com/quantinuum/tket2", branch = "hs/feat/replace-
 hugr = "0.29.3"
 hugr-core = "0.29.3"
 itertools = "0.15.0"
-derive_more = { version = "2", features = ["display", "from"] }
+derive_more = { version = "2", features = ["display", "from", "constructor"] }
 
 [profile.dev-py]
 inherits = "dev"

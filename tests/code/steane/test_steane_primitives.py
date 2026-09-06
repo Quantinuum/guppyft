@@ -6,7 +6,7 @@ from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.builtins import array
 from guppylang.std.lang import comptime
 from guppylang.std.platform import output
-from guppylang.std.quantum import cx, h, qubit, s, sdg, x, y, z
+from guppylang.std.quantum import cx, cz, h, qubit, s, sdg, x, y, z
 
 from guppyft.code.steane import primitives as steane_primitives
 from guppyft.code.steane.primitives import (
@@ -220,6 +220,7 @@ def test_steane_1q_primitives(
     ("specify_def", "implement_def"),
     [
         (cx, steane_primitives.cx),
+        (cz, steane_primitives.cz),
     ],
 )
 def test_steane_2q_primitives(
@@ -262,7 +263,7 @@ def test_t_gate() -> None:
         steane_primitives.h(blk)
         for _ in range(4):
             a = steane_primitives.prep_t_state_ft().force_check().unwrap()
-            steane_primitives.inject_magic_for_t(blk, a)
+            steane_primitives.inject_t(blk, a)
         steane_primitives.h(blk)
         res = steane_primitives.measure_z(blk)
         output("res", steane_primitives.decode(res))

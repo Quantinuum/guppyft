@@ -1,8 +1,8 @@
 [project]
 name = "guppyft"
-version = "0.0.7"
+version = "0.0.8"
 description = "Tools for fault-tolerant quantum computing in the Guppy language"
-requires-python = ">=3.13,<4"
+requires-python = ">=3.12,<4"
 readme = "README.md"
 license = { file = "LICENCE" }
 authors = [
@@ -43,6 +43,7 @@ docs = [
     "myst-nb>=1.4.0",
     "quantinuum-sphinx>=1.11.3",
     "sphinx>=9.1.0",
+    "sphinx-tabs>=3.5.0",
 ]
 lint = [
     "pre-commit>=4.6.2,<5",
@@ -67,8 +68,8 @@ build-backend = "maturin"
 [tool.maturin]
 module-name = "guppyft._bindings"
 python-source = "src/"
-manifest-path = "rust-bindings/Cargo.toml"
-features = ["pyo3/extension-module"] # skips linking against libpython.so
+manifest-path = "rust/Cargo.toml"
+features = ["py"] # skips linking against libpython.so
 profile = "dev-py" # See root Cargo.toml
 
 

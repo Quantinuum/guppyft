@@ -8,6 +8,7 @@ from guppylang.std.platform import output
 from guppylang.std.quantum import (
     collect_measurements,
     cx,
+    cz,
     discard,
     h,
     measure,
@@ -26,13 +27,13 @@ from hugr import Hugr
 from hugr.package import Package
 from selene_hugr_qis_compiler import check_hugr
 
-from guppyft.code.steane.encoder_spec import (
+from guppyft.code.steane.encode import (
     QECPolicy,
     RUSStateFactoryConf,
     SteaneBuilder,
     SteaneEncoderParams,
 )
-from guppyft.encode import annotate_encoding
+from guppyft.encode import UncompilableError, annotate_encoding
 
 
 def test_encoder() -> None:
@@ -76,6 +77,7 @@ def test_encoder_smoke() -> None:
         s(q0)
         sdg(q0)
         cx(q0, q1)
+        cz(q0, q1)
         output("q0", measure(q0).read())
         discard(q1)
 
@@ -107,10 +109,6 @@ def test_encode_function_call() -> None:
 
 
 def test_encoder_missing_op() -> None:
-    # `tket.quantum.rz` has no replacement registered in `SteaneBuilder`, so the encoder
-    # leaves it untouched while everything else is lowered to logical qubits. This
-    # mismatch causes `rz`'s (unencoded) qubit port to be connected to an (encoded)
-    # logical qubit port, which fails validation.
     @guppy
     def main() -> None:
         q = qubit()
@@ -119,11 +117,10 @@ def test_encoder_missing_op() -> None:
 
     pkg = main.compile()
     with pytest.raises(
-        ValueError,
+        UncompilableError,
         match=(
-            r"Encoded Hugr failed validation: Connected ports "
-            r"Port\(Outgoing, 0\) in Node\(4\) and Port\(Incoming, 0\) in Node\(7\) "
-            r"have incompatible kinds\. Cannot connect qubit to qubit\."
+            r"Error encoding `tket.quantum.Rz` at node Node\(7\). "
+            r"Operation not yet supported during encoding."
         ),
     ):
         SteaneBuilder().build(n_blocks=1).encode(pkg)
@@ -139,7 +136,7 @@ def test_builder_methods() -> None:
     pkg = main.compile()
 
     my_policy = QECPolicy(threshold=1)
-    my_policy.set_cost("X", 1.0)
+    my_policy.costs.x = 1.0
 
     zero_factory_conf = RUSStateFactoryConf(1, 2)
 
@@ -222,4 +219,19 @@ def test_t_encoder_smoke() -> None:
         .collated_shots()
     )
 
+    assert res == [{}]
+
+
+def test_encode_classical() -> None:
+    @guppy
+    def main() -> None:
+        pass
+
+    res = (
+        SteaneBuilder()
+        .build(n_blocks=1)
+        .emulator(main.compile(), n_qubits=1)
+        .run()
+        .collated_shots()
+    )
     assert res == [{}]

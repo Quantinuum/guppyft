@@ -1,4 +1,4 @@
-"""Typing stubs for the bindings defined in the `rust-bindings` crate."""
+"""Typing stubs for the bindings defined in the `rust::bindings` module."""
 
 from hugr.envelope import EnvelopeConfig
 
@@ -36,7 +36,7 @@ def _implement_ops(
     the corresponding types in the implementation HUGRs.
     """
 
-def _replace_encoder(
+def _run_replacement_compiler(
         rs_hugr: RsHugr,
         op_replacements: dict[tuple[str, str], tuple[str, str, list[int | str]]],
         compound_op_replacements: dict[tuple[str, str], RsHugr],

@@ -240,7 +240,7 @@ def _inject_t_non_deterministically(
 
 @guppy
 @no_type_check
-def inject_magic_for_t(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
+def inject_t(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
     """Apply T gate via injection.
 
     Note:
@@ -254,9 +254,7 @@ def inject_magic_for_t(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -
 
 @guppy
 @no_type_check
-def inject_magic_for_tdg(
-    blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned
-) -> None:
+def inject_tdg(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
     """Apply Tdg gate via injection.
 
     Note:
@@ -425,3 +423,11 @@ def cx(ctl: LogicalBlock[7], tgt: LogicalBlock[7]) -> None:
     """Logical CX gate between two Steane blocks."""
     for i in range(7):
         qlib.cx(ctl.data_qs[i], tgt.data_qs[i])
+
+
+@guppy
+@no_type_check
+def cz(q0: LogicalBlock[7], q1: LogicalBlock[7]) -> None:
+    """Logical CZ gate between two Steane blocks."""
+    for i in range(7):
+        qlib.cz(q0.data_qs[i], q1.data_qs[i])
