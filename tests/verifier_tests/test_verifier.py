@@ -2,12 +2,12 @@ import numpy as np
 from zixy.qubit import pauli
 
 from guppyft.code_def import identity_code
-from guppyft.verifier.expansion import (
+from guppyft.verify.expansion import (
     expand_logical_signterms,
     get_expanded_stabilizer_set,
     pad_code_stabilizers,
 )
-from guppyft.verifier.verify import (
+from guppyft.verify.verify import (
     _compute_stabilizers_double_block_unitary,
     _compute_stabilizers_single_block_unitary,
 )

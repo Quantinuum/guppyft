@@ -1,4 +1,4 @@
-from guppyft.verifier.verify import (
+from guppyft.verify import (
     valid_clifford_implementation,
     valid_stabilizer_state_preparation,
 )

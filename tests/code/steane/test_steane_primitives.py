@@ -18,7 +18,7 @@ from guppyft.code.steane.primitives import (
 )
 from guppyft.code.util import LogicalBlock
 from guppyft.code_def import StabilizerCode
-from guppyft.verifier import (
+from guppyft.verify import (
     valid_clifford_implementation,
 )
 

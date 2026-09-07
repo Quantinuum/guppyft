@@ -6,7 +6,7 @@ from guppylang.std.quantum import collect_measurements, measure_array, qubit
 from selene_stim_plugin.state import Stabilizer, StabilizerList
 from zixy.qubit import pauli
 
-from guppyft.verifier.utils import (
+from guppyft.verify.utils import (
     array_slicer,
     selene_stabilizer_to_zixy_signterm,
     stabilizerlist_to_signterms,

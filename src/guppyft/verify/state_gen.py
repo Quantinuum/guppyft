@@ -10,8 +10,8 @@ from zixy.qubit import pauli
 from zixy.qubit.clifford import GateList
 
 from guppyft.code_def import StabilizerCode
-from guppyft.verifier.expansion import get_expanded_stabilizer_set
-from guppyft.verifier.utils import SingleBlockUnitary, array_slicer
+from guppyft.verify.expansion import get_expanded_stabilizer_set
+from guppyft.verify.utils import SingleBlockUnitary, array_slicer
 
 
 class SQClifford(Enum):
