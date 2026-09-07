@@ -5,7 +5,7 @@ from typing import no_type_check
 from guppylang import guppy
 from guppylang.std import quantum as phys
 from guppylang.std.builtins import array, owned
-from guppylang.std.collections import Stack, empty_stack
+from guppylang.std.collections import Queue, empty_queue
 from guppylang.std.mem import mem_swap
 
 from guppyft.code._state_factory import PreBlock
@@ -54,7 +54,7 @@ def z(blk: LogicalBlock[4], idx: int) -> None:
 
 @guppy
 @no_type_check
-def h_both(blk: LogicalBlock[4]) -> None:
+def h_all(blk: LogicalBlock[4]) -> None:
     """Logical Hadamard gate on both logical qubits.
 
     Args:
@@ -67,7 +67,7 @@ def h_both(blk: LogicalBlock[4]) -> None:
 
 @guppy
 @no_type_check
-def cx_within(blk: LogicalBlock[4], target: int) -> None:
+def cx_intra(blk: LogicalBlock[4], target: int) -> None:
     """Logical CX within the block, targeting the specified logical qubit.
 
     Args:
@@ -99,7 +99,7 @@ def cx_transversal(control: LogicalBlock[4], target: LogicalBlock[4]) -> None:
 
 @guppy
 @no_type_check
-def swap_within(blk: LogicalBlock[4]) -> None:
+def swap_intra(blk: LogicalBlock[4]) -> None:
     """Logical SWAP within the block, swapping the two logical qubits.
 
     Args:
@@ -111,7 +111,7 @@ def swap_within(blk: LogicalBlock[4]) -> None:
 @guppy
 @no_type_check
 def prep_zero_ft() -> PreBlock[4, 1]:
-    """Fault-tolerant preparation of a logical :math:`|0\\rangle` state.
+    """Fault-tolerant preparation of a logical :math:`|00\\rangle` state.
 
     The logical block is wrapped in a `PreBlock`, which contains the flag
     measurement outcomes. Use `force_check()` to check if preparation was
@@ -160,7 +160,7 @@ def _encode_state_non_ft(
 
 @guppy
 @no_type_check
-def prep_y_state_non_ft() -> LogicalBlock[4]:
+def prep_y_states_non_ft() -> LogicalBlock[4]:
     r"""Non fault-tolerant preparation of a logical :math:`|Y\rangle|Y\rangle` state.
 
     The :math:`|Y\rangle` state is the +1 eigenvector of the Pauli Y operator,
@@ -180,7 +180,7 @@ def prep_y_state_non_ft() -> LogicalBlock[4]:
 
 @guppy
 @no_type_check
-def prep_t_state_non_ft() -> LogicalBlock[4]:
+def prep_t_states_non_ft() -> LogicalBlock[4]:
     r"""Non fault-tolerant preparation of a logical :math:`T|+\rangle T|+\rangle` state.
 
     The architecture uses these states to inject :math:`T` and :math:`T^\dagger` gates.
@@ -198,7 +198,7 @@ def prep_t_state_non_ft() -> LogicalBlock[4]:
 
 @guppy
 @no_type_check
-def measure_z_both(blk: LogicalBlock[4] @ owned) -> array[bool, 2]:
+def measure_z_all(blk: LogicalBlock[4] @ owned) -> array[bool, 2]:
     """Measure both qubits of the block in the Z basis.
 
     This operation destroys the logical block.
@@ -218,16 +218,16 @@ def measure_z_both(blk: LogicalBlock[4] @ owned) -> array[bool, 2]:
 
 @guppy
 @no_type_check
-def measure_z_single(blk: LogicalBlock[4], idx: int) -> bool:
+def measure_z(blk: LogicalBlock[4], idx: int) -> bool:
     """Measure the chosen qubit in the Z basis."""
     if idx != 0 and idx != 1:
         exit("Invalid logical qubit index. Must be 0 or 1.")
 
     # The logical Z observable is measured twice to detect measurement errors.
     # If the two outcomes do not agree, an error is detected.
-    obs_measurements: Stack[phys.Measurement, 2] = empty_stack()  # type: ignore[type-arg,valid-type]
+    obs_measurements: Queue[phys.Measurement, 2] = empty_queue()  # type: ignore[type-arg,valid-type]
     # If the flag measurements return `True`, an error is detected.
-    flag_measurements: Stack[phys.Measurement, 2] = empty_stack()  # type: ignore[type-arg,valid-type]
+    flag_measurements: Queue[phys.Measurement, 2] = empty_queue()  # type: ignore[type-arg,valid-type]
 
     for _ in range(2):
         # Prepare the ancilla in a Bell state
@@ -274,7 +274,9 @@ def measure_z_single(blk: LogicalBlock[4], idx: int) -> bool:
 
 @guppy
 @no_type_check
-def _syndrome_extraction(blk: LogicalBlock[4]) -> array[phys.Measurement, 2]:
+def _syndrome_extraction(
+    blk: LogicalBlock[4],
+) -> tuple[phys.Measurement, phys.Measurement]:
     """Extracts the syndrome of the block.
 
     Returns:
@@ -298,7 +300,7 @@ def _syndrome_extraction(blk: LogicalBlock[4]) -> array[phys.Measurement, 2]:
     x_stab_meas = phys.measure(x_stab_ancilla)
     z_stab_meas = phys.measure(z_stab_ancilla)
 
-    return array(x_stab_meas, z_stab_meas)
+    return x_stab_meas, z_stab_meas
 
 
 @guppy
