@@ -237,6 +237,25 @@ def test_prep_y_states() -> None:
     assert sem == impl
 
 
+def test_prep_t_states() -> None:
+    """This is not an exhaustive test."""
+
+    @guppy
+    @no_type_check
+    def main() -> None:
+        block = toy_k2.prep_t_states_non_ft()
+
+        # Running a QED cycle confirms that the stabilizers
+        # of the code are satisfied
+        toy_k2.qed_cycle(block)
+
+        output("success", 1)
+        block.discard()
+
+    out = main.emulator(n_qubits=6).run().collated_shots()
+    assert out == [{"success": [1]}]
+
+
 @pytest.mark.parametrize("x0", [0, 1])
 @pytest.mark.parametrize("x1", [0, 1])
 def test_measure_z_all(x0: int, x1: int) -> None:
