@@ -159,8 +159,7 @@ def compute_stabilizers_double_block_unitary(
     clifford_func: DoubleBlockUnitary,
     num_selene_qubits: int,
 ) -> pauli.SignTerms:
-    """Compute the stabilizers of a Choi state encoding a Clifford operation across
-      two code blocks.
+    """Compute the stabilizers of a Choi state encoding a Clifford (two code blocks).
 
     :param code: The stabilizer code.
     :param clifford_func: A Guppy function which implements a Clifford unitary
@@ -219,7 +218,7 @@ def compute_tableaux_single_block_state(
     code_definition: StabilizerCode,
     impl_num_ancillas: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
-    """Compute a tableaux pair for Pauli eigenstate preparation over one code block.
+    """Compute tableaux pair for logical Pauli eigenstate preparation (one code block).
 
     Given a semantic Guppy function acting on k qubits and an impl Guppy function
     acting on n qubits, compute a pair of stabilizer tableaux. Note that we will need
@@ -229,8 +228,8 @@ def compute_tableaux_single_block_state(
       of a Clifford operator on k logical qubits.
     :param impl_function: A Guppy function for implementing
       the semantics on n physical qubits.
-    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
-      and logical operators.
+    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters,
+        stabilizer generators and logical operators.
     :param impl_num_ancillas: The number of ancilla qubits used in the
         implementation. Defaults to zero.
     :return: A pair of stabilizer tableaux made up of signed Pauli terms.
@@ -263,7 +262,7 @@ def compute_tableaux_double_block_state(
     code_definition: StabilizerCode,
     impl_num_ancillas: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
-    """Compute a tableaux pair for Pauli eigenstate preparation over two code blocks.
+    """Compute tableaux pair for logical Pauli eigenstate preparation (two code blocks).
 
     Given a semantic Guppy function acting on 2k qubits and an impl Guppy function
       acting on 2n qubits, compute a pair of stabilizer tableaux. Note that we will need
@@ -273,8 +272,8 @@ def compute_tableaux_double_block_state(
       of a Clifford operator on 2k logical qubits.
     :param impl_function: A Guppy function for implementing
       the semantics on 2n physical qubits.
-    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
-      and logical operators.
+    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters,
+        stabilizer generators and logical operators.
     :param impl_num_ancillas: The number of ancilla qubits used in the
         implementation. Defaults to zero.
     :return: A pair of stabilizer tableaux made up of signed Pauli terms.
@@ -348,8 +347,8 @@ def valid_stabilizer_state_preparation(
       of Pauli eigenstate preparation over one or two code blocks.
     :param impl_function: A Guppy function for preparing the logical eigenstate
       over one or two code blocks.
-    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
-      and logical operators.
+    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters,
+        stabilizer generators and logical operators.
     :param impl_num_ancillas: The number of ancilla qubits used in the
         implementation. Defaults to zero.
     :return: A Boolean indicating whether the state preparation is valid.
@@ -399,8 +398,8 @@ def compute_tableaux_single_block_unitary(
       of a Clifford operator on k logical qubits.
     :param impl_function: A Guppy function for implementing
       the semantics on n physical qubits.
-    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
-      and logical operators.
+    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters,
+        stabilizer generators and logical operators.
     :param impl_num_ancillas: The number of ancilla qubits used in the
         implementation. Defaults to zero.
     :return: A pair of Clifford tableaux made up of signed Pauli terms.
@@ -447,8 +446,8 @@ def compute_tableaux_double_block_unitary(
       of a Clifford operator on two code blocks.
     :param impl_function: A Guppy function for implementing
       the semantics on two code blocks.
-    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
-      and logical operators.
+    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters,
+        stabilizer generators and logical operators.
     :param impl_num_ancillas: The number of ancilla qubits used in the
         implementation. Defaults to zero.
     :return: A pair of Clifford tableaux made up of signed Pauli terms.
@@ -504,8 +503,8 @@ def valid_clifford_implementation(
       of a Clifford operator on one or two code blocks.
     :param impl_function: A Guppy function for implementing
       the semantics on one or two code blocks.
-    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters
-      and logical operators.
+    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters,
+        stabilizer generators and logical operators.
     :param impl_num_ancillas: The number of ancilla qubits used in the
         implementation. Defaults to zero.
     :return: A Boolean indicating whether the implementation is valid.
