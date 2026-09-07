@@ -27,7 +27,7 @@
               "args": [
                 {
                   "tya": "BoundedNat",
-                  "n": 1
+                  "n": 6
                 }
               ],
               "bound": "C"
@@ -232,7 +232,7 @@
               "args": [
                 {
                   "tya": "BoundedNat",
-                  "n": 1
+                  "n": 6
                 }
               ],
               "bound": "C"
@@ -243,17 +243,17 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "block",
+              "id": "qubit_measurement",
               "args": [],
-              "bound": "A"
+              "bound": "C"
             },
             {
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit_measurement",
+              "id": "block",
               "args": [],
-              "bound": "C"
+              "bound": "A"
             }
           ]
         }
@@ -443,7 +443,7 @@
               "args": [
                 {
                   "tya": "BoundedNat",
-                  "n": 1
+                  "n": 6
                 }
               ],
               "bound": "C"
@@ -487,7 +487,7 @@
               "args": [
                 {
                   "tya": "BoundedNat",
-                  "n": 1
+                  "n": 6
                 }
               ],
               "bound": "C"
