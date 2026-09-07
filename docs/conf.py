@@ -27,6 +27,8 @@ extensions = [
     "quantinuum_sphinx",
 ]
 
+myst_enable_extensions = ["dollarmath"]
+
 # --- MyST-NB config ---
 # https://myst-nb.readthedocs.io/en/latest/configuration.html
 nb_execution_mode = "cache"
