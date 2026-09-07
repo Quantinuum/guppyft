@@ -26,8 +26,8 @@ classifiers = [
 
 dependencies = [
     "guppylang>=1.0.1",
-    "hugr>=0.18.5",
-    "tket>=0.15.2",
+    "hugr>=0.18.6",
+    "tket>=0.15.8",
     "tket-exts>=0.14.0",
     "zixy~=0.3.2",
     "selene-sim>=0.3.0",
