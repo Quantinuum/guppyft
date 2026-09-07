@@ -18,9 +18,8 @@ from guppyft.code.steane.primitives import (
 )
 from guppyft.code.util import LogicalBlock
 from guppyft.code_def import StabilizerCode
-from guppyft.verifier import (
-    compute_verification_signterms_double_block_unitary,
-    compute_verification_signterms_single_block_unitary,
+from guppyft.verify import (
+    valid_clifford_implementation,
 )
 
 STEANE_DEF = StabilizerCode.from_python_strings(
@@ -63,13 +62,12 @@ def test_knill_qec_without_errors() -> None:
             arr.put(block.data_qs.take(i), i)
         block.discard()
 
-    sem, impl = compute_verification_signterms_single_block_unitary(
+    assert valid_clifford_implementation(
         specify_identity,
         impl_func,
         code_definition=STEANE_DEF,
-        num_ancilla_qubits=14,
+        impl_num_ancillas=14,
     )
-    assert sem == impl
 
 
 @pytest.mark.parametrize("error_loc", [0, 1, 2, 3, 4, 5, 6])
@@ -90,13 +88,12 @@ def test_knill_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
             arr.put(block.data_qs.take(i), i)
         block.discard()
 
-    sem, impl = compute_verification_signterms_single_block_unitary(
+    assert valid_clifford_implementation(
         specify_identity,
         impl_func,
         code_definition=STEANE_DEF,
-        num_ancilla_qubits=14,
+        impl_num_ancillas=14,
     )
-    assert sem == impl
 
 
 def test_steane_qec_without_errors() -> None:
@@ -115,13 +112,12 @@ def test_steane_qec_without_errors() -> None:
             arr.put(block.data_qs.take(i), i)
         block.discard()
 
-    sem, impl = compute_verification_signterms_single_block_unitary(
+    assert valid_clifford_implementation(
         specify_identity,
         impl_func,
         code_definition=STEANE_DEF,
-        num_ancilla_qubits=7,
+        impl_num_ancillas=7,
     )
-    assert sem == impl
 
 
 @pytest.mark.parametrize("error_loc", [0, 1, 2, 3, 4, 5, 6])
@@ -143,13 +139,12 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
             arr.put(block.data_qs.take(i), i)
         block.discard()
 
-    sem, impl = compute_verification_signterms_single_block_unitary(
+    assert valid_clifford_implementation(
         specify_identity,
         impl_func,
         code_definition=STEANE_DEF,
-        num_ancilla_qubits=7,
+        impl_num_ancillas=7,
     )
-    assert sem == impl
 
 
 def test_steane_measure_syndromes() -> None:
@@ -169,13 +164,9 @@ def test_steane_measure_syndromes() -> None:
             arr.put(block.data_qs.take(i), i)
         block.discard()
 
-    sem, impl = compute_verification_signterms_single_block_unitary(
-        specify_identity,
-        impl_func,
-        code_definition=STEANE_DEF,
-        num_ancilla_qubits=3,
+    assert valid_clifford_implementation(
+        specify_identity, impl_func, STEANE_DEF, impl_num_ancillas=3
     )
-    assert sem == impl
 
 
 @pytest.mark.parametrize(
@@ -208,12 +199,7 @@ def test_steane_1q_primitives(
             arr.put(block.data_qs.take(i), i)
         block.discard()
 
-    sem, impl = compute_verification_signterms_single_block_unitary(
-        specify_func,
-        impl_func,
-        code_definition=STEANE_DEF,
-    )
-    assert sem == impl
+    assert valid_clifford_implementation(specify_func, impl_func, STEANE_DEF)
 
 
 @pytest.mark.parametrize(
@@ -247,12 +233,7 @@ def test_steane_2q_primitives(
         blk0.discard()
         blk1.discard()
 
-    sem, impl = compute_verification_signterms_double_block_unitary(
-        specify_func,
-        impl_func,
-        code_definition=STEANE_DEF,
-    )
-    assert sem == impl
+    assert valid_clifford_implementation(specify_func, impl_func, STEANE_DEF)
 
 
 def test_t_gate() -> None:
