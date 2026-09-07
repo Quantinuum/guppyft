@@ -25,6 +25,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.intersphinx",
     "quantinuum_sphinx",
+    "sphinx_copybutton",
 ]
 
 # --- MyST-NB config ---
