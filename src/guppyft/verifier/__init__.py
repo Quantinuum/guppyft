@@ -50,12 +50,10 @@ Steane code example
     assert valid_clifford_implementation(steane_specify_h, steane_impl_h, STEANE_DEF)
 """
 
-from .utils import (
-    selene_stabilizer_to_zixy_signterm,
-    stabilizerlist_to_signterms,
-)
 from .verify import (
+    compute_stabilizers_double_block_state,
     compute_stabilizers_double_block_unitary,
+    compute_stabilizers_single_block_state,
     compute_stabilizers_single_block_unitary,
     compute_tableaux_double_block_state,
     compute_tableaux_double_block_unitary,
@@ -66,14 +64,14 @@ from .verify import (
 )
 
 __all__ = [
+    "compute_stabilizers_double_block_state",
     "compute_stabilizers_double_block_unitary",
+    "compute_stabilizers_single_block_state",
     "compute_stabilizers_single_block_unitary",
     "compute_tableaux_double_block_state",
     "compute_tableaux_double_block_unitary",
     "compute_tableaux_single_block_state",
     "compute_tableaux_single_block_unitary",
-    "selene_stabilizer_to_zixy_signterm",
-    "stabilizerlist_to_signterms",
     "valid_clifford_implementation",
     "valid_stabilizer_state_preparation",
 ]
