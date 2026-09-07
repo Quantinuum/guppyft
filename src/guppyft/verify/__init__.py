@@ -50,7 +50,7 @@ Steane code example
     assert valid_clifford_implementation(steane_specify_h, steane_impl_h, STEANE_DEF)
 """
 
-from .verify import (
+from ._verify import (
     valid_clifford_implementation,
     valid_stabilizer_state_preparation,
 )

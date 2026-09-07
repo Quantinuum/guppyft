@@ -16,7 +16,7 @@ from guppyft.verify._state_gen import (
 from guppyft.verify._utils import (
     stabilizerlist_to_signterms,
 )
-from guppyft.verify.verify import _invoke_selene_stim
+from guppyft.verify._verify import _invoke_selene_stim
 
 
 def test_graph_state_conversion_two_bell_pairs() -> None:

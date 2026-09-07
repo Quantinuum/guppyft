@@ -7,7 +7,7 @@ from guppyft.verify._expansion import (
     get_expanded_stabilizer_set,
     pad_code_stabilizers,
 )
-from guppyft.verify.verify import (
+from guppyft.verify._verify import (
     _compute_stabilizers_double_block_unitary,
     _compute_stabilizers_single_block_unitary,
 )
