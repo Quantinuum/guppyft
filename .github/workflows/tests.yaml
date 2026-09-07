@@ -7,9 +7,18 @@ on:
   pull_request:
     branches:
       - "**"
+  schedule:
+    # Nightly at 4am
+    - cron: '0 4 * * *'
   merge_group:
     types: [ checks_requested ]
-  workflow_dispatch: { }
+  workflow_dispatch:
+    inputs:
+      run_long_tests:
+        description: "Run the long Python tests"
+        type: boolean
+        default: false
+        required: false
 
 # Limits the number of concurrent runs of this workflow for branches to one. For non-main branches, runs caused by newly
 # pushed commits thus cancel any in-progress runs for the same branch.
@@ -68,6 +77,7 @@ jobs:
     env:
       PYTHON_VERSION: ${{ matrix.python-version }}
       LLVM_SYS_211_PREFIX: /usr/lib/llvm-21
+      GUPPYFT_RUN_LONG_TESTS: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.run_long_tests) || github.event.label.name == 'X-nightly-ci' }}
 
     strategy:
       matrix:
@@ -89,7 +99,7 @@ jobs:
         run: uv sync --frozen --python ${{ env.PYTHON_VERSION }}
 
       - name: Run tests
-        run: uv run pytest -n auto -m "not long"
+        run: uv run pytest -n auto
 
   # Ensure that serialized extensions match rust implementation
   check-extensions:

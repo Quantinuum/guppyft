@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import Any
 
@@ -224,6 +225,10 @@ def test_encode_classical() -> None:
 
 
 @pytest.mark.long
+@pytest.mark.skipif(
+    not os.getenv("GUPPYFT_RUN_LONG_TESTS"),
+    reason="GUPPYFT_RUN_LONG_TESTS false or unset",
+)
 def test_steane_encode_suite(request: pytest.FixtureRequest) -> None:
     root_dir = request.config.rootpath
     hugr_dir = root_dir / "tests" / "resources" / "hugrs" / "guppylang-test-exports"
