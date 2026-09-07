@@ -77,7 +77,7 @@ jobs:
     env:
       PYTHON_VERSION: ${{ matrix.python-version }}
       LLVM_SYS_211_PREFIX: /usr/lib/llvm-21
-      GUPPYFT_RUN_LONG_TESTS: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.run_long_tests) || github.event.label.name == 'X-nightly-ci' }}
+      GUPPYFT_RUN_LONG_TESTS: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.run_long_tests) }}
 
     strategy:
       matrix:
