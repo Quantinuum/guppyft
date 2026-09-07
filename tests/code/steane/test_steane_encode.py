@@ -197,7 +197,7 @@ def test_annotate_steane_encoding() -> None:
 def test_collect_measurement_encode() -> None:
     # We are using `ReplaceTypes` to replace a logical steane measurement with a borrow
     # array of measurements. As borrow arrays are always linear, this means we are
-    # replacing a copyable type with a linear type. This test that the Linearizer can
+    # replacing a copyable type with a linear type. This tests that the Linearizer can
     # handle the replacement.
     @guppy
     def main() -> None:
