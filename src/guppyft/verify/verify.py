@@ -212,6 +212,38 @@ def _compute_stabilizers_double_block_unitary(
     return stabilizerlist_to_signterms(stab_list)
 
 
+# TODO: can we clean up this nasty signature hacking function?
+def _count_blocks_state(
+    semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
+    impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
+) -> int:
+    # Get the return type of semantic_function.
+    sem_return_annotation = inspect.signature(
+        semantic_function.wrapped.python_func  # type: ignore[attr-defined]
+    ).return_annotation
+
+    impl_return_annotation = inspect.signature(
+        impl_function.wrapped.python_func  # type: ignore[attr-defined]
+    ).return_annotation
+
+    if get_origin(sem_return_annotation) is tuple:
+        if get_origin(impl_return_annotation) is not tuple:
+            raise TypeError(
+                "semantic_function and impl_function have incompatible signatures"
+            )
+        # Get the size of the tuple used in the return type. Assumes fixed size.
+        size = len(get_args(sem_return_annotation))
+        if size > 2:
+            raise TypeError(
+                "semantic_function has an unsupported return type."
+                f" Only tuples of length two are supported. Got {size}."
+            )
+        return 2
+    # If the state prep function does not return a tuple, it represents a single block.
+    else:
+        return 1
+
+
 def _compute_state_prep_tableaux(
     semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
@@ -271,38 +303,6 @@ def _compute_state_prep_tableaux(
     return expanded_semantic_stabilizers, implementation_stabilizers
 
 
-# TODO: can we clean up this nasty signature hacking function?
-def _count_blocks_state(
-    semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
-    impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
-) -> int:
-    # Get the return type of semantic_function.
-    sem_return_annotation = inspect.signature(
-        semantic_function.wrapped.python_func  # type: ignore[attr-defined]
-    ).return_annotation
-
-    impl_return_annotation = inspect.signature(
-        impl_function.wrapped.python_func  # type: ignore[attr-defined]
-    ).return_annotation
-
-    if get_origin(sem_return_annotation) is tuple:
-        if get_origin(impl_return_annotation) is not tuple:
-            raise TypeError(
-                "semantic_function and impl_function have incompatible signatures"
-            )
-        # Get the size of the tuple used in the return type. Assumes fixed size.
-        size = len(get_args(sem_return_annotation))
-        if size > 2:
-            raise TypeError(
-                "semantic_function has an unsupported return type."
-                f" Only tuples of length two are supported. Got {size}."
-            )
-        return 2
-    # If the state prep function does not return a tuple, it represents a single block.
-    else:
-        return 1
-
-
 def valid_stabilizer_state_preparation(
     semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
@@ -336,6 +336,20 @@ def valid_stabilizer_state_preparation(
     impl_stabilizers.canonicalize_all()
 
     return sem_stabilizers == impl_stabilizers
+
+
+def _count_blocks_unitary(
+    semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
+    impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
+) -> int:
+    sem_signature = inspect.signature(semantic_function.wrapped.python_func)  # type: ignore[attr-defined]
+    impl_signature = inspect.signature(impl_function.wrapped.python_func)  # type: ignore[attr-defined]
+    if len(sem_signature.parameters) != len(impl_signature.parameters):
+        raise TypeError(
+            "semantic_function and impl_function have incompatible signatures"
+        )
+    num_blocks = len(sem_signature.parameters)
+    return num_blocks
 
 
 def _compute_clifford_tableaux(
@@ -401,20 +415,6 @@ def _compute_clifford_tableaux(
         semantic_choi_stabilizers, code_definition, num_blocks=2 * num_blocks
     )
     return expanded_semantic_stabilizers, implementation_stabilizers
-
-
-def _count_blocks_unitary(
-    semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
-    impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
-) -> int:
-    sem_signature = inspect.signature(semantic_function.wrapped.python_func)  # type: ignore[attr-defined]
-    impl_signature = inspect.signature(impl_function.wrapped.python_func)  # type: ignore[attr-defined]
-    if len(sem_signature.parameters) != len(impl_signature.parameters):
-        raise TypeError(
-            "semantic_function and impl_function have incompatible signatures"
-        )
-    num_blocks = len(sem_signature.parameters)
-    return num_blocks
 
 
 def valid_clifford_implementation(
