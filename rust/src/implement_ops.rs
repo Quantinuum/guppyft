@@ -8,7 +8,7 @@ use hugr::{
     extension::SignatureError,
     hugr::{ValidationError, hugrmut::HugrMut},
     ops::ExtensionOp,
-    ops::{DataflowOpTrait, OpType, handle::NodeHandle as _},
+    ops::{DataflowOpTrait, OpType, handle::NodeHandle},
     types::{PolyFuncType, Type, TypeRow},
 };
 use hugr_core::extension::ExtensionId;
@@ -22,6 +22,7 @@ use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::hash_map::Entry;
 use std::collections::{BTreeMap, HashMap, HashSet};
+use tket::passes::replace_types::handlers::register_linear_array_op_replacements;
 use tket::passes::utils::unpack_container::type_unpack::array_args;
 use tket::passes::{
     ComposablePass, PassScope, ReplaceTypes, WithScope, replace_types::ReplaceTypesError,
@@ -306,6 +307,9 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
         for (src, tgt) in types {
             type_replacer.set_replace_type(src, tgt);
         }
+
+        register_linear_array_op_replacements(&mut type_replacer);
+
         Self::new(hugr, type_replacer)
     }
 

@@ -5,14 +5,17 @@ from typing import Any
 import pytest
 from guppylang import guppy
 from guppylang.std.angles import pi
+from guppylang.std.builtins import array
 from guppylang.std.platform import output
 from guppylang.std.qsystem.random import RNG
 from guppylang.std.quantum import (
+    collect_measurements,
     cx,
     cz,
     discard,
     h,
     measure,
+    measure_array,
     qubit,
     rz,
     s,
@@ -189,6 +192,19 @@ def test_annotate_steane_encoding() -> None:
         "encoding": "steane",
         "params": {"n_blocks": 4},
     }
+
+
+def test_collect_measurement_encode() -> None:
+    # We are using `ReplaceTypes` to replace a logical steane measurement with a borrow
+    # array of measurements. As borrow arrays are always linear, this means we are
+    # replacing a copyable type with a linear type. This tests that the Linearizer can
+    # handle the replacement.
+    @guppy
+    def main() -> None:
+        qbs = array(qubit() for _ in range(2))
+        output("qbs", collect_measurements(measure_array(qbs)))
+
+    SteaneBuilder().build(n_blocks=2).encode(main.compile())
 
 
 def test_t_encoder_smoke() -> None:
