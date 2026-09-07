@@ -12,9 +12,9 @@ from selene_stim_plugin import SeleneStimState
 from zixy.qubit import pauli
 
 from guppyft.code_def import StabilizerCode, identity_code
-from guppyft.verify.expansion import get_expanded_stabilizer_set
-from guppyft.verify.state_gen import gen_choi_state
-from guppyft.verify.utils import (
+from guppyft.verify._expansion import get_expanded_stabilizer_set
+from guppyft.verify._state_gen import gen_choi_state
+from guppyft.verify._utils import (
     DoubleBlockState,
     DoubleBlockUnitary,
     ImplementationCliffordUnitary,

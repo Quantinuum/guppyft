@@ -8,12 +8,12 @@ from guppylang.std.qsystem.random import RNG
 from guppylang.std.quantum import cx, discard_array, h, qubit, s, sdg, x, y, z
 from zixy.qubit import pauli
 
-from guppyft.verify.state_gen import (
+from guppyft.verify._state_gen import (
     SQClifford,
     convert_to_graph_state,
     gen_guppy_state_prep,
 )
-from guppyft.verify.utils import (
+from guppyft.verify._utils import (
     stabilizerlist_to_signterms,
 )
 from guppyft.verify.verify import _invoke_selene_stim
