@@ -11,10 +11,10 @@ kernelspec:
 # Getting started
 
 ```{toctree}
-:hidden:
 :maxdepth: 1
 
 api/api.md
+examples_index.md
 ```
 
 GuppyFT is an extension of the [guppylang](https://github.com/Quantinuum/guppylang) quantum programming language to enable fault-tolerant quantum programs.
