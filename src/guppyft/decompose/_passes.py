@@ -53,7 +53,7 @@ class ComparatorRzDecomposer(ComposablePass):
         )
         [module] = compiler.compile(hugr.to_package()).modules
 
-        return PassResult(hugr=module, inplace=False)
+        return PassResult.for_pass(self, hugr=module, inplace=False, result=None)
 
     def with_scope(self, scope: PassScope) -> ComposablePass:
         return self
@@ -101,7 +101,7 @@ class ToffoliDecomposer(ComposablePass):
         )
         [module] = compiler.compile(hugr.to_package()).modules
 
-        return PassResult(hugr=module, inplace=False)
+        return PassResult.for_pass(self, hugr=module, inplace=False, result=None)
 
     def with_scope(self, scope: PassScope) -> ComposablePass:
         return self
