@@ -218,7 +218,7 @@ def _compute_state_prep_tableaux(
     code_definition: StabilizerCode,
     impl_num_ancillas: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
-    """Compute tableaux pair for logical Pauli eigenstate preparation (one code block).
+    """Compute tableaux pair for logical state prep on one or two blocks.
 
     Given a semantic Guppy function acting on k qubits and an impl Guppy function
     acting on n qubits, compute a pair of stabilizer tableaux. Note that we will need
@@ -344,7 +344,7 @@ def _compute_clifford_tableaux(
     code_definition: StabilizerCode,
     impl_num_ancillas: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
-    """Compute a pair of tableaux for a logical Clifford on a single code block.
+    """Compute a pair of tableaux for a logical Clifford on one or two blocks.
 
     Given a semantic Guppy function acting on k qubits and an impl Guppy function
       acting on n qubits, compute a pair of Clifford tableaux. Note that we will need to
