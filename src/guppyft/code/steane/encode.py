@@ -200,7 +200,7 @@ class SteaneBuilder:
         @guppy.struct
         class STATE:
             blocks: array[Option[LogicalBlock[7]], comptime(n_blocks)]  # type: ignore[valid-type,type-arg]
-            addr_stack: Stack[tuple[int, int], comptime(n_blocks)]  # type: ignore[valid-type,type-arg]
+            addr_stack: Stack[tuple[int, int], comptime(n_blocks)]  # type: ignore[valid-type]
             qec_counter: array[float, comptime(n_blocks)]  # type: ignore[valid-type]
 
             zero_state_factory: StateFactory[  # type: ignore[valid-type,type-arg]
