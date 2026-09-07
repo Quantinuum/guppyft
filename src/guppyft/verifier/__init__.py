@@ -51,27 +51,11 @@ Steane code example
 """
 
 from .verify import (
-    compute_stabilizers_double_block_state,
-    compute_stabilizers_double_block_unitary,
-    compute_stabilizers_single_block_state,
-    compute_stabilizers_single_block_unitary,
-    compute_tableaux_double_block_state,
-    compute_tableaux_double_block_unitary,
-    compute_tableaux_single_block_state,
-    compute_tableaux_single_block_unitary,
     valid_clifford_implementation,
     valid_stabilizer_state_preparation,
 )
 
 __all__ = [
-    "compute_stabilizers_double_block_state",
-    "compute_stabilizers_double_block_unitary",
-    "compute_stabilizers_single_block_state",
-    "compute_stabilizers_single_block_unitary",
-    "compute_tableaux_double_block_state",
-    "compute_tableaux_double_block_unitary",
-    "compute_tableaux_single_block_state",
-    "compute_tableaux_single_block_unitary",
     "valid_clifford_implementation",
     "valid_stabilizer_state_preparation",
 ]

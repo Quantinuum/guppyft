@@ -42,7 +42,7 @@ def _invoke_selene_stim(
     return seeded_stim_instance.extract_states_dict(output)
 
 
-def compute_stabilizers_single_block_state(
+def _compute_stabilizers_single_block_state(
     state_prep_func: SingleBlockState,
     num_selene_qubits: int,
 ) -> pauli.SignTerms:
@@ -69,7 +69,7 @@ def compute_stabilizers_single_block_state(
     return stabilizerlist_to_signterms(stab_list)
 
 
-def compute_stabilizers_double_block_state(
+def _compute_stabilizers_double_block_state(
     state_prep_func: DoubleBlockState,
     num_selene_qubits: int,
 ) -> pauli.SignTerms:
@@ -107,7 +107,7 @@ def compute_stabilizers_double_block_state(
     return stabilizerlist_to_signterms(stab_list)
 
 
-def compute_stabilizers_single_block_unitary(
+def _compute_stabilizers_single_block_unitary(
     code: StabilizerCode,
     clifford_func: SingleBlockUnitary,
     num_selene_qubits: int,
@@ -154,7 +154,7 @@ def compute_stabilizers_single_block_unitary(
     return stabilizerlist_to_signterms(stab_list)
 
 
-def compute_stabilizers_double_block_unitary(
+def _compute_stabilizers_double_block_unitary(
     code: StabilizerCode,
     clifford_func: DoubleBlockUnitary,
     num_selene_qubits: int,
@@ -212,7 +212,7 @@ def compute_stabilizers_double_block_unitary(
     return stabilizerlist_to_signterms(stab_list)
 
 
-def compute_tableaux_single_block_state(
+def _compute_tableaux_single_block_state(
     semantic_function: SemanticStabilizerState,
     impl_function: ImplementationStabilizerState,
     code_definition: StabilizerCode,
@@ -235,7 +235,7 @@ def compute_tableaux_single_block_state(
     :return: A pair of stabilizer tableaux made up of signed Pauli terms.
     """
     # Get the k stabilizers for the k qubit state.
-    semantic_stabilizers = compute_stabilizers_single_block_state(
+    semantic_stabilizers = _compute_stabilizers_single_block_state(
         semantic_function,
         code_definition.num_logical_qubits + impl_num_ancillas,
     )
@@ -248,7 +248,7 @@ def compute_tableaux_single_block_state(
     )
 
     # Calculate the n stabilizers of the physical state.
-    implementation_stabilizers = compute_stabilizers_single_block_state(
+    implementation_stabilizers = _compute_stabilizers_single_block_state(
         impl_function,
         code_definition.num_physical_qubits + impl_num_ancillas,
     )
@@ -256,7 +256,7 @@ def compute_tableaux_single_block_state(
     return expanded_semantic_stabilizers, implementation_stabilizers
 
 
-def compute_tableaux_double_block_state(
+def _compute_tableaux_double_block_state(
     semantic_function: SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerStateDouble,
     code_definition: StabilizerCode,
@@ -279,7 +279,7 @@ def compute_tableaux_double_block_state(
     :return: A pair of stabilizer tableaux made up of signed Pauli terms.
     """
     # Get the 2k stabilizers for the 2k qubit state.
-    semantic_stabilizers = compute_stabilizers_double_block_state(
+    semantic_stabilizers = _compute_stabilizers_double_block_state(
         semantic_function,
         2 * code_definition.num_logical_qubits + impl_num_ancillas,
     )
@@ -292,7 +292,7 @@ def compute_tableaux_double_block_state(
     )
 
     # Calculate the 2n stabilizers of the physical state.
-    implementation_stabilizers = compute_stabilizers_double_block_state(
+    implementation_stabilizers = _compute_stabilizers_double_block_state(
         impl_function,
         2 * code_definition.num_physical_qubits + impl_num_ancillas,
     )
@@ -356,14 +356,14 @@ def valid_stabilizer_state_preparation(
     num_blocks = _count_blocks_state(semantic_function, impl_function)
     match num_blocks:
         case 1:
-            sem_stabilizers, impl_stabilizers = compute_tableaux_single_block_state(
+            sem_stabilizers, impl_stabilizers = _compute_tableaux_single_block_state(
                 semantic_function,  # type: ignore[arg-type]
                 impl_function,  # type: ignore[arg-type]
                 code_definition,
                 impl_num_ancillas,
             )
         case 2:
-            sem_stabilizers, impl_stabilizers = compute_tableaux_double_block_state(
+            sem_stabilizers, impl_stabilizers = _compute_tableaux_double_block_state(
                 semantic_function,  # type: ignore[arg-type]
                 impl_function,  # type: ignore[arg-type]
                 code_definition,
@@ -382,7 +382,7 @@ def valid_stabilizer_state_preparation(
     return sem_stabilizers == impl_stabilizers
 
 
-def compute_tableaux_single_block_unitary(
+def _compute_tableaux_single_block_unitary(
     semantic_function: SemanticCliffordUnitary,
     impl_function: ImplementationCliffordUnitary,
     code_definition: StabilizerCode,
@@ -406,7 +406,7 @@ def compute_tableaux_single_block_unitary(
     """
 
     # Get the 2k stabilizers for the 2k qubit Choi state encoding the logical operation.
-    semantic_choi_stabilizers = compute_stabilizers_single_block_unitary(
+    semantic_choi_stabilizers = _compute_stabilizers_single_block_unitary(
         identity_code(code_definition.num_logical_qubits),
         semantic_function,
         num_selene_qubits=2 * (code_definition.num_logical_qubits) + impl_num_ancillas,
@@ -421,7 +421,7 @@ def compute_tableaux_single_block_unitary(
     )
 
     # Calculate the 2n stabilizers of the Choi state encoding the physical operation.
-    implementation_stabilizers = compute_stabilizers_single_block_unitary(
+    implementation_stabilizers = _compute_stabilizers_single_block_unitary(
         code_definition,
         impl_function,
         num_selene_qubits=2 * (code_definition.num_physical_qubits) + impl_num_ancillas,
@@ -429,7 +429,7 @@ def compute_tableaux_single_block_unitary(
     return expanded_semantic_stabilizers, implementation_stabilizers
 
 
-def compute_tableaux_double_block_unitary(
+def _compute_tableaux_double_block_unitary(
     semantic_function: SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitaryDouble,
     code_definition: StabilizerCode,
@@ -454,7 +454,7 @@ def compute_tableaux_double_block_unitary(
     """
 
     # Get the 4k stabilizers for the 4k qubit Choi state encoding the logical operation.
-    semantic_choi_stabilizers = compute_stabilizers_double_block_unitary(
+    semantic_choi_stabilizers = _compute_stabilizers_double_block_unitary(
         identity_code(code_definition.num_logical_qubits),
         semantic_function,
         num_selene_qubits=4 * (code_definition.num_logical_qubits) + impl_num_ancillas,
@@ -467,7 +467,7 @@ def compute_tableaux_double_block_unitary(
     )
 
     # Calculate the 4n stabilizers of the Choi state encoding the physical operation.
-    implementation_stabilizers = compute_stabilizers_double_block_unitary(
+    implementation_stabilizers = _compute_stabilizers_double_block_unitary(
         code_definition,
         impl_function,
         num_selene_qubits=4 * (code_definition.num_physical_qubits) + impl_num_ancillas,
@@ -513,14 +513,14 @@ def valid_clifford_implementation(
     num_blocks = _count_blocks_unitary(semantic_function, impl_function)
     match num_blocks:
         case 1:
-            sem_stabilizers, impl_stabilizers = compute_tableaux_single_block_unitary(
+            sem_stabilizers, impl_stabilizers = _compute_tableaux_single_block_unitary(
                 semantic_function,  # type: ignore[arg-type]
                 impl_function,  # type: ignore[arg-type]
                 code_definition,
                 impl_num_ancillas,
             )
         case 2:
-            sem_stabilizers, impl_stabilizers = compute_tableaux_double_block_unitary(
+            sem_stabilizers, impl_stabilizers = _compute_tableaux_double_block_unitary(
                 semantic_function,  # type: ignore[arg-type]
                 impl_function,  # type: ignore[arg-type]
                 code_definition,
