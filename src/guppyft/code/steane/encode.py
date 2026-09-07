@@ -1,4 +1,3 @@
-from collections import defaultdict
 from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from enum import Enum, auto
@@ -19,6 +18,7 @@ from hugr.std import _std_extensions
 from guppyft.code._state_factory import StateFactory
 from guppyft.code.steane.primitives import (
     cx,
+    cz,
     decode,
     h,
     inject_t,
@@ -96,24 +96,35 @@ class QECPolicy:
     Attributes:
         style: The style of syndrome extraction to use (see `QECStyle`).
         threshold: Threshold at which a QEC cycle is triggered.
-        costs: Mapping from operation name to its cost.
-               Defaults to 0 for any op not explicitly set.
+        costs: See `OperationCosts`.
     """
+
+    class OperationCosts:
+        """Configuration for operation costs. Used e.g. for applying QEC cycles."""
+
+        prep_zero: float = 0.0
+        prep_t: float = 0.0
+        x: float = 0.0
+        y: float = 0.0
+        z: float = 0.0
+        h: float = 0.0
+        s: float = 0.0
+        sdg: float = 0.0
+        inject_t: float = 0.0
+        inject_tdg: float = 0.0
+        cx: float = 0.0
+        cz: float = 0.0
+
+        def __setattr__(self, key: str, value: Any) -> None:
+            if not hasattr(self, key):
+                raise KeyError(f"Unknown cost key: {key}")
+            if value < 0:
+                raise ValueError(f"Op cost cannot be negative: received {value}")
+            super().__setattr__(key, value)
 
     style: QECStyle = QECStyle.Steane
     threshold: int = 1
-    costs: dict[str, float] = field(default_factory=lambda: defaultdict(float))
-
-    def set_cost(self, op: str, cost: float) -> None:
-        """Set the cost of an operation.
-
-        Args:
-            op: Name of the operation.
-            cost: Non-negative cost to assign to the operation.
-        """
-        if cost < 0:
-            raise ValueError(f"Op cost cannot be negative: received {cost}")
-        self.costs[op] = cost
+    costs: OperationCosts = field(default_factory=OperationCosts)
 
 
 @dataclass(frozen=True)
@@ -312,7 +323,7 @@ class SteaneBuilder:
                 blk = state.zero_state_factory.get_state()
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["Prep_zero"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.prep_zero))
 
                 return state, (blk_id, qb_id)
 
@@ -328,7 +339,7 @@ class SteaneBuilder:
                 blk = state.magic_state_factory.get_state()
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["Prep_T"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.prep_t))
 
                 return state, (blk_id, qb_id)
 
@@ -381,7 +392,7 @@ class SteaneBuilder:
                 x(blk)
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["X"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.x))
 
                 return state, q
 
@@ -400,7 +411,7 @@ class SteaneBuilder:
                 y(blk)
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["Y"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.y))
 
                 return state, q
 
@@ -419,7 +430,7 @@ class SteaneBuilder:
                 z(blk)
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["Z"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.z))
 
                 return state, q
 
@@ -438,7 +449,7 @@ class SteaneBuilder:
                 h(blk)
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["H"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.h))
 
                 return state, q
 
@@ -457,7 +468,7 @@ class SteaneBuilder:
                 s(blk)
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["S"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.s))
 
                 return state, q
 
@@ -476,7 +487,7 @@ class SteaneBuilder:
                 sdg(blk)
                 state.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["Sdg"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.sdg))
 
                 return state, q
 
@@ -497,7 +508,7 @@ class SteaneBuilder:
                 state.put_block(blk_id, blk)
                 state.free_addr(a)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs["Inject_T"]))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.inject_t))
 
                 return state, q
 
@@ -520,9 +531,7 @@ class SteaneBuilder:
                 state.put_block(blk_id, blk)
                 state.free_addr(a)
 
-                state.qec_policy(
-                    array(blk_id), comptime(qec_policy.costs["Inject_Tdg"])
-                )
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.inject_tdg))
 
                 return state, q
 
@@ -545,13 +554,34 @@ class SteaneBuilder:
                 state.put_block(ctl[0], ctl_blk)
                 state.put_block(tgt[0], tgt_blk)
 
-                state.qec_policy(
-                    array(ctl[0], tgt[0]), comptime(qec_policy.costs["CX"])
-                )
+                state.qec_policy(array(ctl[0], tgt[0]), comptime(qec_policy.costs.cx))
 
                 return state, ctl, tgt
 
             return map_global(_impl, ctl, tgt)
+
+        @guppy
+        @no_type_check
+        @link_name("guppyft.steane._cz")
+        def _cz(
+            q0: tuple[int, int], q1: tuple[int, int]
+        ) -> tuple[tuple[int, int], tuple[int, int]]:
+            @guppy
+            def _impl(
+                state: STATE @ owned, q0: tuple[int, int], q1: tuple[int, int]
+            ) -> tuple[STATE, tuple[int, int], tuple[int, int]]:
+                blk0, blk1 = state.take_block(q0[0]), state.take_block(q1[0])
+
+                cz(blk0, blk1)
+
+                state.put_block(q0[0], blk0)
+                state.put_block(q1[0], blk1)
+
+                state.qec_policy(array(q0[0], q1[0]), comptime(qec_policy.costs.cz))
+
+                return state, q0, q1
+
+            return map_global(_impl, q0, q1)
 
         @guppy.declare
         @no_type_check
@@ -630,6 +660,7 @@ class SteaneBuilder:
             _inject_t,
             _inject_tdg,
             _cx,
+            _cz,
         ).compile()
 
         ops = OpReplacements().with_generated_decls(
@@ -657,6 +688,7 @@ class SteaneBuilder:
                     "inject_tdg",
                 ): "guppyft.steane._inject_tdg",
                 ("guppyft.steane.ops", "cx"): "guppyft.steane._cx",
+                ("guppyft.steane.ops", "cz"): "guppyft.steane._cz",
                 ("guppyft.steane.ops", "decode"): "guppyft.steane.decode",
             }
         )
@@ -701,6 +733,7 @@ class SteaneBuilder:
                 ("tket.quantum", "S"): ("guppyft.steane.ops", "s", []),
                 ("tket.quantum", "Sdg"): ("guppyft.steane.ops", "sdg", []),
                 ("tket.quantum", "CX"): ("guppyft.steane.ops", "cx", []),
+                ("tket.quantum", "CZ"): ("guppyft.steane.ops", "cz", []),
             },
             compound_op_replacements={
                 ("tket.quantum", "T"): steane_logical.t,

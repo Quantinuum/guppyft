@@ -183,6 +183,12 @@ def cx(q0: "Qubit", q1: "Qubit") -> None:
     """CX gate."""
 
 
+@hugr_op(steane_op("cz"))
+@no_type_check
+def cz(q0: "Qubit", q1: "Qubit") -> None:
+    """CZ gate."""
+
+
 @hugr_op(steane_op("swap"))
 @no_type_check
 def swap(q0: "Qubit", q1: "Qubit") -> None:
