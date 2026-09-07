@@ -6,6 +6,7 @@ import pytest
 from guppylang import guppy
 from guppylang.std.angles import pi
 from guppylang.std.platform import output
+from guppylang.std.qsystem.random import RNG
 from guppylang.std.quantum import (
     cx,
     cz,
@@ -26,6 +27,7 @@ from hugr import Hugr
 from hugr.cli import validate
 from hugr.package import Package
 from selene_hugr_qis_compiler import check_hugr
+from selene_sim.backends.bundled_simulators import Coinflip
 
 from guppyft.code.steane.encode import (
     QECPolicy,
@@ -33,6 +35,7 @@ from guppyft.code.steane.encode import (
     SteaneBuilder,
     SteaneEncoderParams,
 )
+from guppyft.decompose import ComparatorRzDecomposer, ToffoliDecomposer
 from guppyft.encode import UncompilableError, annotate_encoding
 
 
@@ -222,6 +225,40 @@ def test_encode_classical() -> None:
         .collated_shots()
     )
     assert res == [{}]
+
+
+def test_realtime_rz_encoder() -> None:
+
+    @guppy
+    def main() -> None:
+        rng = RNG(1234)
+
+        target = qubit()
+        h(target)
+        rz(target, rng.random_angle())
+        discard(target)
+        output("success", 1)
+
+        rng.discard()
+
+    pkg = main.compile()
+
+    rz_decomposer = ComparatorRzDecomposer(epsilon=0.01)
+    rz_decomposer.then(ToffoliDecomposer()).run(pkg.modules[0], inplace=True)
+
+    # Original block + one block for magic + ancilla space for Rz
+    n_blocks = 1 + 1 + rz_decomposer.num_ancilla()
+
+    res = (
+        SteaneBuilder()
+        .build(n_blocks=n_blocks)
+        .emulator(pkg, n_qubits=7 * n_blocks + 6)
+        .with_simulator(Coinflip(bias=0.0))
+        .run()
+        .collated_shots()
+    )
+
+    assert res == [{"success": [1]}]
 
 
 @pytest.mark.skipif(
