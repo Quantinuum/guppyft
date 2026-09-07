@@ -1,6 +1,6 @@
 import guppyft  # noqa: INP001
 
-html_title = f"GuppyFT v{guppyft.__version__} Documentation"
+html_title = f"Guppy FT v{guppyft.__version__} Documentation"
 
 html_theme = "quantinuum_sphinx"
 html_theme_options = {
