@@ -224,10 +224,9 @@ def test_encode_classical() -> None:
     assert res == [{}]
 
 
-@pytest.mark.long
 @pytest.mark.skipif(
-    not os.getenv("GUPPYFT_RUN_LONG_TESTS"),
-    reason="GUPPYFT_RUN_LONG_TESTS false or unset",
+    os.getenv("GUPPYFT_RUN_LONG_TESTS") != "true",
+    reason="GUPPYFT_RUN_LONG_TESTS is not set to 'true'",
 )
 def test_steane_encode_suite(request: pytest.FixtureRequest) -> None:
     root_dir = request.config.rootpath
