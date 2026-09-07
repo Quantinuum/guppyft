@@ -31,23 +31,23 @@ pub enum ToyK2OpDef {
     /// Apply a Z gate on a chosen logical qubit of a ToyK2 block.
     z,
     /// Apply an H gate on both logical qubits of a ToyK2 block.
-    h_both,
+    h_all,
     /// Apply a CX gate within a ToyK2 block, specifying which logical qubit is the target.
-    cx_within,
+    cx_intra,
     /// Apply two CX gates in parallel (transversal) between two ToyK2 blocks.
     cx_transversal,
     /// Swap the two logical qubits of a ToyK2 block.
-    swap_within,
+    swap_intra,
     /// Prepare a ToyK2 block with both logical qubits on the |0> state.
     prep_zero_ft,
     /// Prepare a ToyK2 block with both logical qubits on the |Y>|Y> state.
-    prep_y_state_non_ft,
+    prep_y_states_non_ft,
     /// Prepare a ToyK2 block with both logical qubits on the T|+>T|+> state.
-    prep_t_state_non_ft,
+    prep_t_states_non_ft,
     /// Destructively measure a ToyK2 block in the Z basis.
-    measure_z_both,
+    measure_z_all,
     /// Measure a logical qubit of a ToyK2 block non-destructively in the Z basis.
-    measure_z_single,
+    measure_z,
     /// Apply a error detection cycle on a ToyK2 block.
     qed_cycle,
     /// Decode a qubit measurement of a ToyK2 block.
@@ -149,21 +149,21 @@ impl MakeOpDef for ToyK2OpDef {
         match self {
             x => sig_addressable(),
             z => sig_addressable(),
-            h_both => sig_blocks(1, 1),
-            cx_within => sig_addressable(),
+            h_all => sig_blocks(1, 1),
+            cx_intra => sig_addressable(),
             cx_transversal => sig_blocks(2, 2),
-            swap_within => sig_blocks(1, 1),
+            swap_intra => sig_blocks(1, 1),
             prep_zero_ft => sig_blocks(0, 1),
-            prep_y_state_non_ft => sig_blocks(0, 1),
-            prep_t_state_non_ft => sig_blocks(0, 1),
+            prep_y_states_non_ft => sig_blocks(0, 1),
+            prep_t_states_non_ft => sig_blocks(0, 1),
             qed_cycle => sig_blocks(1, 1),
             free => sig_blocks(1, 0),
-            measure_z_both => FuncValueType::new(
+            measure_z_all => FuncValueType::new(
                 vec![logical_block_type()],
                 vec![logical_block_measurement_type()],
             )
             .into(),
-            measure_z_single => FuncValueType::new(
+            measure_z => FuncValueType::new(
                 vec![logical_block_type(), int_type(1)],
                 vec![logical_block_type(), logical_qubit_measurement_type()],
             )
@@ -223,7 +223,7 @@ mod tests {
             &Signature::new([], [logical_block_type()])
         );
         assert_eq!(
-            ToyK2OpDef::prep_t_state_non_ft
+            ToyK2OpDef::prep_t_states_non_ft
                 .instantiate_no_args()
                 .to_extension_op()
                 .unwrap()
@@ -232,7 +232,7 @@ mod tests {
             &Signature::new([], [logical_block_type()])
         );
         assert_eq!(
-            ToyK2OpDef::prep_y_state_non_ft
+            ToyK2OpDef::prep_y_states_non_ft
                 .instantiate_no_args()
                 .to_extension_op()
                 .unwrap()
@@ -246,10 +246,10 @@ mod tests {
     fn test_linear_ops() -> Result<(), Box<dyn Error>> {
         let x = EXTENSION.instantiate_extension_op("x", [])?;
         let z = EXTENSION.instantiate_extension_op("z", [])?;
-        let h_both = EXTENSION.instantiate_extension_op("h_both", [])?;
-        let cx_within = EXTENSION.instantiate_extension_op("cx_within", [])?;
+        let h_all = EXTENSION.instantiate_extension_op("h_all", [])?;
+        let cx_intra = EXTENSION.instantiate_extension_op("cx_intra", [])?;
         let cx_transversal = EXTENSION.instantiate_extension_op("cx_transversal", [])?;
-        let swap_within = EXTENSION.instantiate_extension_op("swap_within", [])?;
+        let swap_intra = EXTENSION.instantiate_extension_op("swap_intra", [])?;
         let qed_cycle = EXTENSION.instantiate_extension_op("qed_cycle", [])?;
 
         let mut module_builder = ModuleBuilder::new();
@@ -263,13 +263,13 @@ mod tests {
         linear
             .append_and_consume(x, [CircuitUnit::Linear(0), CircuitUnit::Wire(index0)])?
             .append_and_consume(z, [CircuitUnit::Linear(1), CircuitUnit::Wire(index1)])?
-            .append(h_both, [0])?
+            .append(h_all, [0])?
             .append_and_consume(
-                cx_within,
+                cx_intra,
                 [CircuitUnit::Linear(1), CircuitUnit::Wire(index2)],
             )?
             .append(cx_transversal, [0, 1])?
-            .append(swap_within, [0])?
+            .append(swap_intra, [0])?
             .append(qed_cycle, [1])?;
         let outs = linear.finish();
         f_build.finish_with_outputs(outs)?;
@@ -282,7 +282,7 @@ mod tests {
     fn test_prep_measure_decode_qubit_free() -> Result<(), Box<dyn Error>> {
         let prep_zero_ft = EXTENSION.instantiate_extension_op("prep_zero_ft", [])?;
         let free = EXTENSION.instantiate_extension_op("free", [])?;
-        let measure_z_single = EXTENSION.instantiate_extension_op("measure_z_single", [])?;
+        let measure_z = EXTENSION.instantiate_extension_op("measure_z", [])?;
         let decode_qubit_measurement =
             EXTENSION.instantiate_extension_op("decode_qubit_measurement", [])?;
 
@@ -295,7 +295,7 @@ mod tests {
             .outputs_arr();
         let constant = f_build.add_load_value(ConstInt::new_u(1, 0).unwrap());
         let [blk, meas] = f_build
-            .add_dataflow_op(measure_z_single, [blk, constant])?
+            .add_dataflow_op(measure_z, [blk, constant])?
             .outputs_arr();
         let [bool_wire] = f_build
             .add_dataflow_op(decode_qubit_measurement, [meas])?
@@ -311,7 +311,7 @@ mod tests {
     #[test]
     fn test_prep_measure_decode_block() -> Result<(), Box<dyn Error>> {
         let prep_zero_ft = EXTENSION.instantiate_extension_op("prep_zero_ft", [])?;
-        let measure_z_both = EXTENSION.instantiate_extension_op("measure_z_both", [])?;
+        let measure_z_all = EXTENSION.instantiate_extension_op("measure_z_all", [])?;
         let decode_block_measurement =
             EXTENSION.instantiate_extension_op("decode_block_measurement", [])?;
 
@@ -320,7 +320,7 @@ mod tests {
         let mut f_build = module_builder.define_function("main", signature)?;
 
         let handle = f_build.add_dataflow_op(prep_zero_ft.clone(), vec![])?;
-        let handle = f_build.add_dataflow_op(measure_z_both, handle.outputs())?;
+        let handle = f_build.add_dataflow_op(measure_z_all, handle.outputs())?;
         let [bool_wire0, bool_wire1] = f_build
             .add_dataflow_op(decode_block_measurement, handle.outputs())?
             .outputs_arr();
@@ -335,15 +335,15 @@ mod tests {
     fn test_serialization() {
         let block_type = logical_block_type();
         let measurent_block_type = logical_block_measurement_type();
-        let measure_z_both = EXTENSION
-            .instantiate_extension_op("measure_z_both", [])
+        let measure_z_all = EXTENSION
+            .instantiate_extension_op("measure_z_all", [])
             .unwrap();
         let mut module_builder = ModuleBuilder::new();
         let signature = Signature::new(vec![block_type], vec![measurent_block_type]);
         let mut f_build = module_builder.define_function("main", signature).unwrap();
         let wires: Vec<_> = f_build.input_wires().collect();
         let mut linear = f_build.as_circuit(wires);
-        linear.append(measure_z_both, [0]).unwrap();
+        linear.append(measure_z_all, [0]).unwrap();
         let outs = linear.finish();
         f_build.finish_with_outputs(outs).unwrap();
         let h = module_builder.finish_hugr().unwrap();
