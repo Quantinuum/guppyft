@@ -25,7 +25,7 @@ CODE_DEF = StabilizerCode.from_python_strings(
 @guppy
 @no_type_check
 def x(blk: LogicalBlock[4], idx: int) -> None:
-    """Logical X gate to the chosen logical qubit.
+    """Logical X gate on the chosen logical qubit.
 
     Args:
         blk: The logical block to apply the gate to.
@@ -40,7 +40,7 @@ def x(blk: LogicalBlock[4], idx: int) -> None:
 @guppy
 @no_type_check
 def z(blk: LogicalBlock[4], idx: int) -> None:
-    """Logical Z gate to the chosen logical qubit.
+    """Logical Z gate on the chosen logical qubit.
 
     Args:
         blk: The logical block to apply the gate to.
