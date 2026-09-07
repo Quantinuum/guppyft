@@ -121,7 +121,7 @@ fn sig_blocks(n_blocks_in: usize, n_blocks_out: usize) -> SignatureFunc {
 /// Signature of an operation acting on a single qubit, addressed by an index
 fn sig_addressable() -> SignatureFunc {
     Signature::new(
-        vec![logical_block_type(), int_type(1)],
+        vec![logical_block_type(), int_type(6)],
         vec![logical_block_type()],
     )
     .into()
@@ -164,8 +164,8 @@ impl MakeOpDef for ToyK2OpDef {
             )
             .into(),
             measure_z => FuncValueType::new(
-                vec![logical_block_type(), int_type(1)],
-                vec![logical_block_type(), logical_qubit_measurement_type()],
+                vec![logical_block_type(), int_type(6)],
+                vec![logical_qubit_measurement_type(), logical_block_type()],
             )
             .into(),
             decode_qubit_measurement => {
@@ -257,9 +257,9 @@ mod tests {
         let mut f_build = module_builder.define_function("main", signature)?;
         let wires: Vec<_> = f_build.input_wires().collect();
         let mut linear = f_build.as_circuit(wires);
-        let index0 = linear.add_constant(ConstInt::new_u(1, 0).unwrap());
-        let index1 = linear.add_constant(ConstInt::new_u(1, 1).unwrap());
-        let index2 = linear.add_constant(ConstInt::new_u(1, 0).unwrap());
+        let index0 = linear.add_constant(ConstInt::new_u(6, 0).unwrap());
+        let index1 = linear.add_constant(ConstInt::new_u(6, 1).unwrap());
+        let index2 = linear.add_constant(ConstInt::new_u(6, 0).unwrap());
         linear
             .append_and_consume(x, [CircuitUnit::Linear(0), CircuitUnit::Wire(index0)])?
             .append_and_consume(z, [CircuitUnit::Linear(1), CircuitUnit::Wire(index1)])?
@@ -293,8 +293,8 @@ mod tests {
         let [blk] = f_build
             .add_dataflow_op(prep_zero_ft.clone(), vec![])?
             .outputs_arr();
-        let constant = f_build.add_load_value(ConstInt::new_u(1, 0).unwrap());
-        let [blk, meas] = f_build
+        let constant = f_build.add_load_value(ConstInt::new_u(6, 0).unwrap());
+        let [meas, blk] = f_build
             .add_dataflow_op(measure_z, [blk, constant])?
             .outputs_arr();
         let [bool_wire] = f_build
