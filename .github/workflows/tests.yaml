@@ -31,6 +31,9 @@ env:
   RUSTC_WRAPPER: "sccache"
   UV_VERSION: "0.11.7"
 
+permissions:
+  contents: read
+
 jobs:
   # Check if changes were made to the relevant files.
   # Always returns true if running on the default branch, to ensure all changes are thoroughly checked.
@@ -142,3 +145,28 @@ jobs:
 
       - name: Check if extension versions are updated
         run: python ./.github/scripts/check_extension_versions.py
+
+  # This is a meta job to mark successful completion of the required checks,
+  # even if they are skipped due to no changes in the relevant files.
+  required-checks:
+    name: Required checks 🦀+🐍
+    needs:
+      [
+        changes,
+        check-rs,
+        check-py,
+        check-extensions,
+        extension-versions,
+      ]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if required checks failed
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          echo "Required checks failed"
+          echo "Please check the logs for more information"
+          exit 1
+      - name: Pass if required checks passed
+        run: |
+          echo "All required checks passed"
