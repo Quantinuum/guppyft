@@ -72,7 +72,7 @@ def test_z(idx: int) -> None:
     assert sem == impl
 
 
-def test_h_both() -> None:
+def test_h_all() -> None:
 
     @guppy
     @no_type_check
@@ -85,7 +85,7 @@ def test_h_both() -> None:
     def impl_func(arr: array[qubit, 4]) -> None:
         block = LogicalBlock(array(arr.take(i) for i in range(4)))
 
-        toy_k2.h_both(block)
+        toy_k2.h_all(block)
 
         for i in range(4):
             arr.put(block.data_qs.take(i), i)
@@ -100,7 +100,7 @@ def test_h_both() -> None:
 
 
 @pytest.mark.parametrize("target", [0, 1])
-def test_cx_within(target: int) -> None:
+def test_cx_intra(target: int) -> None:
 
     @guppy
     @no_type_check
@@ -112,7 +112,7 @@ def test_cx_within(target: int) -> None:
     def impl_func(arr: array[qubit, 4]) -> None:
         block = LogicalBlock(array(arr.take(i) for i in range(4)))
 
-        toy_k2.cx_within(block, comptime(target))
+        toy_k2.cx_intra(block, comptime(target))
 
         for i in range(4):
             arr.put(block.data_qs.take(i), i)
@@ -156,7 +156,7 @@ def test_cx_transversal() -> None:
     assert sem == impl
 
 
-def test_swap_within() -> None:
+def test_swap_intra() -> None:
 
     @guppy
     @no_type_check
@@ -168,7 +168,7 @@ def test_swap_within() -> None:
     def impl_func(arr: array[qubit, 4]) -> None:
         block = LogicalBlock(array(arr.take(i) for i in range(4)))
 
-        toy_k2.swap_within(block)
+        toy_k2.swap_intra(block)
 
         for i in range(4):
             arr.put(block.data_qs.take(i), i)
@@ -208,7 +208,7 @@ def test_prep_zero() -> None:
     assert sem == impl
 
 
-def test_prep_y_state() -> None:
+def test_prep_y_states() -> None:
 
     @guppy
     @no_type_check
@@ -222,7 +222,7 @@ def test_prep_y_state() -> None:
     @guppy
     @no_type_check
     def impl_func() -> array[qubit, 4]:
-        block = toy_k2.prep_y_state_non_ft()
+        block = toy_k2.prep_y_states_non_ft()
 
         arr = array(block.data_qs.take(i) for i in range(4))
         block.discard()
@@ -239,7 +239,7 @@ def test_prep_y_state() -> None:
 
 @pytest.mark.parametrize("x0", [0, 1])
 @pytest.mark.parametrize("x1", [0, 1])
-def test_measure_z_both(x0: int, x1: int) -> None:
+def test_measure_z_all(x0: int, x1: int) -> None:
 
     @guppy
     @no_type_check
@@ -251,7 +251,7 @@ def test_measure_z_both(x0: int, x1: int) -> None:
         if comptime(x1) == 1:
             toy_k2.x(block, comptime(1))
 
-        res = toy_k2.measure_z_both(block)
+        res = toy_k2.measure_z_all(block)
         output("result", res)
 
     out = main.emulator(n_qubits=5).run().collated_shots()
@@ -261,7 +261,7 @@ def test_measure_z_both(x0: int, x1: int) -> None:
 @pytest.mark.parametrize("idx", [0, 1])
 @pytest.mark.parametrize("x0", [0, 1])
 @pytest.mark.parametrize("x1", [0, 1])
-def test_measure_z_single(idx: int, x0: int, x1: int) -> None:
+def test_measure_z(idx: int, x0: int, x1: int) -> None:
 
     @guppy
     @no_type_check
@@ -273,7 +273,7 @@ def test_measure_z_single(idx: int, x0: int, x1: int) -> None:
         if comptime(x1) == 1:
             toy_k2.x(block, comptime(1))
 
-        res = toy_k2.measure_z_single(block, comptime(idx))
+        res = toy_k2.measure_z(block, comptime(idx))
         output("result", res)
 
         block.discard()
