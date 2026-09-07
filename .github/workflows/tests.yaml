@@ -57,7 +57,7 @@ jobs:
   check-rs:
     name: Test Rust code 🦀
     needs: changes
-    if: ${{ needs.changes.outputs.rust == 'true' }}
+    if: ${{ needs.changes.outputs.rust == 'true' || true }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -75,7 +75,7 @@ jobs:
   check-py:
     name: 🐍 Test Python code (${{ matrix.python-version }})
     needs: changes
-    if: ${{ needs.changes.outputs.python == 'true' }}
+    if: ${{ needs.changes.outputs.python == 'true' || true }}
     runs-on: ubuntu-latest
     env:
       PYTHON_VERSION: ${{ matrix.python-version }}
@@ -108,7 +108,7 @@ jobs:
   check-extensions:
     name: Check extensions
     needs: changes
-    if: ${{ needs.changes.outputs.rust == 'true' && github.event_name != 'merge_group' }}
+    if: ${{ needs.changes.outputs.rust == 'true' && github.event_name != 'merge_group' || true }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -131,7 +131,7 @@ jobs:
   extension-versions:
     name: Check extension versions
     needs: [ changes ]
-    if: ${{ needs.changes.outputs.extensions_data == 'true' }}
+    if: ${{ needs.changes.outputs.extensions_data == 'true' || true }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
