@@ -2,14 +2,14 @@ import numpy as np
 from zixy.qubit import pauli
 
 from guppyft.code_def import identity_code
-from guppyft.verifier.expansion import (
+from guppyft.verify._expansion import (
     expand_logical_signterms,
     get_expanded_stabilizer_set,
     pad_code_stabilizers,
 )
-from guppyft.verifier.verify import (
-    compute_stabilizers_double_block_unitary,
-    compute_stabilizers_single_block_unitary,
+from guppyft.verify._verify import (
+    _compute_stabilizers_double_block_unitary,
+    _compute_stabilizers_single_block_unitary,
 )
 
 from .ops import css_4q, steane
@@ -67,7 +67,7 @@ def test_canonical() -> None:
 
 
 def test_bell_state_stabilizers() -> None:
-    stabilizer_terms = compute_stabilizers_single_block_unitary(
+    stabilizer_terms = _compute_stabilizers_single_block_unitary(
         code=identity_code(1),
         clifford_func=steane.specify_identity,
         num_selene_qubits=2,
@@ -76,11 +76,11 @@ def test_bell_state_stabilizers() -> None:
 
 
 def test_s_state_stabilizers() -> None:
-    terms_logical = compute_stabilizers_single_block_unitary(
+    terms_logical = _compute_stabilizers_single_block_unitary(
         code=identity_code(1), clifford_func=steane.specify_s, num_selene_qubits=2
     )
 
-    terms_physical = compute_stabilizers_single_block_unitary(
+    terms_physical = _compute_stabilizers_single_block_unitary(
         steane.STEANE_DEF, steane.implement_s, 14
     )
 
@@ -89,7 +89,7 @@ def test_s_state_stabilizers() -> None:
 
 
 def test_compute_stabilizers_double_block() -> None:
-    stabilizers = compute_stabilizers_double_block_unitary(
+    stabilizers = _compute_stabilizers_double_block_unitary(
         code=identity_code(1),
         clifford_func=steane.specify_identity_double_block,
         num_selene_qubits=4,
@@ -156,7 +156,7 @@ def test_stabilizer_padding_double_block() -> None:
 
 
 def test_compute_stabilizers_single_block_css_4q_id() -> None:
-    choi_stabilizers_before_expansion = compute_stabilizers_single_block_unitary(
+    choi_stabilizers_before_expansion = _compute_stabilizers_single_block_unitary(
         identity_code(2), css_4q.specify_identity, 4
     )
     assert (
@@ -188,7 +188,7 @@ def test_compute_stabilizers_single_block_css_4q_id() -> None:
 
 
 def test_compute_stabilizers_double_block_css_4q_id() -> None:
-    choi_stabilizers_before_expansion = compute_stabilizers_double_block_unitary(
+    choi_stabilizers_before_expansion = _compute_stabilizers_double_block_unitary(
         identity_code(2),
         css_4q.specify_identity_double_block,
         8,
@@ -209,7 +209,7 @@ def test_compute_stabilizers_double_block_css_4q_id() -> None:
 
 
 def test_compute_stabilizers_intrablock_cx_css_4q() -> None:
-    choi_stabilizers_before_expansion = compute_stabilizers_single_block_unitary(
+    choi_stabilizers_before_expansion = _compute_stabilizers_single_block_unitary(
         identity_code(2),
         css_4q.specify_intra_block_cx,
         4,

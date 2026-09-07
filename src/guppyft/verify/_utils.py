@@ -11,6 +11,8 @@ from zixy.container.coeffs import Sign
 from zixy.qubit import pauli
 
 N = guppy.nat_var("N")
+N_PHYSICAL = guppy.nat_var("N_PHYSICAL")
+K_LOGICAL = guppy.nat_var("K_LOGICAL")
 
 type SingleBlockUnitary = GuppyFunctionDefinition[[array[qubit, N]], None]  # type: ignore[valid-type]
 type DoubleBlockUnitary = GuppyFunctionDefinition[
@@ -19,6 +21,37 @@ type DoubleBlockUnitary = GuppyFunctionDefinition[
 type SingleBlockState = GuppyFunctionDefinition[[], array[qubit, N]]  # type: ignore[valid-type]
 type DoubleBlockState = GuppyFunctionDefinition[
     [], tuple[array[qubit, N], array[qubit, N]]  # type: ignore[valid-type]
+]
+
+type SemanticStabilizerState = GuppyFunctionDefinition[
+    [], array[qubit, K_LOGICAL]  # type: ignore[valid-type]
+]
+type ImplementationStabilizerState = GuppyFunctionDefinition[
+    [], array[qubit, N_PHYSICAL]  # type: ignore[valid-type]
+]
+
+
+type SemanticStabilizerStateDouble = GuppyFunctionDefinition[
+    [], tuple[array[qubit, K_LOGICAL], array[qubit, K_LOGICAL]]  # type: ignore[valid-type]
+]
+type ImplementationStabilizerStateDouble = GuppyFunctionDefinition[
+    [], tuple[array[qubit, N_PHYSICAL], array[qubit, N_PHYSICAL]]  # type: ignore[valid-type]
+]
+
+
+type SemanticCliffordUnitary = GuppyFunctionDefinition[
+    [array[qubit, K_LOGICAL]], None  # type: ignore[valid-type]
+]
+type ImplementationCliffordUnitary = GuppyFunctionDefinition[
+    [array[qubit, N_PHYSICAL]], None  # type: ignore[valid-type]
+]
+
+
+type SemanticCliffordUnitaryDouble = GuppyFunctionDefinition[
+    [array[qubit, K_LOGICAL], array[qubit, K_LOGICAL]], None  # type: ignore[valid-type]
+]
+type ImplementationCliffordUnitaryDouble = GuppyFunctionDefinition[
+    [array[qubit, N_PHYSICAL], array[qubit, N_PHYSICAL]], None  # type: ignore[valid-type]
 ]
 
 
