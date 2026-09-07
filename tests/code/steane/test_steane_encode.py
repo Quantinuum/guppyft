@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -21,6 +23,7 @@ from guppylang.std.quantum import (
     z,
 )
 from hugr import Hugr
+from hugr.cli import validate
 from hugr.package import Package
 from selene_hugr_qis_compiler import check_hugr
 
@@ -219,3 +222,20 @@ def test_encode_classical() -> None:
         .collated_shots()
     )
     assert res == [{}]
+
+
+@pytest.mark.skipif(
+    os.getenv("GUPPYFT_RUN_LONG_TESTS") != "true",
+    reason="GUPPYFT_RUN_LONG_TESTS is not set to 'true'",
+)
+def test_steane_encode_suite(request: pytest.FixtureRequest) -> None:
+    root_dir = request.config.rootpath
+    hugr_dir = root_dir / "tests" / "resources" / "hugrs" / "guppylang-test-exports"
+    for fname in Path.iterdir(hugr_dir):
+        fpath = hugr_dir / fname
+        with Path.open(fpath, "rb") as f:
+            hugr0 = Hugr.from_bytes(f.read())
+            pkg0 = hugr0.to_package()
+            steane = SteaneBuilder().build(n_blocks=8)
+            pkg1 = steane.encode(pkg0)
+            validate(pkg1.to_bytes())
