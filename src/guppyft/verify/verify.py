@@ -270,19 +270,23 @@ def _compute_state_prep_tableaux(
     num_blocks = _count_blocks_state(semantic_function, impl_function)
     match num_blocks:
         case 1:
+            # Get the k stabilizers for the k qubit state.
             semantic_stabilizers = _compute_stabilizers_single_block_state(
                 semantic_function,  # type: ignore[arg-type]
                 code_definition.num_logical_qubits + impl_num_ancillas,
             )
+            # Calculate the n stabilizers of the physical state.
             implementation_stabilizers = _compute_stabilizers_single_block_state(
                 impl_function,  # type: ignore[arg-type]
                 code_definition.num_physical_qubits + impl_num_ancillas,
             )
         case 2:
+            # Get the 2k stabilizers for the 2k qubit state.
             semantic_stabilizers = _compute_stabilizers_double_block_state(
                 semantic_function,  # type: ignore[arg-type]
                 2 * code_definition.num_logical_qubits + impl_num_ancillas,
             )
+            # Calculate the 2n stabilizers of the physical state.
             implementation_stabilizers = _compute_stabilizers_double_block_state(
                 impl_function,  # type: ignore[arg-type]
                 2 * code_definition.num_physical_qubits + impl_num_ancillas,
@@ -293,9 +297,9 @@ def _compute_state_prep_tableaux(
                 + f"Got {num_blocks} blocks. Only 1 and 2 are supported."
             )
 
-    # Expand the k logical stabilizers to k stabilizers of size n.
-    # We also add the (n-k) stabilizer generators of our code.
-    # We have k + (n-k) = n stabilizers in total.
+    # Expand the num_blocks*k logical stabilizers to stabilizers of size num_blocks*n.
+    # We also add the num_blocks*(n-k) stabilizer generators of our code.
+    # We have num_blocks * k + num_blocks*(n-k) = num_blocks*n stabilizers in total.
     expanded_semantic_stabilizers = get_expanded_stabilizer_set(
         semantic_stabilizers, code_definition, num_blocks=num_blocks
     )
@@ -377,6 +381,7 @@ def _compute_clifford_tableaux(
     num_blocks = _count_blocks_unitary(semantic_function, impl_function)
     match num_blocks:
         case 1:
+            # Get the 2k stabilizers for the 2k qubit Choi state encoding the logical.
             semantic_choi_stabilizers = _compute_stabilizers_single_block_unitary(
                 identity_code(code_definition.num_logical_qubits),
                 semantic_function,  # type: ignore[arg-type]
@@ -391,12 +396,14 @@ def _compute_clifford_tableaux(
                 + impl_num_ancillas,
             )
         case 2:
+            # Get the 4k stabilizers for the 4k qubit Choi state encoding the logical.
             semantic_choi_stabilizers = _compute_stabilizers_double_block_unitary(
                 identity_code(code_definition.num_logical_qubits),
                 semantic_function,  # type: ignore[arg-type]
                 num_selene_qubits=4 * (code_definition.num_logical_qubits)
                 + impl_num_ancillas,
             )
+            # Calculate the 4n stabilizers of the Choi state encoding the physical.
             implementation_stabilizers = _compute_stabilizers_double_block_unitary(
                 code_definition,
                 impl_function,  # type: ignore[arg-type]
@@ -409,8 +416,10 @@ def _compute_clifford_tableaux(
                 + f"Got {num_blocks} blocks. Only 1 and 2 are supported."
             )
 
-    # Expand the 4k logical stabilizers and combine them with the generators for each
-    #  block. We obtain 4k + 4(n-k) = 4n stabilizers in total.
+    # Expand 2*num_blocks*k logical stabilizers to stabilizers of size 2*num_blocks*n.
+    # We also add the 2*num_blocks(n-k) stabilizer generators of our code.
+    # For each code block there are 2(n-k) so we have 2*num_blocks*(n-k) in total.
+    # We have 2*num_blocks*k + 2*num_blocks*(n-k) = 2*num_blocks*n stabilizers in total.
     expanded_semantic_stabilizers = get_expanded_stabilizer_set(
         semantic_choi_stabilizers, code_definition, num_blocks=2 * num_blocks
     )
