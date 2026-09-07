@@ -31,6 +31,9 @@ env:
   RUSTC_WRAPPER: "sccache"
   UV_VERSION: "0.11.7"
 
+permissions:
+  contents: read
+
 jobs:
   # Check if changes were made to the relevant files.
   # Always returns true if running on the default branch, to ensure all changes are thoroughly checked.
