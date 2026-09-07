@@ -11,10 +11,9 @@ from guppylang.std.quantum import cx, h, qubit, s, x, z
 from guppyft.code.toy_k2 import primitives as toy_k2
 from guppyft.code.toy_k2.primitives import CODE_DEF
 from guppyft.code.util import LogicalBlock
-from guppyft.verifier import (
-    compute_verification_signterms_double_block_unitary,
-    compute_verification_signterms_single_block_state,
-    compute_verification_signterms_single_block_unitary,
+from guppyft.verify import (
+    valid_clifford_implementation,
+    valid_stabilizer_state_preparation,
 )
 
 
@@ -37,12 +36,11 @@ def test_x(idx: int) -> None:
             arr.put(block.data_qs.take(i), i)
         block.discard()
 
-    sem, impl = compute_verification_signterms_single_block_unitary(
+    assert valid_clifford_implementation(
         specify_func,
         impl_func,
         CODE_DEF,
     )
-    assert sem == impl
 
 
 @pytest.mark.parametrize("idx", [0, 1])
@@ -64,12 +62,11 @@ def test_z(idx: int) -> None:
             arr.put(block.data_qs.take(i), i)
         block.discard()
 
-    sem, impl = compute_verification_signterms_single_block_unitary(
+    assert valid_clifford_implementation(
         specify_func,
         impl_func,
         CODE_DEF,
     )
-    assert sem == impl
 
 
 def test_h_all() -> None:
@@ -91,12 +88,11 @@ def test_h_all() -> None:
             arr.put(block.data_qs.take(i), i)
         block.discard()
 
-    sem, impl = compute_verification_signterms_single_block_unitary(
+    assert valid_clifford_implementation(
         specify_func,
         impl_func,
         CODE_DEF,
     )
-    assert sem == impl
 
 
 @pytest.mark.parametrize("target", [0, 1])
@@ -118,12 +114,11 @@ def test_cx_intra(target: int) -> None:
             arr.put(block.data_qs.take(i), i)
         block.discard()
 
-    sem, impl = compute_verification_signterms_single_block_unitary(
+    assert valid_clifford_implementation(
         specify_func,
         impl_func,
         CODE_DEF,
     )
-    assert sem == impl
 
 
 def test_cx_transversal() -> None:
@@ -148,12 +143,11 @@ def test_cx_transversal() -> None:
         c_block.discard()
         t_block.discard()
 
-    sem, impl = compute_verification_signterms_double_block_unitary(
+    assert valid_clifford_implementation(
         specify_func,
         impl_func,
         CODE_DEF,
     )
-    assert sem == impl
 
 
 def test_swap_intra() -> None:
@@ -174,12 +168,11 @@ def test_swap_intra() -> None:
             arr.put(block.data_qs.take(i), i)
         block.discard()
 
-    sem, impl = compute_verification_signterms_single_block_unitary(
+    assert valid_clifford_implementation(
         specify_func,
         impl_func,
         CODE_DEF,
     )
-    assert sem == impl
 
 
 def test_prep_zero() -> None:
@@ -199,13 +192,12 @@ def test_prep_zero() -> None:
 
         return arr
 
-    sem, impl = compute_verification_signterms_single_block_state(
+    assert valid_stabilizer_state_preparation(
         specify_func,
         impl_func,
         CODE_DEF,
-        num_ancilla_qubits=1,
+        impl_num_ancillas=1,
     )
-    assert sem == impl
 
 
 def test_prep_y_states() -> None:
@@ -229,12 +221,11 @@ def test_prep_y_states() -> None:
 
         return arr
 
-    sem, impl = compute_verification_signterms_single_block_state(
+    assert valid_stabilizer_state_preparation(
         specify_func,
         impl_func,
         CODE_DEF,
     )
-    assert sem == impl
 
 
 def test_prep_t_states() -> None:
@@ -321,13 +312,12 @@ def test_qed_cycle_without_errors() -> None:
             arr.put(block.data_qs.take(i), i)
         block.discard()
 
-    sem, impl = compute_verification_signterms_single_block_unitary(
+    assert valid_clifford_implementation(
         specify_func,
         impl_func,
         CODE_DEF,
-        num_ancilla_qubits=2,
+        impl_num_ancillas=2,
     )
-    assert sem == impl
 
 
 @pytest.mark.parametrize("error_loc", [0, 1, 2, 3])
