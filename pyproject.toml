@@ -1,6 +1,6 @@
 [project]
 name = "guppyft"
-version = "0.0.7"
+version = "0.0.8"
 description = "Tools for fault-tolerant quantum computing in the Guppy language"
 requires-python = ">=3.12,<4"
 readme = "README.md"
@@ -27,7 +27,7 @@ classifiers = [
 dependencies = [
     "guppylang>=1.0.1",
     "hugr>=0.18.6",
-    "tket>=0.15.2",
+    "tket>=0.15.8",
     "tket-exts>=0.14.0",
     "zixy~=0.3.2",
     "selene-sim>=0.3.0",
