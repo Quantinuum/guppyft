@@ -20,12 +20,12 @@ api/api.md
 Guppy FT is an extension of the [guppylang](https://github.com/Quantinuum/guppylang) quantum programming language to enable fault-tolerant quantum programs.
 
 In Guppy FT, we refer to a QEC architecture as the combination of a QEC code
-definition, its collection of logical gadgets and their implementation, the
+definition, its collection of logical gadgets and their implementations, the
 compilation passes that let users encode their programs automatically, and
 any code-specific policies used to manage resources at runtime, for instance
 automated QEC insertion and state factories.
 
-The goal of Guppy FT is to provide tools for two kinds
+The purpose of Guppy FT is to provide tools for two kinds
 of users:
 * Users that wish to use QEC in their experiments, treating QEC
 as a black-box pass they can apply to their program. (**TODO** link to end-to-end notebook).
@@ -33,7 +33,7 @@ as a black-box pass they can apply to their program. (**TODO** link to end-to-en
 having more control over how their program is encoded. (**TODO** link to logical notebook).
 
 Additionally, we encourage developers to define their own QEC architectures
-following the GuppyFT framework, as described in (**TODO** link to QEC architecture dev guide).
+following the Guppy FT framework, as described in (**TODO** link to QEC architecture dev guide).
 
 For the sake of separation of concerns, we find it useful to think about programs
 at three different levels of abstraction:
@@ -65,7 +65,7 @@ As a Python package, [Guppy FT](https://pypi.org/project/guppyft/) can be instal
       uv add guppyft
 ```
 
-The source for Guppy FT is available on [GitHub](https://github.com/quantinuum/guppyft/). If you have a feature request or think you have found a bug, feel free to raise a [GitHub issue](https://github.com/quantinuum/guppyft/issues).
+The source for `guppyft` is available on [GitHub](https://github.com/quantinuum/guppyft/). If you have a feature request or think you have found a bug, feel free to raise a [GitHub issue](https://github.com/quantinuum/guppyft/issues).
 
 
 ## Example: Encoding with Steane
