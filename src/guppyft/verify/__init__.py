@@ -15,6 +15,8 @@ Verifying Cliffords with :py:func:`valid_clifford_implementation`
 
 The same features are available for :py:func:`valid_stabilizer_state_preparation`.
 
+See the :doc:`/examples/clifford_verification` tutorial for more details.
+
 Steane code example
 ===================
 
