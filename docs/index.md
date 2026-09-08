@@ -17,7 +17,7 @@ kernelspec:
 api/api.md
 ```
 
-Guppy FT is an extension of the [guppylang](https://github.com/Quantinuum/guppylang) quantum programming language to enable fault-tolerant quantum programs.
+Guppy FT is an extension of the [Guppy](https://docs.quantinuum.com/guppy/) quantum programming language to enable fault-tolerant quantum programs.
 
 In Guppy FT, we refer to a QEC architecture as the combination of a QEC code
 definition, its collection of logical gadgets and their implementations, the
