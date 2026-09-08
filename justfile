@@ -28,6 +28,10 @@ test-rust *TEST_ARGS: _check_nextest_installed
 test-python *PYTEST_FLAGS:
     uv run pytest -n auto {{ PYTEST_FLAGS }}
 
+# Run the Python tests including those marked as "long".
+test-python-long *PYTEST_FLAGS:
+    GUPPYFT_RUN_LONG_TESTS=true uv run pytest -n auto {{ PYTEST_FLAGS }}
+
 # Auto-fix lint issues.
 fix: fix-rust fix-python
 # Auto-fix all rust clippy warnings.
@@ -62,3 +66,5 @@ serve-docs: build-docs
 clean-docs:
     rm -rf docs/build
     rm -rf docs/api/generated
+    rm -rf docs/jupyter_execute
+    rm -rf docs/.jupyter_cache
