@@ -11,9 +11,10 @@ kernelspec:
 # Getting started
 
 ```{toctree}
-:hidden:
 :maxdepth: 1
+:hidden:
 
+examples_index.md
 api/api.md
 ```
 
