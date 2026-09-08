@@ -29,7 +29,7 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
-    versioning-strategy: widen
+    versioning-strategy: increase-if-necessary
     commit-message:
       # Use a conventional commit tag
       prefix: "chore(deps-py)"
