@@ -1,7 +1,7 @@
 import inspect
-from typing import get_args, get_origin
+from typing import Any, get_args, get_origin
 
-from guppylang import guppy
+from guppylang.decorator import expected_qubits, guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.builtins import comptime
 from guppylang.std.debug import state_output
@@ -42,6 +42,16 @@ def _invoke_selene_stim(
     return seeded_stim_instance.extract_states_dict(output)
 
 
+def _get_qubit_number(func: GuppyFunctionDefinition[Any, Any], num_qubits: int) -> int:
+    try:
+        num_qubits = func.wrapped.python_func.__guppy_metadata__[  # type: ignore[attr-defined]
+            "tket.hint.expected_qubits"
+        ]
+    except KeyError:
+        num_qubits = num_qubits
+    return num_qubits
+
+
 def _compute_stabilizers_single_block_state(
     state_prep_func: SingleBlockState,
     num_selene_qubits: int,
@@ -55,7 +65,10 @@ def _compute_stabilizers_single_block_state(
     :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
 
+    num_qubits = _get_qubit_number(state_prep_func, num_selene_qubits)
+
     @guppy
+    @expected_qubits(num_qubits)
     def main() -> None:
         block = state_prep_func()
         state_output("total", block)
@@ -81,8 +94,10 @@ def _compute_stabilizers_double_block_state(
           used in state_prep_func.
     :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
+    num_qubits = _get_qubit_number(state_prep_func, num_selene_qubits)
 
     @guppy
+    @expected_qubits(num_qubits)
     def main() -> None:
         block0, block1 = state_prep_func()
         state_output("block0", block0)
@@ -121,11 +136,13 @@ def _compute_stabilizers_single_block_unitary(
       used in the Choi state for clifford_func.
     :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
+    num_qubits = _get_qubit_number(clifford_func, num_selene_qubits)
 
     choi_prep = gen_choi_state(code, clifford_func, 1)
     n = code.num_physical_qubits
 
     @guppy
+    @expected_qubits(num_qubits)
     def main() -> None:
         controls, targets = choi_prep[comptime(n)]()
 
@@ -172,7 +189,10 @@ def _compute_stabilizers_double_block_unitary(
     choi_prep = gen_choi_state(code, clifford_func, 2)  # type: ignore[arg-type]
     n = code.num_physical_qubits
 
+    num_qubits = _get_qubit_number(clifford_func, num_selene_qubits)
+
     @guppy
+    @expected_qubits(num_qubits)
     def main() -> None:
         first_controls, first_targets, second_controls, second_targets = choi_prep[
             comptime(n)
