@@ -56,7 +56,7 @@ gen-extensions:
 
 # Build the Python Sphinx docs. The html pages are in the docs/build directory.
 build-docs:
-    uv run --group docs sphinx-build -b html docs docs/build
+    uv run --group docs sphinx-build -W -b html docs docs/build
 
 # Serve the docs html pages on a Python web server.
 serve-docs: build-docs
