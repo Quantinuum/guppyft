@@ -1,6 +1,6 @@
 from typing import no_type_check
 
-from guppylang import guppy
+from guppylang.decorator import expected_qubits, guppy
 from guppylang.std.array import array
 from guppylang.std.quantum import cx, discard, h, measure, measure_array, qubit, s, sdg
 
@@ -55,6 +55,7 @@ def implement_non_ft_zero_state() -> array[qubit, 7]:
 
 @guppy
 @no_type_check
+@expected_qubits(14)
 def implement_ft_zero_state() -> array[qubit, 7]:
     """Dummy fault-tolerant zero state preparation.
 
@@ -116,6 +117,7 @@ def implement_identity(block: array[qubit, 7]) -> None:
 
 @guppy
 @no_type_check
+@expected_qubits(8)
 def implement_identity_with_shor_extraction(block: array[qubit, 7]) -> None:
     # measure the ZZZZIII stabilizer
     ancilla = qubit()
@@ -134,6 +136,7 @@ def implement_identity_double_block(
 
 @guppy
 @no_type_check
+@expected_qubits(16)
 def implement_identity_double_block_with_shor_extraction(
     first_block: array[qubit, 7], second_block: array[qubit, 7]
 ) -> None:
@@ -161,6 +164,7 @@ def specify_h(block: array[qubit, 1]) -> None:
 
 @guppy
 @no_type_check
+@expected_qubits(8)
 def implement_h_with_ancilla(block: array[qubit, 7]) -> None:
     ancilla = qubit()
     for i in range(len(block)):
