@@ -5,6 +5,4 @@ can be directly encoded with Steane, i.e.:
 
 - are not `Module`-rooted;
 - have an entrypoint signature of `[] -> []`;
-- have only supported quantum operations;
-- are not `tests.integration.test_array-test_array_reverse_linear.hugr`, which
-  has a [known issue](https://github.com/quantinuum-dev/guppyft/issues/225).
+- have only supported quantum operations.
