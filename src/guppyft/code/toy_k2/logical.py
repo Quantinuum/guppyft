@@ -237,3 +237,167 @@ def prep_t_states_non_ft() -> "Block":
 
     The architecture uses these states to inject :math:`T` and :math:`T^\dagger` gates.
     """
+
+
+@guppy
+@no_type_check
+def cx_inter(ctrl_block: Block, ctrl_idx: int, tgt_block: Block, tgt_idx: int) -> None:
+    """Logical CX between two blocks, targeting the specified logical qubits.
+
+    Args:
+        ctrl_block: The logical block that acts as control.
+        ctrl_idx: The index of the logical qubit in the control block (0 or 1).
+        tgt_block: The logical block that acts as target.
+        tgt_idx: The index of the logical qubit in the target block (0 or 1).
+    """
+    if ctrl_idx == tgt_idx:
+        swap_intra(ctrl_block)
+
+    cx_transversal(ctrl_block, tgt_block)
+    cx_intra(tgt_block, tgt_idx)
+    cx_transversal(ctrl_block, tgt_block)
+    cx_intra(tgt_block, tgt_idx)
+
+    if ctrl_idx == tgt_idx:
+        swap_intra(ctrl_block)
+
+
+@guppy
+@no_type_check
+def h(block: Block, idx: int) -> None:
+    """Logical Hadamard gate on the specified logical qubit.
+
+    Args:
+        block: The logical block to apply the gate to.
+        idx: The index of the logical qubit to apply the gate to (0 or 1).
+    """
+    # Prepare an ancilla `|0+>` state, with the `|+>` on the index where we want
+    # to apply the Hadamard.
+    ancilla = Block()  # |00>
+    h_all(ancilla)  # |++>
+    # Project the other ancilla logical qubit to |0>
+    if measure_z(ancilla, 1 - idx).decode():
+        x(ancilla, idx)
+
+    # Use the ancilla state to introduce a Hadamard on the chosen index.
+    # This approach follows Fig 8A from https://arxiv.org/abs/2403.16054
+    # In the case where ancilla is |0>, the CX gates are cancelled and there is
+    # no effect on the logical qubit at that index.
+    # In the case where the ancilla is |+>, a H is applied on the block,
+    # up to a Z correction if the measurement outcome is 0 and X if it is 1.
+    cx_transversal(ancilla, block)
+    h_all(ancilla)
+    cx_transversal(block, ancilla)
+    m0, m1 = measure_z_all(ancilla).decode()
+    m = m0 if idx == 0 else m1
+
+    if m:
+        x(block, idx)
+    else:
+        z(block, idx)
+
+
+@guppy
+@no_type_check
+def s_all(block: Block) -> None:
+    """Logical S or Sdg gate on both logical qubits.
+
+    Args:
+        block: The logical block to apply the gate to.
+    """
+    y_states = prep_y_states_non_ft()
+
+    cx_transversal(block, y_states)
+    m0, m1 = measure_z_all(y_states).decode()
+
+    if m0:
+        z(block, 0)
+    if m1:
+        z(block, 1)
+
+
+@guppy
+@no_type_check
+def s(block: Block, idx: int) -> None:
+    """Logical S gate on the specified logical qubit.
+
+    Args:
+        block: The logical block to apply the gate to.
+        idx: The index of the logical qubit to apply the gate to (0 or 1).
+    """
+    y_states = prep_y_states_non_ft()
+
+    cx_inter(block, idx, y_states, idx)
+    m0, m1 = measure_z_all(y_states).decode()
+    m = m0 if idx == 0 else m1
+
+    if m:
+        z(block, idx)
+
+
+@guppy
+@no_type_check
+def sdg(block: Block, idx: int) -> None:
+    """Logical Sdg gate on the specified logical qubit.
+
+    Args:
+        block: The logical block to apply the gate to.
+        idx: The index of the logical qubit to apply the gate to (0 or 1).
+    """
+    x(block, idx)
+    s(block, idx)
+    x(block, idx)
+
+
+@guppy
+@no_type_check
+def t_all(block: Block) -> None:
+    """Logical T or Tdg gate on both logical qubits.
+
+    Args:
+        block: The logical block to apply the gate to.
+    """
+    t_states = prep_t_states_non_ft()
+
+    cx_transversal(block, t_states)
+    m0, m1 = measure_z_all(t_states).decode()
+
+    if m0 and m1:
+        s_all(block)
+    elif m0:
+        s(block, 0)
+    elif m1:
+        s(block, 1)
+
+
+@guppy
+@no_type_check
+def t(block: Block, idx: int) -> None:
+    """Logical T gate on the specified logical qubit.
+
+    Args:
+        block: The logical block to apply the gate to.
+        idx: The index of the logical qubit to apply the gate to (0 or 1).
+    """
+    t_states = prep_t_states_non_ft()
+
+    cx_inter(block, idx, t_states, idx)
+    m0, m1 = measure_z_all(t_states).decode()
+    m = m0 if idx == 0 else m1
+
+    if m:
+        s(block, idx)
+
+
+@guppy
+@no_type_check
+def tdg(block: Block, idx: int) -> None:
+    """Logical Tdg gate on the specified logical qubit.
+
+    Args:
+        block: The logical block to apply the gate to.
+        idx: The index of the logical qubit to apply the gate to (0 or 1).
+    """
+    x(block, idx)
+    t(block, idx)
+    x(block, idx)
