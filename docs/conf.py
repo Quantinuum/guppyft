@@ -45,6 +45,10 @@ myst_enable_extensions = [
     "amsmath",
 ]
 
+
+exclude_patterns = ["build/**", "jupyter_execute", ".jupyter_cache", "**/README.md"]
+
+
 # Sphinx autosummary
 # https://www.sphinx-doc.org/en/master/usage/extensions/autosummary.html
 
