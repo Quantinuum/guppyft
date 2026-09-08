@@ -2,7 +2,7 @@
 //! [Iceberg code](https://arxiv.org/abs/2211.06703).
 //!
 //! The extension `guppyft.iceberg.types` provides one new type: this is the
-//! code block for the [[k+2, k, 2]] Iceberg code (parametrized by an even
+//! code block for the $[[k+2, k, 2]]$ Iceberg code (parametrized by an even
 //! integer k >= 2). This is a linear (non-copyable) type.
 //!
 //! ```

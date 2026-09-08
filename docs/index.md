@@ -15,7 +15,23 @@ kernelspec:
 :hidden:
 
 examples_index.md
+```
+
+```{toctree}
+:maxdepth: 1
+:hidden:
+:caption: Python API
+
 api/api.md
+```
+
+```{toctree}
+:maxdepth: 1
+:hidden:
+:caption: Rust API
+
+rust/guppyft/lib
+rust/extensions/lib
 ```
 
 Guppy FT is an extension of the [Guppy](https://docs.quantinuum.com/guppy/) quantum programming language to enable fault-tolerant quantum programs.

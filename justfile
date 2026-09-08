@@ -66,5 +66,6 @@ serve-docs: build-docs
 clean-docs:
     rm -rf docs/build
     rm -rf docs/api/generated
+    rm -rf docs/rust
     rm -rf docs/jupyter_execute
     rm -rf docs/.jupyter_cache

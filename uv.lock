@@ -585,6 +585,7 @@ docs = [
     { name = "sphinx" },
     { name = "sphinx-copybutton" },
     { name = "sphinx-tabs" },
+    { name = "sphinxcontrib-rust" },
 ]
 lint = [
     { name = "mypy" },
@@ -624,6 +625,7 @@ docs = [
     { name = "sphinx", specifier = ">=9.1.0" },
     { name = "sphinx-copybutton", specifier = ">=0.5.2" },
     { name = "sphinx-tabs", specifier = ">=3.5.0" },
+    { name = "sphinxcontrib-rust", specifier = ">=1.2.1" },
 ]
 lint = [
     { name = "mypy", specifier = ">=2.3.1" },
@@ -2368,6 +2370,17 @@ sdist = { url = "https://files.pythonhosted.org/packages/68/bc/9104308fc285eb3e0
 wheels = [
     { url = "https://files.pythonhosted.org/packages/27/83/859ecdd180cacc13b1f7e857abf8582a64552ea7a061057a6c716e790fce/sphinxcontrib_qthelp-2.0.0-py3-none-any.whl", hash = "sha256:b18a828cdba941ccd6ee8445dbe72ffa3ef8cbe7505d8cd1fa0d42d3f2d5f3eb", size = 88743, upload-time = "2024-07-29T01:09:54.885Z" },
 ]
+
+[[package]]
+name = "sphinxcontrib-rust"
+version = "1.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "markdown-it-py" },
+    { name = "myst-parser" },
+    { name = "sphinx" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/0b/21/8b6e062d845dc429d63d856d53c758e367e3da524676236d8f06f9c5dd42/sphinxcontrib_rust-1.2.1.tar.gz", hash = "sha256:71ddb07f99d074549ccecc12924f844d415b4024bc469e95efff6d5c8ef3727d", size = 71419, upload-time = "2026-07-19T20:38:09.502Z" }
 
 [[package]]
 name = "sphinxcontrib-serializinghtml"
