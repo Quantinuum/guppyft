@@ -226,11 +226,19 @@ def test_guppy_hugr() -> None:
     # test will have to change: all the logical ops including `alloc_zero`
     # should appear under the entrypoint node. (Possibly we may need to append a
     # final `InlineFunctions()` pass to make that happen.)
-    assert {h[child].op.name() for child in children} >= {
+    assert {h[child].op.name() for child in children} == {
         "Input",
         "LoadFunc",  # loads the alloc_zero function
         "CallIndirect",
         "guppyft.iceberg.ops.all_h<8>",
+        "guppyft.iceberg.ops.measure_all<8>",
+        "guppyft.std.ops.decode<8>",
+        "Const(ConstUsize(0))",
+        "LoadConst",
+        "collections.borrow_arr.get<8, Type(Bool)>",
+        "Conditional",
+        'tket.result.result_bool<"m0">',
+        "tket.guppy.drop<Type(borrow_array<8, Type(Bool)>)>",
         "Output",
     }
     [all_h_node] = [child for child in children if "all_h" in h[child].op.name()]
