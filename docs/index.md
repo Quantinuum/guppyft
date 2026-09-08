@@ -21,15 +21,15 @@ Guppy FT is an extension of the [guppylang](https://github.com/Quantinuum/guppyl
 
 In Guppy FT, we refer to a QEC architecture as the combination of a QEC code
 definition, its collection of logical gadgets and their implementations, the
-compilation passes that let users encode their programs automatically, and
+program transformation passes that let users encode their programs automatically, and
 any code-specific policies used to manage resources at runtime, for instance
 automated QEC insertion and state factories.
 
 The purpose of Guppy FT is to provide tools for two kinds
 of users:
-* Users that wish to use QEC in their experiments, treating QEC
+* QEC-agnostic users that wish to use QEC in their experiments, treating QEC
 as a black-box pass they can apply to their program. (**TODO** link to end-to-end notebook).
-* Users that wish to co-design their experiments with particular QEC architectures,
+* Advanced users that wish to co-design their experiments with particular QEC architectures,
 having more control over how their program is encoded. (**TODO** link to logical notebook).
 
 Additionally, we encourage developers to define their own QEC architectures
@@ -37,21 +37,21 @@ following the Guppy FT framework, as described in (**TODO** link to QEC architec
 
 For the sake of separation of concerns, we find it useful to think about programs
 at three different levels of abstraction:
-* *Computational.* The program assumes a noiseless device and arbitrary gate set. This is the kind of program that the QEC-agnostic users write, using Guppy.
-* *Logical.* The program uses the gate set of the QEC architecture, using a logical Guppy library provided by the QEC architecture.
+* **Computational** - The program assumes a noiseless device and arbitrary gate set. This is the kind of program that the QEC-agnostic users write, using Guppy.
+* **Logical** - The program uses the gate set of the QEC architecture, using a logical Guppy library provided by the QEC architecture.
 The user may want to specify where to introduce QEC cycles and how to handle state preparation explicitly, or defer to automated methods.
-* *Physical.* The program with all of its logical gadgets implemented as physical circuits. These programs are ready for submission to a quantum device.
+* **Physical** - The program with all of its logical gadgets implemented as physical circuits. These programs are ready for submission to a quantum device.
 
 Guppy FT provides transformations to lower the user program through these levels of
 abstraction. We use the following naming convention:
-* `compile` refers to the transformation of a computational program into a logical program. It involves transforming the program to use the logical gate set, as well as introduce QEC cycles, magic state injection, etc.
+* `compile` refers to the transformation of a computational program into a logical program. It involves transforming the program to use the logical gate set, as well as introduce QEC cycles and resource state preparation.
 * `implement_ops` refers to the transformation of a logical program into a physical program. It involves linking the opaque logical gadget declarations to their physical implementation.
 * `encode` refers to the composition of the above, transforming a computational program all the way to physical.
 
 
 ## Installation
 
-As a Python package, [Guppy FT](https://pypi.org/project/guppyft/) can be installed from PyPI using `pip` or `uv`.
+As a Python package, `guppyft` can be installed from [PyPI](https://pypi.org/project/guppyft/) using `pip` or `uv`.
 
 ```{eval-rst}
 .. tabs::
@@ -120,5 +120,5 @@ The resulting package is runnable and fully compatible with `Selene`, locally or
 ```{code-cell} ipython3
 from selene_sim import Stim
 
-steane.emulator(teleportation.compile(), n_qubits=100).with_simulator(Stim()).run().collated_shots()
+steane.emulator(teleportation.compile(), n_qubits=22).with_simulator(Stim()).run().collated_shots()
 ```
