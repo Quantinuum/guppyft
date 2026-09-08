@@ -1,4 +1,4 @@
-"""Standard types and operations shared between codes."""
+"""Standard types and operations shared between QEC architectures."""
 
 from collections.abc import Callable, Sequence
 from typing import Generic, no_type_check

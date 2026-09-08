@@ -1,1 +1,1 @@
-"""Guppy bindings for the Steane code."""
+"""Steane QEC architecture."""

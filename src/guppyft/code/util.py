@@ -1,4 +1,4 @@
-"""Guppy bindings for generic types and operations."""
+"""Shared utilities, operations and types for use when defining QEC architectures."""
 
 from typing import Generic, no_type_check
 

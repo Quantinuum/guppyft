@@ -1,1 +1,1 @@
-"""Guppy bindings for logical types and operations."""
+"""QEC architectures and utilities."""
