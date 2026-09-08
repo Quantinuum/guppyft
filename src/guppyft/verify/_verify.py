@@ -331,31 +331,37 @@ def valid_stabilizer_state_preparation(
 
     .. code-block:: python
 
+        from guppylang import guppy
+        from guppylang.std.builtins import array
+        from guppylang.std.quantum import cx, h, qubit
+
         from guppyft.code_def import StabilizerCode
+        from guppyft.verify import valid_stabilizer_state_preparation
 
         CSS_4Q_DEF = StabilizerCode.from_python_strings(
             num_physical_qubits=4,
             num_logical_qubits=2,
             distance=2,
-            generators=["XZZX", "ZXXZ"],
-            x_logicals=["ZIXI", "IZIX"],
-            z_logicals=["IZZI", "ZIIZ"],
+            generators=["XXXX", "ZZZZ"],
+            x_logicals=["XXII", "XIXI"],
+            z_logicals=["IZIZ", "IIZZ"],
         )
+
 
         @guppy
         def specify_zero_state() -> array[qubit, 2]:
             return array(qubit() for _ in range(2))
 
+
         @guppy
         def implement_non_ft_zero_state() -> array[qubit, 4]:
             block = array(qubit() for _ in range(4))
             h(block[0])
-            h(block[1])
-            cz(block[0], block[2])
-            cz(block[1], block[3])
-            cx(block[1], block[2])
+            cx(block[0], block[1])
+            cx(block[0], block[2])
             cx(block[0], block[3])
             return block
+
 
         assert valid_stabilizer_state_preparation(
             specify_zero_state,
