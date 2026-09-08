@@ -260,8 +260,8 @@ def _compute_state_prep_tableaux(
       of a Clifford operator on k logical qubits.
     :param impl_function: A Guppy function for implementing
       the semantics on n physical qubits.
-    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters,
-        stabilizer generators and logical operators.
+    :param code_definition: A stabilizer code with well defined :math:`[[n, k, d]]`
+      parameters, stabilizer generators and logical operators.
     :param impl_num_ancillas: The number of ancilla qubits used in the
         implementation. Defaults to zero.
     :return: A pair of stabilizer tableaux made up of signed Pauli terms.
@@ -440,8 +440,8 @@ def valid_clifford_implementation(
       of a Clifford operator on one or two code blocks.
     :param impl_function: A Guppy function for implementing
       the semantics on one or two code blocks.
-    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters,
-        stabilizer generators and logical operators.
+    :param code_definition: A stabilizer code with well defined :math:`[[n, k, d]]`
+         parameters, stabilizer generators and logical operators.
     :param impl_num_ancillas: The number of ancilla qubits used in the
         implementation. Defaults to zero.
     :return: A Boolean indicating whether the implementation is valid.
