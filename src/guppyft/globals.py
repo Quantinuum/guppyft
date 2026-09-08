@@ -1,3 +1,5 @@
+"""Methods for handling global state."""
+
 import ast
 from collections.abc import Callable
 from typing import (
