@@ -213,7 +213,8 @@ def test_guppy_hugr() -> None:
     def main() -> None:
         b = Block[8]()
         b.all_h()
-        discard(b)
+        m = measure_all(b).decode()
+        result("m0", m[0])
 
     pkg = main.compile()
     h = pkg.modules[0]
@@ -230,7 +231,14 @@ def test_guppy_hugr() -> None:
         "LoadFunc",  # loads the alloc_zero function
         "CallIndirect",
         "guppyft.iceberg.ops.all_h<8>",
-        "guppyft.iceberg.ops.free<8>",
+        "guppyft.iceberg.ops.measure_all<8>",
+        "guppyft.std.ops.decode<8>",
+        "Const(ConstUsize(0))",
+        "LoadConst",
+        "collections.borrow_arr.get<8, Type(Bool)>",
+        "Conditional",
+        'tket.result.result_bool<"m0">',
+        "tket.guppy.drop<Type(borrow_array<8, Type(Bool)>)>",
         "Output",
     }
     [all_h_node] = [child for child in children if "all_h" in h[child].op.name()]
@@ -246,7 +254,8 @@ def test_guppy_types() -> None:
         b = Block[8]()
         bb, q_arr = borrow(b, array(0, 1, 2))
         b = restore(bb, q_arr)
-        discard(b)
+        m = measure_all(b).decode()
+        result("m0", m[0])
 
     pkg = main.compile()
     h = pkg.modules[0]
