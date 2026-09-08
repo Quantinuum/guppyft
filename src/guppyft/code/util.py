@@ -1,3 +1,5 @@
+"""Guppy bindings for generic types and operations."""
+
 from typing import Generic, no_type_check
 
 from guppylang import guppy
