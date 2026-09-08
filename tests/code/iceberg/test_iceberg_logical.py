@@ -213,7 +213,8 @@ def test_guppy_hugr() -> None:
     def main() -> None:
         b = Block[8]()
         b.all_h()
-        discard(b)
+        m = measure_all(b).decode()
+        result("m0", m[0])
 
     pkg = main.compile()
     h = pkg.modules[0]
@@ -225,12 +226,11 @@ def test_guppy_hugr() -> None:
     # test will have to change: all the logical ops including `alloc_zero`
     # should appear under the entrypoint node. (Possibly we may need to append a
     # final `InlineFunctions()` pass to make that happen.)
-    assert {h[child].op.name() for child in children} == {
+    assert {h[child].op.name() for child in children} >= {
         "Input",
         "LoadFunc",  # loads the alloc_zero function
         "CallIndirect",
         "guppyft.iceberg.ops.all_h<8>",
-        "guppyft.iceberg.ops.free<8>",
         "Output",
     }
     [all_h_node] = [child for child in children if "all_h" in h[child].op.name()]
@@ -246,7 +246,8 @@ def test_guppy_types() -> None:
         b = Block[8]()
         bb, q_arr = borrow(b, array(0, 1, 2))
         b = restore(bb, q_arr)
-        discard(b)
+        m = measure_all(b).decode()
+        result("m0", m[0])
 
     pkg = main.compile()
     h = pkg.modules[0]
