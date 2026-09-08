@@ -205,7 +205,7 @@ def with_global[G, **P, Ret](
     checker=_GlobalWithChecker(),
     compiler=_GlobalOpCompiler(_with_op_instantiate(GLOBAL_VAR_NAME)),
     higher_order_value=False,
-    effects=(Effect.ANY,),
+    effects=[Effect.ANY],
 )
 def with_global[G, **P, *R, Ret](  # type: ignore[empty-body]
     initial_state: G,
@@ -395,7 +395,7 @@ def map_global[G, **P](
     checker=_GlobalMapChecker(),
     compiler=_GlobalOpCompiler(_map_op_instantiate(GLOBAL_VAR_NAME)),
     higher_order_value=False,
-    effects=(Effect.ANY,),
+    effects=[Effect.ANY],
 )
 def map_global[G, **P, *R](  # type: ignore[empty-body]
     callback_func: Callable[Concatenate[G, P], G | tuple[G, *R]],
