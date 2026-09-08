@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, get_args, get_origin
+from typing import Any, get_args, get_origin, no_type_check
 
 from guppylang.decorator import expected_qubits, guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -68,7 +68,8 @@ def _compute_stabilizers_single_block_state(
     num_qubits = _get_qubit_number(state_prep_func, num_selene_qubits)
 
     @guppy
-    @expected_qubits(num_qubits)  # type: ignore[untyped-decorator]
+    @no_type_check
+    @expected_qubits(num_qubits)
     def main() -> None:
         block = state_prep_func()
         state_output("total", block)
@@ -95,7 +96,8 @@ def _compute_stabilizers_double_block_state(
     num_qubits = _get_qubit_number(state_prep_func, num_selene_qubits)
 
     @guppy
-    @expected_qubits(num_qubits)  # type: ignore[untyped-decorator]
+    @no_type_check
+    @expected_qubits(num_qubits)
     def main() -> None:
         block0, block1 = state_prep_func()
         state_output("block0", block0)
@@ -138,7 +140,8 @@ def _compute_stabilizers_single_block_unitary(
     n = code.num_physical_qubits
 
     @guppy
-    @expected_qubits(num_qubits + n)  # type: ignore[untyped-decorator]
+    @no_type_check
+    @expected_qubits(num_qubits + n)
     def main() -> None:
         controls, targets = choi_prep[comptime(n)]()
 
@@ -188,7 +191,8 @@ def _compute_stabilizers_double_block_unitary(
     num_qubits = _get_qubit_number(clifford_func, num_selene_qubits)
 
     @guppy
-    @expected_qubits(2 * (num_qubits + n))  # type: ignore[untyped-decorator]
+    @no_type_check
+    @expected_qubits(2 * (num_qubits + n))
     def main() -> None:
         first_controls, first_targets, second_controls, second_targets = choi_prep[
             comptime(n)
