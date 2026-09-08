@@ -7,6 +7,7 @@ from guppylang.std.lang import owned
 from guppylang.std.option import Option
 from guppylang.std.quantum import Measurement
 from guppylang_internals.decorator import custom_type, hugr_op
+from guppylang_internals.tys import Effect
 from guppylang_internals.tys.arg import Argument, ConstArg
 from guppylang_internals.tys.common import ToHugrContext
 from guppylang_internals.tys.param import ConstParam
@@ -51,7 +52,7 @@ M = guppy.nat_var("M")
 
 @_custom_block_type(iceberg_types.iceberg_block_def)
 class Block(Generic[N]):  # type: ignore[misc]
-    @hugr_op(_iceberg_op("alloc_zero"))
+    @hugr_op(_iceberg_op("alloc_zero"), effects=[Effect.ANY])
     @no_type_check
     def __new__() -> "Block[N]": ...
 
@@ -255,7 +256,7 @@ class Block(Generic[N]):  # type: ignore[misc]
 
 @custom_type(iceberg_types.iceberg_qubit(), copyable=False, droppable=False)
 class Qubit:
-    @hugr_op(_iceberg_op("alloc_dynq"))
+    @hugr_op(_iceberg_op("alloc_dynq"), effects=[Effect.ANY])
     @no_type_check
     def __new__() -> "Qubit": ...
 
@@ -327,7 +328,7 @@ class BorrowedBlock(Generic[N]):  # type: ignore[misc]
 
 @_custom_block_type(iceberg_types.iceberg_pre_block_def)
 class PreBlock(Generic[N]):  # type: ignore[misc]
-    @hugr_op(_iceberg_op("try_alloc_zero"))
+    @hugr_op(_iceberg_op("try_alloc_zero"), effects=[Effect.ANY])
     @no_type_check
     def __new__() -> "PreBlock[N]": ...
 
@@ -550,7 +551,7 @@ def cx_transversal(block0: Block[N], block1: Block[N]) -> None:
     """CX gate applied transversally over `block0` and `block1`."""
 
 
-@hugr_op(_iceberg_op("free"))
+@hugr_op(_iceberg_op("free"), effects=[Effect.ANY])
 @no_type_check
 def discard(block: Block[N] @ owned) -> None:
     """Free `block`."""
@@ -562,7 +563,7 @@ def measure_syndrome(block: Block[N]) -> tuple[Measurement, Measurement]:
     """Syndrome measurement."""
 
 
-@hugr_op(_iceberg_op("measure_all"))
+@hugr_op(_iceberg_op("measure_all"), effects=[Effect.ANY])
 @no_type_check
 def measure_all(block: Block[N] @ owned) -> LogicalMeasurement[N]:
     """Destructive measurement of all qubits in `block`."""
@@ -582,13 +583,13 @@ def try_measure_one_z(block: Block[N], i: int) -> Option[Measurement]:
     index `i`."""
 
 
-@hugr_op(_iceberg_op("try_alloc_dynq"))
+@hugr_op(_iceberg_op("try_alloc_dynq"), effects=[Effect.ANY])
 @no_type_check
 def try_alloc_dynq() -> Option[Qubit]:
     """Fallible allocation of a qubit in the zero state."""
 
 
-@hugr_op(_iceberg_op("free_dynq"))
+@hugr_op(_iceberg_op("free_dynq"), effects=[Effect.ANY])
 @no_type_check
 def free_dynq(qubit: Qubit @ owned) -> None:
     """Free `qubit`."""

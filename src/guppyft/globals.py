@@ -16,7 +16,6 @@ from guppylang_internals.checker.expr_checker import (
     synthesize_call,
 )
 from guppylang_internals.compiler.core import (
-    EXTENSION_OPS_WITH_SIDE_EFFECTS,
     CompilerContext,
 )
 from guppylang_internals.decorator import custom_function
@@ -28,6 +27,7 @@ from guppylang_internals.definition.custom import (
 from guppylang_internals.definition.value import CallReturnWires
 from guppylang_internals.error import GuppyTypeError
 from guppylang_internals.nodes import GlobalCall
+from guppylang_internals.tys import Effect
 from guppylang_internals.tys.common import ToHugrContext
 from guppylang_internals.tys.subst import Inst
 from guppylang_internals.tys.ty import (
@@ -57,14 +57,6 @@ from guppyft._errors import (
     get_callback_func_ast,
 )
 
-# Mark ops as having side effects to add order edges in the HUGR
-# when calls return None.
-# https://github.com/Quantinuum/guppylang/issues/1698
-if "tket.globals.with" not in EXTENSION_OPS_WITH_SIDE_EFFECTS:
-    EXTENSION_OPS_WITH_SIDE_EFFECTS.append("tket.globals.with")
-if "tket.globals.map" not in EXTENSION_OPS_WITH_SIDE_EFFECTS:
-    EXTENSION_OPS_WITH_SIDE_EFFECTS.append("tket.globals.map")
-
 GLOBAL_VAR_NAME = "guppy_ft_global"
 
 G = TypeVar("G")
@@ -84,7 +76,7 @@ class _GlobalOpCompiler(CustomInoutCallCompiler):
     @override
     def compile_with_inouts(self, args: list[Wire]) -> CallReturnWires:
         op = self.op(self.ty, self.type_args, self.ctx)
-        node = self.builder.add_op(op, *args)
+        node = self.builder.add_op((op, self.func.effects), *args)
         num_returns = len(self.ty.output)
         return CallReturnWires(
             regular_returns=list(node[:num_returns]),
@@ -171,8 +163,8 @@ class _GlobalWithChecker(CustomCallChecker):
         )
 
         # Use default implementation from the expression checker
-        args, ty, inst = synthesize_call(func_ty, args, self.node, self.ctx)
-        return GlobalCall(def_id=self.func.id, args=args, type_args=inst), ty
+        args, ty, inst = synthesize_call(func_ty, args, self.node, self.ctx, self.func)
+        return GlobalCall(self.func, args, inst), ty
 
 
 def _with_op_instantiate(
@@ -213,6 +205,7 @@ def with_global[G, **P, Ret](
     checker=_GlobalWithChecker(),
     compiler=_GlobalOpCompiler(_with_op_instantiate(GLOBAL_VAR_NAME)),
     higher_order_value=False,
+    effects=[Effect.ANY],
 )
 def with_global[G, **P, *R, Ret](  # type: ignore[empty-body]
     initial_state: G,
@@ -382,8 +375,8 @@ class _GlobalMapChecker(CustomCallChecker):
         )
 
         # Use default implementation from the expression checker
-        args, ty, inst = synthesize_call(func_ty, args, self.node, self.ctx)
-        return GlobalCall(def_id=self.func.id, args=args, type_args=inst), ty
+        args, ty, inst = synthesize_call(func_ty, args, self.node, self.ctx, self.func)
+        return GlobalCall(self.func, args, inst), ty
 
 
 @overload
@@ -402,6 +395,7 @@ def map_global[G, **P](
     checker=_GlobalMapChecker(),
     compiler=_GlobalOpCompiler(_map_op_instantiate(GLOBAL_VAR_NAME)),
     higher_order_value=False,
+    effects=[Effect.ANY],
 )
 def map_global[G, **P, *R](  # type: ignore[empty-body]
     callback_func: Callable[Concatenate[G, P], G | tuple[G, *R]],
