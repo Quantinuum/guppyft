@@ -44,7 +44,7 @@ The user may want to specify where to introduce QEC cycles and how to handle sta
 
 Guppy FT provides transformations to lower the user program through these levels of
 abstraction. We use the following naming convention:
-* `compile` refers to the transformation of a computational program into a logical program. It involves transforming the program to use the logical gate set, as well as introduce QEC cycles and resource state preparation.
+* `compile` refers to the transformation of a computational program into a logical program. It involves transforming the program to use the logical gate set, as well as introducing QEC cycles and resource state preparation.
 * `implement_ops` refers to the transformation of a logical program into a physical program. It involves linking the opaque logical gadget declarations to their physical implementation.
 * `encode` refers to the composition of the above, transforming a computational program all the way to physical.
 
@@ -115,7 +115,8 @@ With our Steane architecture instance, we can encode our program using {py:func}
 pkg = steane.encode(teleportation.compile())
 ```
 
-The resulting package is runnable and fully compatible with `Selene`, locally or through `Nexus`, and running on production hardware. `SteaneInstance` includes an `emulator` helper method to aid with emulating the resulting encoded program locally. Below, we demonstrate simulating our encoded program using `Stim`:
+The resulting package is runnable and fully compatible with `Selene`, locally or through `Nexus` cloud, and can
+be submitted to quantum devices. `SteaneInstance` includes an `emulator` helper method to aid with emulating the resulting encoded program locally. Below, we demonstrate simulating our encoded program using `Stim`:
 
 ```{code-cell} ipython3
 from selene_sim import Stim
