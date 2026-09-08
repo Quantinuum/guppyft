@@ -42,7 +42,9 @@ def _invoke_selene_stim(
     return seeded_stim_instance.extract_states_dict(output)
 
 
-def _get_qubit_number(func: GuppyFunctionDefinition[Any, Any], num_qubits: int) -> int:
+def _get_num_func_qubits(
+    func: GuppyFunctionDefinition[Any, Any], num_qubits: int
+) -> int:
     try:
         num_qubits = func.wrapped.metadata._node_metadata[  # type: ignore[attr-defined]
             "tket.hint.expected_qubits"
@@ -65,7 +67,7 @@ def _compute_stabilizers_single_block_state(
     :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
 
-    num_qubits = _get_qubit_number(state_prep_func, num_selene_qubits)
+    num_qubits = _get_num_func_qubits(state_prep_func, num_selene_qubits)
 
     @guppy
     @no_type_check
@@ -93,11 +95,11 @@ def _compute_stabilizers_double_block_state(
           used in state_prep_func.
     :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
-    num_qubits = _get_qubit_number(state_prep_func, num_selene_qubits)
+    num_func_qubits = _get_num_func_qubits(state_prep_func, num_selene_qubits)
 
     @guppy
     @no_type_check
-    @expected_qubits(num_qubits)
+    @expected_qubits(num_func_qubits)
     def main() -> None:
         block0, block1 = state_prep_func()
         state_output("block0", block0)
@@ -107,7 +109,7 @@ def _compute_stabilizers_double_block_state(
         discard_array(block0)
         discard_array(block1)
 
-    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(main, num_qubits)
+    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(main, num_func_qubits)
 
     # This is a hack so that we can get a state_output over both blocks
     total = states_dict["total"]
@@ -134,14 +136,14 @@ def _compute_stabilizers_single_block_unitary(
       used in the Choi state for clifford_func.
     :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
     """
-    num_qubits = _get_qubit_number(clifford_func, num_selene_qubits)
+    num_func_qubits = _get_num_func_qubits(clifford_func, num_selene_qubits)
 
     choi_prep = gen_choi_state(code, clifford_func, 1)
     n = code.num_physical_qubits
 
     @guppy
     @no_type_check
-    @expected_qubits(num_qubits + n)
+    @expected_qubits(num_func_qubits + n)
     def main() -> None:
         controls, targets = choi_prep[comptime(n)]()
 
@@ -153,7 +155,7 @@ def _compute_stabilizers_single_block_unitary(
         discard_array(targets)
 
     states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
-        main, num_selene_qubits=num_qubits + n
+        main, num_selene_qubits=num_func_qubits + n
     )
 
     # This is a hack so that we can get a state_output over both the
@@ -188,11 +190,11 @@ def _compute_stabilizers_double_block_unitary(
     choi_prep = gen_choi_state(code, clifford_func, 2)  # type: ignore[arg-type]
     n = code.num_physical_qubits
 
-    num_qubits = _get_qubit_number(clifford_func, num_selene_qubits)
+    num_func_qubits = _get_num_func_qubits(clifford_func, num_selene_qubits)
 
     @guppy
     @no_type_check
-    @expected_qubits(2 * (num_qubits + n))
+    @expected_qubits(2 * (num_func_qubits + n))
     def main() -> None:
         first_controls, first_targets, second_controls, second_targets = choi_prep[
             comptime(n)
@@ -212,7 +214,7 @@ def _compute_stabilizers_double_block_unitary(
         discard_array(second_targets)
 
     states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
-        main, 2 * (num_qubits + n)
+        main, 2 * (num_func_qubits + n)
     )
 
     # Using a hack to get the state_output across four code blocks. See the
