@@ -14,6 +14,7 @@ kernelspec:
 :maxdepth: 1
 :hidden:
 
+architecture_dev.md
 examples_index.md
 api/api.md
 ```

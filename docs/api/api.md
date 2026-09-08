@@ -8,6 +8,7 @@
     :nosignatures:
 
     guppyft
+    guppyft.code._state_factory
 
 Indices and tables
 ~~~~~~~~~~~~~~~~~~
