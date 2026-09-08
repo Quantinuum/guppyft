@@ -126,3 +126,29 @@ def test_guppy_hugr() -> None:
     [h_node] = [child for child in children if "h" in h[child].op.name()]
     assert len(list(h.incoming_links(h_node))) == 1  # CallIndirect
     assert len(list(h.outgoing_links(h_node))) == 1  # free
+
+
+def test_non_primitive_logicals_smoke() -> None:
+    """Smoke test: use non-primitive logicals functions to construct a logical
+    HUGRs, and check that we can run compilation passes on the result.."""
+
+    @guppy
+    def main() -> None:
+        blk0, blk1 = k2.Block(), k2.Block()
+
+        k2.cx_inter(blk0, 0, blk1, 1)
+        k2.h(blk0, 0)
+        k2.s_all(blk1)
+        k2.s(blk0, 0)
+        k2.sdg(blk1, 1)
+        k2.t_all(blk0)
+        k2.t(blk0, 0)
+        k2.tdg(blk1, 1)
+
+        k2.free(blk0)
+        k2.free(blk1)
+
+    pkg = main.compile()
+    h = pkg.modules[0]
+    Normalize()(h, inplace=True)
+    InlineFunctions()(h, inplace=True)
