@@ -52,7 +52,7 @@ teleport_encoded = steane.encode(teleport.compile())
 
 ## Installation
 
-Setup a virtual environment and install dependencies using:
+Set up a virtual environment and install dependencies using:
 
 ```bash
 uv sync
