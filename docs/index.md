@@ -31,7 +31,7 @@ of users:
 * QEC-agnostic users that wish to use QEC in their experiments, treating QEC
 as a black-box pass they can apply to their program. (**TODO** link to end-to-end notebook).
 * Advanced users that wish to co-design their experiments with particular QEC architectures,
-having more control over how their program is encoded. (**TODO** link to logical notebook).
+having more control over how their program is encoded. ({doc}`/examples/logical_program`).
 
 Additionally, we encourage developers to define their own QEC architectures
 following the Guppy FT framework, as described in (**TODO** link to QEC architecture dev guide).
