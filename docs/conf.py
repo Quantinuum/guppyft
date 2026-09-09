@@ -1,6 +1,6 @@
 import guppyft  # noqa: INP001
 
-html_title = f"GuppyFT v{guppyft.__version__} Documentation"
+html_title = f"Guppy FT v{guppyft.__version__} Documentation"
 
 html_theme = "quantinuum_sphinx"
 html_theme_options = {
@@ -25,6 +25,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.intersphinx",
     "quantinuum_sphinx",
+    "sphinx_copybutton",
 ]
 
 # --- MyST-NB config ---
@@ -35,6 +36,14 @@ nb_execution_raise_on_error = True  # Cell execution failures are errors not war
 nb_execution_timeout = 90  # Cells which take >90s give timeout error.
 nb_merge_streams = True  # Accumulates all stdout streams into one, same with stderr
 # ----------------------
+
+myst_enable_extensions = [
+    "dollarmath",
+    "html_image",
+    "attrs_inline",
+    "colon_fence",
+    "amsmath",
+]
 
 # Sphinx autosummary
 # https://www.sphinx-doc.org/en/master/usage/extensions/autosummary.html

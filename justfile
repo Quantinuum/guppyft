@@ -28,6 +28,10 @@ test-rust *TEST_ARGS: _check_nextest_installed
 test-python *PYTEST_FLAGS:
     uv run pytest -n auto {{ PYTEST_FLAGS }}
 
+# Run the Python tests including those marked as "long".
+test-python-long *PYTEST_FLAGS:
+    GUPPYFT_RUN_LONG_TESTS=true uv run pytest -n auto {{ PYTEST_FLAGS }}
+
 # Auto-fix lint issues.
 fix: fix-rust fix-python
 # Auto-fix all rust clippy warnings.
@@ -52,7 +56,7 @@ gen-extensions:
 
 # Build the Python Sphinx docs. The html pages are in the docs/build directory.
 build-docs:
-    uv run --group docs sphinx-build -b html docs docs/build
+    uv run --group docs sphinx-build -W -b html docs docs/build
 
 # Serve the docs html pages on a Python web server.
 serve-docs: build-docs
