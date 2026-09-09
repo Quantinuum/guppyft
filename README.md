@@ -4,7 +4,7 @@ Guppy FT is an extension of the [Guppy](https://github.com/Quantinuum/guppylang)
 with writing, compiling and running fault-tolerant quantum programs. As a toolkit, it provides:
 
 - A framework to define QEC architectures
-- Transformations between computational, logical and physical quantum programs
+- Transformations through quantum program abstraction layers: From computational to logical to physical
 - Verification tools to validate QEC primitive implementations
 
 Together, this enables automatic encoding of arbitrary Guppy programs, including measurement dependent control flow.
