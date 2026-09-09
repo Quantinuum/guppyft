@@ -30,12 +30,15 @@ automated QEC insertion and state factories.
 The purpose of Guppy FT is to provide tools for two kinds
 of users:
 * QEC-agnostic users that wish to use QEC in their experiments, treating QEC
-as a black-box pass they can apply to their program. (**TODO** link to end-to-end notebook).
+as a black-box pass they can apply to their program. See the notebook example:
+{doc}`examples/steane_encoding`.
 * Advanced users that wish to co-design their experiments with particular QEC architectures,
-having more control over how their program is encoded. ({doc}`/examples/logical_program`).
+having more control over how their program is encoded. See the notebook example:
+{doc}`/examples/logical_program`.
 
 Additionally, we encourage developers to define their own QEC architectures
-following the Guppy FT framework, as described in (**TODO** link to QEC architecture dev guide).
+following the Guppy FT framework, as described in the
+[QEC architecture developer guide](architecture_dev.md).
 
 For the sake of separation of concerns, we find it useful to think about programs
 at three different levels of abstraction:
