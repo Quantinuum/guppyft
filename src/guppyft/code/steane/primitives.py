@@ -25,7 +25,6 @@ __all__ = [
     "cx",
     "cz",
     "decode",
-    "get_syndrome",
     "h",
     "inject_t",
     "inject_tdg",
