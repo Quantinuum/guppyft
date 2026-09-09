@@ -12,6 +12,7 @@ maintainers = [
     { name = "TKET development team", email = "tket-support@quantinuum.com" },
 ]
 classifiers = [
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: 3 :: Only",
@@ -35,13 +36,13 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "maturin>=1.14.0,<2",
+    "maturin>=1.15.0,<2",
     { include-group = "lint" },
     { include-group = "test" },
 ]
 docs = [
     "myst-nb>=1.4.0",
-    "quantinuum-sphinx>=1.11.3",
+    "quantinuum-sphinx>=1.12.0",
     "sphinx>=9.1.0",
     "ipykernel",
     "sphinx-tabs>=3.5.0",
@@ -64,7 +65,7 @@ allow_redefinition = true
 exclude = ["tests/error"]
 
 [build-system]
-requires = ["maturin>=1.14.0,<2.0"]
+requires = ["maturin>=1.15.0,<2.0"]
 build-backend = "maturin"
 
 [tool.maturin]

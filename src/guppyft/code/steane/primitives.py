@@ -1,31 +1,71 @@
-"""Steane architecture based on https://arxiv.org/abs/2107.07505"""
+"""Implementations of primitives for the Steane QEC architecture.
 
-from typing import no_type_check
+Primitives should be restricted to the most fundamental building blocks of a
+QEC architecture. Operations that comprise multiple primitives should be added to
+:py:mod:`~guppyft.code.steane.logical` instead.
+
+Based on https://arxiv.org/abs/2107.07505"""
+
+from typing import Generic, no_type_check
 
 from guppylang import guppy
 from guppylang.library import link_name
 from guppylang.std import quantum as qlib
 from guppylang.std.angles import pi
-from guppylang.std.builtins import array, comptime, owned
+from guppylang.std.builtins import Measurement, array, comptime, owned
 from guppylang.std.mem import mem_swap
 
-from guppyft.code._state_factory import PreBlock
-from guppyft.code.util import LogicalBlock, RawMeasurement, parity_check
+from guppyft.std import LogicalBlock
+from guppyft.std.state_factory import PreBlock
+
+__all__ = [
+    "RawMeasurement",
+    "cx",
+    "cz",
+    "decode",
+    "h",
+    "inject_t",
+    "inject_tdg",
+    "knill_qec_cycle",
+    "measure_z",
+    "prep_t_state_ft",
+    "prep_zero_ft",
+    "prep_zero_non_ft",
+    "s",
+    "sdg",
+    "steane_x_qec_cycle",
+    "steane_z_qec_cycle",
+    "x",
+    "y",
+    "z",
+]
 
 # ZZZZIII -> 0, 1, 2, 3
 # IZZIZZI -> 1, 2, 4, 5
 # IIZZIZZ -> 2, 3, 5, 6
-stabilizer_indices = [
+_stabilizer_indices = [
     [0, 1, 2, 3],
     [1, 2, 4, 5],
     [2, 3, 5, 6],
 ]
 
+N = guppy.nat_var("N")
+
+
+@guppy
+@no_type_check
+def _parity_check(data_bits: array[bool, N]) -> bool:
+    """Compute the XOR (parity) of all bits in ``data_bits``."""
+    out = False
+    for i in range(N):
+        out ^= data_bits[i]
+    return out
+
 
 @guppy
 @no_type_check
 def prep_zero_non_ft() -> LogicalBlock[7]:
-    """Prepare Steane blk in the logical zero state."""
+    """Prepare Steane block in the logical zero state."""
     blk = LogicalBlock(array(qlib.qubit() for _ in range(7)))
 
     plus_ids = array(0, 4, 6)
@@ -161,11 +201,11 @@ def _prep_h_non_ft() -> LogicalBlock[7]:
 
     arr = array(qlib.qubit() for _ in range(7))
     # Prepare qubit `1` in the |H> = Ry(pi/4)|0> state
-    qlib.ry(arr[relabel[0]], pi / 4)  # 1
+    qlib.ry(arr[relabel[0]], pi / 4)
     # Prepare qubits that start in |+> state.
-    qlib.h(arr[relabel[1]])  # 0
-    qlib.h(arr[relabel[2]])  # 4
-    qlib.h(arr[relabel[5]])  # 6
+    qlib.h(arr[relabel[1]])
+    qlib.h(arr[relabel[2]])
+    qlib.h(arr[relabel[5]])
     # Apply the CNOTs
     cx_pairs = array(
         (0, 6),
@@ -269,10 +309,10 @@ def inject_tdg(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
 
 @guppy
 @no_type_check
-def get_syndrome(data_bits: array[bool, 7]) -> array[bool, 3]:
+def _get_syndrome(data_bits: array[bool, 7]) -> array[bool, 3]:
     return array(
-        parity_check(array(data_bits[i] for i in stab))
-        for stab in comptime(stabilizer_indices)
+        _parity_check(array(data_bits[i] for i in stab))
+        for stab in comptime(_stabilizer_indices)
     )
 
 
@@ -346,6 +386,17 @@ def steane_x_qec_cycle(q: LogicalBlock[7], a: LogicalBlock[7] @ owned) -> None:
         z(q)
 
 
+N = guppy.nat_var("N")
+
+
+@guppy.struct(frozen=True)
+class RawMeasurement(Generic[N]):  # type: ignore[misc]
+    """An immutable Guppy struct of ``N`` measurement outcomes of the
+    physical qubits in a logical block."""
+
+    measurements: array[Measurement, N]  # type: ignore[valid-type]
+
+
 @guppy
 @no_type_check
 def measure_z(blk: LogicalBlock[7] @ owned) -> RawMeasurement[7]:
@@ -359,8 +410,8 @@ def measure_z(blk: LogicalBlock[7] @ owned) -> RawMeasurement[7]:
 def decode(m: RawMeasurement[7] @ owned) -> bool:
     """Decode Steane measurement of logical block"""
     meas = qlib.collect_measurements(m.measurements)
-    synds = get_syndrome(meas)
-    logical_meas = parity_check(meas)
+    synds = _get_syndrome(meas)
+    logical_meas = _parity_check(meas)
     logical_meas ^= synds[0] or synds[1] or synds[2]
 
     return logical_meas

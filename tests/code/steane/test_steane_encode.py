@@ -194,6 +194,15 @@ def test_annotate_steane_encoding() -> None:
     }
 
 
+def test_builder_from_params() -> None:
+    @guppy
+    def main() -> None:
+        q0 = qubit()
+        discard(q0)
+
+    SteaneBuilder.from_params(SteaneEncoderParams(n_blocks=1)).encode(main.compile())
+
+
 def test_collect_measurement_encode() -> None:
     # We are using `ReplaceTypes` to replace a logical steane measurement with a borrow
     # array of measurements. As borrow arrays are always linear, this means we are

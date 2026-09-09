@@ -22,15 +22,16 @@ from guppyft.encode import ReplacementCompiler
 
 @dataclass(frozen=True, kw_only=True)
 class ComparatorRzDecomposer(ComposablePass):
-    """Decomposes Rz gates using $2*ceil(log2(1/epsilon))$ ancilla qubits via
-    comparators and repeat-until-success. Introduces Toffoli gates.
+    """Decomposes Rz gates using :math:`2\\lceil(\\log_2(1/\\epsilon))\\rceil` ancilla
+    qubits via comparators and repeat-until-success. Introduces Toffoli gates.
     Can be used to decompose angles at runtime.
     See https://arxiv.org/pdf/2404.05618."""
 
     epsilon: float
 
     def num_ancilla(self) -> int:
-        """Number of ancilla qubits required for the target precision (epsilon)."""
+        """Number of ancilla qubits required for the
+        target precision (:math:`\\epsilon`)."""
         return n_comparator_based_rz_cascade_ancillas(self.epsilon)
 
     def run(self, hugr: Hugr[Any], *, inplace: bool = True) -> PassResult:
