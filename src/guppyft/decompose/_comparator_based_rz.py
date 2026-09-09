@@ -73,7 +73,7 @@ def temp_and_compute(q0: qubit, q1: qubit, t_qubit: qubit) -> None:
     Args:
         q0 (qubit): The first input qubit.
         q1 (qubit): The second input qubit.
-        t_qubit (qubit): The target qubit to store the result. Begins in $\ket{0}$
+        t_qubit (qubit): Target qubit to store the result. Begins in :math:`\\ket{0}`
 
     """
     # Prepare T|+> state
@@ -212,23 +212,23 @@ class ComparatorBasedRz[
         Drop,
     ),
 ]:
-    r"""Apply an approximate $R_z$ rotation using comparator-based RUS.
+    r"""Apply an approximate :math:`R_z` rotation using comparator-based RUS.
 
     Implements Algorithm 1 from arXiv:2404.05618, "Single-qubit rotation
     algorithm with logarithmic Toffoli count and gate depth". The algorithm
-    uses a repeat-until-success approach to approximate $R_z(\theta)$ within
-    error $\varepsilon$. Its success probability is greater than $1/2$.
+    uses a repeat-until-success approach to approximate :math:`R_z(\\theta)` within
+    error :math:`\\varepsilon`. Its success probability is greater than :math:`1/2`.
 
     Algorithm:
 
-    1. Compute $n = 1 + \lceil \log_2(1/\varepsilon) \rceil$ and
-       $k = 2^{n-1} + \lfloor 2^{n-1} \tan(\theta/2) + 1/2 \rfloor$.
-    2. Prepare register $a$ in superposition $|+\rangle^{\otimes n}$.
-    3. Perform the comparison $a \geq k$ on the target qubit.
-    4. Apply an $S$ gate to the target qubit.
+    1. Compute :math:`n = 1 + \\lceil \\log_2(1/\\varepsilon) \\rceil` and
+       :math:`k = 2^{n-1} + \\lfloor 2^{n-1} \\tan(\\theta/2) + 1/2 \\rfloor`.
+    2. Prepare register :math:`a` in superposition :math:`|+\\rangle^{\\otimes n}`.
+    3. Perform the comparison :math:`a \\geq k` on the target qubit.
+    4. Apply an :math:`S` gate to the target qubit.
     5. Apply the inverse comparison to the target qubit.
-    6. Measure register $a$: if all results are zero, succeed; otherwise apply
-       $Z$ and retry.
+    6. Measure register :math:`a`: if all results are zero, succeed; otherwise apply
+       :math:`Z` and retry.
 
     This struct is generic over the comparator method: any concrete type that
     implements the :class:`ConstantComparator` protocol can be used. The
