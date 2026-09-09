@@ -222,7 +222,7 @@ class ComparatorBasedRz[
     Algorithm:
 
     1. Compute :math:`n = 1 + \\lceil \log_2(1/\varepsilon) \\rceil` and
-       :math:`k = 2^{n-1} + \\lfloor 2^{n-1} \tan(\\theta/2) + 1/2 \\rfloor`.
+       :math:`k = 2^{n-1} + \\lfloor 2^{n-1} \\tan(\\theta/2) + 1/2 \\rfloor`.
     2. Prepare register :math:`a` in superposition :math:`|+\rangle^{\\otimes n}`.
     3. Perform the comparison :math:`a \\geq k` on the target qubit.
     4. Apply an :math:`S` gate to the target qubit.
