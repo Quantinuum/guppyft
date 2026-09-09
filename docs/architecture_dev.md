@@ -91,19 +91,17 @@ The steps for defining a logical API are the following:
 1. **Logical HUGR extensions** - Define logical operations and types to build HUGRs.
    This enables creating logical HUGRs, as well as implementing compilation
    and optimisation passes that transform them.
-   * Generate two HUGR extensions using Rust: one for the operations and one for the types
-     required by the architecture.
-   * Follow the Steane examples
+   * Generate two HUGR extensions using Rust: one for the operations and one for the
+     types required by the architecture. The extensions are separated so that they can
+     be versioned separately. Follow the Steane examples
      for [`ops.rs`](https://github.com/quantinuum-dev/guppyft/blob/main/extensions/src/steane/ops.rs)
      and [`types.rs`](https://github.com/quantinuum-dev/guppyft/blob/main/extensions/src/steane/types.rs).
-   * The extensions are separated so that they can be versioned separately.
    * Run `just gen-extensions` to automatically generate the JSON files of the HUGR
      extension.
 2. **Logical Guppy bindings** - Provide the Guppy interface to create programs
    directly at the logical level.
-   * Follow the pattern in {py:mod}`guppyft.code.steane.logical`.
-   * The logical operations of the code include bindings for the operations and
-     types in the HUGR extensions.
+   * Follow the pattern in {py:mod}`guppyft.code.steane.logical`. The logical operations
+     of the code include bindings for the operations and types in the HUGR extensions.
    * Additionally, developers may define composite logical operations.
      These composite operations should be written in terms
      of other logical operations, and should not include any `guppylang.std.quantum`
@@ -112,14 +110,13 @@ The steps for defining a logical API are the following:
      injection.
 3. **Define resource structures** - Provide structures to manage logical resources
    at runtime, such as resource state generation. These resources will be
-   architecture-dependent and are optional.
-   * The Steane architecture uses state factories to parallelize preparation of
-     $\ket{0}$ and $T\ket{+}$ states.
-   * A {py:class}`~guppyft.std.state_factory.PreBlock` Guppy struct wraps the
-     logical block together with the flag measurements.
-   * The {py:class}`~guppyft.std.state_factory.StateFactory` then manages
-     parallel preparation of `PreBlock`s.
-   * Similar resources could be defined to manage logical measurements or QEC cycles.
+   architecture-dependent and are optional. For example, the Steane architecture uses
+   state factories to parallelize preparation of $\ket{0}$ and $T\ket{+}$ states. A
+   {py:class}`~guppyft.std.state_factory.PreBlock` Guppy struct wraps the logical
+   block together with the flag measurements. The
+   {py:class}`~guppyft.std.state_factory.StateFactory` then manages parallel
+   preparation of `PreBlock`s. Similar resources could be defined to manage logical
+   measurements or QEC cycles.
 4. **Transformation passes** - Define transformation passes between the
    computational, logical and physical abstraction layers. Depending on the chosen
    target milestone, these may be optional.
