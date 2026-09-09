@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.1](https://github.com/Quantinuum/guppyft/compare/v0.1.0...v0.1.1) (2026-09-09)
+
+Re-releasing due to a version number clash with the empty name reservation package.
+
+
 ## [0.1.0](https://github.com/Quantinuum/guppyft/compare/v0.0.8...v0.1.0) (2026-09-09)
 
 
