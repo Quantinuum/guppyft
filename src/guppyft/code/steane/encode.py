@@ -198,6 +198,11 @@ class SteaneBuilder:
     )
     _qec_policy: QECPolicy = field(default_factory=QECPolicy)
 
+    @classmethod
+    def from_params(cls, params: SteaneEncoderParams) -> SteaneInstance:
+        """Build a Steane instance from encoding parameters."""
+        return cls().build(params.n_blocks)
+
     def _gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
         """Generate the `ImplementOpsSpec` providing Steane implementations of
         logical ops for a program using `n_blocks` logical blocks."""
