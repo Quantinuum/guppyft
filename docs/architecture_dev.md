@@ -61,7 +61,7 @@ primitives together, and easily replace them with alternative implementations.
 Compositions of primitives into logical gadgets, such as a $T$ gate, belong to
 the [logical API](#logical-api) as convenience functions.
 
-Where primitives require measurements, be mindful of where
+For primitives that require measurements, be mindful of where
 {py:meth}`~guppylang.std.quantum.Measurement.read` is called. This statement causes
 the program to block until the outcome is available, and this can be an obstacle for
 parallelization. When writing primitives, ensure you defer calling
