@@ -5,7 +5,7 @@ with writing, compiling and running fault-tolerant quantum programs.
 
 ## Installation
 
-Setup a virtual environment and install dependencies using:
+Set up a virtual environment and install dependencies using:
 
 ```bash
 uv sync
