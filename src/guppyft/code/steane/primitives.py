@@ -57,15 +57,10 @@ def _stabilizer_indices() -> list[list[int]]:
     """Report all support sets that exist in the Steane codes generators. Values are
     unique but reported as a nested list so that Guppy can understand them."""
 
-    indices = set()
-    for i, gen in enumerate(CODE_DEF.generators):
-        if i < 3:
-            # Zixy does not yet support slicing, and we want to skip the first three
-            # generators since we only care about the z stabilisers.
-            continue
-        indices.add(
-            frozenset([j for j, p in enumerate(gen.cmpnt.get_tuple()) if p != pauli.I])  # type: ignore[attr-defined]
-        )
+    indices = {
+        frozenset([i for i, p in enumerate(gen.cmpnt.get_tuple()) if p != pauli.I])  # type: ignore[attr-defined]
+        for gen in CODE_DEF.generators
+    }
 
     return [list(idxs) for idxs in indices]
 
