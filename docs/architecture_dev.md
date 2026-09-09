@@ -68,7 +68,7 @@ parallelization. When writing primitives ensure you defer calling
 {py:meth}`~guppylang.std.quantum.Measurement.read` on measurements as late as possible.
 
 To see an example of how to defer measurements to maximize parallelism, see the
-fault-tolerant $\ket{H}$ state preparation in the Steane architecture
+fault-tolerant $T\ket{+}$ state preparation in the Steane architecture
 {py:mod}`~guppyft.code.steane.primitives`. We wrap the logical block in a Guppy
 {py:class}`~guppyft.code._state_factory.PreBlock` struct that contains an array
 of {py:class}`~guppylang.std.quantum.Measurement` and a
@@ -103,13 +103,13 @@ The steps for defining a logical API are the following:
    directly at the logical level.
    * Follow the pattern in {py:mod}`guppyft.code.steane.logical`.
    * The logical operations of the code include bindings for the operations and
-     types in the HUGR extensions, as well as composite operations built from
-     logical operations.
-   * An example of a composite operation in the Steane architecture is
+     types in the HUGR extensions.
+   * Additionally, developers may define composite logical operations.
+     These composite operations should be written in terms
+     of other logical operations, and should not include any `guppylang.std.quantum`
+     operations An example of a composite operation in the Steane architecture is
      {py:func}`guppyft.code.steane.logical.t` that is performed through magic-state
      injection.
-   * The logical operations should be written in terms of logical operations
-     only, and should not include any `guppylang.std.quantum` operations.
 3. **Define resource structures** - Provide structures to manage logical resources
    at runtime, such as resource state generation. These resources will be
    architecture dependent and are optional.
@@ -129,21 +129,21 @@ The steps for defining a logical API are the following:
      supported `guppylang.std.quantum` operations with a corresponding operation
      from the {py:mod}`guppyft.code.steane.logical` API. More complex architecture will
      require a new HUGR compiler to be developed.
-   * Define the `implementation` pass to link opaque logical API operations to their
-     physical [primitives](#implementation-of-qec-primitives) implementations. The
+   * Define the `implement_ops` pass to link opaque logical API operations to their
+     [physical implementation](#implementation-of-qec-primitives). The
      Steane architecture uses the default `implement_ops` pass. See
      the [end-to-end](#end-to-end-encoding) section for more detail.
    * Optionally, we can define QEC-aware optimization passes on the logical HUGR.
-     For example, this could include optimizing of qubit allocation into blocks for
+     For example, this could include optimizing qubit allocation into blocks for
      $k>1$ codes.
 
 ### What distinguishes the Logical API from primitives?
 
 Adding a logical API step is necessary to provide an abstraction layer on top of
-{py:mod}`~guppyft.code.steane.primitives` where we can define compilation and
+{py:mod}`~guppyft.code.steane.primitives`, where we can define compilation and
 optimisation passes and global management of resources. It provides a useful
 separation of concerns: we may build and transform logical HUGRs without involving
-the low-level physical details, then **link** their physical implementation as a
+the low-level physical details, then link their physical implementation as a
 final `implement_ops` pass. This abstraction lets developers provide a public
 interface for the logical operations, while keeping the details of the physical
 circuits private.
@@ -170,13 +170,15 @@ the HUGR extension.
 
 ## End-to-end encoding
 
-We are now in a position to be able to combine the
+We are now able to combine the
 [primitives](#implementation-of-qec-primitives) and [logical API](#logical-api)
 building blocks into a single architecture builder to enable users to automatically encode
-their Guppy programs. This is illustrated in the end-to-end encoding notebook (**TODO**: link).
+their Guppy programs. This is illustrated in the end-to-end encoding notebook
+{doc}`/examples/steane_encoding`.
 
-Following our Steane example, our architecture is defined in {py:mod}`guppyft.code.
-steane.encode` which defines the {py:class}`~guppyft.code.steane.encode.SteaneBuilder`
+Following our Steane example, our architecture is defined in 
+{py:mod}`guppyft.code.steane.encode` which defines the
+{py:class}`~guppyft.code.steane.encode.SteaneBuilder`
 class for users to build a specific architecture instance based on provided
 parameters.
 
@@ -184,11 +186,11 @@ A key enabler for Guppy FT is the ability to track and manage logical resources 
 operations at runtime. This is achieved by defining a Guppy struct, and performing
 logical operations in a global-context where the global state is available. In the
 Steane architecture, {py:class}`~guppyft.code.steane.encode.SteaneBuilder` defines
-`STATE` struct to track and manage logical resources at runtime, which includes:
+the `STATE` struct to track and manage logical resources at runtime, which includes:
 
-- Allocation and freeing of logical blocks;
-- Parallel zero and magic state preparation through state factories;
-- Runtime QEC cycle injection.
+- Allocation and freeing of logical blocks.
+- Parallel zero and magic state preparation through state factories.
+- Runtime QEC cycle insertion.
 
 `STATE` tracks available logical-qubit addresses in a stack. Allocating a qubit pops
 an address from the stack, while freeing it returns the address to the stack.
@@ -210,13 +212,14 @@ run in the global context can be found in
 
 Since Guppy supports classical logic at runtime, you may provide adaptive decompositions
 of gates. For instance, our reference Steane architecture supports `Rz` gates
-with angles determined at runtime from [Single-qubit rotation algorithm with
-logarithmic Toffoli count and gate depth](https://arxiv.org/pdf/2404.05618).
+with angles determined at runtime, following the approach
+from ["Single-qubit rotation algorithm with
+logarithmic Toffoli count and gate depth"](https://arxiv.org/pdf/2404.05618).
 Architectures where each code block contains multiple logical qubits can
 support arbitrary gate addressing by tracking the qubit assignment at runtime (as
 in the global `STATE` from {py:mod}`~guppyft.code.steane.encode`) and using `if`
-statements to resolve how to decompose the computational gate into logical
-operations. (**TODO** point to a k>1 example doing this).
+statements to resolve how to decompose the computational gates into logical
+operations.
 Be mindful that complex classical computation at runtime can lead to adverse
 performance on the quantum device if it causes stalling.
 
