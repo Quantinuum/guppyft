@@ -5,13 +5,41 @@ from guppylang.std.builtins import array, exit, panic
 from guppylang.std.collections import Queue
 from guppylang.std.lang import Function, owned
 from guppylang.std.option import Option, nothing, some
-from guppylang.std.quantum import Measurement, collect_measurements
+from guppylang.std.quantum import (
+    Measurement,
+    collect_measurements,
+    discard_array,
+    qubit,
+)
 
-from guppyft.code.util import LogicalBlock, array_any, qalloc_dirty
+from guppyft.code._util import array_any
 
 BLOCK_SIZE = guppy.nat_var("BLOCK_SIZE")
 N_FLAGS = guppy.nat_var("N_FLAGS")
 BATCH_SIZE = guppy.nat_var("BATCH_SIZE")
+
+
+@guppy.struct
+class LogicalBlock(Generic[BLOCK_SIZE]):  # type: ignore[misc]
+    """A logical block of ``N`` physical qubits."""
+
+    data_qs: array[qubit, BLOCK_SIZE]  # type: ignore[valid-type]
+
+    @guppy
+    @no_type_check
+    def discard(self: "LogicalBlock[BLOCK_SIZE]" @ owned) -> None:
+        """Discard the logical block and all qubits in ``data_qs``."""
+        discard_array(self.data_qs)
+
+    @guppy
+    @no_type_check
+    def __getitem__(self, idx: int) -> qubit:
+        return self.data_qs.take(idx)
+
+    @guppy
+    @no_type_check
+    def __setitem__(self, idx: int, value: qubit @ owned) -> None:
+        self.data_qs.put(value, idx)
 
 
 @guppy.struct
@@ -53,6 +81,14 @@ class PreBlock(Generic[BLOCK_SIZE, N_FLAGS]):  # type: ignore[misc]
             return nothing()
         else:
             return some(self.logical_block)
+
+
+@guppy
+@no_type_check
+def _qalloc_dirty() -> LogicalBlock[BLOCK_SIZE]:
+    """Allocate resources for a codeblock, but the qubits are not in a valid logical
+    state."""
+    return LogicalBlock(array(qubit() for _ in range(BLOCK_SIZE)))
 
 
 @guppy.struct
@@ -106,7 +142,7 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]):  # type: ignore[mi
                 state.unwrap_nothing()
 
         exit("StateFactory ran out of attempts!")
-        return qalloc_dirty()  # Unreachable, but required by the Guppy checker
+        return _qalloc_dirty()  # Unreachable, but required by the Guppy checker
 
     @guppy
     @no_type_check

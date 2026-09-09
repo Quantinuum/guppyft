@@ -1,16 +1,41 @@
 """Steane architecture based on https://arxiv.org/abs/2107.07505"""
 
-from typing import no_type_check
+from typing import Generic, no_type_check
 
 from guppylang import guppy
 from guppylang.library import link_name
 from guppylang.std import quantum as qlib
 from guppylang.std.angles import pi
-from guppylang.std.builtins import array, comptime, owned
+from guppylang.std.builtins import Measurement, array, comptime, owned
 from guppylang.std.mem import mem_swap
 
-from guppyft.code._state_factory import PreBlock
-from guppyft.code.util import LogicalBlock, RawMeasurement, parity_check
+from guppyft.code._state_factory import LogicalBlock, PreBlock
+from guppyft.code._util import parity_check
+
+__all__ = [
+    "LogicalBlock",
+    "PreBlock",
+    "RawMeasurement",
+    "cx",
+    "cz",
+    "decode",
+    "get_syndrome",
+    "h",
+    "inject_t",
+    "inject_tdg",
+    "knill_qec_cycle",
+    "measure_z",
+    "prep_t_state_ft",
+    "prep_zero_ft",
+    "prep_zero_non_ft",
+    "s",
+    "sdg",
+    "steane_x_qec_cycle",
+    "steane_z_qec_cycle",
+    "x",
+    "y",
+    "z",
+]
 
 # ZZZZIII -> 0, 1, 2, 3
 # IZZIZZI -> 1, 2, 4, 5
@@ -344,6 +369,17 @@ def steane_x_qec_cycle(q: LogicalBlock[7], a: LogicalBlock[7] @ owned) -> None:
     h(a)
     if decode(measure_z(a)):
         z(q)
+
+
+N = guppy.nat_var("N")
+
+
+@guppy.struct(frozen=True)
+class RawMeasurement(Generic[N]):  # type: ignore[misc]
+    """An immutable Guppy struct of ``N`` measurement outcomes of the
+    physical qubits in a logical block."""
+
+    measurements: array[Measurement, N]  # type: ignore[valid-type]
 
 
 @guppy
