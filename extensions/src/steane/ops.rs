@@ -111,7 +111,7 @@ impl MakeRegisteredOp for ConcreteSteaneOp {
 }
 
 impl SteaneOpDef {
-    /// Initialise a [`ConcreteSteaneOp`] from a [`SteaneOpDef`].
+    /// Initialize a [`ConcreteSteaneOp`] from a [`SteaneOpDef`].
     #[must_use]
     pub fn instantiate_no_args(self) -> ConcreteSteaneOp {
         ConcreteSteaneOp { def: self }
