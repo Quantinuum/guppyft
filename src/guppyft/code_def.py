@@ -16,13 +16,16 @@ class CodeDefinitionError(ValueError):
 
 @dataclass(frozen=True)
 class StabilizerCode:
-    num_physical_qubits: int
-    num_logical_qubits: int
-    distance: int
-    generators: pauli.SignTermSet
-    x_logicals: pauli.SignTerms
-    z_logicals: pauli.SignTerms
-    """Definition for a stabilizer code.
+    """Definition of a stabilizer code.
+
+    Stores the following information
+
+    * num_physical_qubits (:math:`n`) - Number of physical qubits in a code block.
+    * num_logical_qubits (:math:`k`) - Number of logical qubits in a code block
+    * distance (:math:`d`) - The distance of the stabilizer code.
+    * generators - A set of :math:`(n-k)` commuting stabilizer generators.
+    * x_logicals - The logical :math:`X` operators of the stabilizer code.
+    * z_logicals - The logical :math:`Z` operators of the stabilizer code.
 
 
     .. code-block:: python
@@ -38,6 +41,13 @@ class StabilizerCode:
         z_logicals=["ZZZZZZZ"],
         )
     """
+
+    num_physical_qubits: int
+    num_logical_qubits: int
+    distance: int
+    generators: pauli.SignTermSet
+    x_logicals: pauli.SignTerms
+    z_logicals: pauli.SignTerms
 
     @cached_property
     def y_logicals(self) -> pauli.SignTerms:
