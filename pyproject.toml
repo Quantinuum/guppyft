@@ -1,6 +1,6 @@
 [project]
 name = "guppyft"
-version = "0.0.8"
+version = "0.1.0"
 description = "Tools for fault-tolerant quantum computing in the Guppy language"
 requires-python = ">=3.12,<4"
 readme = "README.md"
