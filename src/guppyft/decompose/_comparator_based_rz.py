@@ -217,7 +217,7 @@ class ComparatorBasedRz[
     Implements Algorithm 1 from arXiv:2404.05618, "Single-qubit rotation
     algorithm with logarithmic Toffoli count and gate depth". The algorithm
     uses a repeat-until-success approach to approximate :math:`R_z(\\theta)` within
-    error :math:`\varepsilon`. Its success probability is greater than :math:`1/2`.
+    error :math:`\\varepsilon`. Its success probability is greater than :math:`1/2`.
 
     Algorithm:
 
