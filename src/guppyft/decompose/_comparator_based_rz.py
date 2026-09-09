@@ -73,7 +73,7 @@ def temp_and_compute(q0: qubit, q1: qubit, t_qubit: qubit) -> None:
     Args:
         q0 (qubit): The first input qubit.
         q1 (qubit): The second input qubit.
-        t_qubit (qubit): The target qubit to store the result. Begins in :math:`\\ket{0}`
+        t_qubit (qubit): Target qubit to store the result. Begins in :math:`\\ket{0}`
 
     """
     # Prepare T|+> state
