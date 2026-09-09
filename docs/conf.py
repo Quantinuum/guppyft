@@ -11,6 +11,9 @@ html_show_sourcelink = False
 html_copy_source = False
 
 templates_path = ["_templates"]
+# Generated sources would otherwise be treated as unlinked documents and fail
+# strict builds.
+exclude_patterns = ["build/**", "jupyter_execute", ".jupyter_cache", "**/README.md"]
 
 master_doc = "index"
 author = "Quantinuum"
@@ -26,6 +29,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "quantinuum_sphinx",
     "sphinx_copybutton",
+    "sphinx.ext.napoleon",
 ]
 
 # --- MyST-NB config ---
@@ -38,8 +42,6 @@ nb_merge_streams = True  # Accumulates all stdout streams into one, same with st
 # ----------------------
 
 
-exclude_patterns = ["build/**", "jupyter_execute", ".jupyter_cache", "**/README.md"]
-
 myst_enable_extensions = [
     "dollarmath",
     "html_image",
@@ -47,6 +49,8 @@ myst_enable_extensions = [
     "colon_fence",
     "amsmath",
 ]
+# Allow links to depth 2 headings
+myst_heading_anchors = 2
 
 # Sphinx autosummary
 # https://www.sphinx-doc.org/en/master/usage/extensions/autosummary.html
