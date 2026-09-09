@@ -17,7 +17,6 @@ from hugr.ext import ExtensionRegistry
 from hugr.package import Package
 from hugr.std import _std_extensions
 
-from guppyft.code._state_factory import LogicalBlock, StateFactory
 from guppyft.code.steane.primitives import (
     cx,
     cz,
@@ -49,6 +48,8 @@ from guppyft.encode import (
 )
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
+from guppyft.std import LogicalBlock
+from guppyft.std.state_factory import StateFactory
 
 from . import logical as steane_logical
 from .primitives import RawMeasurement

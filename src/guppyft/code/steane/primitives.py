@@ -15,12 +15,10 @@ from guppylang.std.angles import pi
 from guppylang.std.builtins import Measurement, array, comptime, owned
 from guppylang.std.mem import mem_swap
 
-from guppyft.code._state_factory import LogicalBlock, PreBlock
-from guppyft.code._util import parity_check
+from guppyft.std import LogicalBlock
+from guppyft.std.state_factory import PreBlock
 
 __all__ = [
-    "LogicalBlock",
-    "PreBlock",
     "RawMeasurement",
     "cx",
     "cz",
@@ -50,6 +48,16 @@ _stabilizer_indices = [
     [1, 2, 4, 5],
     [2, 3, 5, 6],
 ]
+
+
+@guppy
+@no_type_check
+def _parity_check(data_bits: array[bool, 7]) -> bool:
+    """Compute the XOR (parity) of all bits in ``data_bits``."""
+    out = False
+    for i in range(N):
+        out ^= data_bits[i]
+    return out
 
 
 @guppy
@@ -301,7 +309,7 @@ def inject_tdg(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
 @no_type_check
 def _get_syndrome(data_bits: array[bool, 7]) -> array[bool, 3]:
     return array(
-        parity_check(array(data_bits[i] for i in stab))
+        _parity_check(array(data_bits[i] for i in stab))
         for stab in comptime(_stabilizer_indices)
     )
 
@@ -401,7 +409,7 @@ def decode(m: RawMeasurement[7] @ owned) -> bool:
     """Decode Steane measurement of logical block"""
     meas = qlib.collect_measurements(m.measurements)
     synds = _get_syndrome(meas)
-    logical_meas = parity_check(meas)
+    logical_meas = _parity_check(meas)
     logical_meas ^= synds[0] or synds[1] or synds[2]
 
     return logical_meas

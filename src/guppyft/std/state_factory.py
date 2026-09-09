@@ -5,41 +5,27 @@ from guppylang.std.builtins import array, exit, panic
 from guppylang.std.collections import Queue
 from guppylang.std.lang import Function, owned
 from guppylang.std.option import Option, nothing, some
-from guppylang.std.quantum import (
-    Measurement,
-    collect_measurements,
-    discard_array,
-    qubit,
-)
+from guppylang.std.quantum import Measurement, collect_measurements, qubit
 
-from guppyft.code._util import array_any
+from ._logical_block import LogicalBlock
+
+__all__ = [
+    "PreBlock",
+    "StateFactory",
+]
 
 BLOCK_SIZE = guppy.nat_var("BLOCK_SIZE")
 N_FLAGS = guppy.nat_var("N_FLAGS")
 BATCH_SIZE = guppy.nat_var("BATCH_SIZE")
 
 
-@guppy.struct
-class LogicalBlock(Generic[BLOCK_SIZE]):  # type: ignore[misc]
-    """A logical block of ``N`` physical qubits."""
-
-    data_qs: array[qubit, BLOCK_SIZE]  # type: ignore[valid-type]
-
-    @guppy
-    @no_type_check
-    def discard(self: "LogicalBlock[BLOCK_SIZE]" @ owned) -> None:
-        """Discard the logical block and all qubits in ``data_qs``."""
-        discard_array(self.data_qs)
-
-    @guppy
-    @no_type_check
-    def __getitem__(self, idx: int) -> qubit:
-        return self.data_qs.take(idx)
-
-    @guppy
-    @no_type_check
-    def __setitem__(self, idx: int, value: qubit @ owned) -> None:
-        self.data_qs.put(value, idx)
+@guppy
+@no_type_check
+def _array_any(arr: array[bool, BLOCK_SIZE]) -> bool:
+    for i in range(BLOCK_SIZE):  # noqa: SIM110 # `all` is not yet supported by Guppy
+        if arr[i]:
+            return True
+    return False
 
 
 @guppy.struct
@@ -74,7 +60,7 @@ class PreBlock(Generic[BLOCK_SIZE, N_FLAGS]):  # type: ignore[misc]
         Calling this forces the measurement of the flags to take place (if they had
         not already).
         """
-        failed = array_any(collect_measurements(self.flag_outcomes))
+        failed = _array_any(collect_measurements(self.flag_outcomes))
 
         if failed:
             self.logical_block.discard()

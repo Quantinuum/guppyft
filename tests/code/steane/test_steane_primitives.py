@@ -10,7 +10,6 @@ from guppylang.std.quantum import cx, cz, h, qubit, s, sdg, x, y, z
 
 from guppyft.code.steane import primitives as steane_primitives
 from guppyft.code.steane.primitives import (
-    LogicalBlock,
     _measure_syndromes,
     knill_qec_cycle,
     prep_zero_non_ft,
@@ -18,6 +17,7 @@ from guppyft.code.steane.primitives import (
     steane_z_qec_cycle,
 )
 from guppyft.code_def import StabilizerCode
+from guppyft.std import LogicalBlock
 from guppyft.verify import valid_clifford_implementation
 
 STEANE_DEF = StabilizerCode.from_python_strings(
