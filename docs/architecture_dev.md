@@ -208,10 +208,10 @@ run in the global context can be found in
 ### Guidelines
 
 Since Guppy supports classical logic at runtime, you may provide adaptive decompositions
-of gates. For instance, our reference Steane architecture supports `Rz` gates
-with angles determined at runtime, following the approach
+of gates, for instance following the approach
 from ["Single-qubit rotation algorithm with
-logarithmic Toffoli count and gate depth"](https://arxiv.org/pdf/2404.05618).
+logarithmic Toffoli count and gate depth"](https://arxiv.org/pdf/2404.05618) to support `Rz` gates
+with angles determined at runtime.
 Architectures where each code block contains multiple logical qubits can
 support arbitrary gate addressing by tracking the qubit assignment at runtime (as
 in the global `STATE` from {py:mod}`~guppyft.code.steane.encode`) and using `if`
