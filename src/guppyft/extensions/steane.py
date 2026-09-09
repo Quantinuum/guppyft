@@ -87,6 +87,18 @@ class SteaneOpsExtension:
         return self.measure_z_def.instantiate([])
 
     @functools.cached_property
+    def qec_cycle_def(self) -> OpDef:
+        """Perform a QEC cycle on a logical qubit.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `qec_cycle`."""
+        return self().get_op("qec_cycle")
+
+    def qec_cycle(self) -> ExtOp:
+        """Perform a QEC cycle on a logical qubit."""
+        return self.qec_cycle_def.instantiate([])
+
+    @functools.cached_property
     def decode_def(self) -> OpDef:
         """Decode a measurement of a Steane logical qubit.
 
@@ -109,6 +121,18 @@ class SteaneOpsExtension:
     def x(self) -> ExtOp:
         """Apply an X gate to one qubit."""
         return self.x_def.instantiate([])
+
+    @functools.cached_property
+    def y_def(self) -> OpDef:
+        """Apply a Y gate to one qubit.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `y`."""
+        return self().get_op("y")
+
+    def y(self) -> ExtOp:
+        """Apply an Y gate to one qubit."""
+        return self.y_def.instantiate([])
 
     @functools.cached_property
     def z_def(self) -> OpDef:
@@ -159,42 +183,42 @@ class SteaneOpsExtension:
         return self.sdg_def.instantiate([])
 
     @functools.cached_property
-    def prep_magic_for_t_like_def(self) -> OpDef:
+    def prep_t_state_def(self) -> OpDef:
         """Prepare a magic state that can be used to produce T-like states (T and Tdg).
 
         This is the generic operation definition. For the instantiated operation, see
-        `prep_magic_for_t_like`."""
-        return self().get_op("prep_magic_for_t_like")
+        `prep_t_state`."""
+        return self().get_op("prep_t_state")
 
-    def prep_magic_for_t_like(self) -> ExtOp:
+    def prep_t_state(self) -> ExtOp:
         """
         Prepare a magic state that can be used to produce T-like states (T and Tdg).
         """
-        return self.prep_magic_for_t_like_def.instantiate([])
+        return self.prep_t_state_def.instantiate([])
 
     @functools.cached_property
-    def inject_magic_for_t_def(self) -> OpDef:
+    def inject_t_def(self) -> OpDef:
         """Perform a T gate by injecting a magic state.
 
         This is the generic operation definition. For the instantiated operation, see
-        `inject_magic_for_t`."""
-        return self().get_op("inject_magic_for_t")
+        `inject_t`."""
+        return self().get_op("inject_t")
 
-    def inject_magic_for_t(self) -> ExtOp:
+    def inject_t(self) -> ExtOp:
         """Perform a T gate by injecting a magic state."""
-        return self.inject_magic_for_t_def.instantiate([])
+        return self.inject_t_def.instantiate([])
 
     @functools.cached_property
-    def inject_magic_for_tdg_def(self) -> OpDef:
+    def inject_tdg_def(self) -> OpDef:
         """Perform a Tdg gate by injecting a magic state.
 
         This is the generic operation definition. For the instantiated operation, see
-        `inject_magic_for_tdg`."""
-        return self().get_op("inject_magic_for_tdg")
+        `inject_tdg`."""
+        return self().get_op("inject_tdg")
 
-    def inject_magic_for_tdg(self) -> ExtOp:
+    def inject_tdg(self) -> ExtOp:
         """Perform a Tdg gate by injecting a magic state."""
-        return self.inject_magic_for_tdg_def.instantiate([])
+        return self.inject_tdg_def.instantiate([])
 
     @functools.cached_property
     def cx_def(self) -> OpDef:
@@ -207,6 +231,18 @@ class SteaneOpsExtension:
     def cx(self) -> ExtOp:
         """Apply a CX gate to two qubits."""
         return self.cx_def.instantiate([])
+
+    @functools.cached_property
+    def cz_def(self) -> OpDef:
+        """Apply a CZ gate to two qubits.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `cz`."""
+        return self().get_op("cz")
+
+    def cz(self) -> ExtOp:
+        """Apply a CZ gate to two qubits."""
+        return self.cz_def.instantiate([])
 
     @functools.cached_property
     def swap_def(self) -> OpDef:

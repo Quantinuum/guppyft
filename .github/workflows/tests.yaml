@@ -7,9 +7,18 @@ on:
   pull_request:
     branches:
       - "**"
+  schedule:
+    # Nightly at 4am
+    - cron: '0 4 * * *'
   merge_group:
     types: [ checks_requested ]
-  workflow_dispatch: { }
+  workflow_dispatch:
+    inputs:
+      run_long_tests:
+        description: "Run the long Python tests"
+        type: boolean
+        default: false
+        required: false
 
 # Limits the number of concurrent runs of this workflow for branches to one. For non-main branches, runs caused by newly
 # pushed commits thus cancel any in-progress runs for the same branch.
@@ -21,6 +30,9 @@ env:
   SCCACHE_GHA_ENABLED: "true"
   RUSTC_WRAPPER: "sccache"
   UV_VERSION: "0.11.7"
+
+permissions:
+  contents: read
 
 jobs:
   # Check if changes were made to the relevant files.
@@ -59,7 +71,7 @@ jobs:
       - uses: taiki-e/install-action@nextest
       - uses: taiki-e/install-action@cargo-llvm-cov
       - name: Test with all features
-        run: cargo nextest r --verbose --workspace --exclude guppyft-bindings --all-features
+        run: cargo nextest r --verbose --workspace
       - name: Clean existing coverage data
         run: cargo llvm-cov clean --workspace
       - name: Generate coverage report
@@ -80,11 +92,12 @@ jobs:
     env:
       PYTHON_VERSION: ${{ matrix.python-version.py }}
       LLVM_SYS_211_PREFIX: /usr/lib/llvm-21
+      GUPPYFT_RUN_LONG_TESTS: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.run_long_tests) }}
 
     strategy:
       matrix:
         python-version:
-        - { py: "3.13", coverage: false }
+        - { py: "3.12", coverage: false }
         - { py: "3.14", coverage: true }
       fail-fast: false
 
@@ -155,7 +168,32 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.13"
+          python-version: "3.12"
 
       - name: Check if extension versions are updated
         run: python ./.github/scripts/check_extension_versions.py
+
+  # This is a meta job to mark successful completion of the required checks,
+  # even if they are skipped due to no changes in the relevant files.
+  required-checks:
+    name: Required checks 🦀+🐍
+    needs:
+      [
+        changes,
+        check-rs,
+        check-py,
+        check-extensions,
+        extension-versions,
+      ]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if required checks failed
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          echo "Required checks failed"
+          echo "Please check the logs for more information"
+          exit 1
+      - name: Pass if required checks passed
+        run: |
+          echo "All required checks passed"

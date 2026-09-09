@@ -9,9 +9,6 @@ on:
       - "v*"
   workflow_dispatch:
 
-env:
-  UV_EXTRA_INDEX_URL: "https://${{ secrets.QTNM_ARTIF_SW_READ_USER }}:${{ secrets.QTNM_ARTIF_SW_READ_TOKEN }}@quantinuumsw.jfrog.io/artifactory/api/pypi/pypi_local/simple"
-
 jobs:
   build_wheels:
     name: ${{ matrix.os }} wheels
@@ -42,7 +39,7 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build guppyft wheel
-        uses: pypa/cibuildwheel@v4.2.0
+        uses: pypa/cibuildwheel@v4.2.1
         with:
           output-dir: 'wheelhouse'
 
@@ -54,10 +51,11 @@ jobs:
   release:
     name: Release wheels
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: (github.event_name == 'release' || github.event_name == 'workflow_dispatch') && github.ref_type == 'tag'
     needs: [ build_wheels ]
     permissions:
       contents: write
+      id-token: write # mandatory for trusted publishing
     steps:
       - uses: actions/download-artifact@v8
         with:
@@ -75,10 +73,10 @@ jobs:
           enable-cache: true
           python-version: "3.12"
 
-      - name: Upload guppyft wheels to SW artifactory
-        run: |
-          uvx twine upload --verbose --non-interactive wheelhouse/*guppyft*.whl
-        env:
-          TWINE_REPOSITORY_URL: "https://quantinuumsw.jfrog.io/artifactory/api/pypi/pypi_local/"
-          TWINE_USERNAME: ${{ secrets.QTNM_ARTIF_SW_WRITE_USER }}
-          TWINE_PASSWORD: ${{ secrets.QTNM_ARTIF_SW_WRITE_TOKEN }}
+      - name: Publish package distributions to PyPI
+        # This workflow is a trusted publisher for the packages on PyPI.
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: wheelhouse
+          verbose: true
+          skip-existing: true

@@ -2,8 +2,8 @@ from guppylang import guppy
 from guppylang.emulator import EmulatorBuilder
 from guppylang.std.platform import result
 
-from guppyft.code.steane.encoder_spec import SteaneSpec
-from guppyft.logical.steane import Qubit, cx, h, measure_z, x, z
+from guppyft.code.steane.encode import SteaneBuilder
+from guppyft.code.steane.logical import Qubit, cx, h, measure_z, x, z
 
 
 def test_qalloc_measure() -> None:
@@ -14,7 +14,7 @@ def test_qalloc_measure() -> None:
         result("res", measure_z(q).decode())
 
     pkg = main.compile()
-    phys_pkg = SteaneSpec(n_blocks=1).implement_ops(pkg)
+    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=8).run().collated_shots()
 
     assert res == [{"res": [0]}]
@@ -29,7 +29,7 @@ def test_x() -> None:
         result("res", measure_z(q).decode())
 
     pkg = main.compile()
-    phys_pkg = SteaneSpec(n_blocks=1).implement_ops(pkg)
+    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=8).run().collated_shots()
 
     assert res == [{"res": [1]}]
@@ -46,7 +46,7 @@ def test_h_z() -> None:
         result("res", measure_z(q).decode())
 
     pkg = main.compile()
-    phys_pkg = SteaneSpec(n_blocks=1).implement_ops(pkg)
+    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=8).run().collated_shots()
 
     assert res == [{"res": [1]}]
@@ -63,7 +63,21 @@ def test_cx() -> None:
         result("q1", measure_z(q1).decode())
 
     pkg = main.compile()
-    phys_pkg = SteaneSpec(n_blocks=2).implement_ops(pkg)
+    phys_pkg = SteaneBuilder().build(n_blocks=2).implement_ops(pkg)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=18).run().collated_shots()
 
     assert res == [{"q0": [1], "q1": [1]}]
+
+
+def test_qec_cycle() -> None:
+
+    @guppy
+    def main() -> None:
+        q = Qubit()
+        q.qec_cycle()
+        result("q", q.measure_z().decode())
+
+    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(main.compile())
+    res = EmulatorBuilder().build(phys_pkg, n_qubits=10).run().collated_shots()
+
+    assert res == [{"q": [0]}]
