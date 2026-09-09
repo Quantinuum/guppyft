@@ -52,10 +52,10 @@ teleport_encoded = steane.encode(teleport.compile())
 
 ## Installation
 
-Set up a virtual environment and install dependencies using:
+Guppy FT can be installed from [PyPI](https://pypi.org/project/guppyft/) using `pip`. Requires Python>=3.12.
 
 ```bash
-uv sync
+pip install guppyft
 ```
 
 ## Development
