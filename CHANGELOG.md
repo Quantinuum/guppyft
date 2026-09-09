@@ -1,5 +1,51 @@
 # Changelog
 
+## [0.1.0](https://github.com/Quantinuum/guppyft/compare/v0.0.8...v0.1.0) (2026-09-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* Remove RZ decomposition ([#361](https://github.com/Quantinuum/guppyft/issues/361))
+* Move various utils into std library ([#349](https://github.com/Quantinuum/guppyft/issues/349))
+* Refresh public API for Steane architecture and add `SteaneBuilder.from_params` method ([#343](https://github.com/Quantinuum/guppyft/issues/343))
+* Minimise and clean up std types and ops ([#346](https://github.com/Quantinuum/guppyft/issues/346))
+* Minimize Clifford testing interface and add example notebook ([#200](https://github.com/Quantinuum/guppyft/issues/200))
+
+### Features
+
+* Minimize Clifford testing interface and add example notebook ([#200](https://github.com/Quantinuum/guppyft/issues/200)) ([4724a19](https://github.com/Quantinuum/guppyft/commit/4724a1999aae1783632331e3727aca9e54c5611f))
+* RZ synthesis based on comparators ([#271](https://github.com/Quantinuum/guppyft/issues/271)) ([3694c7c](https://github.com/Quantinuum/guppyft/commit/3694c7c90fe70908fb4a8447883bd578ecf83fd3))
+
+
+### Bug Fixes
+
+* Support replacing copyable types with linear types when replacing ops ([#253](https://github.com/Quantinuum/guppyft/issues/253)) ([b20fe88](https://github.com/Quantinuum/guppyft/commit/b20fe88164863fb43eca3a827ac0904ef91c9f47))
+
+
+### Documentation
+
+* Add API docs for global state helpers ([#333](https://github.com/Quantinuum/guppyft/issues/333)) ([9f22f9d](https://github.com/Quantinuum/guppyft/commit/9f22f9d383b9e6e54fb9bd9c5787cf0dd18c0ec1))
+* Add introduction section to home page ([#306](https://github.com/Quantinuum/guppyft/issues/306)) ([3989923](https://github.com/Quantinuum/guppyft/commit/3989923f2c5df1937d3c50a33c0806e2d438c21a))
+* Add missing links in the starting page ([#365](https://github.com/Quantinuum/guppyft/issues/365)) ([abd1048](https://github.com/Quantinuum/guppyft/commit/abd10485bcce69399d13189c09e56e3de5f3e3e9))
+* Add module-level docstrings ([#331](https://github.com/Quantinuum/guppyft/issues/331)) ([4f44452](https://github.com/Quantinuum/guppyft/commit/4f44452b1bafc76b1994c021937a7527b7787bc1))
+* Architecture development guide ([#304](https://github.com/Quantinuum/guppyft/issues/304)) ([e7cad50](https://github.com/Quantinuum/guppyft/commit/e7cad5015ccbabb29c17bfe53a3e570838cb73b9))
+* Embed example notebooks into the sphinx docs ([#320](https://github.com/Quantinuum/guppyft/issues/320)) ([c9ea7f1](https://github.com/Quantinuum/guppyft/commit/c9ea7f1cef058dec42a3b1272f29a3081c86d80d))
+* Example notebook for Steane encoding ([#302](https://github.com/Quantinuum/guppyft/issues/302)) ([8d934cf](https://github.com/Quantinuum/guppyft/commit/8d934cfa4c9d1c86d8c9eca8e38744df4766a302))
+* Example notebook on how to write logical programs ([#338](https://github.com/Quantinuum/guppyft/issues/338)) ([05c94f2](https://github.com/Quantinuum/guppyft/commit/05c94f217b4c162385efa368f34a47d41d4786b6))
+* Fix links to `PreBlock` and `StateFactory` ([#360](https://github.com/Quantinuum/guppyft/issues/360)) ([20b95c7](https://github.com/Quantinuum/guppyft/commit/20b95c7863eba0e1318e2bf82c0e3a9ae039f08d))
+* fix some maths formatting in docstrings ([#335](https://github.com/Quantinuum/guppyft/issues/335)) ([0fbdb72](https://github.com/Quantinuum/guppyft/commit/0fbdb722dd229cb4444ed3c78dff9f256007f43f))
+* Fix typo in README ([#354](https://github.com/Quantinuum/guppyft/issues/354)) ([ac6231a](https://github.com/Quantinuum/guppyft/commit/ac6231a2f0266ae69d857dc859f1613cdbd0a814))
+* Update README with example and links to documentation ([#351](https://github.com/Quantinuum/guppyft/issues/351)) ([3f4d2ac](https://github.com/Quantinuum/guppyft/commit/3f4d2ac5b5c0bb23246d767839f6ca6d33d54639))
+* Use sentence case in heading for consistency ([#363](https://github.com/Quantinuum/guppyft/issues/363)) ([3aa63a9](https://github.com/Quantinuum/guppyft/commit/3aa63a982535227fa38ed7bcc743b6a160c06d5b))
+
+
+### Code Refactoring
+
+* Minimise and clean up std types and ops ([#346](https://github.com/Quantinuum/guppyft/issues/346)) ([96ba9e2](https://github.com/Quantinuum/guppyft/commit/96ba9e297549c6acd048128fe235ec65d7cbc8cf))
+* Move various utils into std library ([#349](https://github.com/Quantinuum/guppyft/issues/349)) ([9dabe25](https://github.com/Quantinuum/guppyft/commit/9dabe25b7f5554047f91f326575046f7c1695748))
+* Refresh public API for Steane architecture and add `SteaneBuilder.from_params` method ([#343](https://github.com/Quantinuum/guppyft/issues/343)) ([faa74f3](https://github.com/Quantinuum/guppyft/commit/faa74f329c48a08d2de2848a0afbf94372165990))
+* Remove RZ decomposition ([#361](https://github.com/Quantinuum/guppyft/issues/361)) ([59cb4fa](https://github.com/Quantinuum/guppyft/commit/59cb4fa3fd7cf61af0fe2a1da8fff886ff4f2bd5))
+
 ## [0.0.8](https://github.com/quantinuum-dev/guppyft/compare/v0.0.7...v0.0.8) (2026-09-04)
 
 
