@@ -1,4 +1,4 @@
-# guppyft API
+# guppyft
 
 ```{eval-rst}
 .. autosummary::

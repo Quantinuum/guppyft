@@ -11,6 +11,13 @@ html_show_sourcelink = False
 html_copy_source = False
 
 templates_path = ["_templates"]
+# Generated sources would otherwise be treated as unlinked documents and fail
+# strict builds.
+exclude_patterns = [
+    ".jupyter_cache",
+    "jupyter_execute",
+    "rust/extensions/bin/extensions.md",
+]
 
 master_doc = "index"
 author = "Quantinuum"
@@ -24,6 +31,7 @@ extensions = [
     "myst_nb",
     "sphinx.ext.mathjax",
     "sphinx.ext.intersphinx",
+    "sphinxcontrib_rust",
     "quantinuum_sphinx",
     "sphinx_copybutton",
 ]
@@ -53,6 +61,13 @@ myst_enable_extensions = [
 
 # __all__ dictates which classes and functions are documented for a module
 autosummary_ignore_module_all = False  # Respect __all__ if specified
+
+rust_crates = {
+    "guppyft": "rust",
+    "extensions": "extensions",
+}
+rust_doc_dir = "docs/rust"
+rust_rustdoc_fmt = "md"
 
 
 intersphinx_mapping = {
