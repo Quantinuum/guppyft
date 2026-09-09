@@ -70,12 +70,12 @@ parallelization. When writing primitives ensure you defer calling
 To see an example of how to defer measurements to maximize parallelism, see the
 fault-tolerant $T\ket{+}$ state preparation in the Steane architecture
 {py:mod}`~guppyft.code.steane.primitives`. We wrap the logical block in a Guppy
-{py:class}`~guppyft.code._state_factory.PreBlock` struct that contains an array
+{py:class}`~guppyft.std.state_factory.PreBlock` struct that contains an array
 of {py:class}`~guppylang.std.quantum.Measurement` and a
-{py:meth}`~guppyft.code._state_factory.PreBlock.force_check` method which calls
+{py:meth}`~guppyft.std.state_factory.PreBlock.force_check` method which calls
 {py:meth}`~guppylang.std.quantum.Measurement.read` on all measurements. This enables
 parallelization of state preparation via
-{py:class}`~guppyft.code._state_factory.StateFactory`.
+{py:class}`~guppyft.std.state_factory.StateFactory`.
 
 ## Logical API
 
@@ -115,9 +115,9 @@ The steps for defining a logical API are the following:
    architecture dependent and are optional.
    * The Steane architecture uses state factories to parallelize preparation of
      $\ket{0}$ and $T\ket{+}$ states.
-   * A {py:class}`~guppyft.code._state_factory.PreBlock` Guppy struct wraps the
+   * A {py:class}`~guppyft.std.state_factory.PreBlock` Guppy struct wraps the
      logical block together with the flag measurements.
-   * The {py:class}`~guppyft.code._state_factory.StateFactory` then manages
+   * The {py:class}`~guppyft.std.state_factory.StateFactory` then manages
      parallel preparation of `PreBlock`s.
    * Similar resources could be defined to manage logical measurements or QEC cycles.
 4. **Transformation passes** - Define transformation passes between the
@@ -125,7 +125,7 @@ The steps for defining a logical API are the following:
    target milestone, these may be optional.
    * Define a `compile` pass that transforms the computational HUGR into a logical
      HUGR using the operations defined in step 1. In the Steane architecture, we
-     use the {py:class}`guppyft.encode._compile.ReplacementCompiler` to replace
+     use the {py:class}`guppyft.encode.ReplacementCompiler` to replace
      supported `guppylang.std.quantum` operations with a corresponding operation
      from the {py:mod}`guppyft.code.steane.logical` API. More complex architecture will
      require a new HUGR compiler to be developed.
@@ -176,7 +176,7 @@ building blocks into a single architecture builder to enable users to automatica
 their Guppy programs. This is illustrated in the end-to-end encoding notebook
 {doc}`/examples/steane_encoding`.
 
-Following our Steane example, our architecture is defined in 
+Following our Steane example, our architecture is defined in
 {py:mod}`guppyft.code.steane.encode` which defines the
 {py:class}`~guppyft.code.steane.encode.SteaneBuilder`
 class for users to build a specific architecture instance based on provided
