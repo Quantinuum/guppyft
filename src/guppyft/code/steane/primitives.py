@@ -1,4 +1,10 @@
-"""Steane architecture based on https://arxiv.org/abs/2107.07505"""
+"""Implementations of primitives for the Steane QEC architecture.
+
+Primitives should be restricted to the most fundamental building blocks of a
+QEC architecture. Operations that comprise multiple primitives should be added to
+:py:mod:`~guppyft.code.steane.logical` instead.
+
+Based on https://arxiv.org/abs/2107.07505"""
 
 from typing import no_type_check
 
@@ -15,7 +21,7 @@ from guppyft.code.util import LogicalBlock, RawMeasurement, parity_check
 # ZZZZIII -> 0, 1, 2, 3
 # IZZIZZI -> 1, 2, 4, 5
 # IIZZIZZ -> 2, 3, 5, 6
-stabilizer_indices = [
+_stabilizer_indices = [
     [0, 1, 2, 3],
     [1, 2, 4, 5],
     [2, 3, 5, 6],
@@ -25,7 +31,7 @@ stabilizer_indices = [
 @guppy
 @no_type_check
 def prep_zero_non_ft() -> LogicalBlock[7]:
-    """Prepare Steane blk in the logical zero state."""
+    """Prepare Steane block in the logical zero state."""
     blk = LogicalBlock(array(qlib.qubit() for _ in range(7)))
 
     plus_ids = array(0, 4, 6)
@@ -161,11 +167,11 @@ def _prep_h_non_ft() -> LogicalBlock[7]:
 
     arr = array(qlib.qubit() for _ in range(7))
     # Prepare qubit `1` in the |H> = Ry(pi/4)|0> state
-    qlib.ry(arr[relabel[0]], pi / 4)  # 1
+    qlib.ry(arr[relabel[0]], pi / 4)
     # Prepare qubits that start in |+> state.
-    qlib.h(arr[relabel[1]])  # 0
-    qlib.h(arr[relabel[2]])  # 4
-    qlib.h(arr[relabel[5]])  # 6
+    qlib.h(arr[relabel[1]])
+    qlib.h(arr[relabel[2]])
+    qlib.h(arr[relabel[5]])
     # Apply the CNOTs
     cx_pairs = array(
         (0, 6),
@@ -269,10 +275,10 @@ def inject_tdg(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
 
 @guppy
 @no_type_check
-def get_syndrome(data_bits: array[bool, 7]) -> array[bool, 3]:
+def _get_syndrome(data_bits: array[bool, 7]) -> array[bool, 3]:
     return array(
         parity_check(array(data_bits[i] for i in stab))
-        for stab in comptime(stabilizer_indices)
+        for stab in comptime(_stabilizer_indices)
     )
 
 
@@ -359,7 +365,7 @@ def measure_z(blk: LogicalBlock[7] @ owned) -> RawMeasurement[7]:
 def decode(m: RawMeasurement[7] @ owned) -> bool:
     """Decode Steane measurement of logical block"""
     meas = qlib.collect_measurements(m.measurements)
-    synds = get_syndrome(meas)
+    synds = _get_syndrome(meas)
     logical_meas = parity_check(meas)
     logical_meas ^= synds[0] or synds[1] or synds[2]
 

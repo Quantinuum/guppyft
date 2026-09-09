@@ -1,3 +1,5 @@
+"""Builder and encoding implementation for the Steane QEC architecture."""
+
 from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from enum import Enum, auto
@@ -56,12 +58,20 @@ N = guppy.nat_var("N")
 
 @dataclass(frozen=True, kw_only=True)
 class SteaneEncoderParams(EncoderParams):
+    """Parameters for a Steane encoding.
+
+    Attributes:
+        n_blocks: Number of logical blocks available to the encoding.
+    """
+
     n_blocks: int
 
     def encoding(self) -> str:
+        """Return the identifier for the Steane encoding."""
         return "steane"
 
     def params(self) -> Mapping[str, Any]:
+        """Return the Steane-specific encoding parameters."""
         return {"n_blocks": self.n_blocks}
 
 
@@ -116,6 +126,7 @@ class QECPolicy:
         cz: float = 0.0
 
         def __setattr__(self, key: str, value: Any) -> None:
+            """Set a non-negative cost for a known logical operation."""
             if not hasattr(self, key):
                 raise KeyError(f"Unknown cost key: {key}")
             if value < 0:
