@@ -49,10 +49,12 @@ _stabilizer_indices = [
     [2, 3, 5, 6],
 ]
 
+N = guppy.nat_var("N")
+
 
 @guppy
 @no_type_check
-def _parity_check(data_bits: array[bool, 7]) -> bool:
+def _parity_check(data_bits: array[bool, N]) -> bool:
     """Compute the XOR (parity) of all bits in ``data_bits``."""
     out = False
     for i in range(N):
