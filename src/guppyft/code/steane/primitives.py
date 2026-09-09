@@ -14,11 +14,14 @@ from guppylang.std import quantum as qlib
 from guppylang.std.angles import pi
 from guppylang.std.builtins import Measurement, array, comptime, owned
 from guppylang.std.mem import mem_swap
+from zixy.qubit import pauli
 
+from guppyft.code_def import StabilizerCode
 from guppyft.std import LogicalBlock
 from guppyft.std.state_factory import PreBlock
 
 __all__ = [
+    "CODE_DEF",
     "RawMeasurement",
     "cx",
     "cz",
@@ -40,14 +43,32 @@ __all__ = [
     "z",
 ]
 
-# ZZZZIII -> 0, 1, 2, 3
-# IZZIZZI -> 1, 2, 4, 5
-# IIZZIZZ -> 2, 3, 5, 6
-_stabilizer_indices = [
-    [0, 1, 2, 3],
-    [1, 2, 4, 5],
-    [2, 3, 5, 6],
-]
+CODE_DEF = StabilizerCode.from_python_strings(
+    num_physical_qubits=7,
+    num_logical_qubits=1,
+    distance=3,
+    generators=["XXXXIII", "IXXIXXI", "IIXXIXX", "ZZZZIII", "IZZIZZI", "IIZZIZZ"],
+    x_logicals=["XXXXXXX"],
+    z_logicals=["ZZZZZZZ"],
+)
+
+
+def _stabilizer_indices() -> list[list[int]]:
+    """Report all support sets that exist in the Steane codes generators. Values are
+    unique but reported as a nested list so that Guppy can understand them."""
+
+    indices = set()
+    for i, gen in enumerate(CODE_DEF.generators):
+        if i < 3:
+            # Zixy does not yet support slicing, and we want to skip the first three
+            # generators since we only care about the z stabilisers.
+            continue
+        indices.add(
+            frozenset([j for j, p in enumerate(gen.cmpnt.get_tuple()) if p != pauli.I])  # type: ignore[attr-defined]
+        )
+
+    return [list(idxs) for idxs in indices]
+
 
 N = guppy.nat_var("N")
 
@@ -312,7 +333,7 @@ def inject_tdg(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
 def _get_syndrome(data_bits: array[bool, 7]) -> array[bool, 3]:
     return array(
         _parity_check(array(data_bits[i] for i in stab))
-        for stab in comptime(_stabilizer_indices)
+        for stab in comptime(_stabilizer_indices())
     )
 
 
