@@ -46,7 +46,7 @@ def gen_guppy_state_prep(
     @no_type_check
     def stabilizer_state_prep() -> array[qubit, comptime(n_qubits)]:
 
-        # Initialise all qubits in the |+> state
+        # Initialize all qubits in the |+> state
         qs = array(qubit() for _ in range(n_qubits))
         for i in range(len(qs)):
             h(qs[i])

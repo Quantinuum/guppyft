@@ -51,7 +51,7 @@ def test_qalloc_project_z_discard() -> None:
     assert runner.run().collated_shots() == [
         # From guppylang v1.0.0a6, `project_z` has been updated to return `Measurement`.
         # As the op `tket.quantum.Measure` still returns a bool, the way this is
-        # achieved is by calling `measure` on the qubit and then initialising a new
+        # achieved is by calling `measure` on the qubit and then initializing a new
         # qubit in the correct state. This is why `_QAlloc` is called twice and
         # the results include `_MeasureFree`.
         {"_MeasureFree": [0], "_QAlloc": [0, 0], "_QFree": [0], "project_z": [0]}

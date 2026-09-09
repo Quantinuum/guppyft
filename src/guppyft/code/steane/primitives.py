@@ -190,7 +190,7 @@ def _measure_h_operator(blk: LogicalBlock[7]) -> array[qlib.Measurement, 2]:
     # Apply controlled-H gates
     for tgt in range(7):
         _phys_controlled_h(
-            a[tgt % 2],  # Alternate control qubit for parallelisation
+            a[tgt % 2],  # Alternate control qubit for parallelization
             blk[tgt],
         )
 
