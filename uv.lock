@@ -599,7 +599,7 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "guppylang", specifier = "~=1.0.4" },
+    { name = "guppylang", specifier = "~=1.0.4,<=1.1.0" },
     { name = "hugr", specifier = ">=0.18.6" },
     { name = "selene-sim", specifier = ">=0.3.0" },
     { name = "tket", specifier = ">=0.15.8" },
