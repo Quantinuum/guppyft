@@ -3,7 +3,7 @@
 from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from enum import Enum, auto
-from typing import Any, Self, no_type_check
+from typing import Any, Self, no_type_check, overload, Literal
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -150,10 +150,14 @@ class SteaneInstance:
         self.check_may_encode(pkg)
         return encode(pkg, self._spec)
 
-    def implement_ops(self, pkg: Package) -> Package:
+    @overload
+    def implement_ops(self, pkg: Package, *, as_bytes: Literal[False] = False) -> Package: ...
+    @overload
+    def implement_ops(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    def implement_ops(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
         """Implement logical ops in `pkg` using this instance's op implementations."""
         assert self._spec.implement_ops is not None
-        return self._spec.implement_ops(pkg)
+        return self._spec.implement_ops(pkg, as_bytes=as_bytes)
 
     def check_may_encode(self, hugr: Package) -> None:
         """Check whether any issues can be detected that would arise when trying to
