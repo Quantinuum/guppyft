@@ -38,8 +38,6 @@ nb_merge_streams = True  # Accumulates all stdout streams into one, same with st
 # ----------------------
 
 
-exclude_patterns = ["build/**", "jupyter_execute", ".jupyter_cache", "**/README.md"]
-
 myst_enable_extensions = [
     "dollarmath",
     "html_image",
