@@ -97,7 +97,7 @@ class StabilizerCode:
         x_logicals: list[str],
         z_logicals: list[str],
     ) -> StabilizerCode:
-        """Helper to create a StabilizerCode from lists of Python strings.
+        """Helper to create a :py:class:`StabilizerCode` from lists of Python strings.
 
         The strings must be defined over the alphabet :math:`\\{I, X, Y, Z\\}` and
         must be of length equal to the number of physical qubits.
