@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.2](https://github.com/Quantinuum/guppyft/compare/v0.1.1...v0.1.2) (2026-09-10)
+
+
+### Documentation
+
+* Add repo and homepage links to package description ([#372](https://github.com/Quantinuum/guppyft/issues/372)) ([44690df](https://github.com/Quantinuum/guppyft/commit/44690dfbfc892af8f5adaddf640cfbc117590105))
+* Make a separate "getting started" page ([#376](https://github.com/Quantinuum/guppyft/issues/376)) ([3ddb5de](https://github.com/Quantinuum/guppyft/commit/3ddb5de687ca2354b9fc14452d88d657bbd5d956))
+* Separate README and package descriptions ([#374](https://github.com/Quantinuum/guppyft/issues/374)) ([e7993af](https://github.com/Quantinuum/guppyft/commit/e7993af0f91e0e52ce9b87c34bcdfc9cf32f109f))
+* Update README and DEVELOPMENT links ([#371](https://github.com/Quantinuum/guppyft/issues/371)) ([dea8de3](https://github.com/Quantinuum/guppyft/commit/dea8de36bf67a63ad7dc1c75a1413732738aafa6))
+
 ## [0.1.1](https://github.com/Quantinuum/guppyft/compare/v0.1.0...v0.1.1) (2026-09-09)
 
 Re-releasing due to a version number clash with the empty name reservation package.
