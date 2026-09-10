@@ -410,7 +410,7 @@ def _compute_clifford_tableaux(
     canonicalize with SignTerms.canonicalize_all() before we can check for equality.
 
     :param semantic_function: A Guppy function for semantic action
-      of a Clifford operator on k logical qubits.
+      of a Clifford operator on :math:`k` logical qubits.
     :param impl_function: A Guppy function for implementing
       the semantics on n physical qubits.
     :param code_definition: A stabilizer code with well defined :math:`[[n, k, d]]`
