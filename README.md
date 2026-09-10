@@ -47,7 +47,7 @@ teleport_encoded = steane.encode(teleport.compile())
 
 📒 [Example notebooks][examples]
 
-[examples]: ./examples/
+[examples]: https://docs.quantinuum.com/guppy/ft/examples_index.html
 [docs]: https://docs.quantinuum.com/guppy/ft
 
 ## Installation
