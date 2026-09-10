@@ -7,7 +7,6 @@ from typing import Any, Self, no_type_check
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
-from guppylang.emulator import EmulatorBuilder, EmulatorInstance
 from guppylang.library import GuppyLibrary, link_name
 from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.collections import Stack, empty_queue
@@ -39,6 +38,7 @@ from guppyft.code.steane.primitives import (
 from guppyft.encode import (
     EncoderParams,
     EncodeSpec,
+    EncodingArchitecture,
     ImplementOps,
     ImplementOpsSpec,
     OpReplacements,
@@ -140,51 +140,22 @@ class QECPolicy:
 
 
 @dataclass(frozen=True)
-class SteaneInstance:
+class SteaneInstance(EncodingArchitecture):
     """A Steane architecture instance built by `SteaneBuilder.build`."""
 
     _spec: EncodeSpec
 
-    def encode(self, pkg: Package) -> Package:
-        """Encode a computational package with the Steane instance."""
-        self.check_may_encode(pkg)
+    def _encode(self, pkg: Package) -> Package:
         return encode(pkg, self._spec)
 
-    def implement_ops(self, pkg: Package) -> Package:
-        """Implement logical ops in `pkg` using this instance's op implementations."""
+    def _implement_ops(self, pkg: Package) -> Package:
         assert self._spec.implement_ops is not None
         return self._spec.implement_ops(pkg)
 
-    def check_may_encode(self, hugr: Package) -> None:
-        """Check whether any issues can be detected that would arise when trying to
-        encode the given package, e.g. the package containing unsupported gates.
-
-        Note that this function returning without error is not a guarantee that a
-        subsequent call to `encode` will succeed."""
+    def _check_may_encode(self, hugr: Package) -> None:
         assert self._spec.compile is not None
         if (error := self._spec.compile.check_may_compile(hugr)) is not None:
             raise error
-
-    def emulator(
-        self,
-        pkg: Package,
-        n_qubits: int,
-        builder: EmulatorBuilder | None = None,
-    ) -> EmulatorInstance:
-        """Encode a hugr Package and build an emulator for it.
-
-        Args:
-            pkg: The computational hugr package.
-            n_qubits: Number of physical qubits available to the emulator.
-            builder: Optional `EmulatorBuilder` to use; defaults to a new one.
-        """
-        encoded_pkg = self.encode(pkg)
-        if builder is None:
-            builder = EmulatorBuilder()
-
-        emulator = builder.build(encoded_pkg, n_qubits)
-
-        return emulator
 
 
 @dataclass(frozen=True, kw_only=True)

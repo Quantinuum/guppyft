@@ -1,8 +1,6 @@
-from collections import defaultdict
 from typing import no_type_check
 
 from guppylang import guppy
-from guppylang.emulator import EmulatorBuilder
 from guppylang.std.angles import angle
 from guppylang.std.builtins import array, result
 from guppylang.std.qsystem.helios import zz_phase
@@ -15,11 +13,8 @@ from guppylang.std.quantum import (
     qubit,
     x,
 )
-from selene_sim.backends.bundled_simulators import Stim
 
-from guppyft.encode import encode
-
-from .utils.identity_code import identity_code_spec
+from tests.utils.identity_code import IdentityBuilder, IdentityQECPolicy
 
 
 def test_qalloc_measure() -> None:
@@ -28,10 +23,7 @@ def test_qalloc_measure() -> None:
         q = qubit()
         measure(q)
 
-    id_code = identity_code_spec(n_qubits=1)
-
-    encoded_pkg = encode(main, id_code)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+    runner = IdentityBuilder().build(n_qubits=1).emulator(main.compile(), n_qubits=1)
 
     assert runner.run().collated_shots() == [{"_MeasureFree": [0], "_QAlloc": [0]}]
 
@@ -43,10 +35,7 @@ def test_qalloc_project_z_discard() -> None:
         result("project_z", project_z(q).read())
         discard(q)
 
-    id_code = identity_code_spec(n_qubits=1)
-
-    encoded_pkg = encode(main, id_code)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+    runner = IdentityBuilder().build(n_qubits=1).emulator(main.compile(), n_qubits=1)
 
     assert runner.run().collated_shots() == [
         # From guppylang v1.0.0a6, `project_z` has been updated to return `Measurement`.
@@ -65,10 +54,7 @@ def test_x() -> None:
         x(q)
         result("q", measure(q).read())
 
-    id_code = identity_code_spec(n_qubits=1)
-
-    encoded_pkg = encode(main, id_code)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+    runner = IdentityBuilder().build(n_qubits=1).emulator(main.compile(), n_qubits=1)
 
     assert runner.run().collated_shots() == [
         {"_MeasureFree": [0], "_QAlloc": [0], "_X": [0], "q": [1]}
@@ -83,10 +69,7 @@ def test_cx() -> None:
         result("ctl", measure(ctl).read())
         result("tgt", measure(tgt).read())
 
-    id_code = identity_code_spec(n_qubits=2)
-
-    encoded_pkg = encode(main, id_code)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
+    runner = IdentityBuilder().build(n_qubits=2).emulator(main.compile(), n_qubits=2)
 
     assert runner.run().collated_shots() == [
         {"_MeasureFree": [0, 0], "_QAlloc": [0, 0], "_CX": [0], "ctl": [0], "tgt": [0]},
@@ -102,10 +85,7 @@ def test_zz_phase() -> None:
         result("ctl", measure(ctl).read())
         result("tgt", measure(tgt).read())
 
-    id_code = identity_code_spec(n_qubits=2)
-
-    encoded_pkg = encode(main, id_code)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
+    runner = IdentityBuilder().build(n_qubits=2).emulator(main.compile(), n_qubits=2)
 
     assert runner.run().collated_shots() == [
         {
@@ -124,10 +104,7 @@ def test_qubit_array() -> None:
         qb_arr = array(qubit() for _ in range(2))
         measure_array(qb_arr)
 
-    id_code = identity_code_spec(n_qubits=2)
-
-    encoded_pkg = encode(main, id_code)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
+    runner = IdentityBuilder().build(n_qubits=2).emulator(main.compile(), n_qubits=2)
 
     assert runner.run().collated_shots() == [
         {"_MeasureFree": [0, 0], "_QAlloc": [0, 0]}
@@ -142,10 +119,7 @@ def test_out_of_logical_qubits() -> None:
         discard(q0)
         discard(q1)
 
-    id_code = identity_code_spec(n_qubits=1)
-
-    encoded_pkg = encode(main, id_code)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+    runner = IdentityBuilder().build(n_qubits=1).emulator(main.compile(), n_qubits=1)
 
     assert runner.run().collated_shots() == [
         {"_QAlloc": [0, 0], "exit: get_next_addr: No more qubits to allocate": [1]}
@@ -160,10 +134,7 @@ def test_qubit_reuse() -> None:
         qb = qubit()
         result("qb", measure(qb).read())
 
-    id_code = identity_code_spec(n_qubits=1)
-
-    encoded_pkg = encode(main, id_code)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+    runner = IdentityBuilder().build(n_qubits=1).emulator(main.compile(), n_qubits=1)
 
     assert runner.run().collated_shots() == [
         {"_MeasureFree": [0, 0], "_QAlloc": [0, 0], "qb": [0, 0]}
@@ -177,13 +148,16 @@ def test_qec_policy() -> None:
         x(qb)
         measure(qb)
 
-    costs: dict[str, int] = defaultdict(int)
-    costs = costs | {"X": 1, "IDLE_X": 0, "CX": 0, "IDLE_CX": 0}
+    costs = IdentityQECPolicy.OperationCosts()
+    costs.x = (1, 0)
+    costs.cx = (0, 0)
 
-    id_code = identity_code_spec(n_qubits=1, qec_budget=1, costs=costs)
-
-    encoded_pkg = encode(main, id_code)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+    runner = (
+        IdentityBuilder()
+        .with_qec_policy(IdentityQECPolicy(threshold=1, costs=costs))
+        .build(n_qubits=1)
+        .emulator(main.compile(), n_qubits=1)
+    )
 
     assert runner.run().collated_shots() == [
         {

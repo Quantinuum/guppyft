@@ -1,11 +1,13 @@
 """Abstractions for constructing QEC architectures."""
 
 import json
+from abc import abstractmethod
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any, Protocol
 
 from guppylang.defs import GuppyFunctionDefinition
+from guppylang.emulator import EmulatorBuilder, EmulatorInstance
 from hugr import Hugr
 from hugr.metadata import Metadata
 from hugr.ops import Module
@@ -25,6 +27,7 @@ from ._implement_ops import (
 __all__ = [
     "EncodeSpec",
     "EncoderParams",
+    "EncodingArchitecture",
     "ImplementOps",
     "ImplementOpsSpec",
     "LogicalCompiler",
@@ -36,6 +39,50 @@ __all__ = [
     "encode",
     "implement_ops",
 ]
+
+
+class EncodingArchitecture(Protocol):
+    def encode(self, pkg: Package) -> Package:
+        """Encode a computational package."""
+        self._check_may_encode(pkg)
+        return self._encode(pkg)
+
+    def implement_ops(self, pkg: Package) -> Package:
+        """Implement logical ops in `pkg` using this instance's op implementations."""
+        return self._implement_ops(pkg)
+
+    def check_may_encode(self, pkg: Package) -> None:
+        """Check whether any issues can be detected that would arise when trying to
+        encode the given package, e.g. the package containing unsupported gates.
+
+        Note that this function returning without error is not a guarantee that a
+        subsequent call to `encode` will succeed."""
+        self._check_may_encode(pkg)
+
+    @abstractmethod
+    def _encode(self, pkg: Package) -> Package: ...
+    @abstractmethod
+    def _check_may_encode(self, pkg: Package) -> None: ...
+    @abstractmethod
+    def _implement_ops(self, pkg: Package) -> Package: ...
+
+    def emulator(
+        self,
+        pkg: Package,
+        n_qubits: int,
+        builder: EmulatorBuilder | None = None,
+    ) -> EmulatorInstance:
+        """Encode a hugr Package and build an emulator for it.
+
+        Args:
+            pkg: The computational hugr package.
+            n_qubits: Number of physical qubits available to the emulator.
+            builder: Optional `EmulatorBuilder` to use; defaults to a new one.
+        """
+        encoded_pkg = self.encode(pkg)
+        if builder is None:
+            builder = EmulatorBuilder()
+        return builder.build(encoded_pkg, n_qubits)
 
 
 @dataclass(frozen=True, kw_only=True)
