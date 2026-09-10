@@ -11,7 +11,7 @@ from selene_sim.build import build
 from selene_stim_plugin import SeleneStimState
 from zixy.qubit import pauli
 
-from guppyft.code_def import StabilizerCode, identity_code
+from guppyft.code_def import StabilizerCode, _identity_code
 from guppyft.verify._expansion import get_expanded_stabilizer_set
 from guppyft.verify._state_gen import gen_choi_state
 from guppyft.verify._utils import (
@@ -424,7 +424,7 @@ def _compute_clifford_tableaux(
         case 1:
             # Get the 2k stabilizers for the 2k qubit Choi state encoding the logical.
             semantic_choi_stabilizers = _compute_stabilizers_single_block_unitary(
-                identity_code(code_definition.num_logical_qubits),
+                _identity_code(code_definition.num_logical_qubits),
                 semantic_function,  # type: ignore[arg-type]
                 num_selene_qubits=2 * (code_definition.num_logical_qubits)
                 + impl_num_ancillas,
@@ -439,7 +439,7 @@ def _compute_clifford_tableaux(
         case 2:
             # Get the 4k stabilizers for the 4k qubit Choi state encoding the logical.
             semantic_choi_stabilizers = _compute_stabilizers_double_block_unitary(
-                identity_code(code_definition.num_logical_qubits),
+                _identity_code(code_definition.num_logical_qubits),
                 semantic_function,  # type: ignore[arg-type]
                 num_selene_qubits=4 * (code_definition.num_logical_qubits)
                 + impl_num_ancillas,

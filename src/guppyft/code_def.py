@@ -159,7 +159,7 @@ def _str_to_zixy(s: str, n: int) -> pauli.SignTerm:
     return pauli.SignTerm.from_str(f"({sign}1, {pauli_str})", n)
 
 
-def identity_code(k: int) -> StabilizerCode:
+def _identity_code(k: int) -> StabilizerCode:
     """Return a stabilizer code that encodes :math:`k` logical qubits into
       :math:`k` physical qubits. This is the trivial code with distance 1.
 
