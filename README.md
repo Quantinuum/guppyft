@@ -3,11 +3,11 @@
 Guppy FT is an extension of the [Guppy](https://github.com/Quantinuum/guppylang) quantum programming language to aid
 with writing, compiling and running fault-tolerant quantum programs. As a toolkit, it provides:
 
-- A framework to define QEC architectures
-- Transformations through quantum program abstraction layers: From computational to logical to physical
-- Verification tools to validate QEC primitive implementations
+- a framework to define QEC architectures;
+- transformations through quantum program abstraction layers, from computational to logical to physical;
+- verification tools to validate QEC primitive implementations.
 
-Together, this enables automatic encoding of arbitrary Guppy programs, including measurement dependent control flow.
+Together, these enable automatic encoding of arbitrary Guppy programs, including measurement dependent control flow.
 
 ```python
 from guppylang import guppy
@@ -47,15 +47,15 @@ teleport_encoded = steane.encode(teleport.compile())
 
 📒 [Example notebooks][examples]
 
-[examples]: ./examples/
-[docs]: ./docs/index.md
+[examples]: https://docs.quantinuum.com/guppy/ft/examples_index.html
+[docs]: https://docs.quantinuum.com/guppy/ft
 
 ## Installation
 
-Guppy FT can be installed from [PyPI](https://pypi.org/project/guppyft/) using `pip`. Requires Python>=3.12.
+Set up a virtual environment and install dependencies using:
 
 ```bash
-pip install guppyft
+uv sync
 ```
 
 ## Development

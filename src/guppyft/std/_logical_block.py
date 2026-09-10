@@ -22,6 +22,17 @@ class LogicalBlock(Generic[BLOCK_SIZE]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
+    def put_into_array(
+        self: "LogicalBlock[BLOCK_SIZE]" @ owned, arr: array[qubit, BLOCK_SIZE]
+    ) -> None:
+        """Put the qubits of the logical block into the array (using `.put`) and discard
+        the block."""
+        for i in range(BLOCK_SIZE):
+            arr.put(self.data_qs.take(i), i)
+        self.data_qs.discard_all_taken()
+
+    @guppy
+    @no_type_check
     def __getitem__(self, idx: int) -> qubit:
         return self.data_qs.take(idx)
 

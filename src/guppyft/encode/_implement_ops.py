@@ -178,7 +178,7 @@ def implement_ops(
     :param hugr_pkg: A package containing a single module.
     :param spec: The spec for the encoding. See `EnrichmentSpec` for details.
     :param as_bytes: Whether to return bytes instead of the Package, skipping the final
-        deserialisation.
+        deserialization.
     :return: The enriched function as an executable HUGR package.
     """
     assert len(hugr_pkg.modules) == 1

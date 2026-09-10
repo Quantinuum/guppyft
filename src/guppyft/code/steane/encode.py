@@ -730,7 +730,7 @@ class SteaneBuilder:
             [steane_ops(), steane_types(), std_ops(), std_types()]
         )
         # `_std_extensions` should not be necessary but seems to be
-        #  required for `borrow_array` when (de)serialising.
+        #  required for `borrow_array` when (de)serializing.
         ext.extend(_std_extensions())
 
         logical_compiler = ReplacementCompiler(

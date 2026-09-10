@@ -63,7 +63,7 @@ def encode(
 
     1. running the given computational passes;
     2. lowering the operations in the package to logical operations and
-       potentially performing static optimisations (e.g. resolving some qubit
+       potentially performing static optimizations (e.g. resolving some qubit
        address assignments statically);
     3. running additional logical passes (e.g. inserting additional QEC cycles);
        and
@@ -111,7 +111,7 @@ class EncoderParams(Protocol):
 
     def params(self) -> Mapping[str, Any]:
         """The parameters to annotate on a program. Implementations should return values
-        that support serialisation to JSON."""
+        that support serialization to JSON."""
 
 
 class _MetadataEncoding(Metadata[Mapping[str, Any]]):
@@ -124,7 +124,7 @@ def annotate_encoding(hugr: Package | Hugr[Any], params: EncoderParams) -> None:
     try:
         json.dumps(params.params(), check_circular=True)
     except TypeError as e:
-        raise ValueError("Could not serialise parameters") from e
+        raise ValueError("Could not serialize parameters") from e
 
     for module in hugr.modules if isinstance(hugr, Package) else [hugr]:
         module[module.module_root].metadata[_MetadataEncoding] = {
