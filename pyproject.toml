@@ -34,6 +34,10 @@ dependencies = [
     "selene-sim>=0.3.0",
 ]
 
+[project.urls]
+homepage = "https://docs.quantinuum.com/guppy/ft/"
+repository = "https://github.com/quantinuum/guppyft"
+
 [dependency-groups]
 dev = [
     "maturin>=1.15.0,<2",
