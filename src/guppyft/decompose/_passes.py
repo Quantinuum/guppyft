@@ -27,12 +27,15 @@ class ComparatorRzDecomposer(ComposablePass):
     Can be used to decompose angles at runtime.
     See https://arxiv.org/pdf/2404.05618.
 
+    On a noiseless setting, the probability of success per attempt
+    is greater than 0.5. The shot will be discarded if all `max_attempts` fail.
+    Hence, the probability of a shot with :math:`g` Rz gates completing
+    is greater than :math:`(1 - 0.5^L)^g`, where :math:`L` is `max_attempts`.
+
     Attributes:
         epsilon: Error tolerance in the approximation of the angle.
         max_attempts: Maximum number of attempts for repeat-until-success for
-            each Rz gate that is decomposed. On a noiseless setting, the
-            probability of success is above 0.5. The shot will be discarded
-            if all attempts fail.
+            each Rz gate that is decomposed.
     """
 
     epsilon: float
