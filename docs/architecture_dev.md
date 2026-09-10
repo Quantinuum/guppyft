@@ -94,8 +94,8 @@ The steps for defining a logical API are the following:
    * Generate two HUGR extensions using Rust: one for the operations and one for the
      types required by the architecture. The extensions are separated so that they can
      be versioned separately. Follow the Steane examples
-     for [`ops.rs`](https://github.com/quantinuum-dev/guppyft/blob/main/extensions/src/steane/ops.rs)
-     and [`types.rs`](https://github.com/quantinuum-dev/guppyft/blob/main/extensions/src/steane/types.rs).
+     for [`ops.rs`](https://github.com/Quantinuum/guppyft/blob/main/extensions/src/steane/ops.rs)
+     and [`types.rs`](https://github.com/Quantinuum/guppyft/blob/main/extensions/src/steane/types.rs).
    * Run `just gen-extensions` to automatically generate the JSON files of the HUGR
      extension.
 2. **Logical Guppy bindings** - Provide the Guppy interface to create programs
