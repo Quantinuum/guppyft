@@ -61,6 +61,7 @@ from guppylang import guppy
 from guppylang.std.builtins import output
 from guppylang.std.quantum import cx, h, measure, qubit, x, z
 
+
 @guppy
 def teleportation() -> None:
     # Init source qubit in the |1> state
@@ -106,5 +107,7 @@ be submitted to quantum devices. `SteaneInstance` includes an `emulator` helper 
 ```python
 from selene_sim import Stim
 
-steane.emulator(teleportation.compile(), n_qubits=22).with_simulator(Stim()).run().collated_shots()
+steane.emulator(teleportation.compile(), n_qubits=22).with_simulator(
+    Stim()
+).run().collated_shots()
 ```
