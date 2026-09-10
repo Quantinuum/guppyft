@@ -322,8 +322,8 @@ def valid_stabilizer_state_preparation(
       of Pauli eigenstate preparation over one or two code blocks.
     :param impl_function: A Guppy function for preparing the logical eigenstate
       over one or two code blocks.
-    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters,
-        stabilizer generators and logical operators.
+    :param code_definition: A stabilizer code with well defined :math:`[[n, k, d]]`
+      parameters, stabilizer generators and logical operators.
     :param impl_num_ancillas: The number of ancilla qubits used in the
         implementation. Defaults to zero.
     :return: A Boolean indicating whether the state preparation is valid.
@@ -413,8 +413,8 @@ def _compute_clifford_tableaux(
       of a Clifford operator on k logical qubits.
     :param impl_function: A Guppy function for implementing
       the semantics on n physical qubits.
-    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters,
-        stabilizer generators and logical operators.
+    :param code_definition: A stabilizer code with well defined :math:`[[n, k, d]]`
+      parameters, stabilizer generators and logical operators.
     :param impl_num_ancillas: The number of ancilla qubits used in the
         implementation. Defaults to zero.
     :return: A pair of Clifford tableaux made up of signed Pauli terms.
