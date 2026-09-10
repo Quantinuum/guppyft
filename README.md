@@ -47,7 +47,7 @@ teleport_encoded = steane.encode(teleport.compile())
 
 📒 [Example notebooks][examples]
 
-[examples]: ./examples/
+[examples]: https://docs.quantinuum.com/guppy/ft/examples_index.html
 [docs]: https://docs.quantinuum.com/guppy/ft
 
 ## Installation
@@ -60,11 +60,11 @@ pip install guppyft
 
 ## Development
 
-See [DEVELOPMENT.md](DEVELOPMENT.md) for instructions on setting up the development environment.
+See [DEVELOPMENT.md](https://github.com/Quantinuum/guppyft/blob/main/DEVELOPMENT.md) for instructions on setting up the development environment.
 
 ## Licence
 
 This project is licensed under Apache License, Version 2.0 ([LICENCE][]
 or <http://www.apache.org/licenses/LICENSE-2.0>).
 
-[LICENCE]: ./LICENCE
+[LICENCE]: https://github.com/Quantinuum/guppyft/blob/main/LICENCE
