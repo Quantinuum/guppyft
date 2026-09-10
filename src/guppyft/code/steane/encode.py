@@ -145,10 +145,14 @@ class SteaneInstance:
 
     _spec: EncodeSpec
 
-    def encode(self, pkg: Package) -> Package:
+    @overload
+    def encode(self, pkg: Package, *, as_bytes: Literal[False] = False) -> Package: ...
+    @overload
+    def encode(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    def encode(self, pkg: Package, *, as_bytes: bool = False) -> Package:
         """Encode a computational package with the Steane instance."""
         self.check_may_encode(pkg)
-        return encode(pkg, self._spec)
+        return encode(pkg, self._spec, as_bytes=as_bytes)
 
     @overload
     def implement_ops(self, pkg: Package, *, as_bytes: Literal[False] = False) -> Package: ...
@@ -182,7 +186,7 @@ class SteaneInstance:
             n_qubits: Number of physical qubits available to the emulator.
             builder: Optional `EmulatorBuilder` to use; defaults to a new one.
         """
-        encoded_pkg = self.encode(pkg)
+        encoded_pkg = self.encode(pkg, as_bytes=True)
         if builder is None:
             builder = EmulatorBuilder()
 

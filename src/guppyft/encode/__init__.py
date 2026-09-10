@@ -3,7 +3,7 @@
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Any, Protocol, overload, Literal
 
 from guppylang.defs import GuppyFunctionDefinition
 from hugr import Hugr
@@ -50,13 +50,29 @@ class EncodeSpec:
     implement_ops: ImplementOps | None = None
     """Lowers the logical computation to a physical level."""
 
-
+@overload
 def encode(
     hugr: Package | GuppyFunctionDefinition[[], None],
     spec: EncodeSpec,
     *,
     passes: list[ComposablePass] | None = None,
-) -> Package:
+    as_bytes: Literal[False] = False,
+) -> Package:...
+@overload
+def encode(
+    hugr: Package | GuppyFunctionDefinition[[], None],
+    spec: EncodeSpec,
+    *,
+    passes: list[ComposablePass] | None = None,
+    as_bytes: Literal[True],
+) -> bytes: ...
+def encode(
+    hugr: Package | GuppyFunctionDefinition[[], None],
+    spec: EncodeSpec,
+    *,
+    passes: list[ComposablePass] | None = None,
+    as_bytes: bool = False,
+) -> Package | bytes:
     """
     Encodes the given package (or Guppy function, directly compiled to a package for
     convenience) by applying four stages:
@@ -101,7 +117,13 @@ def encode(
 
     # 4. Lower logical -> physical
     if spec.implement_ops is not None:
-        hugr = spec.implement_ops(hugr, as_bytes=False)
+        hugr = spec.implement_ops(hugr, as_bytes=as_bytes)
+
+    if isinstance(hugr, GuppyFunctionDefinition):
+        hugr = hugr.compile()
+    if isinstance(hugr, Package) and as_bytes:
+        hugr = hugr.to_bytes()
+
     return hugr
 
 
