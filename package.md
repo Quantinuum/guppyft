@@ -43,12 +43,12 @@ teleport_encoded = steane.encode(teleport.compile())
 
 ## Documentation
 
-📖 [Getting Started][docs]
+📖 [Getting started][docs]
 
 📒 [Example notebooks][examples]
 
 [examples]: https://docs.quantinuum.com/guppy/ft/examples_index.html
-[docs]: https://docs.quantinuum.com/guppy/ft
+[docs]: https://docs.quantinuum.com/guppy/ft/getting_started.html
 
 ## Installation
 
