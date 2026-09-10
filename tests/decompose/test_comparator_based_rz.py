@@ -46,7 +46,7 @@ def test_comparator_based_rz(
     theta: float,
 ) -> None:
     """Test that Rz(theta) gate is approximated within error bound epsilon."""
-    rz_fn = comparator_based_rz_cascade(epsilon)
+    rz_fn = comparator_based_rz_cascade(epsilon, max_attempts=15)
 
     theta = theta / pi
 
@@ -59,9 +59,11 @@ def test_comparator_based_rz(
         state_output("final", target)
         discard(target)
 
-    result = test_circuit.emulator(
-        n_comparator_based_rz_cascade_ancillas(epsilon) + 1
-    ).run()
+    result = (
+        test_circuit.emulator(n_comparator_based_rz_cascade_ancillas(epsilon) + 1)
+        .with_simulator(Quest(random_seed=1234))
+        .run()
+    )
     states = Quest.extract_states_dict(result.results[0].entries)
     final_state = states["final"].get_single_state()
     theta_star = np.angle(final_state[1] / final_state[0]) / np.pi
@@ -91,6 +93,7 @@ def test_comparator_based_rz_replay(theta: float) -> None:
         rz = ComparatorBasedRz(
             comparator,
             inverse_comparator,
+            15,  # max_attempts
         )
         rz.compose(target, theta)
 

@@ -25,9 +25,18 @@ class ComparatorRzDecomposer(ComposablePass):
     """Decomposes Rz gates using :math:`2\\lceil(\\log_2(1/\\epsilon))\\rceil` ancilla
     qubits via comparators and repeat-until-success. Introduces Toffoli gates.
     Can be used to decompose angles at runtime.
-    See https://arxiv.org/pdf/2404.05618."""
+    See https://arxiv.org/pdf/2404.05618.
+
+    Attributes:
+        epsilon: Error tolerance in the approximation of the angle.
+        max_attempts: Maximum number of attempts for repeat-until-success for
+            each Rz gate that is decomposed. On a noiseless setting, the
+            probability of success is above 0.5. The shot will be discarded
+            if all attempts fail.
+    """
 
     epsilon: float
+    max_attempts: int
 
     def num_ancilla(self) -> int:
         """Number of ancilla qubits required for the
@@ -47,7 +56,7 @@ class ComparatorRzDecomposer(ComposablePass):
             op_replacements={},
             compound_op_replacements={
                 ("tket.quantum", "Rz"): _compile_rotation_func(
-                    comparator_based_rz_cascade(self.epsilon)
+                    comparator_based_rz_cascade(self.epsilon, self.max_attempts)
                 )
             },
             extensions=_std_extensions(),

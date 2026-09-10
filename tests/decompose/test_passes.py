@@ -6,6 +6,7 @@ from guppylang.emulator import EmulatorBuilder
 from guppylang.std.angles import pi
 from guppylang.std.builtins import output
 from guppylang.std.quantum import h, measure, qubit, rz, toffoli, x
+from selene_sim.backends.bundled_simulators import Quest
 
 from guppyft.decompose import ComparatorRzDecomposer, ToffoliDecomposer
 
@@ -61,12 +62,13 @@ def test_decompose_rz() -> None:
         output("q", measure(q).read())
 
     pkg = main.with_minimal_opt().compile()
-    rz_decomposer = ComparatorRzDecomposer(epsilon=0.01)
+    rz_decomposer = ComparatorRzDecomposer(epsilon=0.01, max_attempts=15)
     rz_decomposer.run(pkg.modules[0], inplace=True)
 
     shots = (
         EmulatorBuilder()
         .build(pkg, n_qubits=1 + rz_decomposer.num_ancilla())
+        .with_simulator(Quest(random_seed=1234))
         .with_shots(10)
         .run()
         .collated_counts()

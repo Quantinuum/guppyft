@@ -268,7 +268,7 @@ def test_realtime_rz_encoder() -> None:
 
     pkg = main.compile()
 
-    rz_decomposer = ComparatorRzDecomposer(epsilon=0.01)
+    rz_decomposer = ComparatorRzDecomposer(epsilon=0.01, max_attempts=15)
     rz_decomposer.then(ToffoliDecomposer()).run(pkg.modules[0], inplace=True)
 
     # Original block + one block for magic + ancilla space for Rz
