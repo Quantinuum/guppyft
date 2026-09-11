@@ -1,0 +1,511 @@
+{
+  "version": "0.1.0",
+  "name": "guppyft.toy_k2.ops",
+  "types": {},
+  "operations": {
+    "cx_intra": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "cx_intra",
+      "description": "Apply a CX gate within a ToyK2 block, specifying which logical qubit is the target.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "cx_transversal": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "cx_transversal",
+      "description": "Apply two CX gates in parallel (transversal) between two ToyK2 blocks.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "decode_block_measurement": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "decode_block_measurement",
+      "description": "Decode a block measurement (both qubits) of a ToyK2 block.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block_measurement",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Sum",
+              "s": "Unit",
+              "size": 2
+            },
+            {
+              "t": "Sum",
+              "s": "Unit",
+              "size": 2
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "decode_qubit_measurement": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "decode_qubit_measurement",
+      "description": "Decode a qubit measurement of a ToyK2 block.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "qubit_measurement",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Sum",
+              "s": "Unit",
+              "size": 2
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "free": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "free",
+      "description": "Free a logical ToyK2 block.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": []
+        }
+      },
+      "binary": false
+    },
+    "h_all": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "h_all",
+      "description": "Apply an H gate on both logical qubits of a ToyK2 block.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "measure_z": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "measure_z",
+      "description": "Measure a logical qubit of a ToyK2 block non-destructively in the Z basis.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "qubit_measurement",
+              "args": [],
+              "bound": "C"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "measure_z_all": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "measure_z_all",
+      "description": "Destructively measure a ToyK2 block in the Z basis.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block_measurement",
+              "args": [],
+              "bound": "C"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "prep_t_states_non_ft": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "prep_t_states_non_ft",
+      "description": "Prepare a ToyK2 block with both logical qubits on the T|+>T|+> state.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "prep_y_states_non_ft": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "prep_y_states_non_ft",
+      "description": "Prepare a ToyK2 block with both logical qubits on the |Y>|Y> state.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "prep_zero_ft": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "prep_zero_ft",
+      "description": "Prepare a ToyK2 block with both logical qubits on the |0> state.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "qed_cycle": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "qed_cycle",
+      "description": "Apply a error detection cycle on a ToyK2 block.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "swap_intra": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "swap_intra",
+      "description": "Swap the two logical qubits of a ToyK2 block.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "x": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "x",
+      "description": "Apply an X gate on a chosen logical qubit of a ToyK2 block.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "z": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "z",
+      "description": "Apply a Z gate on a chosen logical qubit of a ToyK2 block.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    }
+  }
+}

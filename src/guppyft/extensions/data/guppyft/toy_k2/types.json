@@ -1,0 +1,37 @@
+{
+  "version": "0.1.0",
+  "name": "guppyft.toy_k2.types",
+  "types": {
+    "block": {
+      "extension": "guppyft.toy_k2.types",
+      "name": "block",
+      "params": [],
+      "description": "ToyK2 logical block",
+      "bound": {
+        "b": "Explicit",
+        "bound": "A"
+      }
+    },
+    "block_measurement": {
+      "extension": "guppyft.toy_k2.types",
+      "name": "block_measurement",
+      "params": [],
+      "description": "ToyK2 logical block measurement",
+      "bound": {
+        "b": "Explicit",
+        "bound": "C"
+      }
+    },
+    "qubit_measurement": {
+      "extension": "guppyft.toy_k2.types",
+      "name": "qubit_measurement",
+      "params": [],
+      "description": "ToyK2 logical qubit measurement",
+      "bound": {
+        "b": "Explicit",
+        "bound": "C"
+      }
+    }
+  },
+  "operations": {}
+}
