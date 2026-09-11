@@ -15,7 +15,7 @@ def test_qalloc_measure() -> None:
 
     pkg = main.compile()
     phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg, as_bytes=True)
-    res = EmulatorBuilder().build(phys_pkg, n_qubits=8).run().collated_shots()
+    res = EmulatorBuilder().build(phys_pkg, n_qubits=8).run().collated_shots()  # type: ignore[arg-type]
 
     assert res == [{"res": [0]}]
 
@@ -30,7 +30,7 @@ def test_x() -> None:
 
     pkg = main.compile()
     phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg, as_bytes=True)
-    res = EmulatorBuilder().build(phys_pkg, n_qubits=8).run().collated_shots()
+    res = EmulatorBuilder().build(phys_pkg, n_qubits=8).run().collated_shots()  # type: ignore[arg-type]
 
     assert res == [{"res": [1]}]
 
@@ -47,7 +47,7 @@ def test_h_z() -> None:
 
     pkg = main.compile()
     phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg, as_bytes=True)
-    res = EmulatorBuilder().build(phys_pkg, n_qubits=8).run().collated_shots()
+    res = EmulatorBuilder().build(phys_pkg, n_qubits=8).run().collated_shots()  # type: ignore[arg-type]
 
     assert res == [{"res": [1]}]
 
@@ -64,7 +64,7 @@ def test_cx() -> None:
 
     pkg = main.compile()
     phys_pkg = SteaneBuilder().build(n_blocks=2).implement_ops(pkg, as_bytes=True)
-    res = EmulatorBuilder().build(phys_pkg, n_qubits=18).run().collated_shots()
+    res = EmulatorBuilder().build(phys_pkg, n_qubits=18).run().collated_shots()  # type: ignore[arg-type]
 
     assert res == [{"q0": [1], "q1": [1]}]
 
@@ -79,6 +79,6 @@ def test_qec_cycle() -> None:
 
     pkg = main.compile()
     phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg, as_bytes=True)
-    res = EmulatorBuilder().build(phys_pkg, n_qubits=10).run().collated_shots()
+    res = EmulatorBuilder().build(phys_pkg, n_qubits=10).run().collated_shots()  # type: ignore[arg-type]
 
     assert res == [{"q": [0]}]

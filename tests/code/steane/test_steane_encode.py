@@ -196,7 +196,9 @@ def test_builder_from_params() -> None:
         q0 = qubit()
         discard(q0)
 
-    SteaneBuilder.from_params(SteaneEncoderParams(n_blocks=1)).encode(main.compile(), as_bytes=True)
+    SteaneBuilder.from_params(SteaneEncoderParams(n_blocks=1)).encode(
+        main.compile(), as_bytes=True
+    )
 
 
 def test_collect_measurement_encode() -> None:

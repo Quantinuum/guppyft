@@ -31,7 +31,7 @@ def test_qalloc_measure() -> None:
     id_code = identity_code_spec(n_qubits=1)
 
     encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())  # type: ignore[arg-type]
 
     assert runner.run().collated_shots() == [{"_MeasureFree": [0], "_QAlloc": [0]}]
 
@@ -46,7 +46,7 @@ def test_qalloc_project_z_discard() -> None:
     id_code = identity_code_spec(n_qubits=1)
 
     encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())  # type: ignore[arg-type]
 
     assert runner.run().collated_shots() == [
         # From guppylang v1.0.0a6, `project_z` has been updated to return `Measurement`.
@@ -68,7 +68,7 @@ def test_x() -> None:
     id_code = identity_code_spec(n_qubits=1)
 
     encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())  # type: ignore[arg-type]
 
     assert runner.run().collated_shots() == [
         {"_MeasureFree": [0], "_QAlloc": [0], "_X": [0], "q": [1]}
@@ -86,7 +86,7 @@ def test_cx() -> None:
     id_code = identity_code_spec(n_qubits=2)
 
     encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())  # type: ignore[arg-type]
 
     assert runner.run().collated_shots() == [
         {"_MeasureFree": [0, 0], "_QAlloc": [0, 0], "_CX": [0], "ctl": [0], "tgt": [0]},
@@ -105,7 +105,7 @@ def test_zz_phase() -> None:
     id_code = identity_code_spec(n_qubits=2)
 
     encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())  # type: ignore[arg-type]
 
     assert runner.run().collated_shots() == [
         {
@@ -127,7 +127,7 @@ def test_qubit_array() -> None:
     id_code = identity_code_spec(n_qubits=2)
 
     encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())  # type: ignore[arg-type]
 
     assert runner.run().collated_shots() == [
         {"_MeasureFree": [0, 0], "_QAlloc": [0, 0]}
@@ -145,7 +145,7 @@ def test_out_of_logical_qubits() -> None:
     id_code = identity_code_spec(n_qubits=1)
 
     encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())  # type: ignore[arg-type]
 
     assert runner.run().collated_shots() == [
         {"_QAlloc": [0, 0], "exit: get_next_addr: No more qubits to allocate": [1]}
@@ -163,7 +163,7 @@ def test_qubit_reuse() -> None:
     id_code = identity_code_spec(n_qubits=1)
 
     encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())  # type: ignore[arg-type]
 
     assert runner.run().collated_shots() == [
         {"_MeasureFree": [0, 0], "_QAlloc": [0, 0], "qb": [0, 0]}
@@ -183,7 +183,7 @@ def test_qec_policy() -> None:
     id_code = identity_code_spec(n_qubits=1, qec_budget=1, costs=costs)
 
     encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
-    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
+    runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())  # type: ignore[arg-type]
 
     assert runner.run().collated_shots() == [
         {

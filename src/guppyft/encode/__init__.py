@@ -3,7 +3,7 @@
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Protocol, overload, Literal
+from typing import Any, Literal, Protocol, overload
 
 from guppylang.defs import GuppyFunctionDefinition
 from hugr import Hugr
@@ -50,6 +50,7 @@ class EncodeSpec:
     implement_ops: ImplementOps | None = None
     """Lowers the logical computation to a physical level."""
 
+
 @overload
 def encode(
     hugr: Package | GuppyFunctionDefinition[[], None],
@@ -57,7 +58,7 @@ def encode(
     *,
     passes: list[ComposablePass] | None = None,
     as_bytes: Literal[False] = False,
-) -> Package:...
+) -> Package: ...
 @overload
 def encode(
     hugr: Package | GuppyFunctionDefinition[[], None],
@@ -95,36 +96,35 @@ def encode(
     :return: The encoded runnable package.
     """
 
-    if isinstance(hugr, GuppyFunctionDefinition):
-        hugr = hugr.compile_function()
+    pkg = hugr.compile_function() if isinstance(hugr, GuppyFunctionDefinition) else hugr
 
-    assert len(hugr.modules) == 1, "Given package contains more than one module"
-    assert not isinstance(hugr.modules[0].entrypoint_op(), Module), (
+    assert len(pkg.modules) == 1, "Given package contains more than one module"
+    assert not isinstance(pkg.modules[0].entrypoint_op(), Module), (
         "Cannot process module-rooted HUGRs"
     )
 
     # 1. Passes with computational -> computational
     for tket_pass in passes or [Normalize()]:
-        tket_pass(hugr.modules[0], inplace=True)
+        tket_pass(pkg.modules[0], inplace=True)
 
     # 2. Lower computational -> logical
     if spec.compile is not None:
-        hugr = spec.compile(hugr)
+        pkg = spec.compile(pkg)
 
     # 3. Passes with logical -> logical
     for tket_pass in spec.logical_passes or []:
-        tket_pass(hugr.modules[0], inplace=True)
+        tket_pass(pkg.modules[0], inplace=True)
 
     # 4. Lower logical -> physical
     if spec.implement_ops is not None:
-        hugr = spec.implement_ops(hugr, as_bytes=as_bytes)
+        pkg_maybe_bytes = spec.implement_ops(pkg, as_bytes=as_bytes)  # type: ignore[call-overload]
+    else:
+        pkg_maybe_bytes = pkg
 
-    if isinstance(hugr, GuppyFunctionDefinition):
-        hugr = hugr.compile()
-    if isinstance(hugr, Package) and as_bytes:
-        hugr = hugr.to_bytes()
+    if isinstance(pkg_maybe_bytes, Package) and as_bytes:
+        pkg_maybe_bytes = pkg_maybe_bytes.to_bytes()
 
-    return hugr
+    return pkg_maybe_bytes
 
 
 class EncoderParams(Protocol):
