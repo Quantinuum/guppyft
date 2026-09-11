@@ -52,7 +52,6 @@ myst_enable_extensions = [
 # Allow links to depth 2 headings
 myst_heading_anchors = 2
 
-
 # Sphinx autosummary
 # https://www.sphinx-doc.org/en/master/usage/extensions/autosummary.html
 
