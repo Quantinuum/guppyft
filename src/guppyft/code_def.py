@@ -16,6 +16,32 @@ class CodeDefinitionError(ValueError):
 
 @dataclass(frozen=True)
 class StabilizerCode:
+    """Definition of a stabilizer code.
+
+    Stores the following information
+
+    * num_physical_qubits (:math:`n`) - Number of physical qubits in a code block.
+    * num_logical_qubits (:math:`k`) - Number of logical qubits in a code block
+    * distance (:math:`d`) - The distance of the stabilizer code.
+    * generators - A set of :math:`(n-k)` commuting stabilizer generators.
+    * x_logicals - The logical :math:`X` operators of the stabilizer code.
+    * z_logicals - The logical :math:`Z` operators of the stabilizer code.
+
+
+    .. code-block:: python
+
+        from guppyft.code_def import StabilizerCode
+
+        STEANE_DEF = StabilizerCode.from_python_strings(
+            num_physical_qubits=7,
+            num_logical_qubits=1,
+            distance=3,
+            generators=["XXXXIII", "IXXIXXI", "IIXXIXX", "ZZZZIII", "IZZIZZI", "IIZZIZZ"],
+            x_logicals=["XXXXXXX"],
+            z_logicals=["ZZZZZZZ"],
+        )
+    """  # noqa: E501
+
     num_physical_qubits: int
     num_logical_qubits: int
     distance: int
@@ -71,18 +97,19 @@ class StabilizerCode:
         x_logicals: list[str],
         z_logicals: list[str],
     ) -> StabilizerCode:
-        """Helper to create a StabilizerCode from lists of Python strings.
+        """Helper to create a :py:class:`StabilizerCode` from lists of Python strings.
 
-        The strings must be defined over the alphabet {I, X, Y, Z} and must be
-        of length equal to the number of physical qubits. A sign may be provided at
-        the front. If a string is missing a sign, it is assumed to be positive.
+        The strings must be defined over the alphabet :math:`\\{I, X, Y, Z\\}` and
+        must be of length equal to the number of physical qubits.
+        A sign may be provided at the front. If a string is missing a sign,
+        it is assumed to be positive.
 
         :param num_physical_qubits: The number of physical qubits in the code.
         :param num_logical_qubits: The number of logical qubits in the code.
         :param distance: The distance of the code.
         :param generators: A list of stabilizer generators as Pauli strings.
-        :param x_logicals: A list of X logical operators as Pauli strings.
-        :param z_logicals: A list of Z logical operators as Pauli strings.
+        :param x_logicals: A list of :math:`X` logical operators as Pauli strings.
+        :param z_logicals: A list of :math:`Z` logical operators as Pauli strings.
         :return: A StabilizerCode instance representing the code.
         """
         zixy_generators = pauli.SignTermSet.from_iterable(
@@ -132,9 +159,9 @@ def _str_to_zixy(s: str, n: int) -> pauli.SignTerm:
     return pauli.SignTerm.from_str(f"({sign}1, {pauli_str})", n)
 
 
-def identity_code(k: int) -> StabilizerCode:
-    """Return a stabilizer code that encodes k logical qubits into k physical qubits.
-      This is the trivial code with distance 1.
+def _identity_code(k: int) -> StabilizerCode:
+    """Return a stabilizer code that encodes :math:`k` logical qubits into
+      :math:`k` physical qubits. This is the trivial code with distance 1.
 
     :param k: The number of logical qubits to encode.
     :return: A StabilizerCode instance representing the identity code.

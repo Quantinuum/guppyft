@@ -1,7 +1,7 @@
 import numpy as np
 from zixy.qubit import pauli
 
-from guppyft.code_def import identity_code
+from guppyft.code_def import _identity_code
 from guppyft.verify._expansion import (
     expand_logical_signterms,
     get_expanded_stabilizer_set,
@@ -68,7 +68,7 @@ def test_canonical() -> None:
 
 def test_bell_state_stabilizers() -> None:
     stabilizer_terms = _compute_stabilizers_single_block_unitary(
-        code=identity_code(1),
+        code=_identity_code(1),
         clifford_func=steane.specify_identity,
         num_selene_qubits=2,
     )
@@ -77,7 +77,7 @@ def test_bell_state_stabilizers() -> None:
 
 def test_s_state_stabilizers() -> None:
     terms_logical = _compute_stabilizers_single_block_unitary(
-        code=identity_code(1), clifford_func=steane.specify_s, num_selene_qubits=2
+        code=_identity_code(1), clifford_func=steane.specify_s, num_selene_qubits=2
     )
 
     terms_physical = _compute_stabilizers_single_block_unitary(
@@ -90,7 +90,7 @@ def test_s_state_stabilizers() -> None:
 
 def test_compute_stabilizers_double_block() -> None:
     stabilizers = _compute_stabilizers_double_block_unitary(
-        code=identity_code(1),
+        code=_identity_code(1),
         clifford_func=steane.specify_identity_double_block,
         num_selene_qubits=4,
     )
@@ -157,7 +157,7 @@ def test_stabilizer_padding_double_block() -> None:
 
 def test_compute_stabilizers_single_block_css_4q_id() -> None:
     choi_stabilizers_before_expansion = _compute_stabilizers_single_block_unitary(
-        identity_code(2), css_4q.specify_identity, 4
+        _identity_code(2), css_4q.specify_identity, 4
     )
     assert (
         str(choi_stabilizers_before_expansion)
@@ -189,7 +189,7 @@ def test_compute_stabilizers_single_block_css_4q_id() -> None:
 
 def test_compute_stabilizers_double_block_css_4q_id() -> None:
     choi_stabilizers_before_expansion = _compute_stabilizers_double_block_unitary(
-        identity_code(2),
+        _identity_code(2),
         css_4q.specify_identity_double_block,
         8,
     )
@@ -210,7 +210,7 @@ def test_compute_stabilizers_double_block_css_4q_id() -> None:
 
 def test_compute_stabilizers_intrablock_cx_css_4q() -> None:
     choi_stabilizers_before_expansion = _compute_stabilizers_single_block_unitary(
-        identity_code(2),
+        _identity_code(2),
         css_4q.specify_intra_block_cx,
         4,
     )
