@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/Quantinuum/guppyft/compare/v0.1.2...v0.1.3) (2026-09-11)
+
+
+### Features
+
+* Return bytes from implement ops and encode ([#382](https://github.com/Quantinuum/guppyft/issues/382)) ([c587e14](https://github.com/Quantinuum/guppyft/commit/c587e14906461fd8090f3802d705df33d14b8a0b))
+
 ## [0.1.2](https://github.com/Quantinuum/guppyft/compare/v0.1.1...v0.1.2) (2026-09-10)
 
 
