@@ -38,7 +38,7 @@ class StdOpsExtension:
     """Extension providing standard logical operations."""
 
     def __call__(self) -> Extension:
-        """Returns the Steane ops extension."""
+        """Returns the standard ops extension."""
         return load_extension("guppyft.std.ops")
 
     @functools.cached_property
