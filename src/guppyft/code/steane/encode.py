@@ -1,7 +1,9 @@
+"""Builder and encoding implementation for the Steane QEC architecture."""
+
 from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from enum import Enum, auto
-from typing import Any, Self, no_type_check
+from typing import Any, Literal, Self, no_type_check, overload
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -15,7 +17,6 @@ from hugr.ext import ExtensionRegistry
 from hugr.package import Package
 from hugr.std import _std_extensions
 
-from guppyft.code._state_factory import StateFactory
 from guppyft.code.steane.primitives import (
     cx,
     cz,
@@ -35,7 +36,6 @@ from guppyft.code.steane.primitives import (
     y,
     z,
 )
-from guppyft.code.util import LogicalBlock, RawMeasurement
 from guppyft.encode import (
     EncoderParams,
     EncodeSpec,
@@ -48,20 +48,31 @@ from guppyft.encode import (
 )
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
+from guppyft.std import LogicalBlock
+from guppyft.std.state_factory import StateFactory
 
 from . import logical as steane_logical
+from .primitives import RawMeasurement
 
 N = guppy.nat_var("N")
 
 
 @dataclass(frozen=True, kw_only=True)
 class SteaneEncoderParams(EncoderParams):
+    """Parameters for a Steane encoding.
+
+    Attributes:
+        n_blocks: Number of logical blocks available to the encoding.
+    """
+
     n_blocks: int
 
     def encoding(self) -> str:
+        """Return the identifier for the Steane encoding."""
         return "steane"
 
     def params(self) -> Mapping[str, Any]:
+        """Return the Steane-specific encoding parameters."""
         return {"n_blocks": self.n_blocks}
 
 
@@ -116,6 +127,7 @@ class QECPolicy:
         cz: float = 0.0
 
         def __setattr__(self, key: str, value: Any) -> None:
+            """Set a non-negative cost for a known logical operation."""
             if not hasattr(self, key):
                 raise KeyError(f"Unknown cost key: {key}")
             if value < 0:
@@ -133,15 +145,27 @@ class SteaneInstance:
 
     _spec: EncodeSpec
 
-    def encode(self, pkg: Package) -> Package:
+    @overload
+    def encode(self, pkg: Package, *, as_bytes: Literal[False] = False) -> Package: ...
+    @overload
+    def encode(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    def encode(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
         """Encode a computational package with the Steane instance."""
         self.check_may_encode(pkg)
-        return encode(pkg, self._spec)
+        pkg_bytes: Package | bytes = encode(pkg, self._spec, as_bytes=as_bytes)  # type: ignore[call-overload]
+        return pkg_bytes
 
-    def implement_ops(self, pkg: Package) -> Package:
+    @overload
+    def implement_ops(
+        self, pkg: Package, *, as_bytes: Literal[False] = False
+    ) -> Package: ...
+    @overload
+    def implement_ops(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    def implement_ops(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
         """Implement logical ops in `pkg` using this instance's op implementations."""
         assert self._spec.implement_ops is not None
-        return self._spec.implement_ops(pkg)
+        pkg_bytes: Package | bytes = self._spec.implement_ops(pkg, as_bytes=as_bytes)  # type: ignore[call-overload]
+        return pkg_bytes
 
     def check_may_encode(self, hugr: Package) -> None:
         """Check whether any issues can be detected that would arise when trying to
@@ -166,13 +190,10 @@ class SteaneInstance:
             n_qubits: Number of physical qubits available to the emulator.
             builder: Optional `EmulatorBuilder` to use; defaults to a new one.
         """
-        encoded_pkg = self.encode(pkg)
+        encoded_pkg = self.encode(pkg, as_bytes=True)
         if builder is None:
             builder = EmulatorBuilder()
-
-        emulator = builder.build(encoded_pkg, n_qubits)
-
-        return emulator
+        return builder.build(encoded_pkg, n_qubits)  # type: ignore[arg-type]
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -186,6 +207,11 @@ class SteaneBuilder:
         default_factory=lambda: RUSStateFactoryConf(1, 5)
     )
     _qec_policy: QECPolicy = field(default_factory=QECPolicy)
+
+    @classmethod
+    def from_params(cls, params: SteaneEncoderParams) -> SteaneInstance:
+        """Build a Steane instance from encoding parameters."""
+        return cls().build(params.n_blocks)
 
     def _gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
         """Generate the `ImplementOpsSpec` providing Steane implementations of
@@ -713,7 +739,7 @@ class SteaneBuilder:
             [steane_ops(), steane_types(), std_ops(), std_types()]
         )
         # `_std_extensions` should not be necessary but seems to be
-        #  required for `borrow_array` when (de)serialising.
+        #  required for `borrow_array` when (de)serializing.
         ext.extend(_std_extensions())
 
         logical_compiler = ReplacementCompiler(

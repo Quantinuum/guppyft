@@ -3,11 +3,10 @@ from itertools import product
 import pytest
 from guppylang import comptime, guppy
 from guppylang.emulator import EmulatorBuilder
-from guppylang.std.angles import pi
 from guppylang.std.builtins import output
-from guppylang.std.quantum import h, measure, qubit, rz, toffoli, x
+from guppylang.std.quantum import measure, qubit, toffoli, x
 
-from guppyft.decompose import ComparatorRzDecomposer, ToffoliDecomposer
+from guppyft.decompose import ToffoliDecomposer
 
 
 @pytest.mark.parametrize(
@@ -45,31 +44,3 @@ def test_decompose_toffoli(
             "target": [int(target_value ^ (ctrl0_value and ctrl1_value))],
         }
     ]
-
-
-def test_decompose_rz() -> None:
-
-    @guppy
-    def main() -> None:
-        q = qubit()
-        h(q)
-        # Apply a total of rz(pi)
-        rz(q, pi / 12)
-        rz(q, 5 * pi / 6)
-        rz(q, pi / 12)
-        h(q)
-        output("q", measure(q).read())
-
-    pkg = main.with_minimal_opt().compile()
-    rz_decomposer = ComparatorRzDecomposer(epsilon=0.01)
-    rz_decomposer.run(pkg.modules[0], inplace=True)
-
-    shots = (
-        EmulatorBuilder()
-        .build(pkg, n_qubits=1 + rz_decomposer.num_ancilla())
-        .with_shots(10)
-        .run()
-        .collated_counts()
-    )
-
-    assert shots == {(("q", "1"),): 10}

@@ -5,7 +5,7 @@ from hugr.ops import DFG
 from hugr.tys import ExtType
 from tket.passes import InlineFunctions, Normalize
 
-from guppyft.code.steane.logical import Qubit, cx, prep_t_state
+from guppyft.code.steane.logical import Qubit, cx, inject_t, prep_t_state
 from guppyft.extensions import steane_ops, steane_types
 
 
@@ -77,7 +77,7 @@ def test_guppy_bindings_smoke() -> None:
         cx(q0, q1)
         q1.free()
         magic = prep_t_state()
-        q0.inject_t(magic)
+        inject_t(q0, magic)
         result("q0", q0.measure_z().decode())
 
     pkg = main.compile()
