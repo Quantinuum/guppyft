@@ -21,14 +21,16 @@ class StdTypesExtension:
         """A logical measurement.
 
         This is the generic type definition. For the instantiated type,
-        see `logical_measurement`."""
+        see `logical_measurement`.
+        """
         return self().get_type("logical_measurement")
 
     def logical_measurement(self, k: int) -> ExtType:
         """A logical measurement.
 
         Args:
-            k: The number of logical measurements."""
+            k: The number of logical measurements.
+        """
         return self.logical_measurement_def.instantiate([BoundedNatArg(k)])
 
 
@@ -44,12 +46,14 @@ class StdOpsExtension:
         """Decode a logical measurement.
 
         This is the generic type definition. For the instantiated type,
-        see `decode`."""
+        see `decode`.
+        """
         return self().get_op("decode")
 
     def decode(self, k: int) -> ExtOp:
         """Decode a logical measurement.
 
         Args:
-            k: The number of logical measurements."""
+            k: The number of logical measurements.
+        """
         return self.decode_def.instantiate([BoundedNatArg(k)])

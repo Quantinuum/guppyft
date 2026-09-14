@@ -182,7 +182,8 @@ def implement_ops(
 
     Returns:
         The enriched function as an executable HUGR package, or its serialized
-        representation when `as_bytes` is `True`."""
+        representation when `as_bytes` is `True`.
+    """
     assert len(hugr_pkg.modules) == 1
     hugr = hugr_pkg.modules[0]
 

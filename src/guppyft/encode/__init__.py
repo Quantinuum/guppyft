@@ -97,7 +97,8 @@ def encode(
 
     Returns:
         The encoded runnable package, or its serialized representation when `as_bytes`
-        is `True`."""
+        is `True`.
+    """
     pkg = hugr.compile_function() if isinstance(hugr, GuppyFunctionDefinition) else hugr
 
     assert len(pkg.modules) == 1, "Given package contains more than one module"
@@ -155,7 +156,8 @@ def annotate_encoding(hugr: Package | Hugr[Any], params: EncoderParams) -> None:
         params: The serializable encoding parameters.
 
     Raises:
-        ValueError: If `params` cannot be serialized as JSON."""
+        ValueError: If `params` cannot be serialized as JSON.
+    """
     try:
         json.dumps(params.params(), check_circular=True)
     except TypeError as e:

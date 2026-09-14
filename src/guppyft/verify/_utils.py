@@ -88,7 +88,8 @@ def selene_stabilizer_to_zixy_signterm(stabilizer: Stabilizer) -> pauli.SignTerm
         stabilizer: A signed Pauli stabilizer in Selene's representation.
 
     Returns:
-        A Zixy `SignTerm` instance."""
+        A Zixy `SignTerm` instance.
+    """
     zixy_paulis: tuple[pauli.PauliMatrix, ...] = tuple(
         [_convert_pauli(p) for p in stabilizer.paulis]
     )
@@ -105,7 +106,8 @@ def stabilizerlist_to_signterms(stab_list: StabilizerList) -> pauli.SignTerms:
         stab_list: A list of stabilizers in Selene's representation.
 
     Returns:
-        A Zixy `SignTerms` instance equivalent to `stab_list`."""
+        A Zixy `SignTerms` instance equivalent to `stab_list`.
+    """
     sign_terms = pauli.SignTerms(qubits=len(stab_list.generators[0].paulis))
     for gen in stab_list.generators:
         term = selene_stabilizer_to_zixy_signterm(gen)

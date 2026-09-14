@@ -21,7 +21,8 @@ def pad_code_stabilizers(code: StabilizerCode, num_blocks: int) -> pauli.SignTer
         num_blocks: The number of code blocks.
 
     Returns:
-        A set of padded stabilizers for each code block."""
+        A set of padded stabilizers for each code block.
+    """
     n = code.num_physical_qubits
 
     combined = []
@@ -62,7 +63,8 @@ def expand_pauli_term(
 
     Returns:
         An expanded `SignTerm` representing the physical implementation of the logical
-        term."""
+        term.
+    """
     n = code.num_physical_qubits
     k = code.num_logical_qubits
     total_qubit_number = num_blocks * n
@@ -135,7 +137,8 @@ def expand_logical_signterms(
             operators.
 
     Returns:
-        An expanded `SignTerms` tableau."""
+        An expanded `SignTerms` tableau.
+    """
     k = code.num_logical_qubits
     num_blocks = len(logical_terms.qubits) // k
 
@@ -171,7 +174,8 @@ def get_expanded_stabilizer_set(
         num_blocks: The number of code blocks represented in `signed_logical_paulis`.
 
     Returns:
-        An expanded `SignTerms` tableau."""
+        An expanded `SignTerms` tableau.
+    """
     # Firstly, we expand the stabilizers of the state using the
     # logical operators of the StabilizerCode
     stabilizers: pauli.SignTerms = expand_logical_signterms(signed_logical_paulis, code)

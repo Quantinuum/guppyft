@@ -4,7 +4,7 @@ Primitives should be restricted to the most fundamental building blocks of a
 QEC architecture. Operations that comprise multiple primitives should be added to
 :py:mod:`~guppyft.code.steane.logical` instead.
 
- Based on https://arxiv.org/abs/2107.07505"""
+Based on https://arxiv.org/abs/2107.07505"""
 
 from typing import Generic, no_type_check
 

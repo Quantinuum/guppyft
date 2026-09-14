@@ -237,7 +237,8 @@ def with_global[G, **P, *R, Ret](  # type: ignore[empty-body]
 
     Returns:
         A tuple containing the final global state followed by the value or values
-        returned by the called function."""
+        returned by the called function.
+    """
 
 
 def _map_op_instantiate(
@@ -442,4 +443,5 @@ def map_global[G, **P, *R](  # type: ignore[empty-body]
 
     Returns:
         The values returned by the called function, excluding the updated global state.
-        Returns `None` when the called function returns no values besides the state."""
+        Returns `None` when the called function returns no values besides the state.
+    """
