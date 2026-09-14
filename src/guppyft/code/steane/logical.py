@@ -46,7 +46,8 @@ class Measurement:
 class Qubit:
     """A logical qubit encoded in the Steane code.
 
-    Constructing a ``Qubit`` instance prepares it in the logical zero state."""
+    Constructing a ``Qubit`` instance prepares it in the logical zero state.
+    """
 
     @hugr_op(_steane_op("prep_zero"))
     @no_type_check

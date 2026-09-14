@@ -17,11 +17,12 @@ def pad_code_stabilizers(code: StabilizerCode, num_blocks: int) -> pauli.SignTer
         a factor of 2 is needed in the number of codeblocks.
 
     Args:
-        code: A stabilizer code.
+        code: A :class:`StabilizerCode`.
         num_blocks: The number of code blocks.
 
     Returns:
-        A set of padded stabilizers for each code block.
+        A set of Pauli strings made up of padded stabilizers
+        for each code block. Returns Pauli Strings for m blocks.
     """
     n = code.num_physical_qubits
 
@@ -56,14 +57,14 @@ def expand_pauli_term(
       the definition of the logical operators for a particular StabilizerCode.
 
     Args:
-        logical_term: The signed Pauli term to expand.
-        code: A stabilizer code with defined `[[n, k, d]]` parameters and logical
-            operators.
+        logical_term: The (signed) Pauli term to expand.
+        code: A stabilizer code with well-defined :math:`[[n, k, d]]` parameters
+            and logical operators.
         num_blocks: The number of code blocks represented in the `SignTerm`.
 
     Returns:
-        An expanded `SignTerm` representing the physical implementation of the logical
-        term.
+        An expanded `SignTerm` which represents the physical implementation
+        of the logical term.
     """
     n = code.num_physical_qubits
     k = code.num_logical_qubits
@@ -133,8 +134,8 @@ def expand_logical_signterms(
 
     Args:
         logical_terms: A tableau of signed Pauli terms to expand.
-        code: A stabilizer code with defined `[[n, k, d]]` parameters and logical
-            operators.
+        code: A stabilizer code with well-defined :math:`[[n, k, d]]` parameters
+            and logical operators.
 
     Returns:
         An expanded `SignTerms` tableau.
@@ -169,8 +170,8 @@ def get_expanded_stabilizer_set(
 
     Args:
         signed_logical_paulis: A tableau of signed Pauli terms to expand.
-        code: A stabilizer code with defined `[[n, k, d]]` parameters and logical
-            operators.
+        code: A stabilizer code with well-defined :math:`[[n, k, d]]` parameters
+            and logical operators.
         num_blocks: The number of code blocks represented in `signed_logical_paulis`.
 
     Returns:
