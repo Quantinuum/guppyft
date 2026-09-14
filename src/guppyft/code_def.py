@@ -36,11 +36,12 @@ class StabilizerCode:
             num_physical_qubits=7,
             num_logical_qubits=1,
             distance=3,
-            generators=["XXXXIII", "IXXIXXI", "IIXXIXX", "ZZZZIII", "IZZIZZI", "IIZZIZZ"],
+            generators=["XXXXIII", "IXXIXXI", "IIXXIXX",
+                        "ZZZZIII", "IZZIZZI", "IIZZIZZ"],
             x_logicals=["XXXXXXX"],
             z_logicals=["ZZZZZZZ"],
         )
-    """  # noqa: E501
+    """
 
     num_physical_qubits: int
     num_logical_qubits: int
