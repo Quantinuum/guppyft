@@ -16,10 +16,10 @@ _MEAS_T = measurement.measurement_t
 
 
 class IcebergTypesExtension:
-    """Extension providing the Iceberg codeblock."""
+    """Extension providing the Iceberg logical types."""
 
     def __call__(self) -> Extension:
-        """Returns the Iceberg types extension"""
+        """Returns the Iceberg types extension."""
         return load_extension("guppyft.iceberg.types")
 
     @functools.cached_property
@@ -95,7 +95,7 @@ class IcebergOpsExtension:
     """Extension providing the Iceberg logical operations."""
 
     def __call__(self) -> Extension:
-        """Returns the Iceberg ops extension"""
+        """Returns the Iceberg ops extension."""
         return load_extension("guppyft.iceberg.ops", ["guppyft.std.types"])
 
     # x
