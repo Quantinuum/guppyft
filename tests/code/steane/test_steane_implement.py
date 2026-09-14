@@ -79,6 +79,6 @@ def test_qec_cycle() -> None:
 
     pkg = main.compile()
     phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg, as_bytes=True)
-    res = EmulatorBuilder().build(phys_pkg, n_qubits=10).run().collated_shots()  # type: ignore[arg-type]
+    res = EmulatorBuilder().build(phys_pkg, n_qubits=15).run().collated_shots()  # type: ignore[arg-type]
 
     assert res == [{"q": [0]}]
