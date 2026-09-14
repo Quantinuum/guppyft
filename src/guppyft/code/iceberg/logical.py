@@ -53,12 +53,12 @@ M = guppy.nat_var("M")
 
 @_custom_block_type(iceberg_types.iceberg_block_def)
 class Block(Generic[N]):  # type: ignore[misc]
-    """An Iceberg code block containing `N` logical qubits."""
+    """An Iceberg logical block containing `N` logical qubits."""
 
     @hugr_op(_iceberg_op("alloc_zero"))
     @no_type_check
     def __new__() -> "Block[N]":
-        """Allocate a block in the logical zero state."""
+        """Allocate a block in the all-zero logical state."""
 
     @guppy
     @no_type_check
@@ -265,7 +265,7 @@ class Block(Generic[N]):  # type: ignore[misc]
 
 @custom_type(iceberg_types.iceberg_qubit(), copyable=False, droppable=False)
 class Qubit:
-    """A dynamic logical qubit from an Iceberg code block."""
+    """A dynamic logical qubit from an Iceberg logical block."""
 
     @hugr_op(_iceberg_op("alloc_dynq"))
     @no_type_check
@@ -323,7 +323,7 @@ class Qubit:
 
 @_custom_block_type(iceberg_types.iceberg_borrowed_block_def)
 class BorrowedBlock(Generic[N]):  # type: ignore[misc]
-    """A borrowed Iceberg code block."""
+    """A borrowed Iceberg logical block."""
 
     @guppy
     @no_type_check
@@ -342,17 +342,17 @@ class BorrowedBlock(Generic[N]):  # type: ignore[misc]
 
 @_custom_block_type(iceberg_types.iceberg_pre_block_def)
 class PreBlock(Generic[N]):  # type: ignore[misc]
-    """A candidate Iceberg code block whose preparation may have failed."""
+    """A candidate Iceberg logical block whose preparation may have failed."""
 
     @hugr_op(_iceberg_op("try_alloc_zero"))
     @no_type_check
     def __new__() -> "PreBlock[N]":
-        """Attempt to allocate a block in the logical zero state."""
+        """Attempt to allocate a block in the all-zero logical state."""
 
     @hugr_op(_iceberg_op("check_pre_block"))
     @no_type_check
     def check(self: "PreBlock[N]" @ owned) -> Option[Block[N]]:
-        """Return the block when its preparation succeeded."""
+        """Check whether state preparation succeeded."""
 
 
 @hugr_op(_iceberg_op("x_d"))

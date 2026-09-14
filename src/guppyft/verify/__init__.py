@@ -1,53 +1,54 @@
-"""Verify logical Clifford gadgets by comparing tableaux.
+"""Functions to verify correctness of logical Clifford gadgets with tableaux comparison.
 
-The verification functions support:
+.. currentmodule:: guppyft.verify
 
-* Codes with more than one logical qubit.
-* Operations on one or two code blocks.
-* Non-CSS codes, such as the `[[5, 1, 3]]` code.
-* Implementations that use ancilla qubits.
+Supported features
+==================
 
-The same capabilities are available in `valid_clifford_implementation` and
-`valid_stabilizer_state_preparation`.
+Verifying Cliffords with :py:func:`valid_clifford_implementation`
 
-Examples:
-    Verify a Steane-code Hadamard implementation:
 
-        from guppylang import guppy
-        from guppylang.std.builtins import array
-        from guppylang.std.quantum import h, qubit
+* Works for :math:`k>1` codes
+* Works for operations on a single code block or between two code blocks
+* Works for non-CSS codes (e.g. the :math:`[[5, 1, 3]]` code)
+* Ancilla qubits can be used in the implementation
 
-        from guppyft.code_def import StabilizerCode
-        from guppyft.verify import valid_clifford_implementation
+The same features are available for :py:func:`valid_stabilizer_state_preparation`.
 
-        STEANE_DEF = StabilizerCode.from_python_strings(
-            num_physical_qubits=7,
-            num_logical_qubits=1,
-            distance=3,
-            generators=[
-                "XXXXIII",
-                "IXXIXXI",
-                "IIXXIXX",
-                "ZZZZIII",
-                "IZZIZZI",
-                "IIZZIZZ",
-            ],
-            x_logicals=["XXXXXXX"],
-            z_logicals=["ZZZZZZZ"],
-        )
+Steane code example
+===================
 
-        @guppy
-        def steane_specify_h(qs: array[qubit, 1]) -> None:
-            h(qs[0])
+.. code-block:: python
 
-        @guppy
-        def steane_impl_h(block: array[qubit, 7]) -> None:
-            for i in range(len(block)):
-                h(block[i])
+    from guppylang import guppy
+    from guppylang.std.builtins import array
+    from guppylang.std.quantum import qubit, h
 
-        assert valid_clifford_implementation(
-            steane_specify_h, steane_impl_h, STEANE_DEF
-        )
+    from guppyft.code_def import StabilizerCode
+    from guppyft.verify import valid_clifford_implementation
+
+    STEANE_DEF = StabilizerCode.from_python_strings(
+        num_physical_qubits=7,
+        num_logical_qubits=1,
+        distance=3,
+        generators=["XXXXIII", "IXXIXXI", "IIXXIXX", "ZZZZIII", "IZZIZZI", "IIZZIZZ"],
+        x_logicals=["XXXXXXX"],
+        z_logicals=["ZZZZZZZ"],
+    )
+
+
+    @guppy
+    def steane_specify_h(qs: array[qubit, 1]) -> None:
+        h(qs[0])
+
+    @guppy
+    def steane_impl_h(block: array[qubit, 7]) -> None:
+        for i in range(len(block)):
+            h(block[i])
+
+    # True => implementation is valid
+    assert valid_clifford_implementation(steane_specify_h, steane_impl_h, STEANE_DEF)
+
 """
 
 from ._verify import (

@@ -75,9 +75,8 @@ def encode(
     passes: list[ComposablePass] | None = None,
     as_bytes: bool = False,
 ) -> Package | bytes:
-    """Encode a package or Guppy function by applying four stages.
-
-    Guppy functions are compiled to packages directly for convenience.
+    """Encodes the given package (or Guppy function, directly compiled to a package for
+    convenience) by applying four stages.
 
     1. running the given computational passes;
     2. lowering the operations in the package to logical operations and

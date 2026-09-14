@@ -3,8 +3,8 @@
 This module contains bindings for the fundamental ops in the HUGR extensions, as well
 as composite operations that comprise multiple logical operations.
 
-`guppyft.code.steane.primitives` provides the physical implementations of these
-operations.
+The physical implementation for these ops is provided in
+:py:mod:`~guppyft.code.steane.primitives`.
 """
 
 from collections.abc import Callable

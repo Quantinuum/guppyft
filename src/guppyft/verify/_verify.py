@@ -341,7 +341,7 @@ def valid_stabilizer_state_preparation(
             Defaults to zero.
 
     Returns:
-        Whether the state preparation is valid.
+        A Boolean indicating whether the implementation is valid.
     """
     sem_stabilizers, impl_stabilizers = _compute_state_prep_tableaux(
         semantic_function,
@@ -465,7 +465,7 @@ def valid_clifford_implementation(
             Defaults to zero.
 
     Returns:
-        Whether the implementation is valid.
+        A Boolean indicating whether the implementation is valid.
     """
     sem_stabilizers, impl_stabilizers = _compute_clifford_tableaux(
         semantic_function, impl_function, code_definition, impl_num_ancillas

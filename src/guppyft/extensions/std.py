@@ -1,4 +1,4 @@
-"""GuppyFT standard code extension."""
+"""Guppy FT standard code extensions."""
 
 import functools
 

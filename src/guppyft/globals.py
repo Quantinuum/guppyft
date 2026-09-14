@@ -222,7 +222,8 @@ def with_global[G, **P, *R, Ret](  # type: ignore[empty-body]
     *args: P.args,
     **kwargs: P.kwargs,
 ) -> tuple[G, *R] | tuple[G, Ret]:
-    """Call a Guppy function in a context where `map_global` provides global state.
+    """Call a Guppy function in a context where :py:func:`map_global` provides global
+    state.
 
     Note:
         All calls to this function currently use the same global variable name to store

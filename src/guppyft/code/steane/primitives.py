@@ -1,8 +1,9 @@
 """Implementations of primitives for the Steane QEC architecture.
 
 Primitives should be restricted to the most fundamental building blocks of a
-QEC architecture. Operations that comprise multiple primitives belong in
-`guppyft.code.steane.logical`.
+QEC architecture. Operations that comprise multiple primitives should be added to
+:py:mod:`~guppyft.code.steane.logical` instead.
+
 
 Based on https://arxiv.org/abs/2107.07505
 """
@@ -422,7 +423,7 @@ def measure_z(blk: LogicalBlock[7] @ owned) -> RawMeasurement[7]:
 @link_name("guppyft.steane.decode")
 @no_type_check
 def decode(m: RawMeasurement[7] @ owned) -> bool:
-    """Decode a Steane logical-block measurement."""
+    """Decode Steane measurement of logical block."""
     meas = qlib.collect_measurements(m.measurements)
     synds = _get_syndrome(meas)
     logical_meas = _parity_check(meas)

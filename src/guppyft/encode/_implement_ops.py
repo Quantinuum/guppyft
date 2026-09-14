@@ -172,7 +172,8 @@ def implement_ops(
 def implement_ops(
     hugr_pkg: Package, spec: ImplementOpsSpec, *, as_bytes: bool = False
 ) -> Package | bytes:
-    """Enrich a package by replacing operations with calls to functions in `spec.ops`.
+    """Enriches the given package using the given spec by replacing all operations in
+    the program with function calls to the functions in `spec.ops`.
 
     Args:
         hugr_pkg: A package containing a single module.

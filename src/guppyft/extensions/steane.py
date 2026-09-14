@@ -47,7 +47,7 @@ class SteaneOpsExtension:
     """Extension providing the Steane logical operations."""
 
     def __call__(self) -> Extension:
-        """Return the Steane operations extension."""
+        """Returns the Steane ops extension."""
         return load_extension("guppyft.steane.ops", ["guppyft.std.types"])
 
     @functools.cached_property
@@ -203,7 +203,9 @@ class SteaneOpsExtension:
         return self().get_op("prep_t_state")
 
     def prep_t_state(self) -> ExtOp:
-        """Prepare a magic state that can produce T-like states, T and Tdg."""
+        """Prepare a magic state that can be used to produce T-like
+        states (T and Tdg).
+        """
         return self.prep_t_state_def.instantiate([])
 
     @functools.cached_property
