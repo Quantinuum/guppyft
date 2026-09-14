@@ -1,5 +1,3 @@
-"""Check extension-version updates in changed files."""
-
 # ruff: noqa: INP001
 
 import json
@@ -9,7 +7,7 @@ from pathlib import Path
 
 
 def get_changed_files(target: str) -> list[Path]:
-    """Get the changed extension files in the pull request."""
+    """Get list of changed extension files in the PR"""
     # Use git to get the list of files changed compared to target
     cmd = [
         "git",
@@ -25,7 +23,7 @@ def get_changed_files(target: str) -> list[Path]:
 
 
 def check_version_changes(changed_files: list[Path], target: str) -> list[str]:
-    """Check whether changed extension files have updated versions."""
+    """Check if versions have been updated in changed files"""
     errors = []
 
     for file_path in changed_files:
@@ -85,7 +83,6 @@ def get_latest_release_tag() -> str | None:
 
 
 def main() -> int:
-    """Run the extension-version validation."""
     target = sys.argv[1] if len(sys.argv) > 1 else get_latest_release_tag()
     if target is None:
         sys.stdout.write("No release tags found.\n")

@@ -83,6 +83,7 @@ ignore = [
 [lint.per-file-ignores]
 "tests/**/*.py" = ["D"]
 "docs/conf.py" = ["D"]
+".github/scripts/check_extension_versions.py" = ["D"]
 
 [lint.pydocstyle]
 convention = "google"
