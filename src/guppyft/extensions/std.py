@@ -20,8 +20,8 @@ class StdTypesExtension:
     def logical_measurement_def(self) -> TypeDef:
         """A logical measurement.
 
-        This is the generic type definition. For the instantiated type,
-        see `logical_measurement`.
+        This is the generic type definition. For the instantiated type, see
+        `logical_measurement`.
         """
         return self().get_type("logical_measurement")
 
@@ -45,8 +45,8 @@ class StdOpsExtension:
     def decode_def(self) -> OpDef:
         """Decode a logical measurement.
 
-        This is the generic type definition. For the instantiated type,
-        see `decode`.
+        This is the generic type definition. For the instantiated type, see
+        `decode`.
         """
         return self().get_op("decode")
 

@@ -142,8 +142,7 @@ class EncoderParams(Protocol):
 
 
 class _MetadataEncoding(Metadata[Mapping[str, Any]]):
-    """Metadata key for annotating parameters with which to encode a
-    program."""
+    """Metadata key for annotating parameters with which to encode a program."""
 
     KEY = "guppyft.encoding"
 
