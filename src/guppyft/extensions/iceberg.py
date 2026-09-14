@@ -16,7 +16,7 @@ _MEAS_T = measurement.measurement_t
 
 
 class IcebergTypesExtension:
-    """Extension providing the Iceberg codeblock."""
+    """Extension providing the Iceberg logical types."""
 
     def __call__(self) -> Extension:
         """Returns the Iceberg types extension"""

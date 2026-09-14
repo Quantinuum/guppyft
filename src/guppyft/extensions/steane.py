@@ -10,7 +10,7 @@ from ._util import load_extension
 
 
 class SteaneTypesExtension:
-    """Extension providing the Steane qubit."""
+    """Extension providing the Steane logical types."""
 
     def __call__(self) -> Extension:
         """Returns the Steane types extension"""
