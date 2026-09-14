@@ -7,36 +7,23 @@ The physical implementation for these ops is provided in
 :py:mod:`~guppyft.code.steane.primitives`.
 """
 
-from collections.abc import Callable
 from typing import no_type_check
 
 from guppylang import guppy
 from guppylang.std.lang import owned
 from guppylang_internals.decorator import custom_type, hugr_op
-from guppylang_internals.tys.common import ToHugrContext
-from guppylang_internals.tys.subst import Inst
-from hugr import tys as ht
-from hugr.ops import DataflowOp, ExtOp
 
+from guppyft.code._logical import _logical_op
 from guppyft.extensions import steane_ops, steane_types
 
 _OPS_EXTN = steane_ops()
-
-
-def _steane_op(
-    op_name: str,
-) -> Callable[[ht.FunctionType, Inst, ToHugrContext], DataflowOp]:
-    def op(ty: ht.FunctionType, inst: Inst, ctx: ToHugrContext) -> DataflowOp:
-        return ExtOp(_OPS_EXTN.get_op(op_name), ty, [arg.to_hugr(ctx) for arg in inst])
-
-    return op
 
 
 @custom_type(steane_types.steane_measurement(), copyable=True, droppable=True)
 class Measurement:
     """A measurement outcome of a logical Steane qubit."""
 
-    @hugr_op(_steane_op("decode"))
+    @hugr_op(_logical_op("decode", _OPS_EXTN))
     @no_type_check
     def decode(self: "Measurement") -> bool:
         """Return the decoded logical measurement outcome."""
@@ -49,7 +36,7 @@ class Qubit:
     Constructing a ``Qubit`` instance prepares it in the logical zero state.
     """
 
-    @hugr_op(_steane_op("prep_zero"))
+    @hugr_op(_logical_op("prep_zero", _OPS_EXTN))
     @no_type_check
     def __new__() -> "Qubit": ...
 
@@ -118,92 +105,92 @@ class Qubit:
         tdg(self)
 
 
-@hugr_op(_steane_op("free"))
+@hugr_op(_logical_op("free", _OPS_EXTN))
 @no_type_check
 def free(qubit: "Qubit" @ owned) -> None:
     """Free a qubit."""
 
 
-@hugr_op(_steane_op("measure_z"))
+@hugr_op(_logical_op("measure_z", _OPS_EXTN))
 @no_type_check
 def measure_z(qubit: "Qubit" @ owned) -> Measurement:
     """Destructive measurement of the qubit in the Z basis."""
 
 
-@hugr_op(_steane_op("qec_cycle"))
+@hugr_op(_logical_op("qec_cycle", _OPS_EXTN))
 @no_type_check
 def qec_cycle(qubit: Qubit) -> None:
     """Perform a QEC cycle on the logical qubit."""
 
 
-@hugr_op(_steane_op("x"))
+@hugr_op(_logical_op("x", _OPS_EXTN))
 @no_type_check
 def x(qubit: Qubit) -> None:
     """X gate."""
 
 
-@hugr_op(_steane_op("y"))
+@hugr_op(_logical_op("y", _OPS_EXTN))
 @no_type_check
 def y(qubit: Qubit) -> None:
     """Y gate."""
 
 
-@hugr_op(_steane_op("z"))
+@hugr_op(_logical_op("z", _OPS_EXTN))
 @no_type_check
 def z(qubit: "Qubit") -> None:
     """Z gate."""
 
 
-@hugr_op(_steane_op("h"))
+@hugr_op(_logical_op("h", _OPS_EXTN))
 @no_type_check
 def h(qubit: "Qubit") -> None:
     """H gate."""
 
 
-@hugr_op(_steane_op("s"))
+@hugr_op(_logical_op("s", _OPS_EXTN))
 @no_type_check
 def s(qubit: "Qubit") -> None:
     """S gate."""
 
 
-@hugr_op(_steane_op("sdg"))
+@hugr_op(_logical_op("sdg", _OPS_EXTN))
 @no_type_check
 def sdg(qubit: "Qubit") -> None:
     """Sdg gate."""
 
 
-@hugr_op(_steane_op("prep_t_state"))
+@hugr_op(_logical_op("prep_t_state", _OPS_EXTN))
 @no_type_check
 def prep_t_state() -> "Qubit":
     r"""Prepare a logical :math:`T\ket{+}` magic state for :math:`T` and
     :math:`T^\dagger` injection."""
 
 
-@hugr_op(_steane_op("inject_t"))
+@hugr_op(_logical_op("inject_t", _OPS_EXTN))
 @no_type_check
 def inject_t(qubit: "Qubit", magic: "Qubit" @ owned) -> None:
     """Apply a logical :math:`T` gate by consuming a magic-state qubit."""
 
 
-@hugr_op(_steane_op("inject_tdg"))
+@hugr_op(_logical_op("inject_tdg", _OPS_EXTN))
 @no_type_check
 def inject_tdg(qubit: "Qubit", magic: "Qubit" @ owned) -> None:
     r"""Apply a logical :math:`T^\dagger` gate by consuming a magic-state qubit."""
 
 
-@hugr_op(_steane_op("cx"))
+@hugr_op(_logical_op("cx", _OPS_EXTN))
 @no_type_check
 def cx(q0: "Qubit", q1: "Qubit") -> None:
     """CX gate."""
 
 
-@hugr_op(_steane_op("cz"))
+@hugr_op(_logical_op("cz", _OPS_EXTN))
 @no_type_check
 def cz(q0: "Qubit", q1: "Qubit") -> None:
     """CZ gate."""
 
 
-@hugr_op(_steane_op("swap"))
+@hugr_op(_logical_op("swap", _OPS_EXTN))
 @no_type_check
 def swap(q0: "Qubit", q1: "Qubit") -> None:
     """SWAP gate."""
