@@ -4,7 +4,8 @@ Duplicated from guppy-algos to avoid circular imports.
 These should be added to guppylang.
     (https://github.com/Quantinuum/guppylang/issues/1204)
 
-Original contribution: @vvandaele (Vivien Vandaele)"""
+Original contribution: @vvandaele (Vivien Vandaele)
+"""
 
 from typing import no_type_check
 
@@ -21,7 +22,8 @@ def get_bit(k: int, i: int) -> bool:
         i: Bit position, where 0 is the rightmost (least significant) bit.
 
     Returns:
-        bool: True if bit i is 1, False otherwise."""
+        bool: True if bit i is 1, False otherwise.
+    """
     return ((k >> i) & 1) == 1
 
 
@@ -34,7 +36,8 @@ def floor(x: float) -> int:
         x: Floating-point value.
 
     Returns:
-        int: Largest integer less than or equal to x."""
+        int: Largest integer less than or equal to x.
+    """
     i = int(x)
     if float(i) > x:
         return i - 1
@@ -52,7 +55,8 @@ def tan(x: float) -> float:
         x: Angle in radians.
 
     Returns:
-        float: Tangent of x."""
+        float: Tangent of x.
+    """
     pi4a = 7.85398125648498535156e-1
     pi4b = 3.77489470793079817668e-8
     pi4c = 2.69515142907905952645e-15

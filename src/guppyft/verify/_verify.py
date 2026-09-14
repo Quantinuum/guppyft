@@ -164,8 +164,7 @@ def _compute_stabilizers_double_block_unitary(
     clifford_func: DoubleBlockUnitary,
     num_selene_qubits: int,
 ) -> pauli.SignTerms:
-    """Compute the stabilizers of a Choi state encoding a Clifford (two code
-    blocks).
+    """Compute the stabilizers of a Choi state encoding a Clifford (two code blocks).
 
     Args:
         code: The stabilizer code.

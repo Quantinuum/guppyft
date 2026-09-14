@@ -47,7 +47,8 @@ Steane code example
             h(block[i])
 
     # True => implementation is valid
-    assert valid_clifford_implementation(steane_specify_h, steane_impl_h, STEANE_DEF)"""
+    assert valid_clifford_implementation(steane_specify_h, steane_impl_h, STEANE_DEF)
+"""
 
 from ._verify import (
     valid_clifford_implementation,

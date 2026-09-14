@@ -189,15 +189,13 @@ class Block(Generic[N]):  # type: ignore[misc]
     @guppy
     @no_type_check
     def all_but_one_rx(self: "Block[N]", i: int, phase: float) -> None:
-        """Rx rotation of `phase` radians on qubits except that with index
-        `i`."""
+        """Rx rotation of `phase` radians on qubits except that with index `i`."""
         all_but_one_rx(self, i, phase)
 
     @guppy
     @no_type_check
     def all_but_one_rz(self: "Block[N]", i: int, phase: float) -> None:
-        """Rz rotation of `phase` radians on qubits except that with index
-        `i`."""
+        """Rz rotation of `phase` radians on qubits except that with index `i`."""
         all_but_one_rz(self, i, phase)
 
     @guppy
@@ -230,8 +228,7 @@ class Block(Generic[N]):  # type: ignore[misc]
     @guppy
     @no_type_check
     def cx(self: "Block[N]", i: int, j: int) -> None:
-        """CX gate on the qubits with indices `i` (control) and `j`
-        (target)."""
+        """CX gate on the qubits with indices `i` (control) and `j` (target)."""
         cx(self, i, j)
 
     @guppy
@@ -500,22 +497,19 @@ def all_h(block: Block[N]) -> None:
 @hugr_op(_iceberg_op("xx_phase_d"))
 @no_type_check
 def xx_phase(block: Block[N], i: int, j: int, phase: float) -> None:
-    """XXPhase rotation of `phase` radians on the qubits with indices `i` and
-    `j`."""
+    """XXPhase rotation of `phase` radians on the qubits with indices `i` and `j`."""
 
 
 @hugr_op(_iceberg_op("yy_phase_d"))
 @no_type_check
 def yy_phase(block: Block[N], i: int, j: int, phase: float) -> None:
-    """YYPhase rotation of `phase` radians on the qubits with indices `i` and
-    `j`."""
+    """YYPhase rotation of `phase` radians on the qubits with indices `i` and `j`."""
 
 
 @hugr_op(_iceberg_op("zz_phase_d"))
 @no_type_check
 def zz_phase(block: Block[N], i: int, j: int, phase: float) -> None:
-    """ZZPhase rotation of `phase` radians on the qubits with indices `i` and
-    `j`."""
+    """ZZPhase rotation of `phase` radians on the qubits with indices `i` and `j`."""
 
 
 @hugr_op(_iceberg_op("cx_d"))
@@ -560,8 +554,8 @@ def zz_phase_between_blocks(
 @hugr_op(_iceberg_op("cx_between_blocks_d"))
 @no_type_check
 def cx_between_blocks(block0: Block[N], block1: Block[N], i0: int, i1: int) -> None:
-    """CX gate on the qubit with index `i0` in block `block0` and the qubit
-    with index `i1` in block `block1`."""
+    """CX gate on the qubit with index `i0` in block `block0` and the qubit with
+    index `i1` in block `block1`."""
 
 
 @hugr_op(_iceberg_op("cx_transversal"))
@@ -697,8 +691,7 @@ def borrow(
 @hugr_op(_iceberg_op("borrow_more"))
 @no_type_check
 def borrow_more(block: BorrowedBlock[N], indices: array[int, M]) -> array[Qubit, M]:
-    """Extract additional dynamic logical qubits from an already-borrowed
-    block."""
+    """Extract additional dynamic logical qubits from an already-borrowed block."""
 
 
 @hugr_op(_iceberg_op("restore_some"))
@@ -712,5 +705,4 @@ def restore_some(block: BorrowedBlock[N], qubits: array[Qubit, M] @ owned) -> No
 def restore(
     block: BorrowedBlock[N] @ owned, qubits: array[Qubit, M] @ owned
 ) -> Block[N]:
-    """Restore all remaining dynamic logical qubits to their originating
-    block."""
+    """Restore all remaining dynamic logical qubits to their originating block."""

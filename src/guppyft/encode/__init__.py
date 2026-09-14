@@ -45,10 +45,8 @@ class EncodeSpec:
 
     compile: LogicalCompiler | None = None
     """Pass to lower the computation to a logical level."""
-
     logical_passes: list[ComposablePass] | None = None
     """Additional passes to run on the logical HUGR."""
-
     implement_ops: ImplementOps | None = None
     """Lowers the logical computation to a physical level."""
 
@@ -76,8 +74,8 @@ def encode(
     passes: list[ComposablePass] | None = None,
     as_bytes: bool = False,
 ) -> Package | bytes:
-    """Encodes the given package (or Guppy function, directly compiled to a
-    package for convenience) by applying four stages.
+    """Encodes the given package (or Guppy function, directly compiled to a package for
+    convenience) by applying four stages.
 
     1. running the given computational passes;
     2. lowering the operations in the package to logical operations and
@@ -138,10 +136,8 @@ class EncoderParams(Protocol):
         """The encoding to annotate on a program."""
 
     def params(self) -> Mapping[str, Any]:
-        """The parameters to annotate on a program.
-
-        Implementations should return values that support serialization
-        to JSON."""
+        """The parameters to annotate on a program. Implementations should return values
+        that support serialization to JSON."""
 
 
 class _MetadataEncoding(Metadata[Mapping[str, Any]]):

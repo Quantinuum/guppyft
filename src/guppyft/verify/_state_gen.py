@@ -84,8 +84,8 @@ def gen_guppy_state_prep(
 
 
 def convert_to_graph_state(tableau: pauli.SignTerms) -> list[SQClifford]:
-    """Given a stabilizer tableau, returns a list of single qubit gates that
-    convert it to a graph state, and the tableau of the resulting graph state.
+    """Given a stabilizer tableau, returns a list of single qubit gates
+    that convert it to a graph state, and the tableau of the resulting graph state.
 
     The tableau returned is guaranteed to have X only on the diagonal, and all
     other elements are either I or Z, forming a symmetric tableau.

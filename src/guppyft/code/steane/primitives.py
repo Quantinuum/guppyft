@@ -1,11 +1,10 @@
 """Implementations of primitives for the Steane QEC architecture.
 
-Primitives should be restricted to the most fundamental building blocks
-of a QEC architecture. Operations that comprise multiple primitives
-should be added to :py:mod:`~guppyft.code.steane.logical` instead.
+Primitives should be restricted to the most fundamental building blocks of a
+QEC architecture. Operations that comprise multiple primitives should be added to
+:py:mod:`~guppyft.code.steane.logical` instead.
 
- Based on
-https://arxiv.org/abs/2107.07505"""
+ Based on https://arxiv.org/abs/2107.07505"""
 
 from typing import Generic, no_type_check
 
@@ -55,10 +54,8 @@ CODE_DEF = StabilizerCode.from_python_strings(
 
 
 def _stabilizer_indices() -> list[list[int]]:
-    """Report all support sets that exist in the Steane codes generators.
-
-    Values are unique but reported as a nested list so that Guppy can
-    understand them."""
+    """Report all support sets that exist in the Steane codes generators. Values are
+    unique but reported as a nested list so that Guppy can understand them."""
     indices = {
         frozenset([i for i, p in enumerate(gen.cmpnt.get_tuple()) if p != pauli.I])  # type: ignore[attr-defined]
         for gen in CODE_DEF.generators
@@ -120,8 +117,7 @@ def _syndrome_helper(
     idx: tuple[int, int, int] @ comptime,
     reverse_cx: bool @ comptime,
 ) -> None:
-    """Helper function to perform the cx operations during syndrome
-    extraction."""
+    """Helper function to perform the cx operations during syndrome extraction."""
     if reverse_cx:
         qlib.cx(blk.data_qs[idx[0]], a[0])
         qlib.cx(a[1], blk.data_qs[idx[1]])
@@ -135,9 +131,7 @@ def _syndrome_helper(
 @guppy.comptime
 @no_type_check
 def _measure_syndromes(blk: LogicalBlock[7]) -> array[qlib.Measurement, 6]:
-    """Syndrome measurement using Figure 5.
-
-    from Reichardt arXiv:1804.06995."""
+    """Syndrome measurement using Figure 5. from Reichardt arXiv:1804.06995."""
     relabel = array(0, 4, 1, 6, 3, 5, 2)
 
     # Prepare ancilla state
@@ -184,8 +178,7 @@ def _phys_controlled_h(ctl: qlib.qubit, tgt: qlib.qubit) -> None:
 @guppy
 @no_type_check
 def _measure_h_operator(blk: LogicalBlock[7]) -> array[qlib.Measurement, 2]:
-    """Fault-tolerant measurement of the logical H operator on a Steane
-    block."""
+    """Fault-tolerant measurement of the logical H operator on a Steane block."""
     # Prepare Bell state ancilla
     a = array(qlib.qubit() for _ in range(2))
     qlib.h(a[0])
@@ -214,7 +207,8 @@ def _prep_h_non_ft() -> LogicalBlock[7]:
     preparation of encoded states of the Steane code" 10.1038/srep19578.
 
     To match with our definition of the code stabilizers, we relabel qubits
-    from Fig 3b from top to bottom as: [1, 0, 4, 5, 2, 6, 3]"""
+    from Fig 3b from top to bottom as: [1, 0, 4, 5, 2, 6, 3]
+    """
     relabel = array(1, 0, 4, 5, 2, 6, 3)
 
     arr = array(qlib.qubit() for _ in range(7))
@@ -251,7 +245,8 @@ def _prep_h_ft() -> PreBlock[7, 8]:
     a Steane block.
 
     Using Fig. 3b from "Minimizing resource overheads for fault-tolerant
-    preparation of encoded states of the Steane code" 10.1038/srep19578."""
+    preparation of encoded states of the Steane code" 10.1038/srep19578.
+    """
     blk = _prep_h_non_ft()
     m_h = _measure_h_operator(blk)
     m_syn = _measure_syndromes(blk)
@@ -283,7 +278,8 @@ def _inject_t_non_deterministically(
     """Inject T gate, but do not apply corrections.
 
     Note:
-        Assumes `t_state` is a logical T|+> magic state."""
+        Assumes `t_state` is a logical T|+> magic state.
+    """
     a = t_state  # Rename to avoid confusion, since the state will change
     # Inject (via teleportation)
     cx(a, blk)
@@ -299,7 +295,8 @@ def inject_t(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
     """Apply T gate via injection.
 
     Note:
-        Assumes `t_state` is a logical T|+> magic state."""
+        Assumes `t_state` is a logical T|+> magic state.
+    """
     meas = _inject_t_non_deterministically(blk, t_state)
     if meas:
         x(blk)
@@ -312,7 +309,8 @@ def inject_tdg(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
     """Apply Tdg gate via injection.
 
     Note:
-        Assumes `t_state` is a logical T|+> magic state."""
+        Assumes `t_state` is a logical T|+> magic state.
+    """
     meas = _inject_t_non_deterministically(blk, t_state)
     if meas:
         x(blk)
@@ -340,7 +338,8 @@ def knill_qec_cycle(
 
     Notes:
         Assumes that both ancilla blocks `a0` and `a1` hold logical
-        zero states."""
+        zero states.
+    """
     # Generate a logical Bell state on the ancilla qubits
     h(a0)
     cx(a0, a1)
@@ -361,11 +360,11 @@ def knill_qec_cycle(
 @guppy
 @no_type_check
 def steane_z_qec_cycle(q: LogicalBlock[7], a: LogicalBlock[7] @ owned) -> None:
-    """Implements Z syndrome extraction via Steane with one-qubit
-    teleportation.
+    """Implements Z syndrome extraction via Steane with one-qubit teleportation.
 
     Notes:
-        Assumes that the ancilla block `a` holds a logical zero state."""
+        Assumes that the ancilla block `a` holds a logical zero state.
+    """
     # Convert to logical |+>
     h(a)
 
@@ -382,11 +381,11 @@ def steane_z_qec_cycle(q: LogicalBlock[7], a: LogicalBlock[7] @ owned) -> None:
 @guppy
 @no_type_check
 def steane_x_qec_cycle(q: LogicalBlock[7], a: LogicalBlock[7] @ owned) -> None:
-    """Implements X syndrome extraction via Steane with one-qubit
-    teleportation.
+    """Implements X syndrome extraction via Steane with one-qubit teleportation.
 
     Notes:
-        Assumes that the ancilla block `a` holds a logical zero state."""
+        Assumes that the ancilla block `a` holds a logical zero state.
+    """
     # Swap the labels of `q` and `a` since the latter is where the information
     # of `q` will end after teleportation
     mem_swap(q, a)
@@ -403,8 +402,8 @@ N = guppy.nat_var("N")
 
 @guppy.struct(frozen=True)
 class RawMeasurement(Generic[N]):  # type: ignore[misc]
-    """An immutable Guppy struct of ``N`` measurement outcomes of the physical
-    qubits in a logical block."""
+    """An immutable Guppy struct of ``N`` measurement outcomes of the
+    physical qubits in a logical block."""
 
     measurements: array[Measurement, N]  # type: ignore[valid-type]
 

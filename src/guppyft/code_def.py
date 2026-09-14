@@ -139,10 +139,8 @@ def _str_to_zixy(s: str, n: int) -> pauli.SignTerm:
 
 
 def identity_code(k: int) -> StabilizerCode:
-    """Return a stabilizer code that encodes `k` logical qubits into physical
-    qubits.
-
-    This is the trivial code with distance 1.
+    """Return a stabilizer code that encodes k logical qubits into k physical qubits.
+      This is the trivial code with distance 1.
 
     Args:
         k: The number of logical qubits to encode.

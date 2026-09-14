@@ -25,12 +25,9 @@ class OpReplacements:
         tuple[str, str],
         tuple[GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str],
     ]
-    """Stores the operations to replace during op implementation and the
-    implementation functions.
-
-    A function can be set to `None` to indicate that a declaration with
-    the given name should be generated instead.
-    """
+    """Stores the operations to replace during op implementation and the implementation
+    functions. A function can be set to `None` to indicate that a declaration with the
+    given name should be generated instead."""
 
     def __init__(self) -> None:
         self.ops = {}
@@ -127,23 +124,20 @@ class TyReplacements:
 
 @dataclass(frozen=True, kw_only=True)
 class ImplementOpsSpec:
-    """A specification for the implement ops pass, supplying implementations to
-    a set of HUGR extension ops."""
+    """A specification for the implement ops pass, supplying implementations to a set of
+    HUGR extension ops."""
 
     ops: OpReplacements
     """The operations to replace."""
-
     tys: TyReplacements = field(
         default_factory=lambda: TyReplacements().with_defaults()
     )
     """The types to replace."""
-
     build_wrapper: Callable[
         [GuppyFunctionDefinition[[], None]], GuppyFunctionDefinition[[], None]
     ] = field(default=lambda x: x)
-    """Allows creating a wrapper around the transformed program, e.g. to setup
-    and teardown the environment required for the op implementations."""
-
+    """Allows creating a wrapper around the transformed program, e.g. to setup and
+    teardown the environment required for the op implementations."""
     libs: list[Package] = field(default_factory=list)
     """Additional libraries required to run the transformed program."""
 
@@ -177,9 +171,8 @@ def implement_ops(
 def implement_ops(
     hugr_pkg: Package, spec: ImplementOpsSpec, *, as_bytes: bool = False
 ) -> Package | bytes:
-    """Enriches the given package using the given spec by replacing all
-    operations in the program with function calls to the functions in
-    `spec.ops`.
+    """Enriches the given package using the given spec by replacing all operations in
+    the program with function calls to the functions in `spec.ops`.
 
     Args:
         hugr_pkg: A package containing a single module.
