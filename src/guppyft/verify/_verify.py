@@ -122,8 +122,8 @@ def _compute_stabilizers_single_block_unitary(
 
     Args:
         code: The stabilizer code.
-        clifford_func: A Guppy function that implements a Clifford unitary on a single
-            code block.
+        clifford_func: A Guppy function which implements a Clifford unitary
+            on a single code block.
         num_selene_qubits: An upper bound for the number of qubits used in the Choi
             state for `clifford_func`.
 
@@ -171,8 +171,8 @@ def _compute_stabilizers_double_block_unitary(
 
     Args:
         code: The stabilizer code.
-        clifford_func: A Guppy function that implements a Clifford unitary across two
-            code blocks.
+        clifford_func: A Guppy function which implements a Clifford unitary
+            across two code blocks.
         num_selene_qubits: An upper bound for the number of qubits used in the Choi
             state for `clifford_func`.
 
@@ -268,7 +268,7 @@ def _compute_state_prep_tableaux(
 
     Args:
         semantic_function: A Guppy function for semantic action
-            of a Clifford operator on k logical qubits.
+            of a Clifford operator on `k` logical qubits.
         impl_function: A Guppy function for implementing the semantics on `n` physical
             qubits.
         code_definition: A stabilizer code with well-defined :math:`[[n, k, d]]`
