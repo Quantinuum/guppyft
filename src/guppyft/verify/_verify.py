@@ -313,10 +313,11 @@ def valid_stabilizer_state_preparation(
     code_definition: StabilizerCode,
     impl_num_ancillas: int = 0,
 ) -> bool:
-    """Checks whether impl_function prepares the state specified by semantic function.
+    """Checks whether `impl_function` is a valid implementation of `semantic_function`.
 
-    Can check implementations logical Pauli eigenstate preparation
-      across one or two code blocks.
+    Validates the implementation of a logical state preparation function. The
+    program must contain only Clifford gates and measurements. The resulting
+    state may be on a single code block or entangle two code blocks.
 
     :param semantic_function: A Guppy function for semantic action
       of Pauli eigenstate preparation over one or two code blocks.
@@ -473,9 +474,9 @@ def valid_clifford_implementation(
     code_definition: StabilizerCode,
     impl_num_ancillas: int = 0,
 ) -> bool:
-    """Checks whether impl_function is a valid implementation of semantic_function.
+    """Checks whether `impl_function` is a valid implementation of `semantic_function`.
 
-    Can check implementations of Clifford semantics across one or two code blocks.
+    Validates the implementation of a Clifford function acting one or two code blocks.
 
     :param semantic_function: A Guppy function for semantic action
       of a Clifford operator on one or two code blocks.
