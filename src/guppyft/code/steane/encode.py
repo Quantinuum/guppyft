@@ -193,7 +193,7 @@ class SteaneInstance:
         encoded_pkg = self.encode(pkg, as_bytes=True)
         if builder is None:
             builder = EmulatorBuilder()
-        return builder.build(encoded_pkg, n_qubits)  # type: ignore[arg-type]
+        return builder.build(encoded_pkg, n_qubits)
 
 
 @dataclass(frozen=True, kw_only=True)
