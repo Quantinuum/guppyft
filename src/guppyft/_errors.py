@@ -12,8 +12,7 @@ from guppylang_internals.tys.ty import FuncInput, TupleType, Type
 def get_callback_func_ast(callback_expr: ast.expr) -> ast.AST | None:
     """Return a callback function's definition AST.
 
-    For example, find the AST for `foo` in `map_global(foo)`.
-    """
+    For example, find the AST for `foo` in `map_global(foo)`."""
     match callback_expr:
         case GlobalName():
             return ENGINE.get_parsed(callback_expr.def_id).defined_at
@@ -24,9 +23,9 @@ def get_callback_func_ast(callback_expr: ast.expr) -> ast.AST | None:
 
 
 def get_function_input_arg(func_expr: ast.expr, idx: int | None) -> ast.AST | None:
-    """Helper function to get ast location of function argument. If `idx` is None, the
-    whole function AST is returned.
-    """
+    """Helper function to get ast location of function argument.
+
+    If `idx` is None, the whole function AST is returned."""
     if idx is None:
         return get_callback_func_ast(func_expr)
     else:

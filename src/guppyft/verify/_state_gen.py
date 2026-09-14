@@ -38,8 +38,7 @@ def gen_guppy_state_prep(
         tableau: A list of signed Pauli stabilizers.
 
     Returns:
-        A Guppy function definition that prepares the state.
-    """
+        A Guppy function definition that prepares the state."""
     n_qubits = len(tableau.qubits)
     graph_tableau = tableau.clone()
     sq_gates = convert_to_graph_state(graph_tableau)
@@ -85,8 +84,8 @@ def gen_guppy_state_prep(
 
 
 def convert_to_graph_state(tableau: pauli.SignTerms) -> list[SQClifford]:
-    """Given a stabilizer tableau, returns a list of single qubit gates
-    that convert it to a graph state, and the tableau of the resulting graph state.
+    """Given a stabilizer tableau, returns a list of single qubit gates that
+    convert it to a graph state, and the tableau of the resulting graph state.
 
     The tableau returned is guaranteed to have X only on the diagonal, and all
     other elements are either I or Z, forming a symmetric tableau.
@@ -95,8 +94,7 @@ def convert_to_graph_state(tableau: pauli.SignTerms) -> list[SQClifford]:
         tableau: A list of signed Pauli stabilizers, modified in place.
 
     Returns:
-        A list of single-qubit gates that convert the input to a graph state.
-    """
+        A list of single-qubit gates that convert the input to a graph state."""
     all_q = list(range(len(tableau.qubits)))
     gates_to_apply = [SQClifford.I for _ in all_q]
 
@@ -166,8 +164,7 @@ def gen_choi_state(
 
     Returns:
         A Guppy function definition that prepares the Choi state on `2 * n_blocks`
-        blocks.
-    """
+        blocks."""
     k = code.num_logical_qubits
     # First, produce the tableau of `k*n_blocks` Bell pairs
     # The qubits are arranged in groups of size `k`:

@@ -33,7 +33,8 @@ def _array_any(arr: array[bool, BLOCK_SIZE]) -> bool:
 @guppy.struct
 @no_type_check
 class PreBlock(Generic[BLOCK_SIZE, N_FLAGS]):  # type: ignore[misc]
-    """Logical block that went through state preparation, but may not have succeeded.
+    """Logical block that went through state preparation, but may not have
+    succeeded.
 
     The measurement outcomes specifying if it succeeded have not been read. Hence,
     the runtime is not blocked by measurements, allowing multiple state preparation to
@@ -46,8 +47,7 @@ class PreBlock(Generic[BLOCK_SIZE, N_FLAGS]):  # type: ignore[misc]
     Attributes:
         logical_block (LogicalBlock[N]): The candidate logical block
         flag_outcomes (array[bool, N_FLAGS]): Array of measurement outcomes. Succeeds if
-            all are `False`.
-    """
+            all are `False`."""
 
     logical_block: LogicalBlock[BLOCK_SIZE]  # type: ignore[type-arg, valid-type]
     flag_outcomes: array[Measurement, N_FLAGS]  # type: ignore[valid-type]
@@ -57,11 +57,11 @@ class PreBlock(Generic[BLOCK_SIZE, N_FLAGS]):  # type: ignore[misc]
     def force_check(
         self: "PreBlock[BLOCK_SIZE, N_FLAGS]" @ owned,
     ) -> Option[LogicalBlock[BLOCK_SIZE]]:
-        """If preparation was successful, return the block, otherwise return `nothing`.
+        """If preparation was successful, return the block, otherwise return
+        `nothing`.
 
-        Calling this forces the measurement of the flags to take place (if they had
-        not already).
-        """
+        Calling this forces the measurement of the flags to take place
+        (if they had not already)."""
         failed = _array_any(collect_measurements(self.flag_outcomes))
 
         if failed:
@@ -74,9 +74,8 @@ class PreBlock(Generic[BLOCK_SIZE, N_FLAGS]):  # type: ignore[misc]
 @guppy
 @no_type_check
 def _qalloc_dirty() -> LogicalBlock[BLOCK_SIZE]:
-    """Allocate resources for a codeblock, but the qubits are not in a valid logical
-    state.
-    """
+    """Allocate resources for a codeblock, but the qubits are not in a valid
+    logical state."""
     return LogicalBlock(array(qubit() for _ in range(BLOCK_SIZE)))
 
 
@@ -93,8 +92,7 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]):  # type: ignore[mi
         prep_routine: Function to prepare a state.
         max_attempts: Maximum number of repeat-until-success attempts.
         batch: The Queue of elements in the batch. Provide an empty
-          queue with `guppylang.std.collections.queue.empty_queue`.
-    """
+          queue with `guppylang.std.collections.queue.empty_queue`."""
 
     prep_routine: Function[[], PreBlock[BLOCK_SIZE, N_FLAGS]]  # type: ignore[type-arg,valid-type]
     max_attempts: int
@@ -107,10 +105,9 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]):  # type: ignore[mi
     ) -> LogicalBlock[BLOCK_SIZE]:
         """Parallel RUS preparation, up to `self.max_attempts` retries.
 
-        All `BATCH_SIZE` state preparations may be run in parallel. If any of them
-        succeeds, the state is returned. Surplus states are stored and can be fetched by
-        subsequent calls to this function.
-        """
+        All `BATCH_SIZE` state preparations may be run in parallel. If
+        any of them succeeds, the state is returned. Surplus states are
+        stored and can be fetched by subsequent calls to this function."""
         if BATCH_SIZE <= 0:
             panic("StateFactory: BATCH_SIZE must be greater than zero")
 

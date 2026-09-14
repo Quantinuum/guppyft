@@ -222,8 +222,8 @@ def with_global[G, **P, *R, Ret](  # type: ignore[empty-body]
     *args: P.args,
     **kwargs: P.kwargs,
 ) -> tuple[G, *R] | tuple[G, Ret]:
-    """Call a Guppy function in a context where :py:func:`map_global` provides global
-    state.
+    """Call a Guppy function in a context where :py:func:`map_global` provides
+    global state.
 
     Note:
         All calls to this function currently use the same global variable name to store
@@ -237,8 +237,7 @@ def with_global[G, **P, *R, Ret](  # type: ignore[empty-body]
 
     Returns:
         A tuple containing the final global state followed by the value or values
-        returned by the called function.
-    """
+        returned by the called function."""
 
 
 def _map_op_instantiate(
@@ -443,5 +442,4 @@ def map_global[G, **P, *R](  # type: ignore[empty-body]
 
     Returns:
         The values returned by the called function, excluding the updated global state.
-        Returns `None` when the called function returns no values besides the state.
-    """
+        Returns `None` when the called function returns no values besides the state."""

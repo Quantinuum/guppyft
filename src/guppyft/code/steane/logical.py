@@ -1,11 +1,11 @@
-"""Guppy functions for the logical operations and types for the Steane QEC architecture.
+"""Guppy functions for the logical operations and types for the Steane QEC
+architecture.
 
 This module contains bindings for the fundamental ops in the HUGR extensions, as well
 as composite operations that comprise multiple logical operations.
 
 The physical implementation for these ops is provided in
-:py:mod:`~guppyft.code.steane.primitives`.
-"""
+:py:mod:`~guppyft.code.steane.primitives`."""
 
 from collections.abc import Callable
 from typing import no_type_check
@@ -46,8 +46,8 @@ class Measurement:
 class Qubit:
     """A logical qubit encoded in the Steane code.
 
-    Constructing a ``Qubit`` instance prepares it in the logical zero state.
-    """
+    Constructing a ``Qubit`` instance prepares it in the logical zero
+    state."""
 
     @hugr_op(_steane_op("prep_zero"))
     @no_type_check
@@ -115,7 +115,8 @@ class Qubit:
 
     @guppy
     def tdg(self: "Qubit") -> None:
-        r"""Apply a logical :math:`T^\dagger` gate using magic-state injection."""
+        r"""Apply a logical :math:`T^\dagger` gate using magic-state
+        injection."""
         tdg(self)
 
 
@@ -177,8 +178,7 @@ def sdg(qubit: "Qubit") -> None:
 @no_type_check
 def prep_t_state() -> "Qubit":
     r"""Prepare a logical :math:`T\ket{+}` magic state for :math:`T` and
-    :math:`T^\dagger` injection.
-    """
+    :math:`T^\dagger` injection."""
 
 
 @hugr_op(_steane_op("inject_t"))
@@ -190,7 +190,8 @@ def inject_t(qubit: "Qubit", magic: "Qubit" @ owned) -> None:
 @hugr_op(_steane_op("inject_tdg"))
 @no_type_check
 def inject_tdg(qubit: "Qubit", magic: "Qubit" @ owned) -> None:
-    r"""Apply a logical :math:`T^\dagger` gate by consuming a magic-state qubit."""
+    r"""Apply a logical :math:`T^\dagger` gate by consuming a magic-state
+    qubit."""
 
 
 @hugr_op(_steane_op("cx"))

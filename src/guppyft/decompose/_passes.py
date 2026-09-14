@@ -33,7 +33,9 @@ def _toffoli_decomposition(ctrl0: qubit, ctrl1: qubit, target: qubit) -> None:
 
 @dataclass(frozen=True)
 class ToffoliDecomposer(ComposablePass):
-    """Decomposes Toffoli gates into Clifford+T gates. Each Toffoli uses 7 T gates."""
+    """Decomposes Toffoli gates into Clifford+T gates.
+
+    Each Toffoli uses 7 T gates."""
 
     def run(self, hugr: Hugr[Any], *, inplace: bool = True) -> PassResult:
         return implement_pass_run(

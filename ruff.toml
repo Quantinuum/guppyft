@@ -71,6 +71,7 @@ select = [
 
 ignore = [
     "COM812",
+    "D209", # Don't require multi-line docstrings to have closing quotes on new line.
     "D205", # Legacy docstrings omit the blank line after the summary
     "ISC001", # conflicting with the formatter
     "EM101",

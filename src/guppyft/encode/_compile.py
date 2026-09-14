@@ -27,42 +27,49 @@ class LogicalCompiler(Protocol):
         return self.check_may_compile(pkg) is None
 
     def check_may_compile(self, pkg: Package) -> UncompilableError | None:
-        """Check whether any issues can be detected that would arise when trying to
-        compile the given package, e.g. the package containing unsupported gates.
+        """Check whether any issues can be detected that would arise when
+        trying to compile the given package, e.g. the package containing
+        unsupported gates.
 
-        Note that this function returning without error is not a guarantee that a
-        subsequent call to `encode` will succeed.
-        """
+        Note that this function returning without error is not a
+        guarantee that a subsequent call to `encode` will succeed."""
 
 
 @dataclass(frozen=True)
 class ReplacementCompiler(LogicalCompiler):
-    """A composable pass that replaces extension ops in a `Hugr` according to the given
-    mappings.
+    """A composable pass that replaces extension ops in a `Hugr` according to
+    the given mappings.
 
-    See `guppyft._bindings._run_replacement_compiler` for semantic details.
-    """
+    See `guppyft._bindings._run_replacement_compiler` for semantic
+    details."""
 
     op_replacements: dict[tuple[str, str], tuple[str, str, list[int | str]]]
     """Maps each source `(extension_name, op_name)` pair (taking no type args)
     to a target `(extension_name, op_name, args)` triple, where `args` is the
     list of type args (integers or strings) used to instantiate the target
     op."""
+
     compound_op_replacements: dict[
         tuple[str, str], Hugr[Any] | GuppyFunctionDefinition[[Any], Any] | Package
     ] = field(default_factory=dict)
-    """Replaces each source `(extension_name, op_name)` pair (taking no type args)
-    with the given HUGR. When a Guppy function is given as a replacement, it is
-    compiled to HUGR first."""
+    """Replaces each source `(extension_name, op_name)` pair (taking no type
+    args) with the given HUGR.
+
+    When a Guppy function is given as a replacement, it is compiled to
+    HUGR first.
+    """
+
     ty_replacements: dict[tuple[str, str], tuple[str, str]] = field(
         default_factory=dict
     )
-    """Optional mapping between src and tgt types to be replaced globally during
-    encoding where types are provided in the form `(extension_name, ty_name)`.
-    """
+    """Optional mapping between src and tgt types to be replaced globally
+    during encoding where types are provided in the form `(extension_name,
+    ty_name)`."""
+
     extensions: ExtensionRegistry | None = None
     """Optional JSON-encoded list of additional extension definitions, used to
-    resolve target ops/types that are not already registered on the input Hugr."""
+    resolve target ops/types that are not already registered on the input
+    Hugr."""
 
     def __post_init__(self) -> None:
         duplicates = self.op_replacements.keys() & self.compound_op_replacements.keys()

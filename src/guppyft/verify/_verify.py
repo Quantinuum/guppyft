@@ -55,8 +55,7 @@ def _compute_stabilizers_single_block_state(
             `state_prep_func`.
 
     Returns:
-        A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
-    """
+        A Zixy `SignTerms` instance storing the stabilizers of the Choi state."""
 
     @guppy
     def main() -> None:
@@ -85,8 +84,7 @@ def _compute_stabilizers_double_block_state(
             `state_prep_func`.
 
     Returns:
-        A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
-    """
+        A Zixy `SignTerms` instance storing the stabilizers of the Choi state."""
 
     @guppy
     def main() -> None:
@@ -128,8 +126,7 @@ def _compute_stabilizers_single_block_unitary(
             state for `clifford_func`.
 
     Returns:
-        A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
-    """
+        A Zixy `SignTerms` instance storing the stabilizers of the Choi state."""
     choi_prep = gen_choi_state(code, clifford_func, 1)
     n = code.num_physical_qubits
 
@@ -167,7 +164,8 @@ def _compute_stabilizers_double_block_unitary(
     clifford_func: DoubleBlockUnitary,
     num_selene_qubits: int,
 ) -> pauli.SignTerms:
-    """Compute the stabilizers of a Choi state encoding a Clifford (two code blocks).
+    """Compute the stabilizers of a Choi state encoding a Clifford (two code
+    blocks).
 
     Args:
         code: The stabilizer code.
@@ -177,8 +175,7 @@ def _compute_stabilizers_double_block_unitary(
             state for `clifford_func`.
 
     Returns:
-        A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
-    """
+        A Zixy `SignTerms` instance storing the stabilizers of the Choi state."""
     choi_prep = gen_choi_state(code, clifford_func, 2)  # type: ignore[arg-type]
     n = code.num_physical_qubits
 
@@ -277,8 +274,7 @@ def _compute_state_prep_tableaux(
             Defaults to zero.
 
     Returns:
-        A pair of stabilizer tableaux made up of signed Pauli terms.
-    """
+        A pair of stabilizer tableaux made up of signed Pauli terms."""
     num_blocks = _count_blocks_state(semantic_function, impl_function)
     match num_blocks:
         case 1:
@@ -325,7 +321,8 @@ def valid_stabilizer_state_preparation(
     code_definition: StabilizerCode,
     impl_num_ancillas: int = 0,
 ) -> bool:
-    """Checks whether impl_function prepares the state specified by semantic function.
+    """Checks whether impl_function prepares the state specified by semantic
+    function.
 
     Can check implementations logical Pauli eigenstate preparation
       across one or two code blocks.
@@ -341,8 +338,7 @@ def valid_stabilizer_state_preparation(
             Defaults to zero.
 
     Returns:
-        A Boolean indicating whether the implementation is valid.
-    """
+        A Boolean indicating whether the implementation is valid."""
     sem_stabilizers, impl_stabilizers = _compute_state_prep_tableaux(
         semantic_function,
         impl_function,
@@ -394,8 +390,7 @@ def _compute_clifford_tableaux(
             Defaults to zero.
 
     Returns:
-        A pair of Clifford tableaux made up of signed Pauli terms.
-    """
+        A pair of Clifford tableaux made up of signed Pauli terms."""
     num_blocks = _count_blocks_unitary(semantic_function, impl_function)
     match num_blocks:
         case 1:
@@ -450,7 +445,8 @@ def valid_clifford_implementation(
     code_definition: StabilizerCode,
     impl_num_ancillas: int = 0,
 ) -> bool:
-    """Checks whether impl_function is a valid implementation of semantic_function.
+    """Checks whether impl_function is a valid implementation of
+    semantic_function.
 
     Can check implementations of Clifford semantics across one or two code blocks.
 
@@ -465,8 +461,7 @@ def valid_clifford_implementation(
             Defaults to zero.
 
     Returns:
-        A Boolean indicating whether the implementation is valid.
-    """
+        A Boolean indicating whether the implementation is valid."""
     sem_stabilizers, impl_stabilizers = _compute_clifford_tableaux(
         semantic_function, impl_function, code_definition, impl_num_ancillas
     )

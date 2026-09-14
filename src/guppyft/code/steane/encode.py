@@ -62,8 +62,7 @@ class SteaneEncoderParams(EncoderParams):
     """Parameters for a Steane encoding.
 
     Attributes:
-        n_blocks: Number of logical blocks available to the encoding.
-    """
+        n_blocks: Number of logical blocks available to the encoding."""
 
     n_blocks: int
 
@@ -82,8 +81,7 @@ class RUSStateFactoryConf:
 
     Attributes:
         size: Maximum number of states to be produced in parallel.
-        max_attempts: Maximum number of repeat-until-success attempts.
-    """
+        max_attempts: Maximum number of repeat-until-success attempts."""
 
     size: int
     max_attempts: int
@@ -107,11 +105,12 @@ class QECPolicy:
     Attributes:
         style: The style of syndrome extraction to use (see `QECStyle`).
         threshold: Threshold at which a QEC cycle is triggered.
-        costs: See `OperationCosts`.
-    """
+        costs: See `OperationCosts`."""
 
     class OperationCosts:
-        """Configuration for operation costs. Used e.g. for applying QEC cycles."""
+        """Configuration for operation costs.
+
+        Used e.g. for applying QEC cycles."""
 
         prep_zero: float = 0.0
         prep_t: float = 0.0
@@ -162,18 +161,19 @@ class SteaneInstance:
     @overload
     def implement_ops(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
     def implement_ops(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
-        """Implement logical ops in `pkg` using this instance's op implementations."""
+        """Implement logical ops in `pkg` using this instance's op
+        implementations."""
         assert self._spec.implement_ops is not None
         pkg_bytes: Package | bytes = self._spec.implement_ops(pkg, as_bytes=as_bytes)  # type: ignore[call-overload]
         return pkg_bytes
 
     def check_may_encode(self, hugr: Package) -> None:
-        """Check whether any issues can be detected that would arise when trying to
-        encode the given package, e.g. the package containing unsupported gates.
+        """Check whether any issues can be detected that would arise when
+        trying to encode the given package, e.g. the package containing
+        unsupported gates.
 
-        Note that this function returning without error is not a guarantee that a
-        subsequent call to `encode` will succeed.
-        """
+        Note that this function returning without error is not a
+        guarantee that a subsequent call to `encode` will succeed."""
         assert self._spec.compile is not None
         if (error := self._spec.compile.check_may_compile(hugr)) is not None:
             raise error
@@ -189,8 +189,7 @@ class SteaneInstance:
         Args:
             pkg: The computational hugr package.
             n_qubits: Number of physical qubits available to the emulator.
-            builder: Optional `EmulatorBuilder` to use; defaults to a new one.
-        """
+            builder: Optional `EmulatorBuilder` to use; defaults to a new one."""
         encoded_pkg = self.encode(pkg, as_bytes=True)
         if builder is None:
             builder = EmulatorBuilder()
@@ -199,7 +198,8 @@ class SteaneInstance:
 
 @dataclass(frozen=True, kw_only=True)
 class SteaneBuilder:
-    """Steane architecture builder class for creating `SteaneInstance` objects."""
+    """Steane architecture builder class for creating `SteaneInstance`
+    objects."""
 
     _zero_factory_conf: RUSStateFactoryConf = field(
         default_factory=lambda: RUSStateFactoryConf(1, 5)
@@ -216,8 +216,7 @@ class SteaneBuilder:
 
     def _gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
         """Generate the `ImplementOpsSpec` providing Steane implementations of
-        logical ops for a program using `n_blocks` logical blocks.
-        """
+        logical ops for a program using `n_blocks` logical blocks."""
         qec_policy = self._qec_policy
 
         # TODO STATE should be generic for all codes. The methods that are code specific
@@ -731,9 +730,8 @@ class SteaneBuilder:
         )
 
     def _gen_encoder_spec(self, n_blocks: int) -> EncodeSpec:
-        """Generate the full `EncoderSpec` (logical encoding + op implementations)
-        for a program using `n_blocks` logical blocks.
-        """
+        """Generate the full `EncoderSpec` (logical encoding + op
+        implementations) for a program using `n_blocks` logical blocks."""
         impl_spec = self._gen_implement_spec(n_blocks)
 
         ext = ExtensionRegistry.from_extensions(
@@ -793,6 +791,7 @@ class SteaneBuilder:
         return replace(self, _magic_factory_conf=conf)
 
     def build(self, n_blocks: int) -> SteaneInstance:
-        """Build a `SteaneInstance` configured for `n_blocks` logical blocks."""
+        """Build a `SteaneInstance` configured for `n_blocks` logical
+        blocks."""
         encoder_spec = self._gen_encoder_spec(n_blocks)
         return SteaneInstance(_spec=encoder_spec)

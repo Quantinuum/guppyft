@@ -26,60 +26,53 @@ class IcebergTypesExtension:
     def iceberg_block_def(self) -> TypeDef:
         """An Iceberg code block.
 
-        This is the generic type definition. For the instantiated type, see
-        `iceberg_block`.
-        """
+        This is the generic type definition. For the instantiated type,
+        see `iceberg_block`."""
         return self().get_type("block")
 
     def iceberg_block(self, k: int) -> ExtType:
         """An Iceberg code block.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         return self.iceberg_block_def.instantiate([BoundedNatArg(k)])
 
     @functools.cached_property
     def iceberg_borrowed_block_def(self) -> TypeDef:
         """A borrowed Iceberg code block.
 
-        This is the generic type definition. For the instantiated type, see
-        `iceberg_borrowed_block`.
-        """
+        This is the generic type definition. For the instantiated type,
+        see `iceberg_borrowed_block`."""
         return self().get_type("borrowed_block")
 
     def iceberg_borrowed_block(self, k: int) -> ExtType:
         """A borrowed Iceberg code block.
 
         Args:
-            k: The number of logical qubits encoded in the original block.
-        """
+            k: The number of logical qubits encoded in the original block."""
         return self.iceberg_borrowed_block_def.instantiate([BoundedNatArg(k)])
 
     @functools.cached_property
     def iceberg_pre_block_def(self) -> TypeDef:
         """An Iceberg code pre-block.
 
-        This is the generic type definition. For the instantiated type, see
-        `iceberg_pre_block`.
-        """
+        This is the generic type definition. For the instantiated type,
+        see `iceberg_pre_block`."""
         return self().get_type("pre_block")
 
     def iceberg_pre_block(self, k: int) -> ExtType:
         """An Iceberg code pre-block.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         return self.iceberg_pre_block_def.instantiate([BoundedNatArg(k)])
 
     @functools.cached_property
     def iceberg_qubit_def(self) -> TypeDef:
         """A "dynamic" logical qubit belonging to an unspecified block.
 
-        This is the generic type definition. For the instantiated type, see
-        `iceberg_qubit`.
-        """
+        This is the generic type definition. For the instantiated type,
+        see `iceberg_qubit`."""
         return self().get_type("qubit")
 
     def iceberg_qubit(self) -> ExtType:
@@ -104,9 +97,8 @@ class IcebergOpsExtension:
     def x_def(self) -> OpDef:
         """Apply an X gate to one qubit.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `x`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `x`."""
         return self().get_op("x")
 
     def x(self, k: int, i: int) -> ExtOp:
@@ -114,8 +106,7 @@ class IcebergOpsExtension:
 
         Args:
             k: The number of logical qubits encoded in the block.
-            i: The index of the logical qubit.
-        """
+            i: The index of the logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.x_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i)],
@@ -126,17 +117,15 @@ class IcebergOpsExtension:
     def x_d_def(self) -> OpDef:
         """Apply an X gate to one qubit with dynamic index.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `x_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `x_d`."""
         return self().get_op("x_d")
 
     def x_d(self, k: int) -> ExtOp:
         """Apply an X gate to one qubit with dynamic index.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.x_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -149,9 +138,8 @@ class IcebergOpsExtension:
     def y_def(self) -> OpDef:
         """Apply a Y gate to one qubit.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `y`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `y`."""
         return self().get_op("y")
 
     def y(self, k: int, i: int) -> ExtOp:
@@ -159,8 +147,7 @@ class IcebergOpsExtension:
 
         Args:
             k: The number of logical qubits encoded in the block.
-            i: The index of the logical qubit.
-        """
+            i: The index of the logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.y_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i)],
@@ -171,17 +158,15 @@ class IcebergOpsExtension:
     def y_d_def(self) -> OpDef:
         """Apply a Y gate to one qubit with dynamic index.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `y_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `y_d`."""
         return self().get_op("y_d")
 
     def y_d(self, k: int) -> ExtOp:
         """Apply a Y gate to one qubit with dynamic index.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.y_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -194,9 +179,8 @@ class IcebergOpsExtension:
     def z_def(self) -> OpDef:
         """Apply a Z gate to one qubit.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `z`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `z`."""
         return self().get_op("z")
 
     def z(self, k: int, i: int) -> ExtOp:
@@ -204,8 +188,7 @@ class IcebergOpsExtension:
 
         Args:
             k: The number of logical qubits encoded in the block.
-            i: The index of the logical qubit.
-        """
+            i: The index of the logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.z_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i)],
@@ -216,17 +199,15 @@ class IcebergOpsExtension:
     def z_d_def(self) -> OpDef:
         """Apply a Z gate to one qubit with dynamic index.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `z_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `z_d`."""
         return self().get_op("z_d")
 
     def z_d(self, k: int) -> ExtOp:
         """Apply a Z gate to one qubit with dynamic index.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.z_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -239,9 +220,8 @@ class IcebergOpsExtension:
     def xx_def(self) -> OpDef:
         """Apply an X gate to two qubits.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `xx`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `xx`."""
         return self().get_op("xx")
 
     def xx(self, k: int, i: int, j: int) -> ExtOp:
@@ -250,8 +230,7 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
             i: The index of the first logical qubit.
-            j: The index of the second logical qubit.
-        """
+            j: The index of the second logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.xx_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
@@ -262,17 +241,15 @@ class IcebergOpsExtension:
     def xx_d_def(self) -> OpDef:
         """Apply an X gate to two qubits with dynamic indices.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `xx_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `xx_d`."""
         return self().get_op("xx_d")
 
     def xx_d(self, k: int) -> ExtOp:
         """Apply an X gate to two qubits with dynamic indices.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.xx_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -285,9 +262,8 @@ class IcebergOpsExtension:
     def yy_def(self) -> OpDef:
         """Apply a Y gate to two qubits.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `yy`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `yy`."""
         return self().get_op("yy")
 
     def yy(self, k: int, i: int, j: int) -> ExtOp:
@@ -296,8 +272,7 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
             i: The index of the first logical qubit.
-            j: The index of the second logical qubit.
-        """
+            j: The index of the second logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.yy_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
@@ -308,17 +283,15 @@ class IcebergOpsExtension:
     def yy_d_def(self) -> OpDef:
         """Apply a Y gate to two qubits with dynamic indices.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `yy_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `yy_d`."""
         return self().get_op("yy_d")
 
     def yy_d(self, k: int) -> ExtOp:
         """Apply a Y gate to two qubits with dynamic indices.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.yy_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -331,9 +304,8 @@ class IcebergOpsExtension:
     def zz_def(self) -> OpDef:
         """Apply a Z gate to two qubits.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `zz`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `zz`."""
         return self().get_op("zz")
 
     def zz(self, k: int, i: int, j: int) -> ExtOp:
@@ -342,8 +314,7 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
             i: The index of the first logical qubit.
-            j: The index of the second logical qubit.
-        """
+            j: The index of the second logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.zz_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
@@ -354,17 +325,15 @@ class IcebergOpsExtension:
     def zz_d_def(self) -> OpDef:
         """Apply a Z gate to two qubits with dynamic indices.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `zz_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `zz_d`."""
         return self().get_op("zz_d")
 
     def zz_d(self, k: int) -> ExtOp:
         """Apply a Z gate to two qubits with dynamic indices.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.zz_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -377,9 +346,8 @@ class IcebergOpsExtension:
     def all_but_one_x_def(self) -> OpDef:
         """Apply an X gate to all but one qubit.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_but_one_x`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `all_but_one_x`."""
         return self().get_op("all_but_one_x")
 
     def all_but_one_x(self, k: int, i: int) -> ExtOp:
@@ -387,8 +355,7 @@ class IcebergOpsExtension:
 
         Args:
             k: The number of logical qubits encoded in the block.
-            i: The index of the logical qubit omitted.
-        """
+            i: The index of the logical qubit omitted."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.all_but_one_x_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i)],
@@ -399,17 +366,15 @@ class IcebergOpsExtension:
     def all_but_one_x_d_def(self) -> OpDef:
         """Apply an X gate to all but one qubit with dynamic index.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_but_one_x_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `all_but_one_x_d`."""
         return self().get_op("all_but_one_x_d")
 
     def all_but_one_x_d(self, k: int) -> ExtOp:
         """Apply an X gate to all but one qubit with dynamic index.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.all_but_one_x_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -422,9 +387,8 @@ class IcebergOpsExtension:
     def all_but_one_z_def(self) -> OpDef:
         """Apply a Z gate to all but one qubit.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_but_one_z`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `all_but_one_z`."""
         return self().get_op("all_but_one_z")
 
     def all_but_one_z(self, k: int, i: int) -> ExtOp:
@@ -432,8 +396,7 @@ class IcebergOpsExtension:
 
         Args:
             k: The number of logical qubits encoded in the block.
-            i: The index of the logical qubit omitted.
-        """
+            i: The index of the logical qubit omitted."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.all_but_one_z_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i)],
@@ -444,17 +407,15 @@ class IcebergOpsExtension:
     def all_but_one_z_d_def(self) -> OpDef:
         """Apply a Z gate to all but one qubit with dynamic index.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_but_one_z_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `all_but_one_z_d`."""
         return self().get_op("all_but_one_z_d")
 
     def all_but_one_z_d(self, k: int) -> ExtOp:
         """Apply a Z gate to all but one qubit with dynamic index.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.all_but_one_z_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -467,17 +428,15 @@ class IcebergOpsExtension:
     def all_x_def(self) -> OpDef:
         """Apply an X gate to all qubits.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_x`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `all_x`."""
         return self().get_op("all_x")
 
     def all_x(self, k: int) -> ExtOp:
         """Apply an X gate to all qubits.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.all_x_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -490,17 +449,15 @@ class IcebergOpsExtension:
     def all_y_def(self) -> OpDef:
         """Apply a Y gate to all qubits.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_y`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `all_y`."""
         return self().get_op("all_y")
 
     def all_y(self, k: int) -> ExtOp:
         """Apply a Y gate to all qubits.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.all_y_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -513,17 +470,15 @@ class IcebergOpsExtension:
     def all_z_def(self) -> OpDef:
         """Apply a Z gate to all qubits.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_z`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `all_z`."""
         return self().get_op("all_z")
 
     def all_z(self, k: int) -> ExtOp:
         """Apply a Z gate to all qubits.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.all_z_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -536,9 +491,8 @@ class IcebergOpsExtension:
     def x_with_all_but_one_z_def(self) -> OpDef:
         """Apply an X gate to one qubit and a Z to the rest.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `x_with_all_but_one_z`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `x_with_all_but_one_z`."""
         return self().get_op("x_with_all_but_one_z")
 
     def x_with_all_but_one_z(self, k: int, i: int) -> ExtOp:
@@ -546,8 +500,7 @@ class IcebergOpsExtension:
 
         Args:
             k: The number of logical qubits encoded in the block.
-            i: The index of the logical qubit.
-        """
+            i: The index of the logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.x_with_all_but_one_z_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i)],
@@ -558,17 +511,15 @@ class IcebergOpsExtension:
     def x_with_all_but_one_z_d_def(self) -> OpDef:
         """Apply an X gate to one qubit and a Z to the rest with dynamic index.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `x_with_all_but_one_z_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `x_with_all_but_one_z_d`."""
         return self().get_op("x_with_all_but_one_z_d")
 
     def x_with_all_but_one_z_d(self, k: int) -> ExtOp:
         """Apply an X gate to one qubit and a Z to the rest with dynamic index.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.x_with_all_but_one_z_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -581,9 +532,8 @@ class IcebergOpsExtension:
     def z_with_all_but_one_x_def(self) -> OpDef:
         """Apply a Z gate to one qubit and an X to the rest.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `z_with_all_but_one_x`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `z_with_all_but_one_x`."""
         return self().get_op("z_with_all_but_one_x")
 
     def z_with_all_but_one_x(self, k: int, i: int) -> ExtOp:
@@ -591,8 +541,7 @@ class IcebergOpsExtension:
 
         Args:
             k: The number of logical qubits encoded in the block.
-            i: The index of the logical qubit.
-        """
+            i: The index of the logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.z_with_all_but_one_x_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i)],
@@ -603,17 +552,15 @@ class IcebergOpsExtension:
     def z_with_all_but_one_x_d_def(self) -> OpDef:
         """Apply a Z gate to one qubit and an X to the rest with dynamic index.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `z_with_all_but_one_x_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `z_with_all_but_one_x_d`."""
         return self().get_op("z_with_all_but_one_x_d")
 
     def z_with_all_but_one_x_d(self, k: int) -> ExtOp:
         """Apply a Z gate to one qubit and an X to the rest with dynamic index.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.z_with_all_but_one_x_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -626,9 +573,8 @@ class IcebergOpsExtension:
     def fan_out_def(self) -> OpDef:
         """Fan out from one qubit to the rest.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `fan_out`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `fan_out`."""
         return self().get_op("fan_out")
 
     def fan_out(self, k: int, i: int) -> ExtOp:
@@ -636,8 +582,7 @@ class IcebergOpsExtension:
 
         Args:
             k: The number of logical qubits encoded in the block.
-            i: The index of the logical qubit.
-        """
+            i: The index of the logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.fan_out_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i)],
@@ -648,17 +593,15 @@ class IcebergOpsExtension:
     def fan_out_d_def(self) -> OpDef:
         """Fan out from one qubit to the rest with dynamic index.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `fan_out_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `fan_out_d`."""
         return self().get_op("fan_out_d")
 
     def fan_out_d(self, k: int) -> ExtOp:
         """Fan out from one qubit to the rest with dynamic index.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.fan_out_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -671,9 +614,8 @@ class IcebergOpsExtension:
     def fan_in_def(self) -> OpDef:
         """Fan in to one qubit from the rest.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `fan_in`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `fan_in`."""
         return self().get_op("fan_in")
 
     def fan_in(self, k: int, i: int) -> ExtOp:
@@ -681,8 +623,7 @@ class IcebergOpsExtension:
 
         Args:
             k: The number of logical qubits encoded in the block.
-            i: The index of the logical qubit.
-        """
+            i: The index of the logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.fan_in_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i)],
@@ -693,17 +634,15 @@ class IcebergOpsExtension:
     def fan_in_d_def(self) -> OpDef:
         """Fan in to one qubit from the rest with dynamic index.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `fan_in_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `fan_in_d`."""
         return self().get_op("fan_in_d")
 
     def fan_in_d(self, k: int) -> ExtOp:
         """Fan in to one qubit from the rest with dynamic index.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.fan_in_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -716,9 +655,8 @@ class IcebergOpsExtension:
     def rx_def(self) -> OpDef:
         """Apply an Rx gate to one qubit.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `rx`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `rx`."""
         return self().get_op("rx")
 
     def rx(self, k: int, i: int) -> ExtOp:
@@ -726,8 +664,7 @@ class IcebergOpsExtension:
 
         Args:
             k: The number of logical qubits encoded in the block.
-            i: The index of the logical qubit.
-        """
+            i: The index of the logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.rx_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i)],
@@ -738,17 +675,15 @@ class IcebergOpsExtension:
     def rx_d_def(self) -> OpDef:
         """Apply an Rx gate to one qubit with dynamic index.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `rx_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `rx_d`."""
         return self().get_op("rx_d")
 
     def rx_d(self, k: int) -> ExtOp:
         """Apply an Rx gate to one qubit with dynamic index.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.rx_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -763,9 +698,8 @@ class IcebergOpsExtension:
     def ry_def(self) -> OpDef:
         """Apply an Ry gate to one qubit.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `ry`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `ry`."""
         return self().get_op("ry")
 
     def ry(self, k: int, i: int) -> ExtOp:
@@ -773,8 +707,7 @@ class IcebergOpsExtension:
 
         Args:
             k: The number of logical qubits encoded in the block.
-            i: The index of the logical qubit.
-        """
+            i: The index of the logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.ry_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i)],
@@ -785,17 +718,15 @@ class IcebergOpsExtension:
     def ry_d_def(self) -> OpDef:
         """Apply an Ry gate to one qubit with dynamic index.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `ry_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `ry_d`."""
         return self().get_op("ry_d")
 
     def ry_d(self, k: int) -> ExtOp:
         """Apply an Ry gate to one qubit with dynamic index.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.ry_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -810,9 +741,8 @@ class IcebergOpsExtension:
     def rz_def(self) -> OpDef:
         """Apply an Rz gate to one qubit.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `rz`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `rz`."""
         return self().get_op("rz")
 
     def rz(self, k: int, i: int) -> ExtOp:
@@ -820,8 +750,7 @@ class IcebergOpsExtension:
 
         Args:
             k: The number of logical qubits encoded in the block.
-            i: The index of the logical qubit.
-        """
+            i: The index of the logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.rz_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i)],
@@ -832,17 +761,15 @@ class IcebergOpsExtension:
     def rz_d_def(self) -> OpDef:
         """Apply an Rz gate to one qubit with dynamic index.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `rz_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `rz_d`."""
         return self().get_op("rz_d")
 
     def rz_d(self, k: int) -> ExtOp:
         """Apply an Rz gate to one qubit with dynamic index.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.rz_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -857,17 +784,15 @@ class IcebergOpsExtension:
     def all_rx_def(self) -> OpDef:
         """Apply an Rx gate to all qubits.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_rx`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `all_rx`."""
         return self().get_op("all_rx")
 
     def all_rx(self, k: int) -> ExtOp:
         """Apply an Rx gate to all qubits.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.all_rx_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -880,17 +805,15 @@ class IcebergOpsExtension:
     def all_ry_def(self) -> OpDef:
         """Apply an Ry gate to all qubits.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_ry`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `all_ry`."""
         return self().get_op("all_ry")
 
     def all_ry(self, k: int) -> ExtOp:
         """Apply an Ry gate to all qubits.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.all_ry_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -903,17 +826,15 @@ class IcebergOpsExtension:
     def all_rz_def(self) -> OpDef:
         """Apply an Rz gate to all qubits.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_rz`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `all_rz`."""
         return self().get_op("all_rz")
 
     def all_rz(self, k: int) -> ExtOp:
         """Apply an Rz gate to all qubits.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.all_rz_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -926,9 +847,8 @@ class IcebergOpsExtension:
     def all_but_one_rx_def(self) -> OpDef:
         """Apply an Rx gate to all but one qubit.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_but_one_rx`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `all_but_one_rx`."""
         return self().get_op("all_but_one_rx")
 
     def all_but_one_rx(self, k: int, i: int) -> ExtOp:
@@ -936,8 +856,7 @@ class IcebergOpsExtension:
 
         Args:
             k: The number of logical qubits encoded in the block.
-            i: The index of the logical qubit omitted.
-        """
+            i: The index of the logical qubit omitted."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.all_but_one_rx_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i)],
@@ -948,17 +867,15 @@ class IcebergOpsExtension:
     def all_but_one_rx_d_def(self) -> OpDef:
         """Apply an Rx gate to all but one qubit with dynamic index.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_but_one_rx_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `all_but_one_rx_d`."""
         return self().get_op("all_but_one_rx_d")
 
     def all_but_one_rx_d(self, k: int) -> ExtOp:
         """Apply an Rx gate to all but one qubit with dynamic index.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.all_but_one_rx_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -973,9 +890,8 @@ class IcebergOpsExtension:
     def all_but_one_rz_def(self) -> OpDef:
         """Apply an Rz gate to all but one qubit.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_but_one_rz`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `all_but_one_rz`."""
         return self().get_op("all_but_one_rz")
 
     def all_but_one_rz(self, k: int, i: int) -> ExtOp:
@@ -983,8 +899,7 @@ class IcebergOpsExtension:
 
         Args:
             k: The number of logical qubits encoded in the block.
-            i: The index of the logical qubit omitted.
-        """
+            i: The index of the logical qubit omitted."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.all_but_one_rz_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i)],
@@ -995,17 +910,15 @@ class IcebergOpsExtension:
     def all_but_one_rz_d_def(self) -> OpDef:
         """Apply an Rz gate to all but one qubit with dynamic index.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_but_one_rz_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `all_but_one_rz_d`."""
         return self().get_op("all_but_one_rz_d")
 
     def all_but_one_rz_d(self, k: int) -> ExtOp:
         """Apply an Rz gate to all but one qubit with dynamic index.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.all_but_one_rz_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -1020,17 +933,15 @@ class IcebergOpsExtension:
     def all_h_def(self) -> OpDef:
         """Apply an H gate to all qubits.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_h`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `all_h`."""
         return self().get_op("all_h")
 
     def all_h(self, k: int) -> ExtOp:
         """Apply an H gate to all qubits.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.all_h_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -1043,9 +954,8 @@ class IcebergOpsExtension:
     def xx_phase_def(self) -> OpDef:
         """Apply an XXPhase gate to two qubits within a block.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `xx_phase`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `xx_phase`."""
         return self().get_op("xx_phase")
 
     def xx_phase(self, k: int, i: int, j: int) -> ExtOp:
@@ -1054,8 +964,7 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
             i: The index of the first logical qubit.
-            j: The index of the second logical qubit.
-        """
+            j: The index of the second logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.xx_phase_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
@@ -1064,19 +973,19 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def xx_phase_d_def(self) -> OpDef:
-        """Apply an XXPhase gate to two qubits within a block with dynamic indices.
+        """Apply an XXPhase gate to two qubits within a block with dynamic
+        indices.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `xx_phase_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `xx_phase_d`."""
         return self().get_op("xx_phase_d")
 
     def xx_phase_d(self, k: int) -> ExtOp:
-        """Apply an XXPhase gate to two qubits within a block with dynamic indices.
+        """Apply an XXPhase gate to two qubits within a block with dynamic
+        indices.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.xx_phase_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -1091,9 +1000,8 @@ class IcebergOpsExtension:
     def yy_phase_def(self) -> OpDef:
         """Apply a YYPhase gate to two qubits within a block.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `yy_phase`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `yy_phase`."""
         return self().get_op("yy_phase")
 
     def yy_phase(self, k: int, i: int, j: int) -> ExtOp:
@@ -1102,8 +1010,7 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
             i: The index of the first logical qubit.
-            j: The index of the second logical qubit.
-        """
+            j: The index of the second logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.yy_phase_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
@@ -1112,19 +1019,19 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def yy_phase_d_def(self) -> OpDef:
-        """Apply a YYPhase gate to two qubits within a block with dynamic indices.
+        """Apply a YYPhase gate to two qubits within a block with dynamic
+        indices.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `yy_phase_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `yy_phase_d`."""
         return self().get_op("yy_phase_d")
 
     def yy_phase_d(self, k: int) -> ExtOp:
-        """Apply a YYPhase gate to two qubits within a block with dynamic indices.
+        """Apply a YYPhase gate to two qubits within a block with dynamic
+        indices.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.yy_phase_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -1139,9 +1046,8 @@ class IcebergOpsExtension:
     def zz_phase_def(self) -> OpDef:
         """Apply a ZZPhase gate to two qubits within a block.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `zz_phase`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `zz_phase`."""
         return self().get_op("zz_phase")
 
     def zz_phase(self, k: int, i: int, j: int) -> ExtOp:
@@ -1150,8 +1056,7 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
             i: The index of the first logical qubit.
-            j: The index of the second logical qubit.
-        """
+            j: The index of the second logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.zz_phase_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
@@ -1160,19 +1065,19 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def zz_phase_d_def(self) -> OpDef:
-        """Apply a ZZPhase gate to two qubits within a block with dynamic indices.
+        """Apply a ZZPhase gate to two qubits within a block with dynamic
+        indices.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `zz_phase_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `zz_phase_d`."""
         return self().get_op("zz_phase_d")
 
     def zz_phase_d(self, k: int) -> ExtOp:
-        """Apply a ZZPhase gate to two qubits within a block with dynamic indices.
+        """Apply a ZZPhase gate to two qubits within a block with dynamic
+        indices.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.zz_phase_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -1187,9 +1092,8 @@ class IcebergOpsExtension:
     def cx_def(self) -> OpDef:
         """Apply a CX gate to two qubits within a block.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `cx`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `cx`."""
         return self().get_op("cx")
 
     def cx(self, k: int, i: int, j: int) -> ExtOp:
@@ -1198,8 +1102,7 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
             i: The index of the first logical qubit.
-            j: The index of the second logical qubit.
-        """
+            j: The index of the second logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.cx_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
@@ -1210,17 +1113,15 @@ class IcebergOpsExtension:
     def cx_d_def(self) -> OpDef:
         """Apply a CX gate to two qubits within a block with dynamic indices.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `cx_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `cx_d`."""
         return self().get_op("cx_d")
 
     def cx_d(self, k: int) -> ExtOp:
         """Apply a CX gate to two qubits within a block with dynamic indices.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.cx_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -1233,9 +1134,8 @@ class IcebergOpsExtension:
     def swap_def(self) -> OpDef:
         """Apply a SWAP gate to two qubits within a block.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `swap`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `swap`."""
         return self().get_op("swap")
 
     def swap(self, k: int, i: int, j: int) -> ExtOp:
@@ -1244,8 +1144,7 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the block.
             i: The index of the first logical qubit.
-            j: The index of the second logical qubit.
-        """
+            j: The index of the second logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.swap_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
@@ -1256,17 +1155,15 @@ class IcebergOpsExtension:
     def swap_d_def(self) -> OpDef:
         """Apply a SWAP gate to two qubits within a block with dynamic indices.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `swap_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `swap_d`."""
         return self().get_op("swap_d")
 
     def swap_d(self, k: int) -> ExtOp:
         """Apply a SWAP gate to two qubits within a block with dynamic indices.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.swap_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -1277,21 +1174,21 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def xx_phase_between_blocks_def(self) -> OpDef:
-        """Apply an XXPhase gate to two qubits on different blocks of the same size.
+        """Apply an XXPhase gate to two qubits on different blocks of the same
+        size.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `xx_phase_between_blocks`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `xx_phase_between_blocks`."""
         return self().get_op("xx_phase_between_blocks")
 
     def xx_phase_between_blocks(self, k: int, i: int, j: int) -> ExtOp:
-        """Apply an XXPhase gate to two qubits on different blocks of the same size.
+        """Apply an XXPhase gate to two qubits on different blocks of the same
+        size.
 
         Args:
             k: The number of logical qubits encoded in the blocks.
             i: The index of the logical qubit in the first block.
-            j: The index of the logical qubit in the second block.
-        """
+            j: The index of the logical qubit in the second block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.xx_phase_between_blocks_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
@@ -1302,21 +1199,19 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def xx_phase_between_blocks_d_def(self) -> OpDef:
-        """Apply an XXPhase gate to two qubits on different blocks of the same size with
-        dynamic indices.
+        """Apply an XXPhase gate to two qubits on different blocks of the same
+        size with dynamic indices.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `xx_phase_between_blocks_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `xx_phase_between_blocks_d`."""
         return self().get_op("xx_phase_between_blocks_d")
 
     def xx_phase_between_blocks_d(self, k: int) -> ExtOp:
-        """Apply an XXPhase gate to two qubits on different blocks of the same size with
-        dynamic indices.
+        """Apply an XXPhase gate to two qubits on different blocks of the same
+        size with dynamic indices.
 
         Args:
-            k: The number of logical qubits encoded in the blocks.
-        """
+            k: The number of logical qubits encoded in the blocks."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.xx_phase_between_blocks_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -1330,21 +1225,21 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def yy_phase_between_blocks_def(self) -> OpDef:
-        """Apply a YYPhase gate to two qubits on different blocks of the same size.
+        """Apply a YYPhase gate to two qubits on different blocks of the same
+        size.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `yy_phase_between_blocks`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `yy_phase_between_blocks`."""
         return self().get_op("yy_phase_between_blocks")
 
     def yy_phase_between_blocks(self, k: int, i: int, j: int) -> ExtOp:
-        """Apply a YYPhase gate to two qubits on different blocks of the same size.
+        """Apply a YYPhase gate to two qubits on different blocks of the same
+        size.
 
         Args:
             k: The number of logical qubits encoded in the blocks.
             i: The index of the logical qubit in the first block.
-            j: The index of the logical qubit in the second block.
-        """
+            j: The index of the logical qubit in the second block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.yy_phase_between_blocks_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
@@ -1355,21 +1250,19 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def yy_phase_between_blocks_d_def(self) -> OpDef:
-        """Apply a YYPhase gate to two qubits on different blocks of the same size with
-        dynamic indices.
+        """Apply a YYPhase gate to two qubits on different blocks of the same
+        size with dynamic indices.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `yy_phase_between_blocks_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `yy_phase_between_blocks_d`."""
         return self().get_op("yy_phase_between_blocks_d")
 
     def yy_phase_between_blocks_d(self, k: int) -> ExtOp:
-        """Apply a YYPhase gate to two qubits on different blocks of the same size with
-        dynamic indices.
+        """Apply a YYPhase gate to two qubits on different blocks of the same
+        size with dynamic indices.
 
         Args:
-            k: The number of logical qubits encoded in the blocks.
-        """
+            k: The number of logical qubits encoded in the blocks."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.yy_phase_between_blocks_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -1383,21 +1276,21 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def zz_phase_between_blocks_def(self) -> OpDef:
-        """Apply a ZZPhase gate to two qubits on different blocks of the same size.
+        """Apply a ZZPhase gate to two qubits on different blocks of the same
+        size.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `zz_phase_between_blocks`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `zz_phase_between_blocks`."""
         return self().get_op("zz_phase_between_blocks")
 
     def zz_phase_between_blocks(self, k: int, i: int, j: int) -> ExtOp:
-        """Apply a ZZPhase gate to two qubits on different blocks of the same size.
+        """Apply a ZZPhase gate to two qubits on different blocks of the same
+        size.
 
         Args:
             k: The number of logical qubits encoded in the blocks.
             i: The index of the logical qubit in the first block.
-            j: The index of the logical qubit in the second block.
-        """
+            j: The index of the logical qubit in the second block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.zz_phase_between_blocks_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
@@ -1408,21 +1301,19 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def zz_phase_between_blocks_d_def(self) -> OpDef:
-        """Apply a ZZPhase gate to two qubits on different blocks of the same size with
-        dynamic indices.
+        """Apply a ZZPhase gate to two qubits on different blocks of the same
+        size with dynamic indices.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `zz_phase_between_blocks_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `zz_phase_between_blocks_d`."""
         return self().get_op("zz_phase_between_blocks_d")
 
     def zz_phase_between_blocks_d(self, k: int) -> ExtOp:
-        """Apply a ZZPhase gate to two qubits on different blocks of the same size with
-        dynamic indices.
+        """Apply a ZZPhase gate to two qubits on different blocks of the same
+        size with dynamic indices.
 
         Args:
-            k: The number of logical qubits encoded in the blocks.
-        """
+            k: The number of logical qubits encoded in the blocks."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.zz_phase_between_blocks_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -1438,9 +1329,8 @@ class IcebergOpsExtension:
     def cx_between_blocks_def(self) -> OpDef:
         """Apply a CX gate to two qubits on different blocks of the same size.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `cx_between_blocks`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `cx_between_blocks`."""
         return self().get_op("cx_between_blocks")
 
     def cx_between_blocks(self, k: int, i: int, j: int) -> ExtOp:
@@ -1449,8 +1339,7 @@ class IcebergOpsExtension:
         Args:
             k: The number of logical qubits encoded in the blocks.
             i: The index of the logical qubit in the first block.
-            j: The index of the logical qubit in the second block.
-        """
+            j: The index of the logical qubit in the second block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.cx_between_blocks_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i), BoundedNatArg(j)],
@@ -1461,21 +1350,19 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def cx_between_blocks_d_def(self) -> OpDef:
-        """Apply a CX gate to two qubits on different blocks of the same size with
-        dynamic indices.
+        """Apply a CX gate to two qubits on different blocks of the same size
+        with dynamic indices.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `cx_between_blocks_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `cx_between_blocks_d`."""
         return self().get_op("cx_between_blocks_d")
 
     def cx_between_blocks_d(self, k: int) -> ExtOp:
-        """Apply a CX gate to two qubits on different blocks of the same size with
-        dynamic indices.
+        """Apply a CX gate to two qubits on different blocks of the same size
+        with dynamic indices.
 
         Args:
-            k: The number of logical qubits encoded in the blocks.
-        """
+            k: The number of logical qubits encoded in the blocks."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.cx_between_blocks_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -1490,17 +1377,15 @@ class IcebergOpsExtension:
     def cx_transversal_def(self) -> OpDef:
         """Apply a CX gate transversally over two blocks of the same size.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `cx_transversal`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `cx_transversal`."""
         return self().get_op("cx_transversal")
 
     def cx_transversal(self, k: int) -> ExtOp:
         """Apply a CX gate transversally over two blocks of the same size.
 
         Args:
-            k: The number of logical qubits encoded in the blocks.
-        """
+            k: The number of logical qubits encoded in the blocks."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.cx_transversal_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -1515,17 +1400,15 @@ class IcebergOpsExtension:
     def alloc_zero_def(self) -> OpDef:
         """Allocate a block in the all-zero state.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `alloc_zero`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `alloc_zero`."""
         return self().get_op("alloc_zero")
 
     def alloc_zero(self, k: int) -> ExtOp:
         """Allocate a block in the all-zero state.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.alloc_zero_def.instantiate(
             args=[BoundedNatArg(k)], concrete_signature=FunctionType([], [block_type])
@@ -1537,17 +1420,15 @@ class IcebergOpsExtension:
     def try_alloc_zero_def(self) -> OpDef:
         """Allocate a `PreBlock` in the all-zero state.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `alloc_zero`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `alloc_zero`."""
         return self().get_op("try_alloc_zero")
 
     def try_alloc_zero(self, k: int) -> ExtOp:
         """Allocate a `PreBlock` in the all-zero state.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         preblock_type = _ICEBERG_TYPES.iceberg_pre_block(k)
         return self.try_alloc_zero_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -1560,17 +1441,15 @@ class IcebergOpsExtension:
     def check_pre_block_def(self) -> OpDef:
         """Check if a `PreBlock` is in a valid logical state.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `check`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `check`."""
         return self().get_op("check_pre_block")
 
     def check_pre_block(self, k: int) -> ExtOp:
         """Check if a `PreBlock` is in a valid logical state.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         preblock_type = _ICEBERG_TYPES.iceberg_pre_block(k)
         return self.check_pre_block_def.instantiate(
@@ -1584,17 +1463,15 @@ class IcebergOpsExtension:
     def free_def(self) -> OpDef:
         """Free a block.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `free`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `free`."""
         return self().get_op("free")
 
     def free(self, k: int) -> ExtOp:
         """Free a block.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.free_def.instantiate(
             args=[BoundedNatArg(k)], concrete_signature=FunctionType([block_type], [])
@@ -1606,17 +1483,15 @@ class IcebergOpsExtension:
     def measure_syndrome_def(self) -> OpDef:
         """Perform a syndrome measurement, producing (X,Z) error indicators.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `measure_syndrome`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `measure_syndrome`."""
         return self().get_op("measure_syndrome")
 
     def measure_syndrome(self, k: int) -> ExtOp:
         """Perform a syndrome measurement, producing (X,Z) error indicators.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.measure_syndrome_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -1631,17 +1506,15 @@ class IcebergOpsExtension:
     def measure_all_def(self) -> OpDef:
         """Destructively measure all qubits in the Z basis.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `measure_all`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `measure_all`."""
         return self().get_op("measure_all")
 
     def measure_all(self, k: int) -> ExtOp:
         """Destructively measure all qubits in the Z basis.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         from guppyft.extensions import std_types
 
         block_type = _ICEBERG_TYPES.iceberg_block(k)
@@ -1657,14 +1530,13 @@ class IcebergOpsExtension:
     def try_measure_one_x_def(self) -> OpDef:
         """Non-destructively measure one qubit in the X basis.
 
-        This operation is fallible and produces a future optional bool. A "none"
-        value indicates a probable single-qubit error; QED may then be used to
-        detect whether this was just a measurement error or whether it affected
-        the data qubits.
+        This operation is fallible and produces a future optional bool.
+        A "none" value indicates a probable single-qubit error; QED may
+        then be used to detect whether this was just a measurement error
+        or whether it affected the data qubits.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `try_measure_one_x`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `try_measure_one_x`."""
         return self().get_op("try_measure_one_x")
 
     def try_measure_one_x(self, k: int, i: int) -> ExtOp:
@@ -1677,8 +1549,7 @@ class IcebergOpsExtension:
 
         Args:
             k: The number of logical qubits encoded in the block.
-            i: The index of the logical qubit.
-        """
+            i: The index of the logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.try_measure_one_x_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i)],
@@ -1689,20 +1560,21 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def try_measure_one_x_d_def(self) -> OpDef:
-        """Non-destructively measure one qubit in the X basis with dynamic index.
+        """Non-destructively measure one qubit in the X basis with dynamic
+        index.
 
-        This operation is fallible and produces a future optional bool. A "none"
-        value indicates a probable single-qubit error; QED may then be used to
-        detect whether this was just a measurement error or whether it affected
-        the data qubits.
+        This operation is fallible and produces a future optional bool.
+        A "none" value indicates a probable single-qubit error; QED may
+        then be used to detect whether this was just a measurement error
+        or whether it affected the data qubits.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `try_measure_one_x_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `try_measure_one_x_d`."""
         return self().get_op("try_measure_one_x_d")
 
     def try_measure_one_x_d(self, k: int) -> ExtOp:
-        """Non-destructively measure one qubit in the X basis with dynamic index.
+        """Non-destructively measure one qubit in the X basis with dynamic
+        index.
 
         This operation is fallible and produces a future optional bool. A "none"
         value indicates a probable single-qubit error; QED may then be used to
@@ -1710,8 +1582,7 @@ class IcebergOpsExtension:
         the data qubits.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.try_measure_one_x_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -1726,14 +1597,13 @@ class IcebergOpsExtension:
     def try_measure_one_z_def(self) -> OpDef:
         """Non-destructively measure one qubit in the Z basis.
 
-        This operation is fallible and produces a future optional bool. A "none"
-        value indicates a probable single-qubit error; QED may then be used to
-        detect whether this was just a measurement error or whether it affected
-        the data qubits.
+        This operation is fallible and produces a future optional bool.
+        A "none" value indicates a probable single-qubit error; QED may
+        then be used to detect whether this was just a measurement error
+        or whether it affected the data qubits.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `try_measure_one_z`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `try_measure_one_z`."""
         return self().get_op("try_measure_one_z")
 
     def try_measure_one_z(self, k: int, i: int) -> ExtOp:
@@ -1746,8 +1616,7 @@ class IcebergOpsExtension:
 
         Args:
             k: The number of logical qubits encoded in the block.
-            i: The index of the logical qubit.
-        """
+            i: The index of the logical qubit."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.try_measure_one_z_def.instantiate(
             args=[BoundedNatArg(k), BoundedNatArg(i)],
@@ -1758,20 +1627,21 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def try_measure_one_z_d_def(self) -> OpDef:
-        """Non-destructively measure one qubit in the Z basis with dynamic index.
+        """Non-destructively measure one qubit in the Z basis with dynamic
+        index.
 
-        This operation is fallible and produces a future optional bool. A "none"
-        value indicates a probable single-qubit error; QED may then be used to
-        detect whether this was just a measurement error or whether it affected
-        the data qubits.
+        This operation is fallible and produces a future optional bool.
+        A "none" value indicates a probable single-qubit error; QED may
+        then be used to detect whether this was just a measurement error
+        or whether it affected the data qubits.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `try_measure_one_z_d`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `try_measure_one_z_d`."""
         return self().get_op("try_measure_one_z_d")
 
     def try_measure_one_z_d(self, k: int) -> ExtOp:
-        """Non-destructively measure one qubit in the Z basis with dynamic index.
+        """Non-destructively measure one qubit in the Z basis with dynamic
+        index.
 
         This operation is fallible and produces a future optional bool. A "none"
         value indicates a probable single-qubit error; QED may then be used to
@@ -1779,8 +1649,7 @@ class IcebergOpsExtension:
         the data qubits.
 
         Args:
-            k: The number of logical qubits encoded in the block.
-        """
+            k: The number of logical qubits encoded in the block."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.try_measure_one_z_d_def.instantiate(
             args=[BoundedNatArg(k)],
@@ -1884,18 +1753,16 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def try_measure_x_dynq(self) -> OpDef:
-        """Fallible non-destructive measurement of a dynamic logical qubit in the X
-        basis.
-        """
+        """Fallible non-destructive measurement of a dynamic logical qubit in
+        the X basis."""
         return self().get_op("try_measure_x_dynq")
 
     # try_measure_z_dynq
 
     @functools.cached_property
     def try_measure_z_dynq(self) -> OpDef:
-        """Fallible non-destructive measurement of a dynamic logical qubit in the Z
-        basis.
-        """
+        """Fallible non-destructive measurement of a dynamic logical qubit in
+        the Z basis."""
         return self().get_op("try_measure_z_dynq")
 
     # borrow
@@ -1904,9 +1771,8 @@ class IcebergOpsExtension:
     def borrow_def(self) -> OpDef:
         """Extraction of dynamic logical qubits from a block.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `borrow`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `borrow`."""
         return self().get_op("borrow")
 
     def borrow(self, k: int, m: int) -> ExtOp:
@@ -1914,8 +1780,7 @@ class IcebergOpsExtension:
 
         Args:
             k: The number of logical qubits encoded in the block.
-            m: The number of logical qubits to borrow.
-        """
+            m: The number of logical qubits to borrow."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
         return self.borrow_def.instantiate(
@@ -1932,9 +1797,8 @@ class IcebergOpsExtension:
     def borrow_more_def(self) -> OpDef:
         """Extraction of dynamic logical qubits from an already-borrowed block.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `borrow_more`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `borrow_more`."""
         return self().get_op("borrow_more")
 
     def borrow_more(self, k: int, m: int) -> ExtOp:
@@ -1942,8 +1806,7 @@ class IcebergOpsExtension:
 
         Args:
             k: The number of logical qubits encoded in the block.
-            m: The number of logical qubits to borrow.
-        """
+            m: The number of logical qubits to borrow."""
         bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
         return self.borrow_more_def.instantiate(
             args=[BoundedNatArg(m), BoundedNatArg(k)],
@@ -1957,20 +1820,20 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def restore_some_def(self) -> OpDef:
-        """Restoration of some dynamic logical qubits to their originating block.
+        """Restoration of some dynamic logical qubits to their originating
+        block.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `restore_some`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `restore_some`."""
         return self().get_op("restore_some")
 
     def restore_some(self, k: int, m: int) -> ExtOp:
-        """Restoration of some dynamic logical qubits to their originating block.
+        """Restoration of some dynamic logical qubits to their originating
+        block.
 
         Args:
             k: The number of logical qubits encoded in the block.
-            m: The number of logical qubits to restore.
-        """
+            m: The number of logical qubits to restore."""
         bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
         return self.restore_some_def.instantiate(
             args=[BoundedNatArg(m), BoundedNatArg(k)],
@@ -1984,20 +1847,20 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def restore_def(self) -> OpDef:
-        """Restoration of all dynamic logical qubits to their originating block.
+        """Restoration of all dynamic logical qubits to their originating
+        block.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `restore`.
-        """
+        This is the generic operation definition. For the instantiated
+        operation, see `restore`."""
         return self().get_op("restore")
 
     def restore(self, k: int, m: int) -> ExtOp:
-        """Restoration of all dynamic logical qubits to their originating block.
+        """Restoration of all dynamic logical qubits to their originating
+        block.
 
         Args:
             k: The number of logical qubits encoded in the block.
-            m: The number of logical qubits to restore.
-        """
+            m: The number of logical qubits to restore."""
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
         return self.restore_def.instantiate(

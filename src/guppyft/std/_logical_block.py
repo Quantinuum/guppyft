@@ -25,9 +25,8 @@ class LogicalBlock(Generic[BLOCK_SIZE]):  # type: ignore[misc]
     def put_into_array(
         self: "LogicalBlock[BLOCK_SIZE]" @ owned, arr: array[qubit, BLOCK_SIZE]
     ) -> None:
-        """Put the qubits of the logical block into the array (using `.put`) and discard
-        the block.
-        """
+        """Put the qubits of the logical block into the array (using `.put`)
+        and discard the block."""
         for i in range(BLOCK_SIZE):
             arr.put(self.data_qs.take(i), i)
         self.data_qs.discard_all_taken()
