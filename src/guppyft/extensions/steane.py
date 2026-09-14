@@ -13,7 +13,7 @@ class SteaneTypesExtension:
     """Extension providing the Steane logical types."""
 
     def __call__(self) -> Extension:
-        """Returns the Steane types extension"""
+        """Returns the Steane types extension."""
         return load_extension("guppyft.steane.types")
 
     @functools.cached_property
