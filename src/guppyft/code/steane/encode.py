@@ -3,7 +3,7 @@
 from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from enum import Enum, auto
-from typing import Any, Self, no_type_check
+from typing import Any, Literal, Self, no_type_check, overload
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -145,15 +145,27 @@ class SteaneInstance:
 
     _spec: EncodeSpec
 
-    def encode(self, pkg: Package) -> Package:
+    @overload
+    def encode(self, pkg: Package, *, as_bytes: Literal[False] = False) -> Package: ...
+    @overload
+    def encode(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    def encode(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
         """Encode a computational package with the Steane instance."""
         self.check_may_encode(pkg)
-        return encode(pkg, self._spec)
+        pkg_bytes: Package | bytes = encode(pkg, self._spec, as_bytes=as_bytes)  # type: ignore[call-overload]
+        return pkg_bytes
 
-    def implement_ops(self, pkg: Package) -> Package:
+    @overload
+    def implement_ops(
+        self, pkg: Package, *, as_bytes: Literal[False] = False
+    ) -> Package: ...
+    @overload
+    def implement_ops(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    def implement_ops(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
         """Implement logical ops in `pkg` using this instance's op implementations."""
         assert self._spec.implement_ops is not None
-        return self._spec.implement_ops(pkg)
+        pkg_bytes: Package | bytes = self._spec.implement_ops(pkg, as_bytes=as_bytes)  # type: ignore[call-overload]
+        return pkg_bytes
 
     def check_may_encode(self, hugr: Package) -> None:
         """Check whether any issues can be detected that would arise when trying to
@@ -178,13 +190,10 @@ class SteaneInstance:
             n_qubits: Number of physical qubits available to the emulator.
             builder: Optional `EmulatorBuilder` to use; defaults to a new one.
         """
-        encoded_pkg = self.encode(pkg)
+        encoded_pkg = self.encode(pkg, as_bytes=True)
         if builder is None:
             builder = EmulatorBuilder()
-
-        emulator = builder.build(encoded_pkg, n_qubits)
-
-        return emulator
+        return builder.build(encoded_pkg, n_qubits)  # type: ignore[arg-type]
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -68,12 +68,6 @@ jobs:
         with:
           files: wheelhouse/*guppyft*.whl
 
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v8.1.0
-        with:
-          enable-cache: true
-          python-version: "3.12"
-
       - name: Publish package distributions to PyPI
         # This workflow is a trusted publisher for the packages on PyPI.
         uses: pypa/gh-action-pypi-publish@release/v1

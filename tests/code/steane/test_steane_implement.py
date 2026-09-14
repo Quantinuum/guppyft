@@ -14,8 +14,8 @@ def test_qalloc_measure() -> None:
         result("res", measure_z(q).decode())
 
     pkg = main.compile()
-    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg)
-    res = EmulatorBuilder().build(phys_pkg, n_qubits=8).run().collated_shots()
+    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg, as_bytes=True)
+    res = EmulatorBuilder().build(phys_pkg, n_qubits=8).run().collated_shots()  # type: ignore[arg-type]
 
     assert res == [{"res": [0]}]
 
@@ -29,8 +29,8 @@ def test_x() -> None:
         result("res", measure_z(q).decode())
 
     pkg = main.compile()
-    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg)
-    res = EmulatorBuilder().build(phys_pkg, n_qubits=8).run().collated_shots()
+    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg, as_bytes=True)
+    res = EmulatorBuilder().build(phys_pkg, n_qubits=8).run().collated_shots()  # type: ignore[arg-type]
 
     assert res == [{"res": [1]}]
 
@@ -46,8 +46,8 @@ def test_h_z() -> None:
         result("res", measure_z(q).decode())
 
     pkg = main.compile()
-    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg)
-    res = EmulatorBuilder().build(phys_pkg, n_qubits=8).run().collated_shots()
+    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg, as_bytes=True)
+    res = EmulatorBuilder().build(phys_pkg, n_qubits=8).run().collated_shots()  # type: ignore[arg-type]
 
     assert res == [{"res": [1]}]
 
@@ -63,8 +63,8 @@ def test_cx() -> None:
         result("q1", measure_z(q1).decode())
 
     pkg = main.compile()
-    phys_pkg = SteaneBuilder().build(n_blocks=2).implement_ops(pkg)
-    res = EmulatorBuilder().build(phys_pkg, n_qubits=18).run().collated_shots()
+    phys_pkg = SteaneBuilder().build(n_blocks=2).implement_ops(pkg, as_bytes=True)
+    res = EmulatorBuilder().build(phys_pkg, n_qubits=18).run().collated_shots()  # type: ignore[arg-type]
 
     assert res == [{"q0": [1], "q1": [1]}]
 
@@ -77,7 +77,8 @@ def test_qec_cycle() -> None:
         q.qec_cycle()
         result("q", q.measure_z().decode())
 
-    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(main.compile())
-    res = EmulatorBuilder().build(phys_pkg, n_qubits=10).run().collated_shots()
+    pkg = main.compile()
+    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg, as_bytes=True)
+    res = EmulatorBuilder().build(phys_pkg, n_qubits=10).run().collated_shots()  # type: ignore[arg-type]
 
     assert res == [{"q": [0]}]
