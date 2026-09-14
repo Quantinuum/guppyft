@@ -331,7 +331,7 @@ class SteaneBuilder:
 
                 return state, q
 
-            return (q,)
+            return map_global(_impl, q)
 
         # TODO Defining the primitives to use the global state requires
         # a lot of "boilerplate" code. We should provide helper methods
