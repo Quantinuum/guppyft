@@ -105,7 +105,8 @@ class IcebergOpsExtension:
         """Apply an X gate to one qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `x`."""
+        `x`.
+        """
         return self().get_op("x")
 
     def x(self, k: int, i: int) -> ExtOp:
@@ -126,7 +127,8 @@ class IcebergOpsExtension:
         """Apply an X gate to one qubit with dynamic index.
 
         This is the generic operation definition. For the instantiated operation, see
-        `x_d`."""
+        `x_d`.
+        """
         return self().get_op("x_d")
 
     def x_d(self, k: int) -> ExtOp:
@@ -148,7 +150,8 @@ class IcebergOpsExtension:
         """Apply a Y gate to one qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `y`."""
+        `y`.
+        """
         return self().get_op("y")
 
     def y(self, k: int, i: int) -> ExtOp:
@@ -169,7 +172,8 @@ class IcebergOpsExtension:
         """Apply a Y gate to one qubit with dynamic index.
 
         This is the generic operation definition. For the instantiated operation, see
-        `y_d`."""
+        `y_d`.
+        """
         return self().get_op("y_d")
 
     def y_d(self, k: int) -> ExtOp:
@@ -191,7 +195,8 @@ class IcebergOpsExtension:
         """Apply a Z gate to one qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `z`."""
+        `z`.
+        """
         return self().get_op("z")
 
     def z(self, k: int, i: int) -> ExtOp:
@@ -212,7 +217,8 @@ class IcebergOpsExtension:
         """Apply a Z gate to one qubit with dynamic index.
 
         This is the generic operation definition. For the instantiated operation, see
-        `z_d`."""
+        `z_d`.
+        """
         return self().get_op("z_d")
 
     def z_d(self, k: int) -> ExtOp:
@@ -234,7 +240,8 @@ class IcebergOpsExtension:
         """Apply an X gate to two qubits.
 
         This is the generic operation definition. For the instantiated operation, see
-        `xx`."""
+        `xx`.
+        """
         return self().get_op("xx")
 
     def xx(self, k: int, i: int, j: int) -> ExtOp:
@@ -256,7 +263,8 @@ class IcebergOpsExtension:
         """Apply an X gate to two qubits with dynamic indices.
 
         This is the generic operation definition. For the instantiated operation, see
-        `xx_d`."""
+        `xx_d`.
+        """
         return self().get_op("xx_d")
 
     def xx_d(self, k: int) -> ExtOp:
@@ -278,7 +286,8 @@ class IcebergOpsExtension:
         """Apply a Y gate to two qubits.
 
         This is the generic operation definition. For the instantiated operation, see
-        `yy`."""
+        `yy`.
+        """
         return self().get_op("yy")
 
     def yy(self, k: int, i: int, j: int) -> ExtOp:
@@ -300,7 +309,8 @@ class IcebergOpsExtension:
         """Apply a Y gate to two qubits with dynamic indices.
 
         This is the generic operation definition. For the instantiated operation, see
-        `yy_d`."""
+        `yy_d`.
+        """
         return self().get_op("yy_d")
 
     def yy_d(self, k: int) -> ExtOp:
@@ -322,7 +332,8 @@ class IcebergOpsExtension:
         """Apply a Z gate to two qubits.
 
         This is the generic operation definition. For the instantiated operation, see
-        `zz`."""
+        `zz`.
+        """
         return self().get_op("zz")
 
     def zz(self, k: int, i: int, j: int) -> ExtOp:
@@ -344,7 +355,8 @@ class IcebergOpsExtension:
         """Apply a Z gate to two qubits with dynamic indices.
 
         This is the generic operation definition. For the instantiated operation, see
-        `zz_d`."""
+        `zz_d`.
+        """
         return self().get_op("zz_d")
 
     def zz_d(self, k: int) -> ExtOp:
@@ -366,7 +378,8 @@ class IcebergOpsExtension:
         """Apply an X gate to all but one qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `all_but_one_x`."""
+        `all_but_one_x`.
+        """
         return self().get_op("all_but_one_x")
 
     def all_but_one_x(self, k: int, i: int) -> ExtOp:
@@ -387,7 +400,8 @@ class IcebergOpsExtension:
         """Apply an X gate to all but one qubit with dynamic index.
 
         This is the generic operation definition. For the instantiated operation, see
-        `all_but_one_x_d`."""
+        `all_but_one_x_d`.
+        """
         return self().get_op("all_but_one_x_d")
 
     def all_but_one_x_d(self, k: int) -> ExtOp:
@@ -409,7 +423,8 @@ class IcebergOpsExtension:
         """Apply a Z gate to all but one qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `all_but_one_z`."""
+        `all_but_one_z`.
+        """
         return self().get_op("all_but_one_z")
 
     def all_but_one_z(self, k: int, i: int) -> ExtOp:
@@ -430,7 +445,8 @@ class IcebergOpsExtension:
         """Apply a Z gate to all but one qubit with dynamic index.
 
         This is the generic operation definition. For the instantiated operation, see
-        `all_but_one_z_d`."""
+        `all_but_one_z_d`.
+        """
         return self().get_op("all_but_one_z_d")
 
     def all_but_one_z_d(self, k: int) -> ExtOp:
@@ -452,7 +468,8 @@ class IcebergOpsExtension:
         """Apply an X gate to all qubits.
 
         This is the generic operation definition. For the instantiated operation, see
-        `all_x`."""
+        `all_x`.
+        """
         return self().get_op("all_x")
 
     def all_x(self, k: int) -> ExtOp:
@@ -474,7 +491,8 @@ class IcebergOpsExtension:
         """Apply a Y gate to all qubits.
 
         This is the generic operation definition. For the instantiated operation, see
-        `all_y`."""
+        `all_y`.
+        """
         return self().get_op("all_y")
 
     def all_y(self, k: int) -> ExtOp:
@@ -496,7 +514,8 @@ class IcebergOpsExtension:
         """Apply a Z gate to all qubits.
 
         This is the generic operation definition. For the instantiated operation, see
-        `all_z`."""
+        `all_z`.
+        """
         return self().get_op("all_z")
 
     def all_z(self, k: int) -> ExtOp:
@@ -518,7 +537,8 @@ class IcebergOpsExtension:
         """Apply an X gate to one qubit and a Z to the rest.
 
         This is the generic operation definition. For the instantiated operation, see
-        `x_with_all_but_one_z`."""
+        `x_with_all_but_one_z`.
+        """
         return self().get_op("x_with_all_but_one_z")
 
     def x_with_all_but_one_z(self, k: int, i: int) -> ExtOp:
@@ -539,7 +559,8 @@ class IcebergOpsExtension:
         """Apply an X gate to one qubit and a Z to the rest with dynamic index.
 
         This is the generic operation definition. For the instantiated operation, see
-        `x_with_all_but_one_z_d`."""
+        `x_with_all_but_one_z_d`.
+        """
         return self().get_op("x_with_all_but_one_z_d")
 
     def x_with_all_but_one_z_d(self, k: int) -> ExtOp:
@@ -561,7 +582,8 @@ class IcebergOpsExtension:
         """Apply a Z gate to one qubit and an X to the rest.
 
         This is the generic operation definition. For the instantiated operation, see
-        `z_with_all_but_one_x`."""
+        `z_with_all_but_one_x`.
+        """
         return self().get_op("z_with_all_but_one_x")
 
     def z_with_all_but_one_x(self, k: int, i: int) -> ExtOp:
@@ -582,7 +604,8 @@ class IcebergOpsExtension:
         """Apply a Z gate to one qubit and an X to the rest with dynamic index.
 
         This is the generic operation definition. For the instantiated operation, see
-        `z_with_all_but_one_x_d`."""
+        `z_with_all_but_one_x_d`.
+        """
         return self().get_op("z_with_all_but_one_x_d")
 
     def z_with_all_but_one_x_d(self, k: int) -> ExtOp:
@@ -604,7 +627,8 @@ class IcebergOpsExtension:
         """Fan out from one qubit to the rest.
 
         This is the generic operation definition. For the instantiated operation, see
-        `fan_out`."""
+        `fan_out`.
+        """
         return self().get_op("fan_out")
 
     def fan_out(self, k: int, i: int) -> ExtOp:
@@ -625,7 +649,8 @@ class IcebergOpsExtension:
         """Fan out from one qubit to the rest with dynamic index.
 
         This is the generic operation definition. For the instantiated operation, see
-        `fan_out_d`."""
+        `fan_out_d`.
+        """
         return self().get_op("fan_out_d")
 
     def fan_out_d(self, k: int) -> ExtOp:
@@ -647,7 +672,8 @@ class IcebergOpsExtension:
         """Fan in to one qubit from the rest.
 
         This is the generic operation definition. For the instantiated operation, see
-        `fan_in`."""
+        `fan_in`.
+        """
         return self().get_op("fan_in")
 
     def fan_in(self, k: int, i: int) -> ExtOp:
@@ -668,7 +694,8 @@ class IcebergOpsExtension:
         """Fan in to one qubit from the rest with dynamic index.
 
         This is the generic operation definition. For the instantiated operation, see
-        `fan_in_d`."""
+        `fan_in_d`.
+        """
         return self().get_op("fan_in_d")
 
     def fan_in_d(self, k: int) -> ExtOp:
@@ -690,7 +717,8 @@ class IcebergOpsExtension:
         """Apply an Rx gate to one qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `rx`."""
+        `rx`.
+        """
         return self().get_op("rx")
 
     def rx(self, k: int, i: int) -> ExtOp:
@@ -711,7 +739,8 @@ class IcebergOpsExtension:
         """Apply an Rx gate to one qubit with dynamic index.
 
         This is the generic operation definition. For the instantiated operation, see
-        `rx_d`."""
+        `rx_d`.
+        """
         return self().get_op("rx_d")
 
     def rx_d(self, k: int) -> ExtOp:
@@ -735,7 +764,8 @@ class IcebergOpsExtension:
         """Apply an Ry gate to one qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `ry`."""
+        `ry`.
+        """
         return self().get_op("ry")
 
     def ry(self, k: int, i: int) -> ExtOp:
@@ -756,7 +786,8 @@ class IcebergOpsExtension:
         """Apply an Ry gate to one qubit with dynamic index.
 
         This is the generic operation definition. For the instantiated operation, see
-        `ry_d`."""
+        `ry_d`.
+        """
         return self().get_op("ry_d")
 
     def ry_d(self, k: int) -> ExtOp:
@@ -780,7 +811,8 @@ class IcebergOpsExtension:
         """Apply an Rz gate to one qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `rz`."""
+        `rz`.
+        """
         return self().get_op("rz")
 
     def rz(self, k: int, i: int) -> ExtOp:
@@ -801,7 +833,8 @@ class IcebergOpsExtension:
         """Apply an Rz gate to one qubit with dynamic index.
 
         This is the generic operation definition. For the instantiated operation, see
-        `rz_d`."""
+        `rz_d`.
+        """
         return self().get_op("rz_d")
 
     def rz_d(self, k: int) -> ExtOp:
@@ -825,7 +858,8 @@ class IcebergOpsExtension:
         """Apply an Rx gate to all qubits.
 
         This is the generic operation definition. For the instantiated operation, see
-        `all_rx`."""
+        `all_rx`.
+        """
         return self().get_op("all_rx")
 
     def all_rx(self, k: int) -> ExtOp:
@@ -847,7 +881,8 @@ class IcebergOpsExtension:
         """Apply an Ry gate to all qubits.
 
         This is the generic operation definition. For the instantiated operation, see
-        `all_ry`."""
+        `all_ry`.
+        """
         return self().get_op("all_ry")
 
     def all_ry(self, k: int) -> ExtOp:
@@ -869,7 +904,8 @@ class IcebergOpsExtension:
         """Apply an Rz gate to all qubits.
 
         This is the generic operation definition. For the instantiated operation, see
-        `all_rz`."""
+        `all_rz`.
+        """
         return self().get_op("all_rz")
 
     def all_rz(self, k: int) -> ExtOp:
@@ -891,7 +927,8 @@ class IcebergOpsExtension:
         """Apply an Rx gate to all but one qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `all_but_one_rx`."""
+        `all_but_one_rx`.
+        """
         return self().get_op("all_but_one_rx")
 
     def all_but_one_rx(self, k: int, i: int) -> ExtOp:
@@ -912,7 +949,8 @@ class IcebergOpsExtension:
         """Apply an Rx gate to all but one qubit with dynamic index.
 
         This is the generic operation definition. For the instantiated operation, see
-        `all_but_one_rx_d`."""
+        `all_but_one_rx_d`.
+        """
         return self().get_op("all_but_one_rx_d")
 
     def all_but_one_rx_d(self, k: int) -> ExtOp:
@@ -936,7 +974,8 @@ class IcebergOpsExtension:
         """Apply an Rz gate to all but one qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `all_but_one_rz`."""
+        `all_but_one_rz`.
+        """
         return self().get_op("all_but_one_rz")
 
     def all_but_one_rz(self, k: int, i: int) -> ExtOp:
@@ -957,7 +996,8 @@ class IcebergOpsExtension:
         """Apply an Rz gate to all but one qubit with dynamic index.
 
         This is the generic operation definition. For the instantiated operation, see
-        `all_but_one_rz_d`."""
+        `all_but_one_rz_d`.
+        """
         return self().get_op("all_but_one_rz_d")
 
     def all_but_one_rz_d(self, k: int) -> ExtOp:
@@ -981,7 +1021,8 @@ class IcebergOpsExtension:
         """Apply an H gate to all qubits.
 
         This is the generic operation definition. For the instantiated operation, see
-        `all_h`."""
+        `all_h`.
+        """
         return self().get_op("all_h")
 
     def all_h(self, k: int) -> ExtOp:
@@ -1003,7 +1044,8 @@ class IcebergOpsExtension:
         """Apply an XXPhase gate to two qubits within a block.
 
         This is the generic operation definition. For the instantiated operation, see
-        `xx_phase`."""
+        `xx_phase`.
+        """
         return self().get_op("xx_phase")
 
     def xx_phase(self, k: int, i: int, j: int) -> ExtOp:
@@ -1025,7 +1067,8 @@ class IcebergOpsExtension:
         """Apply an XXPhase gate to two qubits within a block with dynamic indices.
 
         This is the generic operation definition. For the instantiated operation, see
-        `xx_phase_d`."""
+        `xx_phase_d`.
+        """
         return self().get_op("xx_phase_d")
 
     def xx_phase_d(self, k: int) -> ExtOp:
@@ -1049,7 +1092,8 @@ class IcebergOpsExtension:
         """Apply a YYPhase gate to two qubits within a block.
 
         This is the generic operation definition. For the instantiated operation, see
-        `yy_phase`."""
+        `yy_phase`.
+        """
         return self().get_op("yy_phase")
 
     def yy_phase(self, k: int, i: int, j: int) -> ExtOp:
@@ -1071,7 +1115,8 @@ class IcebergOpsExtension:
         """Apply a YYPhase gate to two qubits within a block with dynamic indices.
 
         This is the generic operation definition. For the instantiated operation, see
-        `yy_phase_d`."""
+        `yy_phase_d`.
+        """
         return self().get_op("yy_phase_d")
 
     def yy_phase_d(self, k: int) -> ExtOp:
@@ -1095,7 +1140,8 @@ class IcebergOpsExtension:
         """Apply a ZZPhase gate to two qubits within a block.
 
         This is the generic operation definition. For the instantiated operation, see
-        `zz_phase`."""
+        `zz_phase`.
+        """
         return self().get_op("zz_phase")
 
     def zz_phase(self, k: int, i: int, j: int) -> ExtOp:
@@ -1117,7 +1163,8 @@ class IcebergOpsExtension:
         """Apply a ZZPhase gate to two qubits within a block with dynamic indices.
 
         This is the generic operation definition. For the instantiated operation, see
-        `zz_phase_d`."""
+        `zz_phase_d`.
+        """
         return self().get_op("zz_phase_d")
 
     def zz_phase_d(self, k: int) -> ExtOp:
@@ -1141,7 +1188,8 @@ class IcebergOpsExtension:
         """Apply a CX gate to two qubits within a block.
 
         This is the generic operation definition. For the instantiated operation, see
-        `cx`."""
+        `cx`.
+        """
         return self().get_op("cx")
 
     def cx(self, k: int, i: int, j: int) -> ExtOp:
@@ -1163,7 +1211,8 @@ class IcebergOpsExtension:
         """Apply a CX gate to two qubits within a block with dynamic indices.
 
         This is the generic operation definition. For the instantiated operation, see
-        `cx_d`."""
+        `cx_d`.
+        """
         return self().get_op("cx_d")
 
     def cx_d(self, k: int) -> ExtOp:
@@ -1185,7 +1234,8 @@ class IcebergOpsExtension:
         """Apply a SWAP gate to two qubits within a block.
 
         This is the generic operation definition. For the instantiated operation, see
-        `swap`."""
+        `swap`.
+        """
         return self().get_op("swap")
 
     def swap(self, k: int, i: int, j: int) -> ExtOp:
@@ -1207,7 +1257,8 @@ class IcebergOpsExtension:
         """Apply a SWAP gate to two qubits within a block with dynamic indices.
 
         This is the generic operation definition. For the instantiated operation, see
-        `swap_d`."""
+        `swap_d`.
+        """
         return self().get_op("swap_d")
 
     def swap_d(self, k: int) -> ExtOp:
@@ -1229,7 +1280,8 @@ class IcebergOpsExtension:
         """Apply an XXPhase gate to two qubits on different blocks of the same size.
 
         This is the generic operation definition. For the instantiated operation, see
-        `xx_phase_between_blocks`."""
+        `xx_phase_between_blocks`.
+        """
         return self().get_op("xx_phase_between_blocks")
 
     def xx_phase_between_blocks(self, k: int, i: int, j: int) -> ExtOp:
@@ -1254,7 +1306,8 @@ class IcebergOpsExtension:
         dynamic indices.
 
         This is the generic operation definition. For the instantiated operation, see
-        `xx_phase_between_blocks_d`."""
+        `xx_phase_between_blocks_d`.
+        """
         return self().get_op("xx_phase_between_blocks_d")
 
     def xx_phase_between_blocks_d(self, k: int) -> ExtOp:
@@ -1280,7 +1333,8 @@ class IcebergOpsExtension:
         """Apply a YYPhase gate to two qubits on different blocks of the same size.
 
         This is the generic operation definition. For the instantiated operation, see
-        `yy_phase_between_blocks`."""
+        `yy_phase_between_blocks`.
+        """
         return self().get_op("yy_phase_between_blocks")
 
     def yy_phase_between_blocks(self, k: int, i: int, j: int) -> ExtOp:
@@ -1305,7 +1359,8 @@ class IcebergOpsExtension:
         dynamic indices.
 
         This is the generic operation definition. For the instantiated operation, see
-        `yy_phase_between_blocks_d`."""
+        `yy_phase_between_blocks_d`.
+        """
         return self().get_op("yy_phase_between_blocks_d")
 
     def yy_phase_between_blocks_d(self, k: int) -> ExtOp:
@@ -1331,7 +1386,8 @@ class IcebergOpsExtension:
         """Apply a ZZPhase gate to two qubits on different blocks of the same size.
 
         This is the generic operation definition. For the instantiated operation, see
-        `zz_phase_between_blocks`."""
+        `zz_phase_between_blocks`.
+        """
         return self().get_op("zz_phase_between_blocks")
 
     def zz_phase_between_blocks(self, k: int, i: int, j: int) -> ExtOp:
@@ -1356,7 +1412,8 @@ class IcebergOpsExtension:
         dynamic indices.
 
         This is the generic operation definition. For the instantiated operation, see
-        `zz_phase_between_blocks_d`."""
+        `zz_phase_between_blocks_d`.
+        """
         return self().get_op("zz_phase_between_blocks_d")
 
     def zz_phase_between_blocks_d(self, k: int) -> ExtOp:
@@ -1382,7 +1439,8 @@ class IcebergOpsExtension:
         """Apply a CX gate to two qubits on different blocks of the same size.
 
         This is the generic operation definition. For the instantiated operation, see
-        `cx_between_blocks`."""
+        `cx_between_blocks`.
+        """
         return self().get_op("cx_between_blocks")
 
     def cx_between_blocks(self, k: int, i: int, j: int) -> ExtOp:
@@ -1407,7 +1465,8 @@ class IcebergOpsExtension:
         dynamic indices.
 
         This is the generic operation definition. For the instantiated operation, see
-        `cx_between_blocks_d`."""
+        `cx_between_blocks_d`.
+        """
         return self().get_op("cx_between_blocks_d")
 
     def cx_between_blocks_d(self, k: int) -> ExtOp:
@@ -1432,7 +1491,8 @@ class IcebergOpsExtension:
         """Apply a CX gate transversally over two blocks of the same size.
 
         This is the generic operation definition. For the instantiated operation, see
-        `cx_transversal`."""
+        `cx_transversal`.
+        """
         return self().get_op("cx_transversal")
 
     def cx_transversal(self, k: int) -> ExtOp:
@@ -1456,7 +1516,8 @@ class IcebergOpsExtension:
         """Allocate a block in the all-zero state.
 
         This is the generic operation definition. For the instantiated operation, see
-        `alloc_zero`."""
+        `alloc_zero`.
+        """
         return self().get_op("alloc_zero")
 
     def alloc_zero(self, k: int) -> ExtOp:
@@ -1477,7 +1538,8 @@ class IcebergOpsExtension:
         """Allocate a `PreBlock` in the all-zero state.
 
         This is the generic operation definition. For the instantiated operation, see
-        `alloc_zero`."""
+        `alloc_zero`.
+        """
         return self().get_op("try_alloc_zero")
 
     def try_alloc_zero(self, k: int) -> ExtOp:
@@ -1499,7 +1561,8 @@ class IcebergOpsExtension:
         """Check if a `PreBlock` is in a valid logical state.
 
         This is the generic operation definition. For the instantiated operation, see
-        `check`."""
+        `check`.
+        """
         return self().get_op("check_pre_block")
 
     def check_pre_block(self, k: int) -> ExtOp:
@@ -1522,7 +1585,8 @@ class IcebergOpsExtension:
         """Free a block.
 
         This is the generic operation definition. For the instantiated operation, see
-        `free`."""
+        `free`.
+        """
         return self().get_op("free")
 
     def free(self, k: int) -> ExtOp:
@@ -1543,7 +1607,8 @@ class IcebergOpsExtension:
         """Perform a syndrome measurement, producing (X,Z) error indicators.
 
         This is the generic operation definition. For the instantiated operation, see
-        `measure_syndrome`."""
+        `measure_syndrome`.
+        """
         return self().get_op("measure_syndrome")
 
     def measure_syndrome(self, k: int) -> ExtOp:
@@ -1567,7 +1632,8 @@ class IcebergOpsExtension:
         """Destructively measure all qubits in the Z basis.
 
         This is the generic operation definition. For the instantiated operation, see
-        `measure_all`."""
+        `measure_all`.
+        """
         return self().get_op("measure_all")
 
     def measure_all(self, k: int) -> ExtOp:
@@ -1597,7 +1663,8 @@ class IcebergOpsExtension:
         the data qubits.
 
         This is the generic operation definition. For the instantiated operation, see
-        `try_measure_one_x`."""
+        `try_measure_one_x`.
+        """
         return self().get_op("try_measure_one_x")
 
     def try_measure_one_x(self, k: int, i: int) -> ExtOp:
@@ -1630,7 +1697,8 @@ class IcebergOpsExtension:
         the data qubits.
 
         This is the generic operation definition. For the instantiated operation, see
-        `try_measure_one_x_d`."""
+        `try_measure_one_x_d`.
+        """
         return self().get_op("try_measure_one_x_d")
 
     def try_measure_one_x_d(self, k: int) -> ExtOp:
@@ -1664,7 +1732,8 @@ class IcebergOpsExtension:
         the data qubits.
 
         This is the generic operation definition. For the instantiated operation, see
-        `try_measure_one_z`."""
+        `try_measure_one_z`.
+        """
         return self().get_op("try_measure_one_z")
 
     def try_measure_one_z(self, k: int, i: int) -> ExtOp:
@@ -1697,7 +1766,8 @@ class IcebergOpsExtension:
         the data qubits.
 
         This is the generic operation definition. For the instantiated operation, see
-        `try_measure_one_z_d`."""
+        `try_measure_one_z_d`.
+        """
         return self().get_op("try_measure_one_z_d")
 
     def try_measure_one_z_d(self, k: int) -> ExtOp:
@@ -1815,7 +1885,8 @@ class IcebergOpsExtension:
     @functools.cached_property
     def try_measure_x_dynq(self) -> OpDef:
         """Fallible non-destructive measurement of a dynamic logical qubit in the X
-        basis."""
+        basis.
+        """
         return self().get_op("try_measure_x_dynq")
 
     # try_measure_z_dynq
@@ -1823,7 +1894,8 @@ class IcebergOpsExtension:
     @functools.cached_property
     def try_measure_z_dynq(self) -> OpDef:
         """Fallible non-destructive measurement of a dynamic logical qubit in the Z
-        basis."""
+        basis.
+        """
         return self().get_op("try_measure_z_dynq")
 
     # borrow
@@ -1833,7 +1905,8 @@ class IcebergOpsExtension:
         """Extraction of dynamic logical qubits from a block.
 
         This is the generic operation definition. For the instantiated operation, see
-        `borrow`."""
+        `borrow`.
+        """
         return self().get_op("borrow")
 
     def borrow(self, k: int, m: int) -> ExtOp:
@@ -1860,7 +1933,8 @@ class IcebergOpsExtension:
         """Extraction of dynamic logical qubits from an already-borrowed block.
 
         This is the generic operation definition. For the instantiated operation, see
-        `borrow_more`."""
+        `borrow_more`.
+        """
         return self().get_op("borrow_more")
 
     def borrow_more(self, k: int, m: int) -> ExtOp:
@@ -1886,7 +1960,8 @@ class IcebergOpsExtension:
         """Restoration of some dynamic logical qubits to their originating block.
 
         This is the generic operation definition. For the instantiated operation, see
-        `restore_some`."""
+        `restore_some`.
+        """
         return self().get_op("restore_some")
 
     def restore_some(self, k: int, m: int) -> ExtOp:
@@ -1912,7 +1987,8 @@ class IcebergOpsExtension:
         """Restoration of all dynamic logical qubits to their originating block.
 
         This is the generic operation definition. For the instantiated operation, see
-        `restore`."""
+        `restore`.
+        """
         return self().get_op("restore")
 
     def restore(self, k: int, m: int) -> ExtOp:

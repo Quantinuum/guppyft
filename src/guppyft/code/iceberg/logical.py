@@ -1,3 +1,5 @@
+"""Guppy functions and types for the Iceberg QEC architecture."""
+
 from collections.abc import Callable, Sequence
 from typing import Generic, no_type_check
 
@@ -51,9 +53,12 @@ M = guppy.nat_var("M")
 
 @_custom_block_type(iceberg_types.iceberg_block_def)
 class Block(Generic[N]):  # type: ignore[misc]
+    """An Iceberg code block containing `N` logical qubits."""
+
     @hugr_op(_iceberg_op("alloc_zero"))
     @no_type_check
-    def __new__() -> "Block[N]": ...
+    def __new__() -> "Block[N]":
+        """Allocate a block in the logical zero state."""
 
     @guppy
     @no_type_check
@@ -203,21 +208,24 @@ class Block(Generic[N]):  # type: ignore[misc]
     @no_type_check
     def xx_phase(self: "Block[N]", i: int, j: int, phase: float) -> None:
         """XXPhase rotation of `phase` radians on the qubits with indices `i`
-        and `j`."""
+        and `j`.
+        """
         xx_phase(self, i, j, phase)
 
     @guppy
     @no_type_check
     def yy_phase(self: "Block[N]", i: int, j: int, phase: float) -> None:
         """YYPhase rotation of `phase` radians on the qubits with indices `i`
-        and `j`."""
+        and `j`.
+        """
         yy_phase(self, i, j, phase)
 
     @guppy
     @no_type_check
     def zz_phase(self: "Block[N]", i: int, j: int, phase: float) -> None:
         """ZZPhase rotation of `phase` radians on the qubits with indices `i`
-        and `j`."""
+        and `j`.
+        """
         zz_phase(self, i, j, phase)
 
     @guppy
@@ -242,22 +250,27 @@ class Block(Generic[N]):  # type: ignore[misc]
     @no_type_check
     def try_measure_one_x(self: "Block[N]", i: int) -> Option[Measurement]:
         """Fallible non-destructive measurement in the X basis of the qubit
-        with index `i`."""
+        with index `i`.
+        """
         return try_measure_one_x(self, i)
 
     @guppy
     @no_type_check
     def try_measure_one_z(self: "Block[N]", i: int) -> Option[Measurement]:
         """Fallible non-destructive measurement in the Z basis of the qubit
-        with index `i`."""
+        with index `i`.
+        """
         return try_measure_one_z(self, i)
 
 
 @custom_type(iceberg_types.iceberg_qubit(), copyable=False, droppable=False)
 class Qubit:
+    """A dynamic logical qubit from an Iceberg code block."""
+
     @hugr_op(_iceberg_op("alloc_dynq"))
     @no_type_check
-    def __new__() -> "Qubit": ...
+    def __new__() -> "Qubit":
+        """Allocate a dynamic logical qubit."""
 
     @guppy
     @no_type_check
@@ -310,6 +323,8 @@ class Qubit:
 
 @_custom_block_type(iceberg_types.iceberg_borrowed_block_def)
 class BorrowedBlock(Generic[N]):  # type: ignore[misc]
+    """A borrowed Iceberg code block."""
+
     @guppy
     @no_type_check
     def borrow_more(
@@ -327,13 +342,17 @@ class BorrowedBlock(Generic[N]):  # type: ignore[misc]
 
 @_custom_block_type(iceberg_types.iceberg_pre_block_def)
 class PreBlock(Generic[N]):  # type: ignore[misc]
+    """A candidate Iceberg code block whose preparation may have failed."""
+
     @hugr_op(_iceberg_op("try_alloc_zero"))
     @no_type_check
-    def __new__() -> "PreBlock[N]": ...
+    def __new__() -> "PreBlock[N]":
+        """Attempt to allocate a block in the logical zero state."""
 
     @hugr_op(_iceberg_op("check_pre_block"))
     @no_type_check
-    def check(self: "PreBlock[N]" @ owned) -> Option[Block[N]]: ...
+    def check(self: "PreBlock[N]" @ owned) -> Option[Block[N]]:
+        """Return the block when its preparation succeeded."""
 
 
 @hugr_op(_iceberg_op("x_d"))
@@ -516,7 +535,8 @@ def xx_phase_between_blocks(
     block0: Block[N], block1: Block[N], i0: int, i1: int, phase: float
 ) -> None:
     """XXPhase rotation of `phase` radians on the qubit with index `i0` in
-    block `block0` and the qubit with index `i1` in block `block1`."""
+    block `block0` and the qubit with index `i1` in block `block1`.
+    """
 
 
 @hugr_op(_iceberg_op("yy_phase_between_blocks_d"))
@@ -525,7 +545,8 @@ def yy_phase_between_blocks(
     block0: Block[N], block1: Block[N], i0: int, i1: int, phase: float
 ) -> None:
     """YYPhase rotation of `phase` radians on the qubit with index `i0` in
-    block `block0` and the qubit with index `i1` in block `block1`."""
+    block `block0` and the qubit with index `i1` in block `block1`.
+    """
 
 
 @hugr_op(_iceberg_op("zz_phase_between_blocks_d"))
@@ -534,14 +555,16 @@ def zz_phase_between_blocks(
     block0: Block[N], block1: Block[N], i0: int, i1: int, phase: float
 ) -> None:
     """ZZPhase rotation of `phase` radians on the qubit with index `i0` in
-    block `block0` and the qubit with index `i1` in block `block1`."""
+    block `block0` and the qubit with index `i1` in block `block1`.
+    """
 
 
 @hugr_op(_iceberg_op("cx_between_blocks_d"))
 @no_type_check
 def cx_between_blocks(block0: Block[N], block1: Block[N], i0: int, i1: int) -> None:
     """CX gate on the qubit with index `i0` in block `block0` and the qubit with
-    index `i1` in block `block1`."""
+    index `i1` in block `block1`.
+    """
 
 
 @hugr_op(_iceberg_op("cx_transversal"))
@@ -572,14 +595,16 @@ def measure_all(block: Block[N] @ owned) -> LogicalMeasurement[N]:
 @no_type_check
 def try_measure_one_x(block: Block[N], i: int) -> Option[Measurement]:
     """Fallible non-destructive measurement in the X basis of the qubit with
-    index `i`."""
+    index `i`.
+    """
 
 
 @hugr_op(_iceberg_op("try_measure_one_z_d"))
 @no_type_check
 def try_measure_one_z(block: Block[N], i: int) -> Option[Measurement]:
     """Fallible non-destructive measurement in the Z basis of the qubit with
-    index `i`."""
+    index `i`.
+    """
 
 
 @hugr_op(_iceberg_op("try_alloc_dynq"))

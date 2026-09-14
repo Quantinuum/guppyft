@@ -48,11 +48,14 @@ def _compute_stabilizers_single_block_state(
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation.
 
-    :param state_prep_func: A Guppy function which prepares the stabilizer state
-        on a single code block.
-    :param num_selene_qubits: An upper bound for the number of qubits
-          used in state_prep_func.
-    :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
+    Args:
+        state_prep_func: A Guppy function that prepares the stabilizer state on a single
+            code block.
+        num_selene_qubits: An upper bound for the number of qubits used in
+            `state_prep_func`.
+
+    Returns:
+        A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
     """
 
     @guppy
@@ -75,11 +78,14 @@ def _compute_stabilizers_double_block_state(
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation.
 
-    :param state_prep_func: A Guppy function which prepares the stabilizer state
-        on two code blocks.
-    :param num_selene_qubits: An upper bound for the number of qubits
-          used in state_prep_func.
-    :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
+    Args:
+        state_prep_func: A Guppy function that prepares the stabilizer state on two code
+            blocks.
+        num_selene_qubits: An upper bound for the number of qubits used in
+            `state_prep_func`.
+
+    Returns:
+        A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
     """
 
     @guppy
@@ -114,14 +120,16 @@ def _compute_stabilizers_single_block_unitary(
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation.
 
-    :param code: The stabilizer code.
-    :param clifford_func: A Guppy function which implements a Clifford unitary
-        on a single code block.
-    :param num_selene_qubits: An upper bound for the number of qubits
-      used in the Choi state for clifford_func.
-    :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
-    """
+    Args:
+        code: The stabilizer code.
+        clifford_func: A Guppy function that implements a Clifford unitary on a single
+            code block.
+        num_selene_qubits: An upper bound for the number of qubits used in the Choi
+            state for `clifford_func`.
 
+    Returns:
+        A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
+    """
     choi_prep = gen_choi_state(code, clifford_func, 1)
     n = code.num_physical_qubits
 
@@ -161,14 +169,16 @@ def _compute_stabilizers_double_block_unitary(
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford (two code blocks).
 
-    :param code: The stabilizer code.
-    :param clifford_func: A Guppy function which implements a Clifford unitary
-      across two code blocks.
-    :param num_selene_qubits: An upper bound for the number of qubits
-      used in the Choi state for clifford_func.
-    :return: A Zixy SignTerms instance storing the stabilizers of the Choi state.
-    """
+    Args:
+        code: The stabilizer code.
+        clifford_func: A Guppy function that implements a Clifford unitary across two
+            code blocks.
+        num_selene_qubits: An upper bound for the number of qubits used in the Choi
+            state for `clifford_func`.
 
+    Returns:
+        A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
+    """
     choi_prep = gen_choi_state(code, clifford_func, 2)  # type: ignore[arg-type]
     n = code.num_physical_qubits
 
@@ -256,17 +266,19 @@ def _compute_state_prep_tableaux(
     acting on n qubits, compute a pair of stabilizer tableaux. Note that we will need
     to canonicalize with SignTerms.canonicalize_all() before we can check for equality.
 
-    :param semantic_function: A Guppy function for semantic action
-      of a Clifford operator on k logical qubits.
-    :param impl_function: A Guppy function for implementing
-      the semantics on n physical qubits.
-    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters,
-        stabilizer generators and logical operators.
-    :param impl_num_ancillas: The number of ancilla qubits used in the
-        implementation. Defaults to zero.
-    :return: A pair of stabilizer tableaux made up of signed Pauli terms.
-    """
+    Args:
+        semantic_function: A Guppy function specifying a Clifford operation on `k`
+            logical qubits.
+        impl_function: A Guppy function implementing the semantics on `n` physical
+            qubits.
+        code_definition: A stabilizer code with defined `[[n, k, d]]` parameters,
+            stabilizer generators, and logical operators.
+        impl_num_ancillas: The number of ancilla qubits used in the implementation.
+            Defaults to zero.
 
+    Returns:
+        A pair of stabilizer tableaux made up of signed Pauli terms.
+    """
     num_blocks = _count_blocks_state(semantic_function, impl_function)
     match num_blocks:
         case 1:
@@ -318,15 +330,18 @@ def valid_stabilizer_state_preparation(
     Can check implementations logical Pauli eigenstate preparation
       across one or two code blocks.
 
-    :param semantic_function: A Guppy function for semantic action
-      of Pauli eigenstate preparation over one or two code blocks.
-    :param impl_function: A Guppy function for preparing the logical eigenstate
-      over one or two code blocks.
-    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters,
-        stabilizer generators and logical operators.
-    :param impl_num_ancillas: The number of ancilla qubits used in the
-        implementation. Defaults to zero.
-    :return: A Boolean indicating whether the state preparation is valid.
+    Args:
+        semantic_function: A Guppy function specifying Pauli-eigenstate preparation over
+            one or two code blocks.
+        impl_function: A Guppy function preparing the logical eigenstate over one or two
+            code blocks.
+        code_definition: A stabilizer code with defined `[[n, k, d]]` parameters,
+            stabilizer generators, and logical operators.
+        impl_num_ancillas: The number of ancilla qubits used in the implementation.
+            Defaults to zero.
+
+    Returns:
+        Whether the state preparation is valid.
     """
     sem_stabilizers, impl_stabilizers = _compute_state_prep_tableaux(
         semantic_function,
@@ -368,15 +383,18 @@ def _compute_clifford_tableaux(
       acting on n qubits, compute a pair of Clifford tableaux. Note that we will need to
     canonicalize with SignTerms.canonicalize_all() before we can check for equality.
 
-    :param semantic_function: A Guppy function for semantic action
-      of a Clifford operator on k logical qubits.
-    :param impl_function: A Guppy function for implementing
-      the semantics on n physical qubits.
-    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters,
-        stabilizer generators and logical operators.
-    :param impl_num_ancillas: The number of ancilla qubits used in the
-        implementation. Defaults to zero.
-    :return: A pair of Clifford tableaux made up of signed Pauli terms.
+    Args:
+        semantic_function: A Guppy function specifying a Clifford operation on `k`
+            logical qubits.
+        impl_function: A Guppy function implementing the semantics on `n` physical
+            qubits.
+        code_definition: A stabilizer code with defined `[[n, k, d]]` parameters,
+            stabilizer generators, and logical operators.
+        impl_num_ancillas: The number of ancilla qubits used in the implementation.
+            Defaults to zero.
+
+    Returns:
+        A pair of Clifford tableaux made up of signed Pauli terms.
     """
     num_blocks = _count_blocks_unitary(semantic_function, impl_function)
     match num_blocks:
@@ -436,15 +454,18 @@ def valid_clifford_implementation(
 
     Can check implementations of Clifford semantics across one or two code blocks.
 
-    :param semantic_function: A Guppy function for semantic action
-      of a Clifford operator on one or two code blocks.
-    :param impl_function: A Guppy function for implementing
-      the semantics on one or two code blocks.
-    :param code_definition: A stabilizer code with well defined [[n, k, d]] parameters,
-        stabilizer generators and logical operators.
-    :param impl_num_ancillas: The number of ancilla qubits used in the
-        implementation. Defaults to zero.
-    :return: A Boolean indicating whether the implementation is valid.
+    Args:
+        semantic_function: A Guppy function specifying a Clifford operation on one or
+            two code blocks.
+        impl_function: A Guppy function implementing the semantics on one or two code
+            blocks.
+        code_definition: A stabilizer code with defined `[[n, k, d]]` parameters,
+            stabilizer generators, and logical operators.
+        impl_num_ancillas: The number of ancilla qubits used in the implementation.
+            Defaults to zero.
+
+    Returns:
+        Whether the implementation is valid.
     """
     sem_stabilizers, impl_stabilizers = _compute_clifford_tableaux(
         semantic_function, impl_function, code_definition, impl_num_ancillas

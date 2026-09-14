@@ -31,7 +31,8 @@ class LogicalCompiler(Protocol):
         compile the given package, e.g. the package containing unsupported gates.
 
         Note that this function returning without error is not a guarantee that a
-        subsequent call to `encode` will succeed."""
+        subsequent call to `encode` will succeed.
+        """
 
 
 @dataclass(frozen=True)

@@ -172,7 +172,8 @@ class SteaneInstance:
         encode the given package, e.g. the package containing unsupported gates.
 
         Note that this function returning without error is not a guarantee that a
-        subsequent call to `encode` will succeed."""
+        subsequent call to `encode` will succeed.
+        """
         assert self._spec.compile is not None
         if (error := self._spec.compile.check_may_compile(hugr)) is not None:
             raise error
@@ -215,8 +216,8 @@ class SteaneBuilder:
 
     def _gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
         """Generate the `ImplementOpsSpec` providing Steane implementations of
-        logical ops for a program using `n_blocks` logical blocks."""
-
+        logical ops for a program using `n_blocks` logical blocks.
+        """
         qec_policy = self._qec_policy
 
         # TODO STATE should be generic for all codes. The methods that are code specific
@@ -731,8 +732,8 @@ class SteaneBuilder:
 
     def _gen_encoder_spec(self, n_blocks: int) -> EncodeSpec:
         """Generate the full `EncoderSpec` (logical encoding + op implementations)
-        for a program using `n_blocks` logical blocks."""
-
+        for a program using `n_blocks` logical blocks.
+        """
         impl_spec = self._gen_implement_spec(n_blocks)
 
         ext = ExtensionRegistry.from_extensions(

@@ -222,18 +222,20 @@ def with_global[G, **P, *R, Ret](  # type: ignore[empty-body]
     *args: P.args,
     **kwargs: P.kwargs,
 ) -> tuple[G, *R] | tuple[G, Ret]:
-    """
-    Call the given Guppy function in a context where the global state is available
-    through :py:func:`map_global` calls (see :py:func:`map_global` for more context).
+    """Call a Guppy function in a context where `map_global` provides global state.
 
-    Note: All calls to this function will currently use the same global variable name to
-    store and provide the global state.
+    Note:
+        All calls to this function currently use the same global variable name to store
+        and provide global state.
 
-    :param initial_state: The initial state of the global variable.
-    :param callback_func: The function to call in the global-enabled context.
-    :param args: Regular arguments to pass to the function.
-    :param kwargs: Keyword arguments to pass to the function.
-    :return: A tuple containing the final global state followed by the value(s)
+    Args:
+        initial_state: The initial state of the global variable.
+        callback_func: The function to call in the global-enabled context.
+        *args: Positional arguments to pass to the function.
+        **kwargs: Keyword arguments to pass to the function.
+
+    Returns:
+        A tuple containing the final global state followed by the value or values
         returned by the called function.
     """
 
@@ -424,19 +426,21 @@ def map_global[G, **P, *R](  # type: ignore[empty-body]
     *args: P.args,
     **kwargs: P.kwargs,
 ) -> tuple[*R]:
-    """
-    Call the given function with the given (keyword-)arguments and provide the current
-    value stored in the global state variable to the function as the first parameter.
-    The function must return a new value to store in the global state variable after
-    the call has returned.
+    """Call a function with the current global state as its first argument.
 
-    Note: All calls to this function will currently use the same global variable name to
-    store and provide the global state.
+    The function receives the given positional and keyword arguments after the state. It
+    must return the new global state before any other returned values.
 
-    :param callback_func: The function to call with the value stored in the global
-        variable.
-    :param args: Regular arguments to pass to the function.
-    :param kwargs: Keyword arguments to pass to the function.
-    :return: The value(s) returned by the called function, excluding the updated global
-        state, `None` when the called function does not return values besides the state.
+    Note:
+        All calls to this function currently use the same global variable name to store
+        and provide global state.
+
+    Args:
+        callback_func: The function to call with the current global state.
+        *args: Positional arguments to pass to the function.
+        **kwargs: Keyword arguments to pass to the function.
+
+    Returns:
+        The values returned by the called function, excluding the updated global state.
+        Returns `None` when the called function returns no values besides the state.
     """

@@ -3,8 +3,8 @@
 This module contains bindings for the fundamental ops in the HUGR extensions, as well
 as composite operations that comprise multiple logical operations.
 
-The physical implementation for these ops is provided in
-:py:mod:`~guppyft.code.steane.primitives`.
+`guppyft.code.steane.primitives` provides the physical implementations of these
+operations.
 """
 
 from collections.abc import Callable
@@ -51,7 +51,8 @@ class Qubit:
 
     @hugr_op(_steane_op("prep_zero"))
     @no_type_check
-    def __new__() -> "Qubit": ...
+    def __new__() -> "Qubit":
+        """Prepare a logical qubit in the zero state."""
 
     @guppy
     @no_type_check
@@ -176,7 +177,8 @@ def sdg(qubit: "Qubit") -> None:
 @no_type_check
 def prep_t_state() -> "Qubit":
     r"""Prepare a logical :math:`T\ket{+}` magic state for :math:`T` and
-    :math:`T^\dagger` injection."""
+    :math:`T^\dagger` injection.
+    """
 
 
 @hugr_op(_steane_op("inject_t"))

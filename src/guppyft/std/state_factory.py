@@ -1,4 +1,4 @@
-"""Guppy structs and definitions for state factories"""
+"""Guppy structs and definitions for state factories."""
 
 from typing import Generic, no_type_check
 
@@ -75,7 +75,8 @@ class PreBlock(Generic[BLOCK_SIZE, N_FLAGS]):  # type: ignore[misc]
 @no_type_check
 def _qalloc_dirty() -> LogicalBlock[BLOCK_SIZE]:
     """Allocate resources for a codeblock, but the qubits are not in a valid logical
-    state."""
+    state.
+    """
     return LogicalBlock(array(qubit() for _ in range(BLOCK_SIZE)))
 
 
@@ -135,5 +136,6 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]):  # type: ignore[mi
     @guppy
     @no_type_check
     def discard(self: "StateFactory[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]" @ owned) -> None:
+        """Discard all state-preparation candidates in the batch."""
         for blk in self.batch:
             blk.logical_block.discard()

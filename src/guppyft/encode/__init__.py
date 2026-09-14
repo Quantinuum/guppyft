@@ -41,7 +41,8 @@ __all__ = [
 @dataclass(frozen=True, kw_only=True)
 class EncodeSpec:
     """A QEC-code-specific collection of passes that together fully encode a
-    computation."""
+    computation.
+    """
 
     compile: LogicalCompiler | None = None
     """Pass to lower the computation to a logical level."""
@@ -74,9 +75,9 @@ def encode(
     passes: list[ComposablePass] | None = None,
     as_bytes: bool = False,
 ) -> Package | bytes:
-    """
-    Encodes the given package (or Guppy function, directly compiled to a package for
-    convenience) by applying four stages:
+    """Encode a package or Guppy function by applying four stages.
+
+    Guppy functions are compiled to packages directly for convenience.
 
     1. running the given computational passes;
     2. lowering the operations in the package to logical operations and
@@ -89,13 +90,17 @@ def encode(
     The returned runnable package is guaranteed to be semantically equivalent to the
     given one.
 
-    :param hugr: The package to encode (or Guppy function for convenience).
-    :param spec: See ``EncoderSpec``.
-    :param passes: Computational passes to run on the given package. Defaults to
-        one run of ``Normalize``.
-    :return: The encoded runnable package.
-    """
+    Args:
+        hugr: The package to encode, or a Guppy function for convenience.
+        spec: The encoding specification.
+        passes: Computational passes to run on the given package. Defaults to one run
+            of `Normalize`.
+        as_bytes: Whether to return the encoded package as bytes.
 
+    Returns:
+        The encoded runnable package, or its serialized representation when `as_bytes`
+        is `True`.
+    """
     pkg = hugr.compile_function() if isinstance(hugr, GuppyFunctionDefinition) else hugr
 
     assert len(pkg.modules) == 1, "Given package contains more than one module"
@@ -128,12 +133,15 @@ def encode(
 
 
 class EncoderParams(Protocol):
+    """Parameters used to annotate an encoded program."""
+
     def encoding(self) -> str:
         """The encoding to annotate on a program."""
 
     def params(self) -> Mapping[str, Any]:
         """The parameters to annotate on a program. Implementations should return values
-        that support serialization to JSON."""
+        that support serialization to JSON.
+        """
 
 
 class _MetadataEncoding(Metadata[Mapping[str, Any]]):
@@ -143,6 +151,15 @@ class _MetadataEncoding(Metadata[Mapping[str, Any]]):
 
 
 def annotate_encoding(hugr: Package | Hugr[Any], params: EncoderParams) -> None:
+    """Annotate a HUGR package with encoding parameters.
+
+    Args:
+        hugr: The package or HUGR to annotate.
+        params: The serializable encoding parameters.
+
+    Raises:
+        ValueError: If `params` cannot be serialized as JSON.
+    """
     try:
         json.dumps(params.params(), check_circular=True)
     except TypeError as e:

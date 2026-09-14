@@ -16,6 +16,8 @@ class CodeDefinitionError(ValueError):
 
 @dataclass(frozen=True)
 class StabilizerCode:
+    """A stabilizer code definition."""
+
     num_physical_qubits: int
     num_logical_qubits: int
     distance: int
@@ -25,6 +27,7 @@ class StabilizerCode:
 
     @cached_property
     def y_logicals(self) -> pauli.SignTerms:
+        """Return the Y logical operators derived from X and Z logicals."""
         terms = pauli.ComplexSignTerms(self.num_physical_qubits)
         for j in range(self.num_logical_qubits):
             # ComplexSign(k) ~ i^k
@@ -35,6 +38,7 @@ class StabilizerCode:
         return terms.into(pauli.SignTerms)
 
     def __post_init__(self) -> None:
+        """Validate the stabilizer-code definition."""
         if len(self.generators) != self.num_physical_qubits - self.num_logical_qubits:
             raise CodeDefinitionError(
                 "The number of stabilizer generators must equal n-k."
@@ -77,13 +81,16 @@ class StabilizerCode:
         of length equal to the number of physical qubits. A sign may be provided at
         the front. If a string is missing a sign, it is assumed to be positive.
 
-        :param num_physical_qubits: The number of physical qubits in the code.
-        :param num_logical_qubits: The number of logical qubits in the code.
-        :param distance: The distance of the code.
-        :param generators: A list of stabilizer generators as Pauli strings.
-        :param x_logicals: A list of X logical operators as Pauli strings.
-        :param z_logicals: A list of Z logical operators as Pauli strings.
-        :return: A StabilizerCode instance representing the code.
+        Args:
+            num_physical_qubits: The number of physical qubits in the code.
+            num_logical_qubits: The number of logical qubits in the code.
+            distance: The distance of the code.
+            generators: A list of stabilizer generators as Pauli strings.
+            x_logicals: A list of X logical operators as Pauli strings.
+            z_logicals: A list of Z logical operators as Pauli strings.
+
+        Returns:
+            A `StabilizerCode` instance representing the code.
         """
         zixy_generators = pauli.SignTermSet.from_iterable(
             (_str_to_zixy(s, num_physical_qubits) for s in generators),
@@ -133,11 +140,15 @@ def _str_to_zixy(s: str, n: int) -> pauli.SignTerm:
 
 
 def identity_code(k: int) -> StabilizerCode:
-    """Return a stabilizer code that encodes k logical qubits into k physical qubits.
-      This is the trivial code with distance 1.
+    """Return a stabilizer code that encodes `k` logical qubits into physical qubits.
 
-    :param k: The number of logical qubits to encode.
-    :return: A StabilizerCode instance representing the identity code.
+    This is the trivial code with distance 1.
+
+    Args:
+        k: The number of logical qubits to encode.
+
+    Returns:
+        A `StabilizerCode` instance representing the identity code.
     """
     return StabilizerCode.from_python_strings(
         num_physical_qubits=k,

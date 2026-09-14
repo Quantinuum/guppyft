@@ -47,7 +47,7 @@ class SteaneOpsExtension:
     """Extension providing the Steane logical operations."""
 
     def __call__(self) -> Extension:
-        """Returns the Steane ops extension"""
+        """Return the Steane operations extension."""
         return load_extension("guppyft.steane.ops", ["guppyft.std.types"])
 
     @functools.cached_property
@@ -55,7 +55,8 @@ class SteaneOpsExtension:
         """Prepare a logical qubit in the all-zero state.
 
         This is the generic operation definition. For the instantiated operation, see
-        `prep_zero`."""
+        `prep_zero`.
+        """
         return self().get_op("prep_zero")
 
     def prep_zero(self) -> ExtOp:
@@ -67,7 +68,8 @@ class SteaneOpsExtension:
         """Free a logical qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `free`."""
+        `free`.
+        """
         return self().get_op("free")
 
     def free(self) -> ExtOp:
@@ -79,7 +81,8 @@ class SteaneOpsExtension:
         """Destructive measurement of a logical qubit in the Z basis.
 
         This is the generic operation definition. For the instantiated operation, see
-        `measure_z`."""
+        `measure_z`.
+        """
         return self().get_op("measure_z")
 
     def measure_z(self) -> ExtOp:
@@ -91,7 +94,8 @@ class SteaneOpsExtension:
         """Perform a QEC cycle on a logical qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `qec_cycle`."""
+        `qec_cycle`.
+        """
         return self().get_op("qec_cycle")
 
     def qec_cycle(self) -> ExtOp:
@@ -103,7 +107,8 @@ class SteaneOpsExtension:
         """Decode a measurement of a Steane logical qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `decode`."""
+        `decode`.
+        """
         return self().get_op("decode")
 
     def decode(self) -> ExtOp:
@@ -115,7 +120,8 @@ class SteaneOpsExtension:
         """Apply an X gate to one qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `x`."""
+        `x`.
+        """
         return self().get_op("x")
 
     def x(self) -> ExtOp:
@@ -127,7 +133,8 @@ class SteaneOpsExtension:
         """Apply a Y gate to one qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `y`."""
+        `y`.
+        """
         return self().get_op("y")
 
     def y(self) -> ExtOp:
@@ -139,7 +146,8 @@ class SteaneOpsExtension:
         """Apply a Z gate to one qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `z`."""
+        `z`.
+        """
         return self().get_op("z")
 
     def z(self) -> ExtOp:
@@ -151,7 +159,8 @@ class SteaneOpsExtension:
         """Apply an H gate to one qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `h`."""
+        `h`.
+        """
         return self().get_op("h")
 
     def h(self) -> ExtOp:
@@ -163,7 +172,8 @@ class SteaneOpsExtension:
         """Apply an S gate to one qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `s`."""
+        `s`.
+        """
         return self().get_op("s")
 
     def s(self) -> ExtOp:
@@ -175,7 +185,8 @@ class SteaneOpsExtension:
         """Apply an Sdg gate to one qubit.
 
         This is the generic operation definition. For the instantiated operation, see
-        `sdg`."""
+        `sdg`.
+        """
         return self().get_op("sdg")
 
     def sdg(self) -> ExtOp:
@@ -187,13 +198,12 @@ class SteaneOpsExtension:
         """Prepare a magic state that can be used to produce T-like states (T and Tdg).
 
         This is the generic operation definition. For the instantiated operation, see
-        `prep_t_state`."""
+        `prep_t_state`.
+        """
         return self().get_op("prep_t_state")
 
     def prep_t_state(self) -> ExtOp:
-        """
-        Prepare a magic state that can be used to produce T-like states (T and Tdg).
-        """
+        """Prepare a magic state that can produce T-like states, T and Tdg."""
         return self.prep_t_state_def.instantiate([])
 
     @functools.cached_property
@@ -201,7 +211,8 @@ class SteaneOpsExtension:
         """Perform a T gate by injecting a magic state.
 
         This is the generic operation definition. For the instantiated operation, see
-        `inject_t`."""
+        `inject_t`.
+        """
         return self().get_op("inject_t")
 
     def inject_t(self) -> ExtOp:
@@ -213,7 +224,8 @@ class SteaneOpsExtension:
         """Perform a Tdg gate by injecting a magic state.
 
         This is the generic operation definition. For the instantiated operation, see
-        `inject_tdg`."""
+        `inject_tdg`.
+        """
         return self().get_op("inject_tdg")
 
     def inject_tdg(self) -> ExtOp:
@@ -225,7 +237,8 @@ class SteaneOpsExtension:
         """Apply a CX gate to two qubits.
 
         This is the generic operation definition. For the instantiated operation, see
-        `cx`."""
+        `cx`.
+        """
         return self().get_op("cx")
 
     def cx(self) -> ExtOp:
@@ -237,7 +250,8 @@ class SteaneOpsExtension:
         """Apply a CZ gate to two qubits.
 
         This is the generic operation definition. For the instantiated operation, see
-        `cz`."""
+        `cz`.
+        """
         return self().get_op("cz")
 
     def cz(self) -> ExtOp:
@@ -249,7 +263,8 @@ class SteaneOpsExtension:
         """Apply a SWAP gate to two qubits.
 
         This is the generic operation definition. For the instantiated operation, see
-        `swap`."""
+        `swap`.
+        """
         return self().get_op("swap")
 
     def swap(self) -> ExtOp:
