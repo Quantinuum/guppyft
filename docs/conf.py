@@ -14,8 +14,10 @@ templates_path = ["_templates"]
 # Generated sources would otherwise be treated as unlinked documents and fail
 # strict builds.
 exclude_patterns = [
-    ".jupyter_cache",
+    "build/**",
     "jupyter_execute",
+    ".jupyter_cache",
+    "**/README.md",
     "rust/extensions/bin/extensions.md",
 ]
 
@@ -34,6 +36,7 @@ extensions = [
     "sphinxcontrib_rust",
     "quantinuum_sphinx",
     "sphinx_copybutton",
+    "sphinx.ext.napoleon",
 ]
 
 # --- MyST-NB config ---
@@ -45,6 +48,7 @@ nb_execution_timeout = 90  # Cells which take >90s give timeout error.
 nb_merge_streams = True  # Accumulates all stdout streams into one, same with stderr
 # ----------------------
 
+
 myst_enable_extensions = [
     "dollarmath",
     "html_image",
@@ -52,6 +56,8 @@ myst_enable_extensions = [
     "colon_fence",
     "amsmath",
 ]
+# Allow links to depth 2 headings
+myst_heading_anchors = 2
 
 # Sphinx autosummary
 # https://www.sphinx-doc.org/en/master/usage/extensions/autosummary.html

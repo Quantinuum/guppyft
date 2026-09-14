@@ -55,9 +55,9 @@ def test_annotate_encoding_not_json() -> None:
 
         def params(self) -> Mapping[str, Any]:
             return {
-                # Functions cannot be serialised with the standard JSON encoder
+                # Functions cannot be serialized with the standard JSON encoder
                 "do-not": lambda x: x,
             }
 
-    with pytest.raises(ValueError, match="Could not serialise parameters"):
+    with pytest.raises(ValueError, match="Could not serialize parameters"):
         annotate_encoding(hugr, FailingEncoderParams())
