@@ -55,9 +55,6 @@ myst_heading_anchors = 2
 # Sphinx autosummary
 # https://www.sphinx-doc.org/en/master/usage/extensions/autosummary.html
 
-# __all__ dictates which classes and functions are documented for a module
-autosummary_ignore_module_all = False  # Respect __all__ if specified
-
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
