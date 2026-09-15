@@ -1,6 +1,7 @@
 from guppylang import guppy
 from guppylang.emulator import EmulatorBuilder
 from guppylang.std.platform import result
+from hugr.ops import ExtOp
 
 from guppyft.code.steane.encode import SteaneBuilder
 from guppyft.code.steane.logical import Qubit, cx, h, measure_z, x, z
@@ -78,7 +79,19 @@ def test_qec_cycle() -> None:
         result("q", q.measure_z().decode())
 
     pkg = main.compile()
-    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg, as_bytes=True)
-    res = EmulatorBuilder().build(phys_pkg, n_qubits=15).run().collated_shots()  # type: ignore[arg-type]
+    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg)
+
+    hugr = phys_pkg.modules[0]
+    qec_cycle = next(
+        node
+        for node, node_data in hugr.items()
+        if getattr(node_data.op, "f_name", None) == "guppyft.steane._qec_cycle"
+    )
+    assert any(
+        isinstance(hugr[node].op, ExtOp) and "tket.globals.map" in hugr[node].op.name()
+        for node in hugr.descendants(qec_cycle)
+    )
+
+    res = EmulatorBuilder().build(phys_pkg, n_qubits=15).run().collated_shots()
 
     assert res == [{"q": [0]}]
