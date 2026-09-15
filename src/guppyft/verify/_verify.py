@@ -469,7 +469,6 @@ def _compute_clifford_tableaux(
                 _identity_code(code_definition.num_logical_qubits),
                 semantic_function,  # type: ignore[arg-type]
                 default_num_qubits=2 * (code_definition.num_logical_qubits),
-                num_ancilla_qubits=0,
             )
             # Calculate the 2n stabilizers of the Choi state encoding the physical.
             implementation_stabilizers = _compute_stabilizers_single_block_unitary(
@@ -484,7 +483,6 @@ def _compute_clifford_tableaux(
                 _identity_code(code_definition.num_logical_qubits),
                 semantic_function,  # type: ignore[arg-type]
                 default_num_qubits=4 * (code_definition.num_logical_qubits),
-                num_ancilla_qubits=0,
             )
             # Calculate the 4n stabilizers of the Choi state encoding the physical.
             implementation_stabilizers = _compute_stabilizers_double_block_unitary(
