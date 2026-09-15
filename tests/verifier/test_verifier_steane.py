@@ -19,6 +19,7 @@ def test_steane_single_block_identity_with_shor_extraction() -> None:
         steane.specify_identity,
         steane.implement_identity_with_shor_extraction,
         code_definition=steane.STEANE_DEF,
+        impl_num_ancillas=1,
     )
 
 
@@ -27,6 +28,7 @@ def test_steane_double_block_identity_with_shor_extraction() -> None:
         steane.specify_identity_double_block,
         steane.implement_identity_double_block_with_shor_extraction,
         code_definition=steane.STEANE_DEF,
+        impl_num_ancillas=2,
     )
 
 
@@ -56,6 +58,7 @@ def test_steane_ft_zero_state() -> None:
         steane.specify_zero_state,
         steane.implement_ft_zero_state,
         code_definition=steane.STEANE_DEF,
+        impl_num_ancillas=7,
     )
 
 
@@ -96,6 +99,7 @@ def test_steane_h_with_ancilla() -> None:
         steane.specify_h,
         steane.implement_h_with_ancilla,
         code_definition=steane.STEANE_DEF,
+        impl_num_ancillas=1,
     )
 
 
