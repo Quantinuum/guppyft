@@ -10,7 +10,7 @@ from guppylang.std.quantum import cx, h, qubit, s, x, z
 
 from guppyft.code.toy_k2 import primitives as toy_k2
 from guppyft.code.toy_k2.primitives import CODE_DEF
-from guppyft.code.util import LogicalBlock
+from guppyft.std import LogicalBlock
 from guppyft.verify import (
     valid_clifford_implementation,
     valid_stabilizer_state_preparation,

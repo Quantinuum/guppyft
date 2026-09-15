@@ -8,9 +8,9 @@ from guppylang.std.builtins import array, owned
 from guppylang.std.collections import Queue, empty_queue
 from guppylang.std.mem import mem_swap
 
-from guppyft.code._state_factory import PreBlock
-from guppyft.code.util import LogicalBlock
 from guppyft.code_def import StabilizerCode
+from guppyft.std import LogicalBlock
+from guppyft.std.state_factory import PreBlock
 
 CODE_DEF = StabilizerCode.from_python_strings(
     num_physical_qubits=4,
@@ -111,7 +111,7 @@ def swap_intra(blk: LogicalBlock[4]) -> None:
 @guppy
 @no_type_check
 def prep_zero_ft() -> PreBlock[4, 1]:
-    """Fault-tolerant preparation of a logical :math:`|00\\rangle` state.
+    r"""Fault-tolerant preparation of a logical :math:`|00\\rangle` state.
 
     The logical block is wrapped in a `PreBlock`, which contains the flag
     measurement outcomes. Use `force_check()` to check if preparation was
@@ -225,9 +225,9 @@ def measure_z(blk: LogicalBlock[4], idx: int) -> bool:
 
     # The logical Z observable is measured twice to detect measurement errors.
     # If the two outcomes do not agree, an error is detected.
-    obs_measurements: Queue[phys.Measurement, 2] = empty_queue()  # type: ignore[type-arg,valid-type]
+    obs_measurements: Queue[phys.Measurement, 2] = empty_queue()  # type: ignore[valid-type]
     # If the flag measurements return `True`, an error is detected.
-    flag_measurements: Queue[phys.Measurement, 2] = empty_queue()  # type: ignore[type-arg,valid-type]
+    flag_measurements: Queue[phys.Measurement, 2] = empty_queue()  # type: ignore[valid-type]
 
     for _ in range(2):
         # Prepare the ancilla in a Bell state
