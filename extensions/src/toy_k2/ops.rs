@@ -229,7 +229,7 @@ impl MakeOpDef for ToyK2OpDef {
             .into(),
             borrow_more => FuncValueType::new(
                 vec![borrowed_block_type(), int_type(6)],
-                vec![borrowed_block_type(), dynamic_qubit_type()],
+                vec![dynamic_qubit_type(), borrowed_block_type()],
             )
             .into(),
             restore_some => FuncValueType::new(
