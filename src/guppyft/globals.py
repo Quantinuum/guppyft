@@ -17,9 +17,7 @@ from guppylang_internals.checker.expr_checker import (
     ExprSynthesizer,
     synthesize_call,
 )
-from guppylang_internals.compiler.core import (
-    CompilerContext,
-)
+from guppylang_internals.compiler.core import CompilerContext
 from guppylang_internals.decorator import custom_function
 from guppylang_internals.definition.custom import (
     CustomCallChecker,
