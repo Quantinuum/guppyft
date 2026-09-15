@@ -6,6 +6,7 @@ Here are some example notebooks which demonstrate some of the key features in Gu
 :maxdepth: 1
 
 examples/steane_encoding
+examples/comparator_rz_steane
 examples/logical_program
 examples/clifford_verification
 ```
