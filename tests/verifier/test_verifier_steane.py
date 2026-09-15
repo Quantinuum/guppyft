@@ -141,3 +141,12 @@ def test_steane_cx() -> None:
         steane.implement_cx,
         code_definition=steane.STEANE_DEF,
     )
+
+
+def test_hint_override() -> None:
+    assert valid_clifford_implementation(
+        steane.specify_identity,
+        steane.implement_identity_with_shor_extraction_and_incorrect_ancilla_count,
+        code_definition=steane.STEANE_DEF,
+        impl_num_ancillas=8,
+    )

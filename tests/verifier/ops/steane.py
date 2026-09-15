@@ -128,6 +128,19 @@ def implement_identity_with_shor_extraction(block: array[qubit, 7]) -> None:
 
 @guppy
 @no_type_check
+@expected_qubits(7)
+def implement_identity_with_shor_extraction_and_incorrect_ancilla_count(
+    block: array[qubit, 7],
+) -> None:
+    # measure the ZZZZIII stabilizer
+    ancilla = qubit()
+    for i in array(0, 1, 2, 3):
+        cx(block[i], ancilla)
+    measure(ancilla)
+
+
+@guppy
+@no_type_check
 def implement_identity_double_block(
     first_block: array[qubit, 7], second_block: array[qubit, 7]
 ) -> None:
