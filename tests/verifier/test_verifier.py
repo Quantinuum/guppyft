@@ -77,7 +77,7 @@ def test_bell_state_stabilizers() -> None:
 
 def test_s_state_stabilizers() -> None:
     terms_logical = _compute_stabilizers_single_block_unitary(
-        code=_identity_code(1), clifford_func=steane.specify_s, num_selene_qubits=2
+        code=_identity_code(1), clifford_func=steane.specify_s, default_num_qubits=2
     )
 
     terms_physical = _compute_stabilizers_single_block_unitary(
