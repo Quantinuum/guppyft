@@ -193,7 +193,7 @@ class SteaneInstance:
         encoded_pkg = self.encode(pkg, as_bytes=True)
         if builder is None:
             builder = EmulatorBuilder()
-        return builder.build(encoded_pkg, n_qubits)  # type: ignore[arg-type]
+        return builder.build(encoded_pkg, n_qubits)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -216,7 +216,6 @@ class SteaneBuilder:
     def _gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
         """Generate the `ImplementOpsSpec` providing Steane implementations of
         logical ops for a program using `n_blocks` logical blocks."""
-
         qec_policy = self._qec_policy
 
         # TODO STATE should be generic for all codes. The methods that are code specific
@@ -226,7 +225,7 @@ class SteaneBuilder:
         @guppy.struct
         class STATE:
             blocks: array[Option[LogicalBlock[7]], comptime(n_blocks)]  # type: ignore[valid-type,type-arg]
-            addr_stack: Stack[tuple[int, int], comptime(n_blocks)]  # type: ignore[valid-type,type-arg]
+            addr_stack: Stack[tuple[int, int], comptime(n_blocks)]  # type: ignore[valid-type]
             qec_counter: array[float, comptime(n_blocks)]  # type: ignore[valid-type]
 
             zero_state_factory: StateFactory[  # type: ignore[valid-type,type-arg]
@@ -331,7 +330,7 @@ class SteaneBuilder:
 
                 return state, q
 
-            return (q,)
+            return map_global(_impl, q)
 
         # TODO Defining the primitives to use the global state requires
         # a lot of "boilerplate" code. We should provide helper methods
@@ -732,7 +731,6 @@ class SteaneBuilder:
     def _gen_encoder_spec(self, n_blocks: int) -> EncodeSpec:
         """Generate the full `EncoderSpec` (logical encoding + op implementations)
         for a program using `n_blocks` logical blocks."""
-
         impl_spec = self._gen_implement_spec(n_blocks)
 
         ext = ExtensionRegistry.from_extensions(
