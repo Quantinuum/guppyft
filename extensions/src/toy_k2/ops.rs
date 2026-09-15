@@ -1,5 +1,6 @@
 use crate::toy_k2::types::{
-    logical_block_measurement_type, logical_block_type, logical_qubit_measurement_type,
+    block_measurement_type, block_type, borrowed_block_type, dynamic_qubit_type,
+    qubit_measurement_type,
 };
 use documented::DocumentedVariants;
 use hugr::Extension;
@@ -56,6 +57,28 @@ pub enum ToyK2OpDef {
     decode_block_measurement,
     /// Free a logical ToyK2 block.
     free,
+    /// Allocate a dynamic logical qubit in the zero state.
+    alloc_dynq,
+    /// Free a dynamic logical qubit.
+    free_dynq,
+    /// X gate on a dynamic logical qubit.
+    x_dynq,
+    /// Z gate on a dynamic logical qubit.
+    z_dynq,
+    /// H gate on a dynamic logical qubit.
+    h_dynq,
+    /// CX gate between dynamic logical qubits.
+    cx_dynq,
+    /// Measure a dynamic logical qubit on the Z basis.
+    measure_z_dynq,
+    /// Extraction of dynamic logical qubits from a block (consuming the block and emitting a borrowed block).
+    borrow,
+    /// Extraction of dynamic logical qubits from an already-borrowed block.
+    borrow_more,
+    /// Restoration of some dynamic logical qubits to their originating block.
+    restore_some,
+    /// Restoration of all dynamic logical qubits to their originating block (consuming the borrowed block and emitting a block).
+    restore,
 }
 
 /// Concrete ToyK2 logical operation.
@@ -112,17 +135,21 @@ impl ToyK2OpDef {
 /// Signature of an operation consisting only of logical qubits
 fn sig_blocks(n_blocks_in: usize, n_blocks_out: usize) -> SignatureFunc {
     Signature::new(
-        vec![logical_block_type(); n_blocks_in],
-        vec![logical_block_type(); n_blocks_out],
+        vec![block_type(); n_blocks_in],
+        vec![block_type(); n_blocks_out],
     )
     .into()
 }
 
 /// Signature of an operation acting on a single qubit, addressed by an index
 fn sig_addressable() -> SignatureFunc {
+    Signature::new(vec![block_type(), int_type(6)], vec![block_type()]).into()
+}
+
+fn sig_dynamic_qubits(n_qubits_in: usize, n_qubits_out: usize) -> SignatureFunc {
     Signature::new(
-        vec![logical_block_type(), int_type(6)],
-        vec![logical_block_type()],
+        vec![dynamic_qubit_type(); n_qubits_in],
+        vec![dynamic_qubit_type(); n_qubits_out],
     )
     .into()
 }
@@ -158,22 +185,51 @@ impl MakeOpDef for ToyK2OpDef {
             prep_t_states_non_ft => sig_blocks(0, 1),
             qed_cycle => sig_blocks(1, 1),
             free => sig_blocks(1, 0),
-            measure_z_all => FuncValueType::new(
-                vec![logical_block_type()],
-                vec![logical_block_measurement_type()],
-            )
-            .into(),
+            measure_z_all => {
+                FuncValueType::new(vec![block_type()], vec![block_measurement_type()]).into()
+            }
             measure_z => FuncValueType::new(
-                vec![logical_block_type(), int_type(6)],
-                vec![logical_qubit_measurement_type(), logical_block_type()],
+                vec![block_type(), int_type(6)],
+                vec![qubit_measurement_type(), block_type()],
             )
             .into(),
             decode_qubit_measurement => {
-                FuncValueType::new(vec![logical_qubit_measurement_type()], vec![bool_t()]).into()
+                FuncValueType::new(vec![qubit_measurement_type()], vec![bool_t()]).into()
             }
             decode_block_measurement => {
-                FuncValueType::new(vec![logical_block_measurement_type()], vec![bool_t(); 2]).into()
+                FuncValueType::new(vec![block_measurement_type()], vec![bool_t(); 2]).into()
             }
+            alloc_dynq => sig_dynamic_qubits(0, 1),
+            free_dynq => sig_dynamic_qubits(1, 0),
+            x_dynq => sig_dynamic_qubits(1, 1),
+            z_dynq => sig_dynamic_qubits(1, 1),
+            h_dynq => sig_dynamic_qubits(1, 1),
+            cx_dynq => sig_dynamic_qubits(2, 2),
+            measure_z_dynq => FuncValueType::new(
+                vec![dynamic_qubit_type()],
+                vec![qubit_measurement_type(), dynamic_qubit_type()],
+            )
+            .into(),
+            borrow => FuncValueType::new(
+                vec![block_type(), int_type(6)],
+                vec![borrowed_block_type(), dynamic_qubit_type()],
+            )
+            .into(),
+            borrow_more => FuncValueType::new(
+                vec![borrowed_block_type(), int_type(6)],
+                vec![borrowed_block_type(), dynamic_qubit_type()],
+            )
+            .into(),
+            restore_some => FuncValueType::new(
+                vec![borrowed_block_type(), dynamic_qubit_type()],
+                vec![borrowed_block_type()],
+            )
+            .into(),
+            restore => FuncValueType::new(
+                vec![borrowed_block_type(), dynamic_qubit_type()],
+                vec![block_type()],
+            )
+            .into(),
         }
     }
 
@@ -201,14 +257,14 @@ mod tests {
     use hugr::std_extensions::arithmetic::int_types::ConstInt;
     use hugr::std_extensions::std_reg;
     use hugr::types::Signature;
-    use hugr::{CircuitUnit, HugrView};
+    use hugr::{CircuitUnit, HugrView, Wire};
     use std::error::Error;
 
     #[test]
     fn test_toy_k2_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.toy_k2.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 15);
+        assert_eq!(EXTENSION.operations().count(), 26);
     }
 
     #[test]
@@ -220,7 +276,7 @@ mod tests {
                 .unwrap()
                 .signature()
                 .as_ref(),
-            &Signature::new([], [logical_block_type()])
+            &Signature::new([], [block_type()])
         );
         assert_eq!(
             ToyK2OpDef::prep_t_states_non_ft
@@ -229,7 +285,7 @@ mod tests {
                 .unwrap()
                 .signature()
                 .as_ref(),
-            &Signature::new([], [logical_block_type()])
+            &Signature::new([], [block_type()])
         );
         assert_eq!(
             ToyK2OpDef::prep_y_states_non_ft
@@ -238,7 +294,7 @@ mod tests {
                 .unwrap()
                 .signature()
                 .as_ref(),
-            &Signature::new([], [logical_block_type()])
+            &Signature::new([], [block_type()])
         );
     }
 
@@ -253,7 +309,7 @@ mod tests {
         let qed_cycle = EXTENSION.instantiate_extension_op("qed_cycle", [])?;
 
         let mut module_builder = ModuleBuilder::new();
-        let signature = Signature::new_endo(vec![logical_block_type(); 2]);
+        let signature = Signature::new_endo(vec![block_type(); 2]);
         let mut f_build = module_builder.define_function("main", signature)?;
         let wires: Vec<_> = f_build.input_wires().collect();
         let mut linear = f_build.as_circuit(wires);
@@ -332,9 +388,95 @@ mod tests {
     }
 
     #[test]
+    fn test_dynq_alloc_borrow_cx_restore() -> Result<(), Box<dyn Error>> {
+        let alloc_dynq = EXTENSION
+            .instantiate_extension_op("alloc_dynq", [])
+            .unwrap();
+        let borrow = EXTENSION.instantiate_extension_op("borrow", []).unwrap();
+        let borrowmore = EXTENSION
+            .instantiate_extension_op("borrow_more", [])
+            .unwrap();
+        let restoresome = EXTENSION
+            .instantiate_extension_op("restore_some", [])
+            .unwrap();
+        let restore = EXTENSION.instantiate_extension_op("restore", []).unwrap();
+        let cx_dynq = EXTENSION.instantiate_extension_op("cx_dynq", []).unwrap();
+        let h_dynq = EXTENSION.instantiate_extension_op("h_dynq", []).unwrap();
+
+        let mut module_builder = ModuleBuilder::new();
+        let signature = Signature::new(
+            vec![block_type(), int_type(6), int_type(6)],
+            vec![block_type(), dynamic_qubit_type()],
+        );
+        let mut f_build = module_builder.define_function("main", signature)?;
+
+        let wires: Vec<Wire> = f_build.input_wires().collect();
+        assert_eq!(wires.len(), 3);
+        let block = wires[0];
+        let i0 = wires[1];
+        let i1 = wires[2];
+
+        // Borrow a qubit:
+        let handle = f_build.add_dataflow_op(borrow, vec![block, i0]).unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 2);
+        let bblock = wires[0];
+        let q0 = wires[1];
+        // Allocate a dynamic qubit:
+        let handle = f_build.add_dataflow_op(alloc_dynq, vec![]).unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 1);
+        let q_extra = wires[0];
+        // Do a CX on the borrowed qubits:
+        let handle = f_build
+            .add_dataflow_op(cx_dynq.clone(), vec![q0, q_extra])
+            .unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 2);
+        let q0 = wires[0];
+        let q_extra = wires[1];
+        // Borrow another qubit:
+        let handle = f_build
+            .add_dataflow_op(borrowmore, vec![bblock, i1])
+            .unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 2);
+        let bblock = wires[0];
+        let q1 = wires[1];
+        // Put the first qubit back.
+        let handle = f_build
+            .add_dataflow_op(restoresome, vec![bblock, q0])
+            .unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 1);
+        let bblock = wires[0];
+        // Do a CX with the second qubit and the dynamically allocated qubit.
+        let handle = f_build.add_dataflow_op(cx_dynq, vec![q1, q_extra]).unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 2);
+        let q1 = wires[0];
+        let q_extra = wires[1];
+        // Put the other qubits back.
+        let handle = f_build.add_dataflow_op(restore, vec![bblock, q1]).unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 1);
+        let block = wires[0];
+        // Apply a Hadamard gate to the dynamically allocated qubit.
+        let handle = f_build.add_dataflow_op(h_dynq, vec![q_extra]).unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 1);
+        let q_extra = wires[0];
+
+        f_build.finish_with_outputs([block, q_extra])?;
+        let h = module_builder.finish_hugr()?;
+        h.validate()?;
+        Ok(())
+    }
+
+    #[test]
     fn test_serialization() {
-        let block_type = logical_block_type();
-        let measurent_block_type = logical_block_measurement_type();
+        let block_type = block_type();
+        let measurent_block_type = block_measurement_type();
         let measure_z_all = EXTENSION
             .instantiate_extension_op("measure_z_all", [])
             .unwrap();
