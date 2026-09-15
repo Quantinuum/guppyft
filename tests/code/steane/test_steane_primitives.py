@@ -1,7 +1,7 @@
 from typing import Any, no_type_check
 
 import pytest
-from guppylang import guppy
+from guppylang.decorator import expected_qubits, guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.builtins import array
 from guppylang.std.lang import comptime
@@ -100,6 +100,7 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
 
     @guppy
     @no_type_check
+    @expected_qubits(14)
     def impl_func(arr: array[qubit, 7]) -> None:
         block = LogicalBlock(array(arr.take(i) for i in range(7)))
 
@@ -124,6 +125,7 @@ def test_steane_measure_syndromes() -> None:
 
     @guppy
     @no_type_check
+    @expected_qubits(10)
     def impl_func(arr: array[qubit, 7]) -> None:
         block = LogicalBlock(array(arr.take(i) for i in range(7)))
         _measure_syndromes(block)
