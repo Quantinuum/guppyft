@@ -13,7 +13,7 @@ class ToyK2TypesExtension:
     """Extension providing the ToyK2 types."""
 
     def __call__(self) -> Extension:
-        """Returns the ToyK2 types extension"""
+        """Returns the ToyK2 types extension."""
         return load_extension("guppyft.toy_k2.types")
 
     @functools.cached_property
@@ -86,7 +86,7 @@ class ToyK2OpsExtension:
     """Extension providing the ToyK2 logical operations."""
 
     def __call__(self) -> Extension:
-        """Returns the ToyK2 ops extension"""
+        """Returns the ToyK2 ops extension."""
         return load_extension("guppyft.toy_k2.ops", ["guppyft.std.types"])
 
     @functools.cached_property
@@ -163,14 +163,14 @@ class ToyK2OpsExtension:
 
     @functools.cached_property
     def prep_zero_ft_def(self) -> OpDef:
-        """Fault-tolerant preparation of a logical :math:`|00\\rangle` state.
+        r"""Fault-tolerant preparation of a logical :math:`|00\\rangle` state.
 
         This is the generic operation definition. For the instantiated operation, see
         `prep_zero_ft`."""
         return self().get_op("prep_zero_ft")
 
     def prep_zero_ft(self) -> ExtOp:
-        """Fault-tolerant preparation of a logical :math:`|00\\rangle` state."""
+        r"""Fault-tolerant preparation of a logical :math:`|00\\rangle` state."""
         return self.prep_zero_ft_def.instantiate([])
 
     @functools.cached_property
@@ -332,6 +332,54 @@ class ToyK2OpsExtension:
     def h_dynq(self) -> ExtOp:
         """Apply an H gate to a dynamic ToyK2 logical qubit."""
         return self.h_dynq_def.instantiate([])
+
+    @functools.cached_property
+    def s_dynq_def(self) -> OpDef:
+        """Apply an S gate to a dynamic ToyK2 logical qubit.
+
+        This is the generic operation definition. For the instantiated operation,
+        see `s_dynq`."""
+        return self().get_op("s_dynq")
+
+    def s_dynq(self) -> ExtOp:
+        """Apply an S gate to a dynamic ToyK2 logical qubit."""
+        return self.s_dynq_def.instantiate([])
+
+    @functools.cached_property
+    def sdg_dynq_def(self) -> OpDef:
+        """Apply an Sdg gate to a dynamic ToyK2 logical qubit.
+
+        This is the generic operation definition. For the instantiated operation,
+        see `sdg_dynq`."""
+        return self().get_op("sdg_dynq")
+
+    def sdg_dynq(self) -> ExtOp:
+        """Apply an Sdg gate to a dynamic ToyK2 logical qubit."""
+        return self.sdg_dynq_def.instantiate([])
+
+    @functools.cached_property
+    def t_dynq_def(self) -> OpDef:
+        """Apply an T gate to a dynamic ToyK2 logical qubit.
+
+        This is the generic operation definition. For the instantiated operation,
+        see `t_dynq`."""
+        return self().get_op("t_dynq")
+
+    def t_dynq(self) -> ExtOp:
+        """Apply an T gate to a dynamic ToyK2 logical qubit."""
+        return self.t_dynq_def.instantiate([])
+
+    @functools.cached_property
+    def tdg_dynq_def(self) -> OpDef:
+        """Apply an Tdg gate to a dynamic ToyK2 logical qubit.
+
+        This is the generic operation definition. For the instantiated operation,
+        see `tdg_dynq`."""
+        return self().get_op("tdg_dynq")
+
+    def tdg_dynq(self) -> ExtOp:
+        """Apply an Tdg gate to a dynamic ToyK2 logical qubit."""
+        return self.tdg_dynq_def.instantiate([])
 
     @functools.cached_property
     def cx_dynq_def(self) -> OpDef:
