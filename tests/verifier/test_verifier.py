@@ -70,14 +70,14 @@ def test_bell_state_stabilizers() -> None:
     stabilizer_terms = _compute_stabilizers_single_block_unitary(
         code=_identity_code(1),
         clifford_func=steane.specify_identity,
-        default_num_qubits=2,
+        num_qubits=2,
     )
     assert str(stabilizer_terms) == "(+1, X0 X1), (+1, Z0 Z1)"
 
 
 def test_s_state_stabilizers() -> None:
     terms_logical = _compute_stabilizers_single_block_unitary(
-        code=_identity_code(1), clifford_func=steane.specify_s, default_num_qubits=2
+        code=_identity_code(1), clifford_func=steane.specify_s, num_qubits=2
     )
 
     terms_physical = _compute_stabilizers_single_block_unitary(
@@ -92,7 +92,7 @@ def test_compute_stabilizers_double_block() -> None:
     stabilizers = _compute_stabilizers_double_block_unitary(
         code=_identity_code(1),
         clifford_func=steane.specify_identity_double_block,
-        default_num_qubits=4,
+        num_qubits=4,
     )
 
     assert stabilizers == pauli.SignTerms.from_iterable(
