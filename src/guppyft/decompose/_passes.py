@@ -22,12 +22,17 @@ from guppyft.encode import ReplacementCompiler
 
 @dataclass(frozen=True, kw_only=True)
 class ComparatorRzDecomposer(ComposablePass):
-    """Decomposes Rz gates using :math:`2\\lceil(\\log_2(1/\\epsilon))\\rceil` ancilla
+    r"""Decomposes Rz gates using :math:`2\lceil(\log_2(1/\epsilon))\rceil` ancilla
     qubits via comparators and repeat-until-success. Introduces Toffoli gates.
     Can be used to decompose angles at runtime.
     See https://arxiv.org/pdf/2404.05618.
 
-    On a noiseless setting, the probability of success per attempt
+    .. warning::
+
+       Using this pass during encoding can produce runtimes that are too long
+       to run on Helios, leading to timeout errors.
+
+    In a noiseless setting, the probability of success per attempt
     is greater than 0.5. The shot will be discarded if all `max_attempts` fail.
     Hence, the probability of a shot with :math:`g` Rz gates completing
     is greater than :math:`(1 - 0.5^L)^g`, where :math:`L` is `max_attempts`.
@@ -42,8 +47,8 @@ class ComparatorRzDecomposer(ComposablePass):
     max_attempts: int
 
     def num_ancilla(self) -> int:
-        """Number of ancilla qubits required for the
-        target precision (:math:`\\epsilon`)."""
+        r"""Number of ancilla qubits required for the
+        target precision (:math:`\epsilon`)."""
         return n_comparator_based_rz_cascade_ancillas(self.epsilon)
 
     def run(self, hugr: Hugr[Any], *, inplace: bool = True) -> PassResult:
