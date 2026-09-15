@@ -6,10 +6,13 @@ from guppyft.extensions.std import StdOpsExtension, StdTypesExtension
 from guppyft.extensions.steane import SteaneOpsExtension, SteaneTypesExtension
 
 __all__ = [
+    "iceberg",
     "iceberg_ops",
     "iceberg_types",
+    "std",
     "std_ops",
     "std_types",
+    "steane",
     "steane_ops",
     "steane_types",
 ]

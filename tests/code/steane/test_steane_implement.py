@@ -1,6 +1,7 @@
 from guppylang import guppy
 from guppylang.emulator import EmulatorBuilder
 from guppylang.std.platform import result
+from hugr.ops import ExtOp
 
 from guppyft.code.steane.encode import SteaneBuilder
 from guppyft.code.steane.logical import Qubit, cx, h, measure_z, x, z
@@ -14,7 +15,7 @@ def test_qalloc_measure() -> None:
         result("res", measure_z(q).decode())
 
     pkg = main.compile()
-    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg)
+    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg, as_bytes=True)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=8).run().collated_shots()
 
     assert res == [{"res": [0]}]
@@ -29,7 +30,7 @@ def test_x() -> None:
         result("res", measure_z(q).decode())
 
     pkg = main.compile()
-    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg)
+    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg, as_bytes=True)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=8).run().collated_shots()
 
     assert res == [{"res": [1]}]
@@ -46,7 +47,7 @@ def test_h_z() -> None:
         result("res", measure_z(q).decode())
 
     pkg = main.compile()
-    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg)
+    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg, as_bytes=True)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=8).run().collated_shots()
 
     assert res == [{"res": [1]}]
@@ -63,7 +64,7 @@ def test_cx() -> None:
         result("q1", measure_z(q1).decode())
 
     pkg = main.compile()
-    phys_pkg = SteaneBuilder().build(n_blocks=2).implement_ops(pkg)
+    phys_pkg = SteaneBuilder().build(n_blocks=2).implement_ops(pkg, as_bytes=True)
     res = EmulatorBuilder().build(phys_pkg, n_qubits=18).run().collated_shots()
 
     assert res == [{"q0": [1], "q1": [1]}]
@@ -77,7 +78,20 @@ def test_qec_cycle() -> None:
         q.qec_cycle()
         result("q", q.measure_z().decode())
 
-    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(main.compile())
-    res = EmulatorBuilder().build(phys_pkg, n_qubits=10).run().collated_shots()
+    pkg = main.compile()
+    phys_pkg = SteaneBuilder().build(n_blocks=1).implement_ops(pkg)
+
+    hugr = phys_pkg.modules[0]
+    qec_cycle = next(
+        node
+        for node, node_data in hugr.items()
+        if getattr(node_data.op, "f_name", None) == "guppyft.steane._qec_cycle"
+    )
+    assert any(
+        isinstance(hugr[node].op, ExtOp) and "tket.globals.map" in hugr[node].op.name()
+        for node in hugr.descendants(qec_cycle)
+    )
+
+    res = EmulatorBuilder().build(phys_pkg, n_qubits=15).run().collated_shots()
 
     assert res == [{"q": [0]}]

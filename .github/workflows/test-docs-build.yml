@@ -23,7 +23,7 @@ jobs:
 
         - uses: extractions/setup-just@v4
           with:
-            just-version: '1.40.0'
+            just-version: '1.58.0'
 
         - name: Install uv
           uses: astral-sh/setup-uv@v7

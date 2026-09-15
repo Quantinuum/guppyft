@@ -48,11 +48,11 @@ class LogicalMeasurement(Generic[N]):  # type: ignore[misc]
     @guppy
     @no_type_check
     def decode(self: "LogicalMeasurement[N]") -> array[bool, N]:
-        """Decode logical measurement"""
+        """Decode a logical measurement."""
         return decode(self)
 
 
 @hugr_op(_instantiator_for_op(std_ops.decode_def))
 @no_type_check
 def decode(meas: LogicalMeasurement[N]) -> array[bool, N]:
-    """Decode logical measurement"""
+    """Decode a logical measurement."""

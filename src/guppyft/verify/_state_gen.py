@@ -34,10 +34,12 @@ def gen_guppy_state_prep(
     preparing the graph state using the sequence of CZ gates given by its
     adjacency matrix.
 
-    :param tableau: A list of signed Pauli stabilizers.
-    :return: A guppy function definition that prepares the state.
-    """
+    Args:
+        tableau: A list of signed Pauli stabilizers.
 
+    Returns:
+        A Guppy function definition that prepares the state.
+    """
     n_qubits = len(tableau.qubits)
     graph_tableau = tableau.clone()
     sq_gates = convert_to_graph_state(graph_tableau)
@@ -89,10 +91,12 @@ def convert_to_graph_state(tableau: pauli.SignTerms) -> list[SQClifford]:
     The tableau returned is guaranteed to have X only on the diagonal, and all
     other elements are either I or Z, forming a symmetric tableau.
 
-    :param tableau: A list of signed Pauli stabilizers, modified in-place.
-    :return: A list of single qubit gates that convert the input to a graph state.
-    """
+    Args:
+        tableau: A list of signed Pauli stabilizers, modified in place.
 
+    Returns:
+        A list of single-qubit gates that convert the input to a graph state.
+    """
     all_q = list(range(len(tableau.qubits)))
     gates_to_apply = [SQClifford.I for _ in all_q]
 
@@ -154,15 +158,16 @@ def gen_choi_state(
     """Generate a Guppy function that prepares the Choi state of a single block
     Clifford unitary.
 
-    :param code: The stabilizer code.
-    :param clifford_func: A Guppy function which implements a Clifford unitary
-        on a single code block.
-    :param n_blocks: The number of code blocks that the Clifford function
-        acts on.
-    :return: A Guppy function definition that prepares the Choi state on
-        `2*n_blocks` blocks.
-    """
+    Args:
+        code: The stabilizer code.
+        clifford_func: A Guppy function that implements a Clifford unitary on a single
+            code block.
+        n_blocks: The number of code blocks on which the Clifford function acts.
 
+    Returns:
+        A Guppy function definition that prepares the Choi state on `2 * n_blocks`
+        blocks.
+    """
     k = code.num_logical_qubits
     # First, produce the tableau of `k*n_blocks` Bell pairs
     # The qubits are arranged in groups of size `k`:

@@ -3,7 +3,7 @@
 from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from enum import Enum, auto
-from typing import Any, Self, no_type_check
+from typing import Any, Literal, Self, no_type_check, overload
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -145,15 +145,27 @@ class SteaneInstance:
 
     _spec: EncodeSpec
 
-    def encode(self, pkg: Package) -> Package:
+    @overload
+    def encode(self, pkg: Package, *, as_bytes: Literal[False] = False) -> Package: ...
+    @overload
+    def encode(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    def encode(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
         """Encode a computational package with the Steane instance."""
         self.check_may_encode(pkg)
-        return encode(pkg, self._spec)
+        pkg_bytes: Package | bytes = encode(pkg, self._spec, as_bytes=as_bytes)  # type: ignore[call-overload]
+        return pkg_bytes
 
-    def implement_ops(self, pkg: Package) -> Package:
+    @overload
+    def implement_ops(
+        self, pkg: Package, *, as_bytes: Literal[False] = False
+    ) -> Package: ...
+    @overload
+    def implement_ops(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    def implement_ops(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
         """Implement logical ops in `pkg` using this instance's op implementations."""
         assert self._spec.implement_ops is not None
-        return self._spec.implement_ops(pkg)
+        pkg_bytes: Package | bytes = self._spec.implement_ops(pkg, as_bytes=as_bytes)  # type: ignore[call-overload]
+        return pkg_bytes
 
     def check_may_encode(self, hugr: Package) -> None:
         """Check whether any issues can be detected that would arise when trying to
@@ -178,13 +190,10 @@ class SteaneInstance:
             n_qubits: Number of physical qubits available to the emulator.
             builder: Optional `EmulatorBuilder` to use; defaults to a new one.
         """
-        encoded_pkg = self.encode(pkg)
+        encoded_pkg = self.encode(pkg, as_bytes=True)
         if builder is None:
             builder = EmulatorBuilder()
-
-        emulator = builder.build(encoded_pkg, n_qubits)
-
-        return emulator
+        return builder.build(encoded_pkg, n_qubits)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -207,7 +216,6 @@ class SteaneBuilder:
     def _gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
         """Generate the `ImplementOpsSpec` providing Steane implementations of
         logical ops for a program using `n_blocks` logical blocks."""
-
         qec_policy = self._qec_policy
 
         # TODO STATE should be generic for all codes. The methods that are code specific
@@ -217,7 +225,7 @@ class SteaneBuilder:
         @guppy.struct
         class STATE:
             blocks: array[Option[LogicalBlock[7]], comptime(n_blocks)]  # type: ignore[valid-type,type-arg]
-            addr_stack: Stack[tuple[int, int], comptime(n_blocks)]  # type: ignore[valid-type,type-arg]
+            addr_stack: Stack[tuple[int, int], comptime(n_blocks)]  # type: ignore[valid-type]
             qec_counter: array[float, comptime(n_blocks)]  # type: ignore[valid-type]
 
             zero_state_factory: StateFactory[  # type: ignore[valid-type,type-arg]
@@ -322,7 +330,7 @@ class SteaneBuilder:
 
                 return state, q
 
-            return (q,)
+            return map_global(_impl, q)
 
         # TODO Defining the primitives to use the global state requires
         # a lot of "boilerplate" code. We should provide helper methods
@@ -723,7 +731,6 @@ class SteaneBuilder:
     def _gen_encoder_spec(self, n_blocks: int) -> EncodeSpec:
         """Generate the full `EncoderSpec` (logical encoding + op implementations)
         for a program using `n_blocks` logical blocks."""
-
         impl_spec = self._gen_implement_spec(n_blocks)
 
         ext = ExtensionRegistry.from_extensions(
