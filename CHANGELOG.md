@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.2.0](https://github.com/Quantinuum/guppyft/compare/v0.1.2...v0.2.0) (2026-09-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* Make `identity_code` a private function ([#392](https://github.com/Quantinuum/guppyft/issues/392))
+
+### Features
+
+* Return bytes from implement ops and encode ([#382](https://github.com/Quantinuum/guppyft/issues/382)) ([c587e14](https://github.com/Quantinuum/guppyft/commit/c587e14906461fd8090f3802d705df33d14b8a0b))
+
+
+### Bug Fixes
+
+* Call `_impl` function with `map_global` in `qec_cycle` for Steane encoding ([#394](https://github.com/Quantinuum/guppyft/issues/394)) ([84faa3a](https://github.com/Quantinuum/guppyft/commit/84faa3a7ea990ea1cd4bb1be8304c62095a77896))
+
+
+### Documentation
+
+* add changelog and github link to the sphinx docs ([#396](https://github.com/Quantinuum/guppyft/issues/396)) ([bd5e134](https://github.com/Quantinuum/guppyft/commit/bd5e13420e15578e8a98b1add8d691925be46750))
+* Export extension modules to allow API doc generation ([#386](https://github.com/Quantinuum/guppyft/issues/386)) ([5ba0161](https://github.com/Quantinuum/guppyft/commit/5ba0161972751c524cbb34ee9eaeea271e2bd976))
+* Improve the documentation of `verify` and `code_def` modules ([#340](https://github.com/Quantinuum/guppyft/issues/340)) ([d1f137a](https://github.com/Quantinuum/guppyft/commit/d1f137ae241f5b942139fa7ce3098ea62a3b5d9d))
+* Set Ruff `pydocstyle` to Google style and update all docstrings ([#391](https://github.com/Quantinuum/guppyft/issues/391)) ([1a7c67d](https://github.com/Quantinuum/guppyft/commit/1a7c67d366c684429f8388b5832c1ef8a9f96c57))
+
+
+### Code Refactoring
+
+* Make `identity_code` a private function ([#392](https://github.com/Quantinuum/guppyft/issues/392)) ([14fff93](https://github.com/Quantinuum/guppyft/commit/14fff93d1803f220901c18bf56b163de5cdea654))
+
 ## [0.1.2](https://github.com/Quantinuum/guppyft/compare/v0.1.1...v0.1.2) (2026-09-10)
 
 
