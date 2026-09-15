@@ -102,7 +102,7 @@ class StabilizerCode:
     ) -> StabilizerCode:
         r"""Helper to create a :py:class:`StabilizerCode` from lists of Python strings.
 
-        The strings must be defined over the alphabet :math:`\\{I, X, Y, Z\\}` and
+        The strings must be defined over the alphabet :math:`\{I, X, Y, Z\}` and
         must be of length equal to the number of physical qubits.
         A sign may be provided at the front. If a string is missing a sign,
         it is assumed to be positive.

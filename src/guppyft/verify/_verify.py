@@ -493,7 +493,7 @@ def valid_clifford_implementation(
 ) -> bool:
     """Checks whether `impl_function` is a valid implementation of `semantic_function`.
 
-     Validates the implementation of a Clifford function acting one or two code blocks.
+    Validates the implementation of a Clifford function acting one or two code blocks.
 
     Args:
          semantic_function: A Guppy function for semantic action
