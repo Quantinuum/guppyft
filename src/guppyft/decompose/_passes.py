@@ -29,8 +29,8 @@ class ComparatorRzDecomposer(ComposablePass):
 
     .. warning::
 
-       Using this pass during encoding can produce runtimes that are too long
-       to run on Helios, leading to timeout errors.
+        Using this decomposition together with encoding can produce runtimes that are
+        too long to run on Helios, leading to timeout errors.
 
     In a noiseless setting, the probability of success per attempt
     is greater than 0.5. The shot will be discarded if all `max_attempts` fail.
