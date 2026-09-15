@@ -67,6 +67,14 @@ pub enum ToyK2OpDef {
     z_dynq,
     /// H gate on a dynamic logical qubit.
     h_dynq,
+    /// S gate on a dynamic logical qubit.
+    s_dynq,
+    /// Sdg gate on a dynamic logical qubit.
+    sdg_dynq,
+    /// T gate on a dynamic logical qubit.
+    t_dynq,
+    /// Tdg gate on a dynamic logical qubit.
+    tdg_dynq,
     /// CX gate between dynamic logical qubits.
     cx_dynq,
     /// Measure a dynamic logical qubit on the Z basis.
@@ -204,6 +212,10 @@ impl MakeOpDef for ToyK2OpDef {
             x_dynq => sig_dynamic_qubits(1, 1),
             z_dynq => sig_dynamic_qubits(1, 1),
             h_dynq => sig_dynamic_qubits(1, 1),
+            s_dynq => sig_dynamic_qubits(1, 1),
+            sdg_dynq => sig_dynamic_qubits(1, 1),
+            t_dynq => sig_dynamic_qubits(1, 1),
+            tdg_dynq => sig_dynamic_qubits(1, 1),
             cx_dynq => sig_dynamic_qubits(2, 2),
             measure_z_dynq => FuncValueType::new(
                 vec![dynamic_qubit_type()],
@@ -264,7 +276,7 @@ mod tests {
     fn test_toy_k2_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.toy_k2.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 26);
+        assert_eq!(EXTENSION.operations().count(), 30);
     }
 
     #[test]
@@ -299,7 +311,7 @@ mod tests {
     }
 
     #[test]
-    fn test_linear_ops() -> Result<(), Box<dyn Error>> {
+    fn test_linear_block_ops() -> Result<(), Box<dyn Error>> {
         let x = EXTENSION.instantiate_extension_op("x", [])?;
         let z = EXTENSION.instantiate_extension_op("z", [])?;
         let h_all = EXTENSION.instantiate_extension_op("h_all", [])?;
@@ -327,6 +339,38 @@ mod tests {
             .append(cx_transversal, [0, 1])?
             .append(swap_intra, [0])?
             .append(qed_cycle, [1])?;
+        let outs = linear.finish();
+        f_build.finish_with_outputs(outs)?;
+        let h = module_builder.finish_hugr()?;
+        h.validate()?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_linear_dynamic_qubit_ops() -> Result<(), Box<dyn Error>> {
+        let x_dynq = EXTENSION.instantiate_extension_op("x_dynq", [])?;
+        let z_dynq = EXTENSION.instantiate_extension_op("z_dynq", [])?;
+        let h_dynq = EXTENSION.instantiate_extension_op("h_dynq", [])?;
+        let s_dynq = EXTENSION.instantiate_extension_op("s_dynq", [])?;
+        let sdg_dynq = EXTENSION.instantiate_extension_op("sdg_dynq", [])?;
+        let t_dynq = EXTENSION.instantiate_extension_op("t_dynq", [])?;
+        let tdg_dynq = EXTENSION.instantiate_extension_op("tdg_dynq", [])?;
+        let cx_dynq = EXTENSION.instantiate_extension_op("cx_dynq", [])?;
+
+        let mut module_builder = ModuleBuilder::new();
+        let signature = Signature::new_endo(vec![dynamic_qubit_type(); 2]);
+        let mut f_build = module_builder.define_function("main", signature)?;
+        let wires: Vec<_> = f_build.input_wires().collect();
+        let mut linear = f_build.as_circuit(wires);
+        linear
+            .append(x_dynq, [0])?
+            .append(z_dynq, [1])?
+            .append(h_dynq, [0])?
+            .append(s_dynq, [1])?
+            .append(sdg_dynq, [0])?
+            .append(t_dynq, [0])?
+            .append(tdg_dynq, [1])?
+            .append(cx_dynq, [0, 1])?;
         let outs = linear.finish();
         f_build.finish_with_outputs(outs)?;
         let h = module_builder.finish_hugr()?;
