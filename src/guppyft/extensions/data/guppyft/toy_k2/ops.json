@@ -112,7 +112,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "borrowed_block",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             },
@@ -120,7 +120,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
+              "id": "borrowed_block",
               "args": [],
               "bound": "A"
             }
