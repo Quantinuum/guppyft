@@ -16,7 +16,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -68,7 +68,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -120,7 +120,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -141,7 +141,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             },
@@ -149,7 +149,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -159,7 +159,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             },
@@ -167,7 +167,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -362,7 +362,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -415,7 +415,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -425,7 +425,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -529,7 +529,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -547,7 +547,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -673,7 +673,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -712,7 +712,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -743,7 +743,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -753,7 +753,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -774,7 +774,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -784,7 +784,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -836,7 +836,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -846,7 +846,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -867,7 +867,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -877,7 +877,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -942,7 +942,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -952,7 +952,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -1017,7 +1017,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -1027,7 +1027,7 @@
               "t": "Opaque",
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
-              "id": "qubit",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
