@@ -20,7 +20,7 @@ pub const BORROWED_BLOCK_TYPENAME: TypeName = TypeName::new_inline("borrowed_blo
 
 /// Type name for a ToyK2-encoded logical qubit, either extracted from a
 /// block or dynamically allocated.
-pub const QUBIT_TYPENAME: TypeName = TypeName::new_inline("qubit");
+pub const DYNAMIC_QUBIT_TYPENAME: TypeName = TypeName::new_inline("dynamic_qubit");
 
 /// Type name for a measurement of a ToyK2 logical qubit.
 pub const QUBIT_MEASUREMENT_TYPENAME: TypeName = TypeName::new_inline("qubit_measurement");
@@ -59,7 +59,7 @@ pub fn borrowed_block_type() -> Type {
 /// "borrowed" from a logical block, or allocated independently.
 pub fn dynamic_qubit_type() -> Type {
     CustomType::new(
-        QUBIT_TYPENAME,
+        DYNAMIC_QUBIT_TYPENAME,
         [],
         EXTENSION_ID,
         VERSION,
@@ -118,7 +118,7 @@ fn extension() -> Arc<Extension> {
             .unwrap();
         extension
             .add_type(
-                QUBIT_TYPENAME,
+                DYNAMIC_QUBIT_TYPENAME,
                 vec![],
                 "ToyK2 dynamic logical qubit".to_owned(),
                 TypeBound::Linear.into(),

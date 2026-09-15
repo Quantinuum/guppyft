@@ -32,9 +32,9 @@
         "bound": "A"
       }
     },
-    "qubit": {
+    "dynamic_qubit": {
       "extension": "guppyft.toy_k2.types",
-      "name": "qubit",
+      "name": "dynamic_qubit",
       "params": [],
       "description": "ToyK2 dynamic logical qubit",
       "bound": {
