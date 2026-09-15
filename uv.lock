@@ -571,6 +571,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "ipykernel" },
     { name = "maturin" },
     { name = "mypy" },
     { name = "pre-commit" },
@@ -586,6 +587,9 @@ docs = [
     { name = "sphinx" },
     { name = "sphinx-copybutton" },
     { name = "sphinx-tabs" },
+]
+examples = [
+    { name = "ipykernel" },
 ]
 lint = [
     { name = "mypy" },
@@ -611,6 +615,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "ipykernel", specifier = ">=7.3.0" },
     { name = "maturin", specifier = ">=1.15.0,<2" },
     { name = "mypy", specifier = ">=2.3.1" },
     { name = "pre-commit", specifier = ">=4.6.2,<5" },
@@ -620,13 +625,14 @@ dev = [
     { name = "ruff", specifier = ">=0.16.6" },
 ]
 docs = [
-    { name = "ipykernel" },
+    { name = "ipykernel", specifier = ">=7.3.0" },
     { name = "myst-nb", specifier = ">=1.4.0" },
     { name = "quantinuum-sphinx", specifier = ">=1.12.0" },
     { name = "sphinx", specifier = ">=9.1.0" },
     { name = "sphinx-copybutton", specifier = ">=0.5.2" },
     { name = "sphinx-tabs", specifier = ">=3.5.0" },
 ]
+examples = [{ name = "ipykernel", specifier = ">=7.3.0" }]
 lint = [
     { name = "mypy", specifier = ">=2.3.1" },
     { name = "pre-commit", specifier = ">=4.6.2,<5" },
