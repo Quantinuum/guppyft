@@ -11,11 +11,11 @@ from hugr.ops import DataflowOp, ExtOp
 
 def _logical_op(
     op_name: str,
-    extension: Extension,
+    ext: Extension,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], DataflowOp]:
     """Utility method to create HUGR logical ops.
 
-    args:
+    Args:
         op_name: The name of the operation.
         ext: The extension of the operation.
 
@@ -26,7 +26,7 @@ def _logical_op(
 
     def op(ty: ht.FunctionType, inst: Inst, ctx: ToHugrContext) -> DataflowOp:
         return ExtOp(
-            extension.get_op(op_name),
+            ext.get_op(op_name),
             ty,
             [arg.to_hugr(ctx) for arg in inst],
         )

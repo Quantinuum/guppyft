@@ -1,4 +1,4 @@
-"""Guppy structs and definitions for state factories"""
+"""Guppy structs and definitions for state factories."""
 
 from typing import Generic, no_type_check
 
@@ -135,5 +135,6 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]):  # type: ignore[mi
     @guppy
     @no_type_check
     def discard(self: "StateFactory[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]" @ owned) -> None:
+        """Discard all state-preparation candidates in the batch."""
         for blk in self.batch:
             blk.logical_block.discard()

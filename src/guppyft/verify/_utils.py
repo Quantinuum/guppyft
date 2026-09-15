@@ -56,7 +56,7 @@ type ImplementationCliffordUnitaryDouble = GuppyFunctionDefinition[
 
 
 def _convert_pauli(selene_pauli: Pauli) -> pauli.PauliMatrix:
-    "Convert a selene_stim_plugin.state.Pauli to a zixy.qubit.pauli.PauliMatrix."
+    """Convert a selene_stim_plugin.state.Pauli to a zixy.qubit.pauli.PauliMatrix."""
     match selene_pauli:
         case selene_pauli.X:
             return pauli.PauliMatrix.X
@@ -69,7 +69,7 @@ def _convert_pauli(selene_pauli: Pauli) -> pauli.PauliMatrix:
 
 
 def _get_real_phase(selene_phase: Phase) -> Sign:
-    "Convert a selene Pauli phase to zixy. Phase must be real valued."
+    """Convert a selene Pauli phase to zixy. Phase must be real-valued."""
     match selene_phase:
         case Phase.REAL_POSITIVE:
             return Sign(0)
@@ -84,8 +84,11 @@ def _get_real_phase(selene_phase: Phase) -> Sign:
 def selene_stabilizer_to_zixy_signterm(stabilizer: Stabilizer) -> pauli.SignTerm:
     """Convert a selene_stim_plugin.state.Stabilizer to a zixy.qubit.pauli.SignTerm.
 
-    :param stabilizer: A signed pauli Stabilizer in Selene's representation.
-    :return: A Zixy SignTerms instance.
+    Args:
+        stabilizer: A signed Pauli stabilizer in Selene's representation.
+
+    Returns:
+        A Zixy `SignTerm` instance.
     """
     zixy_paulis: tuple[pauli.PauliMatrix, ...] = tuple(
         [_convert_pauli(p) for p in stabilizer.paulis]
@@ -97,10 +100,13 @@ def selene_stabilizer_to_zixy_signterm(stabilizer: Stabilizer) -> pauli.SignTerm
 
 
 def stabilizerlist_to_signterms(stab_list: StabilizerList) -> pauli.SignTerms:
-    """Convert a list of signed Pauli stablizers to zixy's representation.
+    """Convert a list of signed Pauli stabilizers to Zixy's representation.
 
-    :param stab_list: A list of stabilizer's in Selene's representation.
-    :return: a zixy SignTerms instance equivalent to stab_list.
+    Args:
+        stab_list: A list of stabilizers in Selene's representation.
+
+    Returns:
+        A Zixy `SignTerms` instance equivalent to `stab_list`.
     """
     sign_terms = pauli.SignTerms(qubits=len(stab_list.generators[0].paulis))
     for gen in stab_list.generators:
@@ -116,7 +122,7 @@ T = guppy.type_var("T", copyable=False, droppable=False)
 @guppy.struct
 @no_type_check
 class ArraySlicer(Generic[T, N]):  # type: ignore[misc]
-    _queue: Queue[T, N]  # type: ignore[type-arg, valid-type]
+    _queue: Queue[T, N]  # type: ignore[valid-type]
 
     @guppy
     @no_type_check
