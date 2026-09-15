@@ -22,6 +22,26 @@
         "bound": "C"
       }
     },
+    "borrowed_block": {
+      "extension": "guppyft.toy_k2.types",
+      "name": "borrowed_block",
+      "params": [],
+      "description": "ToyK2 borrowed logical block",
+      "bound": {
+        "b": "Explicit",
+        "bound": "A"
+      }
+    },
+    "qubit": {
+      "extension": "guppyft.toy_k2.types",
+      "name": "qubit",
+      "params": [],
+      "description": "ToyK2 dynamic logical qubit",
+      "bound": {
+        "b": "Explicit",
+        "bound": "A"
+      }
+    },
     "qubit_measurement": {
       "extension": "guppyft.toy_k2.types",
       "name": "qubit_measurement",
