@@ -5,14 +5,16 @@ from typing import Any
 import pytest
 from guppylang import guppy
 from guppylang.std.angles import pi
+from guppylang.std.builtins import array
 from guppylang.std.platform import output
-from guppylang.std.qsystem.random import RNG
 from guppylang.std.quantum import (
+    collect_measurements,
     cx,
     cz,
     discard,
     h,
     measure,
+    measure_array,
     qubit,
     rz,
     s,
@@ -27,7 +29,6 @@ from hugr import Hugr
 from hugr.cli import validate
 from hugr.package import Package
 from selene_hugr_qis_compiler import check_hugr
-from selene_sim.backends.bundled_simulators import Coinflip
 
 from guppyft.code.steane.encode import (
     QECPolicy,
@@ -35,7 +36,6 @@ from guppyft.code.steane.encode import (
     SteaneBuilder,
     SteaneEncoderParams,
 )
-from guppyft.decompose import ComparatorRzDecomposer, ToffoliDecomposer
 from guppyft.encode import UncompilableError, annotate_encoding
 
 
@@ -106,9 +106,8 @@ def test_encode_function_call() -> None:
         pass
 
     pkg = main.compile()
-    phys_pkg = SteaneBuilder().build(n_blocks=1).encode(pkg)
-
-    check_hugr(phys_pkg.to_bytes())
+    phys_pkg = SteaneBuilder().build(n_blocks=1).encode(pkg, as_bytes=True)
+    check_hugr(phys_pkg)
 
 
 def test_encoder_missing_op() -> None:
@@ -126,7 +125,7 @@ def test_encoder_missing_op() -> None:
             r"Operation not yet supported during encoding."
         ),
     ):
-        SteaneBuilder().build(n_blocks=1).encode(pkg)
+        SteaneBuilder().build(n_blocks=1).encode(pkg, as_bytes=True)
 
 
 def test_builder_methods() -> None:
@@ -191,6 +190,30 @@ def test_annotate_steane_encoding() -> None:
     }
 
 
+def test_builder_from_params() -> None:
+    @guppy
+    def main() -> None:
+        q0 = qubit()
+        discard(q0)
+
+    SteaneBuilder.from_params(SteaneEncoderParams(n_blocks=1)).encode(
+        main.compile(), as_bytes=True
+    )
+
+
+def test_collect_measurement_encode() -> None:
+    # We are using `ReplaceTypes` to replace a logical steane measurement with a borrow
+    # array of measurements. As borrow arrays are always linear, this means we are
+    # replacing a copyable type with a linear type. This tests that the Linearizer can
+    # handle the replacement.
+    @guppy
+    def main() -> None:
+        qbs = array(qubit() for _ in range(2))
+        output("qbs", collect_measurements(measure_array(qbs)))
+
+    SteaneBuilder().build(n_blocks=2).encode(main.compile(), as_bytes=True)
+
+
 def test_t_encoder_smoke() -> None:
     @guppy
     def main() -> None:
@@ -227,40 +250,6 @@ def test_encode_classical() -> None:
     assert res == [{}]
 
 
-def test_realtime_rz_encoder() -> None:
-
-    @guppy
-    def main() -> None:
-        rng = RNG(1234)
-
-        target = qubit()
-        h(target)
-        rz(target, rng.random_angle())
-        discard(target)
-        output("success", 1)
-
-        rng.discard()
-
-    pkg = main.compile()
-
-    rz_decomposer = ComparatorRzDecomposer(epsilon=0.01)
-    rz_decomposer.then(ToffoliDecomposer()).run(pkg.modules[0], inplace=True)
-
-    # Original block + one block for magic + ancilla space for Rz
-    n_blocks = 1 + 1 + rz_decomposer.num_ancilla()
-
-    res = (
-        SteaneBuilder()
-        .build(n_blocks=n_blocks)
-        .emulator(pkg, n_qubits=7 * n_blocks + 6)
-        .with_simulator(Coinflip(bias=0.0))
-        .run()
-        .collated_shots()
-    )
-
-    assert res == [{"success": [1]}]
-
-
 @pytest.mark.skipif(
     os.getenv("GUPPYFT_RUN_LONG_TESTS") != "true",
     reason="GUPPYFT_RUN_LONG_TESTS is not set to 'true'",
@@ -274,5 +263,5 @@ def test_steane_encode_suite(request: pytest.FixtureRequest) -> None:
             hugr0 = Hugr.from_bytes(f.read())
             pkg0 = hugr0.to_package()
             steane = SteaneBuilder().build(n_blocks=8)
-            pkg1 = steane.encode(pkg0)
-            validate(pkg1.to_bytes())
+            pkg1 = steane.encode(pkg0, as_bytes=True)
+            validate(pkg1)

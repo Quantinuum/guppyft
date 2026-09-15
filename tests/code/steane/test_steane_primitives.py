@@ -10,26 +10,15 @@ from guppylang.std.quantum import cx, cz, h, qubit, s, sdg, x, y, z
 
 from guppyft.code.steane import primitives as steane_primitives
 from guppyft.code.steane.primitives import (
+    CODE_DEF,
     _measure_syndromes,
     knill_qec_cycle,
     prep_zero_non_ft,
     steane_x_qec_cycle,
     steane_z_qec_cycle,
 )
-from guppyft.code.util import LogicalBlock
-from guppyft.code_def import StabilizerCode
-from guppyft.verify import (
-    valid_clifford_implementation,
-)
-
-STEANE_DEF = StabilizerCode.from_python_strings(
-    num_physical_qubits=7,
-    num_logical_qubits=1,
-    distance=3,
-    generators=["XXXXIII", "IXXIXXI", "IIXXIXX", "ZZZZIII", "IZZIZZI", "IIZZIZZ"],
-    x_logicals=["XXXXXXX"],
-    z_logicals=["ZZZZZZZ"],
-)
+from guppyft.std import LogicalBlock
+from guppyft.verify import valid_clifford_implementation
 
 
 @guppy
@@ -58,15 +47,10 @@ def test_knill_qec_without_errors() -> None:
         a1 = prep_zero_non_ft()
         knill_qec_cycle(block, a0, a1)
 
-        for i in range(7):
-            arr.put(block.data_qs.take(i), i)
-        block.discard()
+        block.put_into_array(arr)
 
     assert valid_clifford_implementation(
-        specify_identity,
-        impl_func,
-        code_definition=STEANE_DEF,
-        impl_num_ancillas=14,
+        specify_identity, impl_func, CODE_DEF, impl_num_ancillas=14
     )
 
 
@@ -84,15 +68,10 @@ def test_knill_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
         a1 = prep_zero_non_ft()
         knill_qec_cycle(block, a0, a1)
 
-        for i in range(7):
-            arr.put(block.data_qs.take(i), i)
-        block.discard()
+        block.put_into_array(arr)
 
     assert valid_clifford_implementation(
-        specify_identity,
-        impl_func,
-        code_definition=STEANE_DEF,
-        impl_num_ancillas=14,
+        specify_identity, impl_func, CODE_DEF, impl_num_ancillas=14
     )
 
 
@@ -108,15 +87,10 @@ def test_steane_qec_without_errors() -> None:
         a0 = prep_zero_non_ft()
         steane_z_qec_cycle(block, a0)
 
-        for i in range(7):
-            arr.put(block.data_qs.take(i), i)
-        block.discard()
+        block.put_into_array(arr)
 
     assert valid_clifford_implementation(
-        specify_identity,
-        impl_func,
-        code_definition=STEANE_DEF,
-        impl_num_ancillas=7,
+        specify_identity, impl_func, CODE_DEF, impl_num_ancillas=7
     )
 
 
@@ -136,15 +110,10 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
         a0 = prep_zero_non_ft()
         steane_z_qec_cycle(block, a0)
 
-        for i in range(7):
-            arr.put(block.data_qs.take(i), i)
-        block.discard()
+        block.put_into_array(arr)
 
     assert valid_clifford_implementation(
-        specify_identity,
-        impl_func,
-        code_definition=STEANE_DEF,
-        impl_num_ancillas=7,
+        specify_identity, impl_func, CODE_DEF, impl_num_ancillas=7
     )
 
 
@@ -159,15 +128,11 @@ def test_steane_measure_syndromes() -> None:
     @expected_qubits(10)
     def impl_func(arr: array[qubit, 7]) -> None:
         block = LogicalBlock(array(arr.take(i) for i in range(7)))
-
         _measure_syndromes(block)
-
-        for i in range(7):
-            arr.put(block.data_qs.take(i), i)
-        block.discard()
+        block.put_into_array(arr)
 
     assert valid_clifford_implementation(
-        specify_identity, impl_func, STEANE_DEF, impl_num_ancillas=3
+        specify_identity, impl_func, CODE_DEF, impl_num_ancillas=3
     )
 
 
@@ -197,11 +162,9 @@ def test_steane_1q_primitives(
     def impl_func(arr: array[qubit, 7]) -> None:
         block = LogicalBlock(array(arr.take(i) for i in range(7)))
         implement_def(block)
-        for i in range(7):
-            arr.put(block.data_qs.take(i), i)
-        block.discard()
+        block.put_into_array(arr)
 
-    assert valid_clifford_implementation(specify_func, impl_func, STEANE_DEF)
+    assert valid_clifford_implementation(specify_func, impl_func, CODE_DEF)
 
 
 @pytest.mark.parametrize(
@@ -229,13 +192,10 @@ def test_steane_2q_primitives(
 
         implement_def(blk0, blk1)
 
-        for i in range(7):
-            arr0.put(blk0.data_qs.take(i), i)
-            arr1.put(blk1.data_qs.take(i), i)
-        blk0.discard()
-        blk1.discard()
+        blk0.put_into_array(arr0)
+        blk1.put_into_array(arr1)
 
-    assert valid_clifford_implementation(specify_func, impl_func, STEANE_DEF)
+    assert valid_clifford_implementation(specify_func, impl_func, CODE_DEF)
 
 
 def test_t_gate() -> None:

@@ -1,7 +1,9 @@
+"""Abstractions for constructing QEC architectures."""
+
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol, overload
 
 from guppylang.defs import GuppyFunctionDefinition
 from hugr import Hugr
@@ -49,19 +51,36 @@ class EncodeSpec:
     """Lowers the logical computation to a physical level."""
 
 
+@overload
 def encode(
     hugr: Package | GuppyFunctionDefinition[[], None],
     spec: EncodeSpec,
     *,
     passes: list[ComposablePass] | None = None,
-) -> Package:
+    as_bytes: Literal[False] = False,
+) -> Package: ...
+@overload
+def encode(
+    hugr: Package | GuppyFunctionDefinition[[], None],
+    spec: EncodeSpec,
+    *,
+    passes: list[ComposablePass] | None = None,
+    as_bytes: Literal[True],
+) -> bytes: ...
+def encode(
+    hugr: Package | GuppyFunctionDefinition[[], None],
+    spec: EncodeSpec,
+    *,
+    passes: list[ComposablePass] | None = None,
+    as_bytes: bool = False,
+) -> Package | bytes:
     """
     Encodes the given package (or Guppy function, directly compiled to a package for
     convenience) by applying four stages:
 
     1. running the given computational passes;
     2. lowering the operations in the package to logical operations and
-       potentially performing static optimisations (e.g. resolving some qubit
+       potentially performing static optimizations (e.g. resolving some qubit
        address assignments statically);
     3. running additional logical passes (e.g. inserting additional QEC cycles);
        and
@@ -77,30 +96,35 @@ def encode(
     :return: The encoded runnable package.
     """
 
-    if isinstance(hugr, GuppyFunctionDefinition):
-        hugr = hugr.compile_function()
+    pkg = hugr.compile_function() if isinstance(hugr, GuppyFunctionDefinition) else hugr
 
-    assert len(hugr.modules) == 1, "Given package contains more than one module"
-    assert not isinstance(hugr.modules[0].entrypoint_op(), Module), (
+    assert len(pkg.modules) == 1, "Given package contains more than one module"
+    assert not isinstance(pkg.modules[0].entrypoint_op(), Module), (
         "Cannot process module-rooted HUGRs"
     )
 
     # 1. Passes with computational -> computational
     for tket_pass in passes or [Normalize()]:
-        tket_pass(hugr.modules[0], inplace=True)
+        tket_pass(pkg.modules[0], inplace=True)
 
     # 2. Lower computational -> logical
     if spec.compile is not None:
-        hugr = spec.compile(hugr)
+        pkg = spec.compile(pkg)
 
     # 3. Passes with logical -> logical
     for tket_pass in spec.logical_passes or []:
-        tket_pass(hugr.modules[0], inplace=True)
+        tket_pass(pkg.modules[0], inplace=True)
 
     # 4. Lower logical -> physical
     if spec.implement_ops is not None:
-        hugr = spec.implement_ops(hugr, as_bytes=False)
-    return hugr
+        pkg_maybe_bytes = spec.implement_ops(pkg, as_bytes=as_bytes)  # type: ignore[call-overload]
+    else:
+        pkg_maybe_bytes = pkg
+
+    if isinstance(pkg_maybe_bytes, Package) and as_bytes:
+        pkg_maybe_bytes = pkg_maybe_bytes.to_bytes()
+
+    return pkg_maybe_bytes
 
 
 class EncoderParams(Protocol):
@@ -109,7 +133,7 @@ class EncoderParams(Protocol):
 
     def params(self) -> Mapping[str, Any]:
         """The parameters to annotate on a program. Implementations should return values
-        that support serialisation to JSON."""
+        that support serialization to JSON."""
 
 
 class _MetadataEncoding(Metadata[Mapping[str, Any]]):
@@ -122,7 +146,7 @@ def annotate_encoding(hugr: Package | Hugr[Any], params: EncoderParams) -> None:
     try:
         json.dumps(params.params(), check_circular=True)
     except TypeError as e:
-        raise ValueError("Could not serialise parameters") from e
+        raise ValueError("Could not serialize parameters") from e
 
     for module in hugr.modules if isinstance(hugr, Package) else [hugr]:
         module[module.module_root].metadata[_MetadataEncoding] = {

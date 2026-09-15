@@ -1,24 +1,4 @@
----
-jupytext:
-  text_representation:
-    extension: .md
-    format_name: myst
-kernelspec:
-  name: python3
-  display_name: Python 3
----
-
 # Guppy FT
-
-```{toctree}
-:maxdepth: 1
-:hidden:
-
-getting_started.md
-architecture_dev.md
-examples_index.md
-api/api.md
-```
 
 Guppy FT is an extension of the [Guppy](https://github.com/Quantinuum/guppylang) quantum programming language to aid
 with writing, compiling and running fault-tolerant quantum programs. As a toolkit, it provides:
@@ -27,9 +7,9 @@ with writing, compiling and running fault-tolerant quantum programs. As a toolki
 - transformations through quantum program abstraction layers, from computational to logical to physical;
 - verification tools to validate QEC primitive implementations.
 
-Together, these enable automatic encoding of arbitrary Guppy programs, including measurement-dependent control flow.
+Together, these enable automatic encoding of arbitrary Guppy programs, including measurement dependent control flow.
 
-```{code-cell} ipython3
+```python
 from guppylang import guppy
 from guppylang.std.builtins import owned, output
 from guppylang.std.quantum import cx, h, measure, qubit, x, z
@@ -61,19 +41,26 @@ steane = SteaneBuilder().build(n_blocks=3)
 teleport_encoded = steane.encode(teleport.compile())
 ```
 
-For more examples, see these [notebooks](https://docs.quantinuum.com/guppy/ft/examples_index.html).
+## Documentation
+
+📖 [Getting started][docs]
+
+📒 [Example notebooks][examples]
+
+[examples]: https://docs.quantinuum.com/guppy/ft/examples_index.html
+[docs]: https://docs.quantinuum.com/guppy/ft/getting_started.html
 
 ## Installation
 
-As a Python package, `guppyft` can be installed from [PyPI](https://pypi.org/project/guppyft/) using `pip` or `uv`.
+Guppy FT can be installed from [PyPI](https://pypi.org/project/guppyft/) using `pip`. Requires Python>=3.12.
 
-```{eval-rst}
-.. tabs::
+```bash
+pip install guppyft
+```
 
-   .. code-tab:: shell pip
+## Licence
 
-      pip install guppyft
+This project is licensed under Apache License, Version 2.0 ([LICENCE][]
+or <http://www.apache.org/licenses/LICENSE-2.0>).
 
-   .. code-tab:: shell uv
-
-      uv add guppyft
+[LICENCE]: https://github.com/Quantinuum/guppyft/blob/main/LICENCE
