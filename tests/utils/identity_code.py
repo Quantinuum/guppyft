@@ -28,8 +28,8 @@ def identity_code_spec(
 
     @guppy.struct
     class STATE:
-        blocks: array[Option[qubit], comptime(n_qubits)]  # type: ignore[type-arg,valid-type]
-        addr_stack: Stack[tuple[int, int], comptime(n_qubits)]  # type: ignore[type-arg,valid-type]
+        blocks: array[Option[qubit], comptime(n_qubits)]  # type: ignore[valid-type]
+        addr_stack: Stack[tuple[int, int], comptime(n_qubits)]  # type: ignore[valid-type]
 
         qec_counter: array[int, comptime(n_qubits)]  # type: ignore[valid-type]
 

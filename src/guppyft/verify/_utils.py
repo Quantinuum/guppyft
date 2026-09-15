@@ -116,7 +116,7 @@ T = guppy.type_var("T", copyable=False, droppable=False)
 @guppy.struct
 @no_type_check
 class ArraySlicer(Generic[T, N]):  # type: ignore[misc]
-    _queue: Queue[T, N]  # type: ignore[type-arg, valid-type]
+    _queue: Queue[T, N]  # type: ignore[valid-type]
 
     @guppy
     @no_type_check
