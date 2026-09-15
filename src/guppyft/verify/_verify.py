@@ -154,6 +154,9 @@ def _compute_stabilizers_single_block_unitary(
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
     """
+    num_func_qubits = _get_num_func_qubits(
+        clifford_func, num_qubits, num_ancilla_qubits
+    )
     choi_prep = gen_choi_state(code, clifford_func, 1)
     n = code.num_physical_qubits
 
