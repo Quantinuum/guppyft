@@ -1,3 +1,5 @@
+"""Guppy functions and types for the Iceberg QEC architecture."""
+
 from collections.abc import Callable, Sequence
 from typing import Generic, no_type_check
 
@@ -52,9 +54,12 @@ M = guppy.nat_var("M")
 
 @_custom_block_type(iceberg_types.iceberg_block_def)
 class Block(Generic[N]):  # type: ignore[misc]
+    """An Iceberg logical block containing `N` logical qubits."""
+
     @hugr_op(_iceberg_op("alloc_zero"), effects=[Effect.ANY])
     @no_type_check
-    def __new__() -> "Block[N]": ...
+    def __new__() -> "Block[N]":
+        """Allocate a block in the all-zero logical state."""
 
     @guppy
     @no_type_check
@@ -256,9 +261,12 @@ class Block(Generic[N]):  # type: ignore[misc]
 
 @custom_type(iceberg_types.iceberg_qubit(), copyable=False, droppable=False)
 class Qubit:
+    """A dynamic logical qubit from an Iceberg logical block."""
+
     @hugr_op(_iceberg_op("alloc_dynq"), effects=[Effect.ANY])
     @no_type_check
-    def __new__() -> "Qubit": ...
+    def __new__() -> "Qubit":
+        """Allocate a dynamic logical qubit."""
 
     @guppy
     @no_type_check
@@ -311,6 +319,8 @@ class Qubit:
 
 @_custom_block_type(iceberg_types.iceberg_borrowed_block_def)
 class BorrowedBlock(Generic[N]):  # type: ignore[misc]
+    """A borrowed Iceberg logical block."""
+
     @guppy
     @no_type_check
     def borrow_more(
@@ -328,13 +338,17 @@ class BorrowedBlock(Generic[N]):  # type: ignore[misc]
 
 @_custom_block_type(iceberg_types.iceberg_pre_block_def)
 class PreBlock(Generic[N]):  # type: ignore[misc]
+    """A candidate Iceberg logical block whose preparation may have failed."""
+
     @hugr_op(_iceberg_op("try_alloc_zero"), effects=[Effect.ANY])
     @no_type_check
-    def __new__() -> "PreBlock[N]": ...
+    def __new__() -> "PreBlock[N]":
+        """Attempt to allocate a block in the all-zero logical state."""
 
     @hugr_op(_iceberg_op("check_pre_block"))
     @no_type_check
-    def check(self: "PreBlock[N]" @ owned) -> Option[Block[N]]: ...
+    def check(self: "PreBlock[N]" @ owned) -> Option[Block[N]]:
+        """Check whether state preparation succeeded."""
 
 
 @hugr_op(_iceberg_op("x_d"))

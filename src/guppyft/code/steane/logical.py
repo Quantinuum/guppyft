@@ -52,7 +52,8 @@ class Qubit:
 
     @hugr_op(_steane_op("prep_zero"), effects=[Effect.ANY])
     @no_type_check
-    def __new__() -> "Qubit": ...
+    def __new__() -> "Qubit":
+        """Prepare a logical qubit in the zero state."""
 
     @guppy
     @no_type_check

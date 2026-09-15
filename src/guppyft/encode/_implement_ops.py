@@ -171,15 +171,18 @@ def implement_ops(
 def implement_ops(
     hugr_pkg: Package, spec: ImplementOpsSpec, *, as_bytes: bool = False
 ) -> Package | bytes:
-    """
-    Enriches the given package using the given spec by replacing all operations in the
-    program with function calls to the functions in `spec.ops`.
+    """Enriches the given package using the given spec by replacing all operations in
+    the program with function calls to the functions in `spec.ops`.
 
-    :param hugr_pkg: A package containing a single module.
-    :param spec: The spec for the encoding. See `EnrichmentSpec` for details.
-    :param as_bytes: Whether to return bytes instead of the Package, skipping the final
-        deserialization.
-    :return: The enriched function as an executable HUGR package.
+    Args:
+        hugr_pkg: A package containing a single module.
+        spec: The specification for the operation implementation.
+        as_bytes: Whether to return bytes instead of a `Package`, skipping final
+            deserialization.
+
+    Returns:
+        The enriched function as an executable HUGR package, or its serialized
+        representation when `as_bytes` is `True`.
     """
     assert len(hugr_pkg.modules) == 1
     hugr = hugr_pkg.modules[0]

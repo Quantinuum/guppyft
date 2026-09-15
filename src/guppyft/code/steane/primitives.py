@@ -56,7 +56,6 @@ CODE_DEF = StabilizerCode.from_python_strings(
 def _stabilizer_indices() -> list[list[int]]:
     """Report all support sets that exist in the Steane codes generators. Values are
     unique but reported as a nested list so that Guppy can understand them."""
-
     indices = {
         frozenset([i for i, p in enumerate(gen.cmpnt.get_tuple()) if p != pauli.I])  # type: ignore[attr-defined]
         for gen in CODE_DEF.generators
@@ -119,7 +118,6 @@ def _syndrome_helper(
     reverse_cx: bool @ comptime,
 ) -> None:
     """Helper function to perform the cx operations during syndrome extraction."""
-
     if reverse_cx:
         qlib.cx(blk.data_qs[idx[0]], a[0])
         qlib.cx(a[1], blk.data_qs[idx[1]])
@@ -134,7 +132,6 @@ def _syndrome_helper(
 @no_type_check
 def _measure_syndromes(blk: LogicalBlock[7]) -> array[qlib.Measurement, 6]:
     """Syndrome measurement using Figure 5. from Reichardt arXiv:1804.06995."""
-
     relabel = array(0, 4, 1, 6, 3, 5, 2)
 
     # Prepare ancilla state
@@ -212,7 +209,6 @@ def _prep_h_non_ft() -> LogicalBlock[7]:
     To match with our definition of the code stabilizers, we relabel qubits
     from Fig 3b from top to bottom as: [1, 0, 4, 5, 2, 6, 3]
     """
-
     relabel = array(1, 0, 4, 5, 2, 6, 3)
 
     arr = array(qlib.qubit() for _ in range(7))
@@ -251,7 +247,6 @@ def _prep_h_ft() -> PreBlock[7, 8]:
     Using Fig. 3b from "Minimizing resource overheads for fault-tolerant
     preparation of encoded states of the Steane code" 10.1038/srep19578.
     """
-
     blk = _prep_h_non_ft()
     m_h = _measure_h_operator(blk)
     m_syn = _measure_syndromes(blk)
@@ -424,7 +419,7 @@ def measure_z(blk: LogicalBlock[7] @ owned) -> RawMeasurement[7]:
 @link_name("guppyft.steane.decode")
 @no_type_check
 def decode(m: RawMeasurement[7] @ owned) -> bool:
-    """Decode Steane measurement of logical block"""
+    """Decode Steane measurement of logical block."""
     meas = qlib.collect_measurements(m.measurements)
     synds = _get_syndrome(meas)
     logical_meas = _parity_check(meas)
