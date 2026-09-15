@@ -46,10 +46,12 @@ def test_exported_extensions() -> None:
     assert len(types_extn.operations) == 0
     assert types_extn.types == {
         "block": toy_k2_types.toy_k2_block_def,
+        "borrowed_block": toy_k2_types.toy_k2_borrowed_block_def,
+        "dynamic_qubit": toy_k2_types.toy_k2_dynamic_qubit_def,
         "block_measurement": toy_k2_types.toy_k2_block_measurement_def,
         "qubit_measurement": toy_k2_types.toy_k2_qubit_measurement_def,
     }
-    assert len(ops_extn.operations) == 15
+    assert len(ops_extn.operations) == 30
     for op_name, op_def in ops_extn.operations.items():
         assert op_def == toy_k2_ops.__getattribute__(f"{op_name}_def")
 
@@ -57,7 +59,7 @@ def test_exported_extensions() -> None:
 def test_op_instantiations() -> None:
     ops_extn = toy_k2_ops()
     # No operations take indices
-    assert len(ops_extn.operations) == 15
+    assert len(ops_extn.operations) == 30
     for op_name in ops_extn.operations:
         assert (
             toy_k2_ops.__getattribute__(op_name)().op_def()
@@ -72,6 +74,7 @@ def test_guppy_bindings_smoke() -> None:
 
     @guppy
     def main() -> None:
+        # Ops on blocks
         b0 = k2.Block()
         k2.cx_intra(b0, 1)
         b1 = k2.Block()
@@ -85,6 +88,24 @@ def test_guppy_bindings_smoke() -> None:
         output("magic_bool0", k2.measure_z(magic, 0).decode())
         output("magic_bool1", k2.measure_z(magic, 1).decode())
         k2.free(magic)
+        # Ops on dynamic qubits and borrowed blocks
+        b = k2.Block()
+        bb, q0 = k2.borrow(b, 0)
+        q1 = k2.borrow_more(bb, 1)
+        q_extra = k2.Qubit()
+        k2.x_dynq(q0)
+        k2.z_dynq(q1)
+        k2.h_dynq(q_extra)
+        k2.s_dynq(q0)
+        k2.sdg_dynq(q1)
+        k2.t_dynq(q0)
+        k2.tdg_dynq(q1)
+        k2.cx_dynq(q0, q_extra)
+        output("meas_dynq", k2.measure_z_dynq(q_extra).decode())
+        k2.free_dynq(q_extra)
+        k2.restore_some(bb, q0)
+        b = k2.restore(bb, q1)
+        k2.free(b)
 
     pkg = main.compile()
     h = pkg.modules[0]

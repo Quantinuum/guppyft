@@ -1,3 +1,12 @@
+"""Guppy functions for the logical operations and types for the ToyK2 QEC architecture.
+
+This module contains bindings for the fundamental ops in the HUGR extensions, as well
+as composite operations that comprise multiple logical operations.
+
+The physical implementation for these ops is provided in
+:py:mod:`~guppyft.code.toy_k2.primitives`.
+"""
+
 from collections.abc import Callable
 from typing import no_type_check
 
@@ -17,6 +26,8 @@ _OPS_EXTN = toy_k2_ops()
 def toy_k2_op(
     op_name: str,
 ) -> Callable[[ht.FunctionType, Inst, ToHugrContext], DataflowOp]:
+    """Placeholder."""
+
     def op(ty: ht.FunctionType, inst: Inst, ctx: ToHugrContext) -> DataflowOp:
         return ExtOp(_OPS_EXTN.get_op(op_name), ty, [arg.to_hugr(ctx) for arg in inst])
 
@@ -25,6 +36,8 @@ def toy_k2_op(
 
 @custom_type(toy_k2_types.toy_k2_qubit_measurement(), copyable=True, droppable=True)
 class QubitMeasurement:
+    """Measurement of a logical qubit."""
+
     @hugr_op(toy_k2_op("decode_qubit_measurement"))
     @no_type_check
     def decode(self: "QubitMeasurement") -> bool:
@@ -33,6 +46,8 @@ class QubitMeasurement:
 
 @custom_type(toy_k2_types.toy_k2_block_measurement(), copyable=True, droppable=True)
 class BlockMeasurement:
+    """Measurement of both qubits in a logical block."""
+
     @hugr_op(toy_k2_op("decode_block_measurement"))
     @no_type_check
     def decode(self: "BlockMeasurement") -> tuple[bool, bool]:
@@ -41,10 +56,12 @@ class BlockMeasurement:
 
 @custom_type(toy_k2_types.toy_k2_block(), copyable=False, droppable=False)
 class Block:
+    """A ToyK2 logical block."""
+
     @hugr_op(toy_k2_op("prep_zero_ft"))
     @no_type_check
     def __new__() -> "Block":
-        """Fault-tolerant preparation of a logical :math:`|00\\rangle` state."""
+        r"""Fault-tolerant preparation of a logical :math:`|00\\rangle` state."""
 
     @guppy
     @no_type_check
@@ -125,21 +142,102 @@ class Block:
         swap_intra(self)
 
 
+@custom_type(toy_k2_types.toy_k2_dynamic_qubit(), copyable=False, droppable=False)
+class Qubit:
+    """A dynamic ToyK2 logical qubit."""
+
+    @hugr_op(toy_k2_op("alloc_dynq"))
+    @no_type_check
+    def __new__() -> "Qubit":
+        r"""Dynamic allocation of a logical qubit in the :math:`|0\\rangle` state."""
+
+    @guppy
+    @no_type_check
+    def free(self: "Qubit" @ owned) -> None:
+        """Free the dynamic qubit."""
+        free_dynq(self)
+
+    @guppy
+    @no_type_check
+    def x(self: "Qubit") -> None:
+        """Apply a logical X gate to the dynamic qubit."""
+        x_dynq(self)
+
+    @guppy
+    @no_type_check
+    def z(self: "Qubit") -> None:
+        """Apply a logical Z gate to the dynamic qubit."""
+        z_dynq(self)
+
+    @guppy
+    @no_type_check
+    def h(self: "Qubit") -> None:
+        """Apply a logical Hadamard gate to the dynamic qubit."""
+        h_dynq(self)
+
+    @guppy
+    @no_type_check
+    def s(self: "Qubit") -> None:
+        """Apply a logical S gate to the dynamic qubit."""
+        s_dynq(self)
+
+    @guppy
+    @no_type_check
+    def sdg(self: "Qubit") -> None:
+        """Apply a logical Sdg gate to the dynamic qubit."""
+        sdg_dynq(self)
+
+    @guppy
+    @no_type_check
+    def t(self: "Qubit") -> None:
+        """Apply a logical T gate to the dynamic qubit."""
+        t_dynq(self)
+
+    @guppy
+    @no_type_check
+    def tdg(self: "Qubit") -> None:
+        """Apply a logical Tdg gate to the dynamic qubit."""
+        tdg_dynq(self)
+
+    @guppy
+    @no_type_check
+    def measure_z(self: "Qubit") -> QubitMeasurement:
+        """Measure the dynamic qubit in the Z basis."""
+        return measure_z_dynq(self)
+
+
+@custom_type(toy_k2_types.toy_k2_borrowed_block(), copyable=False, droppable=False)
+class BorrowedBlock:
+    """A borrowed ToyK2 logical block."""
+
+    @guppy
+    @no_type_check
+    def borrow_more(self: "BorrowedBlock", idx: int) -> Qubit:
+        """Extract a logical qubit from the specified index."""
+        return borrow_more(self, idx)
+
+    @guppy
+    @no_type_check
+    def restore_some(self: "BorrowedBlock", qubit: Qubit @ owned) -> None:
+        """Restore a logical qubits to its original block."""
+        restore_some(self, qubit)
+
+
 @hugr_op(toy_k2_op("free"))
 @no_type_check
-def free(blk: "Block" @ owned) -> None:
+def free(blk: Block @ owned) -> None:
     """Free a block."""
 
 
 @hugr_op(toy_k2_op("measure_z"))
 @no_type_check
-def measure_z(blk: "Block", idx: int) -> QubitMeasurement:
+def measure_z(blk: Block, idx: int) -> QubitMeasurement:
     """Measure the chosen qubit in the Z basis."""
 
 
 @hugr_op(toy_k2_op("measure_z_all"))
 @no_type_check
-def measure_z_all(blk: "Block" @ owned) -> BlockMeasurement:
+def measure_z_all(blk: Block @ owned) -> BlockMeasurement:
     """Measure both qubits of the block in the Z basis.
 
     This operation destroys the logical block.
@@ -148,7 +246,7 @@ def measure_z_all(blk: "Block" @ owned) -> BlockMeasurement:
 
 @hugr_op(toy_k2_op("qed_cycle"))
 @no_type_check
-def qed_cycle(blk: "Block") -> None:
+def qed_cycle(blk: Block) -> None:
     """Performs an error detection cycle on the block.
 
     This consists of a syndrome extraction followed by discarding of the
@@ -158,7 +256,7 @@ def qed_cycle(blk: "Block") -> None:
 
 @hugr_op(toy_k2_op("x"))
 @no_type_check
-def x(blk: "Block", idx: int) -> None:
+def x(blk: Block, idx: int) -> None:
     """Logical X gate to the chosen logical qubit.
 
     Args:
@@ -169,7 +267,7 @@ def x(blk: "Block", idx: int) -> None:
 
 @hugr_op(toy_k2_op("z"))
 @no_type_check
-def z(blk: "Block", idx: int) -> None:
+def z(blk: Block, idx: int) -> None:
     """Logical Z gate to the chosen logical qubit.
 
     Args:
@@ -180,7 +278,7 @@ def z(blk: "Block", idx: int) -> None:
 
 @hugr_op(toy_k2_op("h_all"))
 @no_type_check
-def h_all(blk: "Block") -> None:
+def h_all(blk: Block) -> None:
     """Logical Hadamard gate on both logical qubits.
 
     Args:
@@ -190,7 +288,7 @@ def h_all(blk: "Block") -> None:
 
 @hugr_op(toy_k2_op("cx_intra"))
 @no_type_check
-def cx_intra(blk: "Block", target: int) -> None:
+def cx_intra(blk: Block, target: int) -> None:
     """Logical CX within the block, targeting the specified logical qubit.
 
     Args:
@@ -202,7 +300,7 @@ def cx_intra(blk: "Block", target: int) -> None:
 
 @hugr_op(toy_k2_op("cx_transversal"))
 @no_type_check
-def cx_transversal(control: "Block", target: "Block") -> None:
+def cx_transversal(control: Block, target: Block) -> None:
     """Transversal logical CX, namely, two parallel CX gates between the blocks.
 
     Args:
@@ -213,7 +311,7 @@ def cx_transversal(control: "Block", target: "Block") -> None:
 
 @hugr_op(toy_k2_op("swap_intra"))
 @no_type_check
-def swap_intra(blk: "Block") -> None:
+def swap_intra(blk: Block) -> None:
     """Logical SWAP within the block, swapping the two logical qubits.
 
     Args:
@@ -223,7 +321,7 @@ def swap_intra(blk: "Block") -> None:
 
 @hugr_op(toy_k2_op("prep_y_states_non_ft"))
 @no_type_check
-def prep_y_states_non_ft() -> "Block":
+def prep_y_states_non_ft() -> Block:
     r"""Non fault-tolerant preparation of a logical :math:`|Y\rangle|Y\rangle` state.
 
     The architecture uses these states to inject :math:`S` and :math:`S^\dagger` gates.
@@ -232,11 +330,95 @@ def prep_y_states_non_ft() -> "Block":
 
 @hugr_op(toy_k2_op("prep_t_states_non_ft"))
 @no_type_check
-def prep_t_states_non_ft() -> "Block":
+def prep_t_states_non_ft() -> Block:
     r"""Non fault-tolerant preparation of a logical :math:`T|+\rangle T|+\rangle` state.
 
     The architecture uses these states to inject :math:`T` and :math:`T^\dagger` gates.
     """
+
+
+@hugr_op(toy_k2_op("free_dynq"))
+@no_type_check
+def free_dynq(q: Qubit @ owned) -> None:
+    """Free a dynamic logical qubit."""
+
+
+@hugr_op(toy_k2_op("x_dynq"))
+@no_type_check
+def x_dynq(q: Qubit) -> None:
+    """Apply an X gate to a dynamic logical qubit."""
+
+
+@hugr_op(toy_k2_op("z_dynq"))
+@no_type_check
+def z_dynq(q: Qubit) -> None:
+    """Apply a Z gate to a dynamic logical qubit."""
+
+
+@hugr_op(toy_k2_op("h_dynq"))
+@no_type_check
+def h_dynq(q: Qubit) -> None:
+    """Apply a Hadamard gate to a dynamic logical qubit."""
+
+
+@hugr_op(toy_k2_op("s_dynq"))
+@no_type_check
+def s_dynq(q: Qubit) -> None:
+    """Apply an S gate to a dynamic logical qubit."""
+
+
+@hugr_op(toy_k2_op("sdg_dynq"))
+@no_type_check
+def sdg_dynq(q: Qubit) -> None:
+    """Apply an Sdg gate to a dynamic logical qubit."""
+
+
+@hugr_op(toy_k2_op("t_dynq"))
+@no_type_check
+def t_dynq(q: Qubit) -> None:
+    """Apply an T gate to a dynamic logical qubit."""
+
+
+@hugr_op(toy_k2_op("tdg_dynq"))
+@no_type_check
+def tdg_dynq(q: Qubit) -> None:
+    """Apply a Tdg gate to a dynamic logical qubit."""
+
+
+@hugr_op(toy_k2_op("cx_dynq"))
+@no_type_check
+def cx_dynq(control: Qubit, target: Qubit) -> None:
+    """Apply a CX gate to dynamic logical qubits."""
+
+
+@hugr_op(toy_k2_op("measure_z_dynq"))
+@no_type_check
+def measure_z_dynq(q: Qubit) -> QubitMeasurement:
+    """Measure a dynamic logical qubit in the Z basis."""
+
+
+@hugr_op(toy_k2_op("borrow"))
+@no_type_check
+def borrow(block: Block @ owned, idx: int) -> (BorrowedBlock, Qubit):
+    """Extract a logical qubit from the specified index in the block."""
+
+
+@hugr_op(toy_k2_op("borrow_more"))
+@no_type_check
+def borrow_more(block: BorrowedBlock, idx: int) -> Qubit:
+    """Extract an additional logical qubit from the block, from the specified index."""
+
+
+@hugr_op(toy_k2_op("restore_some"))
+@no_type_check
+def restore_some(block: BorrowedBlock, q: Qubit @ owned) -> None:
+    """Restore a previously borrowed logical qubit to its block."""
+
+
+@hugr_op(toy_k2_op("restore"))
+@no_type_check
+def restore(block: BorrowedBlock @ owned, q: Qubit @ owned) -> Block:
+    """Restore a the last of the borrowed logical qubits back to its block."""
 
 
 @guppy
