@@ -13,6 +13,7 @@ from typing import no_type_check
 from guppylang import guppy
 from guppylang.std.lang import owned
 from guppylang_internals.decorator import custom_type, hugr_op
+from guppylang_internals.tys import Effect
 from guppylang_internals.tys.common import ToHugrContext
 from guppylang_internals.tys.subst import Inst
 from hugr import tys as ht
@@ -49,7 +50,7 @@ class Qubit:
     Constructing a ``Qubit`` instance prepares it in the logical zero state.
     """
 
-    @hugr_op(_steane_op("prep_zero"))
+    @hugr_op(_steane_op("prep_zero"), effects=[Effect.ANY])
     @no_type_check
     def __new__() -> "Qubit":
         """Prepare a logical qubit in the zero state."""
@@ -119,13 +120,13 @@ class Qubit:
         tdg(self)
 
 
-@hugr_op(_steane_op("free"))
+@hugr_op(_steane_op("free"), effects=[Effect.ANY])
 @no_type_check
 def free(qubit: "Qubit" @ owned) -> None:
     """Free a qubit."""
 
 
-@hugr_op(_steane_op("measure_z"))
+@hugr_op(_steane_op("measure_z"), effects=[Effect.ANY])
 @no_type_check
 def measure_z(qubit: "Qubit" @ owned) -> Measurement:
     """Destructive measurement of the qubit in the Z basis."""
@@ -173,7 +174,7 @@ def sdg(qubit: "Qubit") -> None:
     """Sdg gate."""
 
 
-@hugr_op(_steane_op("prep_t_state"))
+@hugr_op(_steane_op("prep_t_state"), effects=[Effect.ANY])
 @no_type_check
 def prep_t_state() -> "Qubit":
     r"""Prepare a logical :math:`T\ket{+}` magic state for :math:`T` and
