@@ -237,7 +237,7 @@ def _compute_stabilizers_double_block_unitary(
         discard_array(second_targets)
 
     states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
-        main, 2 * (num_func_qubits + n)
+        main, 2 * num_func_qubits + n
     )
 
     # Using a hack to get the state_output across four code blocks. See the
