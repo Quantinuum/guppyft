@@ -40,6 +40,7 @@ def test_knill_qec_without_errors() -> None:
 
     @guppy
     @no_type_check
+    @expected_qubits(7 + 14)
     def impl_func(arr: array[qubit, 7]) -> None:
         block = LogicalBlock(array(arr.take(i) for i in range(7)))
 
@@ -49,9 +50,7 @@ def test_knill_qec_without_errors() -> None:
 
         block.put_into_array(arr)
 
-    assert valid_clifford_implementation(
-        specify_identity, impl_func, CODE_DEF, impl_num_ancillas=14
-    )
+    assert valid_clifford_implementation(specify_identity, impl_func, CODE_DEF)
 
 
 @pytest.mark.parametrize("error_loc", [0, 1, 2, 3, 4, 5, 6])
@@ -112,9 +111,7 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
 
         block.put_into_array(arr)
 
-    assert valid_clifford_implementation(
-        specify_identity, impl_func, CODE_DEF, impl_num_ancillas=7
-    )
+    assert valid_clifford_implementation(specify_identity, impl_func, CODE_DEF)
 
 
 def test_steane_measure_syndromes() -> None:
@@ -131,9 +128,7 @@ def test_steane_measure_syndromes() -> None:
         _measure_syndromes(block)
         block.put_into_array(arr)
 
-    assert valid_clifford_implementation(
-        specify_identity, impl_func, CODE_DEF, impl_num_ancillas=3
-    )
+    assert valid_clifford_implementation(specify_identity, impl_func, CODE_DEF)
 
 
 @pytest.mark.parametrize(
