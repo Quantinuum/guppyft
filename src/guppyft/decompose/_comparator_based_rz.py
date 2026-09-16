@@ -319,6 +319,8 @@ def comparator_based_rz_cascade(
     """
     if max_attempts <= 0:
         raise ValueError("max_attempts must be a positive integer.")
+    if epsilon <= 0.0 or epsilon >= 1.0:
+        raise ValueError("epsilon must be between 0 and 1 (exclusive).")
     n = 1 + ceil(log2(1 / epsilon))
     n_comparator_ancillas = n_constant_comparator_cascade_ancillas(n)
 
