@@ -33,58 +33,58 @@ from guppyft.verify._utils import (
 
 def _invoke_selene_stim(
     main_function: GuppyFunctionDefinition[[], None],
-    num_qubits: int,
+    n_qubits: int,
     seed: int = 123,
 ) -> dict[str, SeleneStimState]:
     instance = build(main_function.compile())
     seeded_stim_instance = Stim(random_seed=seed)
-    output = instance.run(simulator=seeded_stim_instance, n_qubits=num_qubits)
+    output = instance.run(simulator=seeded_stim_instance, n_qubits=n_qubits)
     return seeded_stim_instance.extract_states_dict(output)
 
 
 def _get_num_func_qubits(
-    func: GuppyFunctionDefinition[Any, Any], num_qubits: int, num_ancilla_qubits: int
+    func: GuppyFunctionDefinition[Any, Any], n_qubits: int, n_ancilla_qubits: int
 ) -> int:
-    if num_ancilla_qubits == 0:
+    if n_ancilla_qubits == 0:
         try:
-            num_qubits = func.wrapped.metadata._node_metadata[  # type: ignore[attr-defined]
+            n_qubits = func.wrapped.metadata._node_metadata[  # type: ignore[attr-defined]
                 "tket.hint.expected_qubits"
             ]
         except KeyError:
-            num_qubits = num_qubits
+            n_qubits = n_qubits
 
-        return num_qubits
+        return n_qubits
     else:
-        return num_qubits + num_ancilla_qubits
+        return n_qubits + n_ancilla_qubits
 
 
 def _compute_stabilizers_single_block_state(
     state_prep_func: SingleBlockState,
-    num_qubits: int,
-    num_ancilla_qubits: int = 0,
+    n_qubits: int,
+    n_ancilla_qubits: int = 0,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation.
 
     Args:
         state_prep_func: A Guppy function that prepares the stabilizer state on a single
             code block.
-        num_qubits: The number of qubits in the state prepared by state_prep_func.
-        num_ancilla_qubits: The number of ancilla qubits used (0 by default).
+        n_qubits: The number of qubits in the state prepared by state_prep_func.
+        n_ancilla_qubits: The number of ancilla qubits used (0 by default).
 
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
     """
-    num_qubits = _get_num_func_qubits(state_prep_func, num_qubits, num_ancilla_qubits)
+    n_qubits = _get_num_func_qubits(state_prep_func, n_qubits, n_ancilla_qubits)
 
     @guppy
     @no_type_check
-    @expected_qubits(num_qubits)
+    @expected_qubits(n_qubits)
     def main() -> None:
         block = state_prep_func()
         state_output("total", block)
         discard_array(block)
 
-    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(main, num_qubits)
+    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(main, n_qubits)
 
     stab_list = states_dict["total"].get_reduced_stabilizers()
     return stabilizerlist_to_signterms(stab_list)
@@ -92,23 +92,21 @@ def _compute_stabilizers_single_block_state(
 
 def _compute_stabilizers_double_block_state(
     state_prep_func: DoubleBlockState,
-    num_qubits: int,
-    num_ancilla_qubits: int = 0,
+    n_qubits: int,
+    n_ancilla_qubits: int = 0,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation.
 
     Args:
         state_prep_func: A Guppy function that prepares the stabilizer state on two code
             blocks.
-        num_qubits: The number of qubits in the state prepared by state_prep_func.
-        num_ancilla_qubits: The number of ancilla qubits used (0 by default).
+        n_qubits: The number of qubits in the state prepared by state_prep_func.
+        n_ancilla_qubits: The number of ancilla qubits used (0 by default).
 
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
     """
-    num_func_qubits = _get_num_func_qubits(
-        state_prep_func, num_qubits, num_ancilla_qubits
-    )
+    num_func_qubits = _get_num_func_qubits(state_prep_func, n_qubits, n_ancilla_qubits)
 
     @guppy
     @no_type_check
@@ -138,8 +136,8 @@ def _compute_stabilizers_double_block_state(
 def _compute_stabilizers_single_block_unitary(
     code: StabilizerCode,
     clifford_func: SingleBlockUnitary,
-    num_qubits: int,
-    num_ancilla_qubits: int = 0,
+    n_qubits: int,
+    n_ancilla_qubits: int = 0,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation.
 
@@ -147,15 +145,13 @@ def _compute_stabilizers_single_block_unitary(
         code: The stabilizer code.
         clifford_func: A Guppy function which implements a Clifford unitary
             on a single code block.
-        num_qubits: The number of qubits taken as input by `clifford_func`.
-        num_ancilla_qubits: The number of ancilla qubits used (0 by default).
+        n_qubits: The number of qubits taken as input by `clifford_func`.
+        n_ancilla_qubits: The number of ancilla qubits used (0 by default).
 
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
     """
-    num_func_qubits = _get_num_func_qubits(
-        clifford_func, num_qubits, num_ancilla_qubits
-    )
+    num_func_qubits = _get_num_func_qubits(clifford_func, n_qubits, n_ancilla_qubits)
     choi_prep = gen_choi_state(code, clifford_func, 1)
     n = code.num_physical_qubits
 
@@ -173,7 +169,7 @@ def _compute_stabilizers_single_block_unitary(
         discard_array(targets)
 
     states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
-        main, num_qubits=num_func_qubits + n
+        main, n_qubits=num_func_qubits + n
     )
 
     # This is a hack so that we can get a state_output over both the
@@ -193,8 +189,8 @@ def _compute_stabilizers_single_block_unitary(
 def _compute_stabilizers_double_block_unitary(
     code: StabilizerCode,
     clifford_func: DoubleBlockUnitary,
-    num_qubits: int,
-    num_ancilla_qubits: int = 0,
+    n_qubits: int,
+    n_ancilla_qubits: int = 0,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford (two code blocks).
 
@@ -202,8 +198,8 @@ def _compute_stabilizers_double_block_unitary(
         code: The stabilizer code.
         clifford_func: A Guppy function which implements a Clifford unitary
             across two code blocks.
-        num_qubits: The number of qubits taken as input by `clifford_func`.
-        num_ancilla_qubits: The number of ancilla qubits used (0 by default).
+        n_qubits: The number of qubits taken as input by `clifford_func`.
+        n_ancilla_qubits: The number of ancilla qubits used (0 by default).
 
 
     Returns:
@@ -212,9 +208,7 @@ def _compute_stabilizers_double_block_unitary(
     choi_prep = gen_choi_state(code, clifford_func, 2)  # type: ignore[arg-type]
     n = code.num_physical_qubits
 
-    num_func_qubits = _get_num_func_qubits(
-        clifford_func, num_qubits, num_ancilla_qubits
-    )
+    num_func_qubits = _get_num_func_qubits(clifford_func, n_qubits, n_ancilla_qubits)
 
     @guppy
     @no_type_check
@@ -238,7 +232,7 @@ def _compute_stabilizers_double_block_unitary(
         discard_array(second_targets)
 
     states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
-        main, 2 * (num_func_qubits + n)
+        main, 2 * num_func_qubits + n
     )
 
     # Using a hack to get the state_output across four code blocks. See the
@@ -294,7 +288,7 @@ def _compute_state_prep_tableaux(
     semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
     code_definition: StabilizerCode,
-    impl_num_ancillas: int = 0,
+    n_impl_ancillas: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
     """Compute tableaux pair for logical state prep on one or two blocks.
 
@@ -309,7 +303,7 @@ def _compute_state_prep_tableaux(
             qubits.
         code_definition: A stabilizer code with well-defined :math:`[[n, k, d]]`
             parameters, stabilizer generators, and logical operators.
-        impl_num_ancillas: The number of ancilla qubits used in the implementation.
+        n_impl_ancillas: The number of ancilla qubits used in the implementation.
             Defaults to zero.
 
     Returns:
@@ -327,7 +321,7 @@ def _compute_state_prep_tableaux(
             implementation_stabilizers = _compute_stabilizers_single_block_state(
                 impl_function,  # type: ignore[arg-type]
                 code_definition.num_physical_qubits,
-                num_ancilla_qubits=impl_num_ancillas,
+                n_ancilla_qubits=n_impl_ancillas,
             )
         case 2:
             # Get the 2k stabilizers for the 2k qubit state.
@@ -339,7 +333,7 @@ def _compute_state_prep_tableaux(
             implementation_stabilizers = _compute_stabilizers_double_block_state(
                 impl_function,  # type: ignore[arg-type]
                 2 * code_definition.num_physical_qubits,
-                num_ancilla_qubits=impl_num_ancillas,
+                n_ancilla_qubits=n_impl_ancillas,
             )
         case _:
             raise TypeError(
@@ -361,7 +355,7 @@ def valid_stabilizer_state_preparation(
     semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
     code_definition: StabilizerCode,
-    impl_num_ancillas: int = 0,
+    n_impl_ancillas: int = 0,
 ) -> bool:
     """Checks whether `impl_function` is a valid implementation of `semantic_function`.
 
@@ -376,7 +370,7 @@ def valid_stabilizer_state_preparation(
             over one or two code blocks.
         code_definition: A stabilizer code with well-defined :math:`[[n, k, d]]`
             parameters, stabilizer generators, and logical operators.
-        impl_num_ancillas: The number of ancilla qubits used in the implementation.
+        n_impl_ancillas: The number of ancilla qubits used in the implementation.
             Defaults to zero.
 
     Returns:
@@ -426,7 +420,7 @@ def valid_stabilizer_state_preparation(
         semantic_function,
         impl_function,
         code_definition,
-        impl_num_ancillas,
+        n_impl_ancillas,
     )
 
     # Canonicalize both Clifford Tableaux so that we can test for equality.
@@ -454,7 +448,7 @@ def _compute_clifford_tableaux(
     semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
     code_definition: StabilizerCode,
-    impl_num_ancillas: int = 0,
+    n_impl_ancillas: int = 0,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
     """Compute a pair of tableaux for a logical Clifford on one or two blocks.
 
@@ -469,7 +463,7 @@ def _compute_clifford_tableaux(
             the semantics on `n` physical qubits.
         code_definition: A stabilizer code with well-defined :math:`[[n, k, d]]`
             parameters, stabilizer generators and logical operators.
-        impl_num_ancillas: The number of ancilla qubits used in the implementation.
+        n_impl_ancillas: The number of ancilla qubits used in the implementation.
             Defaults to zero.
 
     Returns:
@@ -482,28 +476,28 @@ def _compute_clifford_tableaux(
             semantic_choi_stabilizers = _compute_stabilizers_single_block_unitary(
                 _identity_code(code_definition.num_logical_qubits),
                 semantic_function,  # type: ignore[arg-type]
-                num_qubits=2 * (code_definition.num_logical_qubits),
+                n_qubits=2 * (code_definition.num_logical_qubits),
             )
             # Calculate the 2n stabilizers of the Choi state encoding the physical.
             implementation_stabilizers = _compute_stabilizers_single_block_unitary(
                 code_definition,
                 impl_function,  # type: ignore[arg-type]
-                num_qubits=2 * (code_definition.num_physical_qubits),
-                num_ancilla_qubits=impl_num_ancillas,
+                n_qubits=2 * (code_definition.num_physical_qubits),
+                n_ancilla_qubits=n_impl_ancillas,
             )
         case 2:
             # Get the 4k stabilizers for the 4k qubit Choi state encoding the logical.
             semantic_choi_stabilizers = _compute_stabilizers_double_block_unitary(
                 _identity_code(code_definition.num_logical_qubits),
                 semantic_function,  # type: ignore[arg-type]
-                num_qubits=4 * (code_definition.num_logical_qubits),
+                n_qubits=4 * (code_definition.num_logical_qubits),
             )
             # Calculate the 4n stabilizers of the Choi state encoding the physical.
             implementation_stabilizers = _compute_stabilizers_double_block_unitary(
                 code_definition,
                 impl_function,  # type: ignore[arg-type]
-                num_qubits=4 * (code_definition.num_physical_qubits),
-                num_ancilla_qubits=impl_num_ancillas,
+                n_qubits=4 * (code_definition.num_physical_qubits),
+                n_ancilla_qubits=n_impl_ancillas,
             )
         case _:
             raise TypeError(
@@ -525,7 +519,7 @@ def valid_clifford_implementation(
     semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
     code_definition: StabilizerCode,
-    impl_num_ancillas: int = 0,
+    n_impl_ancillas: int = 0,
 ) -> bool:
     """Checks whether `impl_function` is a valid implementation of `semantic_function`.
 
@@ -538,7 +532,7 @@ def valid_clifford_implementation(
              the semantics on one or two code blocks.
          code_definition: A stabilizer code with well defined :math:`[[n, k, d]]`
              parameters, stabilizer generators and logical operators.
-         impl_num_ancillas: The number of ancilla qubits used in the implementation.
+         n_impl_ancillas: The number of ancilla qubits used in the implementation.
              Defaults to zero.
 
     Returns:
@@ -577,7 +571,7 @@ def valid_clifford_implementation(
      assert valid_clifford_implementation(steane_specify_h, steane_impl_h, STEANE_DEF)
     """
     sem_stabilizers, impl_stabilizers = _compute_clifford_tableaux(
-        semantic_function, impl_function, code_definition, impl_num_ancillas
+        semantic_function, impl_function, code_definition, n_impl_ancillas
     )
 
     # Canonicalize both Clifford Tableaux so that we can test for equality.
