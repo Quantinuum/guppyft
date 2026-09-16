@@ -45,6 +45,10 @@ def _invoke_selene_stim(
 def _get_num_func_qubits(
     func: GuppyFunctionDefinition[Any, Any], num_qubits: int, num_ancilla_qubits: int
 ) -> int:
+    # If the user does not specify the impl_num_ancillas argument in the
+    # valid_clifford_implementation or valid_stabilizer_state_preparation,
+    # We check if the @expected_qubits metadata exists and adjust the number of qubits
+    # accordingly
     if num_ancilla_qubits == 0:
         try:
             num_qubits = func.wrapped.metadata._node_metadata[  # type: ignore[attr-defined]
@@ -54,6 +58,8 @@ def _get_num_func_qubits(
             num_qubits = num_qubits
 
         return num_qubits
+    # If the user specifies an impl_num_ancillas argument this will override any
+    # @expected_qubits metadata.
     else:
         return num_qubits + num_ancilla_qubits
 
