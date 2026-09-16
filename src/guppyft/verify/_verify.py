@@ -68,13 +68,12 @@ def _compute_stabilizers_single_block_state(
     Args:
         state_prep_func: A Guppy function that prepares the stabilizer state on a single
             code block.
-        num_selene_qubits: An upper bound for the number of qubits used in
-            `state_prep_func`.
+        num_qubits: The number of qubits in the state prepared by state_prep_func.
+        num_ancilla_qubits: The number of ancilla qubits used (0 by default).
 
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
     """
-
     num_qubits = _get_num_func_qubits(state_prep_func, num_qubits, num_ancilla_qubits)
 
     @guppy
@@ -101,8 +100,8 @@ def _compute_stabilizers_double_block_state(
     Args:
         state_prep_func: A Guppy function that prepares the stabilizer state on two code
             blocks.
-        num_selene_qubits: An upper bound for the number of qubits used in
-            `state_prep_func`.
+        num_qubits: The number of qubits in the state prepared by state_prep_func.
+        num_ancilla_qubits: The number of ancilla qubits used (0 by default).
 
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
@@ -148,8 +147,8 @@ def _compute_stabilizers_single_block_unitary(
         code: The stabilizer code.
         clifford_func: A Guppy function which implements a Clifford unitary
             on a single code block.
-        num_selene_qubits: An upper bound for the number of qubits used in the Choi
-            state for `clifford_func`.
+        num_qubits: The number of qubits taken as input by `clifford_func`.
+        num_ancilla_qubits: The number of ancilla qubits used (0 by default).
 
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
@@ -203,8 +202,9 @@ def _compute_stabilizers_double_block_unitary(
         code: The stabilizer code.
         clifford_func: A Guppy function which implements a Clifford unitary
             across two code blocks.
-        num_selene_qubits: An upper bound for the number of qubits used in the Choi
-            state for `clifford_func`.
+        num_qubits: The number of qubits taken as input by `clifford_func`.
+        num_ancilla_qubits: The number of ancilla qubits used (0 by default).
+
 
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
