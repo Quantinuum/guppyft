@@ -171,6 +171,14 @@ def implement_h(block: array[qubit, 7]) -> None:
 
 @guppy
 @no_type_check
+@expected_qubits(8)
+def implement_h_wasted_qubit(block: array[qubit, 7]) -> None:
+    for i in range(len(block)):
+        h(block[i])
+
+
+@guppy
+@no_type_check
 def specify_h(block: array[qubit, 1]) -> None:
     h(block[0])
 

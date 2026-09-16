@@ -152,3 +152,12 @@ def test_hint_override() -> None:
         code_definition=steane.STEANE_DEF,
         impl_num_ancillas=8,
     )
+
+
+def test_zero_ancilla_override() -> None:
+    assert valid_clifford_implementation(
+        steane.specify_h,
+        steane.implement_h_wasted_qubit,
+        code_definition=steane.STEANE_DEF,
+        impl_num_ancillas=0,
+    )
