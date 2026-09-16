@@ -54,7 +54,7 @@ def _get_num_func_qubits(
     metadata = func.wrapped.metadata._node_metadata  # type: ignore[attr-defined]
     # Return the value specficed in the @expected_qubits metadata
     # If metadata.get("tket.hint.expected_qubits") is None, "num_qubits" is the value.
-    return metadata.get("tket.hint.expected_qubits", num_qubits)
+    return int(metadata.get("tket.hint.expected_qubits", num_qubits))
 
 
 def _compute_stabilizers_single_block_state(
