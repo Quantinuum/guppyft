@@ -10,6 +10,37 @@ Original contribution: @vvandaele (Vivien Vandaele)
 from typing import no_type_check
 
 from guppylang import guppy
+from guppylang.std.angles import pi
+
+
+@guppy
+@no_type_check
+def atan2(y: float, x: float) -> float:
+    """Compute atan2 by inverting tan, then restoring the quadrant.
+
+    Guppy has no built-in atan2; 52 bisections give float64 precision.
+    """
+    if x == 0.0:
+        if y > 0.0:
+            return float(pi) / 2.0
+        if y < 0.0:
+            return -float(pi) / 2.0
+        return 0.0
+    offset = 0.0
+    if x < 0.0:
+        offset = float(pi)
+        if y < 0.0:
+            offset = -float(pi)
+    lo = -float(pi) / 2.0
+    hi = float(pi) / 2.0
+    ratio = y / x
+    for _ in range(52):
+        mid = (lo + hi) / 2.0
+        if tan(mid) < ratio:
+            lo = mid
+        else:
+            hi = mid
+    return (lo + hi) / 2.0 + offset
 
 
 @guppy

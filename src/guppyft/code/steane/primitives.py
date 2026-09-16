@@ -11,11 +11,13 @@ from typing import Generic, no_type_check
 from guppylang import guppy
 from guppylang.library import link_name
 from guppylang.std import quantum as qlib
-from guppylang.std.angles import pi
+from guppylang.std.angles import angle, pi
 from guppylang.std.builtins import Measurement, array, comptime, owned
 from guppylang.std.mem import mem_swap
+from guppylang.std.platform import output, panic
 from zixy.qubit import pauli
 
+from guppyft._math import atan2, floor, tan
 from guppyft.code_def import StabilizerCode
 from guppyft.std import LogicalBlock
 from guppyft.std.state_factory import PreBlock
@@ -23,6 +25,7 @@ from guppyft.std.state_factory import PreBlock
 __all__ = [
     "CODE_DEF",
     "RawMeasurement",
+    "adaptive_rz",
     "cx",
     "cz",
     "decode",
@@ -34,6 +37,7 @@ __all__ = [
     "prep_t_state_ft",
     "prep_zero_ft",
     "prep_zero_non_ft",
+    "rotate_and_correct_rz",
     "s",
     "sdg",
     "steane_x_qec_cycle",
@@ -126,6 +130,25 @@ def _syndrome_helper(
         qlib.cx(a[0], blk.data_qs[idx[0]])
         qlib.cx(blk.data_qs[idx[1]], a[1])
         qlib.cx(blk.data_qs[idx[2]], a[2])
+
+
+@guppy
+@no_type_check
+def _measure_x_syndromes(blk: LogicalBlock[7]) -> array[bool, 3]:
+    """Measure the three X checks with one reusable ancilla.
+
+    - Check order follows CODE_DEF
+    - The checks are unflagged and assume ideal syndrome extraction
+    """
+    syndromes = array(False for _ in range(3))
+    for j, check in comptime(list(enumerate(sorted(_stabilizer_indices())))):
+        ancilla = qlib.qubit()
+        qlib.h(ancilla)
+        for i in check:
+            qlib.cx(ancilla, blk.data_qs[i])
+        qlib.h(ancilla)
+        syndromes[j] = qlib.measure(ancilla).read()
+    return syndromes
 
 
 @guppy.comptime
@@ -493,3 +516,198 @@ def cz(q0: LogicalBlock[7], q1: LogicalBlock[7]) -> None:
     """Logical CZ gate between two Steane blocks."""
     for i in range(7):
         qlib.cz(q0.data_qs[i], q1.data_qs[i])
+
+
+@guppy
+@no_type_check
+def _rz_coherence(
+    physical: float, dephasing: float, nontrivial: bool
+) -> tuple[float, float, float]:
+    """Return (Re eta, Im eta, probability) for one syndrome.
+
+    Steane dephasing model from arXiv:2608.20676, Eqs. (14)-(17).
+
+    - Independent Z errors on each qubit before or after the rotation
+    - Ideal syndrome extraction
+    """
+    t = tan(physical / 2.0)
+    c = (1.0 - t * t) / (1.0 + t * t)
+    s = 2.0 * t / (1.0 + t * t)
+    # Build cos(n * physical) and sin(n * physical) for n = 2, 3, 4, 7.
+    c2 = c * c - s * s
+    s2 = 2.0 * c * s
+    c3 = c2 * c - s2 * s
+    s3 = s2 * c + c2 * s
+    c4 = c2 * c2 - s2 * s2
+    s4 = 2.0 * c2 * s2
+    c7 = c3 * c4 - s3 * s4
+    s7 = s3 * c4 + c3 * s4
+    lam = 1.0 - 2.0 * dephasing
+    lam3 = lam * lam * lam
+    lam4 = lam3 * lam
+    lam7 = lam3 * lam4
+    probability = (4.0 + 7.0 * lam4 * (3.0 + c4)) / 32.0
+    a = 14.0 * lam3
+    b = lam7
+    # All seven nonzero syndromes have the same conditional channel.
+    if nontrivial:
+        a = 2.0 * lam3
+        b = -lam7
+        probability = (1.0 - probability) / 7.0
+    real = ((3.0 * a + 7.0 * b) * c + a * c3 + b * c7) / 64.0
+    imag = ((3.0 * a + 7.0 * b) * s - a * s3 - b * s7) / 64.0
+    return real, imag, probability
+
+
+@guppy
+@no_type_check
+def _rz_channel(
+    physical: float, dephasing: float, nontrivial: bool
+) -> tuple[float, float, float]:
+    """Return logical angle, logical dephasing, and one syndrome's probability."""
+    real, imag, probability = _rz_coherence(physical, dephasing, nontrivial)
+    if probability <= 0.0:
+        return 0.0, 0.0, 0.0
+    # Normalize by the syndrome probability to get the remaining coherence.
+    # Its phase gives the logical angle; its magnitude gives the dephasing.
+    visibility = (real * real + imag * imag) ** 0.5 / probability
+    # Roundoff can put a pure channel's visibility just above one.
+    if visibility > 1.0:
+        visibility = 1.0
+    return -atan2(imag, real), (1.0 - visibility) / 2.0, probability
+
+
+@guppy
+@no_type_check
+def _physical_angle(target: float, dephasing: float) -> float:
+    """Find the physical angle giving a trivial-syndrome rotation of target.
+
+    The branch is monotone for |target| <= pi/4. With no noise, use the
+    half-angle formula to avoid cancellation near zero.
+    """
+    lo = -float(pi) / 4.0
+    hi = float(pi) / 4.0
+    ratio = tan(-target / 2.0)
+    if dephasing != 0.0:
+        ratio = tan(-target)
+    for _ in range(52):
+        mid = (lo + hi) / 2.0
+        if dephasing == 0.0:
+            t = tan(mid / 2.0)
+            t2 = t * t
+            value = t * t2 * (7.0 + t2 * t2) / (1.0 + 7.0 * t2 * t2)
+        else:
+            real, imag, _ = _rz_coherence(mid, dephasing, False)
+            value = imag / real
+        if value < ratio:
+            lo = mid
+        else:
+            hi = mid
+    return (lo + hi) / 2.0
+
+
+@guppy
+@no_type_check
+def rotate_and_correct_rz(blk: LogicalBlock[7], physical_angle: float) -> bool:
+    """Apply transversal Rz, measure the X checks, and correct the block.
+
+    - physical_angle is in radians
+    - Return True for a nonzero syndrome
+    - Uses one ancilla and unflagged X checks
+    """
+    for i in range(7):
+        qlib.rz(blk.data_qs[i], angle(physical_angle / float(pi)))
+    meas = _measure_x_syndromes(blk)
+    syndrome = int(meas[0]) + 2 * int(meas[1]) + 4 * int(meas[2])
+    if syndrome != 0:
+        # Map the three syndrome bits to the qubit needing a Z correction.
+        corrections = array(0, 0, 4, 1, 6, 3, 5, 2)
+        qlib.z(blk.data_qs[corrections[syndrome]])
+    return syndrome != 0
+
+
+@guppy
+@no_type_check
+def adaptive_rz(
+    blk: LogicalBlock[7],
+    phase: float,
+    tolerance: float,
+    max_rounds: int,
+    dephasing: float,
+    max_dephasing: float,
+) -> float:
+    """Apply an adaptive logical Rz and return this call's logical dephasing.
+
+    - phase and tolerance are in radians
+    - dephasing is the physical Z-error probability per qubit per round
+    - max_rounds and max_dephasing limit this call; exceeding either aborts
+
+    Setting dephasing calibrates the controller; it does not add physical errors.
+
+    We target the trivial syndrome and update the remaining angle after each
+    round. Noise accumulates as Q <- Q + q - 2 Q q (arXiv:2510.01319, Eq. (6)),
+    using the Steane channels from arXiv:2608.20676. This assumes ideal Clifford
+    gates and X checks. The block is never reset.
+    """
+    return _adaptive_rz(
+        blk, phase, tolerance, max_rounds, dephasing, max_dephasing, True
+    )
+
+
+@guppy
+@no_type_check
+def _adaptive_rz(
+    blk: LogicalBlock[7],
+    phase: float,
+    tolerance: float,
+    max_rounds: int,
+    dephasing: float,
+    max_dephasing: float,
+    abort_on_dephasing: bool,
+) -> float:
+    """Run the controller, optionally reporting a budget hit and continuing."""
+    if not (tolerance >= 1e-12 and tolerance < 1.0) or max_rounds < 1:
+        panic("Invalid adaptive Rz configuration")
+    if not (dephasing >= 0.0 and dephasing < 0.5):
+        panic("Invalid physical dephasing probability")
+    if not (max_dephasing >= 0.0 and max_dephasing <= 0.5):
+        panic("Invalid logical dephasing budget")
+    # NaN and infinity both make this subtraction NaN.
+    if phase - phase != 0.0:
+        panic("Adaptive Rz requires a finite angle")
+    remaining = phase - 2.0 * float(pi) * float(floor(phase / (2.0 * float(pi))))
+    total_dephasing = 0.0
+    dephasing_limit_hit = False
+    rounds = 0
+    while True:
+        # Use exact S gates for the large part, leaving a residual in [-pi/4, pi/4].
+        while remaining > float(pi) / 4.0:
+            s(blk)
+            remaining -= float(pi) / 2.0
+        while remaining < -float(pi) / 4.0:
+            sdg(blk)
+            remaining += float(pi) / 2.0
+        if -tolerance <= remaining and remaining <= tolerance:
+            return total_dephasing
+        if rounds == max_rounds:
+            panic("Adaptive Rz exceeded max_rounds")
+        # Aim for the target on a zero syndrome; other outcomes need another round.
+        physical = _physical_angle(remaining, dephasing)
+        nontrivial = rotate_and_correct_rz(blk, physical)
+        applied = remaining
+        noise = 0.0
+        if dephasing == 0.0:
+            if nontrivial:
+                applied = 3.0 * physical
+        else:
+            applied, noise, _ = _rz_channel(physical, dephasing, nontrivial)
+        # Independent Z errors compose as q + p - 2*q*p: two Z errors cancel.
+        total_dephasing += noise - 2.0 * total_dephasing * noise
+        if total_dephasing > max_dephasing:
+            if abort_on_dephasing:
+                panic("Adaptive Rz exceeded max_dephasing")
+            if not dephasing_limit_hit:
+                output("adaptive_rz_dephasing_limit_hit", True)
+                dephasing_limit_hit = True
+        remaining -= applied
+        rounds += 1
