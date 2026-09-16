@@ -143,6 +143,8 @@ def test_steane_cx() -> None:
     )
 
 
+# Here we are testing that if impl_num_ancillas and @expected_qubits are specified,
+# impl_num_ancillas number should override the @expected_qubits hint.
 def test_hint_override() -> None:
     assert valid_clifford_implementation(
         steane.specify_identity,
