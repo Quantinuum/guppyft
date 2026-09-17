@@ -62,7 +62,6 @@ def _compute_stabilizers_single_block_state(
         state_prep_func: A Guppy function that prepares the stabilizer state on a single
             code block.
         num_qubits: The number of qubits in the state prepared by state_prep_func.
-        num_ancilla_qubits: The number of ancilla qubits used (0 by default).
 
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
@@ -91,7 +90,6 @@ def _compute_stabilizers_double_block_state(
         state_prep_func: A Guppy function that prepares the stabilizer state on two code
             blocks.
         num_qubits: The number of qubits in the state prepared by state_prep_func.
-        num_ancilla_qubits: The number of ancilla qubits used (0 by default).
 
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
@@ -133,7 +131,6 @@ def _compute_stabilizers_single_block_unitary(
         clifford_func: A Guppy function which implements a Clifford unitary
             on a single code block.
         num_qubits: The number of qubits taken as input by `clifford_func`.
-        num_ancilla_qubits: The number of ancilla qubits used (0 by default).
 
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
@@ -175,7 +172,6 @@ def _compute_stabilizers_double_block_unitary(
     code: StabilizerCode,
     clifford_func: DoubleBlockUnitary,
     num_qubits: int,
-    num_ancilla_qubits: int = 0,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford (two code blocks).
 
@@ -184,8 +180,6 @@ def _compute_stabilizers_double_block_unitary(
         clifford_func: A Guppy function which implements a Clifford unitary
             across two code blocks.
         num_qubits: The number of qubits taken as input by `clifford_func`.
-        num_ancilla_qubits: The number of ancilla qubits used (0 by default).
-
 
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
@@ -286,7 +280,7 @@ def _compute_state_prep_tableaux(
         code_definition: A stabilizer code with well-defined :math:`[[n, k, d]]`
             parameters, stabilizer generators, and logical operators.
         impl_num_ancillas: The number of ancilla qubits used in the implementation.
-            Defaults to zero.
+            Defaults to None.
 
     Returns:
         A pair of stabilizer tableaux made up of signed Pauli terms.
@@ -361,7 +355,7 @@ def valid_stabilizer_state_preparation(
         code_definition: A stabilizer code with well-defined :math:`[[n, k, d]]`
             parameters, stabilizer generators, and logical operators.
         impl_num_ancillas: The number of ancilla qubits used in the implementation.
-            Defaults to zero.
+            Defaults to None.
 
     Returns:
         A Boolean indicating whether the state preparation is valid.
@@ -454,7 +448,7 @@ def _compute_clifford_tableaux(
         code_definition: A stabilizer code with well-defined :math:`[[n, k, d]]`
             parameters, stabilizer generators and logical operators.
         impl_num_ancillas: The number of ancilla qubits used in the implementation.
-            Defaults to zero.
+            Defaults to None.
 
     Returns:
         A pair of Clifford tableaux made up of signed Pauli terms.
@@ -531,7 +525,7 @@ def valid_clifford_implementation(
          code_definition: A stabilizer code with well defined :math:`[[n, k, d]]`
              parameters, stabilizer generators and logical operators.
          impl_num_ancillas: The number of ancilla qubits used in the implementation.
-             Defaults to zero.
+            Defaults to None.
 
     Returns:
          A Boolean indicating whether the implementation is valid.
