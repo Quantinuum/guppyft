@@ -274,7 +274,7 @@ def _compute_state_prep_tableaux(
         code_definition: A stabilizer code with well-defined :math:`[[n, k, d]]`
             parameters, stabilizer generators, and logical operators.
         n_impl_ancillas: The number of ancilla qubits used in the implementation.
-            Defaults to zero.
+            Defaults to None meaning that no ancilla qubits are used by default.
 
     Returns:
         A pair of stabilizer tableaux made up of signed Pauli terms.
@@ -345,7 +345,7 @@ def valid_stabilizer_state_preparation(
         code_definition: A stabilizer code with well-defined :math:`[[n, k, d]]`
             parameters, stabilizer generators, and logical operators.
         n_impl_ancillas: The number of ancilla qubits used in the implementation.
-            Defaults to zero.
+            Defaults to None meaning that no ancilla qubits are used by default.
 
     Returns:
         A Boolean indicating whether the state preparation is valid.
@@ -438,7 +438,7 @@ def _compute_clifford_tableaux(
         code_definition: A stabilizer code with well-defined :math:`[[n, k, d]]`
             parameters, stabilizer generators and logical operators.
         n_impl_ancillas: The number of ancilla qubits used in the implementation.
-            Defaults to zero.
+            Defaults to None meaning that no ancilla qubits are used by default.
 
     Returns:
         A pair of Clifford tableaux made up of signed Pauli terms.
@@ -510,7 +510,7 @@ def valid_clifford_implementation(
          code_definition: A stabilizer code with well defined :math:`[[n, k, d]]`
              parameters, stabilizer generators and logical operators.
          n_impl_ancillas: The number of ancilla qubits used in the implementation.
-             Defaults to zero.
+             Defaults to None meaning that no ancilla qubits are used by default.
 
     Returns:
          A Boolean indicating whether the implementation is valid.
