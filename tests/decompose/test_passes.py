@@ -67,7 +67,7 @@ def test_decompose_rz() -> None:
 
     shots = (
         EmulatorBuilder()
-        .build(pkg, n_qubits=1 + rz_decomposer.num_ancilla())
+        .build(pkg, n_qubits=1 + rz_decomposer.n_ancillas())
         .with_simulator(Quest(random_seed=1234))
         .with_shots(10)
         .run()
