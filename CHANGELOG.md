@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.2.0](https://github.com/Quantinuum/guppyft/compare/v0.1.2...v0.2.0) (2026-09-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* make ancillas argument optional, rename to `n_impl_ancillas` ([#412](https://github.com/Quantinuum/guppyft/issues/412))
+* Replace `num_` prefix with `n_` for consistency ([#409](https://github.com/Quantinuum/guppyft/issues/409))
+* Make `identity_code` a private function ([#392](https://github.com/Quantinuum/guppyft/issues/392))
+
+### Features
+
+* Add `ComparatorRzDecomposer` pass to the `decompose` module ([#401](https://github.com/Quantinuum/guppyft/issues/401)) ([4c94ca9](https://github.com/Quantinuum/guppyft/commit/4c94ca96239eca13d8fef19991f8aefd9ffefb24))
+* Return bytes from implement ops and encode ([#382](https://github.com/Quantinuum/guppyft/issues/382)) ([c587e14](https://github.com/Quantinuum/guppyft/commit/c587e14906461fd8090f3802d705df33d14b8a0b))
+
+
+### Bug Fixes
+
+* Call `_impl` function with `map_global` in `qec_cycle` for Steane encoding ([#394](https://github.com/Quantinuum/guppyft/issues/394)) ([84faa3a](https://github.com/Quantinuum/guppyft/commit/84faa3a7ea990ea1cd4bb1be8304c62095a77896))
+
+
+### Documentation
+
+* add changelog and github link to the sphinx docs ([#396](https://github.com/Quantinuum/guppyft/issues/396)) ([bd5e134](https://github.com/Quantinuum/guppyft/commit/bd5e13420e15578e8a98b1add8d691925be46750))
+* Example notebook to demonstrate `ComparatorRzDecomposer` with Steane architecture ([#403](https://github.com/Quantinuum/guppyft/issues/403)) ([fcd130e](https://github.com/Quantinuum/guppyft/commit/fcd130e312138f7b5f936b331fa58245cd13a266))
+* Export extension modules to allow API doc generation ([#386](https://github.com/Quantinuum/guppyft/issues/386)) ([5ba0161](https://github.com/Quantinuum/guppyft/commit/5ba0161972751c524cbb34ee9eaeea271e2bd976))
+* Fix API references for Steane ([#410](https://github.com/Quantinuum/guppyft/issues/410)) ([6e5ac5f](https://github.com/Quantinuum/guppyft/commit/6e5ac5f24a830d5f78e2b9355bc4cb1978eea507))
+* Improve the documentation of `verify` and `code_def` modules ([#340](https://github.com/Quantinuum/guppyft/issues/340)) ([d1f137a](https://github.com/Quantinuum/guppyft/commit/d1f137ae241f5b942139fa7ce3098ea62a3b5d9d))
+* Recommend using `guppyft.verify` in the architecture developer guide ([#400](https://github.com/Quantinuum/guppyft/issues/400)) ([7ac0c7f](https://github.com/Quantinuum/guppyft/commit/7ac0c7fbcb94baa80561ce8840e5946ea59e9631))
+* Set Ruff `pydocstyle` to Google style and update all docstrings ([#391](https://github.com/Quantinuum/guppyft/issues/391)) ([1a7c67d](https://github.com/Quantinuum/guppyft/commit/1a7c67d366c684429f8388b5832c1ef8a9f96c57))
+
+
+### Code Refactoring
+
+* Make `identity_code` a private function ([#392](https://github.com/Quantinuum/guppyft/issues/392)) ([14fff93](https://github.com/Quantinuum/guppyft/commit/14fff93d1803f220901c18bf56b163de5cdea654))
+* make ancillas argument optional, rename to `n_impl_ancillas` ([#412](https://github.com/Quantinuum/guppyft/issues/412)) ([f5e24f4](https://github.com/Quantinuum/guppyft/commit/f5e24f44380c1773fcede75f5bf1d32b82687b90))
+* Replace `num_` prefix with `n_` for consistency ([#409](https://github.com/Quantinuum/guppyft/issues/409)) ([96ef34e](https://github.com/Quantinuum/guppyft/commit/96ef34e3ed9ea78c7ed7fdd1e16db39f6b51238b))
+
 ## [0.1.2](https://github.com/Quantinuum/guppyft/compare/v0.1.1...v0.1.2) (2026-09-10)
 
 
