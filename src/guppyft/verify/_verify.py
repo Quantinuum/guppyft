@@ -6,6 +6,8 @@ from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.builtins import comptime
 from guppylang.std.debug import state_output
 from guppylang.std.quantum import discard_array
+from guppylang_internals.definition.function import RawFunctionDef
+from guppylang_internals.metadata.common import FunctionMetadata
 from selene_sim.backends import Stim
 from selene_sim.build import build
 from selene_stim_plugin import SeleneStimState
@@ -42,19 +44,12 @@ def _invoke_selene_stim(
     return seeded_stim_instance.extract_states_dict(output)
 
 
-def _get_num_func_qubits(
-    func: GuppyFunctionDefinition[Any, Any], num_qubits: int, num_ancilla_qubits: int
-) -> int:
-    # If the user specifies an impl_num_ancillas argument in
-    # valid_clifford_implementation or valid_stabilizer_state_preparation this
-    #  will override any @expected_qubits metadata.
-    if num_ancilla_qubits > 0:
-        return num_qubits + num_ancilla_qubits
-
-    metadata = func.wrapped.metadata._node_metadata  # type: ignore[attr-defined]
-    # Return the value specficed in the @expected_qubits metadata
-    # If metadata.get("tket.hint.expected_qubits") is None, "num_qubits" is the value.
-    return int(metadata.get("tket.hint.expected_qubits", num_qubits))
+def _extract_expected_qubits_hint(
+    func: GuppyFunctionDefinition[Any, Any],
+) -> int | None:
+    assert isinstance(func.wrapped, RawFunctionDef)
+    assert isinstance(func.wrapped.metadata, FunctionMetadata)
+    return func.wrapped.metadata.get_expected_qubits()
 
 
 def _compute_stabilizers_single_block_state(
@@ -275,7 +270,7 @@ def _compute_state_prep_tableaux(
     semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
     code_definition: StabilizerCode,
-    impl_num_ancillas: int = 0,
+    impl_num_ancillas: int | None = None,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
     """Compute tableaux pair for logical state prep on one or two blocks.
 
@@ -297,17 +292,22 @@ def _compute_state_prep_tableaux(
         A pair of stabilizer tableaux made up of signed Pauli terms.
     """
     num_blocks = _count_blocks_state(semantic_function, impl_function)
+
+    num_hinted_qubits = _extract_expected_qubits_hint(impl_function)
+
+    impl_num_qubits = num_blocks * code_definition.num_physical_qubits
+
+    if num_hinted_qubits and not impl_num_ancillas:
+        impl_num_qubits += num_hinted_qubits - code_definition.num_physical_qubits
+    if impl_num_ancillas is not None:
+        impl_num_qubits += impl_num_ancillas
+
     match num_blocks:
         case 1:
             # Get the k stabilizers for the k qubit state.
             semantic_stabilizers = _compute_stabilizers_single_block_state(
                 semantic_function,  # type: ignore[arg-type]
                 code_definition.num_logical_qubits,
-            )
-            impl_num_qubits = _get_num_func_qubits(
-                func=impl_function,
-                num_qubits=code_definition.num_physical_qubits,
-                num_ancilla_qubits=impl_num_ancillas,
             )
             # Calculate the n stabilizers of the physical state.
             implementation_stabilizers = _compute_stabilizers_single_block_state(
@@ -319,11 +319,6 @@ def _compute_state_prep_tableaux(
             semantic_stabilizers = _compute_stabilizers_double_block_state(
                 semantic_function,  # type: ignore[arg-type]
                 2 * code_definition.num_logical_qubits,
-            )
-            impl_num_qubits = _get_num_func_qubits(
-                func=impl_function,
-                num_qubits=2 * code_definition.num_physical_qubits,
-                num_ancilla_qubits=impl_num_ancillas,
             )
             # Calculate the 2n stabilizers of the physical state.
             implementation_stabilizers = _compute_stabilizers_double_block_state(
@@ -350,7 +345,7 @@ def valid_stabilizer_state_preparation(
     semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
     code_definition: StabilizerCode,
-    impl_num_ancillas: int = 0,
+    impl_num_ancillas: int | None = None,
 ) -> bool:
     """Checks whether `impl_function` is a valid implementation of `semantic_function`.
 
@@ -443,7 +438,7 @@ def _compute_clifford_tableaux(
     semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
     code_definition: StabilizerCode,
-    impl_num_ancillas: int = 0,
+    impl_num_ancillas: int | None = None,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
     """Compute a pair of tableaux for a logical Clifford on one or two blocks.
 
@@ -465,6 +460,16 @@ def _compute_clifford_tableaux(
         A pair of Clifford tableaux made up of signed Pauli terms.
     """
     num_blocks = _count_blocks_unitary(semantic_function, impl_function)
+
+    num_hinted_qubits = _extract_expected_qubits_hint(impl_function)
+
+    impl_num_qubits = 2 * num_blocks * code_definition.num_physical_qubits
+
+    if num_hinted_qubits and not impl_num_ancillas:
+        impl_num_qubits += num_hinted_qubits - code_definition.num_physical_qubits
+    if impl_num_ancillas is not None:
+        impl_num_qubits += impl_num_ancillas
+
     match num_blocks:
         case 1:
             # Get the 2k stabilizers for the 2k qubit Choi state encoding the logical.
@@ -472,11 +477,6 @@ def _compute_clifford_tableaux(
                 _identity_code(code_definition.num_logical_qubits),
                 semantic_function,  # type: ignore[arg-type]
                 num_qubits=2 * (code_definition.num_logical_qubits),
-            )
-            impl_num_qubits = _get_num_func_qubits(
-                func=impl_function,
-                num_qubits=2 * (code_definition.num_physical_qubits),
-                num_ancilla_qubits=impl_num_ancillas,
             )
             # Calculate the 2n stabilizers of the Choi state encoding the physical.
             implementation_stabilizers = _compute_stabilizers_single_block_unitary(
@@ -490,11 +490,6 @@ def _compute_clifford_tableaux(
                 _identity_code(code_definition.num_logical_qubits),
                 semantic_function,  # type: ignore[arg-type]
                 num_qubits=4 * (code_definition.num_logical_qubits),
-            )
-            impl_num_qubits = _get_num_func_qubits(
-                func=impl_function,
-                num_qubits=4 * (code_definition.num_physical_qubits),
-                num_ancilla_qubits=impl_num_ancillas,
             )
             # Calculate the 4n stabilizers of the Choi state encoding the physical.
             implementation_stabilizers = _compute_stabilizers_double_block_unitary(
@@ -522,7 +517,7 @@ def valid_clifford_implementation(
     semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
     code_definition: StabilizerCode,
-    impl_num_ancillas: int = 0,
+    impl_num_ancillas: int | None = None,
 ) -> bool:
     """Checks whether `impl_function` is a valid implementation of `semantic_function`.
 
