@@ -1,6 +1,7 @@
 from typing import no_type_check
 
-from guppylang.decorator import expected_qubits, guppy
+from guppylang import guppy
+from guppylang.decorator import expected_qubits
 from guppylang.std.array import array
 from guppylang.std.quantum import cx, discard, h, measure, measure_array, qubit, s, sdg
 

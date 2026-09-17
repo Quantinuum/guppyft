@@ -1,7 +1,7 @@
 import inspect
 from typing import Any, get_args, get_origin, no_type_check
 
-from guppylang.decorator import guppy
+from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.builtins import comptime
 from guppylang.std.debug import state_output
