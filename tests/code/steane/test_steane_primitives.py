@@ -1,7 +1,6 @@
 from typing import Any, no_type_check
 
 import pytest
-
 from guppylang import guppy
 from guppylang.decorator import expected_qubits
 from guppylang.defs import GuppyFunctionDefinition
