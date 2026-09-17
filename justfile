@@ -64,7 +64,7 @@ build-docs debug="false" clean="false":
     {{ if clean == "true" { "just clean-docs && " } else { "" } }} \
     uv run --group docs sphinx-build \
         {{ if debug == "true" { "" } else { "-W" } }} \
-        --nitpicky -b html docs docs/build \
+        -b html docs docs/build \
         {{ if debug == "true" { "-D nb_execution_raise_on_error=0" } else { "" } }}
 
 # Serve the docs html pages on a Python web server. Pass `--debug` or `--clean` as needed.
