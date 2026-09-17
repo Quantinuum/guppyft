@@ -44,6 +44,8 @@ def _invoke_selene_stim(
     return seeded_stim_instance.extract_states_dict(output)
 
 
+# Helper to extract the number of qubits in an impl function specified
+#  by the @expected_qubits hint. If no hint is given, returns None
 def _extract_expected_qubits_hint(
     func: GuppyFunctionDefinition[Any, Any],
 ) -> int | None:
