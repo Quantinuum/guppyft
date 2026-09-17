@@ -168,7 +168,7 @@ def gen_choi_state(
         A Guppy function definition that prepares the Choi state on `2 * n_blocks`
         blocks.
     """
-    k = code.num_logical_qubits
+    k = code.n_logical_qubits
     # First, produce the tableau of `k*n_blocks` Bell pairs
     # The qubits are arranged in groups of size `k`:
     #   (block0_input, block0_output, block1_input, block1_output, ...)
