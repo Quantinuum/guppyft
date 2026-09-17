@@ -60,7 +60,6 @@ def _get_num_func_qubits(
 def _compute_stabilizers_single_block_state(
     state_prep_func: SingleBlockState,
     num_qubits: int,
-    num_ancilla_qubits: int = 0,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation.
 
@@ -73,7 +72,6 @@ def _compute_stabilizers_single_block_state(
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
     """
-    num_qubits = _get_num_func_qubits(state_prep_func, num_qubits, num_ancilla_qubits)
 
     @guppy
     @no_type_check
@@ -91,7 +89,6 @@ def _compute_stabilizers_single_block_state(
 def _compute_stabilizers_double_block_state(
     state_prep_func: DoubleBlockState,
     num_qubits: int,
-    num_ancilla_qubits: int = 0,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation.
 
@@ -104,9 +101,6 @@ def _compute_stabilizers_double_block_state(
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
     """
-    num_func_qubits = _get_num_func_qubits(
-        state_prep_func, num_qubits, num_ancilla_qubits
-    )
 
     @guppy
     @no_type_check
@@ -119,7 +113,7 @@ def _compute_stabilizers_double_block_state(
         discard_array(block0)
         discard_array(block1)
 
-    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(main, num_func_qubits)
+    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(main, num_qubits)
 
     # This is a hack so that we can get a state_output over both blocks
     total = states_dict["total"]
@@ -136,7 +130,6 @@ def _compute_stabilizers_single_block_unitary(
     code: StabilizerCode,
     clifford_func: SingleBlockUnitary,
     num_qubits: int,
-    num_ancilla_qubits: int = 0,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation.
 
@@ -150,9 +143,6 @@ def _compute_stabilizers_single_block_unitary(
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
     """
-    num_func_qubits = _get_num_func_qubits(
-        clifford_func, num_qubits, num_ancilla_qubits
-    )
     choi_prep = gen_choi_state(code, clifford_func, 1)
     n = code.num_physical_qubits
 
@@ -169,7 +159,7 @@ def _compute_stabilizers_single_block_unitary(
         discard_array(targets)
 
     states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
-        main, num_qubits=num_func_qubits + n
+        main, num_qubits=num_qubits + n
     )
 
     # This is a hack so that we can get a state_output over both the
@@ -208,10 +198,6 @@ def _compute_stabilizers_double_block_unitary(
     choi_prep = gen_choi_state(code, clifford_func, 2)  # type: ignore[arg-type]
     n = code.num_physical_qubits
 
-    num_func_qubits = _get_num_func_qubits(
-        clifford_func, num_qubits, num_ancilla_qubits
-    )
-
     @guppy
     @no_type_check
     def main() -> None:
@@ -233,7 +219,7 @@ def _compute_stabilizers_double_block_unitary(
         discard_array(second_targets)
 
     states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
-        main, 2 * num_func_qubits + n
+        main, 2 * num_qubits + n
     )
 
     # Using a hack to get the state_output across four code blocks. See the
@@ -318,11 +304,15 @@ def _compute_state_prep_tableaux(
                 semantic_function,  # type: ignore[arg-type]
                 code_definition.num_logical_qubits,
             )
+            impl_num_qubits = _get_num_func_qubits(
+                func=impl_function,
+                num_qubits=code_definition.num_physical_qubits,
+                num_ancilla_qubits=impl_num_ancillas,
+            )
             # Calculate the n stabilizers of the physical state.
             implementation_stabilizers = _compute_stabilizers_single_block_state(
                 impl_function,  # type: ignore[arg-type]
-                code_definition.num_physical_qubits,
-                num_ancilla_qubits=impl_num_ancillas,
+                impl_num_qubits,
             )
         case 2:
             # Get the 2k stabilizers for the 2k qubit state.
@@ -330,11 +320,15 @@ def _compute_state_prep_tableaux(
                 semantic_function,  # type: ignore[arg-type]
                 2 * code_definition.num_logical_qubits,
             )
+            impl_num_qubits = _get_num_func_qubits(
+                func=impl_function,
+                num_qubits=2 * code_definition.num_physical_qubits,
+                num_ancilla_qubits=impl_num_ancillas,
+            )
             # Calculate the 2n stabilizers of the physical state.
             implementation_stabilizers = _compute_stabilizers_double_block_state(
                 impl_function,  # type: ignore[arg-type]
-                2 * code_definition.num_physical_qubits,
-                num_ancilla_qubits=impl_num_ancillas,
+                impl_num_qubits,
             )
         case _:
             raise TypeError(
@@ -479,12 +473,16 @@ def _compute_clifford_tableaux(
                 semantic_function,  # type: ignore[arg-type]
                 num_qubits=2 * (code_definition.num_logical_qubits),
             )
+            impl_num_qubits = _get_num_func_qubits(
+                func=impl_function,
+                num_qubits=2 * (code_definition.num_physical_qubits),
+                num_ancilla_qubits=impl_num_ancillas,
+            )
             # Calculate the 2n stabilizers of the Choi state encoding the physical.
             implementation_stabilizers = _compute_stabilizers_single_block_unitary(
                 code_definition,
                 impl_function,  # type: ignore[arg-type]
-                num_qubits=2 * (code_definition.num_physical_qubits),
-                num_ancilla_qubits=impl_num_ancillas,
+                num_qubits=impl_num_qubits,
             )
         case 2:
             # Get the 4k stabilizers for the 4k qubit Choi state encoding the logical.
@@ -493,12 +491,16 @@ def _compute_clifford_tableaux(
                 semantic_function,  # type: ignore[arg-type]
                 num_qubits=4 * (code_definition.num_logical_qubits),
             )
+            impl_num_qubits = _get_num_func_qubits(
+                func=impl_function,
+                num_qubits=4 * (code_definition.num_physical_qubits),
+                num_ancilla_qubits=impl_num_ancillas,
+            )
             # Calculate the 4n stabilizers of the Choi state encoding the physical.
             implementation_stabilizers = _compute_stabilizers_double_block_unitary(
                 code_definition,
                 impl_function,  # type: ignore[arg-type]
-                num_qubits=4 * (code_definition.num_physical_qubits),
-                num_ancilla_qubits=impl_num_ancillas,
+                num_qubits=impl_num_qubits,
             )
         case _:
             raise TypeError(
