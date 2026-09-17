@@ -152,9 +152,7 @@ def _compute_stabilizers_single_block_unitary(
         discard_array(controls)
         discard_array(targets)
 
-    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
-        main, num_qubits=num_qubits + n
-    )
+    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(main, num_qubits)
 
     # This is a hack so that we can get a state_output over both the
     #  control and target registers. Currently state result doesn't support passing
@@ -209,9 +207,7 @@ def _compute_stabilizers_double_block_unitary(
         discard_array(second_controls)
         discard_array(second_targets)
 
-    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
-        main, 2 * num_qubits + n
-    )
+    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(main, num_qubits)
 
     # Using a hack to get the state_output across four code blocks. See the
     # comment in compute_stabilizers_single_block_unitary for more info.
@@ -291,12 +287,13 @@ def _compute_state_prep_tableaux(
 
     num_hinted_qubits = _extract_expected_qubits_hint(impl_function)
 
-    impl_num_qubits = num_blocks * code_definition.num_physical_qubits
+    num_stab_qubits = num_blocks * code_definition.num_physical_qubits
 
-    if num_hinted_qubits and not impl_num_ancillas:
-        impl_num_qubits += num_hinted_qubits - code_definition.num_physical_qubits
     if impl_num_ancillas is not None:
-        impl_num_qubits += impl_num_ancillas
+        num_stab_qubits += impl_num_ancillas
+
+    if impl_num_ancillas is None and num_hinted_qubits is not None:
+        num_stab_qubits = num_hinted_qubits
 
     match num_blocks:
         case 1:
@@ -308,7 +305,7 @@ def _compute_state_prep_tableaux(
             # Calculate the n stabilizers of the physical state.
             implementation_stabilizers = _compute_stabilizers_single_block_state(
                 impl_function,  # type: ignore[arg-type]
-                impl_num_qubits,
+                num_stab_qubits,
             )
         case 2:
             # Get the 2k stabilizers for the 2k qubit state.
@@ -319,7 +316,7 @@ def _compute_state_prep_tableaux(
             # Calculate the 2n stabilizers of the physical state.
             implementation_stabilizers = _compute_stabilizers_double_block_state(
                 impl_function,  # type: ignore[arg-type]
-                impl_num_qubits,
+                num_stab_qubits,
             )
         case _:
             raise TypeError(
@@ -459,12 +456,13 @@ def _compute_clifford_tableaux(
 
     num_hinted_qubits = _extract_expected_qubits_hint(impl_function)
 
-    impl_num_qubits = 2 * num_blocks * code_definition.num_physical_qubits
+    num_choi_qubits = 2 * num_blocks * code_definition.num_physical_qubits
 
-    if num_hinted_qubits and not impl_num_ancillas:
-        impl_num_qubits += num_hinted_qubits - code_definition.num_physical_qubits
     if impl_num_ancillas is not None:
-        impl_num_qubits += impl_num_ancillas
+        num_choi_qubits += impl_num_ancillas
+
+    if impl_num_ancillas is None and num_hinted_qubits is not None:
+        num_choi_qubits = 2 * num_hinted_qubits
 
     match num_blocks:
         case 1:
@@ -478,7 +476,7 @@ def _compute_clifford_tableaux(
             implementation_stabilizers = _compute_stabilizers_single_block_unitary(
                 code_definition,
                 impl_function,  # type: ignore[arg-type]
-                num_qubits=impl_num_qubits,
+                num_qubits=num_choi_qubits,
             )
         case 2:
             # Get the 4k stabilizers for the 4k qubit Choi state encoding the logical.
@@ -491,7 +489,7 @@ def _compute_clifford_tableaux(
             implementation_stabilizers = _compute_stabilizers_double_block_unitary(
                 code_definition,
                 impl_function,  # type: ignore[arg-type]
-                num_qubits=impl_num_qubits,
+                num_qubits=num_choi_qubits,
             )
         case _:
             raise TypeError(
