@@ -281,7 +281,7 @@ def _compute_state_prep_tableaux(
     """
     num_blocks = _count_blocks_state(semantic_function, impl_function)
 
-    n_stab_qubits = 2 * num_blocks * code_definition.n_physical_qubits
+    n_stab_qubits = num_blocks * code_definition.n_physical_qubits
 
     if n_impl_ancillas is not None:
         n_stab_qubits += n_impl_ancillas
