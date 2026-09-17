@@ -40,7 +40,7 @@ def test_knill_qec_without_errors() -> None:
 
     @guppy
     @no_type_check
-    @expected_qubits(7 + 14)
+    @expected_qubits(7 + 14)  # 7 data qubits, 14 ancillas
     def impl_func(arr: array[qubit, 7]) -> None:
         block = LogicalBlock(array(arr.take(i) for i in range(7)))
 
