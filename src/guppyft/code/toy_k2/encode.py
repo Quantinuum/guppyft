@@ -203,7 +203,7 @@ class ToyK2Builder:
 
             @guppy
             @no_type_check
-            def discard(self) -> None:
+            def discard(self: Self @ owned) -> None:
                 """Discard the runtime block, releasing any resources."""
                 self.logical_block.discard()
 
@@ -260,9 +260,10 @@ class ToyK2Builder:
                 free the block if it is fully restored."""
                 blk_id, qb_id = addr
                 # Restore the block's address
-                self.blocks[blk_id].restore_addr(qb_id)
+                blk = self.take_block(blk_id)
+                blk.restore_addr(qb_id)
                 # Check if the block is fully restored
-                if not self.blocks[blk_id].is_borrowed():
+                if not blk.is_borrowed():
                     # Release the runtime block
                     logical_block = self.release_block(blk_id)
                     # Free the logical block
@@ -272,13 +273,17 @@ class ToyK2Builder:
                     # structure with fast deletion (e.g. a set).
                     # Generally, this stack will be small, though, so it
                     # shouldn't be a performance bottleneck.
-                    aux_stack: Stack[int, comptime(n_blocks)] = empty_stack()
+                    aux_stack: Stack[tuple[int, int], comptime(n_blocks)] = (
+                        empty_stack()
+                    )
                     for _ in range(len(self.avail_dyn_addrs)):
                         addr = self.avail_dyn_addrs.pop()
                         if addr[0] != blk_id:
                             aux_stack.push(addr)
                     for addr in aux_stack:
                         self.avail_dyn_addrs.push(addr)
+
+                self.put_block(blk_id, blk)
 
             @guppy
             @no_type_check
@@ -289,7 +294,7 @@ class ToyK2Builder:
                     blk_id, qb_id = self.avail_dyn_addrs.pop()
                 else:
                     # Otherwise, prepare a new block
-                    logical_block = k2_primitives.prep_zero_ft()
+                    logical_block = k2_primitives.prep_zero_ft().force_check().unwrap()
                     blk_id = self.allocate_block(logical_block)
                     # The first address will be returned
                     qb_id = 0
@@ -297,7 +302,9 @@ class ToyK2Builder:
                     self.avail_dyn_addrs.push((blk_id, 1))
 
                 # Borrow the selected address from the dynamic block
-                self.blocks[blk_id].borrow_addr(qb_id)
+                blk = self.take_block(blk_id)
+                blk.borrow_addr(qb_id)
+                self.put_block(blk_id, blk)
 
                 return blk_id, qb_id
 
@@ -309,15 +316,15 @@ class ToyK2Builder:
                 op_cost: float,
             ) -> None:
                 for i in blk_ids:
-                    self.blocks[i].qed_counter += op_cost
+                    blk = self.take_block(i)
+                    blk.qed_counter += op_cost
 
-                    if self.blocks[i].qed_counter >= comptime(qed_policy.threshold):
-                        blk = self.take_block(i)
-
+                    if blk.qed_counter >= comptime(qed_policy.threshold):
                         k2_primitives.qed_cycle(blk.logical_block)
 
-                        self.put_block(i, blk)
-                        self.blocks[i].qed_counter = 0.0
+                        blk.qed_counter = 0.0
+
+                    self.put_block(i, blk)
 
         # TODO: The output order of borrow is flipped with respect to borrow_more
         # for no good reason. The ordering in borrow_more is forced because
@@ -332,10 +339,13 @@ class ToyK2Builder:
             def _impl(
                 state: STATE @ owned, blk_id: int, qb_id: int
             ) -> tuple[STATE, int, tuple[int, int]]:
-                state.blocks[blk_id].borrow_addr(qb_id)
+                blk = state.blocks.take(blk_id).unwrap()
+                blk.borrow_addr(qb_id)
+                state.blocks.put(some(blk), blk_id)
                 return state, blk_id, (blk_id, qb_id)
 
-            return map_global(_impl, blk_id, qb_id)
+            map_global(_impl, blk_id, qb_id)
+            return blk_id, (blk_id, qb_id)
 
         @guppy
         @no_type_check
@@ -346,11 +356,14 @@ class ToyK2Builder:
             @no_type_check
             def _impl(
                 state: STATE @ owned, blk_id: int, qb_id: int
-            ) -> tuple[STATE, int, tuple[int, int]]:
-                state.blocks[blk_id].borrow_addr(qb_id)
-                return state, (blk_id, qb_id), blk_id
+            ) -> tuple[STATE, tuple[int, int]]:
+                blk = state.blocks.take(blk_id).unwrap()
+                blk.borrow_addr(qb_id)
+                state.blocks.put(some(blk), blk_id)
+                return state, (blk_id, qb_id)
 
-            return map_global(_impl, blk_id, qb_id)
+            map_global(_impl, blk_id, qb_id)
+            return (blk_id, qb_id), blk_id
 
         @guppy
         @no_type_check
@@ -362,7 +375,9 @@ class ToyK2Builder:
             def _impl(
                 state: STATE @ owned, blk_id: int, qb_id: int
             ) -> tuple[STATE, int]:
-                state.blocks[blk_id].restore_addr(qb_id)
+                blk = state.blocks.take(blk_id).unwrap()
+                blk.restore_addr(qb_id)
+                state.blocks.put(some(blk), blk_id)
                 return state, blk_id
 
             return map_global(_impl, blk_id, qb_id)
@@ -377,7 +392,9 @@ class ToyK2Builder:
             def _impl(
                 state: STATE @ owned, blk_id: int, qb_id: int
             ) -> tuple[STATE, int]:
-                state.blocks[blk_id].restore_addr(qb_id)
+                blk = state.blocks.take(blk_id).unwrap()
+                blk.restore_addr(qb_id)
+                state.blocks.put(some(blk), blk_id)
                 return state, blk_id
 
             return map_global(_impl, blk_id, qb_id)
@@ -385,7 +402,7 @@ class ToyK2Builder:
         @guppy
         @no_type_check
         @link_name("guppyft.toy_k2._alloc_dynq")
-        def _alloc_dynq() -> tuple[int, int]:
+        def _alloc_dynq() -> tuple[tuple[int, int]]:
 
             @guppy
             @no_type_check
@@ -402,7 +419,7 @@ class ToyK2Builder:
 
             @guppy
             @no_type_check
-            def _impl(state: STATE @ owned, addr: tuple[int, int]) -> tuple[STATE]:
+            def _impl(state: STATE @ owned, addr: tuple[int, int]) -> STATE:
                 state.release_dyn_addr(addr)
                 return state
 
@@ -421,7 +438,9 @@ class ToyK2Builder:
                 k2_primitives.qed_cycle(blk.logical_block)
 
                 state.put_block(blk_id, blk)
-                state.blocks[blk_id].qed_counter = 0.0
+                blk = state.blocks.take(blk_id).unwrap()
+                blk.qed_counter = 0.0
+                state.blocks.put(some(blk), blk_id)
 
                 return state, blk_id
 
@@ -433,7 +452,7 @@ class ToyK2Builder:
         def _prep_zero_ft() -> int:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, int]:
-                logical_block = k2_primitives.prep_zero_ft()
+                logical_block = k2_primitives.prep_zero_ft().force_check().unwrap()
                 blk_id = state.allocate_block(logical_block)
 
                 state.qed_policy(array(blk_id), comptime(qed_policy.costs.prep_zero_ft))
@@ -503,7 +522,7 @@ class ToyK2Builder:
                 state: STATE @ owned, blk_id: int
             ) -> tuple[STATE, array[bool, 2]]:
                 blk = state.release_block(blk_id)
-                res = k2_primitives.measure_z_all(blk.logical_block)
+                res = k2_primitives.measure_z_all(blk)
 
                 state.qed_policy(
                     array(blk_id), comptime(qed_policy.costs.measure_z_all)
@@ -679,7 +698,7 @@ class ToyK2Builder:
             ancilla_blk_id = _prep_zero_ft()  # |00>
             _h_all(ancilla_blk_id)  # |++>
             # Project the other ancilla logical qubit to |0>
-            if _measure_z(ancilla_blk_id, 1 - qb_id):
+            if _measure_z(ancilla_blk_id, 1 - qb_id)[0]:
                 _x(ancilla_blk_id, qb_id)
 
             # Use the ancilla state to introduce a Hadamard on the chosen index.
@@ -809,7 +828,7 @@ class ToyK2Builder:
         @guppy
         @no_type_check
         @link_name("guppyft.toy_k2._no_op_decode2")
-        def _no_op_decode2(outcome: array[bool, 2]) -> array[bool, 2]:
+        def _no_op_decode2(outcome: array[bool, 2] @ owned) -> array[bool, 2]:
             # Same as _no_op_decode1, but for the outcome of `measure_z_all`.
             return outcome
 

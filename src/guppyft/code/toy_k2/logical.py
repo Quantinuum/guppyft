@@ -403,7 +403,7 @@ def restore_some(block: BorrowedBlock, q: Qubit @ owned) -> None:
 @hugr_op(_logical_op("restore", _OPS_EXTN))
 @no_type_check
 def restore(block: BorrowedBlock @ owned, q: Qubit @ owned) -> Block:
-    """Restore a the last of the borrowed logical qubits back to its block."""
+    """Restore the last of the borrowed logical qubits back to its block."""
 
 
 @guppy
