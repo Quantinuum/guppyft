@@ -286,7 +286,6 @@ class ToyK2Builder:
                     for addr in aux_stack:
                         self.avail_dyn_addrs.push(addr)
 
-
             @guppy
             @no_type_check
             def allocate_dyn_addr(self: "STATE") -> tuple[int, int]:
@@ -733,7 +732,7 @@ class ToyK2Builder:
                 _x(blk_id, qb_id)
             else:
                 _z(blk_id, qb_id)
-            return (addr,) 
+            return (addr,)
 
         @guppy
         @no_type_check
