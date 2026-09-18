@@ -97,6 +97,12 @@ class Qubit:
         sdg(self)
 
     @guppy
+    @no_type_check
+    def adaptive_rz(self: "Qubit", phase: float) -> None:
+        """Adaptive Rz gate with angle in radians."""
+        adaptive_rz(self, phase)
+
+    @guppy
     def t(self: "Qubit") -> None:
         r"""Apply a logical :math:`T` gate using magic-state injection."""
         t(self)
@@ -159,6 +165,12 @@ def s(qubit: "Qubit") -> None:
 @no_type_check
 def sdg(qubit: "Qubit") -> None:
     """Sdg gate."""
+
+
+@hugr_op(_logical_op("adaptive_rz", _OPS_EXTN))
+@no_type_check
+def adaptive_rz(qubit: Qubit, phase: float) -> None:
+    """Adaptive Rz gate with angle in radians."""
 
 
 @hugr_op(_logical_op("prep_t_state", _OPS_EXTN), effects=[Effect.ANY])

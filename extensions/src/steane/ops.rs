@@ -5,6 +5,7 @@ use std::sync::{Arc, LazyLock, Weak};
 use crate::steane::types::{logical_measurement_type, logical_qubit_type};
 use documented::DocumentedVariants;
 use hugr::extension::prelude::bool_t;
+use hugr::std_extensions::arithmetic::float_types::float64_type;
 use hugr::{
     Extension,
     extension::{
@@ -53,6 +54,8 @@ pub enum SteaneOpDef {
     s,
     /// S dagger gate.
     sdg,
+    /// Rz gate with angle in radians.
+    adaptive_rz,
     /// Prepare a magic state that can be used to produce T-like states (T and Tdg).
     prep_t_state,
     /// Perform a T gate by injecting a magic state.
@@ -163,6 +166,11 @@ impl MakeOpDef for SteaneOpDef {
             h => sig_qubits(1, 1),
             s => sig_qubits(1, 1),
             sdg => sig_qubits(1, 1),
+            adaptive_rz => Signature::new(
+                vec![logical_qubit_type(), float64_type()],
+                vec![logical_qubit_type()],
+            )
+            .into(),
             prep_t_state => sig_qubits(0, 1),
             inject_t => sig_qubits(2, 1),
             inject_tdg => sig_qubits(2, 1),
@@ -204,7 +212,7 @@ mod tests {
     fn test_steane_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.steane.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 17);
+        assert_eq!(EXTENSION.operations().count(), 18);
     }
 
     #[test]

@@ -183,6 +183,15 @@ class SteaneOpsExtension:
         return self.sdg_def.instantiate([])
 
     @functools.cached_property
+    def adaptive_rz_def(self) -> OpDef:
+        """Rz gate with angle in radians."""
+        return self().get_op("adaptive_rz")
+
+    def adaptive_rz(self) -> ExtOp:
+        """Rz gate with angle in radians."""
+        return self.adaptive_rz_def.instantiate([])
+
+    @functools.cached_property
     def prep_t_state_def(self) -> OpDef:
         """Prepare a magic state that can be used to produce T-like states (T and Tdg).
 
