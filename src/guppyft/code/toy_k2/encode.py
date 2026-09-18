@@ -672,26 +672,30 @@ class ToyK2Builder:
         # computational CX with this logical CX via the compose_op replacement,
         # and *not* have the dyn ops in the extension.
 
+        # NOTE: The return type below needs to be `tuple[tuple[int,int]]`
+        # to stop Guppy from unpacking the `tuple[int,int]` that is used
+        # to represent a dynamic qubit.
+
         @guppy
         @no_type_check
         @link_name("guppyft.toy_k2._x_dynq")
-        def _x_dynq(addr: tuple[int, int]) -> tuple[int, int]:
+        def _x_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
             blk_id, qb_id = addr
             _x(blk_id, qb_id)
-            return addr
+            return (addr,)
 
         @guppy
         @no_type_check
         @link_name("guppyft.toy_k2._z_dynq")
-        def _z_dynq(addr: tuple[int, int]) -> tuple[int, int]:
+        def _z_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
             blk_id, qb_id = addr
             _z(blk_id, qb_id)
-            return addr
+            return (addr,)
 
         @guppy
         @no_type_check
         @link_name("guppyft.toy_k2._h_dynq")
-        def _h_dynq(addr: tuple[int, int]) -> tuple[int, int]:
+        def _h_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
             blk_id, qb_id = addr
             # Prepare an ancilla `|0+>` state, with the `|+>` on the index where
             # we want to apply the Hadamard.
@@ -717,7 +721,7 @@ class ToyK2Builder:
                 _x(blk_id, qb_id)
             else:
                 _z(blk_id, qb_id)
-            return addr
+            return (addr,) 
 
         @guppy
         @no_type_check
@@ -750,7 +754,7 @@ class ToyK2Builder:
         @guppy
         @no_type_check
         @link_name("guppyft.toy_k2._s_dynq")
-        def _s_dynq(addr: tuple[int, int]) -> tuple[int, int]:
+        def _s_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
             # Prepare two |Y> states
             y_blk_id = _prep_y_states_non_ft()
             # Inject only one of them
@@ -763,21 +767,21 @@ class ToyK2Builder:
             if m:
                 _z_dynq(addr)
 
-            return addr
+            return (addr,)
 
         @guppy
         @no_type_check
         @link_name("guppyft.toy_k2._sdg_dynq")
-        def _sdg_dynq(addr: tuple[int, int]) -> tuple[int, int]:
+        def _sdg_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
             _x_dynq(addr)
             _s_dynq(addr)
             _x_dynq(addr)
-            return addr
+            return (addr,)
 
         @guppy
         @no_type_check
         @link_name("guppyft.toy_k2._t_dynq")
-        def _t_dynq(addr: tuple[int, int]) -> tuple[int, int]:
+        def _t_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
             # Prepare two T|+> states
             t_blk_id = _prep_t_states_non_ft()
             # Inject only one of them
@@ -790,16 +794,16 @@ class ToyK2Builder:
             if m:
                 _s_dynq(addr)
 
-            return addr
+            return (addr,)
 
         @guppy
         @no_type_check
         @link_name("guppyft.toy_k2._tdg_dynq")
-        def _tdg_dynq(addr: tuple[int, int]) -> tuple[int, int]:
+        def _tdg_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
             _x_dynq(addr)
             _t_dynq(addr)
             _x_dynq(addr)
-            return addr
+            return (addr,)
 
         @guppy
         @no_type_check
