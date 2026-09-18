@@ -262,8 +262,10 @@ class ToyK2Builder:
                 # Restore the block's address
                 blk = self.take_block(blk_id)
                 blk.restore_addr(qb_id)
+                blk_borrowed = blk.is_borrowed()
+                self.put_block(blk_id, blk)
                 # Check if the block is fully restored
-                if not blk.is_borrowed():
+                if not blk_borrowed:
                     # Release the runtime block
                     logical_block = self.release_block(blk_id)
                     # Free the logical block
@@ -283,7 +285,6 @@ class ToyK2Builder:
                     for addr in aux_stack:
                         self.avail_dyn_addrs.push(addr)
 
-                self.put_block(blk_id, blk)
 
             @guppy
             @no_type_check
