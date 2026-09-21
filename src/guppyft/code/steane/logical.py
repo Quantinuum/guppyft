@@ -10,11 +10,12 @@ The physical implementation for these ops is provided in
 from typing import no_type_check
 
 from guppylang import guppy
+from guppylang.std.angles import angle
 from guppylang.std.lang import owned
-from guppylang_internals.decorator import custom_type, hugr_op
+from guppylang_internals.decorator import custom_function, custom_type, hugr_op
 from guppylang_internals.tys import Effect
 
-from guppyft.code._logical import _logical_op
+from guppyft.code._logical import _logical_op, _RotationCompiler
 from guppyft.extensions import steane_ops, steane_types
 
 _OPS_EXTN = steane_ops()
@@ -159,6 +160,11 @@ def s(qubit: "Qubit") -> None:
 @no_type_check
 def sdg(qubit: "Qubit") -> None:
     """Sdg gate."""
+
+
+@custom_function(_RotationCompiler("rz", _OPS_EXTN))
+def rz(qubit: "Qubit", angle: angle) -> None:
+    """Rz gate."""
 
 
 @hugr_op(_logical_op("prep_t_state", _OPS_EXTN), effects=[Effect.ANY])
