@@ -5,7 +5,7 @@
 
 ### ⚠ BREAKING CHANGES
 
-* make ancillas argument optional, rename to `n_impl_ancillas` ([#412](https://github.com/Quantinuum/guppyft/issues/412))
+* Make ancillas argument optional, rename to `n_impl_ancillas` ([#412](https://github.com/Quantinuum/guppyft/issues/412))
 * Replace `num_` prefix with `n_` for consistency ([#409](https://github.com/Quantinuum/guppyft/issues/409))
 * Make `identity_code` a private function ([#392](https://github.com/Quantinuum/guppyft/issues/392))
 
@@ -22,7 +22,7 @@
 
 ### Documentation
 
-* add changelog and github link to the sphinx docs ([#396](https://github.com/Quantinuum/guppyft/issues/396)) ([bd5e134](https://github.com/Quantinuum/guppyft/commit/bd5e13420e15578e8a98b1add8d691925be46750))
+* Add changelog and GitHub link to the sphinx docs ([#396](https://github.com/Quantinuum/guppyft/issues/396)) ([bd5e134](https://github.com/Quantinuum/guppyft/commit/bd5e13420e15578e8a98b1add8d691925be46750))
 * Example notebook to demonstrate `ComparatorRzDecomposer` with Steane architecture ([#403](https://github.com/Quantinuum/guppyft/issues/403)) ([fcd130e](https://github.com/Quantinuum/guppyft/commit/fcd130e312138f7b5f936b331fa58245cd13a266))
 * Export extension modules to allow API doc generation ([#386](https://github.com/Quantinuum/guppyft/issues/386)) ([5ba0161](https://github.com/Quantinuum/guppyft/commit/5ba0161972751c524cbb34ee9eaeea271e2bd976))
 * Fix API references for Steane ([#410](https://github.com/Quantinuum/guppyft/issues/410)) ([6e5ac5f](https://github.com/Quantinuum/guppyft/commit/6e5ac5f24a830d5f78e2b9355bc4cb1978eea507))
@@ -34,7 +34,7 @@
 ### Code Refactoring
 
 * Make `identity_code` a private function ([#392](https://github.com/Quantinuum/guppyft/issues/392)) ([14fff93](https://github.com/Quantinuum/guppyft/commit/14fff93d1803f220901c18bf56b163de5cdea654))
-* make ancillas argument optional, rename to `n_impl_ancillas` ([#412](https://github.com/Quantinuum/guppyft/issues/412)) ([f5e24f4](https://github.com/Quantinuum/guppyft/commit/f5e24f44380c1773fcede75f5bf1d32b82687b90))
+* Make ancillas argument optional, rename to `n_impl_ancillas` ([#412](https://github.com/Quantinuum/guppyft/issues/412)) ([f5e24f4](https://github.com/Quantinuum/guppyft/commit/f5e24f44380c1773fcede75f5bf1d32b82687b90))
 * Replace `num_` prefix with `n_` for consistency ([#409](https://github.com/Quantinuum/guppyft/issues/409)) ([96ef34e](https://github.com/Quantinuum/guppyft/commit/96ef34e3ed9ea78c7ed7fdd1e16db39f6b51238b))
 
 ## [0.1.2](https://github.com/Quantinuum/guppyft/compare/v0.1.1...v0.1.2) (2026-09-10)
