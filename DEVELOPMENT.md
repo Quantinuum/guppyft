@@ -18,7 +18,7 @@ PRs should be made against the `main` branch, and should pass all CI checks befo
 To set up the development environment, you will need:
 
 - `uv`: <https://docs.astral.sh/uv/getting-started/installation/>
-- `just`: <https://just.systems/man/en/installation.html>
+- `just`: <https://just.systems/man/en/installation.html> (version 1.46.0 or above)
 - `rust`: <https://www.rust-lang.org/tools/install>
 - `cargo-nextest`: <https://nexte.st/docs/installation/pre-built-binaries/>
 
