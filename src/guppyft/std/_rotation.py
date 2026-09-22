@@ -1,8 +1,10 @@
 from guppylang_internals.compiler.builder import pure
 from guppylang_internals.compiler.builder.ops import unpack_tuple
-from guppylang_internals.definition.custom import CustomInoutCallCompiler
 from guppylang_internals.definition.value import CallReturnWires
-from guppylang_internals.std._internal.compiler.quantum import from_halfturns_unchecked
+from guppylang_internals.std._internal.compiler.quantum import (
+    RotationCompiler,
+    from_halfturns_unchecked,
+)
 from hugr import Wire
 from hugr import tys as ht
 from hugr.ext import Extension
@@ -17,8 +19,7 @@ ROTATION_T_DEF = ROTATION_EXTENSION.get_type("rotation")
 ROTATION_T = ht.ExtType(ROTATION_T_DEF)
 
 
-class _RotationCompiler(CustomInoutCallCompiler):
-    opname: str
+class _RotationCompiler(RotationCompiler):
     ext: Extension
 
     def __init__(self, opname: str, ext: Extension):
