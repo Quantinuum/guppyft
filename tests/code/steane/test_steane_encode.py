@@ -273,7 +273,7 @@ def test_realtime_rz_encoder() -> None:
     rz_decomposer.then(ToffoliDecomposer()).run(pkg.modules[0], inplace=True)
 
     # Original block + one block for magic + ancilla space for Rz
-    n_blocks = 1 + 1 + rz_decomposer.num_ancilla()
+    n_blocks = 1 + 1 + rz_decomposer.n_ancillas()
 
     res = (
         SteaneBuilder()

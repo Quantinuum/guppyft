@@ -10,12 +10,14 @@ The physical implementation for these ops is provided in
 from typing import no_type_check
 
 from guppylang import guppy
+from guppylang.std.angles import angle
 from guppylang.std.lang import owned
-from guppylang_internals.decorator import custom_type, hugr_op
+from guppylang_internals.decorator import custom_function, custom_type, hugr_op
 from guppylang_internals.tys import Effect
 
 from guppyft.code._logical import _logical_op
 from guppyft.extensions import steane_ops, steane_types
+from guppyft.std._rotation import _RotationCompiler
 
 _OPS_EXTN = steane_ops()
 
@@ -97,12 +99,6 @@ class Qubit:
         sdg(self)
 
     @guppy
-    @no_type_check
-    def adaptive_rz(self: "Qubit", phase: float) -> None:
-        """Adaptive Rz gate with angle in radians."""
-        adaptive_rz(self, phase)
-
-    @guppy
     def t(self: "Qubit") -> None:
         r"""Apply a logical :math:`T` gate using magic-state injection."""
         t(self)
@@ -167,10 +163,9 @@ def sdg(qubit: "Qubit") -> None:
     """Sdg gate."""
 
 
-@hugr_op(_logical_op("adaptive_rz", _OPS_EXTN))
-@no_type_check
-def adaptive_rz(qubit: Qubit, phase: float) -> None:
-    """Adaptive Rz gate with angle in radians."""
+@custom_function(_RotationCompiler("rz", _OPS_EXTN))
+def rz(qubit: "Qubit", angle: angle) -> None:
+    """Rz gate."""
 
 
 @hugr_op(_logical_op("prep_t_state", _OPS_EXTN), effects=[Effect.ANY])

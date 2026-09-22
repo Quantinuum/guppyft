@@ -812,7 +812,7 @@ class SteaneBuilder:
         impl_spec = self._gen_implement_spec(n_blocks)
 
         ext = ExtensionRegistry.from_extensions(
-            [steane_ops(), steane_types(), std_ops(), std_types()]
+            [steane_ops(), steane_types(), std_ops(), std_types(), rotation()]
         )
         # `_std_extensions` should not be necessary but seems to be
         #  required for `borrow_array` when (de)serializing.

@@ -46,7 +46,7 @@ class ComparatorRzDecomposer(ComposablePass):
     epsilon: float
     max_attempts: int
 
-    def num_ancilla(self) -> int:
+    def n_ancillas(self) -> int:
         r"""Number of ancilla qubits required for the
         target precision (:math:`\epsilon`)."""
         return n_comparator_based_rz_cascade_ancillas(self.epsilon)

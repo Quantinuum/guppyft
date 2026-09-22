@@ -20,8 +20,8 @@ class StabilizerCode:
 
     Stores the following information
 
-    * num_physical_qubits (:math:`n`) - Number of physical qubits in a code block.
-    * num_logical_qubits (:math:`k`) - Number of logical qubits in a code block
+    * n_physical_qubits (:math:`n`) - Number of physical qubits in a code block.
+    * n_logical_qubits (:math:`k`) - Number of logical qubits in a code block
     * distance (:math:`d`) - The distance of the stabilizer code.
     * generators - A set of :math:`(n-k)` commuting stabilizer generators.
     * x_logicals - The logical :math:`X` operators of the stabilizer code.
@@ -33,8 +33,8 @@ class StabilizerCode:
         from guppyft.code_def import StabilizerCode
 
         STEANE_DEF = StabilizerCode.from_python_strings(
-            num_physical_qubits=7,
-            num_logical_qubits=1,
+            n_physical_qubits=7,
+            n_logical_qubits=1,
             distance=3,
             generators=["XXXXIII", "IXXIXXI", "IIXXIXX",
                         "ZZZZIII", "IZZIZZI", "IIZZIZZ"],
@@ -43,8 +43,8 @@ class StabilizerCode:
         )
     """
 
-    num_physical_qubits: int
-    num_logical_qubits: int
+    n_physical_qubits: int
+    n_logical_qubits: int
     distance: int
     generators: pauli.SignTermSet
     x_logicals: pauli.SignTerms
@@ -53,8 +53,8 @@ class StabilizerCode:
     @cached_property
     def y_logicals(self) -> pauli.SignTerms:
         """Return the Y logical operators derived from X and Z logicals."""
-        terms = pauli.ComplexSignTerms(self.num_physical_qubits)
-        for j in range(self.num_logical_qubits):
+        terms = pauli.ComplexSignTerms(self.n_physical_qubits)
+        for j in range(self.n_logical_qubits):
             # ComplexSign(k) ~ i^k
             # y_logicals[j] = i * (x_logicals[j] * z_logicals[j])
             # y_term will always have a real (+/-)1 coefficient.
@@ -64,24 +64,24 @@ class StabilizerCode:
 
     def __post_init__(self) -> None:
         """Validate the stabilizer-code definition."""
-        if len(self.generators) != self.num_physical_qubits - self.num_logical_qubits:
+        if len(self.generators) != self.n_physical_qubits - self.n_logical_qubits:
             raise CodeDefinitionError(
                 "The number of stabilizer generators must equal n-k."
-                + f" Got n={self.num_physical_qubits}, "
-                + f"k={self.num_logical_qubits} with {len(self.generators)} generators."
+                + f" Got n={self.n_physical_qubits}, "
+                + f"k={self.n_logical_qubits} with {len(self.generators)} generators."
             )
 
-        if len(self.x_logicals) != self.num_logical_qubits:
+        if len(self.x_logicals) != self.n_logical_qubits:
             raise CodeDefinitionError(
                 "Incorrect number of X logical operators: "
-                f"expected {self.num_logical_qubits}, "
+                f"expected {self.n_logical_qubits}, "
                 f"got {len(self.x_logicals)}."
             )
 
-        if len(self.z_logicals) != self.num_logical_qubits:
+        if len(self.z_logicals) != self.n_logical_qubits:
             raise CodeDefinitionError(
                 "Incorrect number of Z logical operators: "
-                f"expected {self.num_logical_qubits}, "
+                f"expected {self.n_logical_qubits}, "
                 f"got {len(self.z_logicals)}."
             )
 
@@ -93,8 +93,8 @@ class StabilizerCode:
 
     @staticmethod
     def from_python_strings(
-        num_physical_qubits: int,
-        num_logical_qubits: int,
+        n_physical_qubits: int,
+        n_logical_qubits: int,
         distance: int,
         generators: list[str],
         x_logicals: list[str],
@@ -108,8 +108,8 @@ class StabilizerCode:
         it is assumed to be positive.
 
         Args:
-            num_physical_qubits: The number of physical qubits in the code.
-            num_logical_qubits: The number of logical qubits in the code.
+            n_physical_qubits: The number of physical qubits in the code.
+            n_logical_qubits: The number of logical qubits in the code.
             distance: The distance of the code.
             generators: A list of stabilizer generators as Pauli strings.
             x_logicals: A list of :math:`X` logical operators as Pauli strings.
@@ -119,23 +119,23 @@ class StabilizerCode:
             A `StabilizerCode` instance representing the code.
         """
         zixy_generators = pauli.SignTermSet.from_iterable(
-            (_str_to_zixy(s, num_physical_qubits) for s in generators),
-            num_physical_qubits,
+            (_str_to_zixy(s, n_physical_qubits) for s in generators),
+            n_physical_qubits,
         )
 
         zixy_x_logicals = pauli.SignTerms.from_iterable(
-            (_str_to_zixy(s, num_physical_qubits) for s in x_logicals),
-            num_physical_qubits,
+            (_str_to_zixy(s, n_physical_qubits) for s in x_logicals),
+            n_physical_qubits,
         )
 
         zixy_z_logicals = pauli.SignTerms.from_iterable(
-            (_str_to_zixy(s, num_physical_qubits) for s in z_logicals),
-            num_physical_qubits,
+            (_str_to_zixy(s, n_physical_qubits) for s in z_logicals),
+            n_physical_qubits,
         )
 
         return StabilizerCode(
-            num_physical_qubits=num_physical_qubits,
-            num_logical_qubits=num_logical_qubits,
+            n_physical_qubits=n_physical_qubits,
+            n_logical_qubits=n_logical_qubits,
             distance=distance,
             generators=zixy_generators,
             x_logicals=zixy_x_logicals,
@@ -176,8 +176,8 @@ def _identity_code(k: int) -> StabilizerCode:
         A `StabilizerCode` instance representing the identity code.
     """
     return StabilizerCode.from_python_strings(
-        num_physical_qubits=k,
-        num_logical_qubits=k,
+        n_physical_qubits=k,
+        n_logical_qubits=k,
         distance=1,
         generators=[],
         x_logicals=["I" * i + "X" + "I" * (k - i - 1) for i in range(k)],

@@ -140,7 +140,7 @@ def test_stabilizer_padding_double_block() -> None:
         steane.STEANE_DEF, num_blocks=4
     )
     assert len(padded_double_block_stabilizers) == 4 * (
-        steane.STEANE_DEF.num_physical_qubits - steane.STEANE_DEF.num_logical_qubits
+        steane.STEANE_DEF.n_physical_qubits - steane.STEANE_DEF.n_logical_qubits
     )
 
     strings = padded_double_block_stabilizers.into(pauli.Strings)
