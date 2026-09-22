@@ -15,8 +15,9 @@ from guppylang.std.lang import owned
 from guppylang_internals.decorator import custom_function, custom_type, hugr_op
 from guppylang_internals.tys import Effect
 
-from guppyft.code._logical import _logical_op, _RotationCompiler
+from guppyft.code._logical import _logical_op
 from guppyft.extensions import steane_ops, steane_types
+from guppyft.std._rotation import _RotationCompiler
 
 _OPS_EXTN = steane_ops()
 
