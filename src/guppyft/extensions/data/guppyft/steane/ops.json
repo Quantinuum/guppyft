@@ -3,45 +3,6 @@
   "name": "guppyft.steane.ops",
   "types": {},
   "operations": {
-    "adaptive_rz": {
-      "extension": "guppyft.steane.ops",
-      "name": "adaptive_rz",
-      "description": "Rz gate with angle in radians.",
-      "signature": {
-        "params": [],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.steane.types",
-              "extension_version": "0.1.1",
-              "id": "qubit",
-              "args": [],
-              "bound": "A"
-            },
-            {
-              "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
-              "args": [],
-              "bound": "C"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.steane.types",
-              "extension_version": "0.1.1",
-              "id": "qubit",
-              "args": [],
-              "bound": "A"
-            }
-          ]
-        }
-      },
-      "binary": false
-    },
     "cx": {
       "extension": "guppyft.steane.ops",
       "name": "cx",

@@ -630,7 +630,7 @@ def rotate_and_correct_rz(blk: LogicalBlock[7], physical_angle: float) -> bool:
 @no_type_check
 def adaptive_rz(
     blk: LogicalBlock[7],
-    phase: float,
+    phase: angle,
     tolerance: float,
     max_rounds: int,
     dephasing: float,
@@ -658,7 +658,7 @@ def adaptive_rz(
 @no_type_check
 def _adaptive_rz(
     blk: LogicalBlock[7],
-    phase: float,
+    phase: angle,
     tolerance: float,
     max_rounds: int,
     dephasing: float,
@@ -673,9 +673,10 @@ def _adaptive_rz(
     if not (max_dephasing >= 0.0 and max_dephasing <= 0.5):
         panic("Invalid logical dephasing budget")
     # NaN and infinity both make this subtraction NaN.
-    if phase - phase != 0.0:
+    if float(phase) - float(phase) != 0.0:
         panic("Adaptive Rz requires a finite angle")
-    remaining = phase - 2.0 * float(pi) * float(floor(phase / (2.0 * float(pi))))
+    remaining = float(phase)
+    remaining -= -2.0 * float(pi) * float(floor(float(phase) / (2.0 * float(pi))))
     total_dephasing = 0.0
     dephasing_limit_hit = False
     rounds = 0

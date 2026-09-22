@@ -168,7 +168,7 @@ def test_adaptive_rz_weight_three_inverse(phase: float) -> None:
     def main() -> None:
         blk = primitives.prep_zero_non_ft()
         primitives.h(blk)
-        adaptive_rz(blk, comptime(phase), 1e-10, 100, 0.0, 0.5)
+        adaptive_rz(blk, angle(comptime(phase / math.pi)), 1e-10, 100, 0.0, 0.5)
 
         # Z_L * ZZZZIII = IIIIZZZ: undo the phase on qubits 4, 5, 6.
         cx(blk.data_qs[4], blk.data_qs[6])
@@ -193,8 +193,8 @@ def test_explicit_adaptive_rz() -> None:
     def main() -> None:
         q = logical.Qubit()
         q.h()
-        q.adaptive_rz(0.13)
-        q.adaptive_rz(-0.13)
+        logical.rz(q, angle(0.13))  # type: ignore[call-arg]
+        logical.rz(q, angle(-0.13))  # type: ignore[call-arg]
         q.h()
         output("logical", q.measure_z().decode())
 

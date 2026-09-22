@@ -9,7 +9,7 @@ from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.emulator import EmulatorBuilder, EmulatorInstance
 from guppylang.library import GuppyLibrary, link_name
-from guppylang.std.angles import pi
+from guppylang.std.angles import angle
 from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.collections import Stack, empty_queue
 from guppylang.std.option import Option, nothing, some
@@ -76,7 +76,7 @@ class _Rotation:
 @guppy
 @no_type_check
 def _encode_adaptive_rz(q: steane_logical.Qubit, phase: _Rotation) -> None:
-    steane_logical.adaptive_rz(q, phase.halfturns() * float(pi))
+    steane_logical.rz(q, angle(phase.halfturns()))
 
 
 @dataclass(frozen=True)
@@ -169,7 +169,7 @@ class QECPolicy:
         h: float = 0.0
         s: float = 0.0
         sdg: float = 0.0
-        adaptive_rz: float = 0.0
+        rz: float = 0.0
         inject_t: float = 0.0
         inject_tdg: float = 0.0
         cx: float = 0.0
@@ -572,16 +572,18 @@ class SteaneBuilder:
         @guppy
         @no_type_check
         @link_name("guppyft.steane._adaptive_rz")
-        def _adaptive_rz(q: tuple[int, int], phase: float) -> tuple[tuple[int, int]]:
+        def _adaptive_rz(
+            q: tuple[int, int], phase: _Rotation
+        ) -> tuple[tuple[int, int]]:
             @guppy
             def _impl(
-                state: STATE @ owned, q: tuple[int, int], phase: float
+                state: STATE @ owned, q: tuple[int, int], phase: _Rotation
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
                 blk = state.take_block(blk_id)
                 adaptive_rz_controller(
                     blk,
-                    phase,
+                    angle(phase.halfturns()),
                     comptime(rz_conf.tolerance),
                     comptime(rz_conf.max_rounds),
                     comptime(rz_conf.dephasing),
@@ -589,7 +591,7 @@ class SteaneBuilder:
                     comptime(rz_conf.abort_on_dephasing),
                 )
                 state.put_block(blk_id, blk)
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs.adaptive_rz))
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.rz))
                 return state, q
 
             return map_global(_impl, q, phase)
@@ -777,7 +779,7 @@ class SteaneBuilder:
                 ("guppyft.steane.ops", "h"): "guppyft.steane._h",
                 ("guppyft.steane.ops", "s"): "guppyft.steane._s",
                 ("guppyft.steane.ops", "sdg"): "guppyft.steane._sdg",
-                ("guppyft.steane.ops", "adaptive_rz"): "guppyft.steane._adaptive_rz",
+                ("guppyft.steane.ops", "rz"): "guppyft.steane._adaptive_rz",
                 (
                     "guppyft.steane.ops",
                     "prep_t_state",
