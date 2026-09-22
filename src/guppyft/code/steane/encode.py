@@ -14,9 +14,7 @@ from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.collections import Stack, empty_queue
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.platform import panic
-from guppylang_internals.decorator import custom_type, hugr_op
 from hugr.ext import ExtensionRegistry
-from hugr.ops import ExtOp
 from hugr.package import Package
 from hugr.std import _std_extensions
 from tket_exts import rotation
@@ -56,27 +54,17 @@ from guppyft.encode import (
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
 from guppyft.std import LogicalBlock
+from guppyft.std._rotation import rotation_ty
 from guppyft.std.state_factory import StateFactory
 
 from . import logical as steane_logical
 from .primitives import RawMeasurement
 
 
-@custom_type(
-    rotation().get_type("rotation").instantiate([]), copyable=True, droppable=True
-)
-class _Rotation:
-    """TKET rotation argument used by the Rz encoder."""
-
-    @hugr_op(lambda ty, _inst, _ctx: ExtOp(rotation().get_op("to_halfturns"), ty, []))
-    @no_type_check
-    def halfturns(self: "_Rotation") -> float: ...
-
-
 @guppy
 @no_type_check
-def _encode_adaptive_rz(q: steane_logical.Qubit, phase: _Rotation) -> None:
-    steane_logical.rz(q, angle(phase.halfturns()))
+def _encode_adaptive_rz(q: steane_logical.Qubit, phase: rotation_ty) -> None:
+    steane_logical.rz(q, angle(phase.to_halfturns()))
 
 
 @dataclass(frozen=True)
@@ -573,17 +561,17 @@ class SteaneBuilder:
         @no_type_check
         @link_name("guppyft.steane._adaptive_rz")
         def _adaptive_rz(
-            q: tuple[int, int], phase: _Rotation
+            q: tuple[int, int], phase: rotation_ty
         ) -> tuple[tuple[int, int]]:
             @guppy
             def _impl(
-                state: STATE @ owned, q: tuple[int, int], phase: _Rotation
+                state: STATE @ owned, q: tuple[int, int], phase: rotation_ty
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
                 blk = state.take_block(blk_id)
                 adaptive_rz_controller(
                     blk,
-                    angle(phase.halfturns()),
+                    angle(phase.to_halfturns()),
                     comptime(rz_conf.tolerance),
                     comptime(rz_conf.max_rounds),
                     comptime(rz_conf.dephasing),
