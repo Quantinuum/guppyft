@@ -212,7 +212,7 @@ mod tests {
     fn test_steane_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.steane.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 17);
+        assert_eq!(EXTENSION.operations().count(), 18);
     }
 
     #[test]
