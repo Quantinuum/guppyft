@@ -285,10 +285,15 @@ def _compute_state_prep_tableaux(
     """
     num_blocks = _count_blocks_state(semantic_function, impl_function)
 
+    n_hinted_qubits = _extract_expected_qubits_hint(impl_function)
+
     n_stab_qubits = num_blocks * code_definition.n_physical_qubits
 
     if n_impl_ancillas is not None:
         n_stab_qubits += n_impl_ancillas
+
+    if n_hinted_qubits is not None and not n_impl_ancillas:
+        n_stab_qubits += n_hinted_qubits
 
     match num_blocks:
         case 1:
@@ -450,8 +455,13 @@ def _compute_clifford_tableaux(
     num_blocks = _count_blocks_unitary(semantic_function, impl_function)
     n_physical_choi_qubits = 2 * num_blocks * code_definition.n_physical_qubits
 
+    n_hinted_qubits = _extract_expected_qubits_hint(impl_function)
+
     if n_impl_ancillas is not None:
         n_physical_choi_qubits += n_impl_ancillas
+
+    if n_hinted_qubits is not None and not n_impl_ancillas:
+        n_physical_choi_qubits += n_hinted_qubits
 
     match num_blocks:
         case 1:

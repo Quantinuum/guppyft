@@ -51,9 +51,7 @@ def test_knill_qec_without_errors() -> None:
 
         block.put_into_array(arr)
 
-    assert valid_clifford_implementation(
-        specify_identity, impl_func, CODE_DEF, n_impl_ancillas=14
-    )
+    assert valid_clifford_implementation(specify_identity, impl_func, CODE_DEF)
 
 
 @pytest.mark.parametrize("error_loc", [0, 1, 2, 3, 4, 5, 6])
@@ -133,9 +131,7 @@ def test_steane_measure_syndromes() -> None:
         _measure_syndromes(block)
         block.put_into_array(arr)
 
-    assert valid_clifford_implementation(
-        specify_identity, impl_func, CODE_DEF, n_impl_ancillas=3
-    )
+    assert valid_clifford_implementation(specify_identity, impl_func, CODE_DEF)
 
 
 @pytest.mark.parametrize(
