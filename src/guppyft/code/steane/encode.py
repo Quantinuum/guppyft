@@ -688,34 +688,28 @@ class SteaneBuilder:
             _cz,
         ).compile()
 
-        ops = OpReplacements().with_generated_decls(
-            {
-                ("guppyft.steane.ops", "prep_zero"): "guppyft.steane._prep_zero",
-                ("guppyft.steane.ops", "measure_z"): "guppyft.steane._measure_z",
-                ("guppyft.steane.ops", "qec_cycle"): "guppyft.steane._qec_cycle",
-                ("guppyft.steane.ops", "free"): "guppyft.steane._free",
-                ("guppyft.steane.ops", "x"): "guppyft.steane._x",
-                ("guppyft.steane.ops", "y"): "guppyft.steane._y",
-                ("guppyft.steane.ops", "z"): "guppyft.steane._z",
-                ("guppyft.steane.ops", "h"): "guppyft.steane._h",
-                ("guppyft.steane.ops", "s"): "guppyft.steane._s",
-                ("guppyft.steane.ops", "sdg"): "guppyft.steane._sdg",
-                (
-                    "guppyft.steane.ops",
-                    "prep_t_state",
-                ): "guppyft.steane._prep_t_state",
-                (
-                    "guppyft.steane.ops",
-                    "inject_t",
-                ): "guppyft.steane._inject_t",
-                (
-                    "guppyft.steane.ops",
-                    "inject_tdg",
-                ): "guppyft.steane._inject_tdg",
-                ("guppyft.steane.ops", "cx"): "guppyft.steane._cx",
-                ("guppyft.steane.ops", "cz"): "guppyft.steane._cz",
-                ("guppyft.steane.ops", "decode"): "guppyft.steane.decode",
-            }
+        ops = (
+            OpReplacements()
+            .with_generated_decl(steane_ops.prep_zero_def, "guppyft.steane._prep_zero")
+            .with_generated_decl(steane_ops.measure_z_def, "guppyft.steane._measure_z")
+            .with_generated_decl(steane_ops.qec_cycle_def, "guppyft.steane._qec_cycle")
+            .with_generated_decl(steane_ops.free_def, "guppyft.steane._free")
+            .with_generated_decl(steane_ops.x_def, "guppyft.steane._x")
+            .with_generated_decl(steane_ops.y_def, "guppyft.steane._y")
+            .with_generated_decl(steane_ops.z_def, "guppyft.steane._z")
+            .with_generated_decl(steane_ops.h_def, "guppyft.steane._h")
+            .with_generated_decl(steane_ops.s_def, "guppyft.steane._s")
+            .with_generated_decl(steane_ops.sdg_def, "guppyft.steane._sdg")
+            .with_generated_decl(
+                steane_ops.prep_t_state_def, "guppyft.steane._prep_t_state"
+            )
+            .with_generated_decl(steane_ops.inject_t_def, "guppyft.steane._inject_t")
+            .with_generated_decl(
+                steane_ops.inject_tdg_def, "guppyft.steane._inject_tdg"
+            )
+            .with_generated_decl(steane_ops.cx_def, "guppyft.steane._cx")
+            .with_generated_decl(steane_ops.cz_def, "guppyft.steane._cz")
+            .with_generated_decl(steane_ops.decode_def, "guppyft.steane.decode")
         )
         tys = TyReplacements().with_types(
             [
