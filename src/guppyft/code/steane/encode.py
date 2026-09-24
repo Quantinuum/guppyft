@@ -1,6 +1,6 @@
 """Builder and encoding implementation for the Steane QEC architecture."""
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field, replace
 from enum import Enum, auto
 from typing import Any, Literal, Self, no_type_check, overload
@@ -13,11 +13,12 @@ from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.collections import Stack, empty_queue
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.platform import panic
-from hugr.ext import ExtensionRegistry
+from hugr.ext import ExtensionRegistry, OpDef
 from hugr.package import Package
 from hugr.std import _std_extensions
 from tket_exts import rotation
 
+from guppyft._util import get_link_name
 from guppyft.code.steane.primitives import (
     cx,
     cz,
@@ -219,6 +220,19 @@ class SteaneBuilder:
         logical ops for a program using `n_blocks` logical blocks."""
         qec_policy = self._qec_policy
 
+        lib = GuppyLibrary(members=[])
+        ops = OpReplacements()
+
+        def _register_op_replacement[F: GuppyFunctionDefinition[Any, Any]](
+            op_def: OpDef,
+        ) -> Callable[[F], F]:
+            def decorator(func: F) -> F:
+                lib.members.append(func.id)
+                ops.with_generated_decl(op_def, get_link_name(func))
+                return func
+
+            return decorator
+
         # TODO STATE should be generic for all codes. The methods that are code specific
         # should be `@guppy.declare` and each code can provide an implementation to be
         # linked i.e. `allocate_next_addr`.
@@ -311,6 +325,7 @@ class SteaneBuilder:
                     ancillaZ = state.zero_state_factory.get_state()
                     steane_z_qec_cycle(q, ancillaZ)
 
+        @_register_op_replacement(steane_ops.qec_cycle_def)
         @guppy
         @no_type_check
         @link_name("guppyft.steane._qec_cycle")
@@ -339,6 +354,7 @@ class SteaneBuilder:
         # this could be replaced with `@custom_function` and a custom
         # compiler.
         # See https://github.com/quantinuum-dev/guppyft/issues/161.
+        @_register_op_replacement(steane_ops.prep_zero_def)
         @guppy
         @no_type_check
         @link_name("guppyft.steane._prep_zero")
@@ -355,6 +371,7 @@ class SteaneBuilder:
 
             return map_global(_impl)
 
+        @_register_op_replacement(steane_ops.prep_t_state_def)
         @guppy
         @no_type_check
         @link_name("guppyft.steane._prep_t_state")
@@ -371,6 +388,7 @@ class SteaneBuilder:
 
             return map_global(_impl)
 
+        @_register_op_replacement(steane_ops.measure_z_def)
         @guppy
         @no_type_check
         @link_name("guppyft.steane._measure_z")
@@ -389,6 +407,7 @@ class SteaneBuilder:
 
             return map_global(_impl, q)
 
+        @_register_op_replacement(steane_ops.free_def)
         @guppy
         @no_type_check
         @link_name("guppyft.steane._free")
@@ -405,6 +424,7 @@ class SteaneBuilder:
 
             return map_global(_impl, q)
 
+        @_register_op_replacement(steane_ops.x_def)
         @guppy
         @no_type_check
         @link_name("guppyft.steane._x")
@@ -424,6 +444,7 @@ class SteaneBuilder:
 
             return map_global(_impl, q)
 
+        @_register_op_replacement(steane_ops.y_def)
         @guppy
         @no_type_check
         @link_name("guppyft.steane._y")
@@ -443,6 +464,7 @@ class SteaneBuilder:
 
             return map_global(_impl, q)
 
+        @_register_op_replacement(steane_ops.z_def)
         @guppy
         @no_type_check
         @link_name("guppyft.steane._z")
@@ -462,6 +484,7 @@ class SteaneBuilder:
 
             return map_global(_impl, q)
 
+        @_register_op_replacement(steane_ops.h_def)
         @guppy
         @no_type_check
         @link_name("guppyft.steane._h")
@@ -481,6 +504,7 @@ class SteaneBuilder:
 
             return map_global(_impl, q)
 
+        @_register_op_replacement(steane_ops.s_def)
         @guppy
         @no_type_check
         @link_name("guppyft.steane._s")
@@ -500,6 +524,7 @@ class SteaneBuilder:
 
             return map_global(_impl, q)
 
+        @_register_op_replacement(steane_ops.sdg_def)
         @guppy
         @no_type_check
         @link_name("guppyft.steane._sdg")
@@ -519,6 +544,7 @@ class SteaneBuilder:
 
             return map_global(_impl, q)
 
+        @_register_op_replacement(steane_ops.inject_t_def)
         @guppy
         @no_type_check
         @link_name("guppyft.steane._inject_t")
@@ -540,6 +566,7 @@ class SteaneBuilder:
 
             return map_global(_impl, q, a)
 
+        @_register_op_replacement(steane_ops.inject_tdg_def)
         @guppy
         @no_type_check
         @link_name("guppyft.steane._inject_tdg")
@@ -563,6 +590,7 @@ class SteaneBuilder:
 
             return map_global(_impl, q, a)
 
+        @_register_op_replacement(steane_ops.cx_def)
         @guppy
         @no_type_check
         @link_name("guppyft.steane._cx")
@@ -586,6 +614,7 @@ class SteaneBuilder:
 
             return map_global(_impl, ctl, tgt)
 
+        @_register_op_replacement(steane_ops.cz_def)
         @guppy
         @no_type_check
         @link_name("guppyft.steane._cz")
@@ -608,6 +637,13 @@ class SteaneBuilder:
                 return state, q0, q1
 
             return map_global(_impl, q0, q1)
+
+        @_register_op_replacement(steane_ops.decode_def)
+        @guppy
+        @link_name("guppyft.steane._decode")
+        @no_type_check
+        def _decode(m: RawMeasurement[7] @ owned) -> bool:
+            return decode(m)
 
         @guppy.declare
         @no_type_check
@@ -668,50 +704,7 @@ class SteaneBuilder:
 
             return wrapper  # type: ignore[no-any-return]
 
-        lib = GuppyLibrary.from_members(
-            state_gen,
-            state_discard,
-            _qec_cycle,
-            _prep_zero,
-            _prep_t_state,
-            _measure_z,
-            _free,
-            decode,
-            _x,
-            _y,
-            _z,
-            _h,
-            _s,
-            _sdg,
-            _inject_t,
-            _inject_tdg,
-            _cx,
-            _cz,
-        ).compile()
-
-        ops = (
-            OpReplacements()
-            .with_generated_decl(steane_ops.prep_zero_def, "guppyft.steane._prep_zero")
-            .with_generated_decl(steane_ops.measure_z_def, "guppyft.steane._measure_z")
-            .with_generated_decl(steane_ops.qec_cycle_def, "guppyft.steane._qec_cycle")
-            .with_generated_decl(steane_ops.free_def, "guppyft.steane._free")
-            .with_generated_decl(steane_ops.x_def, "guppyft.steane._x")
-            .with_generated_decl(steane_ops.y_def, "guppyft.steane._y")
-            .with_generated_decl(steane_ops.z_def, "guppyft.steane._z")
-            .with_generated_decl(steane_ops.h_def, "guppyft.steane._h")
-            .with_generated_decl(steane_ops.s_def, "guppyft.steane._s")
-            .with_generated_decl(steane_ops.sdg_def, "guppyft.steane._sdg")
-            .with_generated_decl(
-                steane_ops.prep_t_state_def, "guppyft.steane._prep_t_state"
-            )
-            .with_generated_decl(steane_ops.inject_t_def, "guppyft.steane._inject_t")
-            .with_generated_decl(
-                steane_ops.inject_tdg_def, "guppyft.steane._inject_tdg"
-            )
-            .with_generated_decl(steane_ops.cx_def, "guppyft.steane._cx")
-            .with_generated_decl(steane_ops.cz_def, "guppyft.steane._cz")
-            .with_generated_decl(steane_ops.decode_def, "guppyft.steane.decode")
-        )
+        lib.members.extend((state_gen.id, state_discard.id))
         tys = TyReplacements().with_types(
             [
                 ("guppyft.steane.types", "qubit"),
@@ -720,7 +713,7 @@ class SteaneBuilder:
         )
 
         return ImplementOpsSpec(
-            ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[lib]
+            ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[lib.compile()]
         )
 
     def _gen_encoder_spec(self, n_blocks: int) -> EncodeSpec:
