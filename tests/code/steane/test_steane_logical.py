@@ -1,11 +1,12 @@
 from guppylang import guppy
+from guppylang.std.angles import angle
 from guppylang.std.builtins import result
 from hugr.build.dfg import Dfg
 from hugr.ops import DFG
 from hugr.tys import ExtType
 from tket.passes import InlineFunctions, Normalize
 
-from guppyft.code.steane.logical import Qubit, cx, inject_t, prep_t_state
+from guppyft.code.steane.logical import Qubit, cx, inject_t, prep_t_state, rz
 from guppyft.extensions import steane_ops, steane_types
 
 
@@ -73,6 +74,7 @@ def test_guppy_bindings_smoke() -> None:
     def main() -> None:
         q0 = Qubit()
         q0.x()
+        rz(q0, angle(0.13))  # type: ignore[call-arg]
         q1 = Qubit()
         cx(q0, q1)
         q1.free()
