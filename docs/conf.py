@@ -64,4 +64,5 @@ intersphinx_mapping = {
     "hugr": ("https://quantinuum.github.io/hugr/", None),
     "zixy": ("https://quantinuum.github.io/zixy/", None),
     "guppylang": ("https://docs.quantinuum.com/guppy/", None),
+    "guppyalgos": ("https://docs.quantinuum.com/guppy/algorithms/", None),
 }

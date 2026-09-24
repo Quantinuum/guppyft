@@ -44,8 +44,8 @@ __all__ = [
 ]
 
 CODE_DEF = StabilizerCode.from_python_strings(
-    num_physical_qubits=7,
-    num_logical_qubits=1,
+    n_physical_qubits=7,
+    n_logical_qubits=1,
     distance=3,
     generators=["XXXXIII", "IXXIXXI", "IIXXIXX", "ZZZZIII", "IZZIZZI", "IIZZIZZ"],
     x_logicals=["XXXXXXX"],
