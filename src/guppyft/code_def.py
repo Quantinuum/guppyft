@@ -52,7 +52,8 @@ class StabilizerCode:
 
     @cached_property
     def y_logicals(self) -> pauli.SignTerms:
-        """Return the Y logical operators derived from X and Z logicals."""
+        """Return the :math:`Y` logical operators derived from :math:`X`
+        and :math:`Z` logicals."""
         terms = pauli.ComplexSignTerms(self.n_physical_qubits)
         for j in range(self.n_logical_qubits):
             # ComplexSign(k) ~ i^k

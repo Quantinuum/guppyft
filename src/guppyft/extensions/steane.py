@@ -183,6 +183,18 @@ class SteaneOpsExtension:
         return self.sdg_def.instantiate([])
 
     @functools.cached_property
+    def rz_def(self) -> OpDef:
+        """Apply an Rz gate to one qubit.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `rz`."""
+        return self().get_op("rz")
+
+    def rz(self) -> ExtOp:
+        """Apply an Rz gate to one qubit."""
+        return self.rz_def.instantiate([])
+
+    @functools.cached_property
     def prep_t_state_def(self) -> OpDef:
         """Prepare a magic state that can be used to produce T-like states (T and Tdg).
 
