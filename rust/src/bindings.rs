@@ -11,6 +11,7 @@ mod _bindings {
     #[pymodule_export]
     use super::hugr::RsHugr;
     use crate::{implement_ops, replacement};
+    use anyhow::Context;
     use itertools::Itertools as _;
     use pyo3::exceptions::PyValueError;
     use pyo3::prelude::*;
@@ -110,7 +111,7 @@ mod _bindings {
 
         let pass = implement_ops::ImplementOpsPass::new(new_ops, ty_hashset);
         pass.run(hugr)
-            .map_err(|e| PyValueError::new_err(format!("Error replacing operations: {e}")))?;
+            .context("Could not successfully run the implement ops pass")?;
 
         Ok(())
     }
