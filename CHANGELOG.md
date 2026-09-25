@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.2.1](https://github.com/Quantinuum/guppyft/compare/v0.2.0...v0.2.1) (2026-09-24)
+
+
+### Features
+
+* Allow registering op replacements with op def ([#425](https://github.com/Quantinuum/guppyft/issues/425)) ([9fe206c](https://github.com/Quantinuum/guppyft/commit/9fe206cd9b55a7fd08b6136d199648531d093f11))
+* Steane `rz` op and logical binding ([#420](https://github.com/Quantinuum/guppyft/issues/420)) ([d6c4afb](https://github.com/Quantinuum/guppyft/commit/d6c4afb1e2732b6619ffebf3c5fa4de7370eb149))
+
+
+### Bug Fixes
+
+* Preserve call location during global op synthesis ([#415](https://github.com/Quantinuum/guppyft/issues/415)) ([5d87069](https://github.com/Quantinuum/guppyft/commit/5d870699ac005ed87ee13b5676e93552cc5ce863))
+
+
+### Documentation
+
+* Document that just &gt;= 1.46.0 is required ([#419](https://github.com/Quantinuum/guppyft/issues/419)) ([4f3d023](https://github.com/Quantinuum/guppyft/commit/4f3d023300b33cebec51677ecb3b215cbc4fbfc5))
+* Use consistent math styling in docstrings for code_def module ([#422](https://github.com/Quantinuum/guppyft/issues/422)) ([3639a34](https://github.com/Quantinuum/guppyft/commit/3639a34bb6ee1ce46708679444ce912dbe346d79))
+
 ## [0.2.0](https://github.com/Quantinuum/guppyft/compare/v0.1.2...v0.2.0) (2026-09-17)
 
 
