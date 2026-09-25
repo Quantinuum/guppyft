@@ -289,11 +289,16 @@ def _compute_state_prep_tableaux(
 
     n_stab_qubits = num_blocks * code_definition.n_physical_qubits
 
+    # If we have an @expected_qubits hint on our impl function and no
+    # n_impl_ancillas, update the number of qubits used in the simulation
+    if n_hinted_qubits is not None and n_impl_ancillas is None:
+        n_stab_qubits += n_hinted_qubits
+
+    # If n_impl_ancillas is specified, add additional the ancilla qubits in the number
+    #  used for the simulation. If both n_hinted_qubits and n_impl_ancillas
+    # are not None, then n_impl_ancillas overrides the hinted number.
     if n_impl_ancillas is not None:
         n_stab_qubits += n_impl_ancillas
-
-    if n_hinted_qubits is not None and not n_impl_ancillas:
-        n_stab_qubits += n_hinted_qubits
 
     match num_blocks:
         case 1:
@@ -457,11 +462,16 @@ def _compute_clifford_tableaux(
 
     n_hinted_qubits = _extract_expected_qubits_hint(impl_function)
 
+    # If we have an @expected_qubits hint on our impl function and no
+    # n_impl_ancillas, update the number of qubits used in the simulation
+    if n_hinted_qubits is not None and n_impl_ancillas is None:
+        n_physical_choi_qubits += n_hinted_qubits
+
+    # If n_impl_ancillas is specified, add additional the ancilla qubits in the number
+    #  used for the simulation. If both n_hinted_qubits and n_impl_ancillas
+    # are not None, then n_impl_ancillas overrides the hinted number.
     if n_impl_ancillas is not None:
         n_physical_choi_qubits += n_impl_ancillas
-
-    if n_hinted_qubits is not None and not n_impl_ancillas:
-        n_physical_choi_qubits += n_hinted_qubits
 
     match num_blocks:
         case 1:
