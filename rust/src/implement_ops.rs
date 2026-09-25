@@ -11,13 +11,17 @@ use hugr::{
     ops::{DataflowOpTrait, OpType, handle::NodeHandle},
     types::{PolyFuncType, Type, TypeRow},
 };
+use hugr_core::builder::{Dataflow, DataflowSubContainer};
 use hugr_core::extension::ExtensionId;
+use hugr_core::extension::prelude::ConstUsize;
 use hugr_core::hugr::internal::HugrMutInternals;
 use hugr_core::hugr::linking::NodeLinkingError;
+use hugr_core::ops::handle::FuncID;
 use hugr_core::ops::{Call, OpName};
+use hugr_core::std_extensions::arithmetic::int_types::int_type;
 use hugr_core::std_extensions::collections::array::Array;
 use hugr_core::std_extensions::collections::borrow_array::BorrowArray;
-use hugr_core::types::{CustomType, SumType, Transformable, TypeArg, TypeName};
+use hugr_core::types::{CustomType, Signature, SumType, Transformable, TypeArg, TypeName};
 use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::hash_map::Entry;
@@ -48,16 +52,20 @@ pub enum ImplementOpsPassError {
     },
 }
 
+pub type OpId = (String, String);
+pub type TypeId = (String, String);
+pub type OpReplacements = BTreeMap<OpId, (Option<Hugr>, String, Vec<usize>)>;
+
 #[derive(Debug, Clone, Default)]
 pub struct ImplementOpsPass {
     scope: PassScope,
-    pub op_replacements: BTreeMap<(String, String), (Option<Hugr>, String)>,
+    pub op_replacements: OpReplacements,
     replaceable_types: HashSet<(ExtensionId, TypeName)>,
 }
 
 impl ImplementOpsPass {
     pub fn new(
-        op_replacements: BTreeMap<(String, String), (Option<Hugr>, String)>,
+        op_replacements: OpReplacements,
         ty_replacements: HashSet<(ExtensionId, TypeName)>,
     ) -> Self {
         Self {
@@ -99,25 +107,30 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
             }
         }
 
-        let op_funcs: Vec<(ExtensionOp, Option<Hugr>, &str)> = hugr
+        let op_funcs: Vec<(ExtensionOp, Option<Hugr>, &str, Vec<usize>)> = hugr
             .nodes()
             .filter_map(|n| hugr.get_optype(n).as_extension_op())
+            .unique_by(|&op| OpHashWrapper::from(op))
             .filter_map(|ext_op| {
                 let key = (
                     ext_op.def().extension_id().to_string(),
                     ext_op.def().name().to_string(),
                 );
-                let (func_hugr, func_name) = self.op_replacements.get(&key)?;
-                Some((ext_op.clone(), func_hugr.clone(), func_name.as_str()))
+                let (func_hugr, func_name, bind) = self.op_replacements.get(&key)?;
+                Some((
+                    ext_op.clone(),
+                    func_hugr.clone(),
+                    func_name.as_str(),
+                    bind.clone(),
+                ))
             })
-            .unique_by(|(op, _, _)| OpHashWrapper::from(op))
             .collect_vec();
 
         // Determine type replacements from differences between the `ext_op` and `func_hugr` signatures.
         // Filter using `self.ty_replacements` to only replace specific extension types.
         let type_map: HashMap<CustomType, Type> = op_funcs.iter().try_fold(
             HashMap::new(),
-            |mut map, (op_def, func_hugr, func_name)| -> Result<_, ImplementOpsPassError> {
+            |mut map, (op_def, func_hugr, func_name, bind)| -> Result<_, ImplementOpsPassError> {
                 let func_hugr =
                     func_hugr
                         .as_ref()
@@ -142,7 +155,8 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
                 for (src_ty, tgt_ty) in src_sig
                     .input
                     .iter()
-                    .zip(tgt_sig.input.iter())
+                    // Skip some arguments since they are bound from generic args in the op
+                    .zip(tgt_sig.input.iter().skip(bind.len()))
                     .chain(src_sig.output.iter().zip(tgt_sig.output.iter()))
                 {
                     let mut pending = vec![(src_ty.clone(), tgt_ty.clone())];
@@ -177,8 +191,8 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
         )?;
 
         let mut state = OpReplacer::new_with_types(hugr, type_map);
-        for (op_def, func_hugr, func_name) in op_funcs {
-            state.register_replacement(op_def, func_hugr, func_name)?;
+        for (op_def, func_hugr, func_name, bind) in op_funcs {
+            state.register_replacement(op_def, func_hugr, func_name, &bind)?;
         }
         state.finish()?;
         hugr.validate()?;
@@ -348,23 +362,63 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
         ext_op: ExtensionOp,
         func_hugr_opt: Option<Hugr>,
         func_name: &str,
+        bind_args: &[usize],
     ) -> Result<(), OpReplacementError> {
-        // Replace qubit type
         let op_sig: PolyFuncType = {
             let mut sig = ext_op.signature().into_owned();
             sig.transform(&self.type_replacer)?;
             sig.into()
         };
+        let expected_sig: PolyFuncType = {
+            let Signature { input, output } = &op_sig.body();
+            // Prepend runtime types for bound generic arguments
+            let input: TypeRow = bind_args
+                .iter()
+                .map(|bound_arg: &usize| match &ext_op.args()[*bound_arg] {
+                    TypeArg::BoundedNat(_) => int_type(6),
+                    e => panic!(
+                        "Binding non-nat-literal generic arguments is not supported, got {e}"
+                    ),
+                })
+                .chain(input.iter().cloned())
+                .collect();
+            PolyFuncType::new(vec![], Signature::new(input, output.clone()))
+        };
 
         // Extract function if given, otherwise generate a declaration with the expected signature.
-        let (func_hugr, func_node) = if let Some(hugr) = func_hugr_opt {
-            let node = self.get_func_node(ext_op.qualified_id(), op_sig, &hugr, func_name)?;
+        let (mut func_hugr, mut func_node) = if let Some(hugr) = func_hugr_opt {
+            let node = self.get_func_node(ext_op.qualified_id(), expected_sig, &hugr, func_name)?;
             (hugr, node)
         } else {
             let mut module_builder = ModuleBuilder::new();
-            let decl = module_builder.declare(func_name, op_sig)?;
+            let decl = module_builder.declare(func_name, expected_sig)?;
             (module_builder.finish_hugr()?, decl.node())
         };
+
+        if !bind_args.is_empty() {
+            let is_defn = match func_hugr.get_optype(func_node) {
+                OpType::FuncDefn(_) => true,
+                OpType::FuncDecl(_) => false,
+                _ => unreachable!(),
+            };
+
+            let mut builder = ModuleBuilder::with_hugr(func_hugr);
+            let mangler = bind_args.iter().join(".");
+            let mut defn = builder.define_function(format!("{func_name}.{mangler}"), op_sig)?;
+            let values: Vec<_> = bind_args
+                .iter()
+                .map(|v| defn.add_load_value(ConstUsize::new(*v as u64)))
+                .collect();
+            let call_inputs = values.into_iter().chain(defn.input_wires());
+            let call = if is_defn {
+                defn.call::<true>(&FuncID::from(func_node), &[], call_inputs)?
+            } else {
+                defn.call::<false>(&FuncID::from(func_node), &[], call_inputs)?
+            };
+            let defn = defn.finish_with_outputs(call.outputs())?;
+            func_hugr = builder.finish_hugr()?;
+            func_node = defn.node();
+        }
 
         // Register call for later replacement
         let call_type: OpType = Call::try_new((*ext_op.signature()).clone().into(), [])?.into();

@@ -20,32 +20,42 @@ from guppyft._util import get_link_name
 from ._util import to_rs_hugr
 
 
+@dataclass(frozen=True)
+class BindGenerics:
+    bound_generics: list[int]
+
+
 class OpReplacements:
-    ops: dict[
+    _ops: dict[
         tuple[str, str],
-        tuple[GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str],
+        tuple[GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str, BindGenerics],
     ]
     """Stores the operations to replace during op implementation and the implementation
     functions. A function can be set to `None` to indicate that a declaration with the
     given name should be generated instead."""
 
     def __init__(self) -> None:
-        self.ops = {}
+        self._ops = {}
 
     def __iter__(
         self,
     ) -> Iterator[
         tuple[
             tuple[str, str],
-            tuple[GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str],
+            tuple[
+                GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str, BindGenerics
+            ],
         ]
     ]:
-        return iter(self.ops.items())
+        return iter(self._ops.items())
 
     def with_func(
-        self, op: tuple[str, str], func: GuppyFunctionDefinition[Any, Any]
+        self,
+        op: tuple[str, str],
+        func: GuppyFunctionDefinition[Any, Any],
+        bind: BindGenerics | None = None,
     ) -> Self:
-        self.ops[op] = (func, get_link_name(func))
+        self._ops[op] = (func, get_link_name(func), bind or BindGenerics([]))
 
         return self
 
@@ -57,8 +67,10 @@ class OpReplacements:
 
         return self
 
-    def with_generated_decl(self, op: tuple[str, str], func_name: str) -> Self:
-        self.ops[op] = (None, func_name)
+    def with_generated_decl(
+        self, op: tuple[str, str], func_name: str, bind: BindGenerics | None = None
+    ) -> Self:
+        self._ops[op] = (None, func_name, bind or BindGenerics([]))
 
         return self
 
@@ -72,7 +84,7 @@ class OpReplacements:
         # Build index of names missing declaration/definition
         missing: dict[str, tuple[str, str]] = {
             f_name: op_key
-            for op_key, (func_opt, f_name) in self.ops.items()
+            for op_key, (func_opt, f_name, _) in self._ops.items()
             if func_opt is None
         }
         if not missing:
@@ -86,7 +98,7 @@ class OpReplacements:
                     DefinitionBuilder(h).module_root_builder().declare_function(
                         data.op.f_name, data.op.signature, data.op.visibility
                     )
-                    self.ops[op_key] = (h, data.op.f_name)
+                    self._ops[op_key] = (h, data.op.f_name, BindGenerics([]))
                     if not missing:
                         return self
 
@@ -151,8 +163,9 @@ def _implement_ops(
         key: (
             func_opt if func_opt is None else to_rs_hugr(func_opt),
             name,
+            bind.bound_generics,
         )
-        for key, (func_opt, name) in ops
+        for key, (func_opt, name, bind) in ops
     }
 
     _implement_ops_binding(rs_hugr, rs_ops, tys)
