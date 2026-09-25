@@ -9,7 +9,7 @@ from guppylang.decorator import custom_guppy_decorator
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.emulator import EmulatorBuilder, EmulatorInstance
 from guppylang.library import GuppyLibrary, link_name
-from guppylang.std.builtins import array, comptime, exit, owned
+from guppylang.std.builtins import Function, array, comptime, exit, owned
 from guppylang.std.collections import Stack, empty_stack
 from guppylang.std.option import Option, nothing, some
 from hugr.ext import ExtensionRegistry, OpDef
@@ -732,32 +732,23 @@ class ToyK2Builder:
                 _z(blk_id, qb_id)
             return (addr,)
 
-        @_register_op_replacement(toy_k2_ops.cx_dynq_def)
+        @_register_op_replacement(toy_k2_ops.call_dyn_tq_def)
         @no_type_check
-        def _cx_dynq(
-            ctl_addr: tuple[int, int], tgt_addr: tuple[int, int]
+        def _call_dyn_tq(
+            ctl_addr: tuple[int, int],
+            tgt_addr: tuple[int, int],
+            same_block_f: Function[[int, int], int],
+            diff_block_f: Function[[int, int, int, int], tuple[int, int]],
         ) -> tuple[tuple[int, int], tuple[int, int]]:
             ctl_blk, ctl_qb = ctl_addr
             tgt_blk, tgt_qb = tgt_addr
 
-            # If they are the same block, we apply an intra CX
             if ctl_blk == tgt_blk:
-                _cx_intra(tgt_blk, tgt_qb)
-
-            # Otherwise, we need to decompose it
+                ctl_blk = same_block_f(ctl_blk, tgt_qb)
             else:
-                if ctl_qb == tgt_qb:
-                    _swap_intra(ctl_blk)
+                ctl_blk, tgt_blk = diff_block_f(ctl_blk, ctl_qb, tgt_blk, tgt_qb)
 
-                _cx_transversal(ctl_blk, tgt_blk)
-                _cx_intra(tgt_blk, tgt_qb)
-                _cx_transversal(ctl_blk, tgt_blk)
-                _cx_intra(tgt_blk, tgt_qb)
-
-                if ctl_qb == tgt_qb:
-                    _swap_intra(ctl_blk)
-
-            return ctl_addr, tgt_addr
+            return (ctl_blk, ctl_qb), (tgt_blk, tgt_qb)
 
         @_register_op_replacement(toy_k2_ops.s_dynq_def)
         @no_type_check
@@ -919,9 +910,9 @@ class ToyK2Builder:
                 ("tket.quantum", "Sdg"): ("guppyft.toy_k2.ops", "sdg_dynq", []),
                 ("tket.quantum", "T"): ("guppyft.toy_k2.ops", "t_dynq", []),
                 ("tket.quantum", "Tdg"): ("guppyft.toy_k2.ops", "tdg_dynq", []),
-                ("tket.quantum", "CX"): ("guppyft.toy_k2.ops", "cx_dynq", []),
             },
             compound_op_replacements={
+                ("tket.quantum", "CX"): k2_logical.cx_dynq,
                 ("tket.quantum", "MeasureFree"): k2_logical.measure_z_dynq,
             },
             ty_replacements={

@@ -10,6 +10,7 @@ The physical implementation for these ops is provided in
 from typing import no_type_check
 
 from guppylang import guppy
+from guppylang.std.builtins import Function
 from guppylang.std.lang import owned
 from guppylang_internals.decorator import custom_type, hugr_op
 
@@ -378,10 +379,20 @@ def tdg_dynq(q: Qubit) -> None:
     """Apply a Tdg gate to a dynamic logical qubit."""
 
 
-@hugr_op(logical_op(toy_k2_ops.cx_dynq_def))
+@hugr_op(logical_op(toy_k2_ops.call_dyn_tq_def))
 @no_type_check
+def _call_dyn_tq(
+    q0: Qubit,
+    q1: Qubit,
+    same_block_f: Function[[Block, int], None],
+    diff_block_f: Function[[Block, int, Block, int], None],
+) -> None: ...
+
+
+@guppy
 def cx_dynq(control: Qubit, target: Qubit) -> None:
     """Apply a CX gate to dynamic logical qubits."""
+    _call_dyn_tq(control, target, cx_intra, cx_inter)
 
 
 @hugr_op(logical_op(toy_k2_ops.project_z_dynq_def))

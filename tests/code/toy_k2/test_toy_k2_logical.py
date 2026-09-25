@@ -101,7 +101,7 @@ def test_guppy_bindings_smoke() -> None:
         k2.sdg_dynq(q1)
         k2.t_dynq(q0)
         k2.tdg_dynq(q1)
-        k2.cx_dynq(q0, q_extra)
+        k2._call_dyn_tq(q0, q_extra, k2.cx_intra, k2.cx_inter)
         output("meas_dynq", k2.project_z_dynq(q_extra).decode())
         k2.free_dynq(q_extra)
         k2.restore_some(bb, q0)
