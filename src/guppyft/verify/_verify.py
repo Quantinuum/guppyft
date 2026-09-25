@@ -258,7 +258,7 @@ def _extract_expected_qubits_hint(
     return func.wrapped.metadata.get_expected_qubits()
 
 
-def _get_n_impl_qubits(
+def _get_n_impl_simulation_qubits(
     n_qubits: int, n_hinted_qubits: int | None, n_impl_ancillas: int | None
 ) -> int:
     """Helper to add any additional implementation qubits specified by the user."""
@@ -306,7 +306,7 @@ def _compute_state_prep_tableaux(
 
     # Get the number of qubits required for the simulation of the impl_function.
     # This includes qubits specified with the @expected_qubits hint or n_impl_ancillas.
-    n_stab_qubits = _get_n_impl_qubits(
+    n_stab_qubits = _get_n_impl_simulation_qubits(
         num_blocks * code_definition.n_physical_qubits,
         n_hinted_qubits,
         n_impl_ancillas,
@@ -475,7 +475,7 @@ def _compute_clifford_tableaux(
 
     # Get the number of qubits required for the simulation of the impl_function.
     # This includes qubits specified with the @expected_qubits hint or n_impl_ancillas.
-    n_physical_choi_qubits = _get_n_impl_qubits(
+    n_physical_choi_qubits = _get_n_impl_simulation_qubits(
         2 * num_blocks * code_definition.n_physical_qubits,
         n_hinted_qubits,
         n_impl_ancillas,
