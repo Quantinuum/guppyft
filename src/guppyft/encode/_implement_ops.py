@@ -7,7 +7,7 @@ from guppylang.defs import GuppyFunctionDefinition
 from guppylang.library import link_name
 from hugr import Hugr
 from hugr.build import DefinitionBuilder
-from hugr.ext import TypeDef
+from hugr.ext import OpDef, TypeDef
 from hugr.ops import FuncDecl, FuncDefn
 from hugr.package import Package, link_packages
 from hugr.tys import ExtType, Type
@@ -49,15 +49,27 @@ class OpReplacements:
     ]:
         return iter(self._ops.items())
 
+    def _insert_for_op(
+        self,
+        op: tuple[str, str] | OpDef,
+        value: tuple[
+            GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str, BindGenerics
+        ],
+    ) -> Self:
+        if isinstance(op, OpDef):
+            op = (op.get_extension().name, op.name)
+        self._ops[op] = value
+        return self
+
     def with_func(
         self,
-        op: tuple[str, str],
+        op: tuple[str, str] | OpDef,
         func: GuppyFunctionDefinition[Any, Any],
         bind: BindGenerics | None = None,
     ) -> Self:
-        self._ops[op] = (func, get_link_name(func), bind or BindGenerics([]))
-
-        return self
+        return self._insert_for_op(
+            op, (func, get_link_name(func), bind or BindGenerics([]))
+        )
 
     def with_funcs(
         self, funcs: dict[tuple[str, str], GuppyFunctionDefinition[Any, Any]]
@@ -68,11 +80,12 @@ class OpReplacements:
         return self
 
     def with_generated_decl(
-        self, op: tuple[str, str], func_name: str, bind: BindGenerics | None = None
+        self,
+        op: tuple[str, str] | OpDef,
+        func_name: str,
+        bind: BindGenerics | None = None,
     ) -> Self:
-        self._ops[op] = (None, func_name, bind or BindGenerics([]))
-
-        return self
+        return self._insert_for_op(op, (None, func_name, bind or BindGenerics([])))
 
     def with_generated_decls(self, names: dict[tuple[str, str], str]) -> Self:
         for op, name in names.items():
