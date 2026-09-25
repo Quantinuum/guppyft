@@ -82,9 +82,9 @@ class OpReplacements:
 
     def gen_missing_decls_from_lib(self, lib: Package) -> Self:
         # Build index of names missing declaration/definition
-        missing: dict[str, tuple[str, str]] = {
-            f_name: op_key
-            for op_key, (func_opt, f_name, _) in self._ops.items()
+        missing: dict[str, tuple[tuple[str, str], BindGenerics]] = {
+            f_name: (op_key, bind)
+            for op_key, (func_opt, f_name, bind) in self._ops.items()
             if func_opt is None
         }
         if not missing:
@@ -93,12 +93,12 @@ class OpReplacements:
         for module in lib.modules:
             for _, data in module.nodes():
                 if isinstance(data.op, FuncDefn) and data.op.f_name in missing:
-                    op_key = missing.pop(data.op.f_name)
+                    op_key, bind = missing.pop(data.op.f_name)
                     h: Hugr[Any] = Hugr()
                     DefinitionBuilder(h).module_root_builder().declare_function(
                         data.op.f_name, data.op.signature, data.op.visibility
                     )
-                    self._ops[op_key] = (h, data.op.f_name, BindGenerics([]))
+                    self._ops[op_key] = (h, data.op.f_name, bind)
                     if not missing:
                         return self
 
