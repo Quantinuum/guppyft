@@ -8,13 +8,14 @@ from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.emulator import EmulatorBuilder, EmulatorInstance
 from guppylang.library import GuppyLibrary, link_name
-from guppylang.std.builtins import array, comptime, exit, owned
+from guppylang.std.builtins import Function, array, comptime, exit, owned
 from guppylang.std.collections import Stack, empty_stack
 from guppylang.std.option import Option, nothing, some
 from hugr.ext import ExtensionRegistry
 from hugr.package import Package
 from hugr.std import _std_extensions
 
+from guppyft.code.toy_k2 import logical as k2_logical
 from guppyft.code.toy_k2 import primitives as k2_primitives
 from guppyft.encode import (
     EncoderParams,
@@ -752,6 +753,24 @@ class ToyK2Builder:
             return ctl_addr, tgt_addr
 
         @guppy
+        @link_name("guppyft.toy_k2._call_dyn_tq")  # type: ignore[untyped-decorator]
+        def _call_dyn_tq(
+            ctl_addr: tuple[int, int],
+            tgt_addr: tuple[int, int],
+            same_block_f: Function[[int, int], int],  # type: ignore[valid-type, type-arg]
+            diff_block_f: Function[[int, int, int, int], tuple[int, int]],  # type: ignore[valid-type, type-arg]
+        ) -> tuple[tuple[int, int], tuple[int, int]]:
+            ctl_blk, ctl_qb = ctl_addr
+            tgt_blk, tgt_qb = tgt_addr
+
+            if ctl_blk == tgt_blk:
+                ctl_blk = same_block_f(ctl_blk, tgt_qb)
+            else:
+                ctl_blk, tgt_blk = diff_block_f(ctl_blk, ctl_qb, tgt_blk, tgt_qb)
+
+            return (ctl_blk, ctl_qb), (tgt_blk, tgt_qb)
+
+        @guppy
         @no_type_check
         @link_name("guppyft.toy_k2._s_dynq")
         def _s_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
@@ -808,16 +827,11 @@ class ToyK2Builder:
         @guppy
         @no_type_check
         @link_name("guppyft.toy_k2._measure_z_dynq")
-        def _measure_z_dynq(addr: tuple[int, int]) -> tuple[bool, tuple[int, int]]:
+        def _measure_z_dynq(addr: tuple[int, int]) -> tuple[bool]:
             blk_id, qb_id = addr
-            res, _ = _measure_z(blk_id, qb_id)
-            # TODO: For the sake of consistency with Guppy, measure_z_dyn
-            # should *not* return the dynamic qubit. Instead, it should be
-            # reset to zero and released, so that it can be picked up again
-            # by `allocate_dynq_addr`. Currently, this requires changing
-            # the signature of the HUGR op.
-            # state.release_dyn_addr(addr)
-            return res, addr
+            res, blk_id = _measure_z(blk_id, qb_id)
+            _free_dynq((blk_id, qb_id))
+            return (res,)
 
         @guppy
         @no_type_check
@@ -905,6 +919,7 @@ class ToyK2Builder:
             _z_dynq,
             _h_dynq,
             _cx_dynq,
+            _call_dyn_tq,
             _s_dynq,
             _sdg_dynq,
             _t_dynq,
@@ -950,7 +965,10 @@ class ToyK2Builder:
                 ("guppyft.toy_k2.ops", "x_dynq"): "guppyft.toy_k2._x_dynq",
                 ("guppyft.toy_k2.ops", "z_dynq"): "guppyft.toy_k2._z_dynq",
                 ("guppyft.toy_k2.ops", "h_dynq"): "guppyft.toy_k2._h_dynq",
-                ("guppyft.toy_k2.ops", "cx_dynq"): "guppyft.toy_k2._cx_dynq",
+                (
+                    "guppyft.toy_k2.ops",
+                    "call_dyn_tq",
+                ): "guppyft.toy_k2._call_dyn_tq",
                 ("guppyft.toy_k2.ops", "s_dynq"): "guppyft.toy_k2._s_dynq",
                 ("guppyft.toy_k2.ops", "sdg_dynq"): "guppyft.toy_k2._sdg_dynq",
                 ("guppyft.toy_k2.ops", "t_dynq"): "guppyft.toy_k2._t_dynq",
@@ -999,8 +1017,6 @@ class ToyK2Builder:
             op_replacements={
                 ("tket.quantum", "QAlloc"): ("guppyft.toy_k2.ops", "alloc_dynq", []),
                 ("tket.quantum", "MeasureFree"): (
-                    # TODO: this will fail due to signature mismatch,
-                    # see comment in _measure_z_dynq
                     "guppyft.toy_k2.ops",
                     "measure_z_dynq",
                     [],
@@ -1008,7 +1024,7 @@ class ToyK2Builder:
                 ("tket.quantum", "QFree"): ("guppyft.toy_k2.ops", "free_dynq", []),
                 ("tket.measurement", "Read"): (
                     "guppyft.toy_k2.ops",
-                    "decode_qubit_type",
+                    "decode_qubit_measurement",
                     [],
                 ),
                 ("tket.quantum", "X"): ("guppyft.toy_k2.ops", "x_dynq", []),
@@ -1018,9 +1034,10 @@ class ToyK2Builder:
                 ("tket.quantum", "Sdg"): ("guppyft.toy_k2.ops", "sdg_dynq", []),
                 ("tket.quantum", "T"): ("guppyft.toy_k2.ops", "t_dynq", []),
                 ("tket.quantum", "Tdg"): ("guppyft.toy_k2.ops", "tdg_dynq", []),
-                ("tket.quantum", "CX"): ("guppyft.toy_k2.ops", "cx_dynq", []),
             },
-            compound_op_replacements={},
+            compound_op_replacements={
+                ("tket.quantum", "CX"): k2_logical.cx_dynq,
+            },
             ty_replacements={
                 ("prelude", "qubit"): ("guppyft.toy_k2.types", "dynamic_qubit"),
                 ("tket.measurement", "Measurement"): (

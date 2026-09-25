@@ -1,5 +1,6 @@
 from guppylang import guppy
 from guppylang.std.platform import output
+from guppylang.std.quantum import cx, measure, qubit, x
 
 import guppyft.code.toy_k2.logical as k2
 from guppyft.code.toy_k2.encode import ToyK2Builder
@@ -48,9 +49,6 @@ def test_k2_dynq_ops() -> None:
         output("q0", k2.measure_z_dynq(q0).decode())
         output("q1", k2.measure_z_dynq(q1).decode())
         output("q2", k2.measure_z_dynq(q2).decode())
-        q0.free()
-        q1.free()
-        q2.free()
         output("end", -1)
 
     pkg = main.with_minimal_opt().compile()
@@ -63,3 +61,28 @@ def test_k2_dynq_ops() -> None:
         .collated_shots()
     )
     assert res == [{"q0": [1], "q1": [1], "q2": [1], "end": [-1]}]
+
+
+def test_encoder_uses_dynamic_dispatch_for_cx() -> None:
+    @guppy
+    def main() -> None:
+        q0 = qubit()
+        q1 = qubit()
+        q2 = qubit()
+        x(q0)
+        cx(q0, q1)
+        cx(q0, q2)
+        output("q0", measure(q0).read())
+        output("q1", measure(q1).read())
+        output("q2", measure(q2).read())
+
+    compiler = ToyK2Builder().build(n_blocks=1)
+    assert compiler._spec.compile is not None
+    logical = compiler._spec.compile(main.compile())
+
+    assert any(
+        data.op.name() == "guppyft.toy_k2.ops.call_dyn_tq"
+        for module in logical.modules
+        for _node, data in module.nodes()
+    )
+    compiler.implement_ops(logical)
