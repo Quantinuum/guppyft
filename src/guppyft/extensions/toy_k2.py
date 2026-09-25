@@ -382,16 +382,17 @@ class ToyK2OpsExtension:
         return self.tdg_dynq_def.instantiate([])
 
     @functools.cached_property
-    def cx_dynq_def(self) -> OpDef:
-        """Apply a CX gate to a dynamic ToyK2 logical qubit.
+    def call_dyn_tq_def(self) -> OpDef:
+        """Dispatch two dynamic qubits to a same-block or different-block callback.
 
         This is the generic operation definition. For the instantiated operation,
-        see `cx_dynq`."""
-        return self().get_op("cx_dynq")
+        see `call_dyn_tq`.
+        """
+        return self().get_op("call_dyn_tq")
 
-    def cx_dynq(self) -> ExtOp:
-        """Apply a CX gate to a dynamic ToyK2 logical qubit."""
-        return self.cx_dynq_def.instantiate([])
+    def call_dyn_tq(self) -> ExtOp:
+        """Dispatch two dynamic qubits to a same-block or different-block callback."""
+        return self.call_dyn_tq_def.instantiate([])
 
     @functools.cached_property
     def measure_z_dynq_def(self) -> OpDef:

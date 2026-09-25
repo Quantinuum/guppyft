@@ -129,10 +129,10 @@
       },
       "binary": false
     },
-    "cx_dynq": {
+    "call_dyn_tq": {
       "extension": "guppyft.toy_k2.ops",
-      "name": "cx_dynq",
-      "description": "CX gate between dynamic logical qubits.",
+      "name": "call_dyn_tq",
+      "description": "Call one of two block callbacks on dynamic logical qubits.\nIf the qubits share a block, call the first callback with that block and\nthe second qubit's index. Otherwise, call the second callback with each\nqubit's block and index, in input order. Callbacks must preserve block\nidentity and restore any changes to other logical qubits in the blocks.",
       "signature": {
         "params": [],
         "body": {
@@ -152,6 +152,107 @@
               "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
+            },
+            {
+              "t": "G",
+              "input": [
+                {
+                  "t": "Opaque",
+                  "extension": "guppyft.toy_k2.types",
+                  "extension_version": "0.1.0",
+                  "id": "block",
+                  "args": [],
+                  "bound": "A"
+                },
+                {
+                  "t": "Opaque",
+                  "extension": "arithmetic.int.types",
+                  "extension_version": "0.1.0",
+                  "id": "int",
+                  "args": [
+                    {
+                      "tya": "BoundedNat",
+                      "n": 6
+                    }
+                  ],
+                  "bound": "C"
+                }
+              ],
+              "output": [
+                {
+                  "t": "Opaque",
+                  "extension": "guppyft.toy_k2.types",
+                  "extension_version": "0.1.0",
+                  "id": "block",
+                  "args": [],
+                  "bound": "A"
+                }
+              ]
+            },
+            {
+              "t": "G",
+              "input": [
+                {
+                  "t": "Opaque",
+                  "extension": "guppyft.toy_k2.types",
+                  "extension_version": "0.1.0",
+                  "id": "block",
+                  "args": [],
+                  "bound": "A"
+                },
+                {
+                  "t": "Opaque",
+                  "extension": "arithmetic.int.types",
+                  "extension_version": "0.1.0",
+                  "id": "int",
+                  "args": [
+                    {
+                      "tya": "BoundedNat",
+                      "n": 6
+                    }
+                  ],
+                  "bound": "C"
+                },
+                {
+                  "t": "Opaque",
+                  "extension": "guppyft.toy_k2.types",
+                  "extension_version": "0.1.0",
+                  "id": "block",
+                  "args": [],
+                  "bound": "A"
+                },
+                {
+                  "t": "Opaque",
+                  "extension": "arithmetic.int.types",
+                  "extension_version": "0.1.0",
+                  "id": "int",
+                  "args": [
+                    {
+                      "tya": "BoundedNat",
+                      "n": 6
+                    }
+                  ],
+                  "bound": "C"
+                }
+              ],
+              "output": [
+                {
+                  "t": "Opaque",
+                  "extension": "guppyft.toy_k2.types",
+                  "extension_version": "0.1.0",
+                  "id": "block",
+                  "args": [],
+                  "bound": "A"
+                },
+                {
+                  "t": "Opaque",
+                  "extension": "guppyft.toy_k2.types",
+                  "extension_version": "0.1.0",
+                  "id": "block",
+                  "args": [],
+                  "bound": "A"
+                }
+              ]
             }
           ],
           "output": [
@@ -542,14 +643,6 @@
               "id": "qubit_measurement",
               "args": [],
               "bound": "C"
-            },
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
-              "args": [],
-              "bound": "A"
             }
           ]
         }
