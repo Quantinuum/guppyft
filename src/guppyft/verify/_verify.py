@@ -44,16 +44,6 @@ def _invoke_selene_stim(
     return seeded_stim_instance.extract_states_dict(output)
 
 
-# Helper to extract the number of qubits in an impl function specified
-#  by the @expected_qubits hint. If no hint is given, returns None
-def _extract_expected_qubits_hint(
-    func: GuppyFunctionDefinition[Any, Any],
-) -> int | None:
-    assert isinstance(func.wrapped, RawFunctionDef)
-    assert isinstance(func.wrapped.metadata, FunctionMetadata)
-    return func.wrapped.metadata.get_expected_qubits()
-
-
 def _compute_stabilizers_single_block_state(
     state_prep_func: SingleBlockState,
     n_qubits: int,
@@ -258,6 +248,33 @@ def _count_blocks_state(
         return 1
 
 
+# Helper to extract the number of qubits in an impl function specified
+#  by the @expected_qubits hint. If no hint is given, returns None
+def _extract_expected_qubits_hint(
+    func: GuppyFunctionDefinition[Any, Any],
+) -> int | None:
+    assert isinstance(func.wrapped, RawFunctionDef)
+    assert isinstance(func.wrapped.metadata, FunctionMetadata)
+    return func.wrapped.metadata.get_expected_qubits()
+
+
+def _get_n_impl_qubits(
+    n_qubits: int, n_hinted_qubits: int | None, n_impl_ancillas: int | None
+) -> int:
+    """Helper to add any additional implementation qubits specified by the user."""
+    # If we have an @expected_qubits hint on our impl function and no
+    # n_impl_ancillas, update the number of qubits used in the simulation
+    if n_hinted_qubits is not None and n_impl_ancillas is None:
+        n_qubits += n_hinted_qubits
+
+    # If n_impl_ancillas is specified, add additional the ancilla qubits in the number
+    #  used for the simulation. If both n_hinted_qubits and n_impl_ancillas
+    # are not None, then n_impl_ancillas overrides the hinted number.
+    if n_impl_ancillas is not None:
+        n_qubits += n_impl_ancillas
+    return n_qubits
+
+
 def _compute_state_prep_tableaux(
     semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
     impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
@@ -287,18 +304,13 @@ def _compute_state_prep_tableaux(
 
     n_hinted_qubits = _extract_expected_qubits_hint(impl_function)
 
-    n_stab_qubits = num_blocks * code_definition.n_physical_qubits
-
-    # If we have an @expected_qubits hint on our impl function and no
-    # n_impl_ancillas, update the number of qubits used in the simulation
-    if n_hinted_qubits is not None and n_impl_ancillas is None:
-        n_stab_qubits += n_hinted_qubits
-
-    # If n_impl_ancillas is specified, add additional the ancilla qubits in the number
-    #  used for the simulation. If both n_hinted_qubits and n_impl_ancillas
-    # are not None, then n_impl_ancillas overrides the hinted number.
-    if n_impl_ancillas is not None:
-        n_stab_qubits += n_impl_ancillas
+    # Get the number of qubits required for the simulation of the impl_function.
+    # This includes qubits specified with the @expected_qubits hint or n_impl_ancillas.
+    n_stab_qubits = _get_n_impl_qubits(
+        num_blocks * code_definition.n_physical_qubits,
+        n_hinted_qubits,
+        n_impl_ancillas,
+    )
 
     match num_blocks:
         case 1:
@@ -458,20 +470,16 @@ def _compute_clifford_tableaux(
         A pair of Clifford tableaux made up of signed Pauli terms.
     """
     num_blocks = _count_blocks_unitary(semantic_function, impl_function)
-    n_physical_choi_qubits = 2 * num_blocks * code_definition.n_physical_qubits
 
     n_hinted_qubits = _extract_expected_qubits_hint(impl_function)
 
-    # If we have an @expected_qubits hint on our impl function and no
-    # n_impl_ancillas, update the number of qubits used in the simulation
-    if n_hinted_qubits is not None and n_impl_ancillas is None:
-        n_physical_choi_qubits += n_hinted_qubits
-
-    # If n_impl_ancillas is specified, add additional the ancilla qubits in the number
-    #  used for the simulation. If both n_hinted_qubits and n_impl_ancillas
-    # are not None, then n_impl_ancillas overrides the hinted number.
-    if n_impl_ancillas is not None:
-        n_physical_choi_qubits += n_impl_ancillas
+    # Get the number of qubits required for the simulation of the impl_function.
+    # This includes qubits specified with the @expected_qubits hint or n_impl_ancillas.
+    n_physical_choi_qubits = _get_n_impl_qubits(
+        2 * num_blocks * code_definition.n_physical_qubits,
+        n_hinted_qubits,
+        n_impl_ancillas,
+    )
 
     match num_blocks:
         case 1:
