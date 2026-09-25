@@ -71,7 +71,7 @@ fn get_type_from_registry(
 
 impl ReplacementCompiler {
     #[allow(unused)]
-    pub(crate) fn run(self, hugr: &mut Hugr) -> Result<(), ReplacementCompilerError> {
+    pub(crate) fn run(self, hugr: &mut Hugr) -> anyhow::Result<()> {
         let registry = hugr.extensions_mut();
         if let Some(additional_extensions) = self.additional_extensions {
             registry.extend(additional_extensions);

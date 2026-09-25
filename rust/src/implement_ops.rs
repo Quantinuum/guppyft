@@ -6,7 +6,7 @@ use anyhow::Context;
 use hugr::{
     Hugr, HugrView, Node,
     builder::{BuildError, Dataflow, DataflowSubContainer, HugrBuilder, ModuleBuilder},
-    extension::{ExtensionId, SignatureError, prelude::ConstUsize},
+    extension::{ExtensionId, SignatureError},
     hugr::{ValidationError, hugrmut::HugrMut},
     ops::{
         Call, DataflowOpTrait, ExtensionOp, OpName, OpType,
@@ -16,14 +16,13 @@ use hugr::{
 };
 use hugr_core::hugr::internal::HugrMutInternals;
 use hugr_core::hugr::linking::NodeLinkingError;
-use hugr_core::std_extensions::arithmetic::int_types::int_type;
+use hugr_core::std_extensions::arithmetic::int_types::{ConstInt, int_type};
 use hugr_core::std_extensions::collections::array::Array;
 use hugr_core::std_extensions::collections::borrow_array::BorrowArray;
 use hugr_core::types::{CustomType, Signature, SumType, Transformable, TypeArg, TypeName};
 use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
-use std::collections::hash_map::Entry;
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet, hash_map::Entry};
 use tket::passes::replace_types::handlers::register_linear_array_op_replacements;
 use tket::passes::utils::unpack_container::type_unpack::array_args;
 use tket::passes::{
@@ -217,7 +216,11 @@ impl ImplementOpsPass {
         }
         state.finish().context("Could not finish op replacements")?;
         hugr.validate()
-            .context("Could not validate hugr after replacement")?;
+            .context("Could not validate hugr after replacement")
+            .inspect_err(|_| {
+                // TODO remove this
+                std::fs::write("hugr.mmd", hugr.mermaid_string()).unwrap();
+            })?;
         Ok(())
     }
 }
@@ -237,9 +240,7 @@ fn unpack_type(ty: &Type) -> Option<Vec<Type>> {
         Some(
             TypeRow::try_from(row.clone())
                 .expect("unexpected row variable.")
-                .iter()
-                .cloned()
-                .collect(),
+                .into_owned(),
         )
     } else if let Some((size, elem_ty)) = ty
         .as_extension()
@@ -381,7 +382,7 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
         func_hugr_opt: Option<Hugr>,
         func_name: &str,
         bind_args: &[usize],
-    ) -> Result<(), OpReplacementError> {
+    ) -> anyhow::Result<()> {
         let op_sig: PolyFuncType = {
             let mut sig = ext_op.signature().into_owned();
             sig.transform(&self.type_replacer)?;
@@ -425,8 +426,8 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
             let mut defn = builder.define_function(format!("{func_name}.{mangler}"), op_sig)?;
             let values: Vec<_> = bind_args
                 .iter()
-                .map(|v| defn.add_load_value(ConstUsize::new(*v as u64)))
-                .collect();
+                .map(|v| Ok(defn.add_load_value(ConstInt::new_u(6, *v as u64)?)))
+                .collect::<anyhow::Result<_>>()?;
             let call_inputs = values.into_iter().chain(defn.input_wires());
             let call = if is_defn {
                 defn.call::<true>(&FuncID::from(func_node), &[], call_inputs)?

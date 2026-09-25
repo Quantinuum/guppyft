@@ -22,6 +22,9 @@ from ._util import to_rs_hugr
 
 @dataclass(frozen=True)
 class BindGenerics:
+    """Bind the concrete generic arguments with the specified indices to the start of
+    the argument list, loaded as constant values per call."""
+
     bound_generics: list[int]
 
 
