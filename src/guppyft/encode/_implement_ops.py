@@ -33,12 +33,14 @@ class OpReplacements:
         tuple[str, str],
         tuple[GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str, BindGenerics],
     ]
+    _check_eliminated: list[str]
     """Stores the operations to replace during op implementation and the implementation
     functions. A function can be set to `None` to indicate that a declaration with the
     given name should be generated instead."""
 
     def __init__(self) -> None:
         self._ops = {}
+        self._check_eliminated = []
 
     def __iter__(
         self,
@@ -51,6 +53,9 @@ class OpReplacements:
         ]
     ]:
         return iter(self._ops.items())
+
+    def iter_eliminated(self) -> Iterator[str]:
+        return self._check_eliminated.__iter__()
 
     def _insert_for_op(
         self,
@@ -120,6 +125,9 @@ class OpReplacements:
 
         return self
 
+    def check_extension_eliminated(self, ext_id: str) -> None:
+        self._check_eliminated.append(ext_id)
+
 
 class TyReplacements:
     tys: set[tuple[str, str]]
@@ -184,7 +192,7 @@ def _implement_ops(
         for key, (func_opt, name, bind) in ops
     }
 
-    _implement_ops_binding(rs_hugr, rs_ops, tys)
+    _implement_ops_binding(rs_hugr, rs_ops, tys, list(ops.iter_eliminated()))
 
     return rs_hugr.to_bytes()
 

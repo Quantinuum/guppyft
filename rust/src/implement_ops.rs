@@ -58,18 +58,40 @@ pub struct ImplementOpsPass {
     scope: PassScope,
     pub op_replacements: OpReplacements,
     replaceable_types: HashSet<(ExtensionId, TypeName)>,
+    check_eliminated: HashSet<ExtensionId>,
 }
 
 impl ImplementOpsPass {
     pub fn new(
         op_replacements: OpReplacements,
         ty_replacements: HashSet<(ExtensionId, TypeName)>,
+        check_eliminated: HashSet<ExtensionId>,
     ) -> Self {
         Self {
             op_replacements,
             replaceable_types: ty_replacements,
+            check_eliminated,
             ..Self::default()
         }
+    }
+
+    fn check_all_ops_eliminated<H: HugrMut<Node = Node>>(
+        &self,
+        hugr: &mut H,
+    ) -> anyhow::Result<()> {
+        for node in hugr.nodes() {
+            let Some(ext_op) = hugr.get_optype(node).as_extension_op() else {
+                continue;
+            };
+            let ext_id = ext_op.def().extension_id();
+            if self.check_eliminated.contains(ext_id) {
+                return Err(anyhow::anyhow!(
+                    "Extension {ext_id} was requested to be eliminated but {} at node {node} remains",
+                    ext_op.qualified_id()
+                ));
+            }
+        }
+        Ok(())
     }
 }
 
@@ -215,12 +237,10 @@ impl ImplementOpsPass {
                 ))?;
         }
         state.finish().context("Could not finish op replacements")?;
+        self.check_all_ops_eliminated(hugr)
+            .context("Could not check requested extensions are eliminated")?;
         hugr.validate()
-            .context("Could not validate hugr after replacement")
-            .inspect_err(|_| {
-                // TODO remove this
-                std::fs::write("hugr.mmd", hugr.mermaid_string()).unwrap();
-            })?;
+            .context("Could not validate hugr after replacement")?;
         Ok(())
     }
 }
