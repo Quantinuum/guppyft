@@ -13,11 +13,12 @@ crate-type = ["cdylib", "rlib"]
 missing_docs = "warn"
 
 [dependencies]
-tket = { workspace = true }
-hugr = { workspace = true }
-hugr-core = { workspace = true }
-itertools = { workspace = true }
-derive_more = { workspace = true }
+tket.workspace = true
+hugr.workspace = true
+hugr-core.workspace = true
+itertools.workspace = true
+derive_more.workspace = true
+anyhow.workspace = true
 
 pyo3 = { version = "0.29.0", features = ["extension-module", "abi3-py310", "anyhow"], optional = true }
 

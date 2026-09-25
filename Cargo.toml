@@ -15,6 +15,7 @@ hugr = "0.30.2"
 hugr-core = "0.30.2"
 itertools = "0.15.0"
 derive_more = { version = "2", features = ["display", "from", "constructor"] }
+anyhow = "1.0.102"
 
 [profile.dev-py]
 inherits = "dev"
