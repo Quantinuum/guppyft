@@ -187,9 +187,9 @@ class Qubit:
 
     @guppy
     @no_type_check
-    def measure_z(self: "Qubit" @ owned) -> QubitMeasurement:
-        """Measure and consume the dynamic qubit in the Z basis."""
-        return measure_z_dynq(self)
+    def project_z(self: "Qubit") -> QubitMeasurement:
+        """Project the dynamic qubit onto the Z basis."""
+        return project_z_dynq(self)
 
 
 @custom_type(toy_k2_types.toy_k2_borrowed_block(), copyable=False, droppable=False)
@@ -387,10 +387,18 @@ def cx_dynq(control: Qubit, target: Qubit) -> None:
     _call_dyn_tq(control, target, cx_intra, cx_inter)
 
 
-@hugr_op(_logical_op("measure_z_dynq", _OPS_EXTN))
+@hugr_op(_logical_op("project_z_dynq", _OPS_EXTN))
 @no_type_check
-def measure_z_dynq(q: Qubit @ owned) -> QubitMeasurement:
-    """Measure and consume a dynamic logical qubit in the Z basis."""
+def project_z_dynq(q: Qubit) -> QubitMeasurement:
+    """Project a dynamic logical qubit onto the Z basis."""
+
+
+@guppy
+@no_type_check
+def _measure_free_dynq(q: Qubit @ owned) -> QubitMeasurement:
+    measurement = project_z_dynq(q)
+    free_dynq(q)
+    return measurement
 
 
 @hugr_op(_logical_op("borrow", _OPS_EXTN))

@@ -129,6 +129,73 @@
       },
       "binary": false
     },
+    "call_dyn_sq": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "call_dyn_sq",
+      "description": "Call the callback function on a dynamic qubit.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "dynamic_qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "G",
+              "input": [
+                {
+                  "t": "Opaque",
+                  "extension": "guppyft.toy_k2.types",
+                  "extension_version": "0.1.0",
+                  "id": "block",
+                  "args": [],
+                  "bound": "A"
+                },
+                {
+                  "t": "Opaque",
+                  "extension": "arithmetic.int.types",
+                  "extension_version": "0.1.0",
+                  "id": "int",
+                  "args": [
+                    {
+                      "tya": "BoundedNat",
+                      "n": 6
+                    }
+                  ],
+                  "bound": "C"
+                }
+              ],
+              "output": [
+                {
+                  "t": "Opaque",
+                  "extension": "guppyft.toy_k2.types",
+                  "extension_version": "0.1.0",
+                  "id": "block",
+                  "args": [],
+                  "bound": "A"
+                }
+              ]
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "dynamic_qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
     "call_dyn_tq": {
       "extension": "guppyft.toy_k2.ops",
       "name": "call_dyn_tq",
@@ -618,37 +685,6 @@
       },
       "binary": false
     },
-    "measure_z_dynq": {
-      "extension": "guppyft.toy_k2.ops",
-      "name": "measure_z_dynq",
-      "description": "Measure a dynamic logical qubit on the Z basis.",
-      "signature": {
-        "params": [],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
-              "args": [],
-              "bound": "A"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "qubit_measurement",
-              "args": [],
-              "bound": "C"
-            }
-          ]
-        }
-      },
-      "binary": false
-    },
     "prep_t_states_non_ft": {
       "extension": "guppyft.toy_k2.ops",
       "name": "prep_t_states_non_ft",
@@ -707,6 +743,45 @@
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
               "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "project_z_dynq": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "project_z_dynq",
+      "description": "Project a dynamic logical qubit onto the Z basis without consuming it.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "dynamic_qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "qubit_measurement",
+              "args": [],
+              "bound": "C"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }

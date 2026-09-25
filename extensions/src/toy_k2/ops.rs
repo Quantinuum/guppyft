@@ -75,14 +75,16 @@ pub enum ToyK2OpDef {
     t_dynq,
     /// Tdg gate on a dynamic logical qubit.
     tdg_dynq,
+    /// Call the callback function on a dynamic qubit.
+    call_dyn_sq,
     /// Call one of two block callbacks on dynamic logical qubits.
     /// If the qubits share a block, call the first callback with that block and
     /// the second qubit's index. Otherwise, call the second callback with each
     /// qubit's block and index, in input order. Callbacks must preserve block
     /// identity and restore any changes to other logical qubits in the blocks.
     call_dyn_tq,
-    /// Measure a dynamic logical qubit on the Z basis.
-    measure_z_dynq,
+    /// Project a dynamic logical qubit onto the Z basis without consuming it.
+    project_z_dynq,
     /// Extraction of dynamic logical qubits from a block (consuming the block and emitting a borrowed block).
     borrow,
     /// Extraction of dynamic logical qubits from an already-borrowed block.
@@ -220,6 +222,17 @@ impl MakeOpDef for ToyK2OpDef {
             sdg_dynq => sig_dynamic_qubits(1, 1),
             t_dynq => sig_dynamic_qubits(1, 1),
             tdg_dynq => sig_dynamic_qubits(1, 1),
+            call_dyn_sq => Signature::new(
+                vec![
+                    dynamic_qubit_type(),
+                    Type::new_function(FuncValueType::new(
+                        vec![block_type(), int_type(6)],
+                        vec![block_type()],
+                    )),
+                ],
+                vec![dynamic_qubit_type()],
+            )
+            .into(),
             call_dyn_tq => Signature::new(
                 vec![
                     dynamic_qubit_type(),
@@ -236,10 +249,11 @@ impl MakeOpDef for ToyK2OpDef {
                 vec![dynamic_qubit_type(); 2],
             )
             .into(),
-            measure_z_dynq => {
-                FuncValueType::new(vec![dynamic_qubit_type()], vec![qubit_measurement_type()])
-                    .into()
-            }
+            project_z_dynq => FuncValueType::new(
+                vec![dynamic_qubit_type()],
+                vec![qubit_measurement_type(), dynamic_qubit_type()],
+            )
+            .into(),
             borrow => FuncValueType::new(
                 vec![block_type(), int_type(6)],
                 vec![borrowed_block_type(), dynamic_qubit_type()],
@@ -294,7 +308,7 @@ mod tests {
     fn test_toy_k2_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.toy_k2.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 30);
+        assert_eq!(EXTENSION.operations().count(), 31);
     }
 
     #[test]
@@ -327,13 +341,16 @@ mod tests {
             &Signature::new([], [block_type()])
         );
         assert_eq!(
-            ToyK2OpDef::measure_z_dynq
+            ToyK2OpDef::project_z_dynq
                 .instantiate_no_args()
                 .to_extension_op()
                 .unwrap()
                 .signature()
                 .as_ref(),
-            &Signature::new([dynamic_qubit_type()], [qubit_measurement_type()],)
+            &Signature::new(
+                [dynamic_qubit_type()],
+                [qubit_measurement_type(), dynamic_qubit_type()],
+            )
         );
     }
 

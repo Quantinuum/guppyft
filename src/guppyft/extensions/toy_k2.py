@@ -382,6 +382,15 @@ class ToyK2OpsExtension:
         return self.tdg_dynq_def.instantiate([])
 
     @functools.cached_property
+    def call_dyn_sq_def(self) -> OpDef:
+        """Dispatch a dynamic qubit to a block callback."""
+        return self().get_op("call_dyn_sq")
+
+    def call_dyn_sq(self) -> ExtOp:
+        """Dispatch a dynamic qubit to a block callback."""
+        return self.call_dyn_sq_def.instantiate([])
+
+    @functools.cached_property
     def call_dyn_tq_def(self) -> OpDef:
         """Dispatch two dynamic qubits to a same-block or different-block callback.
 
@@ -395,16 +404,16 @@ class ToyK2OpsExtension:
         return self.call_dyn_tq_def.instantiate([])
 
     @functools.cached_property
-    def measure_z_dynq_def(self) -> OpDef:
-        """Apply a Z-basis measurement on a dynamic ToyK2 logical qubit.
+    def project_z_dynq_def(self) -> OpDef:
+        """Project a dynamic ToyK2 logical qubit onto the Z basis.
 
         This is the generic operation definition. For the instantiated operation,
-        see `measure_z_dynq`."""
-        return self().get_op("measure_z_dynq")
+        see `project_z_dynq`."""
+        return self().get_op("project_z_dynq")
 
-    def measure_z_dynq(self) -> ExtOp:
-        """Apply a Z-basis measurement on a dynamic ToyK2 logical qubit."""
-        return self.measure_z_dynq_def.instantiate([])
+    def project_z_dynq(self) -> ExtOp:
+        """Project a dynamic ToyK2 logical qubit onto the Z basis."""
+        return self.project_z_dynq_def.instantiate([])
 
     @functools.cached_property
     def borrow_def(self) -> OpDef:

@@ -826,12 +826,11 @@ class ToyK2Builder:
 
         @guppy
         @no_type_check
-        @link_name("guppyft.toy_k2._measure_z_dynq")
-        def _measure_z_dynq(addr: tuple[int, int]) -> tuple[bool]:
+        @link_name("guppyft.toy_k2._project_z_dynq")
+        def _project_z_dynq(addr: tuple[int, int]) -> tuple[bool, tuple[int, int]]:
             blk_id, qb_id = addr
             res, blk_id = _measure_z(blk_id, qb_id)
-            _free_dynq((blk_id, qb_id))
-            return (res,)
+            return res, (blk_id, qb_id)
 
         @guppy
         @no_type_check
@@ -924,7 +923,7 @@ class ToyK2Builder:
             _sdg_dynq,
             _t_dynq,
             _tdg_dynq,
-            _measure_z_dynq,
+            _project_z_dynq,
             _no_op_decode1,
             _no_op_decode2,
         ).compile()
@@ -975,8 +974,8 @@ class ToyK2Builder:
                 ("guppyft.toy_k2.ops", "tdg_dynq"): "guppyft.toy_k2._tdg_dynq",
                 (
                     "guppyft.toy_k2.ops",
-                    "measure_z_dynq",
-                ): "guppyft.toy_k2._measure_z_dynq",
+                    "project_z_dynq",
+                ): "guppyft.toy_k2._project_z_dynq",
                 (
                     "guppyft.toy_k2.ops",
                     "decode_qubit_measurement",
@@ -1016,11 +1015,6 @@ class ToyK2Builder:
         logical_compiler = ReplacementCompiler(
             op_replacements={
                 ("tket.quantum", "QAlloc"): ("guppyft.toy_k2.ops", "alloc_dynq", []),
-                ("tket.quantum", "MeasureFree"): (
-                    "guppyft.toy_k2.ops",
-                    "measure_z_dynq",
-                    [],
-                ),
                 ("tket.quantum", "QFree"): ("guppyft.toy_k2.ops", "free_dynq", []),
                 ("tket.measurement", "Read"): (
                     "guppyft.toy_k2.ops",
@@ -1037,6 +1031,7 @@ class ToyK2Builder:
             },
             compound_op_replacements={
                 ("tket.quantum", "CX"): k2_logical.cx_dynq,
+                ("tket.quantum", "MeasureFree"): k2_logical._measure_free_dynq,
             },
             ty_replacements={
                 ("prelude", "qubit"): ("guppyft.toy_k2.types", "dynamic_qubit"),

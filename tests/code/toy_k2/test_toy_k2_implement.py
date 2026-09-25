@@ -46,9 +46,12 @@ def test_k2_dynq_ops() -> None:
         k2.cx_dynq(q0, q1)
         k2.cx_dynq(q0, q2)
 
-        output("q0", k2.measure_z_dynq(q0).decode())
-        output("q1", k2.measure_z_dynq(q1).decode())
-        output("q2", k2.measure_z_dynq(q2).decode())
+        output("q0", q0.project_z().decode())
+        output("q1", k2.project_z_dynq(q1).decode())
+        output("q2", k2.project_z_dynq(q2).decode())
+        q0.free()
+        q1.free()
+        q2.free()
         output("end", -1)
 
     pkg = main.with_minimal_opt().compile()
