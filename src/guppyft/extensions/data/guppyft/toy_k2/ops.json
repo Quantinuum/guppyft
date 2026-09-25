@@ -129,6 +129,73 @@
       },
       "binary": false
     },
+    "call_dyn_sq": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "call_dyn_sq",
+      "description": "Call the callback function on a dynamic qubit.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "dynamic_qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "G",
+              "input": [
+                {
+                  "t": "Opaque",
+                  "extension": "guppyft.toy_k2.types",
+                  "extension_version": "0.1.0",
+                  "id": "block",
+                  "args": [],
+                  "bound": "A"
+                },
+                {
+                  "t": "Opaque",
+                  "extension": "arithmetic.int.types",
+                  "extension_version": "0.1.0",
+                  "id": "int",
+                  "args": [
+                    {
+                      "tya": "BoundedNat",
+                      "n": 6
+                    }
+                  ],
+                  "bound": "C"
+                }
+              ],
+              "output": [
+                {
+                  "t": "Opaque",
+                  "extension": "guppyft.toy_k2.types",
+                  "extension_version": "0.1.0",
+                  "id": "block",
+                  "args": [],
+                  "bound": "A"
+                }
+              ]
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "dynamic_qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
     "call_dyn_tq": {
       "extension": "guppyft.toy_k2.ops",
       "name": "call_dyn_tq",

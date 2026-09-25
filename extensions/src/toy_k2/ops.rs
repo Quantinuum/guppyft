@@ -77,6 +77,8 @@ pub enum ToyK2OpDef {
     t_dynq,
     /// Tdg gate on a dynamic logical qubit.
     tdg_dynq,
+    /// Call the callback function on a dynamic qubit.
+    call_dyn_sq,
     /// Call one of two block callbacks on dynamic logical qubits.
     /// If the qubits share a block, call the first callback with that block and
     /// the second qubit's index. Otherwise, call the second callback with each
@@ -223,6 +225,17 @@ impl MakeOpDef for ToyK2OpDef {
             sdg_dynq => sig_dynamic_qubits(1, 1),
             t_dynq => sig_dynamic_qubits(1, 1),
             tdg_dynq => sig_dynamic_qubits(1, 1),
+            call_dyn_sq => Signature::new(
+                vec![
+                    dynamic_qubit_type(),
+                    Type::new_function(FuncValueType::new(
+                        vec![block_type(), int_type(6)],
+                        vec![block_type()],
+                    )),
+                ],
+                vec![dynamic_qubit_type()],
+            )
+            .into(),
             call_dyn_tq => Signature::new(
                 vec![
                     dynamic_qubit_type(),

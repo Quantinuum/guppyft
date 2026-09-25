@@ -396,6 +396,15 @@ class ToyK2OpsExtension:
         return self.tdg_dynq_def.instantiate([])
 
     @functools.cached_property
+    def call_dyn_sq_def(self) -> OpDef:
+        """Dispatch a dynamic qubit to a block callback."""
+        return self().get_op("call_dyn_sq")
+
+    def call_dyn_sq(self) -> ExtOp:
+        """Dispatch a dynamic qubit to a block callback."""
+        return self.call_dyn_sq_def.instantiate([])
+
+    @functools.cached_property
     def call_dyn_tq_def(self) -> OpDef:
         """Dispatch two dynamic qubits to a same-block or different-block callback.
 
