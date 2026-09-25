@@ -223,17 +223,13 @@ impl ImplementOpsPass {
 }
 
 fn extract_func_node(func_hugr: &Hugr, func_name: &str) -> Option<Node> {
-    func_hugr.children(func_hugr.module_root()).find(|node| {
-        if let Some(name) = match &func_hugr.get_optype(*node) {
-            OpType::FuncDecl(decl) => Some(decl.func_name().to_owned()),
-            OpType::FuncDefn(defn) => Some(defn.func_name().to_owned()),
-            _ => None,
-        } {
-            name == func_name
-        } else {
-            false
-        }
-    })
+    func_hugr
+        .children(func_hugr.module_root())
+        .find(|node| match &func_hugr.get_optype(*node) {
+            OpType::FuncDecl(decl) => decl.func_name() == func_name,
+            OpType::FuncDefn(defn) => defn.func_name() == func_name,
+            _ => false,
+        })
 }
 
 fn unpack_type(ty: &Type) -> Option<Vec<Type>> {
