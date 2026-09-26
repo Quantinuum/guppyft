@@ -78,8 +78,6 @@ class QEDPolicy:
         cx_intra: float = 0.0
         cx_transversal: float = 0.0
         swap_intra: float = 0.0
-        measure_z_all: float = 0.0
-        measure_z: float = 0.0
 
         def __setattr__(self, key: str, value: Any) -> None:
             """Set a non-negative cost for a known logical operation."""
@@ -508,8 +506,6 @@ class ToyK2Builder:
                 res = k2_primitives.measure_z(blk.logical_block, qb_id)
                 state.put_block(blk_id, blk)
 
-                state.qed_policy(array(blk_id), comptime(qed_policy.costs.measure_z))
-
                 return state, res, blk_id
 
             return map_global(_impl, blk_id, qb_id)
@@ -524,10 +520,6 @@ class ToyK2Builder:
             ) -> tuple[STATE, array[bool, 2]]:
                 blk = state.release_block(blk_id)
                 res = k2_primitives.measure_z_all(blk)
-
-                state.qed_policy(
-                    array(blk_id), comptime(qed_policy.costs.measure_z_all)
-                )
 
                 return state, res
 
@@ -660,97 +652,19 @@ class ToyK2Builder:
 
             return map_global(_impl, blk_id)
 
-        # NOTE: The following are re-implementations of what we have in
-        # `guppyft.code.toy_k2.logical` for the addressable gates.
-        # An alternative would be to first run a pass that replaces the
-        # dynamic qubit operations with the non-primitive addressable logical
-        # gates defined in that module.
-        # Another alternative is to define the addressable gates in
-        # `guppyft.code.toy_k2.logical` acting on the dynamic_qubit type and
-        # adding HUGR extension ops to inspect these types, checking if two are
-        # in the same block (which is implemented by comparing ints during
-        # implement_ops), etc. In that case, we would just replace a
-        # computational CX with this logical CX via the compose_op replacement,
-        # and *not* have the dyn ops in the extension.
-
         # NOTE: The return type below needs to be `tuple[tuple[int,int]]`
         # to stop Guppy from unpacking the `tuple[int,int]` that is used
         # to represent a dynamic qubit.
 
         @guppy
-        @no_type_check
-        @link_name("guppyft.toy_k2._x_dynq")
-        def _x_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
+        @link_name("guppyft.toy_k2._call_dyn_sq")  # type: ignore[untyped-decorator]
+        def _call_dyn_sq(
+            addr: tuple[int, int],
+            callback: Function[[int, int], int],  # type: ignore[valid-type, type-arg]
+        ) -> tuple[tuple[int, int]]:
             blk_id, qb_id = addr
-            _x(blk_id, qb_id)
-            return (addr,)
-
-        @guppy
-        @no_type_check
-        @link_name("guppyft.toy_k2._z_dynq")
-        def _z_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
-            blk_id, qb_id = addr
-            _z(blk_id, qb_id)
-            return (addr,)
-
-        @guppy
-        @no_type_check
-        @link_name("guppyft.toy_k2._h_dynq")
-        def _h_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
-            blk_id, qb_id = addr
-            # Prepare an ancilla `|0+>` state, with the `|+>` on the index where
-            # we want to apply the Hadamard.
-            ancilla_blk_id = _prep_zero_ft()  # |00>
-            _h_all(ancilla_blk_id)  # |++>
-            # Project the other ancilla logical qubit to |0>
-            if _measure_z(ancilla_blk_id, 1 - qb_id)[0]:
-                _x(ancilla_blk_id, qb_id)
-
-            # Use the ancilla state to introduce a Hadamard on the chosen index.
-            # This approach follows Fig 8A from https://arxiv.org/abs/2403.16054
-            # In the case where ancilla is |0>, the CX gates are cancelled and there is
-            # no effect on the logical qubit at that index.
-            # In the case where the ancilla is |+>, a H is applied on the block,
-            # up to a Z correction if the measurement outcome is 0 and X if it is 1.
-            _cx_transversal(ancilla_blk_id, blk_id)
-            _h_all(ancilla_blk_id)
-            _cx_transversal(blk_id, ancilla_blk_id)
-            m0, m1 = _measure_z_all(ancilla_blk_id)
-            m = m0 if qb_id == 0 else m1
-
-            if m:
-                _x(blk_id, qb_id)
-            else:
-                _z(blk_id, qb_id)
-            return (addr,)
-
-        @guppy
-        @no_type_check
-        @link_name("guppyft.toy_k2._cx_dynq")
-        def _cx_dynq(
-            ctl_addr: tuple[int, int], tgt_addr: tuple[int, int]
-        ) -> tuple[tuple[int, int], tuple[int, int]]:
-            ctl_blk, ctl_qb = ctl_addr
-            tgt_blk, tgt_qb = tgt_addr
-
-            # If they are the same block, we apply an intra CX
-            if ctl_blk == tgt_blk:
-                _cx_intra(tgt_blk, tgt_qb)
-
-            # Otherwise, we need to decompose it
-            else:
-                if ctl_qb == tgt_qb:
-                    _swap_intra(ctl_blk)
-
-                _cx_transversal(ctl_blk, tgt_blk)
-                _cx_intra(tgt_blk, tgt_qb)
-                _cx_transversal(ctl_blk, tgt_blk)
-                _cx_intra(tgt_blk, tgt_qb)
-
-                if ctl_qb == tgt_qb:
-                    _swap_intra(ctl_blk)
-
-            return ctl_addr, tgt_addr
+            blk_id = callback(blk_id, qb_id)
+            return ((blk_id, qb_id),)
 
         @guppy
         @link_name("guppyft.toy_k2._call_dyn_tq")  # type: ignore[untyped-decorator]
@@ -769,60 +683,6 @@ class ToyK2Builder:
                 ctl_blk, tgt_blk = diff_block_f(ctl_blk, ctl_qb, tgt_blk, tgt_qb)
 
             return (ctl_blk, ctl_qb), (tgt_blk, tgt_qb)
-
-        @guppy
-        @no_type_check
-        @link_name("guppyft.toy_k2._s_dynq")
-        def _s_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
-            # Prepare two |Y> states
-            y_blk_id = _prep_y_states_non_ft()
-            # Inject only one of them
-            _cx_dynq(addr, (y_blk_id, 0))
-            # Measure the whole block because that's more efficient
-            m0, m1 = _measure_z_all(y_blk_id)
-            # But only pick the measurement outcome we care about for injection
-            m = m0 if addr[1] == 0 else m1
-            # Correct if necessary
-            if m:
-                _z_dynq(addr)
-
-            return (addr,)
-
-        @guppy
-        @no_type_check
-        @link_name("guppyft.toy_k2._sdg_dynq")
-        def _sdg_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
-            _x_dynq(addr)
-            _s_dynq(addr)
-            _x_dynq(addr)
-            return (addr,)
-
-        @guppy
-        @no_type_check
-        @link_name("guppyft.toy_k2._t_dynq")
-        def _t_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
-            # Prepare two T|+> states
-            t_blk_id = _prep_t_states_non_ft()
-            # Inject only one of them
-            _cx_dynq(addr, (t_blk_id, 0))
-            # Measure the whole block because that's more efficient
-            m0, m1 = _measure_z_all(t_blk_id)
-            # But only pick the measurement outcome we care about for injection
-            m = m0 if addr[1] == 0 else m1
-            # Correct if necessary
-            if m:
-                _s_dynq(addr)
-
-            return (addr,)
-
-        @guppy
-        @no_type_check
-        @link_name("guppyft.toy_k2._tdg_dynq")
-        def _tdg_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
-            _x_dynq(addr)
-            _t_dynq(addr)
-            _x_dynq(addr)
-            return (addr,)
 
         @guppy
         @no_type_check
@@ -845,9 +705,9 @@ class ToyK2Builder:
         @guppy
         @no_type_check
         @link_name("guppyft.toy_k2._no_op_decode2")
-        def _no_op_decode2(outcome: array[bool, 2] @ owned) -> array[bool, 2]:
-            # Same as _no_op_decode1, but for the outcome of `measure_z_all`.
-            return outcome
+        def _no_op_decode2(outcome: array[bool, 2] @ owned) -> tuple[bool, bool]:
+            # The logical decode op exposes the two outcomes as separate ports.
+            return outcome[0], outcome[1]
 
         @guppy.declare
         @no_type_check
@@ -914,15 +774,8 @@ class ToyK2Builder:
             _cx_intra,
             _cx_transversal,
             _swap_intra,
-            _x_dynq,
-            _z_dynq,
-            _h_dynq,
-            _cx_dynq,
+            _call_dyn_sq,
             _call_dyn_tq,
-            _s_dynq,
-            _sdg_dynq,
-            _t_dynq,
-            _tdg_dynq,
             _project_z_dynq,
             _no_op_decode1,
             _no_op_decode2,
@@ -961,17 +814,11 @@ class ToyK2Builder:
                     "cx_transversal",
                 ): "guppyft.toy_k2._cx_transversal",
                 ("guppyft.toy_k2.ops", "swap_intra"): "guppyft.toy_k2._swap_intra",
-                ("guppyft.toy_k2.ops", "x_dynq"): "guppyft.toy_k2._x_dynq",
-                ("guppyft.toy_k2.ops", "z_dynq"): "guppyft.toy_k2._z_dynq",
-                ("guppyft.toy_k2.ops", "h_dynq"): "guppyft.toy_k2._h_dynq",
+                ("guppyft.toy_k2.ops", "call_dyn_sq"): "guppyft.toy_k2._call_dyn_sq",
                 (
                     "guppyft.toy_k2.ops",
                     "call_dyn_tq",
                 ): "guppyft.toy_k2._call_dyn_tq",
-                ("guppyft.toy_k2.ops", "s_dynq"): "guppyft.toy_k2._s_dynq",
-                ("guppyft.toy_k2.ops", "sdg_dynq"): "guppyft.toy_k2._sdg_dynq",
-                ("guppyft.toy_k2.ops", "t_dynq"): "guppyft.toy_k2._t_dynq",
-                ("guppyft.toy_k2.ops", "tdg_dynq"): "guppyft.toy_k2._tdg_dynq",
                 (
                     "guppyft.toy_k2.ops",
                     "project_z_dynq",
@@ -1021,15 +868,15 @@ class ToyK2Builder:
                     "decode_qubit_measurement",
                     [],
                 ),
-                ("tket.quantum", "X"): ("guppyft.toy_k2.ops", "x_dynq", []),
-                ("tket.quantum", "Z"): ("guppyft.toy_k2.ops", "z_dynq", []),
-                ("tket.quantum", "H"): ("guppyft.toy_k2.ops", "h_dynq", []),
-                ("tket.quantum", "S"): ("guppyft.toy_k2.ops", "s_dynq", []),
-                ("tket.quantum", "Sdg"): ("guppyft.toy_k2.ops", "sdg_dynq", []),
-                ("tket.quantum", "T"): ("guppyft.toy_k2.ops", "t_dynq", []),
-                ("tket.quantum", "Tdg"): ("guppyft.toy_k2.ops", "tdg_dynq", []),
             },
             compound_op_replacements={
+                ("tket.quantum", "X"): k2_logical.x_dynq,
+                ("tket.quantum", "Z"): k2_logical.z_dynq,
+                ("tket.quantum", "H"): k2_logical.h_dynq,
+                ("tket.quantum", "S"): k2_logical.s_dynq,
+                ("tket.quantum", "Sdg"): k2_logical.sdg_dynq,
+                ("tket.quantum", "T"): k2_logical.t_dynq,
+                ("tket.quantum", "Tdg"): k2_logical.tdg_dynq,
                 ("tket.quantum", "CX"): k2_logical.cx_dynq,
                 ("tket.quantum", "MeasureFree"): k2_logical._measure_free_dynq,
             },

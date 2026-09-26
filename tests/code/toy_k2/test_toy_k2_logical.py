@@ -51,7 +51,7 @@ def test_exported_extensions() -> None:
         "block_measurement": toy_k2_types.toy_k2_block_measurement_def,
         "qubit_measurement": toy_k2_types.toy_k2_qubit_measurement_def,
     }
-    assert len(ops_extn.operations) == 31
+    assert len(ops_extn.operations) == 24
     for op_name, op_def in ops_extn.operations.items():
         assert op_def == toy_k2_ops.__getattribute__(f"{op_name}_def")
 
@@ -59,7 +59,7 @@ def test_exported_extensions() -> None:
 def test_op_instantiations() -> None:
     ops_extn = toy_k2_ops()
     # No operations take indices
-    assert len(ops_extn.operations) == 31
+    assert len(ops_extn.operations) == 24
     for op_name in ops_extn.operations:
         assert (
             toy_k2_ops.__getattribute__(op_name)().op_def()

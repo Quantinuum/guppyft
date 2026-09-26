@@ -49,7 +49,7 @@ pub enum ToyK2OpDef {
     measure_z_all,
     /// Measure a logical qubit of a ToyK2 block non-destructively in the Z basis.
     measure_z,
-    /// Apply a error detection cycle on a ToyK2 block.
+    /// Apply an error detection cycle on a ToyK2 block.
     qed_cycle,
     /// Decode a qubit measurement of a ToyK2 block.
     decode_qubit_measurement,
@@ -61,21 +61,7 @@ pub enum ToyK2OpDef {
     alloc_dynq,
     /// Free a dynamic logical qubit.
     free_dynq,
-    /// X gate on a dynamic logical qubit.
-    x_dynq,
-    /// Z gate on a dynamic logical qubit.
-    z_dynq,
-    /// H gate on a dynamic logical qubit.
-    h_dynq,
-    /// S gate on a dynamic logical qubit.
-    s_dynq,
-    /// Sdg gate on a dynamic logical qubit.
-    sdg_dynq,
-    /// T gate on a dynamic logical qubit.
-    t_dynq,
-    /// Tdg gate on a dynamic logical qubit.
-    tdg_dynq,
-    /// Call the callback function on a dynamic qubit.
+    /// Call a block callback on a dynamic logical qubit.
     call_dyn_sq,
     /// Call one of two block callbacks on dynamic logical qubits.
     /// If the qubits share a block, call the first callback with that block and
@@ -215,13 +201,6 @@ impl MakeOpDef for ToyK2OpDef {
             }
             alloc_dynq => sig_dynamic_qubits(0, 1),
             free_dynq => sig_dynamic_qubits(1, 0),
-            x_dynq => sig_dynamic_qubits(1, 1),
-            z_dynq => sig_dynamic_qubits(1, 1),
-            h_dynq => sig_dynamic_qubits(1, 1),
-            s_dynq => sig_dynamic_qubits(1, 1),
-            sdg_dynq => sig_dynamic_qubits(1, 1),
-            t_dynq => sig_dynamic_qubits(1, 1),
-            tdg_dynq => sig_dynamic_qubits(1, 1),
             call_dyn_sq => Signature::new(
                 vec![
                     dynamic_qubit_type(),
@@ -308,7 +287,7 @@ mod tests {
     fn test_toy_k2_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.toy_k2.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 31);
+        assert_eq!(EXTENSION.operations().count(), 24);
     }
 
     #[test]
@@ -392,13 +371,7 @@ mod tests {
 
     #[test]
     fn test_linear_dynamic_qubit_ops() -> Result<(), Box<dyn Error>> {
-        let x_dynq = EXTENSION.instantiate_extension_op("x_dynq", [])?;
-        let z_dynq = EXTENSION.instantiate_extension_op("z_dynq", [])?;
-        let h_dynq = EXTENSION.instantiate_extension_op("h_dynq", [])?;
-        let s_dynq = EXTENSION.instantiate_extension_op("s_dynq", [])?;
-        let sdg_dynq = EXTENSION.instantiate_extension_op("sdg_dynq", [])?;
-        let t_dynq = EXTENSION.instantiate_extension_op("t_dynq", [])?;
-        let tdg_dynq = EXTENSION.instantiate_extension_op("tdg_dynq", [])?;
+        let call_dyn_sq = EXTENSION.instantiate_extension_op("call_dyn_sq", [])?;
         let call_dyn_tq = EXTENSION.instantiate_extension_op("call_dyn_tq", [])?;
 
         let mut module_builder = ModuleBuilder::new();
@@ -414,24 +387,18 @@ mod tests {
                 dynamic_qubit_type(),
                 dynamic_qubit_type(),
                 callbacks[0].clone(),
+                callbacks[0].clone(),
                 callbacks[1].clone(),
             ],
             [dynamic_qubit_type(), dynamic_qubit_type()],
         );
         let mut f_build = module_builder.define_function("main", signature)?;
         let wires: Vec<_> = f_build.input_wires().collect();
-        let mut linear = f_build.as_circuit([wires[0], wires[1]]);
-        linear
-            .append(x_dynq, [0])?
-            .append(z_dynq, [1])?
-            .append(h_dynq, [0])?
-            .append(s_dynq, [1])?
-            .append(sdg_dynq, [0])?
-            .append(t_dynq, [0])?
-            .append(tdg_dynq, [1])?;
-        let outs = linear.finish();
+        let [q0] = f_build
+            .add_dataflow_op(call_dyn_sq, [wires[0], wires[2]])?
+            .outputs_arr();
         let dispatched =
-            f_build.add_dataflow_op(call_dyn_tq, [outs[0], outs[1], wires[2], wires[3]])?;
+            f_build.add_dataflow_op(call_dyn_tq, [q0, wires[1], wires[3], wires[4]])?;
         f_build.finish_with_outputs(dispatched.outputs())?;
         let h = module_builder.finish_hugr()?;
         h.validate()?;
@@ -507,7 +474,6 @@ mod tests {
         let call_dyn_tq = EXTENSION
             .instantiate_extension_op("call_dyn_tq", [])
             .unwrap();
-        let h_dynq = EXTENSION.instantiate_extension_op("h_dynq", []).unwrap();
 
         let mut module_builder = ModuleBuilder::new();
         let same_block_callback =
@@ -589,12 +555,6 @@ mod tests {
         let wires: Vec<Wire> = handle.outputs().collect();
         assert_eq!(wires.len(), 1);
         let block = wires[0];
-        // Apply a Hadamard gate to the dynamically allocated qubit.
-        let handle = f_build.add_dataflow_op(h_dynq, vec![q_extra]).unwrap();
-        let wires: Vec<Wire> = handle.outputs().collect();
-        assert_eq!(wires.len(), 1);
-        let q_extra = wires[0];
-
         f_build.finish_with_outputs([block, q_extra])?;
         let h = module_builder.finish_hugr()?;
         h.validate()?;

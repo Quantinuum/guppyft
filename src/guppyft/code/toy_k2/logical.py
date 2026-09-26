@@ -329,46 +329,51 @@ def free_dynq(q: Qubit @ owned) -> None:
     """Free a dynamic logical qubit."""
 
 
-@hugr_op(_logical_op("x_dynq", _OPS_EXTN))
+@hugr_op(_logical_op("call_dyn_sq", _OPS_EXTN))
 @no_type_check
+def _call_dyn_sq(q: Qubit, callback: Function[[Block, int], None]) -> None: ...
+
+
+@guppy
 def x_dynq(q: Qubit) -> None:
     """Apply an X gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, x)
 
 
-@hugr_op(_logical_op("z_dynq", _OPS_EXTN))
-@no_type_check
+@guppy
 def z_dynq(q: Qubit) -> None:
     """Apply a Z gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, z)
 
 
-@hugr_op(_logical_op("h_dynq", _OPS_EXTN))
-@no_type_check
+@guppy
 def h_dynq(q: Qubit) -> None:
     """Apply a Hadamard gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, h)
 
 
-@hugr_op(_logical_op("s_dynq", _OPS_EXTN))
-@no_type_check
+@guppy
 def s_dynq(q: Qubit) -> None:
     """Apply an S gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, s)
 
 
-@hugr_op(_logical_op("sdg_dynq", _OPS_EXTN))
-@no_type_check
+@guppy
 def sdg_dynq(q: Qubit) -> None:
     """Apply an Sdg gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, sdg)
 
 
-@hugr_op(_logical_op("t_dynq", _OPS_EXTN))
-@no_type_check
+@guppy
 def t_dynq(q: Qubit) -> None:
-    """Apply an T gate to a dynamic logical qubit."""
+    """Apply a T gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, t)
 
 
-@hugr_op(_logical_op("tdg_dynq", _OPS_EXTN))
-@no_type_check
+@guppy
 def tdg_dynq(q: Qubit) -> None:
     """Apply a Tdg gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, tdg)
 
 
 @hugr_op(_logical_op("call_dyn_tq", _OPS_EXTN))
