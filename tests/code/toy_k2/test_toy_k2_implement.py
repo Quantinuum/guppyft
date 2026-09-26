@@ -1,7 +1,6 @@
 from guppylang import guppy
 from guppylang.std.builtins import array
 from guppylang.std.platform import output
-from guppylang.std.quantum import cx, measure, qubit, x
 
 import guppyft.code.toy_k2.logical as k2
 from guppyft.code.toy_k2.encode import ToyK2Builder
@@ -199,26 +198,18 @@ def test_k2_dynq_ops() -> None:
     assert res == [{"q0": [1], "q1": [1], "q2": [1], "end": [-1]}]
 
 
-def test_encoder_uses_dynamic_dispatch_for_cx() -> None:
+def test_single_qubit_callbacks_link() -> None:
     @guppy
     def main() -> None:
-        q0 = qubit()
-        q1 = qubit()
-        q2 = qubit()
-        x(q0)
-        cx(q0, q1)
-        cx(q0, q2)
-        output("q0", measure(q0).read())
-        output("q1", measure(q1).read())
-        output("q2", measure(q2).read())
+        q = k2.Qubit()
+        k2.x_dynq(q)
+        k2.z_dynq(q)
+        k2.h_dynq(q)
+        k2.s_dynq(q)
+        k2.sdg_dynq(q)
+        k2.t_dynq(q)
+        k2.tdg_dynq(q)
+        q.free()
 
-    compiler = ToyK2Builder().build(n_blocks=1)
-    assert compiler._spec.compile is not None
-    logical = compiler._spec.compile(main.compile())
-
-    assert any(
-        data.op.name() == "guppyft.toy_k2.ops.call_dyn_tq"
-        for module in logical.modules
-        for _node, data in module.nodes()
-    )
-    compiler.implement_ops(logical)
+    compiler = ToyK2Builder().build(n_blocks=2)
+    compiler.implement_ops(main.with_minimal_opt().compile())

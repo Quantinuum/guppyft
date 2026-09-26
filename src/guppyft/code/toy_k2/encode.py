@@ -672,73 +672,25 @@ class ToyK2Builder:
 
             return map_global(_impl, blk_id)
 
-        # NOTE: The following are re-implementations of what we have in
-        # `guppyft.code.toy_k2.logical` for the addressable gates.
-        # An alternative would be to first run a pass that replaces the
-        # dynamic qubit operations with the non-primitive addressable logical
-        # gates defined in that module.
-        # Another alternative is to define the addressable gates in
-        # `guppyft.code.toy_k2.logical` acting on the dynamic_qubit type and
-        # adding HUGR extension ops to inspect these types, checking if two are
-        # in the same block (which is implemented by comparing ints during
-        # implement_ops), etc. In that case, we would just replace a
-        # computational CX with this logical CX via the compose_op replacement,
-        # and *not* have the dyn ops in the extension.
-
         # NOTE: The return type below needs to be `tuple[tuple[int,int]]`
         # to stop Guppy from unpacking the `tuple[int,int]` that is used
         # to represent a dynamic qubit.
 
-        @_register_op_replacement(toy_k2_ops.x_dynq_def)
-        @no_type_check
-        def _x_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
+        @_register_op_replacement(toy_k2_ops.call_dyn_sq_def)
+        def _call_dyn_sq(
+            addr: tuple[int, int],
+            callback: Function[[int, int], int],  # type: ignore[valid-type, type-arg]
+        ) -> tuple[tuple[int, int]]:
             blk_id, qb_id = addr
-            _x(blk_id, qb_id)
-            return (addr,)
-
-        @_register_op_replacement(toy_k2_ops.z_dynq_def)
-        @no_type_check
-        def _z_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
-            blk_id, qb_id = addr
-            _z(blk_id, qb_id)
-            return (addr,)
-
-        @_register_op_replacement(toy_k2_ops.h_dynq_def)
-        @no_type_check
-        def _h_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
-            blk_id, qb_id = addr
-            # Prepare an ancilla `|0+>` state, with the `|+>` on the index where
-            # we want to apply the Hadamard.
-            ancilla_blk_id = _prep_zero_plus_ft()  # |0+>
-            if qb_id == 0:
-                # Swap the qubits so that |+> is on the correct index.
-                _swap_intra(ancilla_blk_id)
-
-            # Use the ancilla state to introduce a Hadamard on the chosen index.
-            # This approach follows Fig 8A from https://arxiv.org/abs/2403.16054
-            # In the case where ancilla is |0>, the CX gates are cancelled and there is
-            # no effect on the logical qubit at that index.
-            # In the case where the ancilla is |+>, a H is applied on the block,
-            # up to a Z correction if the measurement outcome is 0 and X if it is 1.
-            _cx_transversal(ancilla_blk_id, blk_id)
-            _h_all(ancilla_blk_id)
-            _cx_transversal(blk_id, ancilla_blk_id)
-            ((m0, m1),) = _measure_z_all(ancilla_blk_id)
-            m = m0 if qb_id == 0 else m1
-
-            if m:
-                _x(blk_id, qb_id)
-            else:
-                _z(blk_id, qb_id)
-            return (addr,)
+            blk_id = callback(blk_id, qb_id)
+            return ((blk_id, qb_id),)
 
         @_register_op_replacement(toy_k2_ops.call_dyn_tq_def)
-        @no_type_check
         def _call_dyn_tq(
             ctl_addr: tuple[int, int],
             tgt_addr: tuple[int, int],
-            same_block_f: Function[[int, int], int],
-            diff_block_f: Function[[int, int, int, int], tuple[int, int]],
+            same_block_f: Function[[int, int], int],  # type: ignore[valid-type, type-arg]
+            diff_block_f: Function[[int, int, int, int], tuple[int, int]],  # type: ignore[valid-type, type-arg]
         ) -> tuple[tuple[int, int], tuple[int, int]]:
             ctl_blk, ctl_qb = ctl_addr
             tgt_blk, tgt_qb = tgt_addr
@@ -750,58 +702,12 @@ class ToyK2Builder:
 
             return (ctl_blk, ctl_qb), (tgt_blk, tgt_qb)
 
-        @_register_op_replacement(toy_k2_ops.s_dynq_def)
-        @no_type_check
-        def _s_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
-            # Prepare two |Y> states
-            y_blk_id = _prep_y_states_non_ft()
-            # Inject only one of them
-            _cx_dynq(addr, (y_blk_id, 0))
-            # Measure the whole block because that's more efficient
-            ((m0, _),) = _measure_z_all(y_blk_id)
-            # Correct if necessary
-            if m0:
-                _z_dynq(addr)
-
-            return (addr,)
-
-        @_register_op_replacement(toy_k2_ops.sdg_dynq_def)
-        @no_type_check
-        def _sdg_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
-            _x_dynq(addr)
-            _s_dynq(addr)
-            _x_dynq(addr)
-            return (addr,)
-
-        @_register_op_replacement(toy_k2_ops.t_dynq_def)
-        @no_type_check
-        def _t_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
-            # Prepare two T|+> states
-            t_blk_id = _prep_t_states_non_ft()
-            # Inject only one of them
-            _cx_dynq(addr, (t_blk_id, 0))
-            # Measure the whole block because that's more efficient
-            ((m0, _),) = _measure_z_all(t_blk_id)
-            # Correct if necessary
-            if m0:
-                _s_dynq(addr)
-
-            return (addr,)
-
-        @_register_op_replacement(toy_k2_ops.tdg_dynq_def)
-        @no_type_check
-        def _tdg_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
-            _x_dynq(addr)
-            _t_dynq(addr)
-            _x_dynq(addr)
-            return (addr,)
-
         @_register_op_replacement(toy_k2_ops.project_z_dynq_def)
         @no_type_check
         def _project_z_dynq(addr: tuple[int, int]) -> tuple[bool, tuple[int, int]]:
             blk_id, qb_id = addr
             res, _ = _project_z(blk_id, qb_id)
-            return res, addr
+            return res, (blk_id, qb_id)
 
         @_register_op_replacement(toy_k2_ops.decode_qubit_measurement_def)
         @no_type_check
@@ -903,15 +809,15 @@ class ToyK2Builder:
                     "decode_qubit_measurement",
                     [],
                 ),
-                ("tket.quantum", "X"): ("guppyft.toy_k2.ops", "x_dynq", []),
-                ("tket.quantum", "Z"): ("guppyft.toy_k2.ops", "z_dynq", []),
-                ("tket.quantum", "H"): ("guppyft.toy_k2.ops", "h_dynq", []),
-                ("tket.quantum", "S"): ("guppyft.toy_k2.ops", "s_dynq", []),
-                ("tket.quantum", "Sdg"): ("guppyft.toy_k2.ops", "sdg_dynq", []),
-                ("tket.quantum", "T"): ("guppyft.toy_k2.ops", "t_dynq", []),
-                ("tket.quantum", "Tdg"): ("guppyft.toy_k2.ops", "tdg_dynq", []),
             },
             compound_op_replacements={
+                ("tket.quantum", "X"): k2_logical.x_dynq,
+                ("tket.quantum", "Z"): k2_logical.z_dynq,
+                ("tket.quantum", "H"): k2_logical.h_dynq,
+                ("tket.quantum", "S"): k2_logical.s_dynq,
+                ("tket.quantum", "Sdg"): k2_logical.sdg_dynq,
+                ("tket.quantum", "T"): k2_logical.t_dynq,
+                ("tket.quantum", "Tdg"): k2_logical.tdg_dynq,
                 ("tket.quantum", "CX"): k2_logical.cx_dynq,
                 ("tket.quantum", "MeasureFree"): k2_logical.measure_z_dynq,
             },

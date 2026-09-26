@@ -68,6 +68,54 @@ def test_encoder_smoke() -> None:
     ToyK2Builder().build(n_blocks=2).emulator(main.compile(), n_qubits=16).run()
 
 
+def test_encoder_for_dynamic_op() -> None:
+    @guppy
+    def main() -> None:
+        q0 = qlib.qubit()
+        q1 = qlib.qubit()
+        q2 = qlib.qubit()
+        qlib.x(q0)
+        qlib.z(q0)
+        qlib.h(q0)
+        qlib.s(q0)
+        qlib.sdg(q0)
+        qlib.t(q0)
+        qlib.tdg(q0)
+        qlib.h(q0)
+        qlib.cx(q0, q1)
+        qlib.cx(q0, q2)
+        output("q", qlib.measure(q0).read())
+        output("q", qlib.measure(q1).read())
+        output("q", qlib.measure(q2).read())
+
+    compiler = ToyK2Builder().build(n_blocks=4)
+    pkg = main.with_minimal_opt().compile()
+    assert compiler._spec.compile is not None
+    logical = compiler._spec.compile(pkg)
+
+    assert any(
+        data.op.name() == "guppyft.toy_k2.ops.call_dyn_sq"
+        for module in logical.modules
+        for _node, data in module.nodes()
+    )
+    assert any(
+        data.op.name() == "guppyft.toy_k2.ops.call_dyn_tq"
+        for module in logical.modules
+        for _node, data in module.nodes()
+    )
+    compiler.implement_ops(logical)
+
+    res = (
+        compiler.emulator(pkg, n_qubits=10)
+        .with_seed(123)
+        .with_shots(10)
+        .run()
+        .collated_shots()
+    )
+
+    assert res == [{"q": [1, 1, 1]}] * 10
+
+
 def test_encoder_missing_op() -> None:
     @guppy
     def main() -> None:
