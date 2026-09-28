@@ -403,6 +403,11 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
         func_name: &str,
         bind_args: &[usize],
     ) -> anyhow::Result<()> {
+        let op_hash = OpHashWrapper::from(ext_op);
+        if self.op_calls.contains_key(&op_hash) {
+            return Ok(());
+        }
+
         let op_sig: PolyFuncType = {
             let mut sig = ext_op.signature().into_owned();
             sig.transform(&self.type_replacer)?;
@@ -446,7 +451,12 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
             let mut defn = builder.define_function(format!("{func_name}.{mangler}"), op_sig)?;
             let values: Vec<_> = bind_args
                 .iter()
-                .map(|v| Ok(defn.add_load_value(ConstInt::new_u(6, *v as u64)?)))
+                .map(|arg| {
+                    let TypeArg::BoundedNat(v) = &ext_op.args()[*arg] else {
+                        unreachable!()
+                    };
+                    Ok(defn.add_load_value(ConstInt::new_u(6, *v)?))
+                })
                 .collect::<anyhow::Result<_>>()?;
             let call_inputs = values.into_iter().chain(defn.input_wires());
             let call = if is_defn {
@@ -461,10 +471,8 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
 
         // Register call for later replacement
         let call_type: OpType = Call::try_new((*ext_op.signature()).clone().into(), [])?.into();
-        self.op_calls.insert(
-            OpHashWrapper::from(ext_op),
-            (call_type, func_hugr, func_node),
-        );
+        self.op_calls
+            .insert(op_hash, (call_type, func_hugr, func_node));
 
         Ok(())
     }
