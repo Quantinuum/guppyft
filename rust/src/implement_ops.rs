@@ -166,7 +166,7 @@ impl ImplementOpsPass {
             .iter()
             .try_fold(
                 HashMap::new(),
-                |mut map, (op_def, func_hugr, func_name, bind)| -> anyhow::Result<_> {
+                |mut map, (ext_op, func_hugr, func_name, bind)| -> anyhow::Result<_> {
                     let func_hugr =
                         func_hugr
                             .as_ref()
@@ -174,7 +174,7 @@ impl ImplementOpsPass {
                                 name: func_name.to_string(),
                             })?;
 
-                    let src_sig = op_def.signature();
+                    let src_sig = ext_op.signature();
                     let tgt_node = extract_func_node(func_hugr, func_name).ok_or(
                         ImplementOpsPassError::MissingFunctionHugr {
                             name: func_name.to_string(),
@@ -228,12 +228,12 @@ impl ImplementOpsPass {
             .context("Could not build type replacement map")?;
 
         let mut state = OpReplacer::new_with_types(hugr, type_map);
-        for (op_def, func_hugr, func_name, bind) in op_funcs {
+        for (ext_op, func_hugr, func_name, bind) in op_funcs {
             state
-                .register_replacement(&op_def, func_hugr, func_name, &bind)
+                .register_replacement(&ext_op, func_hugr, func_name, &bind)
                 .context(format!(
                     "Could not register op replacement for {}",
-                    op_def.qualified_id()
+                    ext_op.qualified_id()
                 ))?;
         }
         state.finish().context("Could not finish op replacements")?;
@@ -447,18 +447,20 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
             };
 
             let mut builder = ModuleBuilder::with_hugr(func_hugr);
-            let mangler = bind_args.iter().join(".");
-            let mut defn = builder.define_function(format!("{func_name}.{mangler}"), op_sig)?;
-            let values: Vec<_> = bind_args
+            let values: Vec<u64> = bind_args
                 .iter()
-                .map(|arg| {
-                    let TypeArg::BoundedNat(v) = &ext_op.args()[*arg] else {
-                        unreachable!()
-                    };
-                    Ok(defn.add_load_value(ConstInt::new_u(6, *v)?))
+                .map(|arg| match &ext_op.args()[*arg] {
+                    TypeArg::BoundedNat(v) => *v,
+                    _ => unreachable!(),
                 })
+                .collect();
+            let mangler = values.iter().join(".");
+            let mut defn = builder.define_function(format!("{func_name}.{mangler}"), op_sig)?;
+            let load_values: Vec<_> = values
+                .into_iter()
+                .map(|v| Ok(defn.add_load_value(ConstInt::new_u(6, v)?)))
                 .collect::<anyhow::Result<_>>()?;
-            let call_inputs = values.into_iter().chain(defn.input_wires());
+            let call_inputs = load_values.into_iter().chain(defn.input_wires());
             let call = if is_defn {
                 defn.call::<true>(&FuncID::from(func_node), &[], call_inputs)?
             } else {
