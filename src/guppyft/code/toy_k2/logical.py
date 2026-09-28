@@ -10,6 +10,7 @@ The physical implementation for these ops is provided in
 from typing import no_type_check
 
 from guppylang import guppy
+from guppylang.std.builtins import Function
 from guppylang.std.lang import owned
 from guppylang_internals.decorator import custom_type, hugr_op
 
@@ -186,9 +187,9 @@ class Qubit:
 
     @guppy
     @no_type_check
-    def measure_z(self: "Qubit") -> QubitMeasurement:
-        """Measure the dynamic qubit in the Z basis."""
-        return measure_z_dynq(self)
+    def project_z(self: "Qubit") -> QubitMeasurement:
+        """Project the dynamic qubit onto the Z basis."""
+        return project_z_dynq(self)
 
 
 @custom_type(toy_k2_types.toy_k2_borrowed_block(), copyable=False, droppable=False)
@@ -328,58 +329,81 @@ def free_dynq(q: Qubit @ owned) -> None:
     """Free a dynamic logical qubit."""
 
 
-@hugr_op(_logical_op("x_dynq", _OPS_EXTN))
+@hugr_op(_logical_op("call_dyn_sq", _OPS_EXTN))
 @no_type_check
+def _call_dyn_sq(q: Qubit, callback: Function[[Block, int], None]) -> None: ...
+
+
+@guppy
 def x_dynq(q: Qubit) -> None:
     """Apply an X gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, x)
 
 
-@hugr_op(_logical_op("z_dynq", _OPS_EXTN))
-@no_type_check
+@guppy
 def z_dynq(q: Qubit) -> None:
     """Apply a Z gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, z)
 
 
-@hugr_op(_logical_op("h_dynq", _OPS_EXTN))
-@no_type_check
+@guppy
 def h_dynq(q: Qubit) -> None:
     """Apply a Hadamard gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, h)
 
 
-@hugr_op(_logical_op("s_dynq", _OPS_EXTN))
-@no_type_check
+@guppy
 def s_dynq(q: Qubit) -> None:
     """Apply an S gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, s)
 
 
-@hugr_op(_logical_op("sdg_dynq", _OPS_EXTN))
-@no_type_check
+@guppy
 def sdg_dynq(q: Qubit) -> None:
     """Apply an Sdg gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, sdg)
 
 
-@hugr_op(_logical_op("t_dynq", _OPS_EXTN))
-@no_type_check
+@guppy
 def t_dynq(q: Qubit) -> None:
-    """Apply an T gate to a dynamic logical qubit."""
+    """Apply a T gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, t)
 
 
-@hugr_op(_logical_op("tdg_dynq", _OPS_EXTN))
-@no_type_check
+@guppy
 def tdg_dynq(q: Qubit) -> None:
     """Apply a Tdg gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, tdg)
 
 
-@hugr_op(_logical_op("cx_dynq", _OPS_EXTN))
+@hugr_op(_logical_op("call_dyn_tq", _OPS_EXTN))
 @no_type_check
+def _call_dyn_tq(
+    q0: Qubit,
+    q1: Qubit,
+    same_block_f: Function[[Block, int], None],
+    diff_block_f: Function[[Block, int, Block, int], None],
+) -> None: ...
+
+
+@guppy
 def cx_dynq(control: Qubit, target: Qubit) -> None:
     """Apply a CX gate to dynamic logical qubits."""
+    _call_dyn_tq(control, target, cx_intra, cx_inter)
 
 
-@hugr_op(_logical_op("measure_z_dynq", _OPS_EXTN))
+@hugr_op(_logical_op("project_z_dynq", _OPS_EXTN))
 @no_type_check
-def measure_z_dynq(q: Qubit) -> QubitMeasurement:
-    """Measure a dynamic logical qubit in the Z basis."""
+def project_z_dynq(q: Qubit) -> QubitMeasurement:
+    """Project a dynamic logical qubit onto the Z basis."""
+
+
+@guppy
+@no_type_check
+def _measure_free_dynq(q: Qubit @ owned) -> QubitMeasurement:
+    measurement = project_z_dynq(q)
+    free_dynq(q)
+    return measurement
 
 
 @hugr_op(_logical_op("borrow", _OPS_EXTN))
@@ -403,7 +427,7 @@ def restore_some(block: BorrowedBlock, q: Qubit @ owned) -> None:
 @hugr_op(_logical_op("restore", _OPS_EXTN))
 @no_type_check
 def restore(block: BorrowedBlock @ owned, q: Qubit @ owned) -> Block:
-    """Restore a the last of the borrowed logical qubits back to its block."""
+    """Restore the last of the borrowed logical qubits back to its block."""
 
 
 @guppy

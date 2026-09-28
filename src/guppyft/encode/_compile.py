@@ -48,7 +48,7 @@ class ReplacementCompiler(LogicalCompiler):
     list of type args (integers or strings) used to instantiate the target
     op."""
     compound_op_replacements: dict[
-        tuple[str, str], Hugr[Any] | GuppyFunctionDefinition[[Any], Any] | Package
+        tuple[str, str], Hugr[Any] | GuppyFunctionDefinition[Any, Any] | Package
     ] = field(default_factory=dict)
     """Replaces each source `(extension_name, op_name)` pair (taking no type args)
     with the given HUGR. When a Guppy function is given as a replacement, it is

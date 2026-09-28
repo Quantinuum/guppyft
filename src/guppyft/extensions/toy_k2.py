@@ -298,112 +298,38 @@ class ToyK2OpsExtension:
         return self.free_dynq_def.instantiate([])
 
     @functools.cached_property
-    def x_dynq_def(self) -> OpDef:
-        """Apply an X gate to a dynamic ToyK2 logical qubit.
+    def call_dyn_sq_def(self) -> OpDef:
+        """Dispatch a dynamic qubit to a block callback."""
+        return self().get_op("call_dyn_sq")
 
-        This is the generic operation definition. For the instantiated operation,
-        see `x_dynq`."""
-        return self().get_op("x_dynq")
-
-    def x_dynq(self) -> ExtOp:
-        """Apply an X gate to a dynamic ToyK2 logical qubit."""
-        return self.x_dynq_def.instantiate([])
+    def call_dyn_sq(self) -> ExtOp:
+        """Dispatch a dynamic qubit to a block callback."""
+        return self.call_dyn_sq_def.instantiate([])
 
     @functools.cached_property
-    def z_dynq_def(self) -> OpDef:
-        """Apply a Z gate to a dynamic ToyK2 logical qubit.
+    def call_dyn_tq_def(self) -> OpDef:
+        """Dispatch two dynamic qubits to a same-block or different-block callback.
 
         This is the generic operation definition. For the instantiated operation,
-        see `z_dynq`."""
-        return self().get_op("z_dynq")
+        see `call_dyn_tq`.
+        """
+        return self().get_op("call_dyn_tq")
 
-    def z_dynq(self) -> ExtOp:
-        """Apply a Z gate to a dynamic ToyK2 logical qubit."""
-        return self.z_dynq_def.instantiate([])
+    def call_dyn_tq(self) -> ExtOp:
+        """Dispatch two dynamic qubits to a same-block or different-block callback."""
+        return self.call_dyn_tq_def.instantiate([])
 
     @functools.cached_property
-    def h_dynq_def(self) -> OpDef:
-        """Apply an H gate to a dynamic ToyK2 logical qubit.
+    def project_z_dynq_def(self) -> OpDef:
+        """Project a dynamic ToyK2 logical qubit onto the Z basis.
 
         This is the generic operation definition. For the instantiated operation,
-        see `h_dynq`."""
-        return self().get_op("h_dynq")
+        see `project_z_dynq`."""
+        return self().get_op("project_z_dynq")
 
-    def h_dynq(self) -> ExtOp:
-        """Apply an H gate to a dynamic ToyK2 logical qubit."""
-        return self.h_dynq_def.instantiate([])
-
-    @functools.cached_property
-    def s_dynq_def(self) -> OpDef:
-        """Apply an S gate to a dynamic ToyK2 logical qubit.
-
-        This is the generic operation definition. For the instantiated operation,
-        see `s_dynq`."""
-        return self().get_op("s_dynq")
-
-    def s_dynq(self) -> ExtOp:
-        """Apply an S gate to a dynamic ToyK2 logical qubit."""
-        return self.s_dynq_def.instantiate([])
-
-    @functools.cached_property
-    def sdg_dynq_def(self) -> OpDef:
-        """Apply an Sdg gate to a dynamic ToyK2 logical qubit.
-
-        This is the generic operation definition. For the instantiated operation,
-        see `sdg_dynq`."""
-        return self().get_op("sdg_dynq")
-
-    def sdg_dynq(self) -> ExtOp:
-        """Apply an Sdg gate to a dynamic ToyK2 logical qubit."""
-        return self.sdg_dynq_def.instantiate([])
-
-    @functools.cached_property
-    def t_dynq_def(self) -> OpDef:
-        """Apply an T gate to a dynamic ToyK2 logical qubit.
-
-        This is the generic operation definition. For the instantiated operation,
-        see `t_dynq`."""
-        return self().get_op("t_dynq")
-
-    def t_dynq(self) -> ExtOp:
-        """Apply an T gate to a dynamic ToyK2 logical qubit."""
-        return self.t_dynq_def.instantiate([])
-
-    @functools.cached_property
-    def tdg_dynq_def(self) -> OpDef:
-        """Apply an Tdg gate to a dynamic ToyK2 logical qubit.
-
-        This is the generic operation definition. For the instantiated operation,
-        see `tdg_dynq`."""
-        return self().get_op("tdg_dynq")
-
-    def tdg_dynq(self) -> ExtOp:
-        """Apply an Tdg gate to a dynamic ToyK2 logical qubit."""
-        return self.tdg_dynq_def.instantiate([])
-
-    @functools.cached_property
-    def cx_dynq_def(self) -> OpDef:
-        """Apply a CX gate to a dynamic ToyK2 logical qubit.
-
-        This is the generic operation definition. For the instantiated operation,
-        see `cx_dynq`."""
-        return self().get_op("cx_dynq")
-
-    def cx_dynq(self) -> ExtOp:
-        """Apply a CX gate to a dynamic ToyK2 logical qubit."""
-        return self.cx_dynq_def.instantiate([])
-
-    @functools.cached_property
-    def measure_z_dynq_def(self) -> OpDef:
-        """Apply a Z-basis measurement on a dynamic ToyK2 logical qubit.
-
-        This is the generic operation definition. For the instantiated operation,
-        see `measure_z_dynq`."""
-        return self().get_op("measure_z_dynq")
-
-    def measure_z_dynq(self) -> ExtOp:
-        """Apply a Z-basis measurement on a dynamic ToyK2 logical qubit."""
-        return self.measure_z_dynq_def.instantiate([])
+    def project_z_dynq(self) -> ExtOp:
+        """Project a dynamic ToyK2 logical qubit onto the Z basis."""
+        return self.project_z_dynq_def.instantiate([])
 
     @functools.cached_property
     def borrow_def(self) -> OpDef:

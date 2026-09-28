@@ -129,10 +129,77 @@
       },
       "binary": false
     },
-    "cx_dynq": {
+    "call_dyn_sq": {
       "extension": "guppyft.toy_k2.ops",
-      "name": "cx_dynq",
-      "description": "CX gate between dynamic logical qubits.",
+      "name": "call_dyn_sq",
+      "description": "X gate on a dynamic logical qubit.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "dynamic_qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "G",
+              "input": [
+                {
+                  "t": "Opaque",
+                  "extension": "guppyft.toy_k2.types",
+                  "extension_version": "0.1.0",
+                  "id": "block",
+                  "args": [],
+                  "bound": "A"
+                },
+                {
+                  "t": "Opaque",
+                  "extension": "arithmetic.int.types",
+                  "extension_version": "0.1.0",
+                  "id": "int",
+                  "args": [
+                    {
+                      "tya": "BoundedNat",
+                      "n": 6
+                    }
+                  ],
+                  "bound": "C"
+                }
+              ],
+              "output": [
+                {
+                  "t": "Opaque",
+                  "extension": "guppyft.toy_k2.types",
+                  "extension_version": "0.1.0",
+                  "id": "block",
+                  "args": [],
+                  "bound": "A"
+                }
+              ]
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "dynamic_qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "call_dyn_tq": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "call_dyn_tq",
+      "description": "Call one of two block callbacks on dynamic logical qubits.\nIf the qubits share a block, call the first callback with that block and\nthe second qubit's index. Otherwise, call the second callback with each\nqubit's block and index, in input order. Callbacks must preserve block\nidentity and restore any changes to other logical qubits in the blocks.",
       "signature": {
         "params": [],
         "body": {
@@ -152,6 +219,107 @@
               "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
+            },
+            {
+              "t": "G",
+              "input": [
+                {
+                  "t": "Opaque",
+                  "extension": "guppyft.toy_k2.types",
+                  "extension_version": "0.1.0",
+                  "id": "block",
+                  "args": [],
+                  "bound": "A"
+                },
+                {
+                  "t": "Opaque",
+                  "extension": "arithmetic.int.types",
+                  "extension_version": "0.1.0",
+                  "id": "int",
+                  "args": [
+                    {
+                      "tya": "BoundedNat",
+                      "n": 6
+                    }
+                  ],
+                  "bound": "C"
+                }
+              ],
+              "output": [
+                {
+                  "t": "Opaque",
+                  "extension": "guppyft.toy_k2.types",
+                  "extension_version": "0.1.0",
+                  "id": "block",
+                  "args": [],
+                  "bound": "A"
+                }
+              ]
+            },
+            {
+              "t": "G",
+              "input": [
+                {
+                  "t": "Opaque",
+                  "extension": "guppyft.toy_k2.types",
+                  "extension_version": "0.1.0",
+                  "id": "block",
+                  "args": [],
+                  "bound": "A"
+                },
+                {
+                  "t": "Opaque",
+                  "extension": "arithmetic.int.types",
+                  "extension_version": "0.1.0",
+                  "id": "int",
+                  "args": [
+                    {
+                      "tya": "BoundedNat",
+                      "n": 6
+                    }
+                  ],
+                  "bound": "C"
+                },
+                {
+                  "t": "Opaque",
+                  "extension": "guppyft.toy_k2.types",
+                  "extension_version": "0.1.0",
+                  "id": "block",
+                  "args": [],
+                  "bound": "A"
+                },
+                {
+                  "t": "Opaque",
+                  "extension": "arithmetic.int.types",
+                  "extension_version": "0.1.0",
+                  "id": "int",
+                  "args": [
+                    {
+                      "tya": "BoundedNat",
+                      "n": 6
+                    }
+                  ],
+                  "bound": "C"
+                }
+              ],
+              "output": [
+                {
+                  "t": "Opaque",
+                  "extension": "guppyft.toy_k2.types",
+                  "extension_version": "0.1.0",
+                  "id": "block",
+                  "args": [],
+                  "bound": "A"
+                },
+                {
+                  "t": "Opaque",
+                  "extension": "guppyft.toy_k2.types",
+                  "extension_version": "0.1.0",
+                  "id": "block",
+                  "args": [],
+                  "bound": "A"
+                }
+              ]
             }
           ],
           "output": [
@@ -403,37 +571,6 @@
       },
       "binary": false
     },
-    "h_dynq": {
-      "extension": "guppyft.toy_k2.ops",
-      "name": "h_dynq",
-      "description": "H gate on a dynamic logical qubit.",
-      "signature": {
-        "params": [],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
-              "args": [],
-              "bound": "A"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
-              "args": [],
-              "bound": "A"
-            }
-          ]
-        }
-      },
-      "binary": false
-    },
     "measure_z": {
       "extension": "guppyft.toy_k2.ops",
       "name": "measure_z",
@@ -517,45 +654,6 @@
       },
       "binary": false
     },
-    "measure_z_dynq": {
-      "extension": "guppyft.toy_k2.ops",
-      "name": "measure_z_dynq",
-      "description": "Measure a dynamic logical qubit on the Z basis.",
-      "signature": {
-        "params": [],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
-              "args": [],
-              "bound": "A"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "qubit_measurement",
-              "args": [],
-              "bound": "C"
-            },
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
-              "args": [],
-              "bound": "A"
-            }
-          ]
-        }
-      },
-      "binary": false
-    },
     "prep_t_states_non_ft": {
       "extension": "guppyft.toy_k2.ops",
       "name": "prep_t_states_non_ft",
@@ -614,6 +712,45 @@
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
               "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "project_z_dynq": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "project_z_dynq",
+      "description": "Project a dynamic logical qubit onto the Z basis without consuming it.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "dynamic_qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "qubit_measurement",
+              "args": [],
+              "bound": "C"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -731,68 +868,6 @@
       },
       "binary": false
     },
-    "s_dynq": {
-      "extension": "guppyft.toy_k2.ops",
-      "name": "s_dynq",
-      "description": "S gate on a dynamic logical qubit.",
-      "signature": {
-        "params": [],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
-              "args": [],
-              "bound": "A"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
-              "args": [],
-              "bound": "A"
-            }
-          ]
-        }
-      },
-      "binary": false
-    },
-    "sdg_dynq": {
-      "extension": "guppyft.toy_k2.ops",
-      "name": "sdg_dynq",
-      "description": "Sdg gate on a dynamic logical qubit.",
-      "signature": {
-        "params": [],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
-              "args": [],
-              "bound": "A"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
-              "args": [],
-              "bound": "A"
-            }
-          ]
-        }
-      },
-      "binary": false
-    },
     "swap_intra": {
       "extension": "guppyft.toy_k2.ops",
       "name": "swap_intra",
@@ -816,68 +891,6 @@
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
               "id": "block",
-              "args": [],
-              "bound": "A"
-            }
-          ]
-        }
-      },
-      "binary": false
-    },
-    "t_dynq": {
-      "extension": "guppyft.toy_k2.ops",
-      "name": "t_dynq",
-      "description": "T gate on a dynamic logical qubit.",
-      "signature": {
-        "params": [],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
-              "args": [],
-              "bound": "A"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
-              "args": [],
-              "bound": "A"
-            }
-          ]
-        }
-      },
-      "binary": false
-    },
-    "tdg_dynq": {
-      "extension": "guppyft.toy_k2.ops",
-      "name": "tdg_dynq",
-      "description": "Tdg gate on a dynamic logical qubit.",
-      "signature": {
-        "params": [],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
-              "args": [],
-              "bound": "A"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
@@ -930,37 +943,6 @@
       },
       "binary": false
     },
-    "x_dynq": {
-      "extension": "guppyft.toy_k2.ops",
-      "name": "x_dynq",
-      "description": "X gate on a dynamic logical qubit.",
-      "signature": {
-        "params": [],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
-              "args": [],
-              "bound": "A"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
-              "args": [],
-              "bound": "A"
-            }
-          ]
-        }
-      },
-      "binary": false
-    },
     "z": {
       "extension": "guppyft.toy_k2.ops",
       "name": "z",
@@ -997,37 +979,6 @@
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
               "id": "block",
-              "args": [],
-              "bound": "A"
-            }
-          ]
-        }
-      },
-      "binary": false
-    },
-    "z_dynq": {
-      "extension": "guppyft.toy_k2.ops",
-      "name": "z_dynq",
-      "description": "Z gate on a dynamic logical qubit.",
-      "signature": {
-        "params": [],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
-              "args": [],
-              "bound": "A"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
