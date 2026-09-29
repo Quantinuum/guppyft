@@ -30,7 +30,6 @@ extensions = [
     "quantinuum_sphinx",
     "sphinx_copybutton",
     "sphinx.ext.napoleon",
-    "sphinx_autodoc_typehints",
 ]
 
 # --- MyST-NB config ---
