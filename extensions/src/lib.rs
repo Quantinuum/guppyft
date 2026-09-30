@@ -1,6 +1,8 @@
 //! QEC extensions for HUGRs
 
 //! HUGR extensions for logical operations on QEC codes.
+pub mod csd;
+
 pub mod iceberg;
 
 pub mod steane;

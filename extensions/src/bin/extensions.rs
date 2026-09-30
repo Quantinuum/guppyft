@@ -9,6 +9,7 @@ fn main() -> Result<()> {
     match CliArgs::parse() {
         CliArgs::GenExtensions(args) => {
             let reg = ExtensionRegistry::new([
+                extensions::csd::EXTENSION.to_owned(),
                 extensions::iceberg::types::EXTENSION.to_owned(),
                 extensions::iceberg::ops::EXTENSION.to_owned(),
                 extensions::steane::types::EXTENSION.to_owned(),

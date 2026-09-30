@@ -1,0 +1,145 @@
+{
+  "version": "0.1.0",
+  "name": "guppyft.csd",
+  "types": {
+    "block": {
+      "extension": "guppyft.csd",
+      "name": "block",
+      "params": [],
+      "description": "logical CSD block containing two logical qubits",
+      "bound": {
+        "b": "Explicit",
+        "bound": "A"
+      }
+    }
+  },
+  "operations": {
+    "decode": {
+      "extension": "guppyft.csd",
+      "name": "decode",
+      "description": "Decode a logical measurement into two booleans, one per logical qubit.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.std.types",
+              "extension_version": "0.1.0",
+              "id": "logical_measurement",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 2
+                }
+              ],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Sum",
+              "s": "Unit",
+              "size": 2
+            },
+            {
+              "t": "Sum",
+              "s": "Unit",
+              "size": 2
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "measure_z": {
+      "extension": "guppyft.csd",
+      "name": "measure_z",
+      "description": "Destructively measure both logical qubits of a block in the Z basis.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.std.types",
+              "extension_version": "0.1.0",
+              "id": "logical_measurement",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 2
+                }
+              ],
+              "bound": "C"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "prep_zero": {
+      "extension": "guppyft.csd",
+      "name": "prep_zero",
+      "description": "Prepare a block with both logical qubits in the zero state.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "x": {
+      "extension": "guppyft.csd",
+      "name": "x",
+      "description": "Apply transversal X to a single block.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    }
+  }
+}
