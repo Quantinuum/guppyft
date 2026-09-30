@@ -13,6 +13,7 @@ crate-type = ["cdylib", "rlib"]
 missing_docs = "warn"
 
 [dependencies]
+extensions = { path = "../extensions", default-features = false }
 tket = { workspace = true }
 hugr = { workspace = true }
 hugr-core = { workspace = true }

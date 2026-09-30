@@ -14,26 +14,91 @@
     }
   },
   "operations": {
-    "decode": {
+    "global_s": {
       "extension": "guppyft.csd",
-      "name": "decode",
-      "description": "Decode a logical measurement into two booleans, one per logical qubit.",
+      "name": "global_s",
+      "description": "Apply S to both logical qubits in a block.",
       "signature": {
         "params": [],
         "body": {
           "input": [
             {
               "t": "Opaque",
-              "extension": "guppyft.std.types",
+              "extension": "guppyft.csd",
               "extension_version": "0.1.0",
-              "id": "logical_measurement",
-              "args": [
-                {
-                  "tya": "BoundedNat",
-                  "n": 2
-                }
-              ],
-              "bound": "C"
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "global_t": {
+      "extension": "guppyft.csd",
+      "name": "global_t",
+      "description": "Apply T to both data qubits by injection, consuming the second (magic) block.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "measure_z": {
+      "extension": "guppyft.csd",
+      "name": "measure_z",
+      "description": "Destructively measure both logical qubits in Z, returning two booleans in logical-qubit order.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
             }
           ],
           "output": [
@@ -52,14 +117,15 @@
       },
       "binary": false
     },
-    "measure_z": {
+    "prep_magic_state": {
       "extension": "guppyft.csd",
-      "name": "measure_z",
-      "description": "Destructively measure both logical qubits of a block in the Z basis.",
+      "name": "prep_magic_state",
+      "description": "Prepare a block with both logical qubits in the T magic state T|+>.",
       "signature": {
         "params": [],
         "body": {
-          "input": [
+          "input": [],
+          "output": [
             {
               "t": "Opaque",
               "extension": "guppyft.csd",
@@ -67,21 +133,6 @@
               "id": "block",
               "args": [],
               "bound": "A"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.std.types",
-              "extension_version": "0.1.0",
-              "id": "logical_measurement",
-              "args": [
-                {
-                  "tya": "BoundedNat",
-                  "n": 2
-                }
-              ],
-              "bound": "C"
             }
           ]
         }
@@ -110,12 +161,73 @@
       },
       "binary": false
     },
-    "x": {
+    "targeted_cnot": {
       "extension": "guppyft.csd",
-      "name": "x",
-      "description": "Apply transversal X to a single block.",
+      "name": "targeted_cnot",
+      "description": "Apply CNOT between the indexed control in the first block and target in the second.",
       "signature": {
-        "params": [],
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": 2
+          },
+          {
+            "tp": "BoundedNat",
+            "bound": 2
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "targeted_h": {
+      "extension": "guppyft.csd",
+      "name": "targeted_h",
+      "description": "Apply H to the indexed logical qubit in a block.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": 2
+          }
+        ],
         "body": {
           "input": [
             {
@@ -128,6 +240,138 @@
             }
           ],
           "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "targeted_measure_z": {
+      "extension": "guppyft.csd",
+      "name": "targeted_measure_z",
+      "description": "Non-destructively measure the indexed logical qubit in Z, returning the block and a boolean.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": 2
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Sum",
+              "s": "Unit",
+              "size": 2
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "targeted_t": {
+      "extension": "guppyft.csd",
+      "name": "targeted_t",
+      "description": "Apply T to the indexed data qubit using magic slot 0, consuming the second block.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": 2
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "transversal_cnot": {
+      "extension": "guppyft.csd",
+      "name": "transversal_cnot",
+      "description": "Apply CNOT transversally from the first block to the second block.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
             {
               "t": "Opaque",
               "extension": "guppyft.csd",

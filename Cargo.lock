@@ -774,6 +774,7 @@ name = "guppyft"
 version = "0.1.0"
 dependencies = [
  "derive_more 2.1.1",
+ "extensions",
  "hugr",
  "hugr-core",
  "itertools 0.15.0",

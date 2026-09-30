@@ -10,7 +10,7 @@ use pyo3::pymodule;
 mod _bindings {
     #[pymodule_export]
     use super::hugr::RsHugr;
-    use crate::{implement_ops, replacement};
+    use crate::{csd_compiler, implement_ops, replacement};
     use itertools::Itertools as _;
     use pyo3::exceptions::PyValueError;
     use pyo3::prelude::*;
@@ -35,6 +35,12 @@ mod _bindings {
                 PyTypeArgValue::Str(s) => TypeArg::from(s),
             }
         }
+    }
+
+    #[pyfunction]
+    fn _run_csd_compiler(rs_hugr: &mut RsHugr) -> PyResult<()> {
+        csd_compiler::compile(&mut rs_hugr.hugr)
+            .map_err(|e| PyValueError::new_err(format!("Error compiling to CSD: {e}")))
     }
 
     #[pyfunction]

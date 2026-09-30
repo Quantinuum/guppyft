@@ -1,13 +1,25 @@
 //! HUGR extension providing types and logical operations for the `[[20,2,6]]` CSD code.
 //!
 //! A linear `block` holds two logical qubits. The `prep_zero` operation prepares
-//! both qubits in zero, and `x` applies transversal X to a single block.
-//! Destructive `measure_z` produces a standard logical measurement of size two;
-//! `decode` converts it to two boolean outputs, one per logical qubit.
+//! both qubits in zero.
+//! Destructive `measure_z` returns two boolean outputs, one per logical qubit.
+//!
+//! Transversal CNOT acts on corresponding logical qubits of two blocks; global
+//! S and T act on both logical qubits of one block. Targeted operations take
+//! static logical-qubit indices (0 or 1). Targeted CNOT takes a control index
+//! in the first block and a target index in the second block. Targeted Z
+//! measurement preserves the block and returns one boolean result.
+//!
+//! `prep_magic_state` prepares a block containing two T magic states. Both T
+//! operations take the data block first and the magic block second, consume the
+//! magic block, and return only the data block. Targeted T uses magic slot 0
+//! and discards the unused resource slot.
 
-use std::sync::{Arc, LazyLock, Weak};
+use std::{
+    num::NonZeroU64,
+    sync::{Arc, LazyLock, Weak},
+};
 
-use crate::std::types::logical_measurement_type;
 use documented::DocumentedVariants;
 use hugr::{
     Extension,
@@ -20,7 +32,10 @@ use hugr::{
         },
     },
     ops::{ExtensionOp, OpName},
-    types::{CustomType, Signature, Type, TypeArg, TypeBound, TypeName, type_param::TermKindError},
+    types::{
+        CustomType, PolyFuncTypeRV, Signature, Type, TypeArg, TypeBound, TypeName,
+        type_param::{TermKindError, TypeParam, check_term_kind},
+    },
 };
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
@@ -59,28 +74,53 @@ fn block_type_with_extension(extension_ref: &Weak<Extension>) -> Type {
 pub enum CsdOpDef {
     /// Prepare a block with both logical qubits in the zero state.
     prep_zero,
-    /// Apply transversal X to a single block.
-    x,
-    /// Destructively measure both logical qubits of a block in the Z basis.
+    /// Prepare a block with both logical qubits in the T magic state T|+>.
+    prep_magic_state,
+    /// Destructively measure both logical qubits in Z, returning two booleans in logical-qubit order.
     measure_z,
-    /// Decode a logical measurement into two booleans, one per logical qubit.
-    decode,
+    /// Apply CNOT transversally from the first block to the second block.
+    transversal_cnot,
+    /// Apply CNOT between the indexed control in the first block and target in the second.
+    targeted_cnot,
+    /// Apply S to both logical qubits in a block.
+    global_s,
+    /// Apply T to both data qubits by injection, consuming the second (magic) block.
+    global_t,
+    /// Apply T to the indexed data qubit using magic slot 0, consuming the second block.
+    targeted_t,
+    /// Apply H to the indexed logical qubit in a block.
+    targeted_h,
+    /// Non-destructively measure the indexed logical qubit in Z, returning the block and a boolean.
+    targeted_measure_z,
 }
 
 /// Concrete CSD logical operation.
 pub struct ConcreteCsdOp {
     /// The kind of operation.
     pub def: CsdOpDef,
+    /// Static logical-qubit indices, in control/target order for targeted CNOT.
+    pub indices: Vec<TypeArg>,
 }
 
 impl HasConcrete for CsdOpDef {
     type Concrete = ConcreteCsdOp;
 
     fn instantiate(&self, args: &[TypeArg]) -> Result<Self::Concrete, OpLoadError> {
-        if !args.is_empty() {
-            return Err(SignatureError::from(TermKindError::WrongNumberArgs(args.len(), 0)).into());
+        let params = self.index_params();
+        if args.len() != params.len() {
+            return Err(SignatureError::from(TermKindError::WrongNumberArgs(
+                args.len(),
+                params.len(),
+            ))
+            .into());
         }
-        Ok(self.instantiate_no_args())
+        for (arg, param) in args.iter().zip(&params) {
+            check_term_kind(arg, param).map_err(SignatureError::from)?;
+        }
+        Ok(ConcreteCsdOp {
+            def: *self,
+            indices: args.to_vec(),
+        })
     }
 }
 
@@ -98,7 +138,7 @@ impl MakeExtensionOp for ConcreteCsdOp {
     }
 
     fn type_args(&self) -> Vec<TypeArg> {
-        vec![]
+        self.indices.clone()
     }
 }
 
@@ -113,10 +153,23 @@ impl MakeRegisteredOp for ConcreteCsdOp {
 }
 
 impl CsdOpDef {
+    fn index_params(self) -> Vec<TypeParam> {
+        let count = match self {
+            Self::targeted_cnot => 2,
+            Self::targeted_t | Self::targeted_h | Self::targeted_measure_z => 1,
+            _ => 0,
+        };
+        vec![TypeParam::bounded_nat_kind(NonZeroU64::new(2).unwrap()); count]
+    }
+
     /// Initialize a concrete CSD operation without type arguments.
+    ///
+    /// # Panics
+    /// Panics for targeted operations, which require logical-qubit indices.
     #[must_use]
     pub fn instantiate_no_args(self) -> ConcreteCsdOp {
-        ConcreteCsdOp { def: self }
+        self.instantiate(&[])
+            .expect("targeted CSD operations require logical-qubit indices")
     }
 }
 
@@ -139,13 +192,17 @@ impl MakeOpDef for CsdOpDef {
 
     fn init_signature(&self, extension_ref: &Weak<Extension>) -> SignatureFunc {
         let block = block_type_with_extension(extension_ref);
-        match self {
-            Self::prep_zero => Signature::new(vec![], vec![block]),
-            Self::x => Signature::new(vec![block.clone()], vec![block]),
-            Self::measure_z => Signature::new(vec![block], vec![logical_measurement_type(2)]),
-            Self::decode => Signature::new(vec![logical_measurement_type(2)], vec![bool_t(); 2]),
-        }
-        .into()
+        let signature = match self {
+            Self::prep_zero | Self::prep_magic_state => Signature::new(vec![], vec![block]),
+            Self::global_s | Self::targeted_h => Signature::new_endo(vec![block]),
+            Self::global_t | Self::targeted_t => {
+                Signature::new(vec![block.clone(); 2], vec![block])
+            }
+            Self::transversal_cnot | Self::targeted_cnot => Signature::new_endo(vec![block; 2]),
+            Self::measure_z => Signature::new(vec![block], vec![bool_t(); 2]),
+            Self::targeted_measure_z => Signature::new(vec![block.clone()], vec![block, bool_t()]),
+        };
+        PolyFuncTypeRV::new(self.index_params(), signature).into()
     }
 
     fn description(&self) -> String {
@@ -172,7 +229,6 @@ pub static EXTENSION: LazyLock<Arc<Extension>> = LazyLock::new(|| {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::std::types::EXTENSION as std_types_extension;
     use hugr::{
         HugrView,
         builder::{Dataflow, DataflowSubContainer, HugrBuilder, ModuleBuilder},
@@ -188,7 +244,7 @@ mod tests {
     fn test_csd_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.csd");
         assert_eq!(EXTENSION.types().count(), 1);
-        assert_eq!(EXTENSION.operations().count(), 4);
+        assert_eq!(EXTENSION.operations().count(), 10);
         assert!(!block_type().copyable());
         assert_eq!(
             Type::new_extension(
@@ -209,14 +265,18 @@ mod tests {
                 CsdOpDef::prep_zero,
                 Signature::new(vec![], vec![block_type()]),
             ),
-            (CsdOpDef::x, Signature::new_endo(vec![block_type()])),
             (
                 CsdOpDef::measure_z,
-                Signature::new(vec![block_type()], vec![logical_measurement_type(2)]),
+                Signature::new(vec![block_type()], vec![bool_t(); 2]),
             ),
             (
-                CsdOpDef::decode,
-                Signature::new(vec![logical_measurement_type(2)], vec![bool_t(); 2]),
+                CsdOpDef::transversal_cnot,
+                Signature::new_endo(vec![block_type(); 2]),
+            ),
+            (CsdOpDef::global_s, Signature::new_endo(vec![block_type()])),
+            (
+                CsdOpDef::global_t,
+                Signature::new(vec![block_type(); 2], vec![block_type()]),
             ),
         ] {
             let op = def.instantiate_no_args().to_extension_op().unwrap();
@@ -226,36 +286,134 @@ mod tests {
     }
 
     #[test]
+    fn test_targeted_signatures() {
+        for index in 0..2 {
+            for (def, signature) in [
+                (
+                    CsdOpDef::targeted_t,
+                    Signature::new(vec![block_type(); 2], vec![block_type()]),
+                ),
+                (
+                    CsdOpDef::targeted_h,
+                    Signature::new_endo(vec![block_type()]),
+                ),
+                (
+                    CsdOpDef::targeted_measure_z,
+                    Signature::new(vec![block_type()], vec![block_type(), bool_t()]),
+                ),
+            ] {
+                check_targeted_op(def, vec![index.into()], signature);
+            }
+            for target in 0..2 {
+                check_targeted_op(
+                    CsdOpDef::targeted_cnot,
+                    vec![index.into(), target.into()],
+                    Signature::new_endo(vec![block_type(); 2]),
+                );
+            }
+        }
+    }
+
+    fn check_targeted_op(def: CsdOpDef, args: Vec<TypeArg>, signature: Signature) {
+        let concrete = def.instantiate(&args).unwrap();
+        let op = concrete.to_extension_op().unwrap();
+        assert_eq!(op.signature().as_ref(), &signature);
+        let restored = ConcreteCsdOp::from_extension_op(&op).unwrap();
+        assert_eq!(restored.def, def);
+        assert_eq!(restored.type_args(), args);
+        assert_eq!(
+            EXTENSION
+                .instantiate_extension_op(&def.opdef_id(), args)
+                .unwrap()
+                .signature()
+                .as_ref(),
+            &signature
+        );
+    }
+
+    #[test]
     fn test_reject_type_arguments() {
         for def in CsdOpDef::iter() {
-            assert!(def.instantiate(&[2.into()]).is_err());
-            assert!(
-                EXTENSION
-                    .instantiate_extension_op(&def.opdef_id(), [2.into()])
-                    .is_err()
-            );
+            let count = def.index_params().len();
+            let mut invalid_args = vec![vec![0.into(); count + 1]];
+            if count > 0 {
+                invalid_args.push(vec![0.into(); count - 1]);
+                for index in 0..count {
+                    for invalid in [2.into(), u64::MAX.into(), bool_t().into()] {
+                        let mut args = vec![0.into(); count];
+                        args[index] = invalid;
+                        invalid_args.push(args);
+                    }
+                }
+            }
+            for args in invalid_args {
+                assert!(def.instantiate(&args).is_err(), "{def:?}: {args:?}");
+                assert!(
+                    EXTENSION
+                        .instantiate_extension_op(&def.opdef_id(), args.clone())
+                        .is_err(),
+                    "{def:?}: {args:?}"
+                );
+            }
         }
     }
 
     #[test]
-    fn test_prep_x_measure_decode_serialization() -> Result<(), Box<dyn Error>> {
+    fn test_ops_serialization() -> Result<(), Box<dyn Error>> {
         let mut module_builder = ModuleBuilder::new();
         let mut f_build =
-            module_builder.define_function("main", Signature::new(vec![], vec![bool_t(); 2]))?;
-        let prep =
-            f_build.add_dataflow_op(EXTENSION.instantiate_extension_op("prep_zero", [])?, [])?;
-        let x = f_build
-            .add_dataflow_op(EXTENSION.instantiate_extension_op("x", [])?, prep.outputs())?;
-        let measurement = f_build.add_dataflow_op(
-            EXTENSION.instantiate_extension_op("measure_z", [])?,
-            x.outputs(),
-        )?;
-        let decoded = f_build.add_dataflow_op(
-            EXTENSION.instantiate_extension_op("decode", [])?,
-            measurement.outputs(),
-        )?;
-        let [first, second] = decoded.outputs_arr();
-        f_build.finish_with_outputs([first, second])?;
+            module_builder.define_function("main", Signature::new(vec![], vec![bool_t(); 5]))?;
+        let mut blocks = Vec::new();
+        for _ in 0..2 {
+            let [block] = f_build
+                .add_dataflow_op(EXTENSION.instantiate_extension_op("prep_zero", [])?, [])?
+                .outputs_arr();
+            blocks.push(block);
+        }
+        for (name, args) in [
+            ("transversal_cnot", vec![]),
+            ("targeted_cnot", vec![0.into(), 1.into()]),
+        ] {
+            blocks = f_build
+                .add_dataflow_op(EXTENSION.instantiate_extension_op(name, args)?, blocks)?
+                .outputs()
+                .collect();
+        }
+        for (name, args) in [("global_s", vec![]), ("targeted_h", vec![0.into()])] {
+            [blocks[0]] = f_build
+                .add_dataflow_op(EXTENSION.instantiate_extension_op(name, args)?, [blocks[0]])?
+                .outputs_arr();
+        }
+        for (name, args) in [("global_t", vec![]), ("targeted_t", vec![1.into()])] {
+            let [magic] = f_build
+                .add_dataflow_op(
+                    EXTENSION.instantiate_extension_op("prep_magic_state", [])?,
+                    [],
+                )?
+                .outputs_arr();
+            [blocks[0]] = f_build
+                .add_dataflow_op(
+                    EXTENSION.instantiate_extension_op(name, args)?,
+                    [blocks[0], magic],
+                )?
+                .outputs_arr();
+        }
+        let [block, measurement] = f_build
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("targeted_measure_z", [0.into()])?,
+                [blocks[0]],
+            )?
+            .outputs_arr();
+        blocks[0] = block;
+        let mut outputs = vec![measurement];
+        for block in blocks {
+            let measurement = f_build.add_dataflow_op(
+                EXTENSION.instantiate_extension_op("measure_z", [])?,
+                [block],
+            )?;
+            outputs.extend(measurement.outputs());
+        }
+        f_build.finish_with_outputs(outputs)?;
         let h = module_builder.finish_hugr()?;
         h.validate()?;
 
@@ -267,7 +425,7 @@ mod tests {
             EnvelopeConfig::new(EnvelopeFormat::ModelWithExtensions),
         )?;
         let mut registry = std_reg();
-        registry.extend([std_types_extension.clone(), EXTENSION.clone()]);
+        registry.extend([EXTENSION.clone()]);
         let (_, restored) = read_envelope(std::io::BufReader::new(bytes.as_slice()), &registry)?;
         restored.modules[0].validate()?;
         Ok(())

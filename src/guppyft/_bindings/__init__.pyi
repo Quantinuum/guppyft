@@ -36,6 +36,9 @@ def _implement_ops(
     the corresponding types in the implementation HUGRs.
     """
 
+# Compile in place, placing each computational qubit in slot 0 of a CSD block.
+def _run_csd_compiler(rs_hugr: RsHugr) -> None: ...
+
 def _run_replacement_compiler(
         rs_hugr: RsHugr,
         op_replacements: dict[tuple[str, str], tuple[str, str, list[int | str]]],
