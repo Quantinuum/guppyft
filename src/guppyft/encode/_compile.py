@@ -93,6 +93,16 @@ class ReplacementCompiler(LogicalCompiler):
                     f"Error encoding `{op_def.qualified_name()}` at node {node}. "
                     "Operation not yet supported during encoding."
                 )
+            if (
+                op_def.get_extension().name == "tket.qsystem.helios"
+                and ("tket.qsystem.helios", op_def.name) not in self.op_replacements
+                and ("tket.qsystem.helios", op_def.name)
+                not in self.compound_op_replacements
+            ):
+                return UncompilableError(
+                    f"Error encoding `{op_def.qualified_name()}` at node {node}. "
+                    "Operation not yet supported during encoding."
+                )
         return None
 
     def compile(self, pkg: Package) -> Package:

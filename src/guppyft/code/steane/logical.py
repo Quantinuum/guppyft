@@ -10,14 +10,14 @@ The physical implementation for these ops is provided in
 from typing import no_type_check
 
 from guppylang import guppy
-from guppylang.std.angles import angle
+from guppylang.std.angles import angle, pi
 from guppylang.std.lang import owned
 from guppylang_internals.decorator import custom_function, custom_type, hugr_op
 from guppylang_internals.tys import Effect
 
 from guppyft.code._logical import _logical_op
 from guppyft.extensions import steane_ops, steane_types
-from guppyft.std._rotation import _RotationCompiler
+from guppyft.std._rotation import _RotationCompiler, rotation_ty
 
 _OPS_EXTN = steane_ops()
 
@@ -217,3 +217,26 @@ def tdg(q: Qubit) -> None:
     r"""Apply a logical :math:`T^\dagger` gate using magic-state injection."""
     a = prep_t_state()
     inject_tdg(q, a)
+
+
+@guppy
+def zz_phase(q0: Qubit, q1: Qubit, phase: float) -> None:
+    cx(q0, q1)
+    rz(q1, phase / pi)
+    cx(q0, q1)
+
+
+@guppy
+def rx(q: Qubit, phase: rotation_ty) -> None:
+    h(q)
+    rz(q, angle(phase.to_halfturns()))
+    h(q)
+
+
+@guppy
+def ry(q: Qubit, phase: rotation_ty) -> None:
+    sdg(q)
+    h(q)
+    rz(q, angle(phase.to_halfturns()))
+    h(q)
+    s(q)
