@@ -42,7 +42,7 @@ pub enum ReplacementCompilerError {
     },
 }
 
-#[derive(Debug, Clone, Default, derive_more::Constructor)]
+#[derive(Debug, Clone, Default)]
 pub struct ReplacementCompiler {
     op_replacements: BTreeMap<(String, String), (String, String, Vec<TypeArg>)>,
     compound_op_replacements: BTreeMap<(String, String), Hugr>,
@@ -70,6 +70,20 @@ fn get_type_from_registry(
 }
 
 impl ReplacementCompiler {
+    pub const fn new(
+        op_replacements: BTreeMap<(String, String), (String, String, Vec<TypeArg>)>,
+        compound_op_replacements: BTreeMap<(String, String), Hugr>,
+        ty_replacements: BTreeMap<(String, String), (String, String)>,
+        additional_extensions: Option<ExtensionRegistry>,
+    ) -> Self {
+        Self {
+            op_replacements,
+            compound_op_replacements,
+            ty_replacements,
+            additional_extensions,
+        }
+    }
+
     #[allow(unused)]
     pub(crate) fn run(self, hugr: &mut Hugr) -> Result<(), ReplacementCompilerError> {
         let registry = hugr.extensions_mut();
