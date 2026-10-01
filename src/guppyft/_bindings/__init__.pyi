@@ -22,10 +22,11 @@ class RsHugr:
         """Render the Hugr as a Mermaid string."""
 
 def _implement_ops(
-        rs_hugr: RsHugr,
-        op_replacements: dict[tuple[str, str], tuple[RsHugr | None, str]],
-        replaceable_types: set[tuple[str, str]]
-    ) -> None:
+    rs_hugr: RsHugr,
+    op_replacements: dict[tuple[str, str], tuple[RsHugr | None, str, list[int]]],
+    replaceable_types: set[tuple[str, str]],
+    check_eliminated: list[str]
+) -> None:
     """
     Replace extension ops in `rs_hugr` to calls to the provided implementations.
 
@@ -34,6 +35,8 @@ def _implement_ops(
     generated, together with the function name to use.
     `replaceable_types` is a set of extension types that should be replaced by
     the corresponding types in the implementation HUGRs.
+    `check_eliminated` is a list of extensions to check have been fully eliminated after
+    the replacement process.
     """
 
 def _run_replacement_compiler(

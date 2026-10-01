@@ -705,6 +705,7 @@ class SteaneBuilder:
             return wrapper  # type: ignore[no-any-return]
 
         lib.members.extend((state_gen.id, state_discard.id))
+        ops.check_extension_eliminated(steane_ops().name)
         tys = TyReplacements().with_types(
             [
                 ("guppyft.steane.types", "qubit"),
