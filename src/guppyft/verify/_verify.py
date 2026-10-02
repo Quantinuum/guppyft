@@ -350,7 +350,7 @@ def valid_stabilizer_state_preparation(
     Returns:
         A Boolean indicating whether the state preparation is valid.
 
-    .. code-block:: python
+    .. testcode::
 
         from guppylang import guppy
         from guppylang.std.builtins import array
@@ -515,7 +515,7 @@ def valid_clifford_implementation(
     Returns:
          A Boolean indicating whether the implementation is valid.
 
-    .. code-block:: python
+    .. testcode::
 
      from guppylang import guppy
      from guppylang.std.builtins import array
