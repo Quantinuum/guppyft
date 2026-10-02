@@ -17,7 +17,7 @@ from zixy.qubit import pauli
 
 from guppyft.code_def import StabilizerCode
 from guppyft.std import LogicalBlock
-from guppyft.std.state_factory import PreBlock
+from guppyft.std.state_factory import PreBlock, flagged_pre_block
 
 __all__ = [
     "CODE_DEF",
@@ -95,7 +95,7 @@ def prep_zero_non_ft() -> LogicalBlock[7]:
 
 @guppy
 @no_type_check
-def prep_zero_ft() -> PreBlock[7, 1]:
+def prep_zero_ft() -> PreBlock[LogicalBlock[7], array[Measurement, 1]]:
     """Attempt fault-tolerant zero preparation state once."""
     q = prep_zero_non_ft()
 
@@ -105,7 +105,7 @@ def prep_zero_ft() -> PreBlock[7, 1]:
         qlib.cx(q.data_qs[i], ancilla)
 
     flag_outcome = qlib.measure(ancilla)
-    return PreBlock[7, 1](q, array(flag_outcome))
+    return flagged_pre_block(q, array(flag_outcome))
 
 
 @guppy.comptime
@@ -239,7 +239,7 @@ def _prep_h_non_ft() -> LogicalBlock[7]:
 
 @guppy.comptime
 @no_type_check
-def _prep_h_ft() -> PreBlock[7, 8]:
+def _prep_h_ft() -> PreBlock[LogicalBlock[7], array[Measurement, 8]]:
     """Fault-tolerant preparation of an |H> = Ry(pi/4)|0> magic state on
     a Steane block.
 
@@ -253,18 +253,18 @@ def _prep_h_ft() -> PreBlock[7, 8]:
         m_h[0], m_h[1], m_syn[0], m_syn[1], m_syn[2], m_syn[3], m_syn[4], m_syn[5]
     )
 
-    return PreBlock(blk, m)
+    return flagged_pre_block(blk, m)
 
 
 @guppy
 @no_type_check
-def prep_t_state_ft() -> PreBlock[7, 8]:
+def prep_t_state_ft() -> PreBlock[LogicalBlock[7], array[Measurement, 8]]:
     """Attempt to prepare a T|+> logical state on a Steane block."""
     # Attempt |H> = Ry(pi/4)|0> state preparation
     preblock = _prep_h_ft()
     # Convert to Rz(pi/4)|+> state
-    sdg(preblock.logical_block)
-    h(preblock.logical_block)
+    sdg(preblock.state)
+    h(preblock.state)
 
     return preblock
 
