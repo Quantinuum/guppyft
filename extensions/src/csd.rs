@@ -1,24 +1,25 @@
-//! HUGR extension providing types and logical operations for the `[[20,2,6]]` CSD code.
+//! HUGR extension providing types and logical operations for the CSD code.
 //!
-//! A linear `block` holds two logical qubits. The `prep_zero` operation prepares
-//! both qubits in zero.
-//! Destructive `measure_z` returns two boolean outputs, one per logical qubit.
+//! Each linear `qubit` wire represents one logical qubit. `prep_zero` prepares
+//! the two qubits of a block as one `(qubit, qubit)` tuple; destructive `measure_z`
+//! consumes that tuple and returns two booleans in slot order.
 //!
-//! Transversal CNOT acts on corresponding logical qubits of two blocks; global
-//! S and T act on both logical qubits of one block. Targeted operations take
-//! static logical-qubit indices (0 or 1). Targeted CNOT takes a control index
-//! in the first block and a target index in the second block. Targeted Z
-//! measurement preserves the block and returns one boolean result.
+//! Global S and T act on a data tuple. Transversal CNOT takes a control tuple
+//! first, then a target tuple, and acts on corresponding slots. Targeted operations
+//! take only the qubits they act on, without static slot indices. Targeted Z
+//! measurement preserves its qubit and returns one boolean result.
 //!
-//! `prep_magic_state` prepares a block containing two T magic states. Both T
-//! operations take the data block first and the magic block second, consume the
-//! magic block, and return only the data block. Targeted T uses magic slot 0
-//! and discards the unused resource slot.
+//! `prep_magic_state` prepares a tuple of two T magic qubits. Global T consumes
+//! a magic tuple; targeted T also consumes a full tuple, using slot 0 for injection
+//! and discarding the unused resource in slot 1. Both return only the data.
+//! Tuple members must occupy slots 0 and 1 of the same block. The tuple type
+//! expresses this grouping, but checking block membership is left to the pipeline.
+//!
+//! The `_single` preparation and destructive measurement operations expose only
+//! one logical qubit, without an implicit partner wire. Physical block allocation
+//! and release are left to the downstream pipeline.
 
-use std::{
-    num::NonZeroU64,
-    sync::{Arc, LazyLock, Weak},
-};
+use std::sync::{Arc, LazyLock, Weak};
 
 use documented::DocumentedVariants;
 use hugr::{
@@ -32,10 +33,7 @@ use hugr::{
         },
     },
     ops::{ExtensionOp, OpName},
-    types::{
-        CustomType, PolyFuncTypeRV, Signature, Type, TypeArg, TypeBound, TypeName,
-        type_param::{TermKindError, TypeParam, check_term_kind},
-    },
+    types::{CustomType, Signature, Type, TypeArg, TypeBound, TypeName, type_param::TermKindError},
 };
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
@@ -43,19 +41,24 @@ use strum::{EnumIter, EnumString, IntoStaticStr};
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.csd");
 /// Extension version.
 pub const VERSION: semver::Version = semver::Version::new(0, 1, 0);
-/// Type name for a logical CSD block.
-pub const BLOCK_TYPENAME: TypeName = TypeName::new_inline("block");
+/// Type name for a logical CSD qubit.
+pub const QUBIT_TYPENAME: TypeName = TypeName::new_inline("qubit");
 
-/// Type of a CSD block containing two logical qubits.
-pub fn block_type() -> Type {
-    block_type_with_extension(&Arc::downgrade(&EXTENSION))
+/// Type of a single logical CSD qubit.
+pub fn logical_qubit_type() -> Type {
+    logical_qubit_type_with_extension(&Arc::downgrade(&EXTENSION))
+}
+
+/// Tuple of logical qubits in slots 0 and 1 of the same CSD block.
+pub fn logical_qubit_pair_type() -> Type {
+    Type::new_tuple(vec![logical_qubit_type(); 2])
 }
 
 // Use the supplied reference during extension initialization to avoid recursively
-// initializing EXTENSION when operation signatures refer to the block type.
-fn block_type_with_extension(extension_ref: &Weak<Extension>) -> Type {
+// initializing EXTENSION when operation signatures refer to the qubit type.
+fn logical_qubit_type_with_extension(extension_ref: &Weak<Extension>) -> Type {
     CustomType::new(
-        BLOCK_TYPENAME,
+        QUBIT_TYPENAME,
         [],
         EXTENSION_ID,
         VERSION,
@@ -72,25 +75,31 @@ fn block_type_with_extension(extension_ref: &Weak<Extension>) -> Type {
 #[expect(non_camel_case_types)]
 #[non_exhaustive]
 pub enum CsdOpDef {
-    /// Prepare a block with both logical qubits in the zero state.
+    /// Prepare a same-block pair of logical qubits in the zero state.
     prep_zero,
-    /// Prepare a block with both logical qubits in the T magic state T|+>.
+    /// Prepare a same-block pair of logical qubits in the T magic state T|+>.
     prep_magic_state,
-    /// Destructively measure both logical qubits in Z, returning two booleans in logical-qubit order.
+    /// Prepare one logical qubit in the zero state, without allocating a partner wire.
+    prep_zero_single,
+    /// Destructively measure a qubit pair in Z, returning two booleans in slot order.
     measure_z,
-    /// Apply CNOT transversally from the first block to the second block.
+    /// Destructively measure one logical qubit in Z, consuming it and returning a boolean.
+    measure_z_single,
+    /// Apply CNOT from each slot of the control pair to the matching slot of the target pair.
+    /// Return the control pair followed by the target pair.
     transversal_cnot,
-    /// Apply CNOT between the indexed control in the first block and target in the second.
+    /// Apply CNOT from the first logical qubit to the second, returning both in input order.
     targeted_cnot,
-    /// Apply S to both logical qubits in a block.
+    /// Apply S to both qubits of a pair, returning the pair in slot order.
     global_s,
-    /// Apply T to both data qubits by injection, consuming the second (magic) block.
+    /// Apply T to the data pair using the second (magic) pair, returning only the data pair.
     global_t,
-    /// Apply T to the indexed data qubit using magic slot 0, consuming the second block.
+    /// Apply T to the data qubit using slot 0 of the magic pair, consuming the entire pair.
+    /// Discard the unused magic resource in slot 1 and return only the data qubit.
     targeted_t,
-    /// Apply H to the indexed logical qubit in a block.
+    /// Apply H to one logical qubit.
     targeted_h,
-    /// Non-destructively measure the indexed logical qubit in Z, returning the block and a boolean.
+    /// Non-destructively measure one logical qubit in Z, returning the qubit and a boolean.
     targeted_measure_z,
 }
 
@@ -98,29 +107,16 @@ pub enum CsdOpDef {
 pub struct ConcreteCsdOp {
     /// The kind of operation.
     pub def: CsdOpDef,
-    /// Static logical-qubit indices, in control/target order for targeted CNOT.
-    pub indices: Vec<TypeArg>,
 }
 
 impl HasConcrete for CsdOpDef {
     type Concrete = ConcreteCsdOp;
 
     fn instantiate(&self, args: &[TypeArg]) -> Result<Self::Concrete, OpLoadError> {
-        let params = self.index_params();
-        if args.len() != params.len() {
-            return Err(SignatureError::from(TermKindError::WrongNumberArgs(
-                args.len(),
-                params.len(),
-            ))
-            .into());
+        if !args.is_empty() {
+            return Err(SignatureError::from(TermKindError::WrongNumberArgs(args.len(), 0)).into());
         }
-        for (arg, param) in args.iter().zip(&params) {
-            check_term_kind(arg, param).map_err(SignatureError::from)?;
-        }
-        Ok(ConcreteCsdOp {
-            def: *self,
-            indices: args.to_vec(),
-        })
+        Ok(ConcreteCsdOp { def: *self })
     }
 }
 
@@ -138,7 +134,7 @@ impl MakeExtensionOp for ConcreteCsdOp {
     }
 
     fn type_args(&self) -> Vec<TypeArg> {
-        self.indices.clone()
+        vec![]
     }
 }
 
@@ -153,23 +149,10 @@ impl MakeRegisteredOp for ConcreteCsdOp {
 }
 
 impl CsdOpDef {
-    fn index_params(self) -> Vec<TypeParam> {
-        let count = match self {
-            Self::targeted_cnot => 2,
-            Self::targeted_t | Self::targeted_h | Self::targeted_measure_z => 1,
-            _ => 0,
-        };
-        vec![TypeParam::bounded_nat_kind(NonZeroU64::new(2).unwrap()); count]
-    }
-
     /// Initialize a concrete CSD operation without type arguments.
-    ///
-    /// # Panics
-    /// Panics for targeted operations, which require logical-qubit indices.
     #[must_use]
     pub fn instantiate_no_args(self) -> ConcreteCsdOp {
-        self.instantiate(&[])
-            .expect("targeted CSD operations require logical-qubit indices")
+        ConcreteCsdOp { def: self }
     }
 }
 
@@ -191,18 +174,23 @@ impl MakeOpDef for CsdOpDef {
     }
 
     fn init_signature(&self, extension_ref: &Weak<Extension>) -> SignatureFunc {
-        let block = block_type_with_extension(extension_ref);
-        let signature = match self {
-            Self::prep_zero | Self::prep_magic_state => Signature::new(vec![], vec![block]),
-            Self::global_s | Self::targeted_h => Signature::new_endo(vec![block]),
-            Self::global_t | Self::targeted_t => {
-                Signature::new(vec![block.clone(); 2], vec![block])
-            }
-            Self::transversal_cnot | Self::targeted_cnot => Signature::new_endo(vec![block; 2]),
-            Self::measure_z => Signature::new(vec![block], vec![bool_t(); 2]),
-            Self::targeted_measure_z => Signature::new(vec![block.clone()], vec![block, bool_t()]),
-        };
-        PolyFuncTypeRV::new(self.index_params(), signature).into()
+        let qubit = logical_qubit_type_with_extension(extension_ref);
+        let pair = Type::new_tuple(vec![qubit.clone(); 2]);
+        match self {
+            Self::prep_zero | Self::prep_magic_state => Signature::new(vec![], vec![pair]),
+            Self::prep_zero_single => Signature::new(vec![], vec![qubit]),
+            Self::global_s => Signature::new_endo(vec![pair]),
+            Self::targeted_cnot => Signature::new_endo(vec![qubit; 2]),
+            Self::targeted_h => Signature::new_endo(vec![qubit]),
+            // Data inputs precede the magic inputs, which injection consumes.
+            Self::global_t => Signature::new(vec![pair.clone(); 2], vec![pair]),
+            Self::targeted_t => Signature::new(vec![qubit.clone(), pair], vec![qubit]),
+            Self::transversal_cnot => Signature::new_endo(vec![pair; 2]),
+            Self::measure_z => Signature::new(vec![pair], vec![bool_t(); 2]),
+            Self::measure_z_single => Signature::new(vec![qubit], vec![bool_t()]),
+            Self::targeted_measure_z => Signature::new(vec![qubit.clone()], vec![qubit, bool_t()]),
+        }
+        .into()
     }
 
     fn description(&self) -> String {
@@ -210,14 +198,14 @@ impl MakeOpDef for CsdOpDef {
     }
 }
 
-/// Extension for the logical CSD block type and operations.
+/// Extension for the logical CSD qubit type and operations.
 pub static EXTENSION: LazyLock<Arc<Extension>> = LazyLock::new(|| {
     Extension::new_arc(EXTENSION_ID, VERSION, |extension, extension_ref| {
         extension
             .add_type(
-                BLOCK_TYPENAME,
+                QUBIT_TYPENAME,
                 vec![],
-                "logical CSD block containing two logical qubits".to_owned(),
+                "logical CSD qubit".to_owned(),
                 TypeBound::Linear.into(),
                 extension_ref,
             )
@@ -233,6 +221,7 @@ mod tests {
         HugrView,
         builder::{Dataflow, DataflowSubContainer, HugrBuilder, ModuleBuilder},
         envelope::{EnvelopeConfig, EnvelopeFormat, read_envelope, write_envelope},
+        extension::prelude::{MakeTuple, UnpackTuple},
         ops::DataflowOpTrait,
         package::Package,
         std_extensions::std_reg,
@@ -244,17 +233,18 @@ mod tests {
     fn test_csd_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.csd");
         assert_eq!(EXTENSION.types().count(), 1);
-        assert_eq!(EXTENSION.operations().count(), 10);
-        assert!(!block_type().copyable());
+        assert_eq!(EXTENSION.operations().count(), 12);
+        assert!(!logical_qubit_type().copyable());
+        assert!(!logical_qubit_pair_type().copyable());
         assert_eq!(
             Type::new_extension(
                 EXTENSION
-                    .get_type(&BLOCK_TYPENAME)
+                    .get_type(&QUBIT_TYPENAME)
                     .unwrap()
                     .instantiate([])
                     .unwrap()
             ),
-            block_type()
+            logical_qubit_type()
         );
     }
 
@@ -262,68 +252,84 @@ mod tests {
     fn test_signatures() {
         for (def, signature) in [
             (
+                CsdOpDef::prep_zero_single,
+                Signature::new(vec![], vec![logical_qubit_type()]),
+            ),
+            (
+                CsdOpDef::measure_z_single,
+                Signature::new(vec![logical_qubit_type()], vec![bool_t()]),
+            ),
+            (
                 CsdOpDef::prep_zero,
-                Signature::new(vec![], vec![block_type()]),
+                Signature::new(vec![], vec![logical_qubit_pair_type()]),
+            ),
+            (
+                CsdOpDef::prep_magic_state,
+                Signature::new(vec![], vec![logical_qubit_pair_type()]),
             ),
             (
                 CsdOpDef::measure_z,
-                Signature::new(vec![block_type()], vec![bool_t(); 2]),
+                Signature::new(vec![logical_qubit_pair_type()], vec![bool_t(); 2]),
             ),
             (
                 CsdOpDef::transversal_cnot,
-                Signature::new_endo(vec![block_type(); 2]),
+                Signature::new_endo(vec![logical_qubit_pair_type(); 2]),
             ),
-            (CsdOpDef::global_s, Signature::new_endo(vec![block_type()])),
+            (
+                CsdOpDef::global_s,
+                Signature::new_endo(vec![logical_qubit_pair_type()]),
+            ),
             (
                 CsdOpDef::global_t,
-                Signature::new(vec![block_type(); 2], vec![block_type()]),
+                Signature::new(
+                    vec![logical_qubit_pair_type(); 2],
+                    vec![logical_qubit_pair_type()],
+                ),
             ),
         ] {
-            let op = def.instantiate_no_args().to_extension_op().unwrap();
-            assert_eq!(op.signature().as_ref(), &signature);
-            assert_eq!(ConcreteCsdOp::from_extension_op(&op).unwrap().def, def);
+            check_op(def, signature);
         }
     }
 
     #[test]
     fn test_targeted_signatures() {
-        for index in 0..2 {
-            for (def, signature) in [
-                (
-                    CsdOpDef::targeted_t,
-                    Signature::new(vec![block_type(); 2], vec![block_type()]),
+        for (def, signature) in [
+            (
+                CsdOpDef::targeted_t,
+                Signature::new(
+                    vec![logical_qubit_type(), logical_qubit_pair_type()],
+                    vec![logical_qubit_type()],
                 ),
-                (
-                    CsdOpDef::targeted_h,
-                    Signature::new_endo(vec![block_type()]),
+            ),
+            (
+                CsdOpDef::targeted_h,
+                Signature::new_endo(vec![logical_qubit_type()]),
+            ),
+            (
+                CsdOpDef::targeted_measure_z,
+                Signature::new(
+                    vec![logical_qubit_type()],
+                    vec![logical_qubit_type(), bool_t()],
                 ),
-                (
-                    CsdOpDef::targeted_measure_z,
-                    Signature::new(vec![block_type()], vec![block_type(), bool_t()]),
-                ),
-            ] {
-                check_targeted_op(def, vec![index.into()], signature);
-            }
-            for target in 0..2 {
-                check_targeted_op(
-                    CsdOpDef::targeted_cnot,
-                    vec![index.into(), target.into()],
-                    Signature::new_endo(vec![block_type(); 2]),
-                );
-            }
+            ),
+            (
+                CsdOpDef::targeted_cnot,
+                Signature::new_endo(vec![logical_qubit_type(); 2]),
+            ),
+        ] {
+            check_op(def, signature);
         }
     }
 
-    fn check_targeted_op(def: CsdOpDef, args: Vec<TypeArg>, signature: Signature) {
-        let concrete = def.instantiate(&args).unwrap();
-        let op = concrete.to_extension_op().unwrap();
+    fn check_op(def: CsdOpDef, signature: Signature) {
+        let op = def.instantiate_no_args().to_extension_op().unwrap();
         assert_eq!(op.signature().as_ref(), &signature);
         let restored = ConcreteCsdOp::from_extension_op(&op).unwrap();
         assert_eq!(restored.def, def);
-        assert_eq!(restored.type_args(), args);
+        assert!(restored.type_args().is_empty());
         assert_eq!(
             EXTENSION
-                .instantiate_extension_op(&def.opdef_id(), args)
+                .instantiate_extension_op(&def.opdef_id(), [])
                 .unwrap()
                 .signature()
                 .as_ref(),
@@ -334,19 +340,11 @@ mod tests {
     #[test]
     fn test_reject_type_arguments() {
         for def in CsdOpDef::iter() {
-            let count = def.index_params().len();
-            let mut invalid_args = vec![vec![0.into(); count + 1]];
-            if count > 0 {
-                invalid_args.push(vec![0.into(); count - 1]);
-                for index in 0..count {
-                    for invalid in [2.into(), u64::MAX.into(), bool_t().into()] {
-                        let mut args = vec![0.into(); count];
-                        args[index] = invalid;
-                        invalid_args.push(args);
-                    }
-                }
-            }
-            for args in invalid_args {
+            for args in [
+                vec![0.into()],
+                vec![0.into(), 1.into()],
+                vec![bool_t().into()],
+            ] {
                 assert!(def.instantiate(&args).is_err(), "{def:?}: {args:?}");
                 assert!(
                     EXTENSION
@@ -362,57 +360,124 @@ mod tests {
     fn test_ops_serialization() -> Result<(), Box<dyn Error>> {
         let mut module_builder = ModuleBuilder::new();
         let mut f_build =
-            module_builder.define_function("main", Signature::new(vec![], vec![bool_t(); 5]))?;
-        let mut blocks = Vec::new();
+            module_builder.define_function("main", Signature::new(vec![], vec![bool_t(); 6]))?;
+        let mut pairs = Vec::new();
         for _ in 0..2 {
-            let [block] = f_build
+            let [pair] = f_build
                 .add_dataflow_op(EXTENSION.instantiate_extension_op("prep_zero", [])?, [])?
                 .outputs_arr();
-            blocks.push(block);
+            pairs.push(pair);
         }
-        for (name, args) in [
-            ("transversal_cnot", vec![]),
-            ("targeted_cnot", vec![0.into(), 1.into()]),
-        ] {
-            blocks = f_build
-                .add_dataflow_op(EXTENSION.instantiate_extension_op(name, args)?, blocks)?
-                .outputs()
-                .collect();
+        pairs = f_build
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("transversal_cnot", [])?,
+                pairs,
+            )?
+            .outputs()
+            .collect();
+        [pairs[0]] = f_build
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("global_s", [])?,
+                [pairs[0]],
+            )?
+            .outputs_arr();
+        let [magic_pair] = f_build
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("prep_magic_state", [])?,
+                [],
+            )?
+            .outputs_arr();
+        [pairs[0]] = f_build
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("global_t", [])?,
+                [pairs[0], magic_pair],
+            )?
+            .outputs_arr();
+
+        // Targeted gates use individual wires unpacked from the block pairs.
+        let mut qubits = Vec::new();
+        for pair in pairs {
+            qubits.extend(
+                f_build
+                    .add_dataflow_op(
+                        UnpackTuple::new(vec![logical_qubit_type(); 2].into()),
+                        [pair],
+                    )?
+                    .outputs(),
+            );
         }
-        for (name, args) in [("global_s", vec![]), ("targeted_h", vec![0.into()])] {
-            [blocks[0]] = f_build
-                .add_dataflow_op(EXTENSION.instantiate_extension_op(name, args)?, [blocks[0]])?
-                .outputs_arr();
-        }
-        for (name, args) in [("global_t", vec![]), ("targeted_t", vec![1.into()])] {
-            let [magic] = f_build
+        [qubits[0], qubits[2]] = f_build
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("targeted_cnot", [])?,
+                [qubits[0], qubits[2]],
+            )?
+            .outputs_arr();
+        [qubits[0]] = f_build
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("targeted_h", [])?,
+                [qubits[0]],
+            )?
+            .outputs_arr();
+        for qubit in &mut qubits[..2] {
+            let [magic_pair] = f_build
                 .add_dataflow_op(
                     EXTENSION.instantiate_extension_op("prep_magic_state", [])?,
                     [],
                 )?
                 .outputs_arr();
-            [blocks[0]] = f_build
+            [*qubit] = f_build
                 .add_dataflow_op(
-                    EXTENSION.instantiate_extension_op(name, args)?,
-                    [blocks[0], magic],
+                    EXTENSION.instantiate_extension_op("targeted_t", [])?,
+                    [*qubit, magic_pair],
                 )?
                 .outputs_arr();
         }
-        let [block, measurement] = f_build
+        let [qubit, measurement] = f_build
             .add_dataflow_op(
-                EXTENSION.instantiate_extension_op("targeted_measure_z", [0.into()])?,
-                [blocks[0]],
+                EXTENSION.instantiate_extension_op("targeted_measure_z", [])?,
+                [qubits[0]],
             )?
             .outputs_arr();
-        blocks[0] = block;
+        qubits[0] = qubit;
         let mut outputs = vec![measurement];
-        for block in blocks {
-            let measurement = f_build.add_dataflow_op(
-                EXTENSION.instantiate_extension_op("measure_z", [])?,
-                [block],
-            )?;
+        // Reassemble the original block pairs before whole-block measurement.
+        for qubit_pair in qubits.chunks_exact(2) {
+            let [pair] = f_build
+                .add_dataflow_op(
+                    MakeTuple::new(vec![logical_qubit_type(); 2].into()),
+                    qubit_pair.iter().copied(),
+                )?
+                .outputs_arr();
+            let measurement = f_build
+                .add_dataflow_op(EXTENSION.instantiate_extension_op("measure_z", [])?, [pair])?;
             outputs.extend(measurement.outputs());
         }
+        let [data] = f_build
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("prep_zero_single", [])?,
+                [],
+            )?
+            .outputs_arr();
+        let [magic] = f_build
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("prep_magic_state", [])?,
+                [],
+            )?
+            .outputs_arr();
+        let [data] = f_build
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("targeted_t", [])?,
+                [data, magic],
+            )?
+            .outputs_arr();
+        outputs.extend(
+            f_build
+                .add_dataflow_op(
+                    EXTENSION.instantiate_extension_op("measure_z_single", [])?,
+                    [data],
+                )?
+                .outputs(),
+        );
         f_build.finish_with_outputs(outputs)?;
         let h = module_builder.finish_hugr()?;
         h.validate()?;

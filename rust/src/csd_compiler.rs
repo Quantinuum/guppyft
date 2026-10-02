@@ -1,8 +1,9 @@
-//! Minimal computational-to-CSD lowering: one computational qubit per block.
+//! Minimal computational-to-CSD lowering using one logical qubit per input qubit.
 //!
-//! In data blocks, slot 0 holds the computational state and slot 1 stays in zero.
-//! T injections allocate and consume separate magic-state blocks. The input must
-//! already be decomposed into the Clifford+T operations handled below.
+//! Single-qubit preparations and destructive measurements avoid spare wires.
+//! T injections each prepare and consume a full magic pair. Physical block packing
+//! is left to the downstream pipeline. The input must already be decomposed into
+//! the Clifford+T operations handled below.
 
 use std::error::Error;
 
@@ -12,7 +13,7 @@ use hugr::{
     builder::{BuildError, DFGBuilder, Dataflow, DataflowHugr},
     extension::prelude::{bool_t, qb_t},
     ops::{DataflowOpTrait, ExtensionOp},
-    types::{Transformable, TypeArg},
+    types::Transformable,
 };
 use itertools::Itertools;
 use tket::{
@@ -23,13 +24,16 @@ use tket::{
     },
 };
 
-/// Compile a computational HUGR in place, using only logical slot 0 of each block.
+/// Compile a computational HUGR in place, using one CSD logical qubit per qubit.
 ///
 /// Classical control flow is retained, including measurement-dependent retries.
-/// Returned qubits become returned blocks; this pass does not measure them.
+/// Returned qubits remain live logical qubits; this pass does not measure them.
 pub fn compile(hugr: &mut Hugr) -> Result<(), Box<dyn Error>> {
     let mut replacements = ReplaceTypes::default();
-    replacements.set_replace_type(qb_t().as_extension().unwrap().clone(), csd::block_type());
+    replacements.set_replace_type(
+        qb_t().as_extension().unwrap().clone(),
+        csd::logical_qubit_type(),
+    );
     replacements.set_replace_type(measurement_custom_type(), bool_t());
 
     // Rewrite array operations as well as their element types. Branches, loops,
@@ -68,8 +72,8 @@ fn lower_op(op: &ExtensionOp, replacements: &ReplaceTypes) -> Result<Hugr, Box<d
     // These input positions assume the standard TKET signatures.
     // TODO: Report malformed signatures explicitly instead of relying on indexing.
     let outputs = match op.def().name().as_str() {
-        "QAlloc" => add_gate::<1>(&mut builder, "prep_zero", &[], [])?.to_vec(),
-        "H" => add_gate::<1>(&mut builder, "targeted_h", &[0], inputs)?.to_vec(),
+        "QAlloc" => add_gate::<1>(&mut builder, "prep_zero_single", [])?.to_vec(),
+        "H" => add_gate::<1>(&mut builder, "targeted_h", inputs)?.to_vec(),
         "T" | "Tdg" | "S" | "Sdg" | "Z" => {
             // Simple exact phase-gate identities; dedicated ops could reduce cost.
             let count = match op.def().name().as_str() {
@@ -83,23 +87,22 @@ fn lower_op(op: &ExtensionOp, replacements: &ReplaceTypes) -> Result<Hugr, Box<d
             vec![phase(&mut builder, inputs[0], count)?]
         }
         "X" => {
-            // H Z H implements X on slot 0 while leaving slot 1 in zero.
-            let [block] = add_gate(&mut builder, "targeted_h", &[0], inputs)?;
-            let block = phase(&mut builder, block, 4)?;
-            add_gate::<1>(&mut builder, "targeted_h", &[0], [block])?.to_vec()
+            // H Z H implements X without introducing any other data qubits.
+            let [qubit] = add_gate(&mut builder, "targeted_h", inputs)?;
+            let qubit = phase(&mut builder, qubit, 4)?;
+            add_gate::<1>(&mut builder, "targeted_h", [qubit])?.to_vec()
         }
-        "CX" => add_gate::<2>(&mut builder, "targeted_cnot", &[0, 0], inputs)?.to_vec(),
+        "CX" => add_gate::<2>(&mut builder, "targeted_cnot", inputs)?.to_vec(),
         "CZ" => {
-            let [target] = add_gate(&mut builder, "targeted_h", &[0], [inputs[1]])?;
-            let [control, target] =
-                add_gate(&mut builder, "targeted_cnot", &[0, 0], [inputs[0], target])?;
-            let [target] = add_gate(&mut builder, "targeted_h", &[0], [target])?;
+            let [target] = add_gate(&mut builder, "targeted_h", [inputs[1]])?;
+            let [control, target] = add_gate(&mut builder, "targeted_cnot", [inputs[0], target])?;
+            let [target] = add_gate(&mut builder, "targeted_h", [target])?;
             vec![control, target]
         }
-        "Measure" => add_gate::<2>(&mut builder, "targeted_measure_z", &[0], inputs)?.to_vec(),
+        "Measure" => add_gate::<2>(&mut builder, "targeted_measure_z", inputs)?.to_vec(),
         "MeasureFree" | "QFree" => {
-            // Consume the whole block; slot 1 has no computational result to retain.
-            let [result, _unused] = add_gate(&mut builder, "measure_z", &[], inputs)?;
+            // The logical qubit is consumed; only the copyable result may be discarded.
+            let [result] = add_gate(&mut builder, "measure_z_single", inputs)?;
             if op.def().name().as_str() == "MeasureFree" {
                 vec![result]
             } else {
@@ -114,22 +117,20 @@ fn lower_op(op: &ExtensionOp, replacements: &ReplaceTypes) -> Result<Hugr, Box<d
     Ok(builder.finish_hugr_with_outputs(outputs)?)
 }
 
-fn phase(builder: &mut impl Dataflow, mut block: Wire, count: usize) -> Result<Wire, BuildError> {
+fn phase(builder: &mut impl Dataflow, mut qubit: Wire, count: usize) -> Result<Wire, BuildError> {
     for _ in 0..count {
-        // Each injection consumes a fresh resource block; data stays in slot 0.
-        let [magic] = add_gate(builder, "prep_magic_state", &[], [])?;
-        [block] = add_gate(builder, "targeted_t", &[0], [block, magic])?;
+        // Magic resources are prepared and consumed as a pair, even for one data qubit.
+        let [magic] = add_gate(builder, "prep_magic_state", [])?;
+        [qubit] = add_gate(builder, "targeted_t", [qubit, magic])?;
     }
-    Ok(block)
+    Ok(qubit)
 }
 
 fn add_gate<const N: usize>(
     builder: &mut impl Dataflow,
     name: &str,
-    indices: &[u64],
     inputs: impl IntoIterator<Item = Wire>,
 ) -> Result<[Wire; N], BuildError> {
-    let args: Vec<_> = indices.iter().copied().map(TypeArg::from).collect();
-    let op = csd::EXTENSION.instantiate_extension_op(name, args)?;
+    let op = csd::EXTENSION.instantiate_extension_op(name, [])?;
     Ok(builder.add_dataflow_op(op, inputs)?.outputs_arr())
 }

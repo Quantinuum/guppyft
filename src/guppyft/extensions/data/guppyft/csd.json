@@ -2,11 +2,11 @@
   "version": "0.1.0",
   "name": "guppyft.csd",
   "types": {
-    "block": {
+    "qubit": {
       "extension": "guppyft.csd",
-      "name": "block",
+      "name": "qubit",
       "params": [],
-      "description": "logical CSD block containing two logical qubits",
+      "description": "logical CSD qubit",
       "bound": {
         "b": "Explicit",
         "bound": "A"
@@ -17,28 +17,60 @@
     "global_s": {
       "extension": "guppyft.csd",
       "name": "global_s",
-      "description": "Apply S to both logical qubits in a block.",
+      "description": "Apply S to both qubits of a pair, returning the pair in slot order.",
       "signature": {
         "params": [],
         "body": {
           "input": [
             {
-              "t": "Opaque",
-              "extension": "guppyft.csd",
-              "extension_version": "0.1.0",
-              "id": "block",
-              "args": [],
-              "bound": "A"
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  },
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  }
+                ]
+              ]
             }
           ],
           "output": [
             {
-              "t": "Opaque",
-              "extension": "guppyft.csd",
-              "extension_version": "0.1.0",
-              "id": "block",
-              "args": [],
-              "bound": "A"
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  },
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  }
+                ]
+              ]
             }
           ]
         }
@@ -48,36 +80,84 @@
     "global_t": {
       "extension": "guppyft.csd",
       "name": "global_t",
-      "description": "Apply T to both data qubits by injection, consuming the second (magic) block.",
+      "description": "Apply T to the data pair using the second (magic) pair, returning only the data pair.",
       "signature": {
         "params": [],
         "body": {
           "input": [
             {
-              "t": "Opaque",
-              "extension": "guppyft.csd",
-              "extension_version": "0.1.0",
-              "id": "block",
-              "args": [],
-              "bound": "A"
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  },
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  }
+                ]
+              ]
             },
             {
-              "t": "Opaque",
-              "extension": "guppyft.csd",
-              "extension_version": "0.1.0",
-              "id": "block",
-              "args": [],
-              "bound": "A"
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  },
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  }
+                ]
+              ]
             }
           ],
           "output": [
             {
-              "t": "Opaque",
-              "extension": "guppyft.csd",
-              "extension_version": "0.1.0",
-              "id": "block",
-              "args": [],
-              "bound": "A"
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  },
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  }
+                ]
+              ]
             }
           ]
         }
@@ -87,18 +167,34 @@
     "measure_z": {
       "extension": "guppyft.csd",
       "name": "measure_z",
-      "description": "Destructively measure both logical qubits in Z, returning two booleans in logical-qubit order.",
+      "description": "Destructively measure a qubit pair in Z, returning two booleans in slot order.",
       "signature": {
         "params": [],
         "body": {
           "input": [
             {
-              "t": "Opaque",
-              "extension": "guppyft.csd",
-              "extension_version": "0.1.0",
-              "id": "block",
-              "args": [],
-              "bound": "A"
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  },
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  }
+                ]
+              ]
             }
           ],
           "output": [
@@ -107,6 +203,34 @@
               "s": "Unit",
               "size": 2
             },
+            {
+              "t": "Sum",
+              "s": "Unit",
+              "size": 2
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "measure_z_single": {
+      "extension": "guppyft.csd",
+      "name": "measure_z_single",
+      "description": "Destructively measure one logical qubit in Z, consuming it and returning a boolean.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.csd",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
             {
               "t": "Sum",
               "s": "Unit",
@@ -120,19 +244,35 @@
     "prep_magic_state": {
       "extension": "guppyft.csd",
       "name": "prep_magic_state",
-      "description": "Prepare a block with both logical qubits in the T magic state T|+>.",
+      "description": "Prepare a same-block pair of logical qubits in the T magic state T|+>.",
       "signature": {
         "params": [],
         "body": {
           "input": [],
           "output": [
             {
-              "t": "Opaque",
-              "extension": "guppyft.csd",
-              "extension_version": "0.1.0",
-              "id": "block",
-              "args": [],
-              "bound": "A"
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  },
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  }
+                ]
+              ]
             }
           ]
         }
@@ -142,7 +282,45 @@
     "prep_zero": {
       "extension": "guppyft.csd",
       "name": "prep_zero",
-      "description": "Prepare a block with both logical qubits in the zero state.",
+      "description": "Prepare a same-block pair of logical qubits in the zero state.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [],
+          "output": [
+            {
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  },
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "prep_zero_single": {
+      "extension": "guppyft.csd",
+      "name": "prep_zero_single",
+      "description": "Prepare one logical qubit in the zero state, without allocating a partner wire.",
       "signature": {
         "params": [],
         "body": {
@@ -152,7 +330,7 @@
               "t": "Opaque",
               "extension": "guppyft.csd",
               "extension_version": "0.1.0",
-              "id": "block",
+              "id": "qubit",
               "args": [],
               "bound": "A"
             }
@@ -164,25 +342,16 @@
     "targeted_cnot": {
       "extension": "guppyft.csd",
       "name": "targeted_cnot",
-      "description": "Apply CNOT between the indexed control in the first block and target in the second.",
+      "description": "Apply CNOT from the first logical qubit to the second, returning both in input order.",
       "signature": {
-        "params": [
-          {
-            "tp": "BoundedNat",
-            "bound": 2
-          },
-          {
-            "tp": "BoundedNat",
-            "bound": 2
-          }
-        ],
+        "params": [],
         "body": {
           "input": [
             {
               "t": "Opaque",
               "extension": "guppyft.csd",
               "extension_version": "0.1.0",
-              "id": "block",
+              "id": "qubit",
               "args": [],
               "bound": "A"
             },
@@ -190,7 +359,7 @@
               "t": "Opaque",
               "extension": "guppyft.csd",
               "extension_version": "0.1.0",
-              "id": "block",
+              "id": "qubit",
               "args": [],
               "bound": "A"
             }
@@ -200,7 +369,7 @@
               "t": "Opaque",
               "extension": "guppyft.csd",
               "extension_version": "0.1.0",
-              "id": "block",
+              "id": "qubit",
               "args": [],
               "bound": "A"
             },
@@ -208,7 +377,7 @@
               "t": "Opaque",
               "extension": "guppyft.csd",
               "extension_version": "0.1.0",
-              "id": "block",
+              "id": "qubit",
               "args": [],
               "bound": "A"
             }
@@ -220,21 +389,16 @@
     "targeted_h": {
       "extension": "guppyft.csd",
       "name": "targeted_h",
-      "description": "Apply H to the indexed logical qubit in a block.",
+      "description": "Apply H to one logical qubit.",
       "signature": {
-        "params": [
-          {
-            "tp": "BoundedNat",
-            "bound": 2
-          }
-        ],
+        "params": [],
         "body": {
           "input": [
             {
               "t": "Opaque",
               "extension": "guppyft.csd",
               "extension_version": "0.1.0",
-              "id": "block",
+              "id": "qubit",
               "args": [],
               "bound": "A"
             }
@@ -244,7 +408,7 @@
               "t": "Opaque",
               "extension": "guppyft.csd",
               "extension_version": "0.1.0",
-              "id": "block",
+              "id": "qubit",
               "args": [],
               "bound": "A"
             }
@@ -256,21 +420,16 @@
     "targeted_measure_z": {
       "extension": "guppyft.csd",
       "name": "targeted_measure_z",
-      "description": "Non-destructively measure the indexed logical qubit in Z, returning the block and a boolean.",
+      "description": "Non-destructively measure one logical qubit in Z, returning the qubit and a boolean.",
       "signature": {
-        "params": [
-          {
-            "tp": "BoundedNat",
-            "bound": 2
-          }
-        ],
+        "params": [],
         "body": {
           "input": [
             {
               "t": "Opaque",
               "extension": "guppyft.csd",
               "extension_version": "0.1.0",
-              "id": "block",
+              "id": "qubit",
               "args": [],
               "bound": "A"
             }
@@ -280,7 +439,7 @@
               "t": "Opaque",
               "extension": "guppyft.csd",
               "extension_version": "0.1.0",
-              "id": "block",
+              "id": "qubit",
               "args": [],
               "bound": "A"
             },
@@ -297,31 +456,42 @@
     "targeted_t": {
       "extension": "guppyft.csd",
       "name": "targeted_t",
-      "description": "Apply T to the indexed data qubit using magic slot 0, consuming the second block.",
+      "description": "Apply T to the data qubit using slot 0 of the magic pair, consuming the entire pair.\nDiscard the unused magic resource in slot 1 and return only the data qubit.",
       "signature": {
-        "params": [
-          {
-            "tp": "BoundedNat",
-            "bound": 2
-          }
-        ],
+        "params": [],
         "body": {
           "input": [
             {
               "t": "Opaque",
               "extension": "guppyft.csd",
               "extension_version": "0.1.0",
-              "id": "block",
+              "id": "qubit",
               "args": [],
               "bound": "A"
             },
             {
-              "t": "Opaque",
-              "extension": "guppyft.csd",
-              "extension_version": "0.1.0",
-              "id": "block",
-              "args": [],
-              "bound": "A"
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  },
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  }
+                ]
+              ]
             }
           ],
           "output": [
@@ -329,7 +499,7 @@
               "t": "Opaque",
               "extension": "guppyft.csd",
               "extension_version": "0.1.0",
-              "id": "block",
+              "id": "qubit",
               "args": [],
               "bound": "A"
             }
@@ -341,44 +511,108 @@
     "transversal_cnot": {
       "extension": "guppyft.csd",
       "name": "transversal_cnot",
-      "description": "Apply CNOT transversally from the first block to the second block.",
+      "description": "Apply CNOT from each slot of the control pair to the matching slot of the target pair.\nReturn the control pair followed by the target pair.",
       "signature": {
         "params": [],
         "body": {
           "input": [
             {
-              "t": "Opaque",
-              "extension": "guppyft.csd",
-              "extension_version": "0.1.0",
-              "id": "block",
-              "args": [],
-              "bound": "A"
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  },
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  }
+                ]
+              ]
             },
             {
-              "t": "Opaque",
-              "extension": "guppyft.csd",
-              "extension_version": "0.1.0",
-              "id": "block",
-              "args": [],
-              "bound": "A"
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  },
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  }
+                ]
+              ]
             }
           ],
           "output": [
             {
-              "t": "Opaque",
-              "extension": "guppyft.csd",
-              "extension_version": "0.1.0",
-              "id": "block",
-              "args": [],
-              "bound": "A"
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  },
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  }
+                ]
+              ]
             },
             {
-              "t": "Opaque",
-              "extension": "guppyft.csd",
-              "extension_version": "0.1.0",
-              "id": "block",
-              "args": [],
-              "bound": "A"
+              "t": "Sum",
+              "s": "General",
+              "rows": [
+                [
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  },
+                  {
+                    "t": "Opaque",
+                    "extension": "guppyft.csd",
+                    "extension_version": "0.1.0",
+                    "id": "qubit",
+                    "args": [],
+                    "bound": "A"
+                  }
+                ]
+              ]
             }
           ]
         }
