@@ -18,6 +18,8 @@ from guppyft.code.steane.primitives import (
     steane_z_qec_cycle,
 )
 from guppyft.std import LogicalBlock
+from guppyft.std.distillation import Distillation15To1, Distillation15To1QECPolicy
+from guppyft.std.state_factory import NoResources
 from guppyft.verify import valid_clifford_implementation
 
 
@@ -176,3 +178,46 @@ def test_t_gate() -> None:
     res = test.emulator(n_qubits=20).run().collated_shots()
 
     assert res == [{"res": [1]}]
+
+
+def test_t_gate_with_non_ft_t_state() -> None:
+
+    @guppy
+    def test() -> None:
+        blk = steane_primitives.prep_zero_non_ft()
+        steane_primitives.h(blk)
+        for _ in range(4):
+            a = steane_primitives.prep_t_state_non_ft()
+            steane_primitives.inject_t(blk, a)
+        steane_primitives.h(blk)
+        res = steane_primitives.measure_z(blk)
+        output("res", steane_primitives.decode(res))
+
+    res = test.emulator(n_qubits=14).run().collated_shots()
+
+    assert res == [{"res": [1]}]
+
+
+def test_distillation_ops() -> None:
+    # A distillation round needs more than 112 qubits, so only check it compiles.
+
+    @guppy
+    @no_type_check
+    def no_qec(resources: NoResources, q: LogicalBlock[7]) -> None:
+        pass
+
+    @guppy
+    @no_type_check
+    def prep_zero(resources: NoResources) -> LogicalBlock[7]:
+        return steane_primitives.prep_zero_non_ft()
+
+    @guppy
+    @no_type_check
+    def test() -> None:
+        policy = Distillation15To1QECPolicy(1.0, 0.0, 0.0, 0.0, 0.0)
+        ops = steane_primitives.distillation_ops()
+        Distillation15To1(ops).prepare(
+            NoResources(), prep_zero, no_qec, policy
+        ).discard()
+
+    test.compile()
