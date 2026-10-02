@@ -35,7 +35,9 @@ from hugr.package import Package
 from selene_sim.backends.bundled_simulators import Coinflip
 
 from guppyft.code.steane.encode import (
+    MagicStatePrep,
     QECPolicy,
+    QECStyle,
     RUSStateFactoryConf,
     SteaneBuilder,
     SteaneInstance,
@@ -198,6 +200,7 @@ def test_annotate_steane_encoding() -> None:
                     "size": 1,
                     "max_attempts": 5,
                 },
+                "magic_state_prep": "flaggedft",
                 "qec_policy": {
                     "style": "steane",
                     "threshold": 1,
@@ -272,6 +275,57 @@ def test_t_encoder_smoke(make_steane_instance: Callable[[int], SteaneInstance]) 
     )
 
     assert res == [{}]
+
+
+@pytest.mark.parametrize("style", [QECStyle.Knill, QECStyle.Steane])
+def test_distilled_t(style: QECStyle) -> None:
+    # Coinflip ignores the state, so this only checks that distillation runs.
+    @guppy
+    def main() -> None:
+        q = qubit()
+        h(q)
+        t(q)
+        output("q", measure(q).read())
+
+    policy = QECPolicy(style=style, threshold=2)
+    policy.costs.cx = 1.0
+    policy.costs.inject_tdg = 1.0
+
+    res = (
+        SteaneBuilder()
+        .with_qec_policy(policy)
+        .with_magic_state_prep(MagicStatePrep.Distillation15To1)
+        .build(n_blocks=2)
+        .emulator(main.compile(), n_qubits=150)
+        .with_simulator(Coinflip(bias=0.0))
+        .run()
+        .collated_shots()
+    )
+
+    assert res == [{"q": [0]}]
+
+
+def test_distillation_clifford_program() -> None:
+    @guppy
+    def main() -> None:
+        q0 = qubit()
+        q1 = qubit()
+        x(q0)
+        cx(q0, q1)
+        output("q0", measure(q0).read())
+        output("q1", measure(q1).read())
+
+    res = (
+        SteaneBuilder()
+        .with_magic_state_prep(MagicStatePrep.Distillation15To1)
+        .build(n_blocks=2)
+        .emulator(main.compile(), n_qubits=16)
+        .stabilizer_sim()
+        .run()
+        .collated_shots()
+    )
+
+    assert res == [{"q0": [1], "q1": [1]}]
 
 
 def test_encode_classical(
