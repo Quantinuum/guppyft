@@ -408,6 +408,23 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
             return Ok(());
         }
 
+        let bound_values: Vec<u64> = bind_args
+            .iter()
+            .map(|arg_index: &usize| {
+                match &ext_op.args().get(*arg_index) {
+                    Some(TypeArg::BoundedNat(v)) => Result::<_, anyhow::Error>::Ok(*v),
+                    Some(e) => anyhow::bail!(
+                        "Binding non-nat-literal generic arguments is not supported, got {e}"
+                    ),
+                    None => anyhow::bail!(
+                        "Index out of bounds (total generic args: {})",
+                        ext_op.args().len()
+                    ),
+                }
+                .context(format!("Trying to bind generic arg at index {arg_index}"))
+            })
+            .collect::<anyhow::Result<_>>()?;
+
         let op_sig: PolyFuncType = {
             let mut sig = ext_op.signature().into_owned();
             sig.transform(&self.type_replacer)?;
@@ -416,14 +433,9 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
         let expected_sig: PolyFuncType = {
             let Signature { input, output } = &op_sig.body();
             // Prepend runtime types for bound generic arguments
-            let input: TypeRow = bind_args
+            let input: TypeRow = bound_values
                 .iter()
-                .map(|bound_arg: &usize| match &ext_op.args()[*bound_arg] {
-                    TypeArg::BoundedNat(_) => int_type(6),
-                    e => panic!(
-                        "Binding non-nat-literal generic arguments is not supported, got {e}"
-                    ),
-                })
+                .map(|_: &u64| int_type(6))
                 .chain(input.iter().cloned())
                 .collect();
             PolyFuncType::new(vec![], Signature::new(input, output.clone()))
@@ -439,7 +451,8 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
             (module_builder.finish_hugr()?, decl.node())
         };
 
-        if !bind_args.is_empty() {
+        // Generate wrapper function for housing inlined bound generic values
+        if !bound_values.is_empty() {
             let is_defn = match func_hugr.get_optype(func_node) {
                 OpType::FuncDefn(_) => true,
                 OpType::FuncDecl(_) => false,
@@ -447,16 +460,9 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
             };
 
             let mut builder = ModuleBuilder::with_hugr(func_hugr);
-            let values: Vec<u64> = bind_args
-                .iter()
-                .map(|arg| match &ext_op.args()[*arg] {
-                    TypeArg::BoundedNat(v) => *v,
-                    _ => unreachable!(),
-                })
-                .collect();
-            let mangler = values.iter().join(".");
+            let mangler = bound_values.iter().join(".");
             let mut defn = builder.define_function(format!("{func_name}.{mangler}"), op_sig)?;
-            let load_values: Vec<_> = values
+            let load_values: Vec<_> = bound_values
                 .into_iter()
                 .map(|v| Ok(defn.add_load_value(ConstInt::new_u(6, v)?)))
                 .collect::<anyhow::Result<_>>()?;

@@ -125,7 +125,7 @@ class OpReplacements:
 
         return self
 
-    def check_extension_eliminated(self, ext_id: str) -> None:
+    def register_for_elimination_check(self, ext_id: str) -> None:
         self._check_eliminated.append(ext_id)
 
 
