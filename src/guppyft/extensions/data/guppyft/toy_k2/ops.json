@@ -603,7 +603,29 @@
     "prep_zero_ft": {
       "extension": "guppyft.toy_k2.ops",
       "name": "prep_zero_ft",
-      "description": "Prepare a ToyK2 block with both logical qubits on the |0> state.",
+      "description": "Prepare a ToyK2 block with both logical qubits on the |0>|0> state.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "prep_zero_plus_ft": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "prep_zero_plus_ft",
+      "description": "Prepare a ToyK2 block with logical qubits on the |0>|+> state.",
       "signature": {
         "params": [],
         "body": {
