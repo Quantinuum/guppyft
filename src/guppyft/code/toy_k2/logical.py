@@ -217,7 +217,7 @@ def free(blk: Block @ owned) -> None:
 @hugr_op(_logical_op("measure_z", _OPS_EXTN))
 @no_type_check
 def measure_z(blk: Block, idx: int) -> QubitMeasurement:
-    """Measure the chosen qubit in the Z basis."""
+    """Non-destructively measure the chosen qubit in the Z basis."""
 
 
 @hugr_op(_logical_op("measure_z_all", _OPS_EXTN))
