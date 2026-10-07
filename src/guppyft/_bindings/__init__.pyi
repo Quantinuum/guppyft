@@ -32,9 +32,7 @@ def _implement_ops(
 
     `op_replacements` maps each `(extension_name, op_name)` pair to either a
     compiled implementation HUGR or `None` if only a declaration should be
-    generated, together with the function name to use, and a list of generic argument
-    indices that should be instantiated as runtime values and prepended (in the given
-    order) to calls that replace ops.
+    generated, together with the function name to use.
     `replaceable_types` is a set of extension types that should be replaced by
     the corresponding types in the implementation HUGRs.
     `check_eliminated` is a list of extensions to check have been fully eliminated after
