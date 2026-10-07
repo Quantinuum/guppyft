@@ -411,12 +411,21 @@ def restore(block: BorrowedBlock @ owned, q: Qubit @ owned) -> Block:
 def cx_inter(ctrl_block: Block, ctrl_idx: int, tgt_block: Block, tgt_idx: int) -> None:
     """Logical CX between two blocks, targeting the specified logical qubits.
 
+    Note:
+        This is not a "primitive" of the code, but a composite logical, built
+        out of two `cx_transversal` and two `cx_intra` operations, sandwiched
+        by `swap_intra` if `ctrl_idx` equals `tgt_idx`.
+
     Args:
         ctrl_block: The logical block that acts as control.
         ctrl_idx: The index of the logical qubit in the control block (0 or 1).
         tgt_block: The logical block that acts as target.
         tgt_idx: The index of the logical qubit in the target block (0 or 1).
     """
+    # Since it is not a primitive, we do not bind it to a HUGR extension op,
+    # nor provide its physical implementation in `primitives.py`.
+    # Instead, we define it by composing logical primitives.
+
     if ctrl_idx == tgt_idx:
         swap_intra(ctrl_block)
 
