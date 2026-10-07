@@ -23,7 +23,7 @@ class RsHugr:
 
 def _implement_ops(
     rs_hugr: RsHugr,
-    op_replacements: dict[tuple[str, str], tuple[RsHugr | None, str, list[int]]],
+    op_replacements: dict[tuple[str, str], tuple[RsHugr | None, str]],
     replaceable_types: set[tuple[str, str]],
     check_eliminated: list[str]
 ) -> None:

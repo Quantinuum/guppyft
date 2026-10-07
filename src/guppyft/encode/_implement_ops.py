@@ -20,18 +20,10 @@ from guppyft._util import get_link_name
 from ._util import to_rs_hugr
 
 
-@dataclass(frozen=True)
-class BindGenerics:
-    """Bind the concrete generic arguments with the specified indices to the start of
-    the argument list, loaded as constant values per call."""
-
-    bound_generics: list[int]
-
-
 class OpReplacements:
     _ops: dict[
         tuple[str, str],
-        tuple[GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str, BindGenerics],
+        tuple[GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str],
     ]
     _check_eliminated: list[str]
     """Stores the operations to replace during op implementation and the implementation
@@ -47,9 +39,7 @@ class OpReplacements:
     ) -> Iterator[
         tuple[
             tuple[str, str],
-            tuple[
-                GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str, BindGenerics
-            ],
+            tuple[GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str],
         ]
     ]:
         return iter(self._ops.items())
@@ -60,9 +50,7 @@ class OpReplacements:
     def _insert_for_op(
         self,
         op: tuple[str, str] | OpDef,
-        value: tuple[
-            GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str, BindGenerics
-        ],
+        value: tuple[GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str],
     ) -> Self:
         if isinstance(op, OpDef):
             op = (op.get_extension().name, op.name)
@@ -73,11 +61,8 @@ class OpReplacements:
         self,
         op: tuple[str, str] | OpDef,
         func: GuppyFunctionDefinition[Any, Any],
-        bind: BindGenerics | None = None,
     ) -> Self:
-        return self._insert_for_op(
-            op, (func, get_link_name(func), bind or BindGenerics([]))
-        )
+        return self._insert_for_op(op, (func, get_link_name(func)))
 
     def with_funcs(
         self, funcs: dict[tuple[str, str], GuppyFunctionDefinition[Any, Any]]
@@ -91,9 +76,8 @@ class OpReplacements:
         self,
         op: tuple[str, str] | OpDef,
         func_name: str,
-        bind: BindGenerics | None = None,
     ) -> Self:
-        return self._insert_for_op(op, (None, func_name, bind or BindGenerics([])))
+        return self._insert_for_op(op, (None, func_name))
 
     def with_generated_decls(self, names: dict[tuple[str, str], str]) -> Self:
         for op, name in names.items():
@@ -103,9 +87,9 @@ class OpReplacements:
 
     def gen_missing_decls_from_lib(self, lib: Package) -> Self:
         # Build index of names missing declaration/definition
-        missing: dict[str, tuple[tuple[str, str], BindGenerics]] = {
-            f_name: (op_key, bind)
-            for op_key, (func_opt, f_name, bind) in self._ops.items()
+        missing: dict[str, tuple[str, str]] = {
+            f_name: op_key
+            for op_key, (func_opt, f_name) in self._ops.items()
             if func_opt is None
         }
         if not missing:
@@ -114,12 +98,12 @@ class OpReplacements:
         for module in lib.modules:
             for _, data in module.nodes():
                 if isinstance(data.op, FuncDefn) and data.op.f_name in missing:
-                    op_key, bind = missing.pop(data.op.f_name)
+                    op_key = missing.pop(data.op.f_name)
                     h: Hugr[Any] = Hugr()
                     DefinitionBuilder(h).module_root_builder().declare_function(
                         data.op.f_name, data.op.signature, data.op.visibility
                     )
-                    self._ops[op_key] = (h, data.op.f_name, bind)
+                    self._ops[op_key] = (h, data.op.f_name)
                     if not missing:
                         return self
 
@@ -187,9 +171,8 @@ def _implement_ops(
         key: (
             func_opt if func_opt is None else to_rs_hugr(func_opt),
             name,
-            bind.bound_generics,
         )
-        for key, (func_opt, name, bind) in ops
+        for key, (func_opt, name) in ops
     }
 
     _implement_ops_binding(rs_hugr, rs_ops, tys, list(ops.iter_eliminated()))

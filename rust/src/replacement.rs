@@ -154,7 +154,6 @@ impl ReplacementCompiler {
                 &ExtensionOp::new(op_def, [])?,
                 Some(replacement),
                 &func_name,
-                &[],
             )?;
         }
         op_replacer.finish()?;
