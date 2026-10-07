@@ -137,6 +137,34 @@ def prep_zero_ft() -> PreBlock[4, 1]:
 
 @guppy
 @no_type_check
+def prep_zero_plus_ft() -> LogicalBlock[4]:
+    r"""Fault-tolerant preparation of a logical :math:`|0+\rangle` state.
+
+    The logical qubit on address `0` holds the :math:`|0\rangle` state,
+    and the logical qubit on address `1` holds the :math:`|+\rangle` state.
+    """
+    # This is a classic example of deterministic FT state preparation: the
+    # logical |0+> state is built out of two physical Bell states.
+    # A single-qubit X or Z error at any point in the preparation of a physical
+    # Bell state propagates to either a single-qubit error or an XX or ZZ error.
+    # The XX / ZZ errors that would break the FT requirement happen to be
+    # stabilizers of the logical state (logical Z of the first qubit or logical
+    # X of the second qubit, |0+>), up to code stabilizers.
+    # Hence, those propagated two-qubit errors act trivially on the logical data.
+    # Note that Y errors that propagate to ZY or YX are equivalent to single
+    # qubit errors up to stabilizers of the logical state.
+
+    qs = array(phys.qubit() for _ in range(4))
+    phys.h(qs[0])
+    phys.cx(qs[0], qs[1])
+    phys.h(qs[2])
+    phys.cx(qs[2], qs[3])
+
+    return LogicalBlock(qs)
+
+
+@guppy
+@no_type_check
 def _encode_state_non_ft(
     q0: phys.qubit @ owned, q1: phys.qubit @ owned
 ) -> LogicalBlock[4]:
