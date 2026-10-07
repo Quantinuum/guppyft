@@ -85,7 +85,7 @@ impl ReplacementCompiler {
     }
 
     #[allow(unused)]
-    pub(crate) fn run(self, hugr: &mut Hugr) -> Result<(), ReplacementCompilerError> {
+    pub(crate) fn run(self, hugr: &mut Hugr) -> anyhow::Result<()> {
         let registry = hugr.extensions_mut();
         if let Some(additional_extensions) = self.additional_extensions {
             registry.extend(additional_extensions);
@@ -151,7 +151,7 @@ impl ReplacementCompiler {
                 .clone();
             assert!(op_def.params()?.is_empty());
             op_replacer.register_replacement(
-                ExtensionOp::new(op_def, [])?,
+                &ExtensionOp::new(op_def, [])?,
                 Some(replacement),
                 &func_name,
             )?;

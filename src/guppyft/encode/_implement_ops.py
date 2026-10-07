@@ -21,16 +21,18 @@ from ._util import to_rs_hugr
 
 
 class OpReplacements:
-    ops: dict[
+    _ops: dict[
         tuple[str, str],
         tuple[GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str],
     ]
+    _check_eliminated: list[str]
     """Stores the operations to replace during op implementation and the implementation
     functions. A function can be set to `None` to indicate that a declaration with the
     given name should be generated instead."""
 
     def __init__(self) -> None:
-        self.ops = {}
+        self._ops = {}
+        self._check_eliminated = []
 
     def __iter__(
         self,
@@ -40,7 +42,10 @@ class OpReplacements:
             tuple[GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str],
         ]
     ]:
-        return iter(self.ops.items())
+        return iter(self._ops.items())
+
+    def iter_eliminated(self) -> Iterator[str]:
+        return self._check_eliminated.__iter__()
 
     def _insert_for_op(
         self,
@@ -49,11 +54,13 @@ class OpReplacements:
     ) -> Self:
         if isinstance(op, OpDef):
             op = (op.get_extension().name, op.name)
-        self.ops[op] = value
+        self._ops[op] = value
         return self
 
     def with_func(
-        self, op: tuple[str, str] | OpDef, func: GuppyFunctionDefinition[Any, Any]
+        self,
+        op: tuple[str, str] | OpDef,
+        func: GuppyFunctionDefinition[Any, Any],
     ) -> Self:
         return self._insert_for_op(op, (func, get_link_name(func)))
 
@@ -65,7 +72,11 @@ class OpReplacements:
 
         return self
 
-    def with_generated_decl(self, op: tuple[str, str] | OpDef, func_name: str) -> Self:
+    def with_generated_decl(
+        self,
+        op: tuple[str, str] | OpDef,
+        func_name: str,
+    ) -> Self:
         return self._insert_for_op(op, (None, func_name))
 
     def with_generated_decls(self, names: dict[tuple[str, str], str]) -> Self:
@@ -78,7 +89,7 @@ class OpReplacements:
         # Build index of names missing declaration/definition
         missing: dict[str, tuple[str, str]] = {
             f_name: op_key
-            for op_key, (func_opt, f_name) in self.ops.items()
+            for op_key, (func_opt, f_name) in self._ops.items()
             if func_opt is None
         }
         if not missing:
@@ -92,11 +103,14 @@ class OpReplacements:
                     DefinitionBuilder(h).module_root_builder().declare_function(
                         data.op.f_name, data.op.signature, data.op.visibility
                     )
-                    self.ops[op_key] = (h, data.op.f_name)
+                    self._ops[op_key] = (h, data.op.f_name)
                     if not missing:
                         return self
 
         return self
+
+    def register_for_elimination_check(self, ext_id: str) -> None:
+        self._check_eliminated.append(ext_id)
 
 
 class TyReplacements:
@@ -161,7 +175,7 @@ def _implement_ops(
         for key, (func_opt, name) in ops
     }
 
-    _implement_ops_binding(rs_hugr, rs_ops, tys)
+    _implement_ops_binding(rs_hugr, rs_ops, tys, list(ops.iter_eliminated()))
 
     return rs_hugr.to_bytes()
 
