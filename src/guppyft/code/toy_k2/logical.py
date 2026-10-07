@@ -304,6 +304,16 @@ def swap_intra(blk: Block) -> None:
     """
 
 
+@hugr_op(_logical_op("prep_zero_plus_ft", _OPS_EXTN))
+@no_type_check
+def prep_zero_plus_ft() -> Block:
+    r"""Fault-tolerant preparation of a logical :math:`|0+\rangle` state.
+
+    The logical qubit on address `0` holds the :math:`|0\rangle` state,
+    and the logical qubit on address `1` holds the :math:`|+\rangle` state.
+    """
+
+
 @hugr_op(_logical_op("prep_y_states_non_ft", _OPS_EXTN))
 @no_type_check
 def prep_y_states_non_ft() -> Block:
@@ -449,11 +459,10 @@ def h(block: Block, idx: int) -> None:
     """
     # Prepare an ancilla `|0+>` state, with the `|+>` on the index where we want
     # to apply the Hadamard.
-    ancilla = Block()  # |00>
-    h_all(ancilla)  # |++>
-    # Project the other ancilla logical qubit to |0>
-    if measure_z(ancilla, 1 - idx).decode():
-        x(ancilla, idx)
+    ancilla = prep_zero_plus_ft()  # |0+>
+    if idx == 0:
+        # Swap the qubits so that |+> is on the correct index.
+        swap_intra(ancilla)
 
     # Use the ancilla state to introduce a Hadamard on the chosen index.
     # This approach follows Fig 8A from https://arxiv.org/abs/2403.16054
