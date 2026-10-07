@@ -6,11 +6,12 @@ use anyhow::Context;
 use hugr::{
     Hugr, HugrView, Node,
     builder::{BuildError, HugrBuilder, ModuleBuilder},
-    extension::{ExtensionId, SignatureError},
+    extension::{ExtensionId, ExtensionRegistry, SignatureError},
     hugr::{ValidationError, hugrmut::HugrMut},
     ops::{Call, DataflowOpTrait, ExtensionOp, OpName, OpType, handle::NodeHandle},
     types::{PolyFuncType, Type, TypeRow},
 };
+use hugr_core::extension::resolution::ExtensionCollectionError;
 use hugr_core::hugr::internal::HugrMutInternals;
 use hugr_core::hugr::linking::NodeLinkingError;
 use hugr_core::std_extensions::collections::array::Array;
@@ -71,21 +72,23 @@ impl ImplementOpsPass {
         }
     }
 
-    fn check_all_ops_eliminated<H: HugrMut<Node = Node>>(
-        &self,
-        hugr: &mut H,
-    ) -> anyhow::Result<()> {
-        for node in hugr.nodes() {
-            let Some(ext_op) = hugr.get_optype(node).as_extension_op() else {
+    fn check_all_ops_eliminated<H: HugrView<Node = Node>>(&self, hugr: &H) -> anyhow::Result<()> {
+        for ext_id in self.check_eliminated.iter().sorted() {
+            if !hugr.extensions().contains(ext_id) {
                 continue;
-            };
-            let ext_id = ext_op.def().extension_id();
-            if self.check_eliminated.contains(ext_id) {
-                return Err(anyhow::anyhow!(
-                    "Extension {ext_id} was requested to be eliminated but {} at node {node} remains",
-                    ext_op.qualified_id()
-                ));
             }
+
+            let mut remaining = Vec::new();
+            for node in hugr.nodes() {
+                let op = hugr.get_optype(node);
+                if op.used_extensions()?.contains(ext_id) {
+                    remaining.push(format!("{op} at node {node}"));
+                }
+            }
+            anyhow::bail!(
+                "Extension {ext_id} was requested to be eliminated but remains in the registry; nodes using it: {}",
+                remaining.join(", ")
+            );
         }
         Ok(())
     }
@@ -309,6 +312,9 @@ impl From<&ExtensionOp> for OpHashWrapper {
 #[non_exhaustive]
 pub enum OpReplacementError {
     #[from]
+    #[display("Could not collect extensions after replacing ops: {_0}")]
+    ExtensionCollectionError(ExtensionCollectionError),
+    #[from]
     ReplaceTypesError(ReplaceTypesError),
     #[from]
     ValidationError(ValidationError<Node>),
@@ -497,6 +503,13 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
             let call_in_port = self.hugr.get_optype(node).static_input_port().unwrap();
             self.hugr.connect(*func_node, func_port, node, call_in_port);
         }
+
+        // Remove any unused extensions from hugr registry
+        let mut used = ExtensionRegistry::default();
+        for node in self.hugr.nodes() {
+            used.extend(self.hugr.get_optype(node).used_extensions()?);
+        }
+        *self.hugr.extensions_mut() = used;
 
         Ok(())
     }

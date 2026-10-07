@@ -158,10 +158,6 @@ impl ReplacementCompiler {
         }
         op_replacer.finish()?;
 
-        let registry = hugr.extensions().clone();
-        hugr.resolve_extension_defs(&registry)
-            .map_err(ReplacementCompilerError::PostResolveExtensionsError)?;
-
         hugr.validate()?;
         Ok(())
     }
