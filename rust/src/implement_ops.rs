@@ -6,12 +6,12 @@ use anyhow::Context;
 use hugr::{
     Hugr, HugrView, Node,
     builder::{BuildError, HugrBuilder, ModuleBuilder},
-    extension::{ExtensionId, ExtensionRegistry, SignatureError},
+    extension::{ExtensionId, SignatureError},
     hugr::{ValidationError, hugrmut::HugrMut},
     ops::{Call, DataflowOpTrait, ExtensionOp, OpName, OpType, handle::NodeHandle},
     types::{PolyFuncType, Type, TypeRow},
 };
-use hugr_core::extension::resolution::ExtensionCollectionError;
+use hugr_core::extension::resolution::ExtensionResolutionError;
 use hugr_core::hugr::internal::HugrMutInternals;
 use hugr_core::hugr::linking::NodeLinkingError;
 use hugr_core::std_extensions::collections::array::Array;
@@ -110,7 +110,7 @@ impl std::error::Error for ImplementOpsError {
     }
 }
 
-impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
+impl<H: HugrMut<Node = Node> + AsMut<Hugr>> ComposablePass<H> for ImplementOpsPass {
     type Error = ImplementOpsError;
     type Result = ();
 
@@ -120,7 +120,10 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
 }
 
 impl ImplementOpsPass {
-    fn run_impl<H: HugrMut<Node = Node>>(&self, hugr: &mut H) -> Result<(), anyhow::Error> {
+    fn run_impl<H: HugrMut<Node = Node> + AsMut<Hugr>>(
+        &self,
+        hugr: &mut H,
+    ) -> Result<(), anyhow::Error> {
         #[cfg(debug_assertions)]
         {
             for ext_op in hugr
@@ -312,8 +315,8 @@ impl From<&ExtensionOp> for OpHashWrapper {
 #[non_exhaustive]
 pub enum OpReplacementError {
     #[from]
-    #[display("Could not collect extensions after replacing ops: {_0}")]
-    ExtensionCollectionError(ExtensionCollectionError),
+    #[display("Could not resolve extensions after replacing ops: {_0}")]
+    ExtensionResolutionError(ExtensionResolutionError),
     #[from]
     ReplaceTypesError(ReplaceTypesError),
     #[from]
@@ -428,7 +431,10 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
         Ok(())
     }
 
-    pub fn finish(mut self) -> Result<(), OpReplacementError> {
+    pub fn finish(mut self) -> Result<(), OpReplacementError>
+    where
+        H: AsMut<Hugr>,
+    {
         // In an optimal scenario we would use the type replacer to insert the function alongside
         // a call. However, since there is no way to stop the type replacer from recursively
         // processing the RHS at the moment, we have to resort to this hacky approach of manually
@@ -504,12 +510,8 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
             self.hugr.connect(*func_node, func_port, node, call_in_port);
         }
 
-        // Remove any unused extensions from hugr registry
-        let mut used = ExtensionRegistry::default();
-        for node in self.hugr.nodes() {
-            used.extend(self.hugr.get_optype(node).used_extensions()?);
-        }
-        *self.hugr.extensions_mut() = used;
+        let registry = self.hugr.extensions().clone();
+        self.hugr.as_mut().resolve_extension_defs(&registry)?;
 
         Ok(())
     }
