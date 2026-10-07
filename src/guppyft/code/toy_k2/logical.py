@@ -57,7 +57,7 @@ class Block:
     @guppy
     @no_type_check
     def measure_z(self: "Block", idx: int) -> QubitMeasurement:
-        """Measure the chosen qubit in the Z basis.
+        """Non-destructively measure the chosen logical qubit in the Z basis.
 
         Args:
             idx: The index of the logical qubit to apply the measurement to (0 or 1).
@@ -187,7 +187,7 @@ class Qubit:
     @guppy
     @no_type_check
     def measure_z(self: "Qubit") -> QubitMeasurement:
-        """Measure the dynamic qubit in the Z basis."""
+        """Non-destructively measure the dynamic qubit in the Z basis."""
         return measure_z_dynq(self)
 
 
@@ -217,7 +217,7 @@ def free(blk: Block @ owned) -> None:
 @hugr_op(_logical_op("measure_z", _OPS_EXTN))
 @no_type_check
 def measure_z(blk: Block, idx: int) -> QubitMeasurement:
-    """Non-destructively measure the chosen qubit in the Z basis."""
+    """Non-destructively measure the chosen logical qubit in the Z basis."""
 
 
 @hugr_op(_logical_op("measure_z_all", _OPS_EXTN))
