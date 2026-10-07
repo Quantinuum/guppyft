@@ -196,7 +196,7 @@ def test_prep_zero() -> None:
         specify_func,
         impl_func,
         CODE_DEF,
-        impl_num_ancillas=1,
+        n_impl_ancillas=1,
     )
 
 
@@ -316,7 +316,7 @@ def test_qed_cycle_without_errors() -> None:
         specify_func,
         impl_func,
         CODE_DEF,
-        impl_num_ancillas=2,
+        n_impl_ancillas=2,
     )
 
 
