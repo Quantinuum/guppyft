@@ -39,7 +39,7 @@ pub enum ToyK2OpDef {
     cx_transversal,
     /// Swap the two logical qubits of a ToyK2 block.
     swap_intra,
-    /// Prepare a ToyK2 block with both logical qubits on the |0> state.
+    /// Prepare a ToyK2 block with both logical qubits on the |0>|0> state.
     prep_zero_ft,
     /// Prepare a ToyK2 block with both logical qubits on the |Y>|Y> state.
     prep_y_states_non_ft,
