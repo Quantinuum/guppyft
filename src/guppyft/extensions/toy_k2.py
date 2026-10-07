@@ -174,6 +174,18 @@ class ToyK2OpsExtension:
         return self.prep_zero_ft_def.instantiate([])
 
     @functools.cached_property
+    def prep_zero_plus_ft_def(self) -> OpDef:
+        r"""Fault-tolerant preparation of a logical :math:`|0+\rangle` state.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `prep_zero_plus_ft`."""
+        return self().get_op("prep_zero_plus_ft")
+
+    def prep_zero_plus_ft(self) -> ExtOp:
+        r"""Fault-tolerant preparation of a logical :math:`|0+\rangle` state."""
+        return self.prep_zero_plus_ft_def.instantiate([])
+
+    @functools.cached_property
     def prep_y_states_non_ft_def(self) -> OpDef:
         r"""Non fault-tolerant preparation of a logical
         :math:`|Y\rangle|Y\rangle` state.

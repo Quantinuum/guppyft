@@ -41,6 +41,8 @@ pub enum ToyK2OpDef {
     swap_intra,
     /// Prepare a ToyK2 block with both logical qubits on the |0>|0> state.
     prep_zero_ft,
+    /// Prepare a ToyK2 block with logical qubits on the |0>|+> state.
+    prep_zero_plus_ft,
     /// Prepare a ToyK2 block with both logical qubits on the |Y>|Y> state.
     prep_y_states_non_ft,
     /// Prepare a ToyK2 block with both logical qubits on the T|+>T|+> state.
@@ -189,6 +191,7 @@ impl MakeOpDef for ToyK2OpDef {
             cx_transversal => sig_blocks(2, 2),
             swap_intra => sig_blocks(1, 1),
             prep_zero_ft => sig_blocks(0, 1),
+            prep_zero_plus_ft => sig_blocks(0, 1),
             prep_y_states_non_ft => sig_blocks(0, 1),
             prep_t_states_non_ft => sig_blocks(0, 1),
             qed_cycle => sig_blocks(1, 1),
