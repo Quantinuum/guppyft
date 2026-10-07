@@ -200,6 +200,32 @@ def test_prep_zero() -> None:
     )
 
 
+def test_prep_zero_plus() -> None:
+
+    @guppy
+    @no_type_check
+    def specify_func() -> array[qubit, 2]:
+        qs = array(qubit() for _ in range(2))
+        h(qs[1])
+        return qs
+
+    @guppy
+    @no_type_check
+    def impl_func() -> array[qubit, 4]:
+        block = toy_k2.prep_zero_plus_ft()
+
+        arr = array(block.data_qs.take(i) for i in range(4))
+        block.discard()
+
+        return arr
+
+    assert valid_stabilizer_state_preparation(
+        specify_func,
+        impl_func,
+        CODE_DEF,
+    )
+
+
 def test_prep_y_states() -> None:
 
     @guppy
