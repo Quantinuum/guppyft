@@ -60,7 +60,7 @@ examples = [
 lint = [
     "pre-commit>=4.6.2,<5",
     "ruff>=0.16.6",
-    "mypy>=2.3.1",
+    "mypy>=2.4.0",
 ]
 test = [
     "pytest>=9.1.0",

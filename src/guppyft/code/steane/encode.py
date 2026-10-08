@@ -249,11 +249,11 @@ class SteaneBuilder:
             addr_stack: Stack[tuple[int, int], comptime(n_blocks)]  # type: ignore[valid-type]
             qec_counter: array[float, comptime(n_blocks)]  # type: ignore[valid-type]
 
-            zero_state_factory: StateFactory[  # type: ignore[valid-type,type-arg]
-                7, 1, comptime(self._zero_factory_conf.size)
+            zero_state_factory: StateFactory[  # type: ignore[type-arg]
+                7, 1, comptime(self._zero_factory_conf.size)  # type: ignore[valid-type]
             ]
-            magic_state_factory: StateFactory[  # type: ignore[valid-type,type-arg]
-                7, 8, comptime(self._magic_factory_conf.size)
+            magic_state_factory: StateFactory[  # type: ignore[type-arg]
+                7, 8, comptime(self._magic_factory_conf.size)  # type: ignore[valid-type]
             ]
 
             @guppy
