@@ -31,5 +31,5 @@ jobs:
               enable-cache: true
               version: "0.11.3"
 
-        - name: Run the docs build
-          run: just build-docs
+        - name: Build docs and execute docstring examples
+          run: just test-docs
