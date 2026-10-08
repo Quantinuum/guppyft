@@ -1,9 +1,9 @@
 from guppylang import guppy
 from guppylang.std.builtins import output
 from hugr.build.dfg import Dfg
+from hugr.cli import validate
 from hugr.ops import DFG
 from hugr.tys import ExtType
-from selene_hugr_qis_compiler import check_hugr
 from tket.passes import InlineFunctions, Normalize
 
 import guppyft.code.toy_k2.logical as k2
@@ -112,7 +112,7 @@ def test_guppy_bindings_smoke() -> None:
     h = pkg.modules[0]
     Normalize()(h, inplace=True)
     InlineFunctions()(h, inplace=True)
-    check_hugr(h.to_bytes())
+    validate(h.to_bytes())
 
 
 def test_guppy_hugr() -> None:
@@ -149,7 +149,7 @@ def test_guppy_hugr() -> None:
     [h_node] = [child for child in children if "h" in h[child].op.name()]
     assert len(list(h.incoming_links(h_node))) == 1  # CallIndirect
     assert len(list(h.outgoing_links(h_node))) == 1  # free
-    check_hugr(h.to_bytes())
+    validate(h.to_bytes())
 
 
 def test_non_primitive_logicals_smoke() -> None:
@@ -176,4 +176,4 @@ def test_non_primitive_logicals_smoke() -> None:
     h = pkg.modules[0]
     Normalize()(h, inplace=True)
     InlineFunctions()(h, inplace=True)
-    check_hugr(h.to_bytes())
+    validate(h.to_bytes())
