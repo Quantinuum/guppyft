@@ -171,11 +171,8 @@ pub struct ConcreteIcebergOp {
     /// The kind of operation.
     pub def: IcebergOpDef,
 
-    /// The block size.
-    pub k: TypeArg,
-
-    /// Additional type arguments for borrowing and restoring qubits.
-    pub additional_args: Vec<TypeArg>,
+    /// Complete type arguments in the order expected by the operation definition.
+    pub args: Vec<TypeArg>,
 }
 
 impl HasConcrete for IcebergOpDef {
@@ -184,8 +181,7 @@ impl HasConcrete for IcebergOpDef {
     fn instantiate(&self, type_args: &[TypeArg]) -> Result<Self::Concrete, OpLoadError> {
         Ok(ConcreteIcebergOp {
             def: *self,
-            k: type_args[0].clone(),
-            additional_args: type_args[1..].to_vec(),
+            args: type_args.to_vec(),
         })
     }
 }
@@ -205,9 +201,7 @@ impl MakeExtensionOp for ConcreteIcebergOp {
     }
 
     fn type_args(&self) -> Vec<TypeArg> {
-        let mut args: Vec<TypeArg> = vec![self.k.clone()];
-        args.extend(self.additional_args.iter().cloned());
-        args
+        self.args.clone()
     }
 }
 
@@ -227,8 +221,7 @@ impl IcebergOpDef {
     pub fn with_size(self, k: u64) -> ConcreteIcebergOp {
         ConcreteIcebergOp {
             def: self,
-            k: k.into(),
-            additional_args: vec![],
+            args: vec![k.into()],
         }
     }
 }
@@ -574,6 +567,8 @@ pub static EXTENSION: LazyLock<Arc<Extension>> = LazyLock::new(|| {
 
 #[cfg(test)]
 mod tests {
+    use strum::IntoEnumIterator;
+
     use hugr::extension::prelude::UnwrapBuilder;
     use hugr::{
         CircuitUnit, HugrView, Wire,
@@ -615,6 +610,36 @@ mod tests {
                 .as_ref(),
             &Signature::new([block_type(6), int_type(6)], [block_type(6)])
         );
+    }
+
+    #[test]
+    fn test_concrete_op_roundtrip() {
+        for def in IcebergOpDef::iter() {
+            let name = def.opdef_id();
+            let args: Vec<TypeArg> = match def {
+                IcebergOpDef::borrow
+                | IcebergOpDef::borrow_more
+                | IcebergOpDef::restore_some
+                | IcebergOpDef::restore => vec![2.into(), 6.into()],
+                _ if name.ends_with("_dynq") => vec![],
+                _ => vec![6.into()],
+            };
+            let expected = EXTENSION
+                .instantiate_extension_op(&name, args.clone())
+                .unwrap();
+            let concrete = def.instantiate(&args).unwrap();
+            assert_eq!(concrete.args, args);
+            let op = concrete.to_extension_op().unwrap();
+            assert_eq!(op.args(), expected.args());
+            assert_eq!(op.signature(), expected.signature());
+
+            let loaded = ConcreteIcebergOp::from_extension_op(&op).unwrap();
+            assert_eq!(loaded.def, def);
+            assert_eq!(loaded.args, args);
+            let roundtrip = loaded.to_extension_op().unwrap();
+            assert_eq!(roundtrip.args(), expected.args());
+            assert_eq!(roundtrip.signature(), expected.signature());
+        }
     }
 
     #[test]
