@@ -29,7 +29,6 @@ from guppylang.std.quantum import (
 from hugr import Hugr
 from hugr.cli import validate
 from hugr.package import Package
-from selene_hugr_qis_compiler import check_hugr
 from selene_sim.backends.bundled_simulators import Coinflip
 
 from guppyft.code.steane.encode import (
@@ -110,7 +109,7 @@ def test_encode_function_call() -> None:
 
     pkg = main.compile()
     phys_pkg = SteaneBuilder().build(n_blocks=1).encode(pkg, as_bytes=True)
-    check_hugr(phys_pkg)
+    validate(phys_pkg)
 
 
 def test_encoder_missing_op() -> None:
