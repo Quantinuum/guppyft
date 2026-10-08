@@ -112,7 +112,7 @@ def encode(
 
     # 2. Lower computational -> logical
     if spec.compile is not None:
-        pkg = spec.compile(pkg, as_bytes=False)
+        pkg = spec.compile(pkg)
 
     # 3. Passes with logical -> logical
     for tket_pass in spec.logical_passes or []:
