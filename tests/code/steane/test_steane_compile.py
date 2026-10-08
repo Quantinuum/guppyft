@@ -1,21 +1,13 @@
 from guppylang import guppy
 from guppylang.std.platform import output
-from guppylang.std.quantum import (
-    cx,
-    h,
-    measure,
-    qubit,
-    x,
-    z,
-)
-from selene_hugr_qis_compiler import check_hugr
+from guppylang.std.quantum import cx, h, measure, qubit, x, z
+from hugr.cli import validate
+from hugr.package import Package
 
-from guppyft.code.steane.encode import (
-    SteaneBuilder,
-)
+from guppyft.code.steane.encode import SteaneBuilder
 
 
-def test_steane_compiler() -> None:
+def test_smoke_test_steane_compiler() -> None:
 
     @guppy
     def main() -> None:
@@ -32,6 +24,8 @@ def test_steane_compiler() -> None:
         output("q1", r1)
 
     pkg = main.compile()
-    pkg = SteaneBuilder().build(n_blocks=2).compile(pkg)
-    check_hugr(pkg.to_bytes())
-    assert "tket.quantum" not in [ext.name for ext in pkg.extensions]
+    pkg = SteaneBuilder().build(n_blocks=2).compile(pkg, as_bytes=True)
+    validate(pkg)
+    assert "tket.quantum" not in [
+        ext.name for ext in Package.from_bytes(pkg).extensions
+    ]

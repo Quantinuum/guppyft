@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol, overload
 
 from guppylang.defs import GuppyFunctionDefinition
 from hugr import Hugr
@@ -17,10 +17,24 @@ class UncompilableError(Exception):
 
 
 class LogicalCompiler(Protocol):
-    def __call__(self, pkg: Package) -> Package:
-        return self.compile(pkg)
+    @overload
+    def __call__(
+        self, pkg: Package, *, as_bytes: Literal[False] = False
+    ) -> Package: ...
+    @overload
+    def __call__(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    @overload
+    def __call__(self, pkg: Package, *, as_bytes: bool) -> Package | bytes: ...
+    def __call__(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
+        return self.compile(pkg, as_bytes=as_bytes)
 
-    def compile(self, pkg: Package) -> Package: ...
+    @overload
+    def compile(self, pkg: Package, *, as_bytes: Literal[False] = False) -> Package: ...
+    @overload
+    def compile(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    @overload
+    def compile(self, pkg: Package, *, as_bytes: bool) -> Package | bytes: ...
+    def compile(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes: ...
 
     def may_compile(self, pkg: Package) -> bool:
         """Refer to `self.check_may_compile` for details."""
@@ -95,7 +109,13 @@ class ReplacementCompiler(LogicalCompiler):
                 )
         return None
 
-    def compile(self, pkg: Package) -> Package:
+    @overload
+    def compile(self, pkg: Package, *, as_bytes: Literal[False] = False) -> Package: ...
+    @overload
+    def compile(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    @overload
+    def compile(self, pkg: Package, *, as_bytes: bool) -> Package | bytes: ...
+    def compile(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
         rs_hugr = to_rs_hugr(pkg)
         rs_compound_op_replacements = {
             op: to_rs_hugr(repl) for op, repl in self.compound_op_replacements.items()
@@ -107,4 +127,7 @@ class ReplacementCompiler(LogicalCompiler):
             self.ty_replacements,
             extension_registry_to_json(self.extensions) if self.extensions else None,
         )
-        return Package.from_bytes(rs_hugr.to_bytes())
+        if as_bytes:
+            return rs_hugr.to_bytes()
+        else:
+            return Package.from_bytes(rs_hugr.to_bytes())
