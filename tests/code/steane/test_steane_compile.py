@@ -25,4 +25,7 @@ def test_smoke_test_steane_compiler() -> None:
     pkg = main.compile()
     pkg = SteaneBuilder().build(n_blocks=2).compile(pkg)
     validate(pkg.to_bytes())
-    assert "tket.quantum" not in [ext.name for ext in pkg.extensions]
+    ext_names = [ext.name for ext in pkg.extensions]
+    assert "tket.quantum" not in ext_names
+    assert "guppyft.steane.ops" in ext_names
+    assert "guppyft.steane.types" in ext_names
