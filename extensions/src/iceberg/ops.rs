@@ -231,10 +231,10 @@ struct ArgsValidator;
 
 impl ValidateJustArgs for ArgsValidator {
     fn validate(&self, arg_values: &[TypeArg]) -> Result<(), SignatureError> {
-        if arg_values.len() != 1 {
+        let [k_arg] = arg_values else {
             return Err(SignatureError::InvalidTypeArgs);
-        }
-        let Some(k) = arg_values[0].as_nat() else {
+        };
+        let Some(k) = k_arg.as_nat() else {
             // Variable type arguments cannot be checked until instantiated.
             return Ok(());
         };
