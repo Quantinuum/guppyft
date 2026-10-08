@@ -78,7 +78,6 @@ def test_exported_extensions() -> None:
 
 def test_op_instantiations() -> None:
     ops_extn = iceberg_ops()
-    # Ops with only a block size parameter:
     for op_name in [
         "all_x",
         "all_y",
@@ -94,7 +93,6 @@ def test_op_instantiations() -> None:
         "free",
         "measure_syndrome",
         "measure_all",
-        # Ops that take a single index input:
         "x",
         "y",
         "z",
@@ -111,7 +109,6 @@ def test_op_instantiations() -> None:
         "all_but_one_rz",
         "try_measure_one_x",
         "try_measure_one_z",
-        # Ops that take two index inputs:
         "xx",
         "yy",
         "zz",
