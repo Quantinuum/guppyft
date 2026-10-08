@@ -341,49 +341,49 @@ class PreBlock(Generic[N]):  # type: ignore[misc]
         """Check whether state preparation succeeded."""
 
 
-@hugr_op(_logical_op("x_d", _OPS_EXTN))
+@hugr_op(_logical_op("x", _OPS_EXTN))
 @no_type_check
 def x(block: Block[N], i: int) -> None:
     """X gate on the qubit with index `i`."""
 
 
-@hugr_op(_logical_op("y_d", _OPS_EXTN))
+@hugr_op(_logical_op("y", _OPS_EXTN))
 @no_type_check
 def y(block: Block[N], i: int) -> None:
     """Y gate on the qubit with index `i`."""
 
 
-@hugr_op(_logical_op("z_d", _OPS_EXTN))
+@hugr_op(_logical_op("z", _OPS_EXTN))
 @no_type_check
 def z(block: Block[N], i: int) -> None:
     """Z gate on the qubit with index `i`."""
 
 
-@hugr_op(_logical_op("xx_d", _OPS_EXTN))
+@hugr_op(_logical_op("xx", _OPS_EXTN))
 @no_type_check
 def xx(block: Block[N], i: int, j: int) -> None:
     """X gate on the qubits with indices `i` and `j`."""
 
 
-@hugr_op(_logical_op("yy_d", _OPS_EXTN))
+@hugr_op(_logical_op("yy", _OPS_EXTN))
 @no_type_check
 def yy(block: Block[N], i: int, j: int) -> None:
     """Y gate on the qubits with indices `i` and `j`."""
 
 
-@hugr_op(_logical_op("zz_d", _OPS_EXTN))
+@hugr_op(_logical_op("zz", _OPS_EXTN))
 @no_type_check
 def zz(block: Block[N], i: int, j: int) -> None:
     """Z gate on the qubits with indices `i` and `j`."""
 
 
-@hugr_op(_logical_op("all_but_one_x_d", _OPS_EXTN))
+@hugr_op(_logical_op("all_but_one_x", _OPS_EXTN))
 @no_type_check
 def all_but_one_x(block: Block[N], i: int) -> None:
     """X gate on all qubits except that with index `i`."""
 
 
-@hugr_op(_logical_op("all_but_one_z_d", _OPS_EXTN))
+@hugr_op(_logical_op("all_but_one_z", _OPS_EXTN))
 @no_type_check
 def all_but_one_z(block: Block[N], i: int) -> None:
     """Z gate on all qubits except that with index `i`."""
@@ -407,43 +407,43 @@ def all_z(block: Block[N]) -> None:
     """Z gate on all qubits."""
 
 
-@hugr_op(_logical_op("x_with_all_but_one_z_d", _OPS_EXTN))
+@hugr_op(_logical_op("x_with_all_but_one_z", _OPS_EXTN))
 @no_type_check
 def x_with_all_but_one_z(block: Block[N], i: int) -> None:
     """X gate on the qubit with index `i`; Z on all others."""
 
 
-@hugr_op(_logical_op("z_with_all_but_one_x_d", _OPS_EXTN))
+@hugr_op(_logical_op("z_with_all_but_one_x", _OPS_EXTN))
 @no_type_check
 def z_with_all_but_one_x(block: Block[N], i: int) -> None:
     """Z gate on the qubit with index `i`; X on all others."""
 
 
-@hugr_op(_logical_op("fan_out_d", _OPS_EXTN))
+@hugr_op(_logical_op("fan_out", _OPS_EXTN))
 @no_type_check
 def fan_out(block: Block[N], i: int) -> None:
     """Fan-out from the qubit with index `i` to all others."""
 
 
-@hugr_op(_logical_op("fan_in_d", _OPS_EXTN))
+@hugr_op(_logical_op("fan_in", _OPS_EXTN))
 @no_type_check
 def fan_in(block: Block[N], i: int) -> None:
     """Fan-in to the qubit with index `i` from all others."""
 
 
-@hugr_op(_logical_op("rx_d", _OPS_EXTN))
+@hugr_op(_logical_op("rx", _OPS_EXTN))
 @no_type_check
 def rx(block: Block[N], i: int, phase: float) -> None:
     """Rx rotation of `phase` radians on the qubit with index `i`."""
 
 
-@hugr_op(_logical_op("ry_d", _OPS_EXTN))
+@hugr_op(_logical_op("ry", _OPS_EXTN))
 @no_type_check
 def ry(block: Block[N], i: int, phase: float) -> None:
     """Ry rotation of `phase` radians on the qubit with index `i`."""
 
 
-@hugr_op(_logical_op("rz_d", _OPS_EXTN))
+@hugr_op(_logical_op("rz", _OPS_EXTN))
 @no_type_check
 def rz(block: Block[N], i: int, phase: float) -> None:
     """Rz rotation of `phase` radians on the qubit with index `i`."""
@@ -467,13 +467,13 @@ def all_rz(block: Block[N], phase: float) -> None:
     """Rz gate on all qubits."""
 
 
-@hugr_op(_logical_op("all_but_one_rx_d", _OPS_EXTN))
+@hugr_op(_logical_op("all_but_one_rx", _OPS_EXTN))
 @no_type_check
 def all_but_one_rx(block: Block[N], i: int, phase: float) -> None:
     """Rx rotation of `phase` radians on qubits except that with index `i`."""
 
 
-@hugr_op(_logical_op("all_but_one_rz_d", _OPS_EXTN))
+@hugr_op(_logical_op("all_but_one_rz", _OPS_EXTN))
 @no_type_check
 def all_but_one_rz(block: Block[N], i: int, phase: float) -> None:
     """Rz rotation of `phase` radians on qubits except that with index `i`."""
@@ -485,37 +485,37 @@ def all_h(block: Block[N]) -> None:
     """H gate on all qubits."""
 
 
-@hugr_op(_logical_op("xx_phase_d", _OPS_EXTN))
+@hugr_op(_logical_op("xx_phase", _OPS_EXTN))
 @no_type_check
 def xx_phase(block: Block[N], i: int, j: int, phase: float) -> None:
     """XXPhase rotation of `phase` radians on the qubits with indices `i` and `j`."""
 
 
-@hugr_op(_logical_op("yy_phase_d", _OPS_EXTN))
+@hugr_op(_logical_op("yy_phase", _OPS_EXTN))
 @no_type_check
 def yy_phase(block: Block[N], i: int, j: int, phase: float) -> None:
     """YYPhase rotation of `phase` radians on the qubits with indices `i` and `j`."""
 
 
-@hugr_op(_logical_op("zz_phase_d", _OPS_EXTN))
+@hugr_op(_logical_op("zz_phase", _OPS_EXTN))
 @no_type_check
 def zz_phase(block: Block[N], i: int, j: int, phase: float) -> None:
     """ZZPhase rotation of `phase` radians on the qubits with indices `i` and `j`."""
 
 
-@hugr_op(_logical_op("cx_d", _OPS_EXTN))
+@hugr_op(_logical_op("cx", _OPS_EXTN))
 @no_type_check
 def cx(block: Block[N], i: int, j: int) -> None:
     """CX gate on the qubits with indices `i` (control) and `j` (target)."""
 
 
-@hugr_op(_logical_op("swap_d", _OPS_EXTN))
+@hugr_op(_logical_op("swap", _OPS_EXTN))
 @no_type_check
 def swap(block: Block[N], i: int, j: int) -> None:
     """Swap of the qubits with indices `i` and `j`."""
 
 
-@hugr_op(_logical_op("xx_phase_between_blocks_d", _OPS_EXTN))
+@hugr_op(_logical_op("xx_phase_between_blocks", _OPS_EXTN))
 @no_type_check
 def xx_phase_between_blocks(
     block0: Block[N], block1: Block[N], i0: int, i1: int, phase: float
@@ -524,7 +524,7 @@ def xx_phase_between_blocks(
     block `block0` and the qubit with index `i1` in block `block1`."""
 
 
-@hugr_op(_logical_op("yy_phase_between_blocks_d", _OPS_EXTN))
+@hugr_op(_logical_op("yy_phase_between_blocks", _OPS_EXTN))
 @no_type_check
 def yy_phase_between_blocks(
     block0: Block[N], block1: Block[N], i0: int, i1: int, phase: float
@@ -533,7 +533,7 @@ def yy_phase_between_blocks(
     block `block0` and the qubit with index `i1` in block `block1`."""
 
 
-@hugr_op(_logical_op("zz_phase_between_blocks_d", _OPS_EXTN))
+@hugr_op(_logical_op("zz_phase_between_blocks", _OPS_EXTN))
 @no_type_check
 def zz_phase_between_blocks(
     block0: Block[N], block1: Block[N], i0: int, i1: int, phase: float
@@ -542,7 +542,7 @@ def zz_phase_between_blocks(
     block `block0` and the qubit with index `i1` in block `block1`."""
 
 
-@hugr_op(_logical_op("cx_between_blocks_d", _OPS_EXTN))
+@hugr_op(_logical_op("cx_between_blocks", _OPS_EXTN))
 @no_type_check
 def cx_between_blocks(block0: Block[N], block1: Block[N], i0: int, i1: int) -> None:
     """CX gate on the qubit with index `i0` in block `block0` and the qubit with
@@ -573,14 +573,14 @@ def measure_all(block: Block[N] @ owned) -> LogicalMeasurement[N]:
     """Destructive measurement of all qubits in `block`."""
 
 
-@hugr_op(_logical_op("try_measure_one_x_d", _OPS_EXTN))
+@hugr_op(_logical_op("try_measure_one_x", _OPS_EXTN))
 @no_type_check
 def try_measure_one_x(block: Block[N], i: int) -> Option[Measurement]:
     """Fallible non-destructive measurement in the X basis of the qubit with
     index `i`."""
 
 
-@hugr_op(_logical_op("try_measure_one_z_d", _OPS_EXTN))
+@hugr_op(_logical_op("try_measure_one_z", _OPS_EXTN))
 @no_type_check
 def try_measure_one_z(block: Block[N], i: int) -> Option[Measurement]:
     """Fallible non-destructive measurement in the Z basis of the qubit with
