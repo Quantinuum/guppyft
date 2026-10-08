@@ -279,7 +279,7 @@ mod tests {
     fn test_toy_k2_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.toy_k2.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 30);
+        assert_eq!(EXTENSION.operations().count(), 31);
     }
 
     #[test]
@@ -488,8 +488,8 @@ mod tests {
             .unwrap();
         let wires: Vec<Wire> = handle.outputs().collect();
         assert_eq!(wires.len(), 2);
-        let bblock = wires[0];
-        let q1 = wires[1];
+        let q1 = wires[0];
+        let bblock = wires[1];
         // Put the first qubit back.
         let handle = f_build
             .add_dataflow_op(restoresome, vec![bblock, q0])
