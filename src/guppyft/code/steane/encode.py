@@ -157,6 +157,12 @@ class SteaneInstance:
         pkg_bytes: Package | bytes = encode(pkg, self._spec, as_bytes=as_bytes)  # type: ignore[call-overload]
         return pkg_bytes
 
+    def compile(self, pkg: Package) -> Package:
+        """Compile a computational package to logical with the Steane instance."""
+        self.check_may_encode(pkg)
+        assert self._spec.compile is not None
+        return self._spec.compile(pkg)
+
     @overload
     def implement_ops(
         self, pkg: Package, *, as_bytes: Literal[False] = False
