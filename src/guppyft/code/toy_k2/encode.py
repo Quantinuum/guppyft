@@ -523,10 +523,6 @@ class ToyK2Builder:
                 blk = state.release_block(blk_id)
                 res = k2_primitives.measure_z_all(blk.logical_block)
 
-                state.qed_policy(
-                    array(blk_id), comptime(qed_policy.costs.measure_z_all)
-                )
-
                 return state, res
 
             return map_global(_impl, blk_id)
