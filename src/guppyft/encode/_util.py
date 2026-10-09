@@ -31,7 +31,7 @@ def to_rs_hugr(
 NATIVE_ENVELOPE = EnvelopeConfig(format=EnvelopeFormat.JSON)
 
 
-def native_bytes(hugr):
+def native_bytes(hugr: Hugr[Any]) -> bytes:
     extensions = list(hugr.used_extensions().used_extensions.all_extensions)
     return Package([hugr], extensions).to_bytes(NATIVE_ENVELOPE)
 
