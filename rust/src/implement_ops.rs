@@ -9,7 +9,7 @@ use hugr::{
     extension::{ExtensionId, SignatureError},
     hugr::{ValidationError, hugrmut::HugrMut},
     ops::{Call, DataflowOpTrait, ExtensionOp, OpName, OpType, handle::NodeHandle},
-    types::{PolyFuncType, Type, TypeRow, TypeTransformer},
+    types::{PolyFuncType, Type, TypeRow},
 };
 use hugr_core::hugr::internal::HugrMutInternals;
 use hugr_core::hugr::linking::NodeLinkingError;
@@ -22,7 +22,8 @@ use std::collections::{BTreeMap, HashMap, HashSet, hash_map::Entry};
 use tket::passes::replace_types::handlers::register_linear_array_op_replacements;
 use tket::passes::utils::unpack_container::type_unpack::array_args;
 use tket::passes::{
-    ComposablePass, PassScope, ReplaceTypes, WithScope, replace_types::ReplaceTypesError,
+    ComposablePass, PassScope, ReplaceTypes, WithScope,
+    replace_types::{ReplaceTypesError, ReplacementOptions},
 };
 
 #[derive(derive_more::Error, Debug, derive_more::Display, derive_more::From)]
@@ -343,9 +344,6 @@ pub(crate) struct OpReplacer<'a, H: HugrMut<Node = Node>> {
     hugr: &'a mut H,
     type_replacer: ReplaceTypes,
     op_calls: HashMap<OpHashWrapper, (OpType, Hugr, Node)>,
-    final_type_replacer: Option<ReplaceTypes>,
-    direct_types: HashMap<CustomType, Type>,
-    marker_extension: Option<std::sync::Arc<hugr::Extension>>,
 }
 
 impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
@@ -354,46 +352,16 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
             hugr,
             type_replacer: replacer,
             op_calls: Default::default(),
-            final_type_replacer: None,
-            direct_types: Default::default(),
-            marker_extension: None,
         }
     }
 
     pub fn new_with_types(hugr: &'a mut H, types: HashMap<CustomType, Type>) -> Self {
-        // Stage through opaque markers so physical qubits inside a logical
-        // pointer payload are not recursively replaced by another logical value.
-        let mut first = ReplaceTypes::default();
-        let mut last = ReplaceTypes::default();
-        let marker_ext = hugr::Extension::new_arc(
-            ExtensionId::new_unchecked("guppyft.ptr"),
-            hugr::extension::Version::new(0, 1, 0),
-            |ext, weak| {
-                for (i, (src, tgt)) in types.iter().enumerate() {
-                    let name: TypeName = format!("m{i}_{}", src.name()).into();
-                    let def = ext
-                        .add_type(
-                            name,
-                            vec![],
-                            "Temporary logical type".into(),
-                            src.bound().into(),
-                            weak,
-                        )
-                        .unwrap();
-                    let marker = def.instantiate([]).unwrap();
-                    first.set_replace_type(src.clone(), marker.clone().into());
-                    last.set_replace_type(marker, tgt.clone());
-                }
-            },
-        );
-        // Preserve generic array operations while types are opaque markers.
-        // Borrow lowering needs the final handle type and belongs in the last pass.
-        register_linear_array_op_replacements(&mut last);
-        let mut state = Self::new(hugr, first);
-        state.final_type_replacer = Some(last);
-        state.direct_types = types;
-        state.marker_extension = Some(marker_ext);
-        state
+        let mut replacer = ReplaceTypes::default();
+        for (src, tgt) in types {
+            replacer.set_replace_type_with_options(src, tgt, ReplacementOptions::default());
+        }
+        register_linear_array_op_replacements(&mut replacer);
+        Self::new(hugr, replacer)
     }
 
     fn get_func_node(
@@ -439,11 +407,7 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
 
         let expected_sig: PolyFuncType = {
             let mut sig = ext_op.signature().into_owned();
-            if self.final_type_replacer.is_some() {
-                sig.transform(&DirectTypes(&self.direct_types))?;
-            } else {
-                sig.transform(&self.type_replacer)?;
-            }
+            sig.transform(&self.type_replacer)?;
             sig.into()
         };
 
@@ -469,11 +433,8 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
     where
         H: AsMut<Hugr>,
     {
-        // In an optimal scenario we would use the type replacer to insert the function alongside
-        // a call. However, since there is no way to stop the type replacer from recursively
-        // processing the RHS at the moment, we have to resort to this hacky approach of manually
-        // merging the func_hugr into the main hugr, and manually creating calls to the inserted
-        // function.
+        // Convert the computational graph first. Link implementation bodies only
+        // after the type pass so their physical operations remain unchanged.
 
         let ops_to_replace = self
             .hugr
@@ -502,9 +463,6 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
 
         // Transform signatures
         self.type_replacer.run(&mut self.hugr)?;
-        if let Some(last) = &self.final_type_replacer {
-            last.run(&mut self.hugr)?;
-        }
 
         // Insert all registered HUGRs after signature transform, so their contents are not affected
         let inserted_func_nodes: HashMap<OpHashWrapper, H::Node> = self
@@ -554,13 +512,5 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
             .context("Could not resolve extensions after replacing ops")?;
 
         Ok(())
-    }
-}
-
-struct DirectTypes<'a>(&'a HashMap<CustomType, Type>);
-impl TypeTransformer for DirectTypes<'_> {
-    type Err = ReplaceTypesError;
-    fn apply_custom(&self, ty: &CustomType) -> Result<Option<Type>, Self::Err> {
-        Ok(self.0.get(ty).cloned())
     }
 }
