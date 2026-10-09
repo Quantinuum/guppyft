@@ -69,6 +69,7 @@ class QEDPolicy:
         """Configuration for operation costs. Used e.g. for applying QED cycles."""
 
         prep_zero_ft: float = 0.0
+        prep_zero_plus_ft: float = 0.0
         prep_y_states_non_ft: float = 0.0
         prep_t_states_non_ft: float = 0.0
         x: float = 0.0
@@ -444,6 +445,23 @@ class ToyK2Builder:
 
         @guppy
         @no_type_check
+        @link_name("guppyft.toy_k2._prep_zero_plus_ft")
+        def _prep_zero_plus_ft() -> int:
+            @guppy
+            def _impl(state: STATE @ owned) -> tuple[STATE, int]:
+                logical_block = k2_primitives.prep_zero_plus_ft()
+                blk_id = state.allocate_block(logical_block)
+
+                state.qed_policy(
+                    array(blk_id), comptime(qed_policy.costs.prep_zero_plus_ft)
+                )
+
+                return state, blk_id
+
+            return map_global(_impl)
+
+        @guppy
+        @no_type_check
         @link_name("guppyft.toy_k2._prep_y_states_non_ft")
         def _prep_y_states_non_ft() -> int:
             @guppy
@@ -676,11 +694,10 @@ class ToyK2Builder:
             blk_id, qb_id = addr
             # Prepare an ancilla `|0+>` state, with the `|+>` on the index where
             # we want to apply the Hadamard.
-            ancilla_blk_id = _prep_zero_ft()  # |00>
-            _h_all(ancilla_blk_id)  # |++>
-            # Project the other ancilla logical qubit to |0>
-            if _measure_z(ancilla_blk_id, 1 - qb_id):
-                _x(ancilla_blk_id, qb_id)
+            ancilla_blk_id = _prep_zero_plus_ft()  # |0+>
+            if qb_id == 0:
+                # Swap the qubits so that |+> is on the correct index.
+                _swap_intra(ancilla_blk_id)
 
             # Use the ancilla state to introduce a Hadamard on the chosen index.
             # This approach follows Fig 8A from https://arxiv.org/abs/2403.16054
@@ -867,6 +884,7 @@ class ToyK2Builder:
             _free_dynq,
             _qed_cycle,
             _prep_zero_ft,
+            _prep_zero_plus_ft,
             _prep_y_states_non_ft,
             _prep_t_states_non_ft,
             _measure_z,
@@ -901,6 +919,10 @@ class ToyK2Builder:
                 ("guppyft.toy_k2.ops", "free_dynq"): "guppyft.toy_k2._free_dynq",
                 ("guppyft.toy_k2.ops", "qed_cycle"): "guppyft.toy_k2._qed_cycle",
                 ("guppyft.toy_k2.ops", "prep_zero_ft"): "guppyft.toy_k2._prep_zero_ft",
+                (
+                    "guppyft.toy_k2.ops",
+                    "prep_zero_plus_ft",
+                ): "guppyft.toy_k2._prep_zero_plus_ft",
                 (
                     "guppyft.toy_k2.ops",
                     "prep_y_states_non_ft",
