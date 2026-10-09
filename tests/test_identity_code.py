@@ -255,3 +255,23 @@ def test_computational_conversion_before_linking() -> None:
         for n in nodes
     )
     assert all(n["signature"]["input"] == [{"t": "Q"}] for n in physical_x)
+
+
+def test_free_with_live_alias() -> None:
+    """Keep live aliases usable and defer slot reuse until final logical release."""
+
+    @guppy
+    def main() -> None:
+        q = qubit()
+        x(q)
+        result("res", measure(q).read())
+        q = qubit()
+        result("res", measure(q).read())
+
+    spec = identity_code_spec(n_qubits=2, free_alias_before_x=True)
+    encoded = encode(main, spec, as_bytes=True)
+    runner = EmulatorBuilder().build(encoded, n_qubits=2).with_simulator(Stim())
+    shot = runner.run().collated_shots()[0]
+    assert shot["alias_reused_early"] == [0]
+    assert shot["allocation_slot"] == [1, 0, 1]
+    assert shot["res"] == [1, 0]

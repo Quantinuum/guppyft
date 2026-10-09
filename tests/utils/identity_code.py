@@ -9,7 +9,7 @@ from guppylang.std.collections import Stack
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.ptr import Ptr
 from guppylang.std.qsystem import zz_phase
-from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
+from guppylang.std.quantum import cx, discard, project_z, qubit, x
 
 from guppyft.encode import EncodeSpec, ImplementOps, ImplementOpsSpec, OpReplacements
 from guppyft.globals import map_global, with_global
@@ -18,7 +18,10 @@ N = guppy.nat_var("N")
 
 
 def identity_code_spec(
-    n_qubits: int, qec_budget: int = 1, costs: dict[str, int] | None = None
+    n_qubits: int,
+    qec_budget: int = 1,
+    costs: dict[str, int] | None = None,
+    free_alias_before_x: bool = False,
 ) -> EncodeSpec:
     costs = costs or defaultdict(int)
 
@@ -125,9 +128,15 @@ def identity_code_spec(
     @guppy
     @no_type_check
     def release(block: Ptr[LogicalBlock] @ owned) -> None:
-        b = block.free().unwrap()
-        b.data.free().unwrap_nothing()
-        b.global_state.free().unwrap_nothing()
+        value = block.free()
+        if value.is_some():
+            b = value.unwrap()
+            discard(take(b.data))
+            free_slot(b.global_state, b.slot)
+            b.data.free().unwrap_nothing()
+            b.global_state.free().unwrap_nothing()
+        else:
+            value.unwrap_nothing()
 
     @guppy
     @no_type_check
@@ -154,6 +163,8 @@ def identity_code_spec(
             return g, (data, slot)
 
         data, slot = global_state.map(allocate, None)
+        if comptime(free_alias_before_x):
+            result("allocation_slot", slot)
         return Ptr(LogicalBlock(data, global_state, slot))
 
     @guppy
@@ -171,9 +182,10 @@ def identity_code_spec(
     @no_type_check
     def _MeasureFree(block: Ptr[LogicalBlock] @ owned) -> bool:
         result("_MeasureFree", 0)
-        data, global_state, slot = inspect_block(block)
-        res = measure(take(data)).read()
-        free_slot(global_state, slot)
+        data, global_state, _slot = inspect_block(block)
+        q = take(data)
+        res = project_z(q).read()
+        put(data, q)
         data.free().unwrap_nothing()
         global_state.free().unwrap_nothing()
         release(block)
@@ -197,11 +209,6 @@ def identity_code_spec(
     @no_type_check
     def _QFree(block: Ptr[LogicalBlock] @ owned) -> None:
         result("_QFree", 0)
-        data, global_state, slot = inspect_block(block)
-        discard(take(data))
-        free_slot(global_state, slot)
-        data.free().unwrap_nothing()
-        global_state.free().unwrap_nothing()
         release(block)
 
     @guppy
@@ -210,6 +217,14 @@ def identity_code_spec(
     def _X(block: Ptr[LogicalBlock] @ owned) -> Ptr[LogicalBlock]:
         result("_X", 0)
         data, global_state, slot = inspect_block(block)
+        if comptime(free_alias_before_x):
+            _QFree(block.copy())
+            spare = _QAlloc()
+            sd, sg, spare_slot = inspect_block(spare)
+            result("alias_reused_early", slot == spare_slot)
+            sd.free().unwrap_nothing()
+            sg.free().unwrap_nothing()
+            _QFree(spare)
         q = take(data)
         x(q)
         put(data, q)
