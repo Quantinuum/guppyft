@@ -134,6 +134,10 @@ def _compile_rotation_func(
     operations receive the opaque `tket.rotation.rotation` type. The returned
     HUGR unwraps the rotation to half-turns before calling `angle_function`.
     """
+    # Minimal compilation avoids the optimizer's binary/model round-trip.
+    # Python model decoding loses CFG shared outputs:
+    # https://github.com/Quantinuum/hugr/issues/3298
+    # Reassess this workaround after adopting HUGR with the fix.
     fn_hugr = angle_function.with_minimal_opt().compile_function().modules[0]
     orig_func_defn_node = fn_hugr.entrypoint
     orig_func_defn_op = fn_hugr.entrypoint_op()

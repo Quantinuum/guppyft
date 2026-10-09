@@ -107,4 +107,7 @@ class ReplacementCompiler(LogicalCompiler):
             self.ty_replacements,
             extension_registry_to_json(self.extensions) if self.extensions else None,
         )
+        # JSON avoids the Python binary/model decoder losing CFG shared outputs:
+        # https://github.com/Quantinuum/hugr/issues/3298
+        # Reassess this workaround after adopting HUGR with the fix.
         return Package.from_bytes(rs_hugr.to_bytes(NATIVE_ENVELOPE))
