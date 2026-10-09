@@ -9,7 +9,7 @@ from hugr.package import Package
 
 from guppyft._bindings import _run_replacement_compiler
 from guppyft._util import extension_registry_to_json
-from guppyft.encode._util import to_rs_hugr
+from guppyft.encode._util import NATIVE_ENVELOPE, to_rs_hugr
 
 
 class UncompilableError(Exception):
@@ -107,4 +107,7 @@ class ReplacementCompiler(LogicalCompiler):
             self.ty_replacements,
             extension_registry_to_json(self.extensions) if self.extensions else None,
         )
-        return Package.from_bytes(rs_hugr.to_bytes())
+        # JSON avoids the Python binary/model decoder losing CFG shared outputs:
+        # https://github.com/Quantinuum/hugr/issues/3298
+        # Reassess this workaround after adopting HUGR with the fix.
+        return Package.from_bytes(rs_hugr.to_bytes(NATIVE_ENVELOPE))

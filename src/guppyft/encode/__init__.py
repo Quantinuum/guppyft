@@ -11,7 +11,6 @@ from hugr.metadata import Metadata
 from hugr.ops import Module
 from hugr.package import Package
 from hugr.passes.composable import ComposablePass
-from tket.passes import Normalize
 
 from ._compile import LogicalCompiler, ReplacementCompiler, UncompilableError
 from ._implement_ops import (
@@ -21,6 +20,7 @@ from ._implement_ops import (
     TyReplacements,
     implement_ops,
 )
+from ._util import normalize_application
 
 __all__ = [
     "EncodeSpec",
@@ -99,7 +99,11 @@ def encode(
         The encoded runnable package, or its serialized representation when `as_bytes`
         is `True`.
     """
-    pkg = hugr.compile_function() if isinstance(hugr, GuppyFunctionDefinition) else hugr
+    pkg = (
+        hugr.with_minimal_opt().compile_function()
+        if isinstance(hugr, GuppyFunctionDefinition)
+        else hugr
+    )
 
     assert len(pkg.modules) == 1, "Given package contains more than one module"
     assert not isinstance(pkg.modules[0].entrypoint_op(), Module), (
@@ -107,8 +111,11 @@ def encode(
     )
 
     # 1. Passes with computational -> computational
-    for tket_pass in passes or [Normalize()]:
-        tket_pass(pkg.modules[0], inplace=True)
+    if passes is None:
+        pkg = normalize_application(pkg)
+    else:
+        for tket_pass in passes:
+            tket_pass(pkg.modules[0], inplace=True)
 
     # 2. Lower computational -> logical
     if spec.compile is not None:

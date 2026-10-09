@@ -58,3 +58,6 @@ def _run_replacement_compiler(
     definitions to use when resolving the source/target ops and types, for
     extensions not already registered on `rs_hugr`.
     """
+
+
+def _normalize(rs_hugr: RsHugr) -> None: ...

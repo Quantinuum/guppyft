@@ -10,9 +10,9 @@ rust-version = "1.91"
 edition = "2024"
 
 [workspace.dependencies]
-tket = "0.22.0"
-hugr = "0.30.2"
-hugr-core = "0.30.2"
+tket = { git = "https://github.com/Quantinuum/tket2", rev = "a121ad6f4f26bb4541c71cc50a4dfd54455b433e" }
+hugr = { git = "https://github.com/quantinuum/hugr", rev = "1704c5d18fbdac924424cfe111d1338fbb8f3029" }
+hugr-core = { git = "https://github.com/quantinuum/hugr", rev = "1704c5d18fbdac924424cfe111d1338fbb8f3029" }
 itertools = "0.15.0"
 derive_more = { version = "2", features = ["display", "from"] }
 anyhow = "1.0.102"
@@ -25,3 +25,12 @@ inherits = "release"
 lto = "fat"
 strip = "symbols"
 panic = "abort"
+
+# Compiler PR2067 at a121ad6f4f26bb4541c71cc50a4dfd54455b433e.
+# Dependency patches are not transitive; mirror the required root HUGR patch.
+[patch.crates-io]
+hugr = { git = "https://github.com/quantinuum/hugr", rev = "1704c5d18fbdac924424cfe111d1338fbb8f3029" }
+hugr-core = { git = "https://github.com/quantinuum/hugr", rev = "1704c5d18fbdac924424cfe111d1338fbb8f3029" }
+hugr-model = { git = "https://github.com/quantinuum/hugr", rev = "1704c5d18fbdac924424cfe111d1338fbb8f3029" }
+hugr-cli = { git = "https://github.com/quantinuum/hugr", rev = "1704c5d18fbdac924424cfe111d1338fbb8f3029" }
+hugr-llvm = { git = "https://github.com/quantinuum/hugr", rev = "1704c5d18fbdac924424cfe111d1338fbb8f3029" }

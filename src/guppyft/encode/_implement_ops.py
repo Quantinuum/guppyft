@@ -17,7 +17,7 @@ from guppyft._bindings import RsHugr
 from guppyft._bindings import _implement_ops as _implement_ops_binding
 from guppyft._util import get_link_name
 
-from ._util import to_rs_hugr
+from ._util import NATIVE_ENVELOPE, native_bytes, to_rs_hugr
 
 
 class OpReplacements:
@@ -87,23 +87,23 @@ class OpReplacements:
 
     def gen_missing_decls_from_lib(self, lib: Package) -> Self:
         # Build index of names missing declaration/definition
-        missing: dict[str, tuple[str, str]] = {
-            f_name: op_key
-            for op_key, (func_opt, f_name) in self._ops.items()
-            if func_opt is None
-        }
+        missing: dict[str, list[tuple[str, str]]] = {}
+        for op_key, (func_opt, f_name) in self._ops.items():
+            if func_opt is None:
+                missing.setdefault(f_name, []).append(op_key)
         if not missing:
             return self
 
         for module in lib.modules:
             for _, data in module.nodes():
                 if isinstance(data.op, FuncDefn) and data.op.f_name in missing:
-                    op_key = missing.pop(data.op.f_name)
+                    op_keys = missing.pop(data.op.f_name)
                     h: Hugr[Any] = Hugr()
                     DefinitionBuilder(h).module_root_builder().declare_function(
                         data.op.f_name, data.op.signature, data.op.visibility
                     )
-                    self._ops[op_key] = (h, data.op.f_name)
+                    for op_key in op_keys:
+                        self._ops[op_key] = (h, data.op.f_name)
                     if not missing:
                         return self
 
@@ -177,7 +177,7 @@ def _implement_ops(
 
     _implement_ops_binding(rs_hugr, rs_ops, tys, list(ops.iter_eliminated()))
 
-    return rs_hugr.to_bytes()
+    return rs_hugr.to_bytes(NATIVE_ENVELOPE)
 
 
 @overload
@@ -219,9 +219,8 @@ def implement_ops(
     # Reset entrypoint, marking module as non-executable, to avoid linking conflicts
     hugr.entrypoint = hugr.module_root
     # Run rewrite, replacing ops with function calls to the functions in `spec.ops`
-    hugr_pkg_bytes = _implement_ops(hugr.to_bytes(), spec.ops, spec.tys.tys)
+    hugr_pkg_bytes = _implement_ops(native_bytes(hugr), spec.ops, spec.tys.tys)
 
-    # Build, compile, and link wrapper program
     @guppy.declare
     @link_name(entrypoint_op.f_name)
     @no_type_check
@@ -236,9 +235,11 @@ def implement_ops(
     def outer_wrapper() -> None:
         wrapper()
 
-    pkg: Package = outer_wrapper.compile()
+    pkg: Package = outer_wrapper.with_minimal_opt().compile()
     pkg_bytes = link_packages(
-        pkg.to_bytes(), hugr_pkg_bytes, *[lib.to_bytes() for lib in spec.libs]
+        native_bytes(pkg.modules[0]),
+        hugr_pkg_bytes,
+        *[native_bytes(lib.modules[0]) for lib in spec.libs],
     )
 
     if as_bytes:

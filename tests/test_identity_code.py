@@ -1,3 +1,4 @@
+import json
 from collections import defaultdict
 from typing import no_type_check
 
@@ -15,9 +16,12 @@ from guppylang.std.quantum import (
     qubit,
     x,
 )
+from hugr.envelope import EnvelopeFormat, EnvelopeHeader
 from selene_sim.backends.bundled_simulators import Stim
 
+from guppyft._bindings import RsHugr
 from guppyft.encode import encode
+from guppyft.encode._util import NATIVE_ENVELOPE
 
 from .utils.identity_code import identity_code_spec
 
@@ -30,7 +34,7 @@ def test_qalloc_measure() -> None:
 
     id_code = identity_code_spec(n_qubits=1)
 
-    encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
+    encoded_pkg = encode(main, id_code, as_bytes=True)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [{"_MeasureFree": [0], "_QAlloc": [0]}]
@@ -45,7 +49,7 @@ def test_qalloc_project_z_discard() -> None:
 
     id_code = identity_code_spec(n_qubits=1)
 
-    encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
+    encoded_pkg = encode(main, id_code, as_bytes=True)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [
@@ -67,7 +71,7 @@ def test_x() -> None:
 
     id_code = identity_code_spec(n_qubits=1)
 
-    encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
+    encoded_pkg = encode(main, id_code, as_bytes=True)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [
@@ -85,7 +89,7 @@ def test_cx() -> None:
 
     id_code = identity_code_spec(n_qubits=2)
 
-    encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
+    encoded_pkg = encode(main, id_code, as_bytes=True)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [
@@ -104,7 +108,7 @@ def test_zz_phase() -> None:
 
     id_code = identity_code_spec(n_qubits=2)
 
-    encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
+    encoded_pkg = encode(main, id_code, as_bytes=True)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [
@@ -126,7 +130,7 @@ def test_qubit_array() -> None:
 
     id_code = identity_code_spec(n_qubits=2)
 
-    encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
+    encoded_pkg = encode(main, id_code, as_bytes=True)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [
@@ -144,7 +148,7 @@ def test_out_of_logical_qubits() -> None:
 
     id_code = identity_code_spec(n_qubits=1)
 
-    encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
+    encoded_pkg = encode(main, id_code, as_bytes=True)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [
@@ -162,7 +166,7 @@ def test_qubit_reuse() -> None:
 
     id_code = identity_code_spec(n_qubits=1)
 
-    encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
+    encoded_pkg = encode(main, id_code, as_bytes=True)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [
@@ -182,7 +186,7 @@ def test_qec_policy() -> None:
 
     id_code = identity_code_spec(n_qubits=1, qec_budget=1, costs=costs)
 
-    encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
+    encoded_pkg = encode(main, id_code, as_bytes=True)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [
@@ -193,3 +197,88 @@ def test_qec_policy() -> None:
             "qec_counter": [[1]],
         }
     ]
+
+
+def test_computational_conversion_before_linking() -> None:
+    """Convert computational calls, then link untouched physical X bodies."""
+
+    @guppy
+    def computational_x(q: qubit) -> None:
+        x(q)
+
+    @guppy
+    def main() -> None:
+        q = qubit()
+        computational_x(q)
+        measure(q)
+
+    encoded = encode(main, identity_code_spec(n_qubits=1), as_bytes=True)
+    encoded = RsHugr.from_bytes(encoded).to_bytes(NATIVE_ENVELOPE)
+    header = EnvelopeHeader.from_bytes(encoded)
+    assert header.format == EnvelopeFormat.JSON
+    assert not header.zstd
+    # The application boundary explicitly emits the native JSON envelope.
+    assert b"guppyft.type_rewrite" not in encoded
+    nodes = json.loads(encoded[10:])["modules"][0]["nodes"]
+    main_node = next(
+        i
+        for i, n in enumerate(nodes)
+        if n["op"] == "FuncDefn" and n["name"].endswith(".main")
+    )
+
+    def in_computation(index: int) -> bool:
+        while index != nodes[index]["parent"]:
+            index = nodes[index]["parent"]
+            if index == main_node:
+                return True
+        return False
+
+    computational_calls = [
+        n for i, n in enumerate(nodes) if n["op"] == "Call" and in_computation(i)
+    ]
+    assert computational_calls
+    assert any(
+        t.get("extension") == "ptr" and t.get("id") == "ptr"
+        for n in computational_calls
+        for t in n["instantiation"]["output"]
+    )
+    physical_x = [
+        n
+        for n in nodes
+        if n.get("extension") == "tket.quantum" and n.get("name") == "X"
+    ]
+    assert physical_x
+    assert any(
+        '"t": "Q"' in json.dumps(t)
+        for n in computational_calls
+        for t in n["instantiation"]["output"]
+        if t.get("extension") == "ptr"
+    )
+    # Logical handles use explicit application cleanup, not generic payload drops.
+    assert not any(
+        n.get("extension") == "guppylang"
+        and n.get("name") == "drop"
+        and '"extension": "ptr"' in json.dumps(n["signature"]["input"])
+        for n in nodes
+    )
+    assert all(n["signature"]["input"] == [{"t": "Q"}] for n in physical_x)
+
+
+def test_free_with_live_alias() -> None:
+    """Keep live aliases usable and defer slot reuse until final logical release."""
+
+    @guppy
+    def main() -> None:
+        q = qubit()
+        x(q)
+        result("res", measure(q).read())
+        q = qubit()
+        result("res", measure(q).read())
+
+    spec = identity_code_spec(n_qubits=2, free_alias_before_x=True)
+    encoded = encode(main, spec, as_bytes=True)
+    runner = EmulatorBuilder().build(encoded, n_qubits=2).with_simulator(Stim())
+    shot = runner.run().collated_shots()[0]
+    assert shot["alias_reused_early"] == [0]
+    assert shot["allocation_slot"] == [1, 0, 1]
+    assert shot["res"] == [1, 0]
