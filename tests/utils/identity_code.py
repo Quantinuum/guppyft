@@ -12,6 +12,7 @@ from guppylang.std.qsystem import zz_phase
 from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
 
 from guppyft.encode import EncodeSpec, ImplementOps, ImplementOpsSpec, OpReplacements
+from guppyft.globals import map_global, with_global
 
 N = guppy.nat_var("N")
 
@@ -129,9 +130,17 @@ def identity_code_spec(
         b.global_state.free().unwrap_nothing()
 
     @guppy
+    @no_type_check
+    def clone_global(state: Ptr[Global] @ owned) -> tuple[Ptr[Global], Ptr[Global]]:
+        clone = state.copy()
+        return state, clone
+
+    @guppy
     @link_name("link.identity.QAlloc")
     @no_type_check
-    def _QAlloc(global_state: Ptr[Global]) -> Ptr[LogicalBlock]:
+    def _QAlloc() -> Ptr[LogicalBlock]:
+        global_state = map_global(clone_global)
+
         @guppy
         def allocate(
             g: Global @ owned, unused: None
@@ -145,7 +154,7 @@ def identity_code_spec(
             return g, (data, slot)
 
         data, slot = global_state.map(allocate, None)
-        return Ptr(LogicalBlock(data, global_state.copy(), slot))
+        return Ptr(LogicalBlock(data, global_state, slot))
 
     @guppy
     @no_type_check
@@ -293,7 +302,7 @@ def identity_code_spec(
                     ),
                 )
             )
-            func(global_state)
+            global_state = with_global(global_state, func)
             g = global_state.free().unwrap()
             for data in g.blocks:
                 b = data.free().unwrap()
@@ -309,8 +318,6 @@ def identity_code_spec(
             ImplementOpsSpec(
                 ops=ops,
                 build_wrapper=build_wrapper,
-                allocation_context=Global,
-                allocation_ops={("tket.quantum", "QAlloc")},
             )
         )
     )

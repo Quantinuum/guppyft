@@ -5,20 +5,18 @@ from typing import Any, Literal, Self, no_type_check, overload
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.library import link_name
-from guppylang.std.ptr import Ptr
 from hugr import Hugr
 from hugr.build import DefinitionBuilder
 from hugr.ext import OpDef, TypeDef
 from hugr.ops import FuncDecl, FuncDefn
 from hugr.package import Package, link_packages
-from hugr.tys import ExtType, FunctionType, PolyFuncType, Type
+from hugr.tys import ExtType, Type
 from tket.extensions import measurement
 
 from guppyft._bindings import RsHugr
 from guppyft._bindings import _implement_ops as _implement_ops_binding
 from guppyft._util import get_link_name
 
-from ._allocation_context import add_allocation_context
 from ._util import NATIVE_ENVELOPE, native_bytes, to_rs_hugr
 
 
@@ -160,10 +158,6 @@ class ImplementOpsSpec:
     ] = field(default=lambda x: x)
     """Allows creating a wrapper around the transformed program, e.g. to setup and
     teardown the environment required for the op implementations."""
-    allocation_context: Any | None = None
-    """Payload of the borrowed Ptr capability for allocation."""
-    allocation_ops: set[tuple[str, str]] = field(default_factory=set)
-    """Operations that need the allocation capability."""
     libs: list[Package] = field(default_factory=list)
     """Additional libraries required to run the transformed program."""
 
@@ -225,60 +219,12 @@ def implement_ops(
     # Reset entrypoint, marking module as non-executable, to avoid linking conflicts
     hugr.entrypoint = hugr.module_root
     # Run rewrite, replacing ops with function calls to the functions in `spec.ops`
-    implementation_libs = []
-    replacements = spec.ops
-    if spec.allocation_context is not None:
-        replacements = OpReplacements()
-        replacements._ops = dict(spec.ops._ops)
-        replacements._check_eliminated = list(spec.ops._check_eliminated)
-        for key in spec.allocation_ops:
-            source, name = replacements._ops[key]
-            assert source is not None
-            if isinstance(source, GuppyFunctionDefinition):
-                lib = source.with_minimal_opt().compile_function()
-                source = lib.modules[0]
-                source.entrypoint = source.module_root
-                implementation_libs.append(lib)
-            (target,) = [
-                d.op
-                for _, d in source.nodes()
-                if isinstance(d.op, (FuncDefn, FuncDecl)) and d.op.f_name == name
-            ]
-            sig = target.signature.body
-            stub = Hugr()
-            DefinitionBuilder(stub).module_root_builder().declare_function(
-                name, PolyFuncType([], FunctionType(sig.input[:-1], sig.output[:-1]))
-            )
-            replacements._ops[key] = (stub, name)
-    hugr_pkg_bytes = _implement_ops(native_bytes(hugr), replacements, spec.tys.tys)
+    hugr_pkg_bytes = _implement_ops(native_bytes(hugr), spec.ops, spec.tys.tys)
 
-    # Build, compile, and link wrapper program
-    if spec.allocation_context is None:
-
-        @guppy.declare
-        @link_name(entrypoint_op.f_name)
-        @no_type_check
-        def func_decl() -> None: ...
-    else:
-        context_type = spec.allocation_context
-
-        @guppy.declare
-        @link_name(entrypoint_op.f_name)
-        @no_type_check
-        def func_decl(context: Ptr[context_type]) -> None: ...
-
-        declarations = func_decl.with_minimal_opt().compile_function().modules[0]
-        (decl,) = [
-            d.op
-            for _, d in declarations.nodes()
-            if isinstance(d.op, FuncDecl) and d.op.f_name == entrypoint_op.f_name
-        ]
-        source = Package.from_bytes(hugr_pkg_bytes)
-        names = {spec.ops._ops[key][1] for key in spec.allocation_ops}
-        add_allocation_context(
-            source.modules[0], names, decl.signature.body.input[0], entrypoint_op.f_name
-        )
-        hugr_pkg_bytes = native_bytes(source.modules[0])
+    @guppy.declare
+    @link_name(entrypoint_op.f_name)
+    @no_type_check
+    def func_decl() -> None: ...
 
     # We have to ensure the build wrapper is a function definition rather than a
     # declaration, so that the package contains an entrypoint. Guppy compiles
@@ -293,7 +239,7 @@ def implement_ops(
     pkg_bytes = link_packages(
         native_bytes(pkg.modules[0]),
         hugr_pkg_bytes,
-        *[native_bytes(lib.modules[0]) for lib in [*implementation_libs, *spec.libs]],
+        *[native_bytes(lib.modules[0]) for lib in spec.libs],
     )
 
     if as_bytes:
