@@ -218,6 +218,7 @@ def test_computational_conversion_before_linking() -> None:
     assert header.format == EnvelopeFormat.JSON
     assert not header.zstd
     # The application boundary explicitly emits the native JSON envelope.
+    assert b"guppyft.type_rewrite" not in encoded
     nodes = json.loads(encoded[10:])["modules"][0]["nodes"]
     main_node = next(
         i
@@ -247,6 +248,12 @@ def test_computational_conversion_before_linking() -> None:
         if n.get("extension") == "tket.quantum" and n.get("name") == "X"
     ]
     assert physical_x
+    assert any(
+        '"t": "Q"' in json.dumps(t)
+        for n in computational_calls
+        for t in n["instantiation"]["output"]
+        if t.get("extension") == "ptr"
+    )
     # Logical handles use explicit application cleanup, not generic payload drops.
     assert not any(
         n.get("extension") == "guppylang"

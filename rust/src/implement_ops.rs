@@ -19,11 +19,11 @@ use hugr_core::types::{CustomType, SumType, Transformable, TypeArg, TypeName};
 use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::{BTreeMap, HashMap, HashSet, hash_map::Entry};
+use std::sync::Arc;
 use tket::passes::replace_types::handlers::register_linear_array_op_replacements;
 use tket::passes::utils::unpack_container::type_unpack::array_args;
 use tket::passes::{
-    ComposablePass, PassScope, ReplaceTypes, WithScope,
-    replace_types::{ReplaceTypesError, ReplacementOptions},
+    ComposablePass, PassScope, ReplaceTypes, WithScope, replace_types::ReplaceTypesError,
 };
 
 #[derive(derive_more::Error, Debug, derive_more::Display, derive_more::From)]
@@ -343,6 +343,8 @@ pub enum OpReplacementError {
 pub(crate) struct OpReplacer<'a, H: HugrMut<Node = Node>> {
     hugr: &'a mut H,
     type_replacer: ReplaceTypes,
+    final_type_replacer: Option<ReplaceTypes>,
+    marker_extension: Option<Arc<hugr::Extension>>,
     op_calls: HashMap<OpHashWrapper, (OpType, Hugr, Node)>,
 }
 
@@ -351,17 +353,42 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
         Self {
             hugr,
             type_replacer: replacer,
+            final_type_replacer: None,
+            marker_extension: None,
             op_calls: Default::default(),
         }
     }
 
     pub fn new_with_types(hugr: &'a mut H, types: HashMap<CustomType, Type>) -> Self {
-        let mut replacer = ReplaceTypes::default();
-        for (src, tgt) in types {
-            replacer.set_replace_type_with_options(src, tgt, ReplacementOptions::default());
-        }
-        register_linear_array_op_replacements(&mut replacer);
-        Self::new(hugr, replacer)
+        // Stage computational types through opaque markers. The second pass has
+        // no source-qubit rule, so physical qubits inside final payloads stay physical.
+        let mut first = ReplaceTypes::default();
+        let mut last = ReplaceTypes::default();
+        let marker_extension = hugr::Extension::new_arc(
+            ExtensionId::new_unchecked("guppyft.type_rewrite"),
+            hugr::extension::Version::new(0, 1, 0),
+            |ext, weak| {
+                for (i, (src, tgt)) in types.iter().enumerate() {
+                    let def = ext
+                        .add_type(
+                            format!("t{i}").into(),
+                            vec![],
+                            "Temporary computational type".into(),
+                            src.bound().into(),
+                            weak,
+                        )
+                        .unwrap();
+                    let marker = def.instantiate([]).unwrap();
+                    first.set_replace_type(src.clone(), marker.clone().into());
+                    last.set_replace_type(marker, tgt.clone());
+                }
+            },
+        );
+        register_linear_array_op_replacements(&mut last);
+        let mut state = Self::new(hugr, first);
+        state.final_type_replacer = Some(last);
+        state.marker_extension = Some(marker_extension);
+        state
     }
 
     fn get_func_node(
@@ -408,6 +435,9 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
         let expected_sig: PolyFuncType = {
             let mut sig = ext_op.signature().into_owned();
             sig.transform(&self.type_replacer)?;
+            if let Some(last) = &self.final_type_replacer {
+                sig.transform(last)?;
+            }
             sig.into()
         };
 
@@ -461,8 +491,23 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
                 .insert_ports(*node, Direction::Incoming, new_port_index, 1);
         }
 
-        // Transform signatures
+        // Transform the same computational signatures in both stages.
+        if let Some(extension) = &self.marker_extension {
+            self.hugr
+                .as_mut()
+                .extensions_mut()
+                .register(extension.clone());
+        }
         self.type_replacer.run(&mut self.hugr)?;
+        if let Some(last) = &self.final_type_replacer {
+            last.run(&mut self.hugr)?;
+        }
+        if let Some(extension) = &self.marker_extension {
+            self.hugr
+                .as_mut()
+                .extensions_mut()
+                .remove_extension(extension.name());
+        }
 
         // Insert all registered HUGRs after signature transform, so their contents are not affected
         let inserted_func_nodes: HashMap<OpHashWrapper, H::Node> = self
