@@ -892,7 +892,7 @@ dependencies = [
 [[package]]
 name = "hugr"
 version = "0.30.3"
-source = "git+https://github.com/quantinuum/hugr?rev=1704c5d18fbdac924424cfe111d1338fbb8f3029#1704c5d18fbdac924424cfe111d1338fbb8f3029"
+source = "git+https://github.com/quantinuum/hugr?rev=793b1014f490eca899cae0f49d46b3187bfc8da6#793b1014f490eca899cae0f49d46b3187bfc8da6"
 dependencies = [
  "hugr-core",
  "hugr-model",
@@ -901,7 +901,7 @@ dependencies = [
 [[package]]
 name = "hugr-cli"
 version = "0.30.3"
-source = "git+https://github.com/quantinuum/hugr?rev=1704c5d18fbdac924424cfe111d1338fbb8f3029#1704c5d18fbdac924424cfe111d1338fbb8f3029"
+source = "git+https://github.com/quantinuum/hugr?rev=793b1014f490eca899cae0f49d46b3187bfc8da6#793b1014f490eca899cae0f49d46b3187bfc8da6"
 dependencies = [
  "anyhow",
  "clap",
@@ -922,7 +922,7 @@ dependencies = [
 [[package]]
 name = "hugr-core"
 version = "0.30.3"
-source = "git+https://github.com/quantinuum/hugr?rev=1704c5d18fbdac924424cfe111d1338fbb8f3029#1704c5d18fbdac924424cfe111d1338fbb8f3029"
+source = "git+https://github.com/quantinuum/hugr?rev=793b1014f490eca899cae0f49d46b3187bfc8da6#793b1014f490eca899cae0f49d46b3187bfc8da6"
 dependencies = [
  "base64 0.23.1",
  "cgmath",
@@ -959,7 +959,7 @@ dependencies = [
 [[package]]
 name = "hugr-model"
 version = "0.30.3"
-source = "git+https://github.com/quantinuum/hugr?rev=1704c5d18fbdac924424cfe111d1338fbb8f3029#1704c5d18fbdac924424cfe111d1338fbb8f3029"
+source = "git+https://github.com/quantinuum/hugr?rev=793b1014f490eca899cae0f49d46b3187bfc8da6#793b1014f490eca899cae0f49d46b3187bfc8da6"
 dependencies = [
  "base64 0.23.1",
  "bumpalo",
@@ -2076,7 +2076,7 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 [[package]]
 name = "tk-pg-bitpacked"
 version = "0.1.1"
-source = "git+https://github.com/Quantinuum/tket2?rev=a121ad6f4f26bb4541c71cc50a4dfd54455b433e#a121ad6f4f26bb4541c71cc50a4dfd54455b433e"
+source = "git+https://github.com/Quantinuum/tket2?rev=1934838e803de3b724397c3d57897d589302559e#1934838e803de3b724397c3d57897d589302559e"
 dependencies = [
  "rand 0.10.3",
  "tk-pg-core",
@@ -2085,7 +2085,7 @@ dependencies = [
 [[package]]
 name = "tk-pg-canonical-form"
 version = "0.1.1"
-source = "git+https://github.com/Quantinuum/tket2?rev=a121ad6f4f26bb4541c71cc50a4dfd54455b433e#a121ad6f4f26bb4541c71cc50a4dfd54455b433e"
+source = "git+https://github.com/Quantinuum/tket2?rev=1934838e803de3b724397c3d57897d589302559e#1934838e803de3b724397c3d57897d589302559e"
 dependencies = [
  "tk-pg-core",
  "tk-pg-ir-kernels",
@@ -2096,7 +2096,7 @@ dependencies = [
 [[package]]
 name = "tk-pg-core"
 version = "0.1.1"
-source = "git+https://github.com/Quantinuum/tket2?rev=a121ad6f4f26bb4541c71cc50a4dfd54455b433e#a121ad6f4f26bb4541c71cc50a4dfd54455b433e"
+source = "git+https://github.com/Quantinuum/tket2?rev=1934838e803de3b724397c3d57897d589302559e#1934838e803de3b724397c3d57897d589302559e"
 dependencies = [
  "serde",
  "serde_json",
@@ -2106,7 +2106,7 @@ dependencies = [
 [[package]]
 name = "tk-pg-greedy-synth"
 version = "0.1.1"
-source = "git+https://github.com/Quantinuum/tket2?rev=a121ad6f4f26bb4541c71cc50a4dfd54455b433e#a121ad6f4f26bb4541c71cc50a4dfd54455b433e"
+source = "git+https://github.com/Quantinuum/tket2?rev=1934838e803de3b724397c3d57897d589302559e#1934838e803de3b724397c3d57897d589302559e"
 dependencies = [
  "crossbeam-skiplist",
  "indexmap 2.14.0",
@@ -2123,7 +2123,7 @@ dependencies = [
 [[package]]
 name = "tk-pg-ir-kernels"
 version = "0.1.1"
-source = "git+https://github.com/Quantinuum/tket2?rev=a121ad6f4f26bb4541c71cc50a4dfd54455b433e#a121ad6f4f26bb4541c71cc50a4dfd54455b433e"
+source = "git+https://github.com/Quantinuum/tket2?rev=1934838e803de3b724397c3d57897d589302559e#1934838e803de3b724397c3d57897d589302559e"
 dependencies = [
  "tk-pg-core",
  "tk-pg-utils",
@@ -2132,7 +2132,7 @@ dependencies = [
 [[package]]
 name = "tk-pg-optimize"
 version = "0.1.1"
-source = "git+https://github.com/Quantinuum/tket2?rev=a121ad6f4f26bb4541c71cc50a4dfd54455b433e#a121ad6f4f26bb4541c71cc50a4dfd54455b433e"
+source = "git+https://github.com/Quantinuum/tket2?rev=1934838e803de3b724397c3d57897d589302559e#1934838e803de3b724397c3d57897d589302559e"
 dependencies = [
  "tk-pg-core",
  "tk-pg-ir-kernels",
@@ -2143,7 +2143,7 @@ dependencies = [
 [[package]]
 name = "tk-pg-qm-tableau"
 version = "0.1.1"
-source = "git+https://github.com/Quantinuum/tket2?rev=a121ad6f4f26bb4541c71cc50a4dfd54455b433e#a121ad6f4f26bb4541c71cc50a4dfd54455b433e"
+source = "git+https://github.com/Quantinuum/tket2?rev=1934838e803de3b724397c3d57897d589302559e#1934838e803de3b724397c3d57897d589302559e"
 dependencies = [
  "rand 0.10.3",
  "rayon",
@@ -2156,7 +2156,7 @@ dependencies = [
 [[package]]
 name = "tk-pg-rebase"
 version = "0.1.1"
-source = "git+https://github.com/Quantinuum/tket2?rev=a121ad6f4f26bb4541c71cc50a4dfd54455b433e#a121ad6f4f26bb4541c71cc50a4dfd54455b433e"
+source = "git+https://github.com/Quantinuum/tket2?rev=1934838e803de3b724397c3d57897d589302559e#1934838e803de3b724397c3d57897d589302559e"
 dependencies = [
  "tk-pg-core",
 ]
@@ -2164,7 +2164,7 @@ dependencies = [
 [[package]]
 name = "tk-pg-t-optimize"
 version = "0.1.1"
-source = "git+https://github.com/Quantinuum/tket2?rev=a121ad6f4f26bb4541c71cc50a4dfd54455b433e#a121ad6f4f26bb4541c71cc50a4dfd54455b433e"
+source = "git+https://github.com/Quantinuum/tket2?rev=1934838e803de3b724397c3d57897d589302559e#1934838e803de3b724397c3d57897d589302559e"
 dependencies = [
  "bitvec",
  "tk-pg-canonical-form",
@@ -2176,12 +2176,12 @@ dependencies = [
 [[package]]
 name = "tk-pg-utils"
 version = "0.1.1"
-source = "git+https://github.com/Quantinuum/tket2?rev=a121ad6f4f26bb4541c71cc50a4dfd54455b433e#a121ad6f4f26bb4541c71cc50a4dfd54455b433e"
+source = "git+https://github.com/Quantinuum/tket2?rev=1934838e803de3b724397c3d57897d589302559e#1934838e803de3b724397c3d57897d589302559e"
 
 [[package]]
 name = "tket"
 version = "0.22.0"
-source = "git+https://github.com/Quantinuum/tket2?rev=a121ad6f4f26bb4541c71cc50a4dfd54455b433e#a121ad6f4f26bb4541c71cc50a4dfd54455b433e"
+source = "git+https://github.com/Quantinuum/tket2?rev=1934838e803de3b724397c3d57897d589302559e#1934838e803de3b724397c3d57897d589302559e"
 dependencies = [
  "ascent",
  "bytemuck",
@@ -2681,4 +2681,4 @@ dependencies = [
 [[patch.unused]]
 name = "hugr-llvm"
 version = "0.30.3"
-source = "git+https://github.com/quantinuum/hugr?rev=1704c5d18fbdac924424cfe111d1338fbb8f3029#1704c5d18fbdac924424cfe111d1338fbb8f3029"
+source = "git+https://github.com/quantinuum/hugr?rev=793b1014f490eca899cae0f49d46b3187bfc8da6#793b1014f490eca899cae0f49d46b3187bfc8da6"

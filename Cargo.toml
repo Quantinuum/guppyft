@@ -10,9 +10,9 @@ rust-version = "1.91"
 edition = "2024"
 
 [workspace.dependencies]
-tket = { git = "https://github.com/Quantinuum/tket2", rev = "a121ad6f4f26bb4541c71cc50a4dfd54455b433e" }
-hugr = { git = "https://github.com/quantinuum/hugr", rev = "1704c5d18fbdac924424cfe111d1338fbb8f3029" }
-hugr-core = { git = "https://github.com/quantinuum/hugr", rev = "1704c5d18fbdac924424cfe111d1338fbb8f3029" }
+tket = { git = "https://github.com/Quantinuum/tket2", rev = "1934838e803de3b724397c3d57897d589302559e" }
+hugr = { git = "https://github.com/quantinuum/hugr", rev = "793b1014f490eca899cae0f49d46b3187bfc8da6" }
+hugr-core = { git = "https://github.com/quantinuum/hugr", rev = "793b1014f490eca899cae0f49d46b3187bfc8da6" }
 itertools = "0.15.0"
 derive_more = { version = "2", features = ["display", "from"] }
 anyhow = "1.0.102"
@@ -26,11 +26,10 @@ lto = "fat"
 strip = "symbols"
 panic = "abort"
 
-# Compiler PR2067 at a121ad6f4f26bb4541c71cc50a4dfd54455b433e.
 # Dependency patches are not transitive; mirror the required root HUGR patch.
 [patch.crates-io]
-hugr = { git = "https://github.com/quantinuum/hugr", rev = "1704c5d18fbdac924424cfe111d1338fbb8f3029" }
-hugr-core = { git = "https://github.com/quantinuum/hugr", rev = "1704c5d18fbdac924424cfe111d1338fbb8f3029" }
-hugr-model = { git = "https://github.com/quantinuum/hugr", rev = "1704c5d18fbdac924424cfe111d1338fbb8f3029" }
-hugr-cli = { git = "https://github.com/quantinuum/hugr", rev = "1704c5d18fbdac924424cfe111d1338fbb8f3029" }
-hugr-llvm = { git = "https://github.com/quantinuum/hugr", rev = "1704c5d18fbdac924424cfe111d1338fbb8f3029" }
+hugr = { git = "https://github.com/quantinuum/hugr", rev = "793b1014f490eca899cae0f49d46b3187bfc8da6" }
+hugr-core = { git = "https://github.com/quantinuum/hugr", rev = "793b1014f490eca899cae0f49d46b3187bfc8da6" }
+hugr-model = { git = "https://github.com/quantinuum/hugr", rev = "793b1014f490eca899cae0f49d46b3187bfc8da6" }
+hugr-cli = { git = "https://github.com/quantinuum/hugr", rev = "793b1014f490eca899cae0f49d46b3187bfc8da6" }
+hugr-llvm = { git = "https://github.com/quantinuum/hugr", rev = "793b1014f490eca899cae0f49d46b3187bfc8da6" }
