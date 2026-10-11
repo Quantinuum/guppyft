@@ -1,14 +1,15 @@
 from collections import defaultdict
-from typing import no_type_check
+from typing import cast, no_type_check
 
 from guppylang import guppy
+from guppylang.defs import GuppyFunctionDefinition
 from guppylang.library import link_name
 from guppylang.std.angles import angle
 from guppylang.std.builtins import array, comptime, owned, result
 from guppylang.std.collections import Stack
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.ptr import Ptr
-from guppylang.std.qsystem import zz_phase
+from guppylang.std.qsystem.helios import zz_phase
 from guppylang.std.quantum import cx, discard, project_z, qubit, x
 
 from guppyft.encode import EncodeSpec, ImplementOps, ImplementOpsSpec, OpReplacements
@@ -34,8 +35,8 @@ def identity_code_spec(
     class Global:
         # Data-cell registry permits idle-QEC scans without owning LogicalBlock
         # cells: BlockData has no back-reference, so this graph is acyclic.
-        blocks: array[Ptr[BlockData], comptime(n_qubits)]
-        free_ids: Stack[int, comptime(n_qubits)]
+        blocks: array[Ptr[BlockData], comptime(n_qubits)]  # type: ignore[valid-type]
+        free_ids: Stack[int, comptime(n_qubits)]  # type: ignore[valid-type]
 
     @guppy.struct
     class LogicalBlock:
@@ -281,7 +282,7 @@ def identity_code_spec(
         return ctl, tgt
 
     @guppy
-    @link_name("link.identity.Read")
+    @link_name("link.identity.Read")  # type: ignore[untyped-decorator]
     def _Read(m: bool) -> bool:
         return m
 
@@ -301,7 +302,9 @@ def identity_code_spec(
         }
     )
 
-    def build_wrapper(func):
+    def build_wrapper(
+        func: GuppyFunctionDefinition[[], None],
+    ) -> GuppyFunctionDefinition[[], None]:
         @guppy
         @no_type_check
         def wrapper() -> None:
@@ -326,7 +329,7 @@ def identity_code_spec(
                 else:
                     b.physical.unwrap_nothing()
 
-        return wrapper
+        return cast("GuppyFunctionDefinition[[], None]", wrapper)
 
     return EncodeSpec(
         implement_ops=ImplementOps.for_spec(

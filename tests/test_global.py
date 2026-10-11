@@ -336,9 +336,7 @@ def test_nested_with() -> None:
 
 
 def test_nested_map_calls_error() -> None:
-    """Test the scenario with(map(map(...))) i.e. nested map calls.
-    We expect this to fail as the first `map` call retrieves the global variable, so
-    the global will be `None` in the second call"""
+    """Reject reentry to the same global while its Map callback holds the lock."""
 
     @guppy
     def bar(i: int) -> int:
@@ -359,7 +357,7 @@ def test_nested_map_calls_error() -> None:
 
     with pytest.raises(
         EmulatorError,
-        match=re.escape("Panic (#1001): No global provided for GlobalsOp::With"),
+        match=re.escape("Panic (#1001): Global already locked"),
     ):
         run_global_test(main)
 
