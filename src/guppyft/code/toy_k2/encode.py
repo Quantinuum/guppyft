@@ -437,11 +437,9 @@ class ToyK2Builder:
                 blk = state.take_block(blk_id)
 
                 k2_primitives.qed_cycle(blk.logical_block)
+                blk.qed_counter = 0.0
 
                 state.put_block(blk_id, blk)
-                blk = state.blocks.take(blk_id).unwrap()
-                blk.qed_counter = 0.0
-                state.blocks.put(some(blk), blk_id)
 
                 return state, blk_id
 
