@@ -7,7 +7,6 @@ from typing import Any, Literal, Protocol, overload
 
 from guppylang.defs import GuppyFunctionDefinition
 from hugr import Hugr
-from hugr.metadata import Metadata
 from hugr.ops import Module
 from hugr.package import Package
 from hugr.passes.composable import ComposablePass
@@ -24,7 +23,6 @@ from ._implement_ops import (
 
 __all__ = [
     "EncodeSpec",
-    "EncoderParams",
     "ImplementOps",
     "ImplementOpsSpec",
     "LogicalCompiler",
@@ -141,29 +139,26 @@ class EncoderParams(Protocol):
         that support serialization to JSON."""
 
 
-class _MetadataEncoding(Metadata[Mapping[str, Any]]):
-    """Metadata key for annotating parameters with which to encode a program."""
-
-    KEY = "guppyft.encoding"
-
-
-def annotate_encoding(hugr: Package | Hugr[Any], params: EncoderParams) -> None:
+def annotate_encoding(
+    hugr: Package | Hugr[Any], encoding_name: str, params: Mapping[str, Any]
+) -> None:
     """Annotate a HUGR package with encoding parameters.
 
     Args:
         hugr: The package or HUGR to annotate.
+        encoding_name: The name of the encoding to annotate.
         params: The serializable encoding parameters.
 
     Raises:
         ValueError: If `params` cannot be serialized as JSON.
     """
     try:
-        json.dumps(params.params(), check_circular=True)
+        json.dumps(params, check_circular=True)
     except TypeError as e:
         raise ValueError("Could not serialize parameters") from e
 
     for module in hugr.modules if isinstance(hugr, Package) else [hugr]:
-        module[module.module_root].metadata[_MetadataEncoding] = {
-            "encoding": params.encoding(),
-            "params": params.params(),
+        module[module.module_root].metadata["qnt.nexus.compilation"] = {
+            "schema_version": 1,
+            "encoding": {"name": encoding_name, "params": params},
         }
