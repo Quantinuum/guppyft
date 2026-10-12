@@ -73,13 +73,12 @@ def test_exported_extensions() -> None:
     assert len(ops_extn.operations) == 61
     assert str(ops_extn.version) == "0.2.0"
     for op_name, op_def in ops_extn.operations.items():
-        op_def_name = op_name if op_name.endswith("_dynq") else f"{op_name}_def"
-        assert op_def == iceberg_ops.__getattribute__(op_def_name)
+        assert op_def == iceberg_ops.__getattribute__(f"{op_name}_def")
 
 
-def test_op_instantiations() -> None:
-    ops_extn = iceberg_ops()
-    for op_name in [
+@pytest.mark.parametrize(
+    "op_name",
+    [
         "all_x",
         "all_y",
         "all_z",
@@ -122,17 +121,23 @@ def test_op_instantiations() -> None:
         "xx_phase_between_blocks",
         "yy_phase_between_blocks",
         "zz_phase_between_blocks",
-    ]:
-        assert (
-            iceberg_ops.__getattribute__(op_name)(6).op_def()
-            == ops_extn.operations[op_name]
-        )
-    # Ops that take a variable number of inputs and outputs:
-    for op_name in ["borrow", "borrow_more", "restore_some", "restore"]:
-        assert (
-            iceberg_ops.__getattribute__(op_name)(1, 6).op_def()
-            == ops_extn.operations[op_name]
-        )
+    ],
+)
+def test_op_instantiations(op_name: str) -> None:
+    assert (
+        iceberg_ops.__getattribute__(op_name)(6).op_def()
+        == iceberg_ops().operations[op_name]
+    )
+
+
+@pytest.mark.parametrize(
+    "op_name", ["borrow", "borrow_more", "restore_some", "restore"]
+)
+def test_op_instantiations_variable_in_outs(op_name: str) -> None:
+    assert (
+        iceberg_ops.__getattribute__(op_name)(1, 6).op_def()
+        == iceberg_ops().operations[op_name]
+    )
 
 
 @pytest.mark.parametrize(
@@ -157,7 +162,7 @@ def test_op_instantiations() -> None:
 )
 def test_resolve_extensions_dynq(opname: str) -> None:
     """Regression test for not resolving all dependencies."""
-    op = iceberg_ops.__getattribute__(opname).instantiate([])
+    op = iceberg_ops.__getattribute__(opname)
     assert len(op.args) == 0
     resolver = UsedExtensionResolver()
     op._resolve_used_extensions(resolver)
