@@ -369,7 +369,7 @@ class ToyK2Builder:
         @guppy
         @no_type_check
         @link_name("guppyft.toy_k2._restore_some")
-        def _restore_some(blk_id: int, qb_id: int) -> int:
+        def _restore_some(blk_id: int, addr: tuple[int, int]) -> int:
 
             @guppy
             @no_type_check
@@ -381,12 +381,12 @@ class ToyK2Builder:
                 state.blocks.put(some(blk), blk_id)
                 return state, blk_id
 
-            return map_global(_impl, blk_id, qb_id)
+            return map_global(_impl, blk_id, addr[1])
 
         @guppy
         @no_type_check
         @link_name("guppyft.toy_k2._restore")
-        def _restore(blk_id: int, qb_id: int) -> int:
+        def _restore(blk_id: int, addr: tuple[int, int]) -> int:
 
             @guppy
             @no_type_check
@@ -398,7 +398,7 @@ class ToyK2Builder:
                 state.blocks.put(some(blk), blk_id)
                 return state, blk_id
 
-            return map_global(_impl, blk_id, qb_id)
+            return map_global(_impl, blk_id, addr[1])
 
         @guppy
         @no_type_check
@@ -843,9 +843,9 @@ class ToyK2Builder:
         @guppy
         @no_type_check
         @link_name("guppyft.toy_k2._no_op_decode2")
-        def _no_op_decode2(outcome: array[bool, 2] @ owned) -> array[bool, 2]:
+        def _no_op_decode2(outcome: array[bool, 2] @ owned) -> tuple[bool, bool]:
             # Same as _no_op_decode1, but for the outcome of `measure_z_all`.
-            return outcome
+            return (outcome[0], outcome[1])
 
         @guppy.declare
         @no_type_check
