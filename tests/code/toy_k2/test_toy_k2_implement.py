@@ -49,16 +49,16 @@ def test_block_logicals() -> None:
         k2.z(blk, 1)  # ZZ|++>
         # Measure first qubit in X basis
         k2.h(blk, 0)
-        m = k2.measure_z(blk, 0).decode()  # Must always be true
+        m = k2.project_z(blk, 0).decode()  # Must always be true
         output("left", m)
         # Measure the second qubit in the X basis
         k2.h(blk, 1)
-        m = k2.measure_z(blk, 1).decode()  # Must always be true
+        m = k2.project_z(blk, 1).decode()  # Must always be true
         output("right", m)
         # Measure the first qubit again, applying an X first on it
         k2.x(blk, 0)  # |10>
         k2.swap_intra(blk)  # |01>
-        m = k2.measure_z(blk, 1).decode()  # Must always be true
+        m = k2.project_z(blk, 1).decode()  # Must always be true
         output("again", m)
         k2.free(blk)
 
@@ -92,7 +92,6 @@ def test_sq_dynq_logicals() -> None:
         q = k2.Qubit()
         k2.x_dynq(q)
         m = k2.measure_z_dynq(q).decode()
-        k2.free_dynq(q)
         output("x", m)
 
         q = k2.Qubit()
@@ -100,7 +99,6 @@ def test_sq_dynq_logicals() -> None:
         k2.z_dynq(q)
         k2.h_dynq(q)
         m = k2.measure_z_dynq(q).decode()
-        k2.free_dynq(q)
         output("z", m)
 
         q = k2.Qubit()
@@ -110,7 +108,6 @@ def test_sq_dynq_logicals() -> None:
         k2.t_dynq(q)
         k2.h_dynq(q)
         m = k2.measure_z_dynq(q).decode()
-        k2.free_dynq(q)
         output("s", m)
 
         q = k2.Qubit()
@@ -120,7 +117,6 @@ def test_sq_dynq_logicals() -> None:
         k2.tdg_dynq(q)
         k2.h_dynq(q)
         m = k2.measure_z_dynq(q).decode()
-        k2.free_dynq(q)
         output("sdg", m)
 
     pkg = main.with_minimal_opt().compile()
@@ -185,9 +181,6 @@ def test_k2_dynq_ops() -> None:
         output("q0", k2.measure_z_dynq(q0).decode())
         output("q1", k2.measure_z_dynq(q1).decode())
         output("q2", k2.measure_z_dynq(q2).decode())
-        q0.free()
-        q1.free()
-        q2.free()
         output("end", -1)
 
     pkg = main.with_minimal_opt().compile()
