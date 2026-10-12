@@ -227,7 +227,7 @@ impl MakeOpDef for ToyK2OpDef {
             .into(),
             borrow => FuncValueType::new(
                 vec![block_type(), int_type(6)],
-                vec![borrowed_block_type(), dynamic_qubit_type()],
+                vec![dynamic_qubit_type(), borrowed_block_type()],
             )
             .into(),
             borrow_more => FuncValueType::new(
@@ -467,8 +467,8 @@ mod tests {
         let handle = f_build.add_dataflow_op(borrow, vec![block, i0]).unwrap();
         let wires: Vec<Wire> = handle.outputs().collect();
         assert_eq!(wires.len(), 2);
-        let bblock = wires[0];
-        let q0 = wires[1];
+        let q0 = wires[0];
+        let bblock = wires[1];
         // Allocate a dynamic qubit:
         let handle = f_build.add_dataflow_op(alloc_dynq, vec![]).unwrap();
         let wires: Vec<Wire> = handle.outputs().collect();
