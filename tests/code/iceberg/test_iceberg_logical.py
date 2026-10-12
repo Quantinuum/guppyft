@@ -2,6 +2,7 @@ import pytest
 from guppylang import guppy
 from guppylang.std.builtins import array, result
 from hugr.build.dfg import Dfg
+from hugr.ext import UsedExtensionResolver
 from hugr.ops import DFG, ExtOp
 from hugr.std.float import FLOAT_T
 from hugr.std.int import int_t
@@ -25,7 +26,7 @@ from guppyft.code.iceberg.logical import (
     zz_phase_between_blocks,
     zz_phase_dynq,
 )
-from guppyft.extensions import iceberg_ops, iceberg_types
+from guppyft.extensions import iceberg_ops, iceberg_types, std_types
 
 
 def test_hugr() -> None:
@@ -132,6 +133,37 @@ def test_op_instantiations() -> None:
             iceberg_ops.__getattribute__(op_name)(1, 6).op_def()
             == ops_extn.operations[op_name]
         )
+
+
+@pytest.mark.parametrize(
+    "opname",
+    [
+        "alloc_dynq",
+        "try_alloc_dynq",
+        "free_dynq",
+        "x_dynq",
+        "y_dynq",
+        "z_dynq",
+        "rx_dynq",
+        "ry_dynq",
+        "rz_dynq",
+        "xx_phase_dynq",
+        "yy_phase_dynq",
+        "zz_phase_dynq",
+        "cx_dynq",
+        "try_measure_x_dynq",
+        "try_measure_z_dynq",
+    ],
+)
+def test_resolve_extensions_dynq(opname: str) -> None:
+    """Regression test for not resolving all dependencies."""
+    op = iceberg_ops.__getattribute__(opname).instantiate([])
+    assert len(op.args) == 0
+    resolver = UsedExtensionResolver()
+    op._resolve_used_extensions(resolver)
+    unused = resolver.result().unresolved_extensions
+    assert iceberg_types().name not in unused
+    assert std_types().name not in unused
 
 
 @pytest.mark.parametrize(
