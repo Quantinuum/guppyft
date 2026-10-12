@@ -246,8 +246,8 @@ def measure_z_all(blk: LogicalBlock[4] @ owned) -> array[bool, 2]:
 
 @guppy
 @no_type_check
-def measure_z(blk: LogicalBlock[4], idx: int) -> bool:
-    """Measure the chosen qubit in the Z basis."""
+def project_z(blk: LogicalBlock[4], idx: int) -> bool:
+    """Project the chosen qubit onto the Z basis without consuming it."""
     if idx != 0 and idx != 1:
         exit("Invalid logical qubit index. Must be 0 or 1.")
 
