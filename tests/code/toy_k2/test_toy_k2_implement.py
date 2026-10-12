@@ -142,7 +142,7 @@ def test_mix_static_dynq_ops() -> None:
         dyn_q = k2.Qubit()
         k2.x_dynq(dyn_q)
 
-        borrowed_blk, borrowed_q = k2.borrow(blk, 0)
+        borrowed_q, borrowed_blk = k2.borrow(blk, 0)
         other_borrowed_q = k2.borrow_more(borrowed_blk, 1)
         k2.cx_dynq(dyn_q, borrowed_q)
         k2.cx_dynq(borrowed_q, other_borrowed_q)
