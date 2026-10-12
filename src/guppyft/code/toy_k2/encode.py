@@ -15,6 +15,7 @@ from hugr.ext import ExtensionRegistry
 from hugr.package import Package
 from hugr.std import _std_extensions
 
+from guppyft.code.toy_k2 import logical as k2_logical
 from guppyft.code.toy_k2 import primitives as k2_primitives
 from guppyft.encode import (
     EncoderParams,
@@ -79,7 +80,7 @@ class QEDPolicy:
         cx_transversal: float = 0.0
         swap_intra: float = 0.0
         measure_z_all: float = 0.0
-        measure_z: float = 0.0
+        project_z: float = 0.0
 
         def __setattr__(self, key: str, value: Any) -> None:
             """Set a non-negative cost for a known logical operation."""
@@ -513,17 +514,17 @@ class ToyK2Builder:
 
         @guppy
         @no_type_check
-        @link_name("guppyft.toy_k2._measure_z")
-        def _measure_z(blk_id: int, qb_id: int) -> tuple[bool, int]:
+        @link_name("guppyft.toy_k2._project_z")
+        def _project_z(blk_id: int, qb_id: int) -> tuple[bool, int]:
             @guppy
             def _impl(
                 state: STATE @ owned, blk_id: int, qb_id: int
             ) -> tuple[STATE, bool, int]:
                 blk = state.take_block(blk_id)
-                res = k2_primitives.measure_z(blk.logical_block, qb_id)
+                res = k2_primitives.project_z(blk.logical_block, qb_id)
                 state.put_block(blk_id, blk)
 
-                state.qed_policy(array(blk_id), comptime(qed_policy.costs.measure_z))
+                state.qed_policy(array(blk_id), comptime(qed_policy.costs.project_z))
 
                 return state, res, blk_id
 
@@ -818,16 +819,10 @@ class ToyK2Builder:
 
         @guppy
         @no_type_check
-        @link_name("guppyft.toy_k2._measure_z_dynq")
-        def _measure_z_dynq(addr: tuple[int, int]) -> tuple[bool, tuple[int, int]]:
+        @link_name("guppyft.toy_k2._project_z_dynq")
+        def _project_z_dynq(addr: tuple[int, int]) -> tuple[bool, tuple[int, int]]:
             blk_id, qb_id = addr
-            res, _ = _measure_z(blk_id, qb_id)
-            # TODO: For the sake of consistency with Guppy, measure_z_dyn
-            # should *not* return the dynamic qubit. Instead, it should be
-            # reset to zero and released, so that it can be picked up again
-            # by `allocate_dynq_addr`. Currently, this requires changing
-            # the signature of the HUGR op.
-            # state.release_dyn_addr(addr)
+            res, _ = _project_z(blk_id, qb_id)
             return res, addr
 
         @guppy
@@ -904,7 +899,7 @@ class ToyK2Builder:
             _prep_zero_plus_ft,
             _prep_y_states_non_ft,
             _prep_t_states_non_ft,
-            _measure_z,
+            _project_z,
             _measure_z_all,
             _free,
             _x,
@@ -921,7 +916,7 @@ class ToyK2Builder:
             _sdg_dynq,
             _t_dynq,
             _tdg_dynq,
-            _measure_z_dynq,
+            _project_z_dynq,
             _no_op_decode1,
             _no_op_decode2,
         ).compile()
@@ -948,7 +943,7 @@ class ToyK2Builder:
                     "guppyft.toy_k2.ops",
                     "prep_t_states_non_ft",
                 ): "guppyft.toy_k2._prep_t_states_non_ft",
-                ("guppyft.toy_k2.ops", "measure_z"): "guppyft.toy_k2._measure_z",
+                ("guppyft.toy_k2.ops", "project_z"): "guppyft.toy_k2._project_z",
                 (
                     "guppyft.toy_k2.ops",
                     "measure_z_all",
@@ -973,8 +968,8 @@ class ToyK2Builder:
                 ("guppyft.toy_k2.ops", "tdg_dynq"): "guppyft.toy_k2._tdg_dynq",
                 (
                     "guppyft.toy_k2.ops",
-                    "measure_z_dynq",
-                ): "guppyft.toy_k2._measure_z_dynq",
+                    "project_z_dynq",
+                ): "guppyft.toy_k2._project_z_dynq",
                 (
                     "guppyft.toy_k2.ops",
                     "decode_qubit_measurement",
@@ -1014,11 +1009,9 @@ class ToyK2Builder:
         logical_compiler = ReplacementCompiler(
             op_replacements={
                 ("tket.quantum", "QAlloc"): ("guppyft.toy_k2.ops", "alloc_dynq", []),
-                ("tket.quantum", "MeasureFree"): (
-                    # TODO: this will fail due to signature mismatch,
-                    # see comment in _measure_z_dynq
+                ("tket.quantum", "Measure"): (
                     "guppyft.toy_k2.ops",
-                    "measure_z_dynq",
+                    "project_z_dynq",
                     [],
                 ),
                 ("tket.quantum", "QFree"): ("guppyft.toy_k2.ops", "free_dynq", []),
@@ -1036,7 +1029,9 @@ class ToyK2Builder:
                 ("tket.quantum", "Tdg"): ("guppyft.toy_k2.ops", "tdg_dynq", []),
                 ("tket.quantum", "CX"): ("guppyft.toy_k2.ops", "cx_dynq", []),
             },
-            compound_op_replacements={},
+            compound_op_replacements={
+                ("tket.quantum", "MeasureFree"): k2_logical.measure_z_dynq,
+            },
             ty_replacements={
                 ("prelude", "qubit"): ("guppyft.toy_k2.types", "dynamic_qubit"),
                 ("tket.measurement", "Measurement"): (
