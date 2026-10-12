@@ -162,7 +162,7 @@ def test_op_instantiations_variable_in_outs(op_name: str) -> None:
 )
 def test_resolve_extensions_dynq(opname: str) -> None:
     """Regression test for not resolving all dependencies."""
-    op = iceberg_ops.__getattribute__(opname).instantiate([])
+    op = iceberg_ops.__getattribute__(opname)
     assert len(op.args) == 0
     resolver = UsedExtensionResolver()
     op._resolve_used_extensions(resolver)
