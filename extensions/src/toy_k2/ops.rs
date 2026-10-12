@@ -49,8 +49,8 @@ pub enum ToyK2OpDef {
     prep_t_states_non_ft,
     /// Destructively measure a ToyK2 block in the Z basis.
     measure_z_all,
-    /// Measure a logical qubit of a ToyK2 block non-destructively in the Z basis.
-    measure_z,
+    /// Project a logical qubit of a ToyK2 block onto the Z basis. Does not consume it.
+    project_z,
     /// Apply a error detection cycle on a ToyK2 block.
     qed_cycle,
     /// Decode a qubit measurement of a ToyK2 block.
@@ -79,8 +79,8 @@ pub enum ToyK2OpDef {
     tdg_dynq,
     /// CX gate between dynamic logical qubits.
     cx_dynq,
-    /// Measure a dynamic logical qubit on the Z basis.
-    measure_z_dynq,
+    /// Project a dynamic logical qubit onto the Z basis without consuming it.
+    project_z_dynq,
     /// Extraction of dynamic logical qubits from a block (consuming the block and emitting a borrowed block).
     borrow,
     /// Extraction of dynamic logical qubits from an already-borrowed block.
@@ -199,7 +199,7 @@ impl MakeOpDef for ToyK2OpDef {
             measure_z_all => {
                 FuncValueType::new(vec![block_type()], vec![block_measurement_type()]).into()
             }
-            measure_z => FuncValueType::new(
+            project_z => FuncValueType::new(
                 vec![block_type(), int_type(6)],
                 vec![qubit_measurement_type(), block_type()],
             )
@@ -220,7 +220,7 @@ impl MakeOpDef for ToyK2OpDef {
             t_dynq => sig_dynamic_qubits(1, 1),
             tdg_dynq => sig_dynamic_qubits(1, 1),
             cx_dynq => sig_dynamic_qubits(2, 2),
-            measure_z_dynq => FuncValueType::new(
+            project_z_dynq => FuncValueType::new(
                 vec![dynamic_qubit_type()],
                 vec![qubit_measurement_type(), dynamic_qubit_type()],
             )
@@ -385,7 +385,7 @@ mod tests {
     fn test_prep_measure_decode_qubit_free() -> Result<(), Box<dyn Error>> {
         let prep_zero_ft = EXTENSION.instantiate_extension_op("prep_zero_ft", [])?;
         let free = EXTENSION.instantiate_extension_op("free", [])?;
-        let measure_z = EXTENSION.instantiate_extension_op("measure_z", [])?;
+        let project_z = EXTENSION.instantiate_extension_op("project_z", [])?;
         let decode_qubit_measurement =
             EXTENSION.instantiate_extension_op("decode_qubit_measurement", [])?;
 
@@ -398,7 +398,7 @@ mod tests {
             .outputs_arr();
         let constant = f_build.add_load_value(ConstInt::new_u(6, 0).unwrap());
         let [meas, blk] = f_build
-            .add_dataflow_op(measure_z, [blk, constant])?
+            .add_dataflow_op(project_z, [blk, constant])?
             .outputs_arr();
         let [bool_wire] = f_build
             .add_dataflow_op(decode_qubit_measurement, [meas])?
