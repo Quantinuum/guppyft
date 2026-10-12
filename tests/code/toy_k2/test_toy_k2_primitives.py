@@ -297,7 +297,7 @@ def test_measure_z_all(x0: int, x1: int) -> None:
 @pytest.mark.parametrize("idx", [0, 1])
 @pytest.mark.parametrize("x0", [0, 1])
 @pytest.mark.parametrize("x1", [0, 1])
-def test_measure_z(idx: int, x0: int, x1: int) -> None:
+def test_project_z(idx: int, x0: int, x1: int) -> None:
 
     @guppy
     @no_type_check
@@ -309,7 +309,7 @@ def test_measure_z(idx: int, x0: int, x1: int) -> None:
         if comptime(x1) == 1:
             toy_k2.x(block, comptime(1))
 
-        res = toy_k2.measure_z(block, comptime(idx))
+        res = toy_k2.project_z(block, comptime(idx))
         output("result", res)
 
         block.discard()
