@@ -434,58 +434,6 @@
       },
       "binary": false
     },
-    "measure_z": {
-      "extension": "guppyft.toy_k2.ops",
-      "name": "measure_z",
-      "description": "Measure a logical qubit of a ToyK2 block non-destructively in the Z basis.",
-      "signature": {
-        "params": [],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "block",
-              "args": [],
-              "bound": "A"
-            },
-            {
-              "t": "Opaque",
-              "extension": "arithmetic.int.types",
-              "extension_version": "0.1.0",
-              "id": "int",
-              "args": [
-                {
-                  "tya": "BoundedNat",
-                  "n": 6
-                }
-              ],
-              "bound": "C"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "qubit_measurement",
-              "args": [],
-              "bound": "C"
-            },
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "block",
-              "args": [],
-              "bound": "A"
-            }
-          ]
-        }
-      },
-      "binary": false
-    },
     "measure_z_all": {
       "extension": "guppyft.toy_k2.ops",
       "name": "measure_z_all",
@@ -511,45 +459,6 @@
               "id": "block_measurement",
               "args": [],
               "bound": "C"
-            }
-          ]
-        }
-      },
-      "binary": false
-    },
-    "measure_z_dynq": {
-      "extension": "guppyft.toy_k2.ops",
-      "name": "measure_z_dynq",
-      "description": "Measure a dynamic logical qubit on the Z basis.",
-      "signature": {
-        "params": [],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
-              "args": [],
-              "bound": "A"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "qubit_measurement",
-              "args": [],
-              "bound": "C"
-            },
-            {
-              "t": "Opaque",
-              "extension": "guppyft.toy_k2.types",
-              "extension_version": "0.1.0",
-              "id": "dynamic_qubit",
-              "args": [],
-              "bound": "A"
             }
           ]
         }
@@ -636,6 +545,97 @@
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
               "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "project_z": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "project_z",
+      "description": "Project a logical qubit of a ToyK2 block onto the Z basis. Does not consume it.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "qubit_measurement",
+              "args": [],
+              "bound": "C"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "project_z_dynq": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "project_z_dynq",
+      "description": "Project a dynamic logical qubit onto the Z basis without consuming it.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "dynamic_qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "qubit_measurement",
+              "args": [],
+              "bound": "C"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "dynamic_qubit",
               "args": [],
               "bound": "A"
             }
