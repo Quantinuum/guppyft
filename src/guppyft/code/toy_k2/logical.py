@@ -56,13 +56,13 @@ class Block:
 
     @guppy
     @no_type_check
-    def measure_z(self: "Block", idx: int) -> QubitMeasurement:
-        """Non-destructively measure the chosen logical qubit in the Z basis.
+    def project_z(self: "Block", idx: int) -> QubitMeasurement:
+        """Project the chosen logical qubit onto the Z basis without consuming it.
 
         Args:
             idx: The index of the logical qubit to apply the measurement to (0 or 1).
         """
-        return measure_z(self, idx)
+        return project_z(self, idx)
 
     @guppy
     @no_type_check
@@ -186,9 +186,9 @@ class Qubit:
 
     @guppy
     @no_type_check
-    def measure_z(self: "Qubit") -> QubitMeasurement:
-        """Non-destructively measure the dynamic qubit in the Z basis."""
-        return measure_z_dynq(self)
+    def project_z(self: "Qubit") -> QubitMeasurement:
+        """Project the dynamic qubit onto the Z basis without consuming it."""
+        return project_z_dynq(self)
 
 
 @custom_type(toy_k2_types.toy_k2_borrowed_block(), copyable=False, droppable=False)
@@ -214,10 +214,10 @@ def free(blk: Block @ owned) -> None:
     """Free a block."""
 
 
-@hugr_op(_logical_op("measure_z", _OPS_EXTN))
+@hugr_op(_logical_op("project_z", _OPS_EXTN))
 @no_type_check
-def measure_z(blk: Block, idx: int) -> QubitMeasurement:
-    """Non-destructively measure the chosen logical qubit in the Z basis."""
+def project_z(blk: Block, idx: int) -> QubitMeasurement:
+    """Project the chosen logical qubit onto the Z basis without consuming it."""
 
 
 @hugr_op(_logical_op("measure_z_all", _OPS_EXTN))
@@ -386,10 +386,10 @@ def cx_dynq(control: Qubit, target: Qubit) -> None:
     """Apply a CX gate to dynamic logical qubits."""
 
 
-@hugr_op(_logical_op("measure_z_dynq", _OPS_EXTN))
+@hugr_op(_logical_op("project_z_dynq", _OPS_EXTN))
 @no_type_check
-def measure_z_dynq(q: Qubit) -> QubitMeasurement:
-    """Measure a dynamic logical qubit in the Z basis."""
+def project_z_dynq(q: Qubit) -> QubitMeasurement:
+    """Project a dynamic logical qubit onto the Z basis without consuming it."""
 
 
 @hugr_op(_logical_op("borrow", _OPS_EXTN))
@@ -586,3 +586,12 @@ def tdg(block: Block, idx: int) -> None:
     x(block, idx)
     t(block, idx)
     x(block, idx)
+
+
+@guppy
+@no_type_check
+def measure_z_dynq(qubit: Qubit @ owned) -> QubitMeasurement:
+    """Measure the logical qubit in the Z basis and free it."""
+    m = project_z_dynq(qubit)
+    free_dynq(qubit)
+    return m
