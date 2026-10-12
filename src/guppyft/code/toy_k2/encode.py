@@ -328,26 +328,23 @@ class ToyK2Builder:
 
                     self.put_block(i, blk)
 
-        # TODO: The output order of borrow is flipped with respect to borrow_more
-        # for no good reason. The ordering in borrow_more is forced because
-        # the op does not own the borrowed block, so it has to appear at the end.
         @guppy
         @no_type_check
         @link_name("guppyft.toy_k2._borrow")
-        def _borrow(blk_id: int, qb_id: int) -> tuple[int, tuple[int, int]]:
+        def _borrow(blk_id: int, qb_id: int) -> tuple[tuple[int, int], int]:
 
             @guppy
             @no_type_check
             def _impl(
                 state: STATE @ owned, blk_id: int, qb_id: int
-            ) -> tuple[STATE, int, tuple[int, int]]:
+            ) -> tuple[STATE, tuple[int, int], int]:
                 blk = state.blocks.take(blk_id).unwrap()
                 blk.borrow_addr(qb_id)
                 state.blocks.put(some(blk), blk_id)
-                return state, blk_id, (blk_id, qb_id)
+                return state, (blk_id, qb_id), blk_id
 
             map_global(_impl, blk_id, qb_id)
-            return blk_id, (blk_id, qb_id)
+            return (blk_id, qb_id), blk_id
 
         @guppy
         @no_type_check
