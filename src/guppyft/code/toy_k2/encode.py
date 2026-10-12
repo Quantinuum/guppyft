@@ -243,7 +243,7 @@ class ToyK2Builder:
 
             @guppy
             @no_type_check
-            def allocate_block(self, logical_block: LogicalBlock[4] @ owned) -> int:
+            def allocate_block_id(self, logical_block: LogicalBlock[4] @ owned) -> int:
                 """Reserve a new RuntimeBlock containing the given LogicalBlock."""
                 if len(self.unalloc_blks) == 0:
                     exit("allocate_blk_id: No more logical blocks to allocate")
@@ -296,7 +296,7 @@ class ToyK2Builder:
                 else:
                     # Otherwise, prepare a new block
                     logical_block = k2_primitives.prep_zero_ft().force_check().unwrap()
-                    blk_id = self.allocate_block(logical_block)
+                    blk_id = self.allocate_block_id(logical_block)
                     # The first address will be returned
                     qb_id = 0
                     # And the other address is added to the stack
@@ -452,7 +452,7 @@ class ToyK2Builder:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, int]:
                 logical_block = k2_primitives.prep_zero_ft().force_check().unwrap()
-                blk_id = state.allocate_block(logical_block)
+                blk_id = state.allocate_block_id(logical_block)
 
                 state.qed_policy(array(blk_id), comptime(qed_policy.costs.prep_zero_ft))
 
@@ -467,7 +467,7 @@ class ToyK2Builder:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, int]:
                 logical_block = k2_primitives.prep_zero_plus_ft()
-                blk_id = state.allocate_block(logical_block)
+                blk_id = state.allocate_block_id(logical_block)
 
                 state.qed_policy(
                     array(blk_id), comptime(qed_policy.costs.prep_zero_plus_ft)
@@ -484,7 +484,7 @@ class ToyK2Builder:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, int]:
                 logical_block = k2_primitives.prep_y_states_non_ft()
-                blk_id = state.allocate_block(logical_block)
+                blk_id = state.allocate_block_id(logical_block)
 
                 state.qed_policy(
                     array(blk_id), comptime(qed_policy.costs.prep_y_states_non_ft)
@@ -501,7 +501,7 @@ class ToyK2Builder:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, int]:
                 logical_block = k2_primitives.prep_t_states_non_ft()
-                blk_id = state.allocate_block(logical_block)
+                blk_id = state.allocate_block_id(logical_block)
 
                 state.qed_policy(
                     array(blk_id), comptime(qed_policy.costs.prep_t_states_non_ft)
