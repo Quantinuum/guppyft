@@ -91,7 +91,7 @@ def test_guppy_bindings_smoke() -> None:
         k2.free(magic)
         # Ops on dynamic qubits and borrowed blocks
         b = k2.Block()
-        bb, q0 = k2.borrow(b, 0)
+        q0, bb = k2.borrow(b, 0)
         q1 = k2.borrow_more(bb, 1)
         q_extra = k2.Qubit()
         k2.x_dynq(q0)

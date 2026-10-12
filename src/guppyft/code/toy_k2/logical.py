@@ -394,7 +394,7 @@ def project_z_dynq(q: Qubit) -> QubitMeasurement:
 
 @hugr_op(_logical_op("borrow", _OPS_EXTN))
 @no_type_check
-def borrow(block: Block @ owned, idx: int) -> (BorrowedBlock, Qubit):
+def borrow(block: Block @ owned, idx: int) -> (Qubit, BorrowedBlock):
     """Extract a logical qubit from the specified index in the block."""
 
 
