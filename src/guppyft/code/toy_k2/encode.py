@@ -1024,7 +1024,7 @@ class ToyK2Builder:
                 ("tket.quantum", "QFree"): ("guppyft.toy_k2.ops", "free_dynq", []),
                 ("tket.measurement", "Read"): (
                     "guppyft.toy_k2.ops",
-                    "decode_qubit_type",
+                    "decode_qubit_measurement",
                     [],
                 ),
                 ("tket.quantum", "X"): ("guppyft.toy_k2.ops", "x_dynq", []),
