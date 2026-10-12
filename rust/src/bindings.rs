@@ -87,7 +87,7 @@ mod _bindings {
     #[pyfunction]
     fn _implement_ops(
         rs_hugr: &mut RsHugr,
-        op_replacements: BTreeMap<implement_ops::OpId, (Option<RsHugr>, String)>,
+        op_replacements: BTreeMap<implement_ops::OpId, (Option<RsHugr>, String, Vec<usize>)>,
         replaceable_types: HashSet<implement_ops::TypeId>,
         check_eliminated: Vec<String>,
     ) -> PyResult<()> {
@@ -95,7 +95,7 @@ mod _bindings {
 
         let new_ops = op_replacements
             .into_iter()
-            .map(|(k, (rs_hugr, func_name))| (k, (rs_hugr.map(|x| x.hugr), func_name)))
+            .map(|(k, (rs_hugr, func_name, bind))| (k, (rs_hugr.map(|x| x.hugr), func_name, bind)))
             .collect();
 
         let ty_hashset = replaceable_types

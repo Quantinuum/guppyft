@@ -15,6 +15,7 @@ from tket.passes import Normalize
 
 from ._compile import LogicalCompiler, ReplacementCompiler, UncompilableError
 from ._implement_ops import (
+    BindGenerics,
     ImplementOps,
     ImplementOpsSpec,
     OpReplacements,
@@ -23,6 +24,7 @@ from ._implement_ops import (
 )
 
 __all__ = [
+    "BindGenerics",
     "EncodeSpec",
     "EncoderParams",
     "ImplementOps",
