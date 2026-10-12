@@ -23,6 +23,8 @@ from guppyft.code.iceberg.logical import (
     measure_all,
     restore,
     try_alloc_dynq,
+    xx_phase_dynq,
+    yy_phase_dynq,
     zz_phase_between_blocks,
     zz_phase_dynq,
 )
@@ -364,3 +366,67 @@ def test_guppy_types() -> None:
     assert borrow_output0.type_def.name == "borrowed_block"
     assert restore_input0.type_def.name == "borrowed_block"
     assert restore_output0.type_def.name == "block"
+
+
+def test_dynamic_qubit_bindings_resolve_and_normalize() -> None:
+    """Compile every dynamic-qubit binding through the public logical API."""
+
+    @guppy
+    def main() -> None:
+        q0 = Qubit()
+        q1 = Qubit()
+        q0.x()
+        q0.y()
+        q0.z()
+        q0.rx(0.25)
+        q0.ry(0.5)
+        q0.rz(0.75)
+        xx_phase_dynq(q0, q1, 0.25)
+        yy_phase_dynq(q0, q1, 0.5)
+        zz_phase_dynq(q0, q1, 0.75)
+        cx_dynq(q0, q1)
+        mx = q0.try_measure_x()
+        if mx.is_some():
+            result("x", mx.unwrap().read())
+        else:
+            mx.unwrap_nothing()
+        mz = q1.try_measure_z()
+        if mz.is_some():
+            result("z", mz.unwrap().read())
+        else:
+            mz.unwrap_nothing()
+        allocated = try_alloc_dynq()
+        if allocated.is_some():
+            free_dynq(allocated.unwrap())
+        else:
+            allocated.unwrap_nothing()
+        free_dynq(q0)
+        free_dynq(q1)
+
+    h = main.compile().modules[0]
+    InlineFunctions()(h, inplace=True)
+    Normalize()(h, inplace=True)
+    assert not h.used_extensions().unresolved_extensions
+    dynamic_ops = {
+        data.op.op_def().name
+        for _, data in h.nodes()
+        if isinstance(data.op, ExtOp)
+        and data.op.op_def().get_extension().name == "guppyft.iceberg.ops"
+    }
+    assert dynamic_ops == {
+        "alloc_dynq",
+        "try_alloc_dynq",
+        "free_dynq",
+        "x_dynq",
+        "y_dynq",
+        "z_dynq",
+        "rx_dynq",
+        "ry_dynq",
+        "rz_dynq",
+        "xx_phase_dynq",
+        "yy_phase_dynq",
+        "zz_phase_dynq",
+        "cx_dynq",
+        "try_measure_x_dynq",
+        "try_measure_z_dynq",
+    }
