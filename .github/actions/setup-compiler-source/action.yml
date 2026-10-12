@@ -9,9 +9,10 @@ runs:
       run: |
         python - <<'PYCODE' >> "$GITHUB_OUTPUT"
         import tomllib
-        with open("pyproject.toml", "rb") as f:
-            sources = tomllib.load(f)["tool"]["uv"]["sources"]
-        print("revision=" + sources["selene-hugr-qis-compiler"]["rev"])
+        with open("uv.lock", "rb") as f:
+            packages = tomllib.load(f)["package"]
+        compiler = next(p for p in packages if p["name"] == "selene-hugr-qis-compiler")
+        print("revision=" + compiler["source"]["git"].rsplit("#", 1)[1])
         PYCODE
     - name: Fetch locked build environment
       shell: bash

@@ -17,7 +17,7 @@ resolution-markers = [
 ]
 
 [manifest]
-overrides = [{ name = "hugr", git = "https://github.com/Quantinuum/hugr.git?subdirectory=hugr-py&rev=793b1014f490eca899cae0f49d46b3187bfc8da6" }]
+overrides = [{ name = "hugr", git = "https://github.com/Quantinuum/hugr.git?subdirectory=hugr-py&branch=doug%2Fintegration-pointers-cfg" }]
 
 [[package]]
 name = "accessible-pygments"
@@ -608,13 +608,13 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "guppylang", git = "https://github.com/Quantinuum/guppylang.git?subdirectory=guppylang&rev=bb02f8e8989872590cae287af32731c5f7552890" },
-    { name = "guppylang-internals", git = "https://github.com/Quantinuum/guppylang.git?subdirectory=guppylang-internals&rev=bb02f8e8989872590cae287af32731c5f7552890" },
-    { name = "hugr", git = "https://github.com/Quantinuum/hugr.git?subdirectory=hugr-py&rev=793b1014f490eca899cae0f49d46b3187bfc8da6" },
-    { name = "selene-hugr-qis-compiler", git = "https://github.com/Quantinuum/tket2.git?subdirectory=tket%2Fqis-compiler&rev=1934838e803de3b724397c3d57897d589302559e" },
+    { name = "guppylang", git = "https://github.com/Quantinuum/guppylang.git?subdirectory=guppylang&branch=doug%2Fstdlib-pointers" },
+    { name = "guppylang-internals", git = "https://github.com/Quantinuum/guppylang.git?subdirectory=guppylang-internals&branch=doug%2Fstdlib-pointers" },
+    { name = "hugr", git = "https://github.com/Quantinuum/hugr.git?subdirectory=hugr-py&branch=doug%2Fintegration-pointers-cfg" },
+    { name = "selene-hugr-qis-compiler", git = "https://github.com/Quantinuum/tket2.git?subdirectory=tket%2Fqis-compiler&branch=doug%2Fintegration-ptr-globals-futures" },
     { name = "selene-sim", specifier = ">=0.3.0" },
-    { name = "tket", git = "https://github.com/Quantinuum/tket2.git?subdirectory=tket%2Ftket-py&rev=1934838e803de3b724397c3d57897d589302559e" },
-    { name = "tket-exts", git = "https://github.com/Quantinuum/tket2.git?subdirectory=tket%2Ftket-exts&rev=1934838e803de3b724397c3d57897d589302559e" },
+    { name = "tket", git = "https://github.com/Quantinuum/tket2.git?subdirectory=tket%2Ftket-py&branch=doug%2Fintegration-ptr-globals-futures" },
+    { name = "tket-exts", git = "https://github.com/Quantinuum/tket2.git?subdirectory=tket%2Ftket-exts&branch=doug%2Fintegration-ptr-globals-futures" },
     { name = "zixy", specifier = "~=0.4.0" },
 ]
 
@@ -652,7 +652,7 @@ test = [
 [[package]]
 name = "guppylang"
 version = "1.1.2"
-source = { git = "https://github.com/Quantinuum/guppylang.git?subdirectory=guppylang&rev=bb02f8e8989872590cae287af32731c5f7552890#bb02f8e8989872590cae287af32731c5f7552890" }
+source = { git = "https://github.com/Quantinuum/guppylang.git?subdirectory=guppylang&branch=doug%2Fstdlib-pointers#bb02f8e8989872590cae287af32731c5f7552890" }
 dependencies = [
     { name = "guppylang-internals" },
     { name = "numpy" },
@@ -665,7 +665,7 @@ dependencies = [
 [[package]]
 name = "guppylang-internals"
 version = "1.1.2"
-source = { git = "https://github.com/Quantinuum/guppylang.git?subdirectory=guppylang-internals&rev=bb02f8e8989872590cae287af32731c5f7552890#bb02f8e8989872590cae287af32731c5f7552890" }
+source = { git = "https://github.com/Quantinuum/guppylang.git?subdirectory=guppylang-internals&branch=doug%2Fstdlib-pointers#bb02f8e8989872590cae287af32731c5f7552890" }
 dependencies = [
     { name = "hugr" },
     { name = "networkx" },
@@ -679,7 +679,7 @@ dependencies = [
 [[package]]
 name = "hugr"
 version = "0.18.8"
-source = { git = "https://github.com/Quantinuum/hugr.git?subdirectory=hugr-py&rev=793b1014f490eca899cae0f49d46b3187bfc8da6#793b1014f490eca899cae0f49d46b3187bfc8da6" }
+source = { git = "https://github.com/Quantinuum/hugr.git?subdirectory=hugr-py&branch=doug%2Fintegration-pointers-cfg#793b1014f490eca899cae0f49d46b3187bfc8da6" }
 dependencies = [
     { name = "graphviz" },
     { name = "pydantic" },
@@ -2162,7 +2162,7 @@ wheels = [
 [[package]]
 name = "selene-hugr-qis-compiler"
 version = "0.5.1"
-source = { git = "https://github.com/Quantinuum/tket2.git?subdirectory=tket%2Fqis-compiler&rev=1934838e803de3b724397c3d57897d589302559e#1934838e803de3b724397c3d57897d589302559e" }
+source = { git = "https://github.com/Quantinuum/tket2.git?subdirectory=tket%2Fqis-compiler&branch=doug%2Fintegration-ptr-globals-futures#63344c7fc93e3fe710c0da9aed8111134b0f3321" }
 dependencies = [
     { name = "hugr" },
     { name = "typing-extensions" },
@@ -2424,7 +2424,7 @@ wheels = [
 [[package]]
 name = "tket"
 version = "0.15.11"
-source = { git = "https://github.com/Quantinuum/tket2.git?subdirectory=tket%2Ftket-py&rev=1934838e803de3b724397c3d57897d589302559e#1934838e803de3b724397c3d57897d589302559e" }
+source = { git = "https://github.com/Quantinuum/tket2.git?subdirectory=tket%2Ftket-py&branch=doug%2Fintegration-ptr-globals-futures#63344c7fc93e3fe710c0da9aed8111134b0f3321" }
 dependencies = [
     { name = "hugr" },
     { name = "tket-eccs" },
@@ -2439,12 +2439,12 @@ pytket = [
 [[package]]
 name = "tket-eccs"
 version = "0.6.0"
-source = { git = "https://github.com/Quantinuum/tket2.git?subdirectory=tket%2Ftket-eccs&rev=1934838e803de3b724397c3d57897d589302559e#1934838e803de3b724397c3d57897d589302559e" }
+source = { git = "https://github.com/Quantinuum/tket2.git?subdirectory=tket%2Ftket-eccs&branch=doug%2Fintegration-ptr-globals-futures#63344c7fc93e3fe710c0da9aed8111134b0f3321" }
 
 [[package]]
 name = "tket-exts"
 version = "0.14.3"
-source = { git = "https://github.com/Quantinuum/tket2.git?subdirectory=tket%2Ftket-exts&rev=1934838e803de3b724397c3d57897d589302559e#1934838e803de3b724397c3d57897d589302559e" }
+source = { git = "https://github.com/Quantinuum/tket2.git?subdirectory=tket%2Ftket-exts&branch=doug%2Fintegration-ptr-globals-futures#63344c7fc93e3fe710c0da9aed8111134b0f3321" }
 dependencies = [
     { name = "hugr" },
 ]
