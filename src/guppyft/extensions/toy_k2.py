@@ -87,7 +87,9 @@ class ToyK2OpsExtension:
 
     def __call__(self) -> Extension:
         """Returns the ToyK2 ops extension."""
-        return load_extension("guppyft.toy_k2.ops", ["guppyft.std.types"])
+        return load_extension(
+            "guppyft.toy_k2.ops", ["guppyft.std.types", "guppyft.toy_k2.types"]
+        )
 
     @functools.cached_property
     def x_def(self) -> OpDef:
