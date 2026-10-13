@@ -251,7 +251,7 @@ class Block(Generic[N]):  # type: ignore[misc]
 class Qubit:
     """A dynamic logical qubit from an Iceberg logical block."""
 
-    @hugr_op(logical_op(iceberg_ops.alloc_dynq), effects=[Effect.ANY])
+    @hugr_op(logical_op(iceberg_ops.alloc_dynq_def), effects=[Effect.ANY])
     @no_type_check
     def __new__() -> "Qubit":
         """Allocate a dynamic logical qubit."""
@@ -585,85 +585,85 @@ def try_measure_one_z(block: Block[N], i: int) -> Option[Measurement]:
     index `i`."""
 
 
-@hugr_op(logical_op(iceberg_ops.try_alloc_dynq), effects=[Effect.ANY])
+@hugr_op(logical_op(iceberg_ops.try_alloc_dynq_def), effects=[Effect.ANY])
 @no_type_check
 def try_alloc_dynq() -> Option[Qubit]:
     """Fallible allocation of a qubit in the zero state."""
 
 
-@hugr_op(logical_op(iceberg_ops.free_dynq), effects=[Effect.ANY])
+@hugr_op(logical_op(iceberg_ops.free_dynq_def), effects=[Effect.ANY])
 @no_type_check
 def free_dynq(qubit: Qubit @ owned) -> None:
     """Free `qubit`."""
 
 
-@hugr_op(logical_op(iceberg_ops.x_dynq))
+@hugr_op(logical_op(iceberg_ops.x_dynq_def))
 @no_type_check
 def x_dynq(qubit: Qubit) -> None:
     """X gate."""
 
 
-@hugr_op(logical_op(iceberg_ops.y_dynq))
+@hugr_op(logical_op(iceberg_ops.y_dynq_def))
 @no_type_check
 def y_dynq(qubit: Qubit) -> None:
     """Y gate."""
 
 
-@hugr_op(logical_op(iceberg_ops.z_dynq))
+@hugr_op(logical_op(iceberg_ops.z_dynq_def))
 @no_type_check
 def z_dynq(qubit: Qubit) -> None:
     """Z gate."""
 
 
-@hugr_op(logical_op(iceberg_ops.rx_dynq))
+@hugr_op(logical_op(iceberg_ops.rx_dynq_def))
 @no_type_check
 def rx_dynq(qubit: Qubit, phase: float) -> None:
     """Rx rotation of `phase` radians."""
 
 
-@hugr_op(logical_op(iceberg_ops.ry_dynq))
+@hugr_op(logical_op(iceberg_ops.ry_dynq_def))
 @no_type_check
 def ry_dynq(qubit: Qubit, phase: float) -> None:
     """Ry rotation of `phase` radians."""
 
 
-@hugr_op(logical_op(iceberg_ops.rz_dynq))
+@hugr_op(logical_op(iceberg_ops.rz_dynq_def))
 @no_type_check
 def rz_dynq(qubit: Qubit, phase: float) -> None:
     """Rz rotation of `phase` radians."""
 
 
-@hugr_op(logical_op(iceberg_ops.try_measure_x_dynq))
+@hugr_op(logical_op(iceberg_ops.try_measure_x_dynq_def))
 @no_type_check
 def try_measure_x_dynq(qubit: Qubit) -> Option[Measurement]:
     """Fallible non-destructive measurement in the X basis."""
 
 
-@hugr_op(logical_op(iceberg_ops.try_measure_z_dynq))
+@hugr_op(logical_op(iceberg_ops.try_measure_z_dynq_def))
 @no_type_check
 def try_measure_z_dynq(qubit: Qubit) -> Option[Measurement]:
     """Fallible non-destructive measurement in the Z basis."""
 
 
-@hugr_op(logical_op(iceberg_ops.xx_phase_dynq))
+@hugr_op(logical_op(iceberg_ops.xx_phase_dynq_def))
 @no_type_check
 def xx_phase_dynq(qubit0: Qubit, qubit1: Qubit, phase: float) -> None:
     """XXPhase rotation of `phase` radians on two qubits."""
 
 
-@hugr_op(logical_op(iceberg_ops.yy_phase_dynq))
+@hugr_op(logical_op(iceberg_ops.yy_phase_dynq_def))
 @no_type_check
 def yy_phase_dynq(qubit0: Qubit, qubit1: Qubit, phase: float) -> None:
     """YYPhase rotation of `phase` radians on two qubits."""
 
 
-@hugr_op(logical_op(iceberg_ops.zz_phase_dynq))
+@hugr_op(logical_op(iceberg_ops.zz_phase_dynq_def))
 @no_type_check
 def zz_phase_dynq(qubit0: Qubit, qubit1: Qubit, phase: float) -> None:
     """ZZPhase rotation of `phase` radians on two qubits."""
 
 
-@hugr_op(logical_op(iceberg_ops.cx_dynq))
+@hugr_op(logical_op(iceberg_ops.cx_dynq_def))
 @no_type_check
 def cx_dynq(qubit0: Qubit, qubit1: Qubit) -> None:
     """CX gate on `qubit0` (control) and `qubit1` (target)."""
