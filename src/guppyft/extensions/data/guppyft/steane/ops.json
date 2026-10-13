@@ -544,7 +544,7 @@
     "y": {
       "extension": "guppyft.steane.ops",
       "name": "y",
-      "description": "Z gate.",
+      "description": "Y gate.",
       "signature": {
         "params": [],
         "body": {
@@ -575,7 +575,7 @@
     "z": {
       "extension": "guppyft.steane.ops",
       "name": "z",
-      "description": "Y gate.",
+      "description": "Z gate.",
       "signature": {
         "params": [],
         "body": {
