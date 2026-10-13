@@ -1,6 +1,6 @@
 [project]
 name = "guppyft"
-version = "0.2.0"
+version = "0.3.1"
 description = "Tools for fault-tolerant quantum computing in the Guppy language"
 requires-python = ">=3.12,<4"
 readme = "package.md"
@@ -60,7 +60,7 @@ examples = [
 lint = [
     "pre-commit>=4.6.2,<5",
     "ruff>=0.16.6",
-    "mypy>=2.3.1",
+    "mypy>=2.4.0",
 ]
 test = [
     "pytest>=9.1.0",

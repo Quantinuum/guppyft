@@ -71,10 +71,15 @@ impl ImplementOpsPass {
         }
     }
 
-    fn check_all_ops_eliminated<H: HugrMut<Node = Node>>(
-        &self,
-        hugr: &mut H,
-    ) -> anyhow::Result<()> {
+    fn check_all_ops_eliminated<H: HugrView<Node = Node>>(&self, hugr: &H) -> anyhow::Result<()> {
+        if !self
+            .check_eliminated
+            .iter()
+            .any(|ext_id| hugr.extensions().contains(ext_id))
+        {
+            return Ok(());
+        }
+
         for node in hugr.nodes() {
             let Some(ext_op) = hugr.get_optype(node).as_extension_op() else {
                 continue;
@@ -107,7 +112,7 @@ impl std::error::Error for ImplementOpsError {
     }
 }
 
-impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
+impl<H: HugrMut<Node = Node> + AsMut<Hugr>> ComposablePass<H> for ImplementOpsPass {
     type Error = ImplementOpsError;
     type Result = ();
 
@@ -117,7 +122,10 @@ impl<H: HugrMut<Node = Node>> ComposablePass<H> for ImplementOpsPass {
 }
 
 impl ImplementOpsPass {
-    fn run_impl<H: HugrMut<Node = Node>>(&self, hugr: &mut H) -> Result<(), anyhow::Error> {
+    fn run_impl<H: HugrMut<Node = Node> + AsMut<Hugr>>(
+        &self,
+        hugr: &mut H,
+    ) -> Result<(), anyhow::Error> {
         #[cfg(debug_assertions)]
         {
             for ext_op in hugr
@@ -182,7 +190,6 @@ impl ImplementOpsPass {
                     for (src_ty, tgt_ty) in src_sig
                         .input
                         .iter()
-                        // Skip some arguments since they are bound from generic args in the op
                         .zip(tgt_sig.input.iter())
                         .chain(src_sig.output.iter().zip(tgt_sig.output.iter()))
                     {
@@ -247,7 +254,10 @@ fn extract_func_node(func_hugr: &Hugr, func_name: &str) -> Option<Node> {
 }
 
 fn unpack_type(ty: &Type) -> Option<Vec<Type>> {
-    if let Some(row) = ty.as_sum().and_then(SumType::as_tuple) {
+    if let Some(row) = ty
+        .as_sum()
+        .and_then(|sum_type| SumType::as_tuple(sum_type).or_else(|| SumType::as_option(sum_type)))
+    {
         Some(
             TypeRow::try_from(row.clone())
                 .expect("unexpected row variable.")
@@ -422,7 +432,10 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
         Ok(())
     }
 
-    pub fn finish(mut self) -> Result<(), OpReplacementError> {
+    pub fn finish(mut self) -> anyhow::Result<()>
+    where
+        H: AsMut<Hugr>,
+    {
         // In an optimal scenario we would use the type replacer to insert the function alongside
         // a call. However, since there is no way to stop the type replacer from recursively
         // processing the RHS at the moment, we have to resort to this hacky approach of manually
@@ -497,6 +510,12 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
             let call_in_port = self.hugr.get_optype(node).static_input_port().unwrap();
             self.hugr.connect(*func_node, func_port, node, call_in_port);
         }
+
+        let registry = self.hugr.extensions().clone();
+        self.hugr
+            .as_mut()
+            .resolve_extension_defs(&registry)
+            .context("Could not resolve extensions after replacing ops")?;
 
         Ok(())
     }

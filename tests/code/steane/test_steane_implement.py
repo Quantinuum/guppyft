@@ -85,7 +85,7 @@ def test_qec_cycle() -> None:
     qec_cycle = next(
         node
         for node, node_data in hugr.items()
-        if getattr(node_data.op, "f_name", None) == "guppyft.steane._qec_cycle"
+        if getattr(node_data.op, "f_name", None) == "link.guppyft.steane.ops.qec_cycle"
     )
     assert any(
         isinstance(hugr[node].op, ExtOp) and "tket.globals.map" in hugr[node].op.name()
