@@ -1,0 +1,41 @@
+name: Set up compiler source dependencies
+description: Prepare the locked LLVM and tket libraries for native Git dependencies.
+runs:
+  using: composite
+  steps:
+    - name: Read compiler revision
+      id: compiler
+      shell: bash
+      run: |
+        python - <<'PYCODE' >> "$GITHUB_OUTPUT"
+        import tomllib
+        with open("uv.lock", "rb") as f:
+            packages = tomllib.load(f)["package"]
+        compiler = next(p for p in packages if p["name"] == "selene-hugr-qis-compiler")
+        print("revision=" + compiler["source"]["git"].rsplit("#", 1)[1])
+        PYCODE
+    - name: Fetch locked build environment
+      shell: bash
+      env:
+        COMPILER_REVISION: ${{ steps.compiler.outputs.revision }}
+      run: |
+        build_tools="$RUNNER_TEMP/guppyft-compiler-tools"
+        build_env="$RUNNER_TEMP/guppyft-hugrenv"
+        mkdir -p "$build_tools/scripts"
+        for file in scripts/fetch_hugrenv.py hugrenv.lock; do
+          curl --fail --location --retry 3 \
+            "https://raw.githubusercontent.com/Quantinuum/tket2/$COMPILER_REVISION/$file" \
+            --output "$build_tools/$file"
+        done
+        python "$build_tools/scripts/fetch_hugrenv.py" "$build_env"
+        {
+          echo "HUGRENV_PATH=$build_env"
+          echo "TKET_C_API_PATH=$build_env"
+          echo "LLVM_SYS_211_PREFIX=$build_env"
+          echo "LIBCLANG_PATH=$build_env/lib"
+          echo "LD_LIBRARY_PATH=$build_env/lib:$build_env/lib64:${LD_LIBRARY_PATH:-}"
+          echo "CARGO_BUILD_JOBS=2"
+          echo "CARGO_INCREMENTAL=0"
+          echo "CARGO_PROFILE_DEV_DEBUG=0"
+        } >> "$GITHUB_ENV"
+        echo "$build_env/bin" >> "$GITHUB_PATH"

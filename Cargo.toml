@@ -10,9 +10,9 @@ rust-version = "1.91"
 edition = "2024"
 
 [workspace.dependencies]
-tket = "0.22.0"
-hugr = "0.30.2"
-hugr-core = "0.30.2"
+tket = { git = "https://github.com/Quantinuum/tket2", branch = "doug/integration-ptr-globals-futures" }
+hugr = { git = "https://github.com/quantinuum/hugr", branch = "doug/integration-pointers-cfg" }
+hugr-core = { git = "https://github.com/quantinuum/hugr", branch = "doug/integration-pointers-cfg" }
 itertools = "0.15.0"
 derive_more = { version = "2", features = ["display", "from"] }
 anyhow = "1.0.102"
@@ -25,3 +25,11 @@ inherits = "release"
 lto = "fat"
 strip = "symbols"
 panic = "abort"
+
+# Dependency patches are not transitive; mirror the required root HUGR patch.
+[patch.crates-io]
+hugr = { git = "https://github.com/quantinuum/hugr", branch = "doug/integration-pointers-cfg" }
+hugr-core = { git = "https://github.com/quantinuum/hugr", branch = "doug/integration-pointers-cfg" }
+hugr-model = { git = "https://github.com/quantinuum/hugr", branch = "doug/integration-pointers-cfg" }
+hugr-cli = { git = "https://github.com/quantinuum/hugr", branch = "doug/integration-pointers-cfg" }
+hugr-llvm = { git = "https://github.com/quantinuum/hugr", branch = "doug/integration-pointers-cfg" }

@@ -21,6 +21,9 @@ jobs:
       steps:
         - uses: actions/checkout@v7
 
+        - name: Install stable Rust toolchain
+          uses: dtolnay/rust-toolchain@stable
+
         - uses: extractions/setup-just@v4
           with:
             just-version: '1.58.0'
@@ -30,6 +33,9 @@ jobs:
           with:
               enable-cache: true
               version: "0.11.3"
+
+        - name: Set up compiler source dependencies
+          uses: ./.github/actions/setup-compiler-source
 
         - name: Run the docs build
           run: just build-docs

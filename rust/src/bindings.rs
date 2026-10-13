@@ -85,6 +85,18 @@ mod _bindings {
     }
 
     #[pyfunction]
+    fn _normalize(rs_hugr: &mut RsHugr) -> PyResult<()> {
+        tket::passes::Normalize::default()
+            .run(&mut rs_hugr.hugr)
+            .context("Could not normalize the application")?;
+        rs_hugr
+            .hugr
+            .validate()
+            .context("Invalid normalized application")?;
+        Ok(())
+    }
+
+    #[pyfunction]
     fn _implement_ops(
         rs_hugr: &mut RsHugr,
         op_replacements: BTreeMap<implement_ops::OpId, (Option<RsHugr>, String)>,

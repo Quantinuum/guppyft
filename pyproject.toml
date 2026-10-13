@@ -33,6 +33,7 @@ dependencies = [
     "tket-exts>=0.14.0",
     "zixy~=0.4.0",
     "selene-sim>=0.3.0",
+    "selene-hugr-qis-compiler>=0.5.1",
 ]
 
 [project.urls]
@@ -149,3 +150,16 @@ test-command = [
 CARGO_INCREMENTAL = '0'
 CARGO_NET_GIT_FETCH_WITH_CLI = 'true'
 CARGO_PROFILE_RELEASE_DEBUG = 'false'
+
+[tool.uv]
+override-dependencies = [
+    "hugr @ git+https://github.com/Quantinuum/hugr.git@doug/integration-pointers-cfg#subdirectory=hugr-py",
+]
+
+[tool.uv.sources]
+guppylang = { git = "https://github.com/Quantinuum/guppylang.git", branch = "doug/stdlib-pointers", subdirectory = "guppylang" }
+guppylang-internals = { git = "https://github.com/Quantinuum/guppylang.git", branch = "doug/stdlib-pointers", subdirectory = "guppylang-internals" }
+hugr = { git = "https://github.com/Quantinuum/hugr.git", branch = "doug/integration-pointers-cfg", subdirectory = "hugr-py" }
+tket = { git = "https://github.com/Quantinuum/tket2.git", branch = "doug/integration-ptr-globals-futures", subdirectory = "tket/tket-py" }
+selene-hugr-qis-compiler = { git = "https://github.com/Quantinuum/tket2.git", branch = "doug/integration-ptr-globals-futures", subdirectory = "tket/qis-compiler" }
+tket-exts = { git = "https://github.com/Quantinuum/tket2.git", branch = "doug/integration-ptr-globals-futures", subdirectory = "tket/tket-exts" }

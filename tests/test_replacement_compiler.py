@@ -4,8 +4,9 @@ from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.platform import output
 from guppylang.std.quantum import h, measure, qubit
-from hugr import Hugr
+from hugr import Hugr, ops
 from hugr.build import Module
+from hugr.package import Package
 from hugr.std import _std_extensions
 
 from guppyft.encode import ReplacementCompiler
@@ -47,3 +48,27 @@ def test_replace_with_wrapped() -> None:
 
     pkg = main.with_minimal_opt().compile()
     compiler.compile(pkg)  # Smoke test
+
+
+def test_replacement_preserves_cfg_outputs() -> None:
+    """Keep the shared CFG output tail across the application binding boundary."""
+
+    @guppy
+    def conditional(q: qubit, condition: bool) -> None:
+        if condition:
+            h(q)
+
+    original = conditional.with_minimal_opt().compile_function()
+    compiler = ReplacementCompiler(op_replacements={})
+    replaced = compiler.compile(original)
+
+    def block_signatures(pkg: Package) -> list[tuple[Any, Any]]:
+        return [
+            (data.op.sum_ty, data.op.other_outputs)
+            for _, data in pkg.modules[0].nodes()
+            if isinstance(data.op, ops.DataflowBlock)
+        ]
+
+    assert block_signatures(replaced) == block_signatures(original)
+    # A second application pass validates the returned graph before serialization.
+    compiler.compile(replaced)

@@ -157,3 +157,7 @@ devenv.local.nix
 .envrc
 
 _build
+
+.venv-ptr-main/
+.cargo-ptr-main/
+target-ptr-main/

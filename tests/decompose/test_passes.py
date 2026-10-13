@@ -34,7 +34,7 @@ def test_decompose_toffoli(
         output("ctrl1", measure(ctrl1).read())
         output("target", measure(target).read())
 
-    pkg = main.compile()
+    pkg = main.with_minimal_opt().compile()
     ToffoliDecomposer().run(pkg.modules[0], inplace=True)
 
     shots = EmulatorBuilder().build(pkg, n_qubits=3).run().collated_shots()
