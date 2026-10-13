@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, Protocol
+from typing import Any, ClassVar, Protocol
 
 from guppylang.defs import GuppyFunctionDefinition
 from hugr import Hugr
@@ -42,6 +42,8 @@ class ReplacementCompiler(LogicalCompiler):
     See `guppyft._bindings._run_replacement_compiler` for semantic details.
     """
 
+    unsupported_extensions: ClassVar[frozenset[str]] = frozenset(["tket.debug"])
+
     op_replacements: dict[tuple[str, str], tuple[str, str, list[int | str]]]
     """Maps each source `(extension_name, op_name)` pair (taking no type args)
     to a target `(extension_name, op_name, args)` triple, where `args` is the
@@ -80,8 +82,7 @@ class ReplacementCompiler(LogicalCompiler):
     def check_may_compile(self, pkg: Package) -> UncompilableError | None:
         assert len(pkg.modules) == 1
 
-        unsupported_extensions = frozenset(["tket.debug"])
-        used_unsupported_extensions = unsupported_extensions & frozenset(
+        used_unsupported_extensions = self.unsupported_extensions & frozenset(
             pkg.used_extensions().ids()
         )
         if used_unsupported_extensions:
