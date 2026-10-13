@@ -44,9 +44,9 @@ pub enum SteaneOpDef {
     qec_cycle,
     /// X gate.
     x,
-    /// Z gate.
-    y,
     /// Y gate.
+    y,
+    /// Z gate.
     z,
     /// H gate.
     h,
