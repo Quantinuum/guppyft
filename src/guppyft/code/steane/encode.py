@@ -231,10 +231,10 @@ class SteaneBuilder:
 
         def _register_op_replacement(
             op_def: OpDef,
-        ) -> Callable[[Callable[[Any], Any]], GuppyFunctionDefinition[Any, Any]]:
+        ) -> Callable[[Callable[..., Any]], GuppyFunctionDefinition[Any, Any]]:
             @custom_guppy_decorator
             def decorator(
-                func: Callable[[Any], Any],
+                func: Callable[..., Any],
             ) -> GuppyFunctionDefinition[Any, Any]:
                 # Generate guppy function
                 name = f"link.{op_def.qualified_name()}"
