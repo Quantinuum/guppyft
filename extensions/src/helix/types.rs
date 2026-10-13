@@ -1,9 +1,10 @@
-//! Types for logical operations on the fixed [[20, 2, 6]] C4-Helix code.
+//! Types for logical operations on the [[20, 2, 6]] C4-Helix code.
 //!
 //! A `block` owns two logical qubits, labelled 0 and 1. The `qubit` type
-//! represents an independently owned logical qubit for future dynamic-qubit
-//! operations; this extension does not yet provide borrowing or allocation
-//! operations for it. Both types are linear and have no type parameters.
+//! represents an independently owned logical qubit whose block and position
+//! are assigned at runtime. `split` and `join` convert between a block and
+//! its two dynamic logical qubits, preserving their joint state. Both types
+//! are linear and have no type parameters.
 use std::sync::{Arc, LazyLock};
 
 use hugr::{
@@ -38,7 +39,7 @@ pub fn block_type() -> Type {
     .into()
 }
 
-/// Type of a dynamic Helix logical qubit, reserved for future operations.
+/// Type of a dynamic Helix logical qubit with runtime block membership.
 pub fn dynamic_logical_qubit_type() -> Type {
     CustomType::new(
         QUBIT_TYPENAME,

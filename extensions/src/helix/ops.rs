@@ -22,7 +22,7 @@ use hugr::{
     types::{Signature, TypeArg},
 };
 
-use super::types::block_type;
+use super::types::{block_type, dynamic_logical_qubit_type};
 use crate::std::types::logical_measurement_type;
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
@@ -81,6 +81,46 @@ pub enum HelixOpDef {
     /// Perform syndrome extraction and recovery (or a Pauli-frame update).
     /// Ideally preserves the logical state, including external entanglement.
     qec_cycle,
+    /// Allocate a dynamic logical qubit in the |0> state.
+    /// Its physical block and logical position are assigned at runtime.
+    alloc_dynq,
+    /// Discard a dynamic logical qubit in any state without changing its partner.
+    free_dynq,
+    /// Apply logical X to a dynamic qubit, leaving its block partner unchanged.
+    x_dynq,
+    /// Apply logical Y to a dynamic qubit, leaving its block partner unchanged.
+    y_dynq,
+    /// Apply logical Z to a dynamic qubit, leaving its block partner unchanged.
+    z_dynq,
+    /// Apply logical Hadamard to a dynamic qubit, leaving its block partner unchanged.
+    h_dynq,
+    /// Apply logical S = diag(1, i) to a dynamic qubit, leaving its partner unchanged.
+    s_dynq,
+    /// Apply logical S dagger = diag(1, -i) to a dynamic qubit.
+    sdg_dynq,
+    /// Apply logical CX with the first dynamic qubit controlling the second.
+    /// The inputs may belong to the same block or different blocks.
+    cx_dynq,
+    /// Apply logical CZ to two dynamic qubits, regardless of block membership.
+    cz_dynq,
+    /// Exchange the logical states of two dynamic qubits, preserving output order.
+    swap_dynq,
+    /// Destructively measure a dynamic qubit in the X basis, preserving its partner.
+    /// The decoded bit b denotes eigenvalue (-1)^b.
+    measure_x_dynq,
+    /// Destructively measure a dynamic qubit in the Z basis, preserving its partner.
+    /// The decoded bit b denotes eigenvalue (-1)^b.
+    measure_z_dynq,
+    /// Perform QEC on the block containing this dynamic qubit.
+    /// Ideally preserves the state of both logical qubits and external entanglement.
+    qec_cycle_dynq,
+    /// Consume a block and return its logical qubits in order (0, 1).
+    /// Preserves their joint state and entanglement with other resources.
+    split,
+    /// Consume two dynamic qubits and form a block with logical qubits (first, second).
+    /// Preserves their joint state and external entanglement. The runtime must
+    /// arrange the inputs into one block if they are not already colocated.
+    join,
 }
 
 /// Concrete Helix logical operation.
@@ -144,6 +184,15 @@ fn sig_blocks(n_in: usize, n_out: usize, n_indices: usize) -> SignatureFunc {
     Signature::new(inputs, vec![block_type(); n_out]).into()
 }
 
+/// Signature of an operation on independently owned dynamic logical qubits.
+fn sig_dynq(n_in: usize, n_out: usize) -> SignatureFunc {
+    Signature::new(
+        vec![dynamic_logical_qubit_type(); n_in],
+        vec![dynamic_logical_qubit_type(); n_out],
+    )
+    .into()
+}
+
 impl MakeOpDef for HelixOpDef {
     fn opdef_id(&self) -> OpName {
         <&Self as Into<&'static str>>::into(self).into()
@@ -164,6 +213,19 @@ impl MakeOpDef for HelixOpDef {
     fn init_signature(&self, _extension_ref: &Weak<Extension>) -> SignatureFunc {
         use HelixOpDef::*;
         match self {
+            alloc_dynq => sig_dynq(0, 1),
+            free_dynq => sig_dynq(1, 0),
+            x_dynq | y_dynq | z_dynq | h_dynq | s_dynq | sdg_dynq | qec_cycle_dynq => {
+                sig_dynq(1, 1)
+            }
+            cx_dynq | cz_dynq | swap_dynq => sig_dynq(2, 2),
+            measure_x_dynq | measure_z_dynq => Signature::new(
+                [dynamic_logical_qubit_type()],
+                [logical_measurement_type(1)],
+            )
+            .into(),
+            split => Signature::new([block_type()], vec![dynamic_logical_qubit_type(); 2]).into(),
+            join => Signature::new(vec![dynamic_logical_qubit_type(); 2], [block_type()]).into(),
             alloc_zero | alloc_plus => sig_blocks(0, 1, 0),
             free => sig_blocks(1, 0, 0),
             x | y | z => sig_blocks(1, 1, 1),
@@ -191,7 +253,7 @@ pub static EXTENSION: LazyLock<Arc<Extension>> = LazyLock::new(|| {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::helix::types::{EXTENSION as types_extension, dynamic_logical_qubit_type};
+    use crate::helix::types::EXTENSION as types_extension;
     use hugr::{
         HugrView,
         builder::{Dataflow, DataflowSubContainer, HugrBuilder, ModuleBuilder},
@@ -212,7 +274,7 @@ mod tests {
     fn test_helix_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.helix.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 16);
+        assert_eq!(EXTENSION.operations().count(), 32);
     }
 
     #[test]
@@ -248,6 +310,173 @@ mod tests {
             );
         }
         Ok(())
+    }
+
+    #[test]
+    fn test_dynamic_signatures() -> Result<(), Box<dyn Error>> {
+        let block = block_type();
+        let qubit = dynamic_logical_qubit_type();
+        for (name, expected) in [
+            ("alloc_dynq", Signature::new(vec![], [qubit.clone()])),
+            ("free_dynq", Signature::new([qubit.clone()], vec![])),
+            (
+                "split",
+                Signature::new([block.clone()], [qubit.clone(), qubit.clone()]),
+            ),
+            (
+                "join",
+                Signature::new([qubit.clone(), qubit.clone()], [block]),
+            ),
+        ] {
+            assert_eq!(
+                EXTENSION
+                    .instantiate_extension_op(name, [])?
+                    .signature()
+                    .as_ref(),
+                &expected
+            );
+        }
+        for name in [
+            "x_dynq",
+            "y_dynq",
+            "z_dynq",
+            "h_dynq",
+            "s_dynq",
+            "sdg_dynq",
+            "qec_cycle_dynq",
+        ] {
+            assert_eq!(
+                EXTENSION
+                    .instantiate_extension_op(name, [])?
+                    .signature()
+                    .as_ref(),
+                &Signature::new_endo([qubit.clone()])
+            );
+        }
+        for name in ["cx_dynq", "cz_dynq", "swap_dynq"] {
+            assert_eq!(
+                EXTENSION
+                    .instantiate_extension_op(name, [])?
+                    .signature()
+                    .as_ref(),
+                &Signature::new_endo([qubit.clone(), qubit.clone()])
+            );
+        }
+        for name in ["measure_x_dynq", "measure_z_dynq"] {
+            assert_eq!(
+                EXTENSION
+                    .instantiate_extension_op(name, [])?
+                    .signature()
+                    .as_ref(),
+                &Signature::new([qubit.clone()], [logical_measurement_type(1)])
+            );
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn test_dynamic_lifecycle() -> Result<(), Box<dyn Error>> {
+        let mut module = ModuleBuilder::new();
+        let mut function = module.define_function(
+            "main",
+            Signature::new(
+                [block_type()],
+                [
+                    BorrowArray::ty(1, bool_t()),
+                    BorrowArray::ty(1, bool_t()),
+                    block_type(),
+                ],
+            ),
+        )?;
+        let [mut a, mut b] = function
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("split", [])?,
+                function.input_wires(),
+            )?
+            .outputs_arr();
+        for name in ["x_dynq", "y_dynq", "z_dynq", "h_dynq", "s_dynq", "sdg_dynq"] {
+            [a] = function
+                .add_dataflow_op(EXTENSION.instantiate_extension_op(name, [])?, [a])?
+                .outputs_arr();
+        }
+        // Exercise a gate between block partners before introducing an independent qubit.
+        [a, b] = function
+            .add_dataflow_op(EXTENSION.instantiate_extension_op("cx_dynq", [])?, [a, b])?
+            .outputs_arr();
+        let [mut c] = function
+            .add_dataflow_op(EXTENSION.instantiate_extension_op("alloc_dynq", [])?, [])?
+            .outputs_arr();
+        for name in ["cx_dynq", "cz_dynq", "swap_dynq"] {
+            [a, c] = function
+                .add_dataflow_op(EXTENSION.instantiate_extension_op(name, [])?, [a, c])?
+                .outputs_arr();
+        }
+        [c] = function
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("qec_cycle_dynq", [])?,
+                [c],
+            )?
+            .outputs_arr();
+        let [mx] = function
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("measure_x_dynq", [])?,
+                [a],
+            )?
+            .outputs_arr();
+        let [mz] = function
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("measure_z_dynq", [])?,
+                [c],
+            )?
+            .outputs_arr();
+        let decode = crate::std::ops::EXTENSION.instantiate_extension_op("decode", [1.into()])?;
+        let [mx] = function
+            .add_dataflow_op(decode.clone(), [mx])?
+            .outputs_arr();
+        let [mz] = function.add_dataflow_op(decode, [mz])?.outputs_arr();
+        let [d] = function
+            .add_dataflow_op(EXTENSION.instantiate_extension_op("alloc_dynq", [])?, [])?
+            .outputs_arr();
+        let [block] = function
+            .add_dataflow_op(EXTENSION.instantiate_extension_op("join", [])?, [b, d])?
+            .outputs_arr();
+        // Convert back and forth again, exercising linear ownership of both outputs.
+        let [b, d] = function
+            .add_dataflow_op(EXTENSION.instantiate_extension_op("split", [])?, [block])?
+            .outputs_arr();
+        let [block] = function
+            .add_dataflow_op(EXTENSION.instantiate_extension_op("join", [])?, [b, d])?
+            .outputs_arr();
+        let [unused] = function
+            .add_dataflow_op(EXTENSION.instantiate_extension_op("alloc_dynq", [])?, [])?
+            .outputs_arr();
+        function.add_dataflow_op(
+            EXTENSION.instantiate_extension_op("free_dynq", [])?,
+            [unused],
+        )?;
+        function.finish_with_outputs([mx, mz, block])?;
+        module.finish_hugr()?.validate()?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_join_rejects_duplicate_qubit() {
+        let mut module = ModuleBuilder::new();
+        let mut function = module
+            .define_function(
+                "bad_join",
+                Signature::new([dynamic_logical_qubit_type()], [block_type()]),
+            )
+            .unwrap();
+        let [qubit] = function.input_wires_arr();
+        assert!(
+            function
+                .add_dataflow_op(
+                    EXTENSION.instantiate_extension_op("join", []).unwrap(),
+                    [qubit, qubit],
+                )
+                .is_err()
+        );
     }
 
     #[test]
