@@ -79,6 +79,16 @@ class ReplacementCompiler(LogicalCompiler):
 
     def check_may_compile(self, pkg: Package) -> UncompilableError | None:
         assert len(pkg.modules) == 1
+
+        unsupported_extensions = frozenset(["tket.debug"])
+        used_unsupported_extensions = unsupported_extensions & frozenset(
+            pkg.used_extensions().ids()
+        )
+        if used_unsupported_extensions:
+            raise UncompilableError(
+                f"Unsupported extensions found: {used_unsupported_extensions}."
+            )
+
         for node, data in pkg.modules[0].nodes():
             if not isinstance(data.op, ExtOp):
                 continue

@@ -1,4 +1,5 @@
 import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -6,6 +7,7 @@ import pytest
 from guppylang import guppy
 from guppylang.std.angles import pi
 from guppylang.std.builtins import array
+from guppylang.std.debug import state_result
 from guppylang.std.platform import output
 from guppylang.std.qsystem.random import RNG
 from guppylang.std.quantum import (
@@ -301,3 +303,19 @@ def test_steane_encode_suite(request: pytest.FixtureRequest) -> None:
             steane = SteaneBuilder().build(n_blocks=8)
             pkg1 = steane.encode(pkg0, as_bytes=True)
             validate(pkg1)
+
+
+def test_steane_state_result() -> None:
+    @guppy
+    def main() -> None:
+        q = qubit()
+        state_result("q", q)
+        discard(q)
+
+    pkg = main.with_minimal_opt().compile()
+
+    with pytest.raises(
+        UncompilableError,
+        match=re.escape("Unsupported extensions found: frozenset({'tket.debug'})"),
+    ):
+        SteaneBuilder().build(n_blocks=1).compile(pkg)
