@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/Quantinuum/guppyft/compare/v0.3.0...v0.3.1) (2026-10-09)
+
+
+### Bug Fixes
+
+* Add missing local dependencies in the Iceberg ops ([#453](https://github.com/Quantinuum/guppyft/issues/453)) ([a5230e9](https://github.com/Quantinuum/guppyft/commit/a5230e9b60467b5e222a56b2f52539ca2c1f6c6b))
+
 ## [0.3.0](https://github.com/Quantinuum/guppyft/compare/v0.2.0...v0.3.0) (2026-10-08)
 
 

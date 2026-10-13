@@ -96,7 +96,9 @@ class IcebergOpsExtension:
 
     def __call__(self) -> Extension:
         """Returns the Iceberg ops extension."""
-        return load_extension("guppyft.iceberg.ops", ["guppyft.std.types"])
+        return load_extension(
+            "guppyft.iceberg.ops", ["guppyft.std.types", "guppyft.iceberg.types"]
+        )
 
     # x
 
@@ -1090,109 +1092,231 @@ class IcebergOpsExtension:
     # alloc_dynq
 
     @functools.cached_property
-    def alloc_dynq(self) -> OpDef:
-        """Allocate a dynamic logical qubit in the zero state."""
+    def alloc_dynq_def(self) -> OpDef:
+        """Allocate a dynamic logical qubit in the zero state.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `alloc_dynq`."""
         return self().get_op("alloc_dynq")
+
+    @functools.cached_property
+    def alloc_dynq(self) -> ExtOp:
+        """Allocate a dynamic logical qubit in the zero state."""
+        return self.alloc_dynq_def.instantiate([])
 
     # try_alloc_dynq
 
     @functools.cached_property
-    def try_alloc_dynq(self) -> OpDef:
-        """Try to allocate a dynamic logical qubit in the zero state."""
+    def try_alloc_dynq_def(self) -> OpDef:
+        """Try to allocate a dynamic logical qubit in the zero state.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `try_alloc_dynq`."""
         return self().get_op("try_alloc_dynq")
+
+    @functools.cached_property
+    def try_alloc_dynq(self) -> ExtOp:
+        """Try to allocate a dynamic logical qubit in the zero state."""
+        return self.try_alloc_dynq_def.instantiate([])
 
     # free_dynq
 
     @functools.cached_property
-    def free_dynq(self) -> OpDef:
-        """Discard a dynamic logical qubit."""
+    def free_dynq_def(self) -> OpDef:
+        """Discard a dynamic logical qubit.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `free_dynq`."""
         return self().get_op("free_dynq")
+
+    @functools.cached_property
+    def free_dynq(self) -> ExtOp:
+        """Discard a dynamic logical qubit."""
+        return self.free_dynq_def.instantiate([])
 
     # x_dynq
 
     @functools.cached_property
-    def x_dynq(self) -> OpDef:
-        """X gate on a dynamic logical qubit."""
+    def x_dynq_def(self) -> OpDef:
+        """X gate on a dynamic logical qubit.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `x_dynq`."""
         return self().get_op("x_dynq")
+
+    @functools.cached_property
+    def x_dynq(self) -> ExtOp:
+        """X gate on a dynamic logical qubit."""
+        return self.x_dynq_def.instantiate([])
 
     # y_dynq
 
     @functools.cached_property
-    def y_dynq(self) -> OpDef:
-        """Y gate on a dynamic logical qubit."""
+    def y_dynq_def(self) -> OpDef:
+        """Y gate on a dynamic logical qubit.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `y_dynq`."""
         return self().get_op("y_dynq")
+
+    @functools.cached_property
+    def y_dynq(self) -> ExtOp:
+        """Y gate on a dynamic logical qubit."""
+        return self.y_dynq_def.instantiate([])
 
     # z_dynq
 
     @functools.cached_property
-    def z_dynq(self) -> OpDef:
-        """Z gate on a dynamic logical qubit."""
+    def z_dynq_def(self) -> OpDef:
+        """Z gate on a dynamic logical qubit.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `z_dynq`."""
         return self().get_op("z_dynq")
+
+    @functools.cached_property
+    def z_dynq(self) -> ExtOp:
+        """Z gate on a dynamic logical qubit."""
+        return self.z_dynq_def.instantiate([])
 
     # rx_dynq
 
     @functools.cached_property
-    def rx_dynq(self) -> OpDef:
-        """Rx gate on a dynamic logical qubit."""
+    def rx_dynq_def(self) -> OpDef:
+        """Rx gate on a dynamic logical qubit.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `rx_dynq`."""
         return self().get_op("rx_dynq")
+
+    @functools.cached_property
+    def rx_dynq(self) -> ExtOp:
+        """Rx gate on a dynamic logical qubit."""
+        return self.rx_dynq_def.instantiate([])
 
     # ry_dynq
 
     @functools.cached_property
-    def ry_dynq(self) -> OpDef:
-        """Ry gate on a dynamic logical qubit."""
+    def ry_dynq_def(self) -> OpDef:
+        """Ry gate on a dynamic logical qubit.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `ry_dynq`."""
         return self().get_op("ry_dynq")
+
+    @functools.cached_property
+    def ry_dynq(self) -> ExtOp:
+        """Ry gate on a dynamic logical qubit."""
+        return self.ry_dynq_def.instantiate([])
 
     # rz_dynq
 
     @functools.cached_property
-    def rz_dynq(self) -> OpDef:
-        """Rz gate on a dynamic logical qubit."""
+    def rz_dynq_def(self) -> OpDef:
+        """Rz gate on a dynamic logical qubit.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `rz_dynq`."""
         return self().get_op("rz_dynq")
+
+    @functools.cached_property
+    def rz_dynq(self) -> ExtOp:
+        """Rz gate on a dynamic logical qubit."""
+        return self.rz_dynq_def.instantiate([])
 
     # xx_phase_dynq
 
     @functools.cached_property
-    def xx_phase_dynq(self) -> OpDef:
-        """XXPhase gate on two dynamic logical qubits."""
+    def xx_phase_dynq_def(self) -> OpDef:
+        """XXPhase gate on two dynamic logical qubits.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `xx_phase_dynq`."""
         return self().get_op("xx_phase_dynq")
+
+    @functools.cached_property
+    def xx_phase_dynq(self) -> ExtOp:
+        """XXPhase gate on two dynamic logical qubits."""
+        return self.xx_phase_dynq_def.instantiate([])
 
     # yy_phase_dynq
 
     @functools.cached_property
-    def yy_phase_dynq(self) -> OpDef:
-        """YYPhase gate on two dynamic logical qubits."""
+    def yy_phase_dynq_def(self) -> OpDef:
+        """YYPhase gate on two dynamic logical qubits.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `yy_phase_dynq`."""
         return self().get_op("yy_phase_dynq")
+
+    @functools.cached_property
+    def yy_phase_dynq(self) -> ExtOp:
+        """YYPhase gate on two dynamic logical qubits."""
+        return self.yy_phase_dynq_def.instantiate([])
 
     # zz_phase_dynq
 
     @functools.cached_property
-    def zz_phase_dynq(self) -> OpDef:
-        """ZZPhase gate on two dynamic logical qubits."""
+    def zz_phase_dynq_def(self) -> OpDef:
+        """ZZPhase gate on two dynamic logical qubits.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `zz_phase_dynq`."""
         return self().get_op("zz_phase_dynq")
+
+    @functools.cached_property
+    def zz_phase_dynq(self) -> ExtOp:
+        """ZZPhase gate on two dynamic logical qubits."""
+        return self.zz_phase_dynq_def.instantiate([])
 
     # cx_dynq
 
     @functools.cached_property
-    def cx_dynq(self) -> OpDef:
-        """CX gate on two dynamic logical qubits.."""
+    def cx_dynq_def(self) -> OpDef:
+        """CX gate on two dynamic logical qubits.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `cx_dynq`."""
         return self().get_op("cx_dynq")
+
+    @functools.cached_property
+    def cx_dynq(self) -> ExtOp:
+        """CX gate on two dynamic logical qubits."""
+        return self.cx_dynq_def.instantiate([])
 
     # try_measure_x_dynq
 
     @functools.cached_property
-    def try_measure_x_dynq(self) -> OpDef:
+    def try_measure_x_dynq_def(self) -> OpDef:
+        """Fallible non-destructive measurement of a dynamic logical qubit in the X
+        basis.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `try_measure_x_dynq`."""
+        return self().get_op("try_measure_x_dynq")
+
+    @functools.cached_property
+    def try_measure_x_dynq(self) -> ExtOp:
         """Fallible non-destructive measurement of a dynamic logical qubit in the X
         basis."""
-        return self().get_op("try_measure_x_dynq")
+        return self.try_measure_x_dynq_def.instantiate([])
 
     # try_measure_z_dynq
 
     @functools.cached_property
-    def try_measure_z_dynq(self) -> OpDef:
+    def try_measure_z_dynq_def(self) -> OpDef:
+        """Fallible non-destructive measurement of a dynamic logical qubit in the Z
+        basis.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `try_measure_z_dynq`."""
+        return self().get_op("try_measure_z_dynq")
+
+    @functools.cached_property
+    def try_measure_z_dynq(self) -> ExtOp:
         """Fallible non-destructive measurement of a dynamic logical qubit in the Z
         basis."""
-        return self().get_op("try_measure_z_dynq")
+        return self.try_measure_z_dynq_def.instantiate([])
 
     # borrow
 
