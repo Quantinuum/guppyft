@@ -190,7 +190,6 @@ impl ImplementOpsPass {
                     for (src_ty, tgt_ty) in src_sig
                         .input
                         .iter()
-                        // Skip some arguments since they are bound from generic args in the op
                         .zip(tgt_sig.input.iter())
                         .chain(src_sig.output.iter().zip(tgt_sig.output.iter()))
                     {
@@ -255,7 +254,10 @@ fn extract_func_node(func_hugr: &Hugr, func_name: &str) -> Option<Node> {
 }
 
 fn unpack_type(ty: &Type) -> Option<Vec<Type>> {
-    if let Some(row) = ty.as_sum().and_then(SumType::as_tuple) {
+    if let Some(row) = ty
+        .as_sum()
+        .and_then(|sum_type| SumType::as_tuple(sum_type).or_else(|| SumType::as_option(sum_type)))
+    {
         Some(
             TypeRow::try_from(row.clone())
                 .expect("unexpected row variable.")
