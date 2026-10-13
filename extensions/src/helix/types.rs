@@ -1,10 +1,15 @@
-/// Extension providing types for logical operations on the C4-Helix code.
+//! Types for logical operations on the fixed [[20, 2, 6]] C4-Helix code.
+//!
+//! A `block` owns two logical qubits, labelled 0 and 1. The `qubit` type
+//! represents an independently owned logical qubit for future dynamic-qubit
+//! operations; this extension does not yet provide borrowing or allocation
+//! operations for it. Both types are linear and have no type parameters.
 use std::sync::{Arc, LazyLock};
 
 use hugr::{
     Extension,
     extension::ExtensionId,
-    types::{CustomType, Type, TypeBound, TypeName, type_param::TypeParam},
+    types::{CustomType, Type, TypeBound, TypeName},
 };
 
 /// The extension identifier.
@@ -13,14 +18,14 @@ pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.helix.
 /// Extension version.
 pub const VERSION: semver::Version = semver::Version::new(0, 1, 0);
 
-/// Type name for logical Iceberg block.
+/// Type name for a logical Helix block.
 pub const BLOCK_TYPENAME: TypeName = TypeName::new_inline("block");
 
 /// Type name for a Helix-encoded logical qubit, either extracted from a block
 /// or dynamically allocated.
 pub const QUBIT_TYPENAME: TypeName = TypeName::new_inline("qubit");
 
-/// Type of a Helix block.
+/// Type of a Helix block containing exactly two logical qubits.
 pub fn block_type() -> Type {
     CustomType::new(
         BLOCK_TYPENAME,
@@ -33,9 +38,7 @@ pub fn block_type() -> Type {
     .into()
 }
 
-/// Type of a "dynamic" logical qubit. This represents a logical qubit whose
-/// block is not statically known (but assigned at runtime). It may have been
-/// "borrowed" from a logical block, or allocated independently.
+/// Type of a dynamic Helix logical qubit, reserved for future operations.
 pub fn dynamic_logical_qubit_type() -> Type {
     CustomType::new(
         QUBIT_TYPENAME,
