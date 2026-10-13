@@ -4,7 +4,7 @@ use std::sync::{Arc, LazyLock};
 use hugr::{
     Extension,
     extension::ExtensionId,
-    types::{CustomType, Type, TypeBound, TypeName},
+    types::{CustomType, Type, TypeBound, TypeName, type_param::TypeParam},
 };
 
 /// The extension identifier.
@@ -13,11 +13,30 @@ pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.helix.
 /// Extension version.
 pub const VERSION: semver::Version = semver::Version::new(0, 1, 0);
 
-/// Type name for a Helix-encoded logical qubit.
+/// Type name for logical Iceberg block.
+pub const BLOCK_TYPENAME: TypeName = TypeName::new_inline("block");
+
+/// Type name for a Helix-encoded logical qubit, either extracted from a block
+/// or dynamically allocated.
 pub const QUBIT_TYPENAME: TypeName = TypeName::new_inline("qubit");
 
-/// Type of a logical Helix qubit.
-pub fn logical_qubit_type() -> Type {
+/// Type of a Helix block.
+pub fn block_type() -> Type {
+    CustomType::new(
+        BLOCK_TYPENAME,
+        [],
+        EXTENSION_ID,
+        VERSION,
+        TypeBound::Linear,
+        &Arc::<Extension>::downgrade(&EXTENSION),
+    )
+    .into()
+}
+
+/// Type of a "dynamic" logical qubit. This represents a logical qubit whose
+/// block is not statically known (but assigned at runtime). It may have been
+/// "borrowed" from a logical block, or allocated independently.
+pub fn dynamic_logical_qubit_type() -> Type {
     CustomType::new(
         QUBIT_TYPENAME,
         [],
@@ -29,9 +48,18 @@ pub fn logical_qubit_type() -> Type {
     .into()
 }
 
-/// Extension for logical types for the Helix code.
+/// Extension for logical Helix types.
 fn extension() -> Arc<Extension> {
     Extension::new_arc(EXTENSION_ID, VERSION, |extension, extension_ref| {
+        extension
+            .add_type(
+                BLOCK_TYPENAME,
+                vec![],
+                "logical Helix block".to_owned(),
+                TypeBound::Linear.into(),
+                extension_ref,
+            )
+            .unwrap();
         extension
             .add_type(
                 QUBIT_TYPENAME,
@@ -44,7 +72,7 @@ fn extension() -> Arc<Extension> {
     })
 }
 
-/// Lazy reference to the extension for logical types for the Helix code.
+/// Lazy reference to extension for logical Helix block type.
 pub static EXTENSION: LazyLock<Arc<Extension>> = LazyLock::new(extension);
 
 #[cfg(test)]
@@ -61,21 +89,28 @@ mod tests {
     fn test_helix_types_extension() {
         let extn = extension();
         assert_eq!(extn.name() as &str, "guppyft.helix.types");
-        assert_eq!(extn.types().count(), 1);
+        assert_eq!(extn.types().count(), 2);
         assert_eq!(extn.operations().count(), 0);
     }
 
     #[test]
+    fn test_helix_block_type() {
+        let block = block_type();
+        assert!(!block.copyable());
+    }
+
+    #[test]
     fn test_helix_qubit_type() {
-        let qubit = logical_qubit_type();
+        let qubit = dynamic_logical_qubit_type();
         assert!(!qubit.copyable());
     }
 
     #[test]
     fn test_hugr() {
-        let qubit = logical_qubit_type();
+        let block = block_type();
+        let qubit = dynamic_logical_qubit_type();
         let mut module_builder = ModuleBuilder::new();
-        let signature = Signature::new_endo(vec![qubit]);
+        let signature = Signature::new_endo(vec![block, qubit]);
         let f_build = module_builder.define_function("main", signature).unwrap();
         let wires: Vec<_> = f_build.input_wires().collect();
         f_build.finish_with_outputs(wires).unwrap();
