@@ -149,13 +149,9 @@ class QECPolicy:
 
 @dataclass(frozen=True, kw_only=True)
 class _SteaneOptions:
-    zero_factory_conf: RUSStateFactoryConf = field(
-        default_factory=lambda: RUSStateFactoryConf(1, 5)
-    )
-    magic_factory_conf: RUSStateFactoryConf = field(
-        default_factory=lambda: RUSStateFactoryConf(1, 5)
-    )
-    qec_policy: QECPolicy = field(default_factory=QECPolicy)
+    zero_factory_conf: RUSStateFactoryConf
+    magic_factory_conf: RUSStateFactoryConf
+    qec_policy: QECPolicy
 
 
 @dataclass(frozen=True)
