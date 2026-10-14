@@ -1,6 +1,7 @@
 """Builder and encoding implementation for the Steane QEC architecture."""
 
 from collections.abc import Callable
+from copy import deepcopy
 from dataclasses import asdict, dataclass, field, replace
 from enum import Enum, auto
 from typing import Any, Literal, Self, no_type_check, overload
@@ -126,7 +127,7 @@ class QECPolicy:
         cx: float = 0.0
         cz: float = 0.0
 
-        def __setattr__(self, key: str, value: Any) -> None:
+        def __setattr__(self, key: str, value: float) -> None:
             """Set a non-negative cost for a known logical operation."""
             if not hasattr(self, key):
                 raise KeyError(f"Unknown cost key: {key}")
@@ -789,5 +790,5 @@ class SteaneBuilder:
         """Build a `SteaneInstance` configured for `n_blocks` logical blocks."""
         encoder_spec = self._gen_encoder_spec(n_blocks)
         return SteaneInstance(
-            _spec=encoder_spec, _n_blocks=n_blocks, _options=self._options
+            _spec=encoder_spec, _n_blocks=n_blocks, _options=deepcopy(self._options)
         )
