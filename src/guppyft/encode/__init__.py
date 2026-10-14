@@ -3,7 +3,7 @@
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Literal, Protocol, overload
+from typing import Any, Literal, overload
 
 from guppylang.defs import GuppyFunctionDefinition
 from hugr import Hugr
@@ -126,17 +126,6 @@ def encode(
         pkg_maybe_bytes = pkg_maybe_bytes.to_bytes()
 
     return pkg_maybe_bytes
-
-
-class EncoderParams(Protocol):
-    """Parameters used to annotate an encoded program."""
-
-    def encoding(self) -> str:
-        """The encoding to annotate on a program."""
-
-    def params(self) -> Mapping[str, Any]:
-        """The parameters to annotate on a program. Implementations should return values
-        that support serialization to JSON."""
 
 
 def annotate_encoding(
