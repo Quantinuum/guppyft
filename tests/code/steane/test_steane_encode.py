@@ -33,14 +33,9 @@ from hugr.cli import validate
 from hugr.package import Package
 from selene_sim.backends.bundled_simulators import Coinflip
 
-from guppyft.code.steane.encode import (
-    QECPolicy,
-    RUSStateFactoryConf,
-    SteaneBuilder,
-    SteaneEncoderParams,
-)
+from guppyft.code.steane.encode import QECPolicy, RUSStateFactoryConf, SteaneBuilder
 from guppyft.decompose import ComparatorRzDecomposer, ToffoliDecomposer
-from guppyft.encode import UncompilableError, annotate_encoding
+from guppyft.encode import UncompilableError
 
 
 def test_encoder() -> None:
@@ -186,23 +181,44 @@ def test_annotate_steane_encoding() -> None:
     hugr = Hugr[Any]()
     pkg = Package([hugr])
 
-    annotate_encoding(pkg, SteaneEncoderParams(n_blocks=4))
+    SteaneBuilder().build(n_blocks=4).annotate(pkg)
 
-    assert hugr[hugr.module_root].metadata["guppyft.encoding"] == {
-        "encoding": "steane",
-        "params": {"n_blocks": 4},
+    assert hugr[hugr.module_root].metadata["qnt.nexus.compilation"] == {
+        "schema_version": 1,
+        "encoding": {
+            "name": "steane",
+            "params": {
+                "schema_version": 1,
+                "n_blocks": 4,
+                "zero_factory": {
+                    "size": 1,
+                    "max_attempts": 5,
+                },
+                "magic_factory": {
+                    "size": 1,
+                    "max_attempts": 5,
+                },
+                "qec_policy": {
+                    "style": "steane",
+                    "threshold": 1,
+                    "costs": {
+                        "prep_zero": 0.0,
+                        "prep_t": 0.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "h": 0.0,
+                        "s": 0.0,
+                        "sdg": 0.0,
+                        "inject_t": 0.0,
+                        "inject_tdg": 0.0,
+                        "cx": 0.0,
+                        "cz": 0.0,
+                    },
+                },
+            },
+        },
     }
-
-
-def test_builder_from_params() -> None:
-    @guppy
-    def main() -> None:
-        q0 = qubit()
-        discard(q0)
-
-    SteaneBuilder.from_params(SteaneEncoderParams(n_blocks=1)).encode(
-        main.compile(), as_bytes=True
-    )
 
 
 def test_collect_measurement_encode() -> None:
