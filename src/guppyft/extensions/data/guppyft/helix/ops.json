@@ -1,0 +1,1135 @@
+{
+  "version": "0.1.0",
+  "name": "guppyft.helix.ops",
+  "types": {},
+  "operations": {
+    "alloc_dynq": {
+      "extension": "guppyft.helix.ops",
+      "name": "alloc_dynq",
+      "description": "Allocate a dynamic logical qubit in the |0> state.\nIts physical block and logical position are assigned at runtime.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "alloc_plus": {
+      "extension": "guppyft.helix.ops",
+      "name": "alloc_plus",
+      "description": "Prepare the |++> state on a block.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "alloc_zero": {
+      "extension": "guppyft.helix.ops",
+      "name": "alloc_zero",
+      "description": "Prepare the all-zero state on a block.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "cx_between_blocks": {
+      "extension": "guppyft.helix.ops",
+      "name": "cx_between_blocks",
+      "description": "Targeted CX from the first block to the second.\nRuntime indices select the control and target; the other qubits are unchanged.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "cx_dynq": {
+      "extension": "guppyft.helix.ops",
+      "name": "cx_dynq",
+      "description": "Apply logical CX with the first dynamic qubit controlling the second.\nThe inputs may belong to the same block or different blocks.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "cx_swap": {
+      "extension": "guppyft.helix.ops",
+      "name": "cx_swap",
+      "description": "CX from logical qubit 0 to 1, then SWAP: |a,b> -> |a XOR b,a>.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "cx_transversal": {
+      "extension": "guppyft.helix.ops",
+      "name": "cx_transversal",
+      "description": "Apply CX from each logical qubit in the first block to the corresponding\nlogical qubit in the second block, preserving block order.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "cz": {
+      "extension": "guppyft.helix.ops",
+      "name": "cz",
+      "description": "Logical CZ: |a,b> -> (-1)^(ab)|a,b>.\nLowering must compensate the physical gadget's residual Z on qubit 1.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "cz_dynq": {
+      "extension": "guppyft.helix.ops",
+      "name": "cz_dynq",
+      "description": "Apply logical CZ to two dynamic qubits, regardless of block membership.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "free": {
+      "extension": "guppyft.helix.ops",
+      "name": "free",
+      "description": "Discard a block in any logical state.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": []
+        }
+      },
+      "binary": false
+    },
+    "free_dynq": {
+      "extension": "guppyft.helix.ops",
+      "name": "free_dynq",
+      "description": "Discard a dynamic logical qubit in any state without changing its partner.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": []
+        }
+      },
+      "binary": false
+    },
+    "h_dynq": {
+      "extension": "guppyft.helix.ops",
+      "name": "h_dynq",
+      "description": "Apply logical Hadamard to a dynamic qubit, leaving its block partner unchanged.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "hh_swap": {
+      "extension": "guppyft.helix.ops",
+      "name": "hh_swap",
+      "description": "Hadamard on each logical qubit followed by SWAP.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "join": {
+      "extension": "guppyft.helix.ops",
+      "name": "join",
+      "description": "Consume two dynamic qubits and form a block with logical qubits (first, second).\nPreserves their joint state and external entanglement. The runtime must\narrange the inputs into one block if they are not already colocated.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "measure_x_dynq": {
+      "extension": "guppyft.helix.ops",
+      "name": "measure_x_dynq",
+      "description": "Destructively measure a dynamic qubit in the X basis, preserving its partner.\nThe decoded bit b denotes eigenvalue (-1)^b.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.std.types",
+              "extension_version": "0.1.0",
+              "id": "logical_measurement",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 1
+                }
+              ],
+              "bound": "C"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "measure_xx": {
+      "extension": "guppyft.helix.ops",
+      "name": "measure_xx",
+      "description": "Destructively measure both logical qubits in the X basis.\nReturn a two-outcome logical measurement, ordered by logical index.\nDecoded bit b denotes eigenvalue (-1)^b; this is not an XX parity measurement.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.std.types",
+              "extension_version": "0.1.0",
+              "id": "logical_measurement",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 2
+                }
+              ],
+              "bound": "C"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "measure_z_dynq": {
+      "extension": "guppyft.helix.ops",
+      "name": "measure_z_dynq",
+      "description": "Destructively measure a dynamic qubit in the Z basis, preserving its partner.\nThe decoded bit b denotes eigenvalue (-1)^b.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.std.types",
+              "extension_version": "0.1.0",
+              "id": "logical_measurement",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 1
+                }
+              ],
+              "bound": "C"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "measure_zz": {
+      "extension": "guppyft.helix.ops",
+      "name": "measure_zz",
+      "description": "Destructively measure both logical qubits in the Z basis.\nReturn a two-outcome logical measurement, ordered by logical index.\nDecoded bit b denotes eigenvalue (-1)^b; this is not a ZZ parity measurement.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.std.types",
+              "extension_version": "0.1.0",
+              "id": "logical_measurement",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 2
+                }
+              ],
+              "bound": "C"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "qec_cycle": {
+      "extension": "guppyft.helix.ops",
+      "name": "qec_cycle",
+      "description": "Perform syndrome extraction and recovery (or a Pauli-frame update).\nIdeally preserves the logical state, including external entanglement.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "qec_cycle_dynq": {
+      "extension": "guppyft.helix.ops",
+      "name": "qec_cycle_dynq",
+      "description": "Perform QEC on the block containing this dynamic qubit.\nIdeally preserves the state of both logical qubits and external entanglement.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "s_dynq": {
+      "extension": "guppyft.helix.ops",
+      "name": "s_dynq",
+      "description": "Apply logical S = diag(1, i) to a dynamic qubit, leaving its partner unchanged.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "sdg_dynq": {
+      "extension": "guppyft.helix.ops",
+      "name": "sdg_dynq",
+      "description": "Apply logical S dagger = diag(1, -i) to a dynamic qubit.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "split": {
+      "extension": "guppyft.helix.ops",
+      "name": "split",
+      "description": "Consume a block and return its logical qubits in order (0, 1).\nPreserves their joint state and entanglement with other resources.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "ss": {
+      "extension": "guppyft.helix.ops",
+      "name": "ss",
+      "description": "Logical S on both qubits: |a,b> -> i^(a+b)|a,b>.\nLowering must compensate the physical gadget's residual Z on both qubits\nand include the flagging and syndrome extraction required for fault tolerance.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "swap": {
+      "extension": "guppyft.helix.ops",
+      "name": "swap",
+      "description": "Swap the two qubits in the block.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "swap_dynq": {
+      "extension": "guppyft.helix.ops",
+      "name": "swap_dynq",
+      "description": "Exchange the logical states of two dynamic qubits, preserving output order.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "x": {
+      "extension": "guppyft.helix.ops",
+      "name": "x",
+      "description": "Apply X to the logical qubit selected by a runtime index.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "x_dynq": {
+      "extension": "guppyft.helix.ops",
+      "name": "x_dynq",
+      "description": "Apply logical X to a dynamic qubit, leaving its block partner unchanged.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "y": {
+      "extension": "guppyft.helix.ops",
+      "name": "y",
+      "description": "Apply Y to the logical qubit selected by a runtime index.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "y_dynq": {
+      "extension": "guppyft.helix.ops",
+      "name": "y_dynq",
+      "description": "Apply logical Y to a dynamic qubit, leaving its block partner unchanged.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "z": {
+      "extension": "guppyft.helix.ops",
+      "name": "z",
+      "description": "Apply Z to the logical qubit selected by a runtime index.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "z_dynq": {
+      "extension": "guppyft.helix.ops",
+      "name": "z_dynq",
+      "description": "Apply logical Z to a dynamic qubit, leaving its block partner unchanged.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    }
+  }
+}
