@@ -21,6 +21,16 @@
         "b": "Explicit",
         "bound": "A"
       }
+    },
+    "t_state": {
+      "extension": "guppyft.helix.types",
+      "name": "t_state",
+      "params": [],
+      "description": "consumable T-state resource with backend-selected encoding",
+      "bound": {
+        "b": "Explicit",
+        "bound": "A"
+      }
     }
   },
   "operations": {}

@@ -389,6 +389,28 @@
       },
       "binary": false
     },
+    "free_t_state": {
+      "extension": "guppyft.helix.ops",
+      "name": "free_t_state",
+      "description": "Discard an unused T-state resource.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "t_state",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": []
+        }
+      },
+      "binary": false
+    },
     "h_dynq": {
       "extension": "guppyft.helix.ops",
       "name": "h_dynq",
@@ -443,6 +465,188 @@
               "extension": "guppyft.helix.types",
               "extension_version": "0.1.0",
               "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "inject_t": {
+      "extension": "guppyft.helix.ops",
+      "name": "inject_t",
+      "description": "Consume a T-state resource and apply T = diag(1, exp(i*pi/4)) to the\nlogical qubit selected by a runtime index, preserving its block partner.\nInputs are (block, index, resource); measurement and feed-forward\ncorrections are included, leaving no outstanding Clifford correction.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "t_state",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "inject_t_dynq": {
+      "extension": "guppyft.helix.ops",
+      "name": "inject_t_dynq",
+      "description": "Consume a T-state resource and apply T to a dynamic logical qubit.\nInputs are (qubit, resource). Preserves its partner and includes all\nmeasurement, feed-forward, and Clifford corrections.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "t_state",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "inject_tdg": {
+      "extension": "guppyft.helix.ops",
+      "name": "inject_tdg",
+      "description": "Consume the same T-state resource as inject_t and apply T dagger to\nthe indexed logical qubit, preserving its block partner. Inputs are\n(block, index, resource); all measurement and Clifford corrections are included.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "t_state",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "inject_tdg_dynq": {
+      "extension": "guppyft.helix.ops",
+      "name": "inject_tdg_dynq",
+      "description": "Consume a T-state resource and apply T dagger to a dynamic logical qubit.\nInputs are (qubit, resource). Preserves its partner and includes all\nmeasurement, feed-forward, and Clifford corrections.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "t_state",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "qubit",
               "args": [],
               "bound": "A"
             }
@@ -628,6 +832,28 @@
                 }
               ],
               "bound": "C"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "prep_t_state": {
+      "extension": "guppyft.helix.ops",
+      "name": "prep_t_state",
+      "description": "Supply a resource with ideal state (|0> + exp(i*pi/4)|1>)/sqrt(2).\nThe backend chooses the factory and encoding, and handles heralded retries.\nPreparation need not occur inside a Helix block.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "t_state",
+              "args": [],
+              "bound": "A"
             }
           ]
         }

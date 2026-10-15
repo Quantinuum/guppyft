@@ -4,7 +4,9 @@
 //! corrections in their implementations. Addressable operations take runtime
 //! logical indices (0 or 1); invalid indices cause a runtime panic.
 //!
-//! Magic-state preparation and injection are deferred.
+//! T-state preparation requests a resource from a backend-selected factory.
+//! Injection consumes the resource and includes measurement, feed-forward, and
+//! Clifford corrections in its ideal gate contract.
 use std::sync::{Arc, LazyLock, Weak};
 
 use documented::DocumentedVariants;
@@ -22,7 +24,7 @@ use hugr::{
     types::{Signature, TypeArg},
 };
 
-use super::types::{block_type, dynamic_logical_qubit_type};
+use super::types::{block_type, dynamic_logical_qubit_type, t_state_type};
 use crate::std::types::logical_measurement_type;
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
@@ -118,6 +120,29 @@ pub enum HelixOpDef {
     /// Preserves their joint state and external entanglement. The runtime must
     /// arrange the inputs into one block if they are not already colocated.
     join,
+    /// Supply a resource with ideal state (|0> + exp(i*pi/4)|1>)/sqrt(2).
+    /// The backend chooses the factory and encoding, and handles heralded retries.
+    /// Preparation need not occur inside a Helix block.
+    prep_t_state,
+    /// Consume a T-state resource and apply T = diag(1, exp(i*pi/4)) to the
+    /// logical qubit selected by a runtime index, preserving its block partner.
+    /// Inputs are (block, index, resource); measurement and feed-forward
+    /// corrections are included, leaving no outstanding Clifford correction.
+    inject_t,
+    /// Consume the same T-state resource as inject_t and apply T dagger to
+    /// the indexed logical qubit, preserving its block partner. Inputs are
+    /// (block, index, resource); all measurement and Clifford corrections are included.
+    inject_tdg,
+    /// Consume a T-state resource and apply T to a dynamic logical qubit.
+    /// Inputs are (qubit, resource). Preserves its partner and includes all
+    /// measurement, feed-forward, and Clifford corrections.
+    inject_t_dynq,
+    /// Consume a T-state resource and apply T dagger to a dynamic logical qubit.
+    /// Inputs are (qubit, resource). Preserves its partner and includes all
+    /// measurement, feed-forward, and Clifford corrections.
+    inject_tdg_dynq,
+    /// Discard an unused T-state resource.
+    free_t_state,
 }
 
 /// Concrete Helix logical operation.
@@ -210,6 +235,16 @@ impl MakeOpDef for HelixOpDef {
     fn init_signature(&self, _extension_ref: &Weak<Extension>) -> SignatureFunc {
         use HelixOpDef::*;
         match self {
+            prep_t_state => Signature::new(vec![], [t_state_type()]).into(),
+            free_t_state => Signature::new([t_state_type()], vec![]).into(),
+            inject_t | inject_tdg => {
+                Signature::new([block_type(), int_type(6), t_state_type()], [block_type()]).into()
+            }
+            inject_t_dynq | inject_tdg_dynq => Signature::new(
+                [dynamic_logical_qubit_type(), t_state_type()],
+                [dynamic_logical_qubit_type()],
+            )
+            .into(),
             alloc_dynq => sig_dynq(0, 1),
             free_dynq => sig_dynq(1, 0),
             x_dynq | y_dynq | z_dynq | h_dynq | s_dynq | sdg_dynq => sig_dynq(1, 1),
@@ -269,7 +304,7 @@ mod tests {
     fn test_helix_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.helix.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 31);
+        assert_eq!(EXTENSION.operations().count(), 37);
     }
 
     #[test]
@@ -461,6 +496,133 @@ mod tests {
     }
 
     #[test]
+    fn test_magic_state_lifecycle() -> Result<(), Box<dyn Error>> {
+        let mut module = ModuleBuilder::new();
+        let mut function = module.define_function("magic", Signature::new_endo([block_type()]))?;
+        let [mut block] = function.input_wires_arr();
+        let zero = function.add_load_const(Value::extension(ConstInt::new_u(6, 0)?));
+        let one = function.add_load_const(Value::extension(ConstInt::new_u(6, 1)?));
+        for (name, index) in [("inject_t", zero), ("inject_tdg", one)] {
+            let [resource] = function
+                .add_dataflow_op(EXTENSION.instantiate_extension_op("prep_t_state", [])?, [])?
+                .outputs_arr();
+            [block] = function
+                .add_dataflow_op(
+                    EXTENSION.instantiate_extension_op(name, [])?,
+                    [block, index, resource],
+                )?
+                .outputs_arr();
+        }
+        let [mut first, mut second] = function
+            .add_dataflow_op(EXTENSION.instantiate_extension_op("split", [])?, [block])?
+            .outputs_arr();
+        for (name, target) in [
+            ("inject_t_dynq", &mut first),
+            ("inject_tdg_dynq", &mut second),
+        ] {
+            let [resource] = function
+                .add_dataflow_op(EXTENSION.instantiate_extension_op("prep_t_state", [])?, [])?
+                .outputs_arr();
+            [*target] = function
+                .add_dataflow_op(
+                    EXTENSION.instantiate_extension_op(name, [])?,
+                    [*target, resource],
+                )?
+                .outputs_arr();
+        }
+        [block] = function
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("join", [])?,
+                [first, second],
+            )?
+            .outputs_arr();
+        let [unused] = function
+            .add_dataflow_op(EXTENSION.instantiate_extension_op("prep_t_state", [])?, [])?
+            .outputs_arr();
+        function.add_dataflow_op(
+            EXTENSION.instantiate_extension_op("free_t_state", [])?,
+            [unused],
+        )?;
+        function.finish_with_outputs([block])?;
+        module.finish_hugr()?.validate()?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_magic_state_signatures() -> Result<(), Box<dyn Error>> {
+        for (name, expected) in [
+            ("prep_t_state", Signature::new(vec![], [t_state_type()])),
+            ("free_t_state", Signature::new([t_state_type()], vec![])),
+            (
+                "inject_t",
+                Signature::new([block_type(), int_type(6), t_state_type()], [block_type()]),
+            ),
+            (
+                "inject_tdg",
+                Signature::new([block_type(), int_type(6), t_state_type()], [block_type()]),
+            ),
+            (
+                "inject_t_dynq",
+                Signature::new(
+                    [dynamic_logical_qubit_type(), t_state_type()],
+                    [dynamic_logical_qubit_type()],
+                ),
+            ),
+            (
+                "inject_tdg_dynq",
+                Signature::new(
+                    [dynamic_logical_qubit_type(), t_state_type()],
+                    [dynamic_logical_qubit_type()],
+                ),
+            ),
+        ] {
+            assert_eq!(
+                EXTENSION
+                    .instantiate_extension_op(name, [])?
+                    .signature()
+                    .as_ref(),
+                &expected
+            );
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn test_magic_state_cannot_be_reused() -> Result<(), Box<dyn Error>> {
+        let mut module = ModuleBuilder::new();
+        let mut function = module.define_function("bad", Signature::new(vec![], vec![]))?;
+        let [resource] = function
+            .add_dataflow_op(EXTENSION.instantiate_extension_op("prep_t_state", [])?, [])?
+            .outputs_arr();
+        let free = EXTENSION.instantiate_extension_op("free_t_state", [])?;
+        function.add_dataflow_op(free.clone(), [resource])?;
+        assert!(function.add_dataflow_op(free, [resource]).is_err());
+        Ok(())
+    }
+
+    #[test]
+    fn test_injection_rejects_ordinary_qubit_resource() -> Result<(), Box<dyn Error>> {
+        let mut module = ModuleBuilder::new();
+        let mut function = module.define_function(
+            "bad",
+            Signature::new(
+                vec![dynamic_logical_qubit_type(); 2],
+                [dynamic_logical_qubit_type()],
+            ),
+        )?;
+        let outputs = function
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("inject_t_dynq", [])?,
+                function.input_wires(),
+            )?
+            .outputs()
+            .collect::<Vec<_>>();
+        function.finish_with_outputs(outputs)?;
+        assert!(module.finish_hugr().is_err());
+        Ok(())
+    }
+
+    #[test]
     fn test_all_ops_serialization() -> Result<(), Box<dyn Error>> {
         // Validate every operation in a function with its complete signature,
         // then round-trip all functions through an envelope and registry.
@@ -566,7 +728,6 @@ mod tests {
                     .is_err()
             );
         }
-        assert!(EXTENSION.get_op("inject_t").is_none());
         let steane_x = crate::steane::ops::EXTENSION
             .instantiate_extension_op("x", [])
             .unwrap();
