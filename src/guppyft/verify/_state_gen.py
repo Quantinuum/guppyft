@@ -5,7 +5,6 @@ from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.builtins import array, comptime
 from guppylang.std.quantum import cz, h, qubit, sdg, z
-from zixy._zixy import SymplecticPart
 from zixy.qubit import pauli
 from zixy.qubit.clifford import GateList
 
@@ -102,7 +101,7 @@ def convert_to_graph_state(tableau: pauli.SignTerms) -> list[SQClifford]:
 
     # Try to solve for X/Y everywhere
     tableau.canonicalize(
-        mode_order=[(q, SymplecticPart.X) for q in all_q],
+        mode_order=[(q, pauli.SymplecticPart.X) for q in all_q],
         to_solve=all_q,
         additional_reduces=[],
     )
@@ -128,7 +127,7 @@ def convert_to_graph_state(tableau: pauli.SignTerms) -> list[SQClifford]:
 
     # Solve for X/Y everywhere. Now it is guaranteed to solve for all qubits.
     tableau.canonicalize(
-        mode_order=[(q, SymplecticPart.X) for q in all_q],
+        mode_order=[(q, pauli.SymplecticPart.X) for q in all_q],
         to_solve=all_q,
         additional_reduces=[],
     )

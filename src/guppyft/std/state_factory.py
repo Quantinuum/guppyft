@@ -45,8 +45,7 @@ class PreBlock(Generic[BLOCK_SIZE, N_FLAGS]):  # type: ignore[misc]
 
     Attributes:
         logical_block (LogicalBlock[N]): The candidate logical block
-        flag_outcomes (array[bool, N_FLAGS]): Array of measurement outcomes. Succeeds if
-            all are `False`.
+        flag_outcomes (array[Measurement, N_FLAGS]): Array of measurement outcomes.
     """
 
     logical_block: LogicalBlock[BLOCK_SIZE]  # type: ignore[type-arg, valid-type]

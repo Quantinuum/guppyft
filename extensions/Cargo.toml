@@ -12,7 +12,7 @@ semver = "1.0.28"
 strum = "0.28.0"
 clap = { version = "4.6.1", optional = true }
 hugr-cli = { version = "0.30.2", optional = true }
-anyhow = { version = "1.0.102", optional = true }
+anyhow = { workspace = true, optional = true }
 documented = "0.10.0"
 tket.workspace = true
 

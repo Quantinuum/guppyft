@@ -1,11 +1,12 @@
 """Builder and encoding implementation for the Steane QEC architecture."""
-
-from collections.abc import Mapping
+import math
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field, replace
 from enum import Enum, auto
 from typing import Any, Literal, Self, no_type_check, overload
 
 from guppylang import guppy
+from guppylang.decorator import custom_guppy_decorator
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.emulator import EmulatorBuilder, EmulatorInstance
 from guppylang.library import GuppyLibrary, link_name
@@ -14,7 +15,7 @@ from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.collections import Stack, empty_queue
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.platform import panic
-from hugr.ext import ExtensionRegistry
+from hugr.ext import ExtensionRegistry, OpDef
 from hugr.package import Package
 from hugr.std import _std_extensions
 from tket_exts import rotation
@@ -54,7 +55,6 @@ from guppyft.encode import (
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
 from guppyft.std import LogicalBlock
-from guppyft.std._rotation import rotation_ty
 from guppyft.std.state_factory import StateFactory
 
 from . import logical as steane_logical
@@ -63,8 +63,8 @@ from .primitives import RawMeasurement
 
 @guppy
 @no_type_check
-def _encode_adaptive_rz(q: steane_logical.Qubit, phase: rotation_ty) -> None:
-    steane_logical.rz(q, angle(phase.to_halfturns()))
+def _encode_adaptive_rz(q: steane_logical.Qubit, phase: angle) -> None:
+    steane_logical.rz(q, phase)
 
 
 @dataclass(frozen=True)
@@ -192,6 +192,12 @@ class SteaneInstance:
         pkg_bytes: Package | bytes = encode(pkg, self._spec, as_bytes=as_bytes)  # type: ignore[call-overload]
         return pkg_bytes
 
+    def compile(self, pkg: Package) -> Package:
+        """Compile a computational package to logical with the Steane instance."""
+        self.check_may_encode(pkg)
+        assert self._spec.compile is not None
+        return self._spec.compile(pkg)
+
     @overload
     def implement_ops(
         self, pkg: Package, *, as_bytes: Literal[False] = False
@@ -257,6 +263,28 @@ class SteaneBuilder:
         qec_policy = self._qec_policy
         rz_conf = self._adaptive_rz_conf or AdaptiveRzConf()
 
+        lib = GuppyLibrary(members=[])
+        ops = OpReplacements()
+
+        def _register_op_replacement(
+            op_def: OpDef,
+        ) -> Callable[[Callable[..., Any]], GuppyFunctionDefinition[Any, Any]]:
+            @custom_guppy_decorator
+            def decorator(
+                func: Callable[..., Any],
+            ) -> GuppyFunctionDefinition[Any, Any]:
+                # Generate guppy function
+                name = f"link.{op_def.qualified_name()}"
+                guppy_func = guppy(link_name(name)(func))
+
+                # Register in library and for op replacement
+                lib.members.append(guppy_func.id)
+                ops.with_generated_decl(op_def, name)
+
+                return guppy_func
+
+            return decorator
+
         # TODO STATE should be generic for all codes. The methods that are code specific
         # should be `@guppy.declare` and each code can provide an implementation to be
         # linked i.e. `allocate_next_addr`.
@@ -267,11 +295,11 @@ class SteaneBuilder:
             addr_stack: Stack[tuple[int, int], comptime(n_blocks)]  # type: ignore[valid-type]
             qec_counter: array[float, comptime(n_blocks)]  # type: ignore[valid-type]
 
-            zero_state_factory: StateFactory[  # type: ignore[valid-type,type-arg]
-                7, 1, comptime(self._zero_factory_conf.size)
+            zero_state_factory: StateFactory[  # type: ignore[type-arg]
+                7, 1, comptime(self._zero_factory_conf.size)  # type: ignore[valid-type]
             ]
-            magic_state_factory: StateFactory[  # type: ignore[valid-type,type-arg]
-                7, 8, comptime(self._magic_factory_conf.size)
+            magic_state_factory: StateFactory[  # type: ignore[type-arg]
+                7, 8, comptime(self._magic_factory_conf.size)  # type: ignore[valid-type]
             ]
 
             @guppy
@@ -349,13 +377,10 @@ class SteaneBuilder:
                     ancillaZ = state.zero_state_factory.get_state()
                     steane_z_qec_cycle(q, ancillaZ)
 
-        @guppy
+        @_register_op_replacement(steane_ops.qec_cycle_def)
         @no_type_check
-        @link_name("guppyft.steane._qec_cycle")
         def _qec_cycle(q: tuple[int, int]) -> tuple[tuple[int, int]]:
-
             @guppy
-            @no_type_check
             def _impl(
                 state: STATE @ owned, q: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
@@ -377,9 +402,8 @@ class SteaneBuilder:
         # this could be replaced with `@custom_function` and a custom
         # compiler.
         # See https://github.com/quantinuum-dev/guppyft/issues/161.
-        @guppy
+        @_register_op_replacement(steane_ops.prep_zero_def)
         @no_type_check
-        @link_name("guppyft.steane._prep_zero")
         def _prep_zero() -> tuple[tuple[int, int]]:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, tuple[int, int]]:
@@ -393,9 +417,8 @@ class SteaneBuilder:
 
             return map_global(_impl)
 
-        @guppy
+        @_register_op_replacement(steane_ops.prep_t_state_def)
         @no_type_check
-        @link_name("guppyft.steane._prep_t_state")
         def _prep_t_state() -> tuple[tuple[int, int]]:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, tuple[int, int]]:
@@ -409,9 +432,8 @@ class SteaneBuilder:
 
             return map_global(_impl)
 
-        @guppy
+        @_register_op_replacement(steane_ops.measure_z_def)
         @no_type_check
-        @link_name("guppyft.steane._measure_z")
         def _measure_z(q: tuple[int, int]) -> RawMeasurement[7]:
             @guppy
             def _impl(
@@ -427,9 +449,8 @@ class SteaneBuilder:
 
             return map_global(_impl, q)
 
-        @guppy
+        @_register_op_replacement(steane_ops.free_def)
         @no_type_check
-        @link_name("guppyft.steane._free")
         def _free(q: tuple[int, int]) -> None:
             @guppy
             def _impl(state: STATE @ owned, q: tuple[int, int]) -> STATE:
@@ -443,9 +464,8 @@ class SteaneBuilder:
 
             return map_global(_impl, q)
 
-        @guppy
+        @_register_op_replacement(steane_ops.x_def)
         @no_type_check
-        @link_name("guppyft.steane._x")
         def _x(q: tuple[int, int]) -> tuple[tuple[int, int]]:
             @guppy
             def _impl(
@@ -462,9 +482,8 @@ class SteaneBuilder:
 
             return map_global(_impl, q)
 
-        @guppy
+        @_register_op_replacement(steane_ops.y_def)
         @no_type_check
-        @link_name("guppyft.steane._y")
         def _y(q: tuple[int, int]) -> tuple[tuple[int, int]]:
             @guppy
             def _impl(
@@ -481,9 +500,8 @@ class SteaneBuilder:
 
             return map_global(_impl, q)
 
-        @guppy
+        @_register_op_replacement(steane_ops.z_def)
         @no_type_check
-        @link_name("guppyft.steane._z")
         def _z(q: tuple[int, int]) -> tuple[tuple[int, int]]:
             @guppy
             def _impl(
@@ -500,9 +518,8 @@ class SteaneBuilder:
 
             return map_global(_impl, q)
 
-        @guppy
+        @_register_op_replacement(steane_ops.h_def)
         @no_type_check
-        @link_name("guppyft.steane._h")
         def _h(q: tuple[int, int]) -> tuple[tuple[int, int]]:
             @guppy
             def _impl(
@@ -519,9 +536,8 @@ class SteaneBuilder:
 
             return map_global(_impl, q)
 
-        @guppy
+        @_register_op_replacement(steane_ops.s_def)
         @no_type_check
-        @link_name("guppyft.steane._s")
         def _s(q: tuple[int, int]) -> tuple[tuple[int, int]]:
             @guppy
             def _impl(
@@ -538,9 +554,8 @@ class SteaneBuilder:
 
             return map_global(_impl, q)
 
-        @guppy
+        @_register_op_replacement(steane_ops.sdg_def)
         @no_type_check
-        @link_name("guppyft.steane._sdg")
         def _sdg(q: tuple[int, int]) -> tuple[tuple[int, int]]:
             @guppy
             def _impl(
@@ -557,21 +572,18 @@ class SteaneBuilder:
 
             return map_global(_impl, q)
 
-        @guppy
+        @_register_op_replacement(steane_ops.rz_def)
         @no_type_check
-        @link_name("guppyft.steane._adaptive_rz")
-        def _adaptive_rz(
-            q: tuple[int, int], phase: rotation_ty
-        ) -> tuple[tuple[int, int]]:
+        def _adaptive_rz(q: tuple[int, int], phase: float) -> tuple[tuple[int, int]]:
             @guppy
             def _impl(
-                state: STATE @ owned, q: tuple[int, int], phase: rotation_ty
+                state: STATE @ owned, q: tuple[int, int], phase: float
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
                 blk = state.take_block(blk_id)
                 adaptive_rz_controller(
                     blk,
-                    angle(phase.to_halfturns()),
+                    angle(phase / comptime(math.pi)),
                     comptime(rz_conf.tolerance),
                     comptime(rz_conf.max_rounds),
                     comptime(rz_conf.dephasing),
@@ -584,9 +596,8 @@ class SteaneBuilder:
 
             return map_global(_impl, q, phase)
 
-        @guppy
+        @_register_op_replacement(steane_ops.inject_t_def)
         @no_type_check
-        @link_name("guppyft.steane._inject_t")
         def _inject_t(q: tuple[int, int], a: tuple[int, int]) -> tuple[tuple[int, int]]:
             @guppy
             def _impl(
@@ -605,9 +616,8 @@ class SteaneBuilder:
 
             return map_global(_impl, q, a)
 
-        @guppy
+        @_register_op_replacement(steane_ops.inject_tdg_def)
         @no_type_check
-        @link_name("guppyft.steane._inject_tdg")
         def _inject_tdg(
             q: tuple[int, int], a: tuple[int, int]
         ) -> tuple[tuple[int, int]]:
@@ -628,9 +638,8 @@ class SteaneBuilder:
 
             return map_global(_impl, q, a)
 
-        @guppy
+        @_register_op_replacement(steane_ops.cx_def)
         @no_type_check
-        @link_name("guppyft.steane._cx")
         def _cx(
             ctl: tuple[int, int], tgt: tuple[int, int]
         ) -> tuple[tuple[int, int], tuple[int, int]]:
@@ -651,9 +660,8 @@ class SteaneBuilder:
 
             return map_global(_impl, ctl, tgt)
 
-        @guppy
+        @_register_op_replacement(steane_ops.cz_def)
         @no_type_check
-        @link_name("guppyft.steane._cz")
         def _cz(
             q0: tuple[int, int], q1: tuple[int, int]
         ) -> tuple[tuple[int, int], tuple[int, int]]:
@@ -673,6 +681,11 @@ class SteaneBuilder:
                 return state, q0, q1
 
             return map_global(_impl, q0, q1)
+
+        @_register_op_replacement(steane_ops.decode_def)
+        @no_type_check
+        def _decode(m: RawMeasurement[7] @ owned) -> bool:
+            return decode(m)
 
         @guppy.declare
         @no_type_check
@@ -733,58 +746,8 @@ class SteaneBuilder:
 
             return wrapper  # type: ignore[no-any-return]
 
-        lib = GuppyLibrary.from_members(
-            state_gen,
-            state_discard,
-            _qec_cycle,
-            _prep_zero,
-            _prep_t_state,
-            _measure_z,
-            _free,
-            decode,
-            _x,
-            _y,
-            _z,
-            _h,
-            _s,
-            _sdg,
-            _inject_t,
-            _inject_tdg,
-            _cx,
-            _cz,
-            _adaptive_rz,
-        ).compile()
-
-        ops = OpReplacements().with_generated_decls(
-            {
-                ("guppyft.steane.ops", "prep_zero"): "guppyft.steane._prep_zero",
-                ("guppyft.steane.ops", "measure_z"): "guppyft.steane._measure_z",
-                ("guppyft.steane.ops", "qec_cycle"): "guppyft.steane._qec_cycle",
-                ("guppyft.steane.ops", "free"): "guppyft.steane._free",
-                ("guppyft.steane.ops", "x"): "guppyft.steane._x",
-                ("guppyft.steane.ops", "y"): "guppyft.steane._y",
-                ("guppyft.steane.ops", "z"): "guppyft.steane._z",
-                ("guppyft.steane.ops", "h"): "guppyft.steane._h",
-                ("guppyft.steane.ops", "s"): "guppyft.steane._s",
-                ("guppyft.steane.ops", "sdg"): "guppyft.steane._sdg",
-                ("guppyft.steane.ops", "rz"): "guppyft.steane._adaptive_rz",
-                (
-                    "guppyft.steane.ops",
-                    "prep_t_state",
-                ): "guppyft.steane._prep_t_state",
-                (
-                    "guppyft.steane.ops",
-                    "inject_t",
-                ): "guppyft.steane._inject_t",
-                (
-                    "guppyft.steane.ops",
-                    "inject_tdg",
-                ): "guppyft.steane._inject_tdg",
-                ("guppyft.steane.ops", "cx"): "guppyft.steane._cx",
-                ("guppyft.steane.ops", "cz"): "guppyft.steane._cz",
-                ("guppyft.steane.ops", "decode"): "guppyft.steane.decode",
-            }
-        )
+        lib.members.extend((state_gen.id, state_discard.id))
+        ops.register_for_elimination_check(steane_ops().name)
         tys = TyReplacements().with_types(
             [
                 ("guppyft.steane.types", "qubit"),
@@ -793,7 +756,7 @@ class SteaneBuilder:
         )
 
         return ImplementOpsSpec(
-            ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[lib]
+            ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[lib.compile()]
         )
 
     def _gen_encoder_spec(self, n_blocks: int) -> EncodeSpec:
