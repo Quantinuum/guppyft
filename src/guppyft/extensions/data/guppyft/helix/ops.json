@@ -665,37 +665,6 @@
       },
       "binary": false
     },
-    "qec_cycle_dynq": {
-      "extension": "guppyft.helix.ops",
-      "name": "qec_cycle_dynq",
-      "description": "Perform QEC on the block containing this dynamic qubit.\nIdeally preserves the state of both logical qubits and external entanglement.",
-      "signature": {
-        "params": [],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.helix.types",
-              "extension_version": "0.1.0",
-              "id": "qubit",
-              "args": [],
-              "bound": "A"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.helix.types",
-              "extension_version": "0.1.0",
-              "id": "qubit",
-              "args": [],
-              "bound": "A"
-            }
-          ]
-        }
-      },
-      "binary": false
-    },
     "s_dynq": {
       "extension": "guppyft.helix.ops",
       "name": "s_dynq",

@@ -111,9 +111,6 @@ pub enum HelixOpDef {
     /// Destructively measure a dynamic qubit in the Z basis, preserving its partner.
     /// The decoded bit b denotes eigenvalue (-1)^b.
     measure_z_dynq,
-    /// Perform QEC on the block containing this dynamic qubit.
-    /// Ideally preserves the state of both logical qubits and external entanglement.
-    qec_cycle_dynq,
     /// Consume a block and return its logical qubits in order (0, 1).
     /// Preserves their joint state and entanglement with other resources.
     split,
@@ -215,9 +212,7 @@ impl MakeOpDef for HelixOpDef {
         match self {
             alloc_dynq => sig_dynq(0, 1),
             free_dynq => sig_dynq(1, 0),
-            x_dynq | y_dynq | z_dynq | h_dynq | s_dynq | sdg_dynq | qec_cycle_dynq => {
-                sig_dynq(1, 1)
-            }
+            x_dynq | y_dynq | z_dynq | h_dynq | s_dynq | sdg_dynq => sig_dynq(1, 1),
             cx_dynq | cz_dynq | swap_dynq => sig_dynq(2, 2),
             measure_x_dynq | measure_z_dynq => Signature::new(
                 [dynamic_logical_qubit_type()],
@@ -274,7 +269,7 @@ mod tests {
     fn test_helix_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.helix.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 32);
+        assert_eq!(EXTENSION.operations().count(), 31);
     }
 
     #[test]
@@ -336,15 +331,7 @@ mod tests {
                 &expected
             );
         }
-        for name in [
-            "x_dynq",
-            "y_dynq",
-            "z_dynq",
-            "h_dynq",
-            "s_dynq",
-            "sdg_dynq",
-            "qec_cycle_dynq",
-        ] {
+        for name in ["x_dynq", "y_dynq", "z_dynq", "h_dynq", "s_dynq", "sdg_dynq"] {
             assert_eq!(
                 EXTENSION
                     .instantiate_extension_op(name, [])?
@@ -411,12 +398,6 @@ mod tests {
                 .add_dataflow_op(EXTENSION.instantiate_extension_op(name, [])?, [a, c])?
                 .outputs_arr();
         }
-        [c] = function
-            .add_dataflow_op(
-                EXTENSION.instantiate_extension_op("qec_cycle_dynq", [])?,
-                [c],
-            )?
-            .outputs_arr();
         let [mx] = function
             .add_dataflow_op(
                 EXTENSION.instantiate_extension_op("measure_x_dynq", [])?,
