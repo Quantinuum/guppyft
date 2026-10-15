@@ -13,7 +13,7 @@ use documented::DocumentedVariants;
 use hugr::{
     Extension,
     extension::{
-        ExtensionId, OpDef, SignatureError, SignatureFunc,
+        ExtensionId, OpDef, SignatureError, SignatureFromArgs, SignatureFunc,
         simple_op::{
             HasConcrete, HasDef, MakeExtensionOp, MakeOpDef, MakeRegisteredOp, OpLoadError,
             try_from_name,
@@ -21,10 +21,10 @@ use hugr::{
     },
     ops::{ExtensionOp, OpName},
     std_extensions::arithmetic::int_types::int_type,
-    types::{Signature, TypeArg},
+    types::{FuncValueType, PolyFuncTypeRV, Signature, TypeArg, type_param::TypeParam},
 };
 
-use super::types::{block_type, dynamic_logical_qubit_type, t_state_type};
+use super::types::{block_type, borrowed_block_type, dynamic_logical_qubit_type, t_state_type};
 use crate::std::types::logical_measurement_type;
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
@@ -113,13 +113,25 @@ pub enum HelixOpDef {
     /// Destructively measure a dynamic qubit in the Z basis, preserving its partner.
     /// The decoded bit b denotes eigenvalue (-1)^b.
     measure_z_dynq,
-    /// Consume a block and return its logical qubits in order (0, 1).
-    /// Preserves their joint state and entanglement with other resources.
-    split,
-    /// Consume two dynamic qubits and form a block with logical qubits (first, second).
-    /// Preserves their joint state and external entanglement. The runtime must
-    /// arrange the inputs into one block if they are not already colocated.
-    join,
+    /// Borrow m logical qubits selected by distinct runtime indices (0 or 1).
+    /// Takes a block followed by m indices; returns a borrowed block followed
+    /// by m dynamic qubits in index-input order. Static parameter m is in 0..=2.
+    /// Preserves the joint state and each qubit's originating block and index.
+    borrow,
+    /// Borrow m additional logical qubits from a borrowed block.
+    /// Takes a borrowed block followed by m distinct, currently unborrowed indices;
+    /// returns the borrowed block followed by m dynamic qubits in index-input order.
+    /// Invalid indices or outstanding borrows of those indices cause a runtime panic.
+    borrow_more,
+    /// Return m borrowed qubits to their originating block and logical positions.
+    /// Takes the borrowed block followed by m qubits; returns the borrowed block.
+    /// Qubit order is immaterial; wrong-block or invalid handles cause a runtime panic.
+    restore_some,
+    /// Return the final m borrowed qubits and recover the owning block.
+    /// Takes the borrowed block followed by m qubits; returns a block.
+    /// Panics at runtime for invalid provenance or remaining outstanding borrows.
+    /// All borrow/restore operations have a single static count m in 0..=2.
+    restore,
     /// Supply a resource with ideal state (|0> + exp(i*pi/4)|1>)/sqrt(2).
     /// The backend chooses the factory and encoding, and handles heralded retries.
     /// Preparation need not occur inside a Helix block.
@@ -149,16 +161,27 @@ pub enum HelixOpDef {
 pub struct ConcreteHelixOp {
     /// The kind of operation.
     pub def: HelixOpDef,
+
+    /// Complete static arguments (a count for borrow/restore operations, otherwise empty).
+    pub args: Vec<TypeArg>,
 }
 
 impl HasConcrete for HelixOpDef {
     type Concrete = ConcreteHelixOp;
 
     fn instantiate(&self, args: &[TypeArg]) -> Result<Self::Concrete, OpLoadError> {
-        if !args.is_empty() {
+        if matches!(
+            self,
+            Self::borrow | Self::borrow_more | Self::restore_some | Self::restore
+        ) {
+            self.compute_signature(args)?;
+        } else if !args.is_empty() {
             return Err(SignatureError::InvalidTypeArgs.into());
         }
-        Ok(ConcreteHelixOp { def: *self })
+        Ok(ConcreteHelixOp {
+            def: *self,
+            args: args.to_vec(),
+        })
     }
 }
 
@@ -177,7 +200,7 @@ impl MakeExtensionOp for ConcreteHelixOp {
     }
 
     fn type_args(&self) -> Vec<TypeArg> {
-        vec![]
+        self.args.clone()
     }
 }
 
@@ -192,10 +215,14 @@ impl MakeRegisteredOp for ConcreteHelixOp {
 }
 
 impl HelixOpDef {
-    /// Initialize a [`ConcreteHelixOp`] from a [`HelixOpDef`].
+    /// Initialize an operation without static arguments.
+    /// Borrow/restore operations must instead be instantiated with a count.
     #[must_use]
     pub fn instantiate_no_args(self) -> ConcreteHelixOp {
-        ConcreteHelixOp { def: self }
+        ConcreteHelixOp {
+            def: self,
+            args: vec![],
+        }
     }
 }
 
@@ -254,8 +281,7 @@ impl MakeOpDef for HelixOpDef {
                 [logical_measurement_type(1)],
             )
             .into(),
-            split => Signature::new([block_type()], vec![dynamic_logical_qubit_type(); 2]).into(),
-            join => Signature::new(vec![dynamic_logical_qubit_type(); 2], [block_type()]).into(),
+            borrow | borrow_more | restore_some | restore => (*self).into(),
             alloc_zero | alloc_plus => sig_blocks(0, 1, 0),
             free => sig_blocks(1, 0, 0),
             x | y | z => sig_blocks(1, 1, 1),
@@ -270,6 +296,51 @@ impl MakeOpDef for HelixOpDef {
 
     fn description(&self) -> String {
         self.get_variant_docs().into()
+    }
+}
+
+/// Static count of logical qubits borrowed or restored.
+const STATIC_NAT_PARAM: &[TypeParam; 1] = &[TypeParam::max_nat_kind()];
+
+impl SignatureFromArgs for HelixOpDef {
+    fn compute_signature(&self, arg_values: &[TypeArg]) -> Result<PolyFuncTypeRV, SignatureError> {
+        let [TypeArg::BoundedNat(m @ 0..=2)] = *arg_values else {
+            return Err(SignatureError::InvalidTypeArgs);
+        };
+        let m = m as usize;
+        let (inputs, outputs) = match self {
+            Self::borrow | Self::borrow_more => {
+                let owner = if matches!(self, Self::borrow) {
+                    block_type()
+                } else {
+                    borrowed_block_type()
+                };
+                let mut inputs = vec![owner];
+                inputs.extend(vec![int_type(6); m]);
+                let mut outputs = vec![borrowed_block_type()];
+                outputs.extend(vec![dynamic_logical_qubit_type(); m]);
+                (inputs, outputs)
+            }
+            Self::restore_some | Self::restore => {
+                let mut inputs = vec![borrowed_block_type()];
+                inputs.extend(vec![dynamic_logical_qubit_type(); m]);
+                let owner = if matches!(self, Self::restore) {
+                    block_type()
+                } else {
+                    borrowed_block_type()
+                };
+                (inputs, vec![owner])
+            }
+            _ => return Err(SignatureError::InvalidTypeArgs),
+        };
+        Ok(PolyFuncTypeRV::new(
+            vec![],
+            FuncValueType::new(inputs, outputs),
+        ))
+    }
+
+    fn static_params(&self) -> &[TypeParam] {
+        STATIC_NAT_PARAM
     }
 }
 
@@ -304,7 +375,7 @@ mod tests {
     fn test_helix_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.helix.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 37);
+        assert_eq!(EXTENSION.operations().count(), 39);
     }
 
     #[test]
@@ -344,19 +415,10 @@ mod tests {
 
     #[test]
     fn test_dynamic_signatures() -> Result<(), Box<dyn Error>> {
-        let block = block_type();
         let qubit = dynamic_logical_qubit_type();
         for (name, expected) in [
             ("alloc_dynq", Signature::new(vec![], [qubit.clone()])),
             ("free_dynq", Signature::new([qubit.clone()], vec![])),
-            (
-                "split",
-                Signature::new([block.clone()], [qubit.clone(), qubit.clone()]),
-            ),
-            (
-                "join",
-                Signature::new([qubit.clone(), qubit.clone()], [block]),
-            ),
         ] {
             assert_eq!(
                 EXTENSION
@@ -402,26 +464,22 @@ mod tests {
         let mut function = module.define_function(
             "main",
             Signature::new(
-                [block_type()],
-                [
-                    BorrowArray::ty(1, bool_t()),
-                    BorrowArray::ty(1, bool_t()),
-                    block_type(),
-                ],
+                vec![],
+                [BorrowArray::ty(1, bool_t()), BorrowArray::ty(1, bool_t())],
             ),
         )?;
-        let [mut a, mut b] = function
-            .add_dataflow_op(
-                EXTENSION.instantiate_extension_op("split", [])?,
-                function.input_wires(),
-            )?
+        let [mut a] = function
+            .add_dataflow_op(EXTENSION.instantiate_extension_op("alloc_dynq", [])?, [])?
+            .outputs_arr();
+        let [mut b] = function
+            .add_dataflow_op(EXTENSION.instantiate_extension_op("alloc_dynq", [])?, [])?
             .outputs_arr();
         for name in ["x_dynq", "y_dynq", "z_dynq", "h_dynq", "s_dynq", "sdg_dynq"] {
             [a] = function
                 .add_dataflow_op(EXTENSION.instantiate_extension_op(name, [])?, [a])?
                 .outputs_arr();
         }
-        // Exercise a gate between block partners before introducing an independent qubit.
+        // Exercise gates on independently allocated dynamic qubits.
         [a, b] = function
             .add_dataflow_op(EXTENSION.instantiate_extension_op("cx_dynq", [])?, [a, b])?
             .outputs_arr();
@@ -450,19 +508,7 @@ mod tests {
             .add_dataflow_op(decode.clone(), [mx])?
             .outputs_arr();
         let [mz] = function.add_dataflow_op(decode, [mz])?.outputs_arr();
-        let [d] = function
-            .add_dataflow_op(EXTENSION.instantiate_extension_op("alloc_dynq", [])?, [])?
-            .outputs_arr();
-        let [block] = function
-            .add_dataflow_op(EXTENSION.instantiate_extension_op("join", [])?, [b, d])?
-            .outputs_arr();
-        // Convert back and forth again, exercising linear ownership of both outputs.
-        let [b, d] = function
-            .add_dataflow_op(EXTENSION.instantiate_extension_op("split", [])?, [block])?
-            .outputs_arr();
-        let [block] = function
-            .add_dataflow_op(EXTENSION.instantiate_extension_op("join", [])?, [b, d])?
-            .outputs_arr();
+        function.add_dataflow_op(EXTENSION.instantiate_extension_op("free_dynq", [])?, [b])?;
         let [unused] = function
             .add_dataflow_op(EXTENSION.instantiate_extension_op("alloc_dynq", [])?, [])?
             .outputs_arr();
@@ -470,29 +516,150 @@ mod tests {
             EXTENSION.instantiate_extension_op("free_dynq", [])?,
             [unused],
         )?;
-        function.finish_with_outputs([mx, mz, block])?;
+        function.finish_with_outputs([mx, mz])?;
         module.finish_hugr()?.validate()?;
         Ok(())
     }
 
     #[test]
-    fn test_join_rejects_duplicate_qubit() {
+    fn test_borrow_restore() -> Result<(), Box<dyn Error>> {
+        let mut module = ModuleBuilder::new();
+        let mut function = module.define_function("main", Signature::new_endo([block_type()]))?;
+        let [block] = function.input_wires_arr();
+        let zero = function.add_load_const(Value::extension(ConstInt::new_u(6, 0)?));
+        let one = function.add_load_const(Value::extension(ConstInt::new_u(6, 1)?));
+        let [owner, first] = function
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("borrow", [1.into()])?,
+                [block, zero],
+            )?
+            .outputs_arr();
+        let [owner, second] = function
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("borrow_more", [1.into()])?,
+                [owner, one],
+            )?
+            .outputs_arr();
+        let [first, second] = function
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("cx_dynq", [])?,
+                [first, second],
+            )?
+            .outputs_arr();
+        let [owner] = function
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("restore_some", [1.into()])?,
+                [owner, second],
+            )?
+            .outputs_arr();
+        let [block] = function
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("restore", [1.into()])?,
+                [owner, first],
+            )?
+            .outputs_arr();
+        // Borrow both in reversed index order, then restore in another order.
+        let [owner, second, first] = function
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("borrow", [2.into()])?,
+                [block, one, zero],
+            )?
+            .outputs_arr();
+        let [owner] = function
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("restore_some", [2.into()])?,
+                [owner, first, second],
+            )?
+            .outputs_arr();
+        let [block] = function
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("restore", [0.into()])?,
+                [owner],
+            )?
+            .outputs_arr();
+        function.finish_with_outputs([block])?;
+        module.finish_hugr()?.validate()?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_borrow_restore_signatures() -> Result<(), Box<dyn Error>> {
+        for m in 0..=2 {
+            for name in ["borrow", "borrow_more", "restore_some", "restore"] {
+                let borrowing = matches!(name, "borrow" | "borrow_more");
+                let mut inputs = vec![if name == "borrow" {
+                    block_type()
+                } else {
+                    borrowed_block_type()
+                }];
+                inputs.extend(vec![
+                    if borrowing {
+                        int_type(6)
+                    } else {
+                        dynamic_logical_qubit_type()
+                    };
+                    m
+                ]);
+                let mut outputs = vec![if name == "restore" {
+                    block_type()
+                } else {
+                    borrowed_block_type()
+                }];
+                if borrowing {
+                    outputs.extend(vec![dynamic_logical_qubit_type(); m]);
+                }
+                let args = [TypeArg::from(m as u64)];
+                let op = EXTENSION.instantiate_extension_op(name, args.clone())?;
+                assert_eq!(op.signature().as_ref(), &Signature::new(inputs, outputs));
+                let concrete = ConcreteHelixOp::from_extension_op(&op)?;
+                assert_eq!(concrete.type_args(), args);
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn test_restore_rejects_duplicate_qubit() {
         let mut module = ModuleBuilder::new();
         let mut function = module
             .define_function(
-                "bad_join",
-                Signature::new([dynamic_logical_qubit_type()], [block_type()]),
+                "bad_restore",
+                Signature::new(
+                    [borrowed_block_type(), dynamic_logical_qubit_type()],
+                    [block_type()],
+                ),
             )
             .unwrap();
-        let [qubit] = function.input_wires_arr();
+        let [owner, qubit] = function.input_wires_arr();
         assert!(
             function
                 .add_dataflow_op(
-                    EXTENSION.instantiate_extension_op("join", []).unwrap(),
-                    [qubit, qubit],
+                    EXTENSION
+                        .instantiate_extension_op("restore", [2.into()])
+                        .unwrap(),
+                    [owner, qubit, qubit],
                 )
                 .is_err()
         );
+    }
+
+    #[test]
+    fn test_borrowed_block_rejects_block_gate() -> Result<(), Box<dyn Error>> {
+        let mut module = ModuleBuilder::new();
+        let mut function = module.define_function(
+            "bad",
+            Signature::new([borrowed_block_type()], [block_type()]),
+        )?;
+        let outputs = function
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("qec_cycle", [])?,
+                function.input_wires(),
+            )?
+            .outputs()
+            .collect::<Vec<_>>();
+        function.finish_with_outputs(outputs)?;
+        assert!(module.finish_hugr().is_err());
+        Ok(())
     }
 
     #[test]
@@ -513,8 +680,11 @@ mod tests {
                 )?
                 .outputs_arr();
         }
-        let [mut first, mut second] = function
-            .add_dataflow_op(EXTENSION.instantiate_extension_op("split", [])?, [block])?
+        let [owner, mut first, mut second] = function
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("borrow", [2.into()])?,
+                [block, zero, one],
+            )?
             .outputs_arr();
         for (name, target) in [
             ("inject_t_dynq", &mut first),
@@ -532,8 +702,8 @@ mod tests {
         }
         [block] = function
             .add_dataflow_op(
-                EXTENSION.instantiate_extension_op("join", [])?,
-                [first, second],
+                EXTENSION.instantiate_extension_op("restore", [2.into()])?,
+                [owner, first, second],
             )?
             .outputs_arr();
         let [unused] = function
@@ -628,11 +798,22 @@ mod tests {
         // then round-trip all functions through an envelope and registry.
         let mut module = ModuleBuilder::new();
         for def in HelixOpDef::iter() {
-            let concrete = def.instantiate_no_args();
+            let args = if matches!(
+                def,
+                HelixOpDef::borrow
+                    | HelixOpDef::borrow_more
+                    | HelixOpDef::restore_some
+                    | HelixOpDef::restore
+            ) {
+                vec![2.into()]
+            } else {
+                vec![]
+            };
+            let concrete = def.instantiate(&args)?;
             let op = concrete.to_extension_op()?;
             let loaded = ConcreteHelixOp::from_extension_op(&op)?;
             assert_eq!(loaded.def, def);
-            assert!(loaded.type_args().is_empty());
+            assert_eq!(loaded.type_args(), args);
             let mut function =
                 module.define_function(def.opdef_id(), op.signature().as_ref().clone())?;
             let outputs = function
@@ -721,12 +902,31 @@ mod tests {
     #[test]
     fn test_invalid_ops() {
         for def in HelixOpDef::iter() {
-            assert!(def.instantiate(&[2.into()]).is_err());
-            assert!(
-                EXTENSION
-                    .instantiate_extension_op(&def.opdef_id(), [2.into()])
-                    .is_err()
-            );
+            let invalid_args = if matches!(
+                def,
+                HelixOpDef::borrow
+                    | HelixOpDef::borrow_more
+                    | HelixOpDef::restore_some
+                    | HelixOpDef::restore
+            ) {
+                vec![
+                    vec![],
+                    vec![3.into()],
+                    vec![u64::MAX.into()],
+                    vec![1.into(), 2.into()],
+                    vec!["one".into()],
+                ]
+            } else {
+                vec![vec![2.into()]]
+            };
+            for args in invalid_args {
+                assert!(def.instantiate(&args).is_err());
+                assert!(
+                    EXTENSION
+                        .instantiate_extension_op(&def.opdef_id(), args)
+                        .is_err()
+                );
+            }
         }
         let steane_x = crate::steane::ops::EXTENSION
             .instantiate_extension_op("x", [])
