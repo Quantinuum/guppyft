@@ -12,26 +12,6 @@
         "bound": "A"
       }
     },
-    "borrowed_block": {
-      "extension": "guppyft.helix.types",
-      "name": "borrowed_block",
-      "params": [],
-      "description": "logical Helix block with outstanding logical-qubit borrows",
-      "bound": {
-        "b": "Explicit",
-        "bound": "A"
-      }
-    },
-    "qubit": {
-      "extension": "guppyft.helix.types",
-      "name": "qubit",
-      "params": [],
-      "description": "logical Helix qubit",
-      "bound": {
-        "b": "Explicit",
-        "bound": "A"
-      }
-    },
     "t_state": {
       "extension": "guppyft.helix.types",
       "name": "t_state",

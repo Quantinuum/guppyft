@@ -1,19 +1,12 @@
 //! Types for logical operations on the [[20, 2, 6]] C4-Helix code.
 //!
-//! A `block` owns two logical qubits, labelled 0 and 1. The `qubit` type
-//! represents an independently owned logical qubit whose block and position
-//! are assigned at runtime. `borrow` converts the owning block to a
-//! `borrowed_block`, and `borrow_more` extracts additional logical qubits.
-//! `restore_some` returns qubits while retaining the borrowed-block handle;
-//! `restore` returns the final borrowed qubits and recovers the owning block.
-//! A borrowed block cannot be used in ordinary block operations. Borrowed
-//! qubits retain their originating block and logical index, and borrowing
-//! and restoration preserve the joint state.
+//! A `block` owns two logical qubits, labelled 0 and 1. All code operations
+//! act on blocks.
 //!
 //! A `t_state` owns one magic resource with ideal state
 //! (|0> + exp(i*pi/4)|1>)/sqrt(2).
 //! Its physical encoding and preparation protocol are chosen by the backend.
-//! All four types are linear and have no type parameters.
+//! Both types are linear and have no type parameters.
 use std::sync::{Arc, LazyLock};
 
 use hugr::{
@@ -30,27 +23,6 @@ pub const VERSION: semver::Version = semver::Version::new(0, 1, 0);
 
 /// Type name for a logical Helix block.
 pub const BLOCK_TYPENAME: TypeName = TypeName::new_inline("block");
-
-/// Type name for a Helix block with outstanding logical-qubit borrows.
-pub const BORROWED_BLOCK_TYPENAME: TypeName = TypeName::new_inline("borrowed_block");
-
-/// Type of a Helix block whose logical qubits may be borrowed.
-/// Cannot be used in block operations until `restore` converts it back to a block.
-pub fn borrowed_block_type() -> Type {
-    CustomType::new(
-        BORROWED_BLOCK_TYPENAME,
-        [],
-        EXTENSION_ID,
-        VERSION,
-        TypeBound::Linear,
-        &Arc::<Extension>::downgrade(&EXTENSION),
-    )
-    .into()
-}
-
-/// Type name for a Helix-encoded logical qubit, either extracted from a block
-/// or dynamically allocated.
-pub const QUBIT_TYPENAME: TypeName = TypeName::new_inline("qubit");
 
 /// Type name for a consumable T-state resource.
 pub const T_STATE_TYPENAME: TypeName = TypeName::new_inline("t_state");
@@ -83,19 +55,6 @@ pub fn block_type() -> Type {
     .into()
 }
 
-/// Type of a dynamic Helix logical qubit with runtime block membership.
-pub fn dynamic_logical_qubit_type() -> Type {
-    CustomType::new(
-        QUBIT_TYPENAME,
-        [],
-        EXTENSION_ID,
-        VERSION,
-        TypeBound::Linear,
-        &Arc::<Extension>::downgrade(&EXTENSION),
-    )
-    .into()
-}
-
 /// Extension for logical Helix types.
 fn extension() -> Arc<Extension> {
     Extension::new_arc(EXTENSION_ID, VERSION, |extension, extension_ref| {
@@ -104,24 +63,6 @@ fn extension() -> Arc<Extension> {
                 BLOCK_TYPENAME,
                 vec![],
                 "logical Helix block".to_owned(),
-                TypeBound::Linear.into(),
-                extension_ref,
-            )
-            .unwrap();
-        extension
-            .add_type(
-                BORROWED_BLOCK_TYPENAME,
-                vec![],
-                "logical Helix block with outstanding logical-qubit borrows".to_owned(),
-                TypeBound::Linear.into(),
-                extension_ref,
-            )
-            .unwrap();
-        extension
-            .add_type(
-                QUBIT_TYPENAME,
-                vec![],
-                "logical Helix qubit".to_owned(),
                 TypeBound::Linear.into(),
                 extension_ref,
             )
@@ -155,7 +96,7 @@ mod tests {
     fn test_helix_types_extension() {
         let extn = extension();
         assert_eq!(extn.name() as &str, "guppyft.helix.types");
-        assert_eq!(extn.types().count(), 4);
+        assert_eq!(extn.types().count(), 2);
         assert_eq!(extn.operations().count(), 0);
     }
 
@@ -166,34 +107,17 @@ mod tests {
     }
 
     #[test]
-    fn test_helix_qubit_type() {
-        let qubit = dynamic_logical_qubit_type();
-        assert!(!qubit.copyable());
-    }
-
-    #[test]
-    fn test_borrowed_block_type() {
-        let borrowed = borrowed_block_type();
-        assert!(!borrowed.copyable());
-        assert_ne!(borrowed, block_type());
-        assert_ne!(borrowed, dynamic_logical_qubit_type());
-    }
-
-    #[test]
     fn test_t_state_type() {
         let resource = t_state_type();
         assert!(!resource.copyable());
         assert_ne!(resource, block_type());
-        assert_ne!(resource, dynamic_logical_qubit_type());
     }
 
     #[test]
     fn test_hugr() {
         let block = block_type();
-        let qubit = dynamic_logical_qubit_type();
         let mut module_builder = ModuleBuilder::new();
-        let signature =
-            Signature::new_endo(vec![block, qubit, t_state_type(), borrowed_block_type()]);
+        let signature = Signature::new_endo(vec![block, t_state_type()]);
         let f_build = module_builder.define_function("main", signature).unwrap();
         let wires: Vec<_> = f_build.input_wires().collect();
         f_build.finish_with_outputs(wires).unwrap();
