@@ -123,8 +123,8 @@ def prep_zero_ft() -> PreBlock[4, 1]:
     # Implement a physical GHZ state, which corresponds to logical |00> state.
     phys.h(phys_qs[0])
     phys.cx(phys_qs[0], phys_qs[1])
-    phys.cx(phys_qs[0], phys_qs[2])
-    phys.cx(phys_qs[0], phys_qs[3])
+    phys.cx(phys_qs[1], phys_qs[2])
+    phys.cx(phys_qs[2], phys_qs[3])
 
     # Flag using an ancilla qubit
     ancilla = phys.qubit()
