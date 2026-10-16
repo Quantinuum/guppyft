@@ -1,17 +1,18 @@
 """Builder and encoding implementation for the ToyK2 architecture."""
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field, replace
 from typing import Any, Literal, Self, no_type_check, overload
 
 from guppylang import guppy
+from guppylang.decorator import custom_guppy_decorator
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.emulator import EmulatorBuilder, EmulatorInstance
 from guppylang.library import GuppyLibrary, link_name
 from guppylang.std.builtins import array, comptime, exit, owned
 from guppylang.std.collections import Stack, empty_stack
 from guppylang.std.option import Option, nothing, some
-from hugr.ext import ExtensionRegistry
+from hugr.ext import ExtensionRegistry, OpDef
 from hugr.package import Package
 from hugr.std import _std_extensions
 
@@ -166,6 +167,28 @@ class ToyK2Builder:
         """Generate the `ImplementOpsSpec` providing ToyK2 implementations of
         logical ops for a program using `n_blocks` logical blocks."""
         qed_policy = self._qed_policy
+
+        lib = GuppyLibrary(members=[])
+        ops = OpReplacements()
+
+        def _register_op_replacement(
+            op_def: OpDef,
+        ) -> Callable[[Callable[..., Any]], GuppyFunctionDefinition[Any, Any]]:
+            @custom_guppy_decorator
+            def decorator(
+                func: Callable[..., Any],
+            ) -> GuppyFunctionDefinition[Any, Any]:
+                # Generate guppy function
+                name = f"link.{op_def.qualified_name()}"
+                guppy_func = guppy(link_name(name)(func))
+
+                # Register in library and for op replacement
+                lib.members.append(guppy_func.id)
+                ops.with_generated_decl(op_def, name)
+
+                return guppy_func
+
+            return decorator
 
         @guppy.struct
         class RuntimeBlock:
@@ -328,9 +351,8 @@ class ToyK2Builder:
 
                     self.put_block(i, blk)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.borrow_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._borrow")
         def _borrow(blk_id: int, qb_id: int) -> tuple[tuple[int, int], int]:
 
             @guppy
@@ -346,9 +368,8 @@ class ToyK2Builder:
             map_global(_impl, blk_id, qb_id)
             return (blk_id, qb_id), blk_id
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.borrow_more_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._borrow_more")
         def _borrow_more(blk_id: int, qb_id: int) -> tuple[tuple[int, int], int]:
 
             @guppy
@@ -364,9 +385,8 @@ class ToyK2Builder:
             map_global(_impl, blk_id, qb_id)
             return (blk_id, qb_id), blk_id
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.restore_some_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._restore_some")
         def _restore_some(blk_id: int, addr: tuple[int, int]) -> int:
 
             @guppy
@@ -381,9 +401,8 @@ class ToyK2Builder:
 
             return map_global(_impl, blk_id, addr[1])
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.restore_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._restore")
         def _restore(blk_id: int, addr: tuple[int, int]) -> int:
 
             @guppy
@@ -398,9 +417,8 @@ class ToyK2Builder:
 
             return map_global(_impl, blk_id, addr[1])
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.alloc_dynq_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._alloc_dynq")
         def _alloc_dynq() -> tuple[tuple[int, int]]:
 
             @guppy
@@ -411,9 +429,8 @@ class ToyK2Builder:
 
             return map_global(_impl)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.free_dynq_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._free_dynq")
         def _free_dynq(addr: tuple[int, int]) -> None:
 
             @guppy
@@ -424,9 +441,8 @@ class ToyK2Builder:
 
             return map_global(_impl, addr)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.qed_cycle_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._qed_cycle")
         def _qed_cycle(blk_id: int) -> int:
 
             @guppy
@@ -443,9 +459,8 @@ class ToyK2Builder:
 
             return map_global(_impl, blk_id)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.prep_zero_ft_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._prep_zero_ft")
         def _prep_zero_ft() -> int:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, int]:
@@ -458,9 +473,8 @@ class ToyK2Builder:
 
             return map_global(_impl)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.prep_zero_plus_ft_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._prep_zero_plus_ft")
         def _prep_zero_plus_ft() -> int:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, int]:
@@ -475,9 +489,8 @@ class ToyK2Builder:
 
             return map_global(_impl)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.prep_y_states_non_ft_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._prep_y_states_non_ft")
         def _prep_y_states_non_ft() -> int:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, int]:
@@ -492,9 +505,8 @@ class ToyK2Builder:
 
             return map_global(_impl)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.prep_t_states_non_ft_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._prep_t_states_non_ft")
         def _prep_t_states_non_ft() -> int:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, int]:
@@ -509,9 +521,8 @@ class ToyK2Builder:
 
             return map_global(_impl)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.project_z_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._project_z")
         def _project_z(blk_id: int, qb_id: int) -> tuple[bool, int]:
             @guppy
             def _impl(
@@ -527,9 +538,8 @@ class ToyK2Builder:
 
             return map_global(_impl, blk_id, qb_id)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.measure_z_all_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._measure_z_all")
         def _measure_z_all(blk_id: int) -> tuple[tuple[bool, bool]]:
             @guppy
             def _impl(
@@ -542,9 +552,8 @@ class ToyK2Builder:
 
             return map_global(_impl, blk_id)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.free_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._free")
         def _free(blk_id: int) -> None:
             @guppy
             def _impl(state: STATE @ owned, blk_id: int) -> STATE:
@@ -554,9 +563,8 @@ class ToyK2Builder:
 
             return map_global(_impl, blk_id)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.x_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._x")
         def _x(blk_id: int, target: int) -> int:
             @guppy
             def _impl(
@@ -572,9 +580,8 @@ class ToyK2Builder:
 
             return map_global(_impl, blk_id, target)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.z_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._z")
         def _z(blk_id: int, target: int) -> int:
             @guppy
             def _impl(
@@ -590,9 +597,8 @@ class ToyK2Builder:
 
             return map_global(_impl, blk_id, target)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.h_all_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._h_all")
         def _h_all(blk_id: int) -> int:
             @guppy
             def _impl(state: STATE @ owned, blk_id: int) -> tuple[STATE, int]:
@@ -606,9 +612,8 @@ class ToyK2Builder:
 
             return map_global(_impl, blk_id)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.cx_intra_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._cx_intra")
         def _cx_intra(blk_id: int, target: int) -> int:
             @guppy
             def _impl(
@@ -624,9 +629,8 @@ class ToyK2Builder:
 
             return map_global(_impl, blk_id, target)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.cx_transversal_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._cx_transversal")
         def _cx_transversal(ctl_blk_id: int, tgt_blk_id: int) -> tuple[int, int]:
             @guppy
             def _impl(
@@ -653,9 +657,8 @@ class ToyK2Builder:
 
             return map_global(_impl, ctl_blk_id, tgt_blk_id)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.swap_intra_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._swap_intra")
         def _swap_intra(blk_id: int) -> int:
             @guppy
             def _impl(state: STATE @ owned, blk_id: int) -> tuple[STATE, int]:
@@ -686,25 +689,22 @@ class ToyK2Builder:
         # to stop Guppy from unpacking the `tuple[int,int]` that is used
         # to represent a dynamic qubit.
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.x_dynq_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._x_dynq")
         def _x_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
             blk_id, qb_id = addr
             _x(blk_id, qb_id)
             return (addr,)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.z_dynq_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._z_dynq")
         def _z_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
             blk_id, qb_id = addr
             _z(blk_id, qb_id)
             return (addr,)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.h_dynq_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._h_dynq")
         def _h_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
             blk_id, qb_id = addr
             # Prepare an ancilla `|0+>` state, with the `|+>` on the index where
@@ -732,9 +732,8 @@ class ToyK2Builder:
                 _z(blk_id, qb_id)
             return (addr,)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.cx_dynq_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._cx_dynq")
         def _cx_dynq(
             ctl_addr: tuple[int, int], tgt_addr: tuple[int, int]
         ) -> tuple[tuple[int, int], tuple[int, int]]:
@@ -760,9 +759,8 @@ class ToyK2Builder:
 
             return ctl_addr, tgt_addr
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.s_dynq_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._s_dynq")
         def _s_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
             # Prepare two |Y> states
             y_blk_id = _prep_y_states_non_ft()
@@ -776,18 +774,16 @@ class ToyK2Builder:
 
             return (addr,)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.sdg_dynq_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._sdg_dynq")
         def _sdg_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
             _x_dynq(addr)
             _s_dynq(addr)
             _x_dynq(addr)
             return (addr,)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.t_dynq_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._t_dynq")
         def _t_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
             # Prepare two T|+> states
             t_blk_id = _prep_t_states_non_ft()
@@ -801,26 +797,23 @@ class ToyK2Builder:
 
             return (addr,)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.tdg_dynq_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._tdg_dynq")
         def _tdg_dynq(addr: tuple[int, int]) -> tuple[tuple[int, int]]:
             _x_dynq(addr)
             _t_dynq(addr)
             _x_dynq(addr)
             return (addr,)
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.project_z_dynq_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._project_z_dynq")
         def _project_z_dynq(addr: tuple[int, int]) -> tuple[bool, tuple[int, int]]:
             blk_id, qb_id = addr
             res, _ = _project_z(blk_id, qb_id)
             return res, addr
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.decode_qubit_measurement_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._no_op_decode1")
         def _no_op_decode1(outcome: bool) -> bool:
             # In the current version of ToyK2, decoding actually happens within
             # the implementation of the measure primitive, which returns bool.
@@ -828,9 +821,8 @@ class ToyK2Builder:
             # `read()` with.
             return outcome
 
-        @guppy
+        @_register_op_replacement(toy_k2_ops.decode_block_measurement_def)
         @no_type_check
-        @link_name("guppyft.toy_k2._no_op_decode2")
         def _no_op_decode2(outcome: tuple[bool, bool]) -> tuple[bool, bool]:
             # Same as _no_op_decode1, but for the outcome of `measure_z_all`.
             return outcome
@@ -878,101 +870,8 @@ class ToyK2Builder:
 
             return wrapper  # type: ignore[no-any-return]
 
-        lib = GuppyLibrary.from_members(
-            state_gen,
-            state_discard,
-            _borrow,
-            _borrow_more,
-            _restore_some,
-            _restore,
-            _alloc_dynq,
-            _free_dynq,
-            _qed_cycle,
-            _prep_zero_ft,
-            _prep_zero_plus_ft,
-            _prep_y_states_non_ft,
-            _prep_t_states_non_ft,
-            _project_z,
-            _measure_z_all,
-            _free,
-            _x,
-            _z,
-            _h_all,
-            _cx_intra,
-            _cx_transversal,
-            _swap_intra,
-            _x_dynq,
-            _z_dynq,
-            _h_dynq,
-            _cx_dynq,
-            _s_dynq,
-            _sdg_dynq,
-            _t_dynq,
-            _tdg_dynq,
-            _project_z_dynq,
-            _no_op_decode1,
-            _no_op_decode2,
-        ).compile()
-
-        ops = OpReplacements().with_generated_decls(
-            {
-                ("guppyft.toy_k2.ops", "borrow"): "guppyft.toy_k2._borrow",
-                ("guppyft.toy_k2.ops", "borrow_more"): "guppyft.toy_k2._borrow_more",
-                ("guppyft.toy_k2.ops", "restore_some"): "guppyft.toy_k2._restore_some",
-                ("guppyft.toy_k2.ops", "restore"): "guppyft.toy_k2._restore",
-                ("guppyft.toy_k2.ops", "alloc_dynq"): "guppyft.toy_k2._alloc_dynq",
-                ("guppyft.toy_k2.ops", "free_dynq"): "guppyft.toy_k2._free_dynq",
-                ("guppyft.toy_k2.ops", "qed_cycle"): "guppyft.toy_k2._qed_cycle",
-                ("guppyft.toy_k2.ops", "prep_zero_ft"): "guppyft.toy_k2._prep_zero_ft",
-                (
-                    "guppyft.toy_k2.ops",
-                    "prep_zero_plus_ft",
-                ): "guppyft.toy_k2._prep_zero_plus_ft",
-                (
-                    "guppyft.toy_k2.ops",
-                    "prep_y_states_non_ft",
-                ): "guppyft.toy_k2._prep_y_states_non_ft",
-                (
-                    "guppyft.toy_k2.ops",
-                    "prep_t_states_non_ft",
-                ): "guppyft.toy_k2._prep_t_states_non_ft",
-                ("guppyft.toy_k2.ops", "project_z"): "guppyft.toy_k2._project_z",
-                (
-                    "guppyft.toy_k2.ops",
-                    "measure_z_all",
-                ): "guppyft.toy_k2._measure_z_all",
-                ("guppyft.toy_k2.ops", "free"): "guppyft.toy_k2._free",
-                ("guppyft.toy_k2.ops", "x"): "guppyft.toy_k2._x",
-                ("guppyft.toy_k2.ops", "z"): "guppyft.toy_k2._z",
-                ("guppyft.toy_k2.ops", "h_all"): "guppyft.toy_k2._h_all",
-                ("guppyft.toy_k2.ops", "cx_intra"): "guppyft.toy_k2._cx_intra",
-                (
-                    "guppyft.toy_k2.ops",
-                    "cx_transversal",
-                ): "guppyft.toy_k2._cx_transversal",
-                ("guppyft.toy_k2.ops", "swap_intra"): "guppyft.toy_k2._swap_intra",
-                ("guppyft.toy_k2.ops", "x_dynq"): "guppyft.toy_k2._x_dynq",
-                ("guppyft.toy_k2.ops", "z_dynq"): "guppyft.toy_k2._z_dynq",
-                ("guppyft.toy_k2.ops", "h_dynq"): "guppyft.toy_k2._h_dynq",
-                ("guppyft.toy_k2.ops", "cx_dynq"): "guppyft.toy_k2._cx_dynq",
-                ("guppyft.toy_k2.ops", "s_dynq"): "guppyft.toy_k2._s_dynq",
-                ("guppyft.toy_k2.ops", "sdg_dynq"): "guppyft.toy_k2._sdg_dynq",
-                ("guppyft.toy_k2.ops", "t_dynq"): "guppyft.toy_k2._t_dynq",
-                ("guppyft.toy_k2.ops", "tdg_dynq"): "guppyft.toy_k2._tdg_dynq",
-                (
-                    "guppyft.toy_k2.ops",
-                    "project_z_dynq",
-                ): "guppyft.toy_k2._project_z_dynq",
-                (
-                    "guppyft.toy_k2.ops",
-                    "decode_qubit_measurement",
-                ): "guppyft.toy_k2._no_op_decode1",
-                (
-                    "guppyft.toy_k2.ops",
-                    "decode_block_measurement",
-                ): "guppyft.toy_k2._no_op_decode2",
-            }
-        )
+        lib.members.extend((state_gen.id, state_discard.id))
+        ops.register_for_elimination_check(toy_k2_ops().name)
         tys = TyReplacements().with_types(
             [
                 ("guppyft.toy_k2.types", "block"),
@@ -984,7 +883,7 @@ class ToyK2Builder:
         )
 
         return ImplementOpsSpec(
-            ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[lib]
+            ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[lib.compile()]
         )
 
     def _gen_encoder_spec(self, n_blocks: int) -> EncodeSpec:
