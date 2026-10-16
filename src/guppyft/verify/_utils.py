@@ -17,28 +17,27 @@ T = guppy.type_var("T", copyable=False, droppable=False)
 
 # Specifications act on logical qubit arrays; implementations may use LogicalBlock.
 # Guppy checks concrete block sizes when compiling the verification program.
-type SemanticCliffordUnitary = GuppyFunctionDefinition[[array[qubit, N]], None]  # type: ignore[valid-type]
-type SemanticCliffordUnitaryDouble = GuppyFunctionDefinition[
-    [array[qubit, N], array[qubit, N]], None  # type: ignore[valid-type]
-]
 type SemanticStabilizerState = GuppyFunctionDefinition[[], array[qubit, N]]  # type: ignore[valid-type]
-type SemanticStabilizerStateDouble = GuppyFunctionDefinition[
-    [], tuple[array[qubit, N], array[qubit, N]]  # type: ignore[valid-type]
-]
-
-type ImplementationCliffordUnitary = (
-    SemanticCliffordUnitary | GuppyFunctionDefinition[[LogicalBlock[N]], None]  # type: ignore[valid-type, type-arg]
-)
-type ImplementationCliffordUnitaryDouble = (
-    SemanticCliffordUnitaryDouble
-    | GuppyFunctionDefinition[[LogicalBlock[N], LogicalBlock[N]], None]  # type: ignore[valid-type, type-arg]
-)
 type ImplementationStabilizerState = (
     SemanticStabilizerState | GuppyFunctionDefinition[[], LogicalBlock[N]]  # type: ignore[valid-type, type-arg]
 )
+type SemanticStabilizerStateDouble = GuppyFunctionDefinition[
+    [], tuple[array[qubit, N], array[qubit, N]]  # type: ignore[valid-type]
+]
 type ImplementationStabilizerStateDouble = (
     SemanticStabilizerStateDouble
     | GuppyFunctionDefinition[[], tuple[LogicalBlock[N], LogicalBlock[N]]]  # type: ignore[valid-type, type-arg]
+)
+type SemanticCliffordUnitary = GuppyFunctionDefinition[[array[qubit, N]], None]  # type: ignore[valid-type]
+type ImplementationCliffordUnitary = (
+    SemanticCliffordUnitary | GuppyFunctionDefinition[[LogicalBlock[N]], None]  # type: ignore[valid-type, type-arg]
+)
+type SemanticCliffordUnitaryDouble = GuppyFunctionDefinition[
+    [array[qubit, N], array[qubit, N]], None  # type: ignore[valid-type]
+]
+type ImplementationCliffordUnitaryDouble = (
+    SemanticCliffordUnitaryDouble
+    | GuppyFunctionDefinition[[LogicalBlock[N], LogicalBlock[N]], None]  # type: ignore[valid-type, type-arg]
 )
 
 
