@@ -530,11 +530,11 @@ class ToyK2Builder:
         @guppy
         @no_type_check
         @link_name("guppyft.toy_k2._measure_z_all")
-        def _measure_z_all(blk_id: int) -> array[bool, 2]:
+        def _measure_z_all(blk_id: int) -> tuple[tuple[bool, bool]]:
             @guppy
             def _impl(
                 state: STATE @ owned, blk_id: int
-            ) -> tuple[STATE, array[bool, 2]]:
+            ) -> tuple[STATE, tuple[bool, bool]]:
                 blk = state.release_block(blk_id)
                 res = k2_primitives.measure_z_all(blk)
 
@@ -723,7 +723,7 @@ class ToyK2Builder:
             _cx_transversal(ancilla_blk_id, blk_id)
             _h_all(ancilla_blk_id)
             _cx_transversal(blk_id, ancilla_blk_id)
-            m0, m1 = _measure_z_all(ancilla_blk_id)
+            ((m0, m1),) = _measure_z_all(ancilla_blk_id)
             m = m0 if qb_id == 0 else m1
 
             if m:
@@ -769,11 +769,9 @@ class ToyK2Builder:
             # Inject only one of them
             _cx_dynq(addr, (y_blk_id, 0))
             # Measure the whole block because that's more efficient
-            m0, m1 = _measure_z_all(y_blk_id)
-            # But only pick the measurement outcome we care about for injection
-            m = m0 if addr[1] == 0 else m1
+            ((m0, _),) = _measure_z_all(y_blk_id)
             # Correct if necessary
-            if m:
+            if m0:
                 _z_dynq(addr)
 
             return (addr,)
@@ -796,11 +794,9 @@ class ToyK2Builder:
             # Inject only one of them
             _cx_dynq(addr, (t_blk_id, 0))
             # Measure the whole block because that's more efficient
-            m0, m1 = _measure_z_all(t_blk_id)
-            # But only pick the measurement outcome we care about for injection
-            m = m0 if addr[1] == 0 else m1
+            ((m0, _),) = _measure_z_all(t_blk_id)
             # Correct if necessary
-            if m:
+            if m0:
                 _s_dynq(addr)
 
             return (addr,)
@@ -835,9 +831,9 @@ class ToyK2Builder:
         @guppy
         @no_type_check
         @link_name("guppyft.toy_k2._no_op_decode2")
-        def _no_op_decode2(outcome: array[bool, 2] @ owned) -> tuple[bool, bool]:
+        def _no_op_decode2(outcome: tuple[bool, bool]) -> tuple[bool, bool]:
             # Same as _no_op_decode1, but for the outcome of `measure_z_all`.
-            return (outcome[0], outcome[1])
+            return outcome
 
         @guppy.declare
         @no_type_check
