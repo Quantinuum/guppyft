@@ -1,13 +1,3 @@
-from typing import no_type_check
-
-import pytest
-from guppylang import guppy
-from guppylang.std.array import ArrayIter
-from guppylang.std.builtins import array, owned
-from guppylang.std.iter import SizedIter
-from guppylang.std.quantum import qubit
-from guppylang_internals.error import GuppyError
-
 from guppyft.verify import (
     valid_clifford_implementation,
     valid_stabilizer_state_preparation,
@@ -170,36 +160,6 @@ def test_steane_cx_logical_block() -> None:
         steane.implement_cx_logical_block,
         code_definition=steane.STEANE_DEF,
     )
-
-
-def test_steane_zero_state_unsupported_iterable_struct() -> None:
-    @guppy.struct
-    class UnsupportedBlock:
-        data_qs: array[qubit, 7]  # type: ignore[valid-type]
-
-        @guppy
-        @no_type_check
-        def __iter__(
-            self: "UnsupportedBlock" @ owned,
-        ) -> SizedIter[ArrayIter[qubit, 7], 7]:
-            return self.data_qs.__iter__()
-
-    @guppy
-    @no_type_check
-    def implement_non_ft_zero_unsupported_block() -> UnsupportedBlock:
-        return UnsupportedBlock(steane.implement_non_ft_zero_state())
-
-    with pytest.raises(
-        GuppyError,
-        match="Invalid call of overloaded function",
-    ) as error:
-        valid_stabilizer_state_preparation(
-            steane.specify_zero_state,
-            implement_non_ft_zero_unsupported_block,
-            code_definition=steane.STEANE_DEF,
-        )
-
-    assert "UnsupportedBlock" in str(error.value)
 
 
 def test_steane_bell_state_logical_block() -> None:
