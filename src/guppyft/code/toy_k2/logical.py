@@ -510,11 +510,10 @@ def s(block: Block, idx: int) -> None:
     """
     y_states = prep_y_states_non_ft()
 
-    cx_inter(block, idx, y_states, idx)
-    m0, m1 = measure_z_all(y_states).decode()
-    m = m0 if idx == 0 else m1
+    cx_inter(block, idx, y_states, 0)
+    m0, _ = measure_z_all(y_states).decode()
 
-    if m:
+    if m0:
         z(block, idx)
 
 
@@ -564,11 +563,10 @@ def t(block: Block, idx: int) -> None:
     """
     t_states = prep_t_states_non_ft()
 
-    cx_inter(block, idx, t_states, idx)
-    m0, m1 = measure_z_all(t_states).decode()
-    m = m0 if idx == 0 else m1
+    cx_inter(block, idx, t_states, 0)
+    m0, _ = measure_z_all(t_states).decode()
 
-    if m:
+    if m0:
         s(block, idx)
 
 
