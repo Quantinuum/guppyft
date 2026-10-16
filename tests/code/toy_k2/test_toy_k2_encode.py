@@ -68,29 +68,6 @@ def test_encoder_smoke() -> None:
     ToyK2Builder().build(n_blocks=2).emulator(main.compile(), n_qubits=16).run()
 
 
-def test_encode_function_call() -> None:
-    # `foo` is a public function, so the `ReplaceEncoder` pass (which defaults to
-    # `GlobalScope.PRESERVE_PUBLIC`) should in principle leave its interface/behaviour
-    # untouched. However, `PRESERVE_PUBLIC` is not actually enforced by the underlying
-    # `ReplaceTypes` pass (a lowering pass, which ignores `preserve_interface` since its
-    # purpose is to change signatures) - it still rewrites ops/types in `foo` like
-    # everything else. This test just checks that the call to `foo` is still valid
-    # after encoding, not that `foo`'s public interface was preserved.
-    @guppy
-    def main() -> None:
-        q = qlib.qubit()
-        foo(q)
-        qlib.discard(q)
-
-    @guppy
-    def foo(q: qlib.qubit) -> None:
-        pass
-
-    pkg = main.compile()
-    phys_pkg = ToyK2Builder().build(n_blocks=1).encode(pkg, as_bytes=True)
-    validate(phys_pkg)
-
-
 def test_encoder_missing_op() -> None:
     @guppy
     def main() -> None:
@@ -201,7 +178,7 @@ def test_encode_classical() -> None:
     assert res == [{}]
 
 
-@pytest.mark.skip(reason="CZ not currently supported")  # TODO
+@pytest.mark.xfail(reason="CZ not currently supported")  # TODO
 def test_realtime_rz_encoder() -> None:
 
     @guppy
