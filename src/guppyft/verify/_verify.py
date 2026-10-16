@@ -1,5 +1,5 @@
 import inspect
-from typing import get_args, get_origin
+from typing import get_args, get_origin, overload
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -12,19 +12,12 @@ from selene_stim_plugin import SeleneStimState
 from zixy.qubit import pauli
 
 from guppyft.code_def import StabilizerCode, _identity_code
+from guppyft.verify._adapters import _to_array
 from guppyft.verify._expansion import get_expanded_stabilizer_set
 from guppyft.verify._state_gen import gen_choi_state
 from guppyft.verify._utils import (
     DoubleBlockState,
     DoubleBlockUnitary,
-    ImplementationCliffordUnitary,
-    ImplementationCliffordUnitaryDouble,
-    ImplementationStabilizerState,
-    ImplementationStabilizerStateDouble,
-    SemanticCliffordUnitary,
-    SemanticCliffordUnitaryDouble,
-    SemanticStabilizerState,
-    SemanticStabilizerStateDouble,
     SingleBlockState,
     SingleBlockUnitary,
     stabilizerlist_to_signterms,
@@ -60,7 +53,7 @@ def _compute_stabilizers_single_block_state(
 
     @guppy
     def main() -> None:
-        block = state_prep_func()
+        block = _to_array(state_prep_func())
         state_output("total", block)
         discard_array(block)
 
@@ -91,12 +84,14 @@ def _compute_stabilizers_double_block_state(
     @guppy
     def main() -> None:
         block0, block1 = state_prep_func()
-        state_output("block0", block0)
-        state_output("block1", block1)
-        state_output("total", block0)
+        block0_arr = _to_array(block0)
+        block1_arr = _to_array(block1)
+        state_output("block0", block0_arr)
+        state_output("block1", block1_arr)
+        state_output("total", block0_arr)
 
-        discard_array(block0)
-        discard_array(block1)
+        discard_array(block0_arr)
+        discard_array(block1_arr)
 
     states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
         main, num_selene_qubits
@@ -179,7 +174,7 @@ def _compute_stabilizers_double_block_unitary(
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
     """
-    choi_prep = gen_choi_state(code, clifford_func, 2)  # type: ignore[arg-type]
+    choi_prep = gen_choi_state(code, clifford_func, 2)
     n = code.n_physical_qubits
 
     @guppy
@@ -224,8 +219,8 @@ def _compute_stabilizers_double_block_unitary(
 
 # TODO: can we clean up this nasty signature hacking function?
 def _count_blocks_state(
-    semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
-    impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
+    semantic_function: SingleBlockState | DoubleBlockState,
+    impl_function: SingleBlockState | DoubleBlockState,
 ) -> int:
     # Get the return type of semantic_function.
     sem_return_annotation = inspect.signature(
@@ -255,8 +250,8 @@ def _count_blocks_state(
 
 
 def _compute_state_prep_tableaux(
-    semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
-    impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
+    semantic_function: SingleBlockState | DoubleBlockState,
+    impl_function: SingleBlockState | DoubleBlockState,
     code_definition: StabilizerCode,
     n_impl_ancillas: int | None = None,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
@@ -326,8 +321,8 @@ def _compute_state_prep_tableaux(
 
 
 def valid_stabilizer_state_preparation(
-    semantic_function: SemanticStabilizerState | SemanticStabilizerStateDouble,
-    impl_function: ImplementationStabilizerState | ImplementationStabilizerStateDouble,
+    semantic_function: SingleBlockState | DoubleBlockState,
+    impl_function: SingleBlockState | DoubleBlockState,
     code_definition: StabilizerCode,
     n_impl_ancillas: int | None = None,
 ) -> bool:
@@ -405,8 +400,8 @@ def valid_stabilizer_state_preparation(
 
 
 def _count_blocks_unitary(
-    semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
-    impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
+    semantic_function: SingleBlockUnitary | DoubleBlockUnitary,
+    impl_function: SingleBlockUnitary | DoubleBlockUnitary,
 ) -> int:
     sem_signature = inspect.signature(semantic_function.wrapped.python_func)  # type: ignore[attr-defined]
     impl_signature = inspect.signature(impl_function.wrapped.python_func)  # type: ignore[attr-defined]
@@ -419,8 +414,8 @@ def _count_blocks_unitary(
 
 
 def _compute_clifford_tableaux(
-    semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
-    impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
+    semantic_function: SingleBlockUnitary | DoubleBlockUnitary,
+    impl_function: SingleBlockUnitary | DoubleBlockUnitary,
     code_definition: StabilizerCode,
     n_impl_ancillas: int | None = None,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
@@ -492,9 +487,23 @@ def _compute_clifford_tableaux(
     return expanded_semantic_stabilizers, implementation_stabilizers
 
 
+@overload
 def valid_clifford_implementation(
-    semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
-    impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
+    semantic_function: SingleBlockUnitary,
+    impl_function: SingleBlockUnitary,
+    code_definition: StabilizerCode,
+    n_impl_ancillas: int | None = None,
+) -> bool: ...
+@overload
+def valid_clifford_implementation(
+    semantic_function: DoubleBlockUnitary,
+    impl_function: DoubleBlockUnitary,
+    code_definition: StabilizerCode,
+    n_impl_ancillas: int | None = None,
+) -> bool: ...
+def valid_clifford_implementation(
+    semantic_function: SingleBlockUnitary | DoubleBlockUnitary,
+    impl_function: SingleBlockUnitary | DoubleBlockUnitary,
     code_definition: StabilizerCode,
     n_impl_ancillas: int | None = None,
 ) -> bool:

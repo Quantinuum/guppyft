@@ -1,11 +1,12 @@
-import re
 from typing import no_type_check
 
 import pytest
 from guppylang import guppy
-from guppylang.std.builtins import array
+from guppylang.std.array import ArrayIter
+from guppylang.std.builtins import array, owned
+from guppylang.std.iter import SizedIter
 from guppylang.std.quantum import qubit
-from guppylang_internals.error import GuppyTypeError
+from guppylang_internals.error import GuppyError
 
 from guppyft.verify import (
     valid_clifford_implementation,
@@ -171,23 +172,48 @@ def test_steane_cx_logical_block() -> None:
     )
 
 
-def test_steane_zero_state_non_iterable_struct() -> None:
+def test_steane_zero_state_unsupported_iterable_struct() -> None:
 
     @guppy.struct
-    class NonIterableBlock:
+    class UnsupportedBlock:
         data_qs: array[qubit, 7]  # type: ignore[valid-type]
+
+        @guppy
+        @no_type_check
+        def __iter__(
+            self: "UnsupportedBlock" @ owned,
+        ) -> SizedIter[ArrayIter[qubit, 7], 7]:
+            return self.data_qs.__iter__()
 
     @guppy
     @no_type_check
-    def implement_non_ft_zero_non_iterable_block() -> NonIterableBlock:
-        return NonIterableBlock(steane.implement_non_ft_zero_state())
+    def implement_non_ft_zero_unsupported_block() -> UnsupportedBlock:
+        return UnsupportedBlock(steane.implement_non_ft_zero_state())
 
     with pytest.raises(
-        GuppyTypeError,
-        match=re.escape("Expression of type `NonIterableBlock` is not iterable"),
-    ):
-        valid_clifford_implementation(
+        GuppyError,
+        match="Invalid call of overloaded function",
+    ) as error:
+        valid_stabilizer_state_preparation(
             steane.specify_zero_state,
-            implement_non_ft_zero_non_iterable_block,
+            implement_non_ft_zero_unsupported_block,
             code_definition=steane.STEANE_DEF,
         )
+
+    assert "UnsupportedBlock" in str(error.value)
+
+
+def test_steane_bell_state_logical_block() -> None:
+    assert valid_stabilizer_state_preparation(
+        steane.specify_bell_state,
+        steane.implement_bell_state_logical_block,
+        code_definition=steane.STEANE_DEF,
+    )
+
+
+def test_steane_h_logical_block_is_not_identity() -> None:
+    assert not valid_clifford_implementation(
+        steane.specify_identity,
+        steane.implement_h_logical_block,
+        code_definition=steane.STEANE_DEF,
+    )

@@ -4,13 +4,19 @@ from typing import no_type_check
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.builtins import array, comptime
+from guppylang.std.num import nat
 from guppylang.std.quantum import cz, h, qubit, sdg, z
 from zixy.qubit import pauli
 from zixy.qubit.clifford import GateList
 
 from guppyft.code_def import StabilizerCode
+from guppyft.verify._adapters import apply_double_block, apply_single_block
 from guppyft.verify._expansion import get_expanded_stabilizer_set
-from guppyft.verify._utils import SingleBlockUnitary, array_slicer
+from guppyft.verify._utils import (
+    DoubleBlockUnitary,
+    SingleBlockUnitary,
+    array_slicer,
+)
 
 
 class SQClifford(Enum):
@@ -151,7 +157,7 @@ TWICE_NUM_BLOCKS = guppy.nat_var("TWICE_NUM_BLOCKS")
 
 def gen_choi_state(
     code: StabilizerCode,
-    clifford_func: SingleBlockUnitary,
+    clifford_func: SingleBlockUnitary | DoubleBlockUnitary,
     n_blocks: int,
 ) -> GuppyFunctionDefinition[[], array[array[qubit, N], TWICE_NUM_BLOCKS]]:  # type: ignore[valid-type]
     """Generate a Guppy function that prepares the Choi state of a single block
@@ -214,7 +220,7 @@ def gen_choi_state(
                 slicer.discard_empty()
 
                 # Apply the Clifford unitary to the output leg
-                clifford_func(output_leg)
+                output_leg = apply_single_block(output_leg, clifford_func)
 
                 return array(input_leg, output_leg)
 
@@ -235,7 +241,9 @@ def gen_choi_state(
                 slicer.discard_empty()
 
                 # Apply the Clifford unitary to the output legs
-                clifford_func(output0_leg, output1_leg)
+                output0_leg, output1_leg = apply_double_block(
+                    output0_leg, output1_leg, clifford_func
+                )
 
                 return array(input0_leg, output0_leg, input1_leg, output1_leg)
 
