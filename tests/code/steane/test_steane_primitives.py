@@ -41,16 +41,12 @@ def test_knill_qec_without_errors() -> None:
     @guppy
     @no_type_check
     def impl_func(block: LogicalBlock[7]) -> None:
-
         a0 = prep_zero_non_ft()
         a1 = prep_zero_non_ft()
         knill_qec_cycle(block, a0, a1)
 
     assert valid_clifford_implementation(
-        specify_identity,
-        impl_func,
-        CODE_DEF,
-        n_impl_ancillas=14,
+        specify_identity, impl_func, CODE_DEF, n_impl_ancillas=14
     )
 
 
@@ -61,17 +57,13 @@ def test_knill_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
     @guppy
     @no_type_check
     def impl_func(block: LogicalBlock[7]) -> None:
-
         _apply_error(block, comptime(error_loc), comptime(is_x_error))
         a0 = prep_zero_non_ft()
         a1 = prep_zero_non_ft()
         knill_qec_cycle(block, a0, a1)
 
     assert valid_clifford_implementation(
-        specify_identity,
-        impl_func,
-        CODE_DEF,
-        n_impl_ancillas=14,
+        specify_identity, impl_func, CODE_DEF, n_impl_ancillas=14
     )
 
 
@@ -80,17 +72,13 @@ def test_steane_qec_without_errors() -> None:
     @guppy
     @no_type_check
     def impl_func(block: LogicalBlock[7]) -> None:
-
         a0 = prep_zero_non_ft()
         steane_x_qec_cycle(block, a0)
         a0 = prep_zero_non_ft()
         steane_z_qec_cycle(block, a0)
 
     assert valid_clifford_implementation(
-        specify_identity,
-        impl_func,
-        CODE_DEF,
-        n_impl_ancillas=7,
+        specify_identity, impl_func, CODE_DEF, n_impl_ancillas=7
     )
 
 
@@ -101,7 +89,6 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
     @guppy
     @no_type_check
     def impl_func(block: LogicalBlock[7]) -> None:
-
         _apply_error(block, comptime(error_loc), comptime(is_x_error))
         a0 = prep_zero_non_ft()
         steane_x_qec_cycle(block, a0)
@@ -109,10 +96,7 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
         steane_z_qec_cycle(block, a0)
 
     assert valid_clifford_implementation(
-        specify_identity,
-        impl_func,
-        CODE_DEF,
-        n_impl_ancillas=7,
+        specify_identity, impl_func, CODE_DEF, n_impl_ancillas=7
     )
 
 
@@ -128,10 +112,7 @@ def test_steane_measure_syndromes() -> None:
         _measure_syndromes(block)
 
     assert valid_clifford_implementation(
-        specify_identity,
-        impl_func,
-        CODE_DEF,
-        n_impl_ancillas=3,
+        specify_identity, impl_func, CODE_DEF, n_impl_ancillas=3
     )
 
 
@@ -184,7 +165,6 @@ def test_steane_2q_primitives(
     @guppy
     @no_type_check
     def impl_func(blk0: LogicalBlock[7], blk1: LogicalBlock[7]) -> None:
-
         implement_def(blk0, blk1)
 
     assert valid_clifford_implementation(specify_func, impl_func, CODE_DEF)

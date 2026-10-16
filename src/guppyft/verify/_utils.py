@@ -15,7 +15,6 @@ from guppyft.std import LogicalBlock
 N = guppy.nat_var("N")
 T = guppy.type_var("T", copyable=False, droppable=False)
 
-
 # Semantic and implementation functions share these shapes. Guppy checks their
 # concrete block sizes when compiling the generated verification program.
 type SingleBlockUnitary = (

@@ -173,7 +173,6 @@ def test_steane_cx_logical_block() -> None:
 
 
 def test_steane_zero_state_unsupported_iterable_struct() -> None:
-
     @guppy.struct
     class UnsupportedBlock:
         data_qs: array[qubit, 7]  # type: ignore[valid-type]

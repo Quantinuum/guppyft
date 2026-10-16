@@ -12,11 +12,7 @@ from zixy.qubit.clifford import GateList
 from guppyft.code_def import StabilizerCode
 from guppyft.verify._adapters import apply_double_block, apply_single_block
 from guppyft.verify._expansion import get_expanded_stabilizer_set
-from guppyft.verify._utils import (
-    DoubleBlockUnitary,
-    SingleBlockUnitary,
-    array_slicer,
-)
+from guppyft.verify._utils import DoubleBlockUnitary, SingleBlockUnitary, array_slicer
 
 
 class SQClifford(Enum):
