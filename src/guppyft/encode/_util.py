@@ -8,7 +8,7 @@ from guppyft._bindings import RsHugr
 
 
 def to_rs_hugr(
-    repl: Hugr[Any] | GuppyFunctionDefinition[[Any], Any] | Package,
+    repl: Hugr[Any] | GuppyFunctionDefinition[Any, Any] | Package,
 ) -> RsHugr:
     match repl:
         case GuppyFunctionDefinition():

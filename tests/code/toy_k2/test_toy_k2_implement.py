@@ -196,3 +196,20 @@ def test_k2_dynq_ops() -> None:
         .collated_shots()
     )
     assert res == [{"q0": [1], "q1": [1], "q2": [1], "end": [-1]}]
+
+
+def test_single_qubit_callbacks_link() -> None:
+    @guppy
+    def main() -> None:
+        q = k2.Qubit()
+        k2.x_dynq(q)
+        k2.z_dynq(q)
+        k2.h_dynq(q)
+        k2.s_dynq(q)
+        k2.sdg_dynq(q)
+        k2.t_dynq(q)
+        k2.tdg_dynq(q)
+        q.free()
+
+    compiler = ToyK2Builder().build(n_blocks=2)
+    compiler.implement_ops(main.with_minimal_opt().compile())

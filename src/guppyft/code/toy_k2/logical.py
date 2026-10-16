@@ -10,6 +10,7 @@ The physical implementation for these ops is provided in
 from typing import no_type_check
 
 from guppylang import guppy
+from guppylang.std.builtins import Function
 from guppylang.std.lang import owned
 from guppylang_internals.decorator import custom_type, hugr_op
 
@@ -336,52 +337,67 @@ def free_dynq(q: Qubit @ owned) -> None:
     """Free a dynamic logical qubit."""
 
 
-@hugr_op(logical_op(toy_k2_ops.x_dynq_def))
+@hugr_op(logical_op(toy_k2_ops.call_dyn_sq_def))
 @no_type_check
+def _call_dyn_sq(q: Qubit, callback: Function[[Block, int], None]) -> None: ...
+
+
+@guppy
 def x_dynq(q: Qubit) -> None:
     """Apply an X gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, x)
 
 
-@hugr_op(logical_op(toy_k2_ops.z_dynq_def))
-@no_type_check
+@guppy
 def z_dynq(q: Qubit) -> None:
     """Apply a Z gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, z)
 
 
-@hugr_op(logical_op(toy_k2_ops.h_dynq_def))
-@no_type_check
+@guppy
 def h_dynq(q: Qubit) -> None:
     """Apply a Hadamard gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, h)
 
 
-@hugr_op(logical_op(toy_k2_ops.s_dynq_def))
-@no_type_check
+@guppy
 def s_dynq(q: Qubit) -> None:
     """Apply an S gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, s)
 
 
-@hugr_op(logical_op(toy_k2_ops.sdg_dynq_def))
-@no_type_check
+@guppy
 def sdg_dynq(q: Qubit) -> None:
     """Apply an Sdg gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, sdg)
 
 
-@hugr_op(logical_op(toy_k2_ops.t_dynq_def))
-@no_type_check
+@guppy
 def t_dynq(q: Qubit) -> None:
-    """Apply an T gate to a dynamic logical qubit."""
+    """Apply a T gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, t)
 
 
-@hugr_op(logical_op(toy_k2_ops.tdg_dynq_def))
-@no_type_check
+@guppy
 def tdg_dynq(q: Qubit) -> None:
     """Apply a Tdg gate to a dynamic logical qubit."""
+    _call_dyn_sq(q, tdg)
 
 
-@hugr_op(logical_op(toy_k2_ops.cx_dynq_def))
+@hugr_op(logical_op(toy_k2_ops.call_dyn_tq_def))
 @no_type_check
+def _call_dyn_tq(
+    q0: Qubit,
+    q1: Qubit,
+    same_block_f: Function[[Block, int], None],
+    diff_block_f: Function[[Block, int, Block, int], None],
+) -> None: ...
+
+
+@guppy
 def cx_dynq(control: Qubit, target: Qubit) -> None:
     """Apply a CX gate to dynamic logical qubits."""
+    _call_dyn_tq(control, target, cx_intra, cx_inter)
 
 
 @hugr_op(logical_op(toy_k2_ops.project_z_dynq_def))
