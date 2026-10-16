@@ -1,5 +1,5 @@
 import inspect
-from typing import get_args, get_origin, overload
+from typing import Literal, get_args, get_origin, overload
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -218,9 +218,19 @@ def _compute_stabilizers_double_block_unitary(
 
 
 # TODO: can we clean up this nasty signature hacking function?
+@overload
 def _count_blocks_state(
-    semantic_function: SingleBlockState | DoubleBlockState,
-    impl_function: SingleBlockState | DoubleBlockState,
+    semantic_function: SingleBlockState,
+    impl_function: SingleBlockState,
+) -> Literal[1]: ...
+@overload
+def _count_blocks_state(
+    semantic_function: DoubleBlockState,
+    impl_function: DoubleBlockState,
+) -> Literal[2]: ...
+def _count_blocks_state[F: (SingleBlockState, DoubleBlockState)](
+    semantic_function: F,
+    impl_function: F,
 ) -> int:
     # Get the return type of semantic_function.
     sem_return_annotation = inspect.signature(
@@ -249,9 +259,23 @@ def _count_blocks_state(
         return 1
 
 
+@overload
 def _compute_state_prep_tableaux(
-    semantic_function: SingleBlockState | DoubleBlockState,
-    impl_function: SingleBlockState | DoubleBlockState,
+    semantic_function: SingleBlockState,
+    impl_function: SingleBlockState,
+    code_definition: StabilizerCode,
+    n_impl_ancillas: int | None = None,
+) -> tuple[pauli.SignTerms, pauli.SignTerms]: ...
+@overload
+def _compute_state_prep_tableaux(
+    semantic_function: DoubleBlockState,
+    impl_function: DoubleBlockState,
+    code_definition: StabilizerCode,
+    n_impl_ancillas: int | None = None,
+) -> tuple[pauli.SignTerms, pauli.SignTerms]: ...
+def _compute_state_prep_tableaux[F: (SingleBlockState, DoubleBlockState)](
+    semantic_function: F,
+    impl_function: F,
     code_definition: StabilizerCode,
     n_impl_ancillas: int | None = None,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
@@ -285,23 +309,23 @@ def _compute_state_prep_tableaux(
         case 1:
             # Get the k stabilizers for the k qubit state.
             semantic_stabilizers = _compute_stabilizers_single_block_state(
-                semantic_function,  # type: ignore[arg-type]
+                semantic_function,
                 code_definition.n_logical_qubits,
             )
             # Calculate the n stabilizers of the physical state.
             implementation_stabilizers = _compute_stabilizers_single_block_state(
-                impl_function,  # type: ignore[arg-type]
+                impl_function,
                 n_stab_qubits,
             )
         case 2:
             # Get the 2k stabilizers for the 2k qubit state.
             semantic_stabilizers = _compute_stabilizers_double_block_state(
-                semantic_function,  # type: ignore[arg-type]
+                semantic_function,
                 2 * code_definition.n_logical_qubits,
             )
             # Calculate the 2n stabilizers of the physical state.
             implementation_stabilizers = _compute_stabilizers_double_block_state(
-                impl_function,  # type: ignore[arg-type]
+                impl_function,
                 n_stab_qubits,
             )
         case _:
@@ -320,9 +344,23 @@ def _compute_state_prep_tableaux(
     return expanded_semantic_stabilizers, implementation_stabilizers
 
 
+@overload
 def valid_stabilizer_state_preparation(
-    semantic_function: SingleBlockState | DoubleBlockState,
-    impl_function: SingleBlockState | DoubleBlockState,
+    semantic_function: SingleBlockState,
+    impl_function: SingleBlockState,
+    code_definition: StabilizerCode,
+    n_impl_ancillas: int | None = None,
+) -> bool: ...
+@overload
+def valid_stabilizer_state_preparation(
+    semantic_function: DoubleBlockState,
+    impl_function: DoubleBlockState,
+    code_definition: StabilizerCode,
+    n_impl_ancillas: int | None = None,
+) -> bool: ...
+def valid_stabilizer_state_preparation[F: (SingleBlockState, DoubleBlockState)](
+    semantic_function: F,
+    impl_function: F,
     code_definition: StabilizerCode,
     n_impl_ancillas: int | None = None,
 ) -> bool:
@@ -399,9 +437,19 @@ def valid_stabilizer_state_preparation(
     return sem_stabilizers == impl_stabilizers
 
 
+@overload
 def _count_blocks_unitary(
-    semantic_function: SingleBlockUnitary | DoubleBlockUnitary,
-    impl_function: SingleBlockUnitary | DoubleBlockUnitary,
+    semantic_function: SingleBlockUnitary,
+    impl_function: SingleBlockUnitary,
+) -> Literal[1]: ...
+@overload
+def _count_blocks_unitary(
+    semantic_function: DoubleBlockUnitary,
+    impl_function: DoubleBlockUnitary,
+) -> Literal[2]: ...
+def _count_blocks_unitary[F: (SingleBlockUnitary, DoubleBlockUnitary)](
+    semantic_function: F,
+    impl_function: F,
 ) -> int:
     sem_signature = inspect.signature(semantic_function.wrapped.python_func)  # type: ignore[attr-defined]
     impl_signature = inspect.signature(impl_function.wrapped.python_func)  # type: ignore[attr-defined]
@@ -413,9 +461,23 @@ def _count_blocks_unitary(
     return num_blocks
 
 
+@overload
 def _compute_clifford_tableaux(
-    semantic_function: SingleBlockUnitary | DoubleBlockUnitary,
-    impl_function: SingleBlockUnitary | DoubleBlockUnitary,
+    semantic_function: SingleBlockUnitary,
+    impl_function: SingleBlockUnitary,
+    code_definition: StabilizerCode,
+    n_impl_ancillas: int | None = None,
+) -> tuple[pauli.SignTerms, pauli.SignTerms]: ...
+@overload
+def _compute_clifford_tableaux(
+    semantic_function: DoubleBlockUnitary,
+    impl_function: DoubleBlockUnitary,
+    code_definition: StabilizerCode,
+    n_impl_ancillas: int | None = None,
+) -> tuple[pauli.SignTerms, pauli.SignTerms]: ...
+def _compute_clifford_tableaux[F: (SingleBlockUnitary, DoubleBlockUnitary)](
+    semantic_function: F,
+    impl_function: F,
     code_definition: StabilizerCode,
     n_impl_ancillas: int | None = None,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]:
@@ -449,26 +511,26 @@ def _compute_clifford_tableaux(
             # Get the 2k stabilizers for the 2k qubit Choi state encoding the logical.
             semantic_choi_stabilizers = _compute_stabilizers_single_block_unitary(
                 _identity_code(code_definition.n_logical_qubits),
-                semantic_function,  # type: ignore[arg-type]
+                semantic_function,
                 num_selene_qubits=2 * code_definition.n_logical_qubits,
             )
             # Calculate the 2n stabilizers of the Choi state encoding the physical.
             implementation_stabilizers = _compute_stabilizers_single_block_unitary(
                 code_definition,
-                impl_function,  # type: ignore[arg-type]
+                impl_function,
                 num_selene_qubits=n_physical_choi_qubits,
             )
         case 2:
             # Get the 4k stabilizers for the 4k qubit Choi state encoding the logical.
             semantic_choi_stabilizers = _compute_stabilizers_double_block_unitary(
                 _identity_code(code_definition.n_logical_qubits),
-                semantic_function,  # type: ignore[arg-type]
+                semantic_function,
                 num_selene_qubits=4 * code_definition.n_logical_qubits,
             )
             # Calculate the 4n stabilizers of the Choi state encoding the physical.
             implementation_stabilizers = _compute_stabilizers_double_block_unitary(
                 code_definition,
-                impl_function,  # type: ignore[arg-type]
+                impl_function,
                 num_selene_qubits=n_physical_choi_qubits,
             )
         case _:
@@ -501,9 +563,9 @@ def valid_clifford_implementation(
     code_definition: StabilizerCode,
     n_impl_ancillas: int | None = None,
 ) -> bool: ...
-def valid_clifford_implementation(
-    semantic_function: SingleBlockUnitary | DoubleBlockUnitary,
-    impl_function: SingleBlockUnitary | DoubleBlockUnitary,
+def valid_clifford_implementation[F: (SingleBlockUnitary, DoubleBlockUnitary)](
+    semantic_function: F,
+    impl_function: F,
     code_definition: StabilizerCode,
     n_impl_ancillas: int | None = None,
 ) -> bool:

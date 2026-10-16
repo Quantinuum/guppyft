@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import no_type_check
+from typing import Literal, no_type_check, overload
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -155,6 +155,18 @@ def convert_to_graph_state(tableau: pauli.SignTerms) -> list[SQClifford]:
 TWICE_NUM_BLOCKS = guppy.nat_var("TWICE_NUM_BLOCKS")
 
 
+@overload
+def gen_choi_state(
+    code: StabilizerCode,
+    clifford_func: SingleBlockUnitary,
+    n_blocks: Literal[1],
+) -> GuppyFunctionDefinition[[], array[array[qubit, N], 2]]: ...  # type: ignore[valid-type]
+@overload
+def gen_choi_state(
+    code: StabilizerCode,
+    clifford_func: DoubleBlockUnitary,
+    n_blocks: Literal[2],
+) -> GuppyFunctionDefinition[[], array[array[qubit, N], 4]]: ...  # type: ignore[valid-type]
 def gen_choi_state(
     code: StabilizerCode,
     clifford_func: SingleBlockUnitary | DoubleBlockUnitary,
