@@ -25,9 +25,9 @@ def test_block_logicals() -> None:
         # Create a GHZ state between two blocks
         blk0 = k2.prep_zero_plus_ft()
         blk1 = k2.Block()
-        k2.cx_inter(blk0, 0, blk1, 0)
-        k2.cx_inter(blk0, 0, blk1, 1)
-        k2.cx_intra(blk0, 1)
+        k2.cx_inter(blk0, 1, blk1, 0)
+        k2.cx_inter(blk0, 1, blk1, 1)
+        k2.cx_intra(blk0, 0)
         m0 = k2.measure_z_all(blk0).decode()
         m1 = k2.measure_z_all(blk1).decode()
         output("ghz", m0[0] == m0[1] and m1[0] == m1[1] and m0[0] == m1[1])
@@ -46,20 +46,20 @@ def test_block_logicals() -> None:
         k2.sdg(blk, 1)  # ZI|++>
         k2.t(blk, 1)  # ZT|++>
         k2.tdg(blk, 1)  # ZI|++>
-        k2.z(blk, 1)  # ZZ|++>
+        k2.z(blk, 1)  # ZZ|++> = |-->
         # Measure first qubit in X basis
-        k2.h(blk, 0)
+        k2.h(blk, 0)  # |1->
         m = k2.project_z(blk, 0).decode()  # Must always be true
         output("left", m)
         # Measure the second qubit in the X basis
-        k2.h(blk, 1)
+        k2.h(blk, 1)  # |11>
         m = k2.project_z(blk, 1).decode()  # Must always be true
         output("right", m)
         # Measure the first qubit again, applying an X first on it
-        k2.x(blk, 0)  # |10>
-        k2.swap_intra(blk)  # |01>
-        m = k2.project_z(blk, 1).decode()  # Must always be true
-        output("again", m)
+        k2.x(blk, 0)  # |01>
+        k2.swap_intra(blk)  # |10>
+        m = k2.project_z(blk, 1).decode()  # Must always be false
+        output("again", not m)
         k2.free(blk)
 
     pkg = main.with_minimal_opt().compile()
@@ -73,16 +73,15 @@ def test_block_logicals() -> None:
         .collated_shots()
     )
     for shot in res:
-        assert set(shot.keys()) == {
-            "left_pair",
-            "right_pair",
-            "ghz",
-            "parallel",
-            "left",
-            "right",
-            "again",
+        assert shot == {
+            "left_pair": [1],
+            "right_pair": [1],
+            "ghz": [1],
+            "parallel": [1],
+            "left": [1],
+            "right": [1],
+            "again": [1],
         }
-        assert all(v for v in shot.values())
 
 
 def test_sq_dynq_logicals() -> None:
@@ -130,8 +129,12 @@ def test_sq_dynq_logicals() -> None:
         .collated_shots()
     )
     for shot in res:
-        assert shot.keys() == {"x", "z", "s", "sdg"}
-        assert all(v for v in shot.values())
+        assert shot == {
+            "x": [1],
+            "z": [1],
+            "s": [1],
+            "sdg": [1],
+        }
 
 
 def test_mix_static_dynq_ops() -> None:
