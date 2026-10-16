@@ -2,6 +2,7 @@ import pytest
 from guppylang import guppy
 from guppylang.std.builtins import array, result
 from hugr.build.dfg import Dfg
+from hugr.cli import validate
 from hugr.ext import UsedExtensionResolver
 from hugr.ops import DFG, ExtOp
 from hugr.std.float import FLOAT_T
@@ -430,3 +431,43 @@ def test_dynamic_qubit_bindings_resolve_and_normalize() -> None:
         "try_measure_x_dynq",
         "try_measure_z_dynq",
     }
+
+
+@pytest.mark.parametrize("normalize", [False, True])
+def test_borrow_restore_match_extension_signatures(normalize: bool) -> None:
+    """Guppy arrays must lower to variadic ops with static arguments [m, k]."""
+
+    @guppy
+    def main() -> None:
+        block = Block[8]()
+        owner, first = borrow(block, array(0, 1))
+        second = owner.borrow_more(array(2))
+        cx_dynq(first[0], second[0])
+        owner.restore_some(first)
+        block = restore(owner, second)
+        discard(block)
+
+    [h] = main.compile().modules
+    expected = {
+        "borrow": iceberg_ops.borrow(8, 2),
+        "borrow_more": iceberg_ops.borrow_more(8, 1),
+        "restore_some": iceberg_ops.restore_some(8, 2),
+        "restore": iceberg_ops.restore(8, 1),
+    }
+    if normalize:
+        InlineFunctions()(h, inplace=True)
+        Normalize()(h, inplace=True)
+    found = set()
+    for _node, data in h.nodes():
+        op = data.op
+        if (
+            isinstance(op, ExtOp)
+            and op.op_def().get_extension().name == "guppyft.iceberg.ops"
+            and op.op_def().name in expected
+        ):
+            name = op.op_def().name
+            found.add(name)
+            assert op.args == expected[name].args
+            assert op.outer_signature() == expected[name].outer_signature()
+    assert found == expected.keys()
+    validate(h.to_bytes())
