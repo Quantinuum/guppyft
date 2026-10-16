@@ -226,7 +226,7 @@ def prep_t_states_non_ft() -> LogicalBlock[4]:
 
 @guppy
 @no_type_check
-def measure_z_all(blk: LogicalBlock[4] @ owned) -> array[bool, 2]:
+def measure_z_all(blk: LogicalBlock[4] @ owned) -> tuple[bool, bool]:
     """Measure both qubits of the block in the Z basis.
 
     This operation destroys the logical block.
@@ -241,7 +241,7 @@ def measure_z_all(blk: LogicalBlock[4] @ owned) -> array[bool, 2]:
     if z_stab:
         exit("Detected an X error during measurement of a logical block.")
 
-    return array(q0_outcome, q1_outcome)
+    return q0_outcome, q1_outcome
 
 
 @guppy

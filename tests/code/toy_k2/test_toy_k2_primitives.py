@@ -288,7 +288,7 @@ def test_measure_z_all(x0: int, x1: int) -> None:
             toy_k2.x(block, comptime(1))
 
         res = toy_k2.measure_z_all(block)
-        output("result", res)
+        output("result", array(res[0], res[1]))
 
     out = main.emulator(n_qubits=5).run().collated_shots()
     assert out[0]["result"] == [[x0, x1]]
