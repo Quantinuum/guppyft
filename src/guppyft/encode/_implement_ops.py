@@ -1,15 +1,15 @@
 from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass, field
-from typing import Any, Self, no_type_check
+from typing import Any, Literal, Self, no_type_check, overload
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.library import link_name
 from hugr import Hugr
 from hugr.build import DefinitionBuilder
-from hugr.ext import TypeDef
+from hugr.ext import OpDef, TypeDef
 from hugr.ops import FuncDecl, FuncDefn
-from hugr.package import Package
+from hugr.package import Package, link_packages
 from hugr.tys import ExtType, Type
 from tket.extensions import measurement
 
@@ -17,18 +17,22 @@ from guppyft._bindings import RsHugr
 from guppyft._bindings import _implement_ops as _implement_ops_binding
 from guppyft._util import get_link_name
 
+from ._util import to_rs_hugr
+
 
 class OpReplacements:
-    ops: dict[
+    _ops: dict[
         tuple[str, str],
         tuple[GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str],
     ]
+    _check_eliminated: list[str]
     """Stores the operations to replace during op implementation and the implementation
     functions. A function can be set to `None` to indicate that a declaration with the
     given name should be generated instead."""
 
     def __init__(self) -> None:
-        self.ops = {}
+        self._ops = {}
+        self._check_eliminated = []
 
     def __iter__(
         self,
@@ -38,14 +42,27 @@ class OpReplacements:
             tuple[GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str],
         ]
     ]:
-        return iter(self.ops.items())
+        return iter(self._ops.items())
+
+    def iter_eliminated(self) -> Iterator[str]:
+        return self._check_eliminated.__iter__()
+
+    def _insert_for_op(
+        self,
+        op: tuple[str, str] | OpDef,
+        value: tuple[GuppyFunctionDefinition[Any, Any] | Hugr[Any] | None, str],
+    ) -> Self:
+        if isinstance(op, OpDef):
+            op = (op.get_extension().name, op.name)
+        self._ops[op] = value
+        return self
 
     def with_func(
-        self, op: tuple[str, str], func: GuppyFunctionDefinition[Any, Any]
+        self,
+        op: tuple[str, str] | OpDef,
+        func: GuppyFunctionDefinition[Any, Any],
     ) -> Self:
-        self.ops[op] = (func, get_link_name(func))
-
-        return self
+        return self._insert_for_op(op, (func, get_link_name(func)))
 
     def with_funcs(
         self, funcs: dict[tuple[str, str], GuppyFunctionDefinition[Any, Any]]
@@ -55,10 +72,12 @@ class OpReplacements:
 
         return self
 
-    def with_generated_decl(self, op: tuple[str, str], func_name: str) -> Self:
-        self.ops[op] = (None, func_name)
-
-        return self
+    def with_generated_decl(
+        self,
+        op: tuple[str, str] | OpDef,
+        func_name: str,
+    ) -> Self:
+        return self._insert_for_op(op, (None, func_name))
 
     def with_generated_decls(self, names: dict[tuple[str, str], str]) -> Self:
         for op, name in names.items():
@@ -70,7 +89,7 @@ class OpReplacements:
         # Build index of names missing declaration/definition
         missing: dict[str, tuple[str, str]] = {
             f_name: op_key
-            for op_key, (func_opt, f_name) in self.ops.items()
+            for op_key, (func_opt, f_name) in self._ops.items()
             if func_opt is None
         }
         if not missing:
@@ -84,11 +103,14 @@ class OpReplacements:
                     DefinitionBuilder(h).module_root_builder().declare_function(
                         data.op.f_name, data.op.signature, data.op.visibility
                     )
-                    self.ops[op_key] = (h, data.op.f_name)
+                    self._ops[op_key] = (h, data.op.f_name)
                     if not missing:
                         return self
 
         return self
+
+    def register_for_elimination_check(self, ext_id: str) -> None:
+        self._check_eliminated.append(ext_id)
 
 
 class TyReplacements:
@@ -140,50 +162,47 @@ class ImplementOpsSpec:
     """Additional libraries required to run the transformed program."""
 
 
-def _to_rs_hugr(
-    func_opt: GuppyFunctionDefinition[Any, Any] | Hugr[Any],
-) -> RsHugr:
-    match func_opt:
-        case GuppyFunctionDefinition():
-            return RsHugr.from_bytes(func_opt.compile_function().modules[0].to_bytes())
-        case Hugr():
-            return RsHugr.from_bytes(func_opt.to_bytes())
-        case _:
-            raise TypeError(
-                f"Expected GuppyFunctionDefinition or Hugr, "
-                f"got {type(func_opt)}: {func_opt}"
-            )
-
-
 def _implement_ops(
-    pkg: Package, ops: OpReplacements, tys: set[tuple[str, str]]
-) -> Package:
-    rs_hugr = RsHugr.from_bytes(pkg.modules[0].to_bytes())
+    pkg_bytes: bytes, ops: OpReplacements, tys: set[tuple[str, str]]
+) -> bytes:
+    rs_hugr = RsHugr.from_bytes(pkg_bytes)
 
     rs_ops = {
         key: (
-            func_opt if func_opt is None else _to_rs_hugr(func_opt),
+            func_opt if func_opt is None else to_rs_hugr(func_opt),
             name,
         )
         for key, (func_opt, name) in ops
     }
 
-    _implement_ops_binding(rs_hugr, rs_ops, tys)
+    _implement_ops_binding(rs_hugr, rs_ops, tys, list(ops.iter_eliminated()))
 
-    return Package.from_bytes(rs_hugr.to_bytes())
+    return rs_hugr.to_bytes()
 
 
+@overload
 def implement_ops(
-    hugr_pkg: Package,
-    spec: ImplementOpsSpec,
-) -> Package:
-    """
-    Enriches the given package using the given spec by replacing all operations in the
-    program with function calls to the functions in `spec.ops`.
+    hugr_pkg: Package, spec: ImplementOpsSpec, *, as_bytes: Literal[False] = False
+) -> Package: ...
+@overload
+def implement_ops(
+    hugr_pkg: Package, spec: ImplementOpsSpec, *, as_bytes: Literal[True]
+) -> bytes: ...
+def implement_ops(
+    hugr_pkg: Package, spec: ImplementOpsSpec, *, as_bytes: bool = False
+) -> Package | bytes:
+    """Enriches the given package using the given spec by replacing all operations in
+    the program with function calls to the functions in `spec.ops`.
 
-    :param hugr_pkg: A package containing a single module.
-    :param spec: The spec for the encoding. See `EnrichmentSpec` for details.
-    :return: The enriched function as an executable HUGR package.
+    Args:
+        hugr_pkg: A package containing a single module.
+        spec: The specification for the operation implementation.
+        as_bytes: Whether to return bytes instead of a `Package`, skipping final
+            deserialization.
+
+    Returns:
+        The enriched function as an executable HUGR package, or its serialized
+        representation when `as_bytes` is `True`.
     """
     assert len(hugr_pkg.modules) == 1
     hugr = hugr_pkg.modules[0]
@@ -200,7 +219,7 @@ def implement_ops(
     # Reset entrypoint, marking module as non-executable, to avoid linking conflicts
     hugr.entrypoint = hugr.module_root
     # Run rewrite, replacing ops with function calls to the functions in `spec.ops`
-    hugr_pkg = _implement_ops(hugr_pkg, spec.ops, spec.tys.tys)
+    hugr_pkg_bytes = _implement_ops(hugr.to_bytes(), spec.ops, spec.tys.tys)
 
     # Build, compile, and link wrapper program
     @guppy.declare
@@ -208,9 +227,47 @@ def implement_ops(
     @no_type_check
     def func_decl() -> None: ...
 
+    # We have to ensure the build wrapper is a function definition rather than a
+    # declaration, so that the package contains an entrypoint. Guppy compiles
+    # declarations to module-rooted HUGRs.
     wrapper = spec.build_wrapper(func_decl)
-    pkg: Package = wrapper.compile()
-    pkg = pkg.link(hugr_pkg, *spec.libs)
-    assert isinstance(pkg, Package)  # Assert type for type checker
 
-    return pkg
+    @guppy
+    def outer_wrapper() -> None:
+        wrapper()
+
+    pkg: Package = outer_wrapper.compile()
+    pkg_bytes = link_packages(
+        pkg.to_bytes(), hugr_pkg_bytes, *[lib.to_bytes() for lib in spec.libs]
+    )
+
+    if as_bytes:
+        return pkg_bytes
+
+    return Package.from_bytes(pkg_bytes)
+
+
+@dataclass(frozen=True)
+class ImplementOps:
+    _runner: Callable[[Package, bool], Package]
+
+    @overload
+    def __call__(
+        self, pkg: Package, *, as_bytes: Literal[False] = False
+    ) -> Package: ...
+    @overload
+    def __call__(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    def __call__(self, pkg: Package, as_bytes: bool = False) -> Package | bytes:
+        return self._runner(pkg, as_bytes)
+
+    @staticmethod
+    def for_spec(spec: ImplementOpsSpec) -> "ImplementOps":
+        return ImplementOps.for_spec_generator(lambda _: spec)
+
+    @staticmethod
+    def for_spec_generator(
+        spec_gen: Callable[[Package], ImplementOpsSpec],
+    ) -> "ImplementOps":
+        return ImplementOps(
+            lambda pkg, as_bytes: implement_ops(pkg, spec_gen(pkg), as_bytes=as_bytes)  # type: ignore[call-overload]
+        )

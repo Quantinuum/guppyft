@@ -11,7 +11,7 @@ from guppylang_internals.tys.ty import FuncInput, TupleType, Type
 
 def get_callback_func_ast(callback_expr: ast.expr) -> ast.AST | None:
     """Helper function to get the function definition from use.
-    i.e. find the ast for `foo` from the use in `map_global(foo)`"""
+    i.e. find the ast for `foo` from the use in `map_global(foo)`."""
     match callback_expr:
         case GlobalName():
             return ENGINE.get_parsed(callback_expr.def_id).defined_at

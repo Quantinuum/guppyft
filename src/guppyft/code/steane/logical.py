@@ -1,0 +1,216 @@
+"""Guppy functions for the logical operations and types for the Steane QEC architecture.
+
+This module contains bindings for the fundamental ops in the HUGR extensions, as well
+as composite operations that comprise multiple logical operations.
+
+The physical implementation for these ops is provided in
+:py:mod:`~guppyft.code.steane.primitives`.
+"""
+
+from typing import no_type_check
+
+from guppylang import guppy
+from guppylang.std.angles import angle
+from guppylang.std.lang import owned
+from guppylang_internals.decorator import custom_function, custom_type, hugr_op
+from guppylang_internals.tys import Effect
+
+from guppyft.code._util import RotationCompiler, logical_op
+from guppyft.extensions import steane_ops, steane_types
+
+
+@custom_type(steane_types.steane_measurement(), copyable=True, droppable=True)
+class Measurement:
+    """A measurement outcome of a logical Steane qubit."""
+
+    @hugr_op(logical_op(steane_ops.decode_def))
+    @no_type_check
+    def decode(self: "Measurement") -> bool:
+        """Return the decoded logical measurement outcome."""
+
+
+@custom_type(steane_types.steane_qubit(), copyable=False, droppable=False)
+class Qubit:
+    """A logical qubit encoded in the Steane code.
+
+    Constructing a ``Qubit`` instance prepares it in the logical zero state.
+    """
+
+    @hugr_op(logical_op(steane_ops.prep_zero_def), effects=[Effect.ANY])
+    @no_type_check
+    def __new__() -> "Qubit":
+        """Prepare a logical qubit in the zero state."""
+
+    @guppy
+    @no_type_check
+    def free(self: "Qubit" @ owned) -> None:
+        """Free the qubit."""
+        free(self)
+
+    @guppy
+    @no_type_check
+    def measure_z(self: "Qubit" @ owned) -> Measurement:
+        """Destructive measurement of the qubit in the Z basis."""
+        return measure_z(self)
+
+    @guppy
+    @no_type_check
+    def qec_cycle(self: "Qubit") -> None:
+        """Perform a QEC cycle on the logical qubit."""
+        qec_cycle(self)
+
+    @guppy
+    @no_type_check
+    def x(self: "Qubit") -> None:
+        """X gate."""
+        x(self)
+
+    @guppy
+    @no_type_check
+    def y(self: "Qubit") -> None:
+        """Y gate."""
+        y(self)
+
+    @guppy
+    @no_type_check
+    def z(self: "Qubit") -> None:
+        """Z gate."""
+        z(self)
+
+    @guppy
+    @no_type_check
+    def h(self: "Qubit") -> None:
+        """H gate."""
+        h(self)
+
+    @guppy
+    @no_type_check
+    def s(self: "Qubit") -> None:
+        """S gate."""
+        s(self)
+
+    @guppy
+    @no_type_check
+    def sdg(self: "Qubit") -> None:
+        """Sdg gate."""
+        sdg(self)
+
+    @guppy
+    def t(self: "Qubit") -> None:
+        r"""Apply a logical :math:`T` gate using magic-state injection."""
+        t(self)
+
+    @guppy
+    def tdg(self: "Qubit") -> None:
+        r"""Apply a logical :math:`T^\dagger` gate using magic-state injection."""
+        tdg(self)
+
+
+@hugr_op(logical_op(steane_ops.free_def), effects=[Effect.ANY])
+@no_type_check
+def free(qubit: "Qubit" @ owned) -> None:
+    """Free a qubit."""
+
+
+@hugr_op(logical_op(steane_ops.measure_z_def), effects=[Effect.ANY])
+@no_type_check
+def measure_z(qubit: "Qubit" @ owned) -> Measurement:
+    """Destructive measurement of the qubit in the Z basis."""
+
+
+@hugr_op(logical_op(steane_ops.qec_cycle_def))
+@no_type_check
+def qec_cycle(qubit: Qubit) -> None:
+    """Perform a QEC cycle on the logical qubit."""
+
+
+@hugr_op(logical_op(steane_ops.x_def))
+@no_type_check
+def x(qubit: Qubit) -> None:
+    """X gate."""
+
+
+@hugr_op(logical_op(steane_ops.y_def))
+@no_type_check
+def y(qubit: Qubit) -> None:
+    """Y gate."""
+
+
+@hugr_op(logical_op(steane_ops.z_def))
+@no_type_check
+def z(qubit: "Qubit") -> None:
+    """Z gate."""
+
+
+@hugr_op(logical_op(steane_ops.h_def))
+@no_type_check
+def h(qubit: "Qubit") -> None:
+    """H gate."""
+
+
+@hugr_op(logical_op(steane_ops.s_def))
+@no_type_check
+def s(qubit: "Qubit") -> None:
+    """S gate."""
+
+
+@hugr_op(logical_op(steane_ops.sdg_def))
+@no_type_check
+def sdg(qubit: "Qubit") -> None:
+    """Sdg gate."""
+
+
+@custom_function(RotationCompiler(steane_ops.rz_def))
+def rz(qubit: "Qubit", angle: angle) -> None:
+    """Rz gate."""
+
+
+@hugr_op(logical_op(steane_ops.prep_t_state_def), effects=[Effect.ANY])
+@no_type_check
+def prep_t_state() -> "Qubit":
+    r"""Prepare a logical :math:`T\ket{+}` magic state for :math:`T` and
+    :math:`T^\dagger` injection."""
+
+
+@hugr_op(logical_op(steane_ops.inject_t_def))
+@no_type_check
+def inject_t(qubit: "Qubit", magic: "Qubit" @ owned) -> None:
+    """Apply a logical :math:`T` gate by consuming a magic-state qubit."""
+
+
+@hugr_op(logical_op(steane_ops.inject_tdg_def))
+@no_type_check
+def inject_tdg(qubit: "Qubit", magic: "Qubit" @ owned) -> None:
+    r"""Apply a logical :math:`T^\dagger` gate by consuming a magic-state qubit."""
+
+
+@hugr_op(logical_op(steane_ops.cx_def))
+@no_type_check
+def cx(q0: "Qubit", q1: "Qubit") -> None:
+    """CX gate."""
+
+
+@hugr_op(logical_op(steane_ops.cz_def))
+@no_type_check
+def cz(q0: "Qubit", q1: "Qubit") -> None:
+    """CZ gate."""
+
+
+@hugr_op(logical_op(steane_ops.swap_def))
+@no_type_check
+def swap(q0: "Qubit", q1: "Qubit") -> None:
+    """SWAP gate."""
+
+
+@guppy
+def t(q: Qubit) -> None:
+    r"""Apply a logical :math:`T` gate using magic-state injection."""
+    a = prep_t_state()
+    inject_t(q, a)
+
+
+@guppy
+def tdg(q: Qubit) -> None:
+    r"""Apply a logical :math:`T^\dagger` gate using magic-state injection."""
+    a = prep_t_state()
+    inject_tdg(q, a)

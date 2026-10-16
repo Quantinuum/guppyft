@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for helping improve GuppyFT's performance!
+        Thank you for helping improve guppyft's performance!
 
   - type: textarea
     id: description

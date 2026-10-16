@@ -1,1 +1,3 @@
-__version__ = "0.0.2"  # Updated by release-please
+"""Tools for building runnable, fault-tolerant programs from Guppy."""
+
+__version__ = "0.3.1"  # Updated by release-please

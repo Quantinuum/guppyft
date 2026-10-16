@@ -59,7 +59,10 @@ cover/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+docs/build/
+docs/api/generated
+docs/jupyter_execute
+docs/.jupyter_cache
 
 # PyBuilder
 .pybuilder/

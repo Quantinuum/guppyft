@@ -106,7 +106,7 @@ def test_with_global_struct() -> None:
 
 def test_global_struct_with_rng() -> None:
     """Including an RNG in the global state is expected to be a common requirement for
-    randomised compilation so it is tested explicitly."""
+    randomized compilation so it is tested explicitly."""
 
     @guppy.struct
     class MyStruct:

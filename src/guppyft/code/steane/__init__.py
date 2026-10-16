@@ -1,0 +1,1 @@
+"""Steane QEC architecture."""
