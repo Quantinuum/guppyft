@@ -12,7 +12,11 @@ from zixy.qubit.clifford import GateList
 from guppyft.code_def import StabilizerCode
 from guppyft.verify._adapters import apply_double_block, apply_single_block
 from guppyft.verify._expansion import get_expanded_stabilizer_set
-from guppyft.verify._utils import DoubleBlockUnitary, SingleBlockUnitary, array_slicer
+from guppyft.verify._utils import (
+    ImplementationCliffordUnitary,
+    ImplementationCliffordUnitaryDouble,
+    array_slicer,
+)
 
 
 class SQClifford(Enum):
@@ -154,18 +158,18 @@ TWICE_NUM_BLOCKS = guppy.nat_var("TWICE_NUM_BLOCKS")
 @overload
 def gen_choi_state(
     code: StabilizerCode,
-    clifford_func: SingleBlockUnitary,
+    clifford_func: ImplementationCliffordUnitary,
     n_blocks: Literal[1],
 ) -> GuppyFunctionDefinition[[], array[array[qubit, N], 2]]: ...  # type: ignore[valid-type]
 @overload
 def gen_choi_state(
     code: StabilizerCode,
-    clifford_func: DoubleBlockUnitary,
+    clifford_func: ImplementationCliffordUnitaryDouble,
     n_blocks: Literal[2],
 ) -> GuppyFunctionDefinition[[], array[array[qubit, N], 4]]: ...  # type: ignore[valid-type]
 def gen_choi_state(
     code: StabilizerCode,
-    clifford_func: SingleBlockUnitary | DoubleBlockUnitary,
+    clifford_func: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
     n_blocks: int,
 ) -> GuppyFunctionDefinition[[], array[array[qubit, N], TWICE_NUM_BLOCKS]]:  # type: ignore[valid-type]
     """Generate a Guppy function that prepares the Choi state of a single block
