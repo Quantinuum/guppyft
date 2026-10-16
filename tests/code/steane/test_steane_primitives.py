@@ -112,7 +112,7 @@ def test_steane_measure_syndromes() -> None:
         _measure_syndromes(block)
 
     assert valid_clifford_implementation(
-        specify_identity, impl_func, CODE_DEF, n_impl_ancillas=3
+        specify_identity, _measure_syndromes, CODE_DEF, n_impl_ancillas=3
     )
 
 
@@ -137,12 +137,7 @@ def test_steane_1q_primitives(
     def specify_func(q: array[qubit, 1]) -> None:
         specify_def(q[0])
 
-    @guppy
-    @no_type_check
-    def impl_func(block: LogicalBlock[7]) -> None:
-        implement_def(block)
-
-    assert valid_clifford_implementation(specify_func, impl_func, CODE_DEF)
+    assert valid_clifford_implementation(specify_func, implement_def, CODE_DEF)
 
 
 @pytest.mark.parametrize(
@@ -162,12 +157,7 @@ def test_steane_2q_primitives(
     def specify_func(q0: array[qubit, 1], q1: array[qubit, 1]) -> None:
         specify_def(q0[0], q1[0])
 
-    @guppy
-    @no_type_check
-    def impl_func(blk0: LogicalBlock[7], blk1: LogicalBlock[7]) -> None:
-        implement_def(blk0, blk1)
-
-    assert valid_clifford_implementation(specify_func, impl_func, CODE_DEF)
+    assert valid_clifford_implementation(specify_func, implement_def, CODE_DEF)
 
 
 def test_t_gate() -> None:
