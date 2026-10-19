@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.12, <4"
 resolution-markers = [
     "python_full_version >= '3.15' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
@@ -524,6 +524,15 @@ wheels = [
 ]
 
 [[package]]
+name = "greenery"
+version = "4.2.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a3/84/7ab4ea60ceaf9d5594cc4fe98c585ba7f9137b2203e84ac5b72c3f8a258b/greenery-4.2.2.tar.gz", hash = "sha256:6221d5727d19b4f46fc794635aa00b3dbbab33ed7ff1d686a0011d9197a4b7a0", size = 50696, upload-time = "2024-06-08T12:09:00.185Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/de/12/e604674ba0ce89bb710e60ed57e165e088787216cd7b27302c0cd7e7b095/greenery-4.2.2-py3-none-any.whl", hash = "sha256:df82131963230c9e9ff7d356eed7556626accef52c1c6c2abda8eb57565f7197", size = 51158, upload-time = "2024-06-08T12:08:58.335Z" },
+]
+
+[[package]]
 name = "greenlet"
 version = "3.5.5"
 source = { registry = "https://pypi.org/simple" }
@@ -595,6 +604,8 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "ipykernel" },
+    { name = "jsonschema" },
+    { name = "jsonsubschema" },
     { name = "maturin" },
     { name = "mypy" },
     { name = "pre-commit" },
@@ -602,6 +613,7 @@ dev = [
     { name = "pytest-snapshot" },
     { name = "pytest-xdist" },
     { name = "ruff" },
+    { name = "types-jsonschema" },
 ]
 docs = [
     { name = "ipykernel" },
@@ -618,8 +630,11 @@ lint = [
     { name = "mypy" },
     { name = "pre-commit" },
     { name = "ruff" },
+    { name = "types-jsonschema" },
 ]
 test = [
+    { name = "jsonschema" },
+    { name = "jsonsubschema" },
     { name = "pytest" },
     { name = "pytest-snapshot" },
     { name = "pytest-xdist" },
@@ -639,6 +654,8 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "ipykernel", specifier = ">=7.3.0" },
+    { name = "jsonschema", specifier = ">=4.23,<5" },
+    { name = "jsonsubschema", specifier = ">=0.0.7,<0.1" },
     { name = "maturin", specifier = ">=1.15.0,<2" },
     { name = "mypy", specifier = ">=2.4.0" },
     { name = "pre-commit", specifier = ">=4.6.2,<5" },
@@ -646,6 +663,7 @@ dev = [
     { name = "pytest-snapshot", specifier = ">=0.9.0" },
     { name = "pytest-xdist", specifier = ">=3.8.0" },
     { name = "ruff", specifier = ">=0.16.6" },
+    { name = "types-jsonschema", specifier = ">=4.23,<5" },
 ]
 docs = [
     { name = "ipykernel", specifier = ">=7.3.0" },
@@ -660,8 +678,11 @@ lint = [
     { name = "mypy", specifier = ">=2.4.0" },
     { name = "pre-commit", specifier = ">=4.6.2,<5" },
     { name = "ruff", specifier = ">=0.16.6" },
+    { name = "types-jsonschema", specifier = ">=4.23,<5" },
 ]
 test = [
+    { name = "jsonschema", specifier = ">=4.23,<5" },
+    { name = "jsonsubschema", specifier = ">=0.0.7,<0.1" },
     { name = "pytest", specifier = ">=9.1.0" },
     { name = "pytest-snapshot", specifier = ">=0.9.0" },
     { name = "pytest-xdist", specifier = ">=3.8.0" },
@@ -873,6 +894,15 @@ wheels = [
 ]
 
 [[package]]
+name = "jsonref"
+version = "1.1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/aa/0d/c1f3277e90ccdb50d33ed5ba1ec5b3f0a242ed8c1b1a85d3afeb68464dca/jsonref-1.1.0.tar.gz", hash = "sha256:32fe8e1d85af0fdefbebce950af85590b22b60f9e95443176adbde4e1ecea552", size = 8814, upload-time = "2023-01-16T16:10:04.455Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0c/ec/e1db9922bceb168197a558a2b8c03a7963f1afe93517ddd3cf99f202f996/jsonref-1.1.0-py3-none-any.whl", hash = "sha256:590dc7773df6c21cbf948b5dac07a72a251db28b0238ceecce0a2abfa8ec30a9", size = 9425, upload-time = "2023-01-16T16:10:02.255Z" },
+]
+
+[[package]]
 name = "jsonschema"
 version = "4.26.0"
 source = { registry = "https://pypi.org/simple" }
@@ -897,6 +927,21 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/19/74/a633ee74eb36c44aa6d1095e7cc5569bebf04342ee146178e2d36600708b/jsonschema_specifications-2025.9.1.tar.gz", hash = "sha256:b540987f239e745613c7a9176f3edb72b832a4ac465cf02712288397832b5e8d", size = 32855, upload-time = "2025-09-08T01:34:59.186Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/41/45/1a4ed80516f02155c51f51e8cedb3c1902296743db0bbc66608a0db2814f/jsonschema_specifications-2025.9.1-py3-none-any.whl", hash = "sha256:98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe", size = 18437, upload-time = "2025-09-08T01:34:57.871Z" },
+]
+
+[[package]]
+name = "jsonsubschema"
+version = "0.0.8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "greenery" },
+    { name = "jsonref" },
+    { name = "jsonschema" },
+    { name = "portion" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/6b/b2/0e2b7fca010d39789e0394170e0ef814ff29fcdc1639ee0db595f3b3ba94/jsonsubschema-0.0.8.tar.gz", hash = "sha256:39846ece264fe62aae5dd86e71bef8899a5d0869b8be03ab582066acbee7f9d9", size = 44518, upload-time = "2026-06-12T14:28:33.589Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2a/e3/c4721c54f2f28b4b263a007dafe5916ed352af28f44bbd7dcdf676c9b31a/jsonsubschema-0.0.8-py3-none-any.whl", hash = "sha256:4ab42ad1de7795f5b2abe9842cc797a135a18b24d9ff6b09e4d7ad4a8d2ea4a5", size = 28549, upload-time = "2026-06-12T14:28:32.281Z" },
 ]
 
 [[package]]
@@ -1603,6 +1648,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/f9/e2/3e91f31a7d2b083fe6ef3fa267035b518369d9511ffab804f839851d2779/pluggy-1.6.0.tar.gz", hash = "sha256:7dcc130b76258d33b90f61b658791dede3486c3e6bfb003ee5c9bfb396dd22f3", size = 69412, upload-time = "2025-05-15T12:30:07.975Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/54/20/4d324d65cc6d9205fabedc306948156824eb9f0ee1633355a8f7ec5c66bf/pluggy-1.6.0-py3-none-any.whl", hash = "sha256:e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746", size = 20538, upload-time = "2025-05-15T12:30:06.134Z" },
+]
+
+[[package]]
+name = "portion"
+version = "2.6.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "sortedcontainers" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f1/5a/1a1529cfded038731348db1fdbe444c9bf24dcdaf7428449dbb1e8d918c1/portion-2.6.3.tar.gz", hash = "sha256:4dd6a68bb1cd7a553d9b1f556818708b973c4a8855244e0af79e2586bba5794e", size = 125019, upload-time = "2026-09-29T10:07:02.741Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/85/8d/09471f7a9f322366cf8c20d375139239489a39352cf4630b1c39f1979f82/portion-2.6.3-py3-none-any.whl", hash = "sha256:9f5a26de92ff1241c7ba7ab23da0b544e67308187100681512871a50d6d206f1", size = 28491, upload-time = "2026-09-29T10:07:01.694Z" },
 ]
 
 [[package]]
@@ -2320,6 +2377,15 @@ wheels = [
 ]
 
 [[package]]
+name = "sortedcontainers"
+version = "2.4.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e8/c4/ba2f8066cceb6f23394729afe52f3bf7adec04bf9ed2c820b39e19299111/sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88", size = 30594, upload-time = "2021-05-16T22:03:42.897Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/32/46/9cb0e58b2deb7f82b84065f37f3bffeb12413f947f9388e4cac22c4621ce/sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0", size = 29575, upload-time = "2021-05-16T22:03:41.177Z" },
+]
+
+[[package]]
 name = "soupsieve"
 version = "2.9.2"
 source = { registry = "https://pypi.org/simple" }
@@ -2598,6 +2664,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/2c/2e/a7fbfe268c8a3b32546930c0297c101d65a4a14c304ad5790a9f478f0e4e/traitlets-5.16.1.tar.gz", hash = "sha256:ed900c2b631aa3a112811139fa97b8d2c3bad5e989656bba4b7e52c7852c18c1", size = 166137, upload-time = "2026-08-03T08:32:36.848Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ad/66/0d785f0bc5e4315a96c989bb476d0fc07ea4f85132550c7b156ca2035d52/traitlets-5.16.1-py3-none-any.whl", hash = "sha256:f775618166caa0396c8e337099240f2bd3e5e917d203b2e6fbe21a58d3cb1f6b", size = 86211, upload-time = "2026-08-03T08:32:34.48Z" },
+]
+
+[[package]]
+name = "types-jsonschema"
+version = "4.26.0.20261006"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "referencing" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/29/d2/1f742605f5a6d39f993134885b8de41c98af606871d3ebddaf3e776bd1eb/types_jsonschema-4.26.0.20261006.tar.gz", hash = "sha256:3eb7db61b6819d40addfdaac7173e749071a7d4a9a4394f0c844598ec84b2500", size = 16843, upload-time = "2026-10-06T08:16:07.318Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8b/a0/4f2e3c0dc3d5cad958006f2e0307065cc8fe4fbf0393ff0b69d55ee9bbe5/types_jsonschema-4.26.0.20261006-py3-none-any.whl", hash = "sha256:29301f4e65e3928540cdf5e23ad716e38bb0c0b416a48dada213edd3d70206ec", size = 16113, upload-time = "2026-10-06T08:16:06.355Z" },
 ]
 
 [[package]]
