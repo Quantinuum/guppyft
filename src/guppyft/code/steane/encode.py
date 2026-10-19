@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from copy import deepcopy
 from dataclasses import asdict, dataclass, field, replace
-from enum import Enum, auto
+from enum import StrEnum, auto
 from typing import Any, Literal, Self, no_type_check, overload
 
 from guppylang import guppy
@@ -76,24 +76,14 @@ class RUSStateFactoryConf:
 
     def to_json(self) -> JsonType:
         """Serialise the RUS state factory config to JSON."""
-        return {"size": self.size, "max_attempts": self.max_attempts}
+        return asdict(self)
 
 
-class QECStyle(Enum):
+class QECStyle(StrEnum):
     """The style of syndrome extraction to use during a QEC cycle."""
 
     Knill = auto()
     Steane = auto()
-
-    def to_json(self) -> JsonType:
-        """Serialise the QEC style to JSON."""
-        match self:
-            case QECStyle.Knill:
-                return "knill"
-            case QECStyle.Steane:
-                return "steane"
-            case style:
-                raise ValueError(f"Unknown QEC style `{style}` given!")
 
 
 @dataclass
@@ -141,11 +131,7 @@ class QECPolicy:
 
     def to_json(self) -> JsonType:
         """Serialise the QEC policy to JSON."""
-        return {
-            "style": self.style.to_json(),
-            "threshold": self.threshold,
-            "costs": asdict(self.costs),
-        }
+        return asdict(self)
 
 
 @dataclass(frozen=True, kw_only=True)

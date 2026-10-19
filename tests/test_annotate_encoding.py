@@ -23,7 +23,7 @@ def test_annotate_encoding() -> None:
 
     assert hugr1[hugr1.module_root].metadata["qnt.nexus.compilation"] == {
         "schema_version": 1,
-        "encoding": {
+        "ft_encoding": {
             "name": "my-custom-encoding",
             "params": {
                 "my": "custom",

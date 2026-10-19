@@ -185,7 +185,7 @@ def test_annotate_steane_encoding() -> None:
 
     assert hugr[hugr.module_root].metadata["qnt.nexus.compilation"] == {
         "schema_version": 1,
-        "encoding": {
+        "ft_encoding": {
             "name": "steane",
             "params": {
                 "schema_version": 1,
@@ -219,6 +219,24 @@ def test_annotate_steane_encoding() -> None:
             },
         },
     }
+
+
+def test_annotated_policy_immutable() -> None:
+    hugr = Hugr[Any]()
+    pkg = Package([hugr])
+
+    policy = QECPolicy(threshold=2)
+    policy.costs.x = 4.0
+    instance = SteaneBuilder().with_qec_policy(policy).build(n_blocks=4)
+
+    policy.threshold = 99
+    policy.costs.x = 20.0
+    instance.annotate(pkg)
+
+    compilation = hugr[hugr.module_root].metadata["qnt.nexus.compilation"]
+    policy_val = compilation["ft_encoding"]["params"]["qec_policy"]  # type: ignore[index,call-overload]
+    assert policy_val["threshold"] == 2  # type: ignore[index,call-overload]
+    assert policy_val["costs"]["x"] == 4.0  # type: ignore[index,call-overload]
 
 
 def test_collect_measurement_encode(

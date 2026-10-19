@@ -149,5 +149,5 @@ def annotate_encoding(
     for module in hugr.modules if isinstance(hugr, Package) else [hugr]:
         module[module.module_root].metadata["qnt.nexus.compilation"] = {
             "schema_version": 1,
-            "encoding": {"name": encoding_name, "params": params},
+            "ft_encoding": {"name": encoding_name, "params": params},
         }
