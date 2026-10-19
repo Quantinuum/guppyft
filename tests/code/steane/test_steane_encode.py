@@ -1,5 +1,6 @@
 import os
 import re
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -33,12 +34,17 @@ from hugr.cli import validate
 from hugr.package import Package
 from selene_sim.backends.bundled_simulators import Coinflip
 
-from guppyft.code.steane.encode import QECPolicy, RUSStateFactoryConf, SteaneBuilder
+from guppyft.code.steane.encode import (
+    QECPolicy,
+    RUSStateFactoryConf,
+    SteaneBuilder,
+    SteaneInstance,
+)
 from guppyft.decompose import ComparatorRzDecomposer, ToffoliDecomposer
 from guppyft.encode import UncompilableError
 
 
-def test_encoder() -> None:
+def test_encoder(make_steane_instance: Callable[[int], SteaneInstance]) -> None:
 
     @guppy
     def main() -> None:
@@ -55,18 +61,12 @@ def test_encoder() -> None:
         output("q1", r1)
 
     pkg = main.compile()
-    res = (
-        SteaneBuilder()
-        .build(n_blocks=2)
-        .emulator(pkg, n_qubits=16)
-        .run()
-        .collated_shots()
-    )
+    res = make_steane_instance(2).emulator(pkg, n_qubits=16).run().collated_shots()
 
     assert res == [{"q0": [1], "q1": [0]}]
 
 
-def test_encoder_smoke() -> None:
+def test_encoder_smoke(make_steane_instance: Callable[[int], SteaneInstance]) -> None:
 
     @guppy
     def main() -> None:
@@ -83,10 +83,12 @@ def test_encoder_smoke() -> None:
         output("q0", measure(q0).read())
         discard(q1)
 
-    SteaneBuilder().build(n_blocks=2).emulator(main.compile(), n_qubits=16).run()
+    make_steane_instance(2).emulator(main.compile(), n_qubits=16).run()
 
 
-def test_encode_function_call() -> None:
+def test_encode_function_call(
+    make_steane_instance: Callable[[int], SteaneInstance],
+) -> None:
     # `foo` is a public function, so the `ReplaceEncoder` pass (which defaults to
     # `GlobalScope.PRESERVE_PUBLIC`) should in principle leave its interface/behaviour
     # untouched. However, `PRESERVE_PUBLIC` is not actually enforced by the underlying
@@ -105,11 +107,13 @@ def test_encode_function_call() -> None:
         pass
 
     pkg = main.compile()
-    phys_pkg = SteaneBuilder().build(n_blocks=1).encode(pkg, as_bytes=True)
+    phys_pkg = make_steane_instance(1).encode(pkg, as_bytes=True)
     validate(phys_pkg)
 
 
-def test_encoder_missing_op() -> None:
+def test_encoder_missing_op(
+    make_steane_instance: Callable[[int], SteaneInstance],
+) -> None:
     @guppy
     def main() -> None:
         q = qubit()
@@ -124,7 +128,7 @@ def test_encoder_missing_op() -> None:
             r"Operation not yet supported during encoding."
         ),
     ):
-        SteaneBuilder().build(n_blocks=1).encode(pkg, as_bytes=True)
+        make_steane_instance(1).encode(pkg, as_bytes=True)
 
 
 def test_builder_methods() -> None:
@@ -154,7 +158,9 @@ def test_builder_methods() -> None:
     assert res == [{"q": [1]}]
 
 
-def test_encoder_control_flow() -> None:
+def test_encoder_control_flow(
+    make_steane_instance: Callable[[int], SteaneInstance],
+) -> None:
     @guppy
     def main() -> None:
         q0 = qubit()
@@ -166,13 +172,7 @@ def test_encoder_control_flow() -> None:
         output("q1", measure(q1).read())
 
     pkg = main.compile()
-    res = (
-        SteaneBuilder()
-        .build(n_blocks=2)
-        .emulator(pkg, n_qubits=20)
-        .run()
-        .collated_shots()
-    )
+    res = make_steane_instance(2).emulator(pkg, n_qubits=20).run().collated_shots()
 
     assert res == [{"q1": [0]}]
 
@@ -221,7 +221,9 @@ def test_annotate_steane_encoding() -> None:
     }
 
 
-def test_collect_measurement_encode() -> None:
+def test_collect_measurement_encode(
+    make_steane_instance: Callable[[int], SteaneInstance],
+) -> None:
     # We are using `ReplaceTypes` to replace a logical steane measurement with a borrow
     # array of measurements. As borrow arrays are always linear, this means we are
     # replacing a copyable type with a linear type. This tests that the Linearizer can
@@ -231,10 +233,10 @@ def test_collect_measurement_encode() -> None:
         qbs = array(qubit() for _ in range(2))
         output("qbs", collect_measurements(measure_array(qbs)))
 
-    SteaneBuilder().build(n_blocks=2).encode(main.compile(), as_bytes=True)
+    make_steane_instance(2).encode(main.compile(), as_bytes=True)
 
 
-def test_t_encoder_smoke() -> None:
+def test_t_encoder_smoke(make_steane_instance: Callable[[int], SteaneInstance]) -> None:
     @guppy
     def main() -> None:
         q = qubit()
@@ -245,8 +247,7 @@ def test_t_encoder_smoke() -> None:
         discard(q)
 
     res = (
-        SteaneBuilder()
-        .build(n_blocks=2)
+        make_steane_instance(2)
         .emulator(main.compile(), n_qubits=17)
         .run()
         .collated_shots()
@@ -255,14 +256,15 @@ def test_t_encoder_smoke() -> None:
     assert res == [{}]
 
 
-def test_encode_classical() -> None:
+def test_encode_classical(
+    make_steane_instance: Callable[[int], SteaneInstance],
+) -> None:
     @guppy
     def main() -> None:
         pass
 
     res = (
-        SteaneBuilder()
-        .build(n_blocks=1)
+        make_steane_instance(1)
         .emulator(main.compile(), n_qubits=1)
         .run()
         .collated_shots()
@@ -270,7 +272,9 @@ def test_encode_classical() -> None:
     assert res == [{}]
 
 
-def test_realtime_rz_encoder() -> None:
+def test_realtime_rz_encoder(
+    make_steane_instance: Callable[[int], SteaneInstance],
+) -> None:
 
     @guppy
     def main() -> None:
@@ -293,8 +297,7 @@ def test_realtime_rz_encoder() -> None:
     n_blocks = 1 + 1 + rz_decomposer.n_ancillas()
 
     res = (
-        SteaneBuilder()
-        .build(n_blocks=n_blocks)
+        make_steane_instance(n_blocks)
         .emulator(pkg, n_qubits=7 * n_blocks + 6)
         .with_simulator(Coinflip(bias=0.0))
         .run()
@@ -308,7 +311,10 @@ def test_realtime_rz_encoder() -> None:
     os.getenv("GUPPYFT_RUN_LONG_TESTS") != "true",
     reason="GUPPYFT_RUN_LONG_TESTS is not set to 'true'",
 )
-def test_steane_encode_suite(request: pytest.FixtureRequest) -> None:
+def test_steane_encode_suite(
+    request: pytest.FixtureRequest,
+    make_steane_instance: Callable[[int], SteaneInstance],
+) -> None:
     root_dir = request.config.rootpath
     hugr_dir = root_dir / "tests" / "resources" / "hugrs" / "guppylang-test-exports"
     for fname in Path.iterdir(hugr_dir):
@@ -316,12 +322,13 @@ def test_steane_encode_suite(request: pytest.FixtureRequest) -> None:
         with Path.open(fpath, "rb") as f:
             hugr0 = Hugr.from_bytes(f.read())
             pkg0 = hugr0.to_package()
-            steane = SteaneBuilder().build(n_blocks=8)
-            pkg1 = steane.encode(pkg0, as_bytes=True)
+            pkg1 = make_steane_instance(8).encode(pkg0, as_bytes=True)
             validate(pkg1)
 
 
-def test_steane_state_result() -> None:
+def test_steane_state_result(
+    make_steane_instance: Callable[[int], SteaneInstance],
+) -> None:
     @guppy
     def main() -> None:
         q = qubit()
@@ -334,4 +341,4 @@ def test_steane_state_result() -> None:
         UncompilableError,
         match=re.escape("Unsupported extensions found: frozenset({'tket.debug'})"),
     ):
-        SteaneBuilder().build(n_blocks=1).compile(pkg)
+        make_steane_instance(1).compile(pkg)

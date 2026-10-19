@@ -1,12 +1,16 @@
+from collections.abc import Callable
+
 from guppylang import guppy
 from guppylang.std.platform import output
 from guppylang.std.quantum import cx, h, measure, qubit, x, z
 from hugr.cli import validate
 
-from guppyft.code.steane.encode import SteaneBuilder
+from guppyft.code.steane.encode import SteaneInstance
 
 
-def test_smoke_test_steane_compiler() -> None:
+def test_smoke_test_steane_compiler(
+    make_steane_instance: Callable[[int], SteaneInstance],
+) -> None:
 
     @guppy
     def main() -> None:
@@ -23,7 +27,7 @@ def test_smoke_test_steane_compiler() -> None:
         output("q1", r1)
 
     pkg = main.compile()
-    pkg = SteaneBuilder().build(n_blocks=2).compile(pkg)
+    pkg = make_steane_instance(2).compile(pkg)
     validate(pkg.to_bytes())
     ext_names = [ext.name for ext in pkg.extensions]
     assert "tket.quantum" not in ext_names
