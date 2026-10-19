@@ -264,7 +264,7 @@ class SteaneBuilder:
         # TODO STATE should be generic for all codes. The methods that are code specific
         # should be `@guppy.declare` and each code can provide an implementation to be
         # linked i.e. `allocate_next_addr`.
-        # See https://github.com/quantinuum-dev/guppyft/issues/179
+        # See https://github.com/Quantinuum/guppyft/issues/179
         @guppy.struct
         class STATE:
             blocks: array[Option[LogicalBlock[7]], comptime(n_blocks)]  # type: ignore[valid-type,type-arg]
@@ -377,7 +377,7 @@ class SteaneBuilder:
         # to easily define these functions from the primitives. I think
         # this could be replaced with `@custom_function` and a custom
         # compiler.
-        # See https://github.com/quantinuum-dev/guppyft/issues/161.
+        # See https://github.com/Quantinuum/guppyft/issues/161.
         @_register_op_replacement(steane_ops.prep_zero_def)
         @no_type_check
         def _prep_zero() -> tuple[tuple[int, int]]:
