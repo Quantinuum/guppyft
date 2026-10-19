@@ -112,7 +112,7 @@ def test_steane_measure_syndromes() -> None:
         _measure_syndromes(block)
 
     assert valid_clifford_implementation(
-        specify_identity, _measure_syndromes, CODE_DEF, n_impl_ancillas=3
+        specify_identity, impl_func, CODE_DEF, n_impl_ancillas=3
     )
 
 
