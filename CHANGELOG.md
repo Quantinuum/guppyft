@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.4.0](https://github.com/Quantinuum/guppyft/compare/v0.3.1...v0.4.0) (2026-10-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* Add support for `LogicalBlock` in verifier ([#199](https://github.com/Quantinuum/guppyft/issues/199))
+* Annotate full Steane params in encoding metadata ([#465](https://github.com/Quantinuum/guppyft/issues/465))
+* Extract op defs in Iceberg op extension Python bindings ([#458](https://github.com/Quantinuum/guppyft/issues/458))
+
+### Features
+
+* Add support for `LogicalBlock` in verifier ([#199](https://github.com/Quantinuum/guppyft/issues/199)) ([eb45488](https://github.com/Quantinuum/guppyft/commit/eb45488de365b31296dad8bfb41701118e164a11))
+* Add unsupported extensions to `ReplacementCompiler` ([#464](https://github.com/Quantinuum/guppyft/issues/464)) ([dc5b86f](https://github.com/Quantinuum/guppyft/commit/dc5b86fccffc3f364f2052b06047ea73c278b4f4))
+* Annotate full Steane params in encoding metadata ([#465](https://github.com/Quantinuum/guppyft/issues/465)) ([550cfbb](https://github.com/Quantinuum/guppyft/commit/550cfbbabcbd984b85884f663a7e5b22b0c10a15))
+
+
+### Bug Fixes
+
+* Add a `CustomInoutCallCompiler` for borrow and restore operations ([#471](https://github.com/Quantinuum/guppyft/issues/471)) ([e8805e1](https://github.com/Quantinuum/guppyft/commit/e8805e1140393408c981c99247299e0eaa2b60ee))
+* Register Iceberg logical bindings with op definition instead of instantiation ([#460](https://github.com/Quantinuum/guppyft/issues/460)) ([f532abc](https://github.com/Quantinuum/guppyft/commit/f532abc1ba21384e74246c2ec59799308348d695))
+* Unpack options for nested type replacements during op replacement ([#461](https://github.com/Quantinuum/guppyft/issues/461)) ([1a68c18](https://github.com/Quantinuum/guppyft/commit/1a68c18416f9be02667a284f4f0edbb6fe99f309))
+
+
+### Documentation
+
+* Correct docstring for Steane types extension ([#462](https://github.com/Quantinuum/guppyft/issues/462)) ([221af1e](https://github.com/Quantinuum/guppyft/commit/221af1efbf9d7c551614621ae53498559a21a208))
+* Correct docstrings for Steane Y and Z ([#463](https://github.com/Quantinuum/guppyft/issues/463)) ([65c5b82](https://github.com/Quantinuum/guppyft/commit/65c5b82540b446540ac18a5ddc782cf257d184d6))
+* Update old quantinuum-dev URLs ([#477](https://github.com/Quantinuum/guppyft/issues/477)) ([692f1bc](https://github.com/Quantinuum/guppyft/commit/692f1bc08a200e9147d3a05e912367a515c35a01))
+
+
+### Code Refactoring
+
+* Extract op defs in Iceberg op extension Python bindings ([#458](https://github.com/Quantinuum/guppyft/issues/458)) ([a5b44b2](https://github.com/Quantinuum/guppyft/commit/a5b44b2618f98cf06e83f573b01f029474239f97))
+
 ## [0.3.1](https://github.com/Quantinuum/guppyft/compare/v0.3.0...v0.3.1) (2026-10-09)
 
 
