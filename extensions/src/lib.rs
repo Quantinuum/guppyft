@@ -1,11 +1,12 @@
 //! QEC extensions for HUGRs
 
-//! HUGR extensions for logical operations on QEC codes.
+pub mod std;
+
 pub mod iceberg;
 
 pub mod steane;
 
-pub mod std;
+pub mod toy_k2;
 
 #[cfg(feature = "cli")]
 pub mod cli;
