@@ -5,9 +5,13 @@ on:
     branches:
       - main
       - "release-please--*"
-    tags:
-      - "v*"
+  release:
+    types:
+      - published
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build_wheels:
@@ -39,7 +43,7 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build guppyft wheel
-        uses: pypa/cibuildwheel@v4.2.1
+        uses: pypa/cibuildwheel@v4.3.1
         with:
           output-dir: 'wheelhouse'
 
@@ -66,12 +70,6 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           files: wheelhouse/*guppyft*.whl
-
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v8.1.0
-        with:
-          enable-cache: true
-          python-version: "3.12"
 
       - name: Publish package distributions to PyPI
         # This workflow is a trusted publisher for the packages on PyPI.

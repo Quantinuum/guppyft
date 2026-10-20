@@ -10,10 +10,10 @@ from ._util import load_extension
 
 
 class SteaneTypesExtension:
-    """Extension providing the Steane qubit."""
+    """Extension providing the Steane logical types."""
 
     def __call__(self) -> Extension:
-        """Returns the Steane types extension"""
+        """Returns the Steane types extension."""
         return load_extension("guppyft.steane.types")
 
     @functools.cached_property
@@ -47,8 +47,10 @@ class SteaneOpsExtension:
     """Extension providing the Steane logical operations."""
 
     def __call__(self) -> Extension:
-        """Returns the Steane ops extension"""
-        return load_extension("guppyft.steane.ops", ["guppyft.std.types"])
+        """Returns the Steane ops extension."""
+        return load_extension(
+            "guppyft.steane.ops", ["guppyft.std.types", "guppyft.steane.types"]
+        )
 
     @functools.cached_property
     def prep_zero_def(self) -> OpDef:
@@ -183,6 +185,18 @@ class SteaneOpsExtension:
         return self.sdg_def.instantiate([])
 
     @functools.cached_property
+    def rz_def(self) -> OpDef:
+        """Apply an Rz gate to one qubit.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `rz`."""
+        return self().get_op("rz")
+
+    def rz(self) -> ExtOp:
+        """Apply an Rz gate to one qubit."""
+        return self.rz_def.instantiate([])
+
+    @functools.cached_property
     def prep_t_state_def(self) -> OpDef:
         """Prepare a magic state that can be used to produce T-like states (T and Tdg).
 
@@ -191,9 +205,8 @@ class SteaneOpsExtension:
         return self().get_op("prep_t_state")
 
     def prep_t_state(self) -> ExtOp:
-        """
-        Prepare a magic state that can be used to produce T-like states (T and Tdg).
-        """
+        """Prepare a magic state that can be used to produce
+        T-like states (T and Tdg)."""
         return self.prep_t_state_def.instantiate([])
 
     @functools.cached_property

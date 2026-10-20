@@ -30,7 +30,7 @@ def test_qalloc_measure() -> None:
 
     id_code = identity_code_spec(n_qubits=1)
 
-    encoded_pkg = encode(main, id_code)
+    encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [{"_MeasureFree": [0], "_QAlloc": [0]}]
@@ -45,13 +45,13 @@ def test_qalloc_project_z_discard() -> None:
 
     id_code = identity_code_spec(n_qubits=1)
 
-    encoded_pkg = encode(main, id_code)
+    encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [
         # From guppylang v1.0.0a6, `project_z` has been updated to return `Measurement`.
         # As the op `tket.quantum.Measure` still returns a bool, the way this is
-        # achieved is by calling `measure` on the qubit and then initialising a new
+        # achieved is by calling `measure` on the qubit and then initializing a new
         # qubit in the correct state. This is why `_QAlloc` is called twice and
         # the results include `_MeasureFree`.
         {"_MeasureFree": [0], "_QAlloc": [0, 0], "_QFree": [0], "project_z": [0]}
@@ -67,7 +67,7 @@ def test_x() -> None:
 
     id_code = identity_code_spec(n_qubits=1)
 
-    encoded_pkg = encode(main, id_code)
+    encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [
@@ -85,7 +85,7 @@ def test_cx() -> None:
 
     id_code = identity_code_spec(n_qubits=2)
 
-    encoded_pkg = encode(main, id_code)
+    encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [
@@ -104,7 +104,7 @@ def test_zz_phase() -> None:
 
     id_code = identity_code_spec(n_qubits=2)
 
-    encoded_pkg = encode(main, id_code)
+    encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [
@@ -126,7 +126,7 @@ def test_qubit_array() -> None:
 
     id_code = identity_code_spec(n_qubits=2)
 
-    encoded_pkg = encode(main, id_code)
+    encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=2).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [
@@ -144,7 +144,7 @@ def test_out_of_logical_qubits() -> None:
 
     id_code = identity_code_spec(n_qubits=1)
 
-    encoded_pkg = encode(main, id_code)
+    encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [
@@ -162,7 +162,7 @@ def test_qubit_reuse() -> None:
 
     id_code = identity_code_spec(n_qubits=1)
 
-    encoded_pkg = encode(main, id_code)
+    encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [
@@ -182,7 +182,7 @@ def test_qec_policy() -> None:
 
     id_code = identity_code_spec(n_qubits=1, qec_budget=1, costs=costs)
 
-    encoded_pkg = encode(main, id_code)
+    encoded_pkg = encode(main.compile(), id_code, as_bytes=True)
     runner = EmulatorBuilder().build(encoded_pkg, n_qubits=1).with_simulator(Stim())
 
     assert runner.run().collated_shots() == [

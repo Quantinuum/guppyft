@@ -51,6 +51,39 @@ state preparation, syndrome extraction, or transversal gates. We define these in
 directly using Guppy's {py:mod}`guppylang.std.quantum` library, or you may use
 {py:mod}`guppylang.std.qsystem` to make explicit use of the Quantinuum device gate set.
 
+### Verify logical semantics
+
+Typically, it is not straightforward to check that the primitive implementation at
+the physical level matches the intended logical action. We strongly recommend using
+{py:mod}`guppyft.verify` to validate the logical action of Clifford primitives while
+developing your architecture.
+
+Using the verifier requires three definitions:
+
+1. `semantic_function` is a Guppy function that defines the logical action on an
+   array of $k$ logical qubits.
+2. `impl_function` is a Guppy function that defines the physical implementation on
+   an array of $n$ physical qubits.
+3. `code_definition` is the {py:class}`~guppyft.code_def.StabilizerCode` definition.
+
+These definitions can then be used to as an assertion in the architecture test suite
+using {py:func}`~guppyft.verify.valid_clifford_implementation`:
+
+```python
+assert valid_clifford_implementation(
+    semantic_function,
+    impl_function,
+    code_definition,
+)
+```
+
+Equivalently, {py:func}`~guppyft.verify.valid_stabilizer_state_preparation` can be
+used to check state preparation.
+
+See the {doc}`/examples/clifford_verification` tutorial for
+complete examples, including transversal and two-block gates, incorrect
+implementations, and logical state preparation.
+
 ### Guidelines
 
 Primitives are the most fundamental building blocks of the architecture. For instance,
@@ -94,8 +127,8 @@ The steps for defining a logical API are the following:
    * Generate two HUGR extensions using Rust: one for the operations and one for the
      types required by the architecture. The extensions are separated so that they can
      be versioned separately. Follow the Steane examples
-     for [`ops.rs`](https://github.com/quantinuum-dev/guppyft/blob/main/extensions/src/steane/ops.rs)
-     and [`types.rs`](https://github.com/quantinuum-dev/guppyft/blob/main/extensions/src/steane/types.rs).
+     for [`ops.rs`](https://github.com/Quantinuum/guppyft/blob/main/extensions/src/steane/ops.rs)
+     and [`types.rs`](https://github.com/Quantinuum/guppyft/blob/main/extensions/src/steane/types.rs).
    * Run `just gen-extensions` to automatically generate the JSON files of the HUGR
      extension.
 2. **Logical Guppy bindings** - Provide the Guppy interface to create programs

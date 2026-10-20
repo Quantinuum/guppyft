@@ -3,11 +3,10 @@
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Any, Literal, overload
 
 from guppylang.defs import GuppyFunctionDefinition
 from hugr import Hugr
-from hugr.metadata import Metadata
 from hugr.ops import Module
 from hugr.package import Package
 from hugr.passes.composable import ComposablePass
@@ -24,7 +23,6 @@ from ._implement_ops import (
 
 __all__ = [
     "EncodeSpec",
-    "EncoderParams",
     "ImplementOps",
     "ImplementOpsSpec",
     "LogicalCompiler",
@@ -51,19 +49,35 @@ class EncodeSpec:
     """Lowers the logical computation to a physical level."""
 
 
+@overload
 def encode(
     hugr: Package | GuppyFunctionDefinition[[], None],
     spec: EncodeSpec,
     *,
     passes: list[ComposablePass] | None = None,
-) -> Package:
-    """
-    Encodes the given package (or Guppy function, directly compiled to a package for
-    convenience) by applying four stages:
+    as_bytes: Literal[False] = False,
+) -> Package: ...
+@overload
+def encode(
+    hugr: Package | GuppyFunctionDefinition[[], None],
+    spec: EncodeSpec,
+    *,
+    passes: list[ComposablePass] | None = None,
+    as_bytes: Literal[True],
+) -> bytes: ...
+def encode(
+    hugr: Package | GuppyFunctionDefinition[[], None],
+    spec: EncodeSpec,
+    *,
+    passes: list[ComposablePass] | None = None,
+    as_bytes: bool = False,
+) -> Package | bytes:
+    """Encodes the given package (or Guppy function, directly compiled to a package for
+    convenience) by applying four stages.
 
     1. running the given computational passes;
     2. lowering the operations in the package to logical operations and
-       potentially performing static optimisations (e.g. resolving some qubit
+       potentially performing static optimizations (e.g. resolving some qubit
        address assignments statically);
     3. running additional logical passes (e.g. inserting additional QEC cycles);
        and
@@ -72,62 +86,68 @@ def encode(
     The returned runnable package is guaranteed to be semantically equivalent to the
     given one.
 
-    :param hugr: The package to encode (or Guppy function for convenience).
-    :param spec: See ``EncoderSpec``.
-    :param passes: Computational passes to run on the given package. Defaults to
-        one run of ``Normalize``.
-    :return: The encoded runnable package.
+    Args:
+        hugr: The package to encode, or a Guppy function for convenience.
+        spec: See :class:`EncodeSpec`.
+        passes: Computational passes to run on the given package. Defaults to one run
+            of :class:`Normalize`.
+        as_bytes: Whether to return the encoded package as bytes.
+
+    Returns:
+        The encoded runnable package, or its serialized representation when `as_bytes`
+        is `True`.
     """
+    pkg = hugr.compile_function() if isinstance(hugr, GuppyFunctionDefinition) else hugr
 
-    if isinstance(hugr, GuppyFunctionDefinition):
-        hugr = hugr.compile_function()
-
-    assert len(hugr.modules) == 1, "Given package contains more than one module"
-    assert not isinstance(hugr.modules[0].entrypoint_op(), Module), (
+    assert len(pkg.modules) == 1, "Given package contains more than one module"
+    assert not isinstance(pkg.modules[0].entrypoint_op(), Module), (
         "Cannot process module-rooted HUGRs"
     )
 
     # 1. Passes with computational -> computational
     for tket_pass in passes or [Normalize()]:
-        tket_pass(hugr.modules[0], inplace=True)
+        tket_pass(pkg.modules[0], inplace=True)
 
     # 2. Lower computational -> logical
     if spec.compile is not None:
-        hugr = spec.compile(hugr)
+        pkg = spec.compile(pkg)
 
     # 3. Passes with logical -> logical
     for tket_pass in spec.logical_passes or []:
-        tket_pass(hugr.modules[0], inplace=True)
+        tket_pass(pkg.modules[0], inplace=True)
 
     # 4. Lower logical -> physical
     if spec.implement_ops is not None:
-        hugr = spec.implement_ops(hugr, as_bytes=False)
-    return hugr
+        pkg_maybe_bytes = spec.implement_ops(pkg, as_bytes=as_bytes)  # type: ignore[call-overload]
+    else:
+        pkg_maybe_bytes = pkg
+
+    if isinstance(pkg_maybe_bytes, Package) and as_bytes:
+        pkg_maybe_bytes = pkg_maybe_bytes.to_bytes()
+
+    return pkg_maybe_bytes
 
 
-class EncoderParams(Protocol):
-    def encoding(self) -> str:
-        """The encoding to annotate on a program."""
+def annotate_encoding(
+    hugr: Package | Hugr[Any], encoding_name: str, params: Mapping[str, Any]
+) -> None:
+    """Annotate a HUGR package with encoding parameters.
 
-    def params(self) -> Mapping[str, Any]:
-        """The parameters to annotate on a program. Implementations should return values
-        that support serialisation to JSON."""
+    Args:
+        hugr: The package or HUGR to annotate.
+        encoding_name: The name of the encoding to annotate.
+        params: The serializable encoding parameters.
 
-
-class _MetadataEncoding(Metadata[Mapping[str, Any]]):
-    """Metadata key for annotating parameters with which to encode a program."""
-
-    KEY = "guppyft.encoding"
-
-
-def annotate_encoding(hugr: Package | Hugr[Any], params: EncoderParams) -> None:
+    Raises:
+        ValueError: If `params` cannot be serialized as JSON.
+    """
     try:
-        json.dumps(params.params(), check_circular=True)
+        json.dumps(params, check_circular=True)
     except TypeError as e:
-        raise ValueError("Could not serialise parameters") from e
+        raise ValueError("Could not serialize parameters") from e
 
     for module in hugr.modules if isinstance(hugr, Package) else [hugr]:
-        module[module.module_root].metadata[_MetadataEncoding] = {
-            "encoding": params.encoding(),
-            "params": params.params(),
+        module[module.module_root].metadata["qnt.nexus.compilation"] = {
+            "schema_version": 1,
+            "ft_encoding": {"name": encoding_name, "params": params},
         }

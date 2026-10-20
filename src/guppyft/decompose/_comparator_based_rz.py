@@ -3,7 +3,7 @@
 This is a duplicate of the `comparator_based_rz.py` module in guppy-algos.
 This is a temporary solution to avoid circular imports. We will remove when
 we find the right place for this to live
-See: https://github.com/quantinuum-dev/guppyft/issues/272.
+See: https://github.com/Quantinuum/guppyft/issues/272.
 
 Reference: https://arxiv.org/pdf/2404.05618
 Original contribution: @vvandaele (Vivien Vandaele)
@@ -73,7 +73,7 @@ def temp_and_compute(q0: qubit, q1: qubit, t_qubit: qubit) -> None:
     Args:
         q0 (qubit): The first input qubit.
         q1 (qubit): The second input qubit.
-        t_qubit (qubit): Target qubit to store the result. Begins in :math:`\\ket{0}`
+        t_qubit (qubit): Target qubit to store the result. Begins in :math:`\ket{0}`
 
     """
     # Prepare T|+> state
@@ -216,15 +216,15 @@ class ComparatorBasedRz[
 
     Implements Algorithm 1 from arXiv:2404.05618, "Single-qubit rotation
     algorithm with logarithmic Toffoli count and gate depth". The algorithm
-    uses a repeat-until-success approach to approximate :math:`R_z(\\theta)` within
-    error :math:`\\varepsilon`. Its success probability is greater than :math:`1/2`.
+    uses a repeat-until-success approach to approximate :math:`R_z(\theta)` within
+    error :math:`\varepsilon`. Its success probability is greater than :math:`1/2`.
 
     Algorithm:
 
-    1. Compute :math:`n = 1 + \\lceil \\log_2(1/\\varepsilon) \\rceil` and
-       :math:`k = 2^{n-1} + \\lfloor 2^{n-1} \\tan(\\theta/2) + 1/2 \\rfloor`.
-    2. Prepare register :math:`a` in superposition :math:`|+\\rangle^{\\otimes n}`.
-    3. Perform the comparison :math:`a \\geq k` on the target qubit.
+    1. Compute :math:`n = 1 + \lceil \log_2(1/\varepsilon) \rceil` and
+       :math:`k = 2^{n-1} + \lfloor 2^{n-1} \tan(\theta/2) + 1/2 \rfloor`.
+    2. Prepare register :math:`a` in superposition :math:`|+\rangle^{\otimes n}`.
+    3. Perform the comparison :math:`a \geq k` on the target qubit.
     4. Apply an :math:`S` gate to the target qubit.
     5. Apply the inverse comparison to the target qubit.
     6. Measure register :math:`a`: if all results are zero, succeed; otherwise apply
@@ -241,11 +241,12 @@ class ComparatorBasedRz[
     Attributes:
         comparator: Configured forward constant comparator.
         inverse_comparator: Configured inverse constant comparator.
-
+        max_attempts: Maximum number of attempts for the repeat-until-success loop.
     """
 
     comparator: ComparatorType
     inverse_comparator: ComparatorType
+    max_attempts: nat
 
     @guppy
     @no_type_check
@@ -266,10 +267,9 @@ class ComparatorBasedRz[
 
         power = 2 ** (n - 1)
         k = power + floor(float(power) * tan(theta_reduced / 2.0) + 0.5)
-        attempts = 0
+        succeeded = False
 
-        while True:
-            attempts += 1
+        for _ in range(self.max_attempts):
             a_reg = array(qubit() for _ in range(n))
             b_reg = array(qubit() for _ in range(n_ancillas))
 
@@ -290,12 +290,17 @@ class ComparatorBasedRz[
                     all_zero = False
 
             if all_zero:
+                succeeded = True
                 break
             z(target)
+
+        if not succeeded:
+            exit("Comparator-based Rz decomposition ran out of attempts.")
 
 
 def comparator_based_rz_cascade(
     epsilon: float,
+    max_attempts: int,
 ) -> GuppyFunctionDefinition[[qubit, angle], None]:
     """Build a comparator-based Rz using the cascade comparator.
 
@@ -305,12 +310,17 @@ def comparator_based_rz_cascade(
 
     Args:
         epsilon: Approximation error bound in operator norm.
+        max_attempts: Maximum number of attempts for repeat-until-success.
 
     Returns:
         A Guppy function with signature ``(target: qubit, theta: angle) -> None``.
         The returned function uses temporary AND compute and uncompute operations.
 
     """
+    if max_attempts <= 0:
+        raise ValueError("max_attempts must be a positive integer.")
+    if epsilon <= 0.0 or epsilon >= 1.0:
+        raise ValueError("epsilon must be between 0 and 1 (exclusive).")
     n = 1 + ceil(log2(1 / epsilon))
     n_comparator_ancillas = n_constant_comparator_cascade_ancillas(n)
 
@@ -332,7 +342,7 @@ def comparator_based_rz_cascade(
             temp_and_uncompute,
             True,
         )
-        rz = ComparatorBasedRz(comparator, inverse_comparator)
+        rz = ComparatorBasedRz(comparator, inverse_comparator, comptime(max_attempts))
         rz.compose(target, theta)
 
     return rz_fn

@@ -2,14 +2,14 @@
 
 This guide is intended to help you get started with developing guppyft.
 
-If you find any errors or omissions in this document, please [open an issue](https://github.com/quantinuum-dev/guppyft/issues/new)!
+If you find any errors or omissions in this document, please [open an issue](https://github.com/Quantinuum/guppyft/issues/new)!
 
 # 🌐 Contributing to guppyft
 
 > [!NOTE]
 > By submitting a contribution to this project, you certify that you have the right to submit it and agree that your contribution is licensed under the Apache License, Version 2.0, under the same terms as the rest of the project.
 
-Contributions to guppyft are welcomed! Please open [an issue](https://github.com/quantinuum-dev/guppyft/issues/new) or [pull request](https://github.com/quantinuum-dev/guppyft/compare) if you have any questions or suggestions.
+Contributions to guppyft are welcomed! Please open [an issue](https://github.com/Quantinuum/guppyft/issues/new) or [pull request](https://github.com/Quantinuum/guppyft/compare) if you have any questions or suggestions.
 
 PRs should be made against the `main` branch, and should pass all CI checks before being merged. This includes using the [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) format in the PR title.
 
@@ -18,7 +18,7 @@ PRs should be made against the `main` branch, and should pass all CI checks befo
 To set up the development environment, you will need:
 
 - `uv`: <https://docs.astral.sh/uv/getting-started/installation/>
-- `just`: <https://just.systems/man/en/installation.html>
+- `just>=1.46.0`: <https://just.systems/man/en/installation.html> (version 1.46.0 or above)
 - `rust`: <https://www.rust-lang.org/tools/install>
 - `cargo-nextest`: <https://nexte.st/docs/installation/pre-built-binaries/>
 

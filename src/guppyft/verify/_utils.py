@@ -10,53 +10,39 @@ from selene_stim_plugin.state import Pauli, Phase, Stabilizer, StabilizerList
 from zixy.container.coeffs import Sign
 from zixy.qubit import pauli
 
-N = guppy.nat_var("N")
-N_PHYSICAL = guppy.nat_var("N_PHYSICAL")
-K_LOGICAL = guppy.nat_var("K_LOGICAL")
+from guppyft.std import LogicalBlock
 
-type SingleBlockUnitary = GuppyFunctionDefinition[[array[qubit, N]], None]  # type: ignore[valid-type]
-type DoubleBlockUnitary = GuppyFunctionDefinition[
-    [array[qubit, N], array[qubit, N]], None  # type: ignore[valid-type]
-]
-type SingleBlockState = GuppyFunctionDefinition[[], array[qubit, N]]  # type: ignore[valid-type]
-type DoubleBlockState = GuppyFunctionDefinition[
+N = guppy.nat_var("N")
+T = guppy.type_var("T", copyable=False, droppable=False)
+
+# Specifications act on logical qubit arrays; implementations may use LogicalBlock.
+# Guppy checks concrete block sizes when compiling the verification program.
+type SemanticStabilizerState = GuppyFunctionDefinition[[], array[qubit, N]]  # type: ignore[valid-type]
+type ImplementationStabilizerState = (
+    SemanticStabilizerState | GuppyFunctionDefinition[[], LogicalBlock[N]]  # type: ignore[valid-type, type-arg]
+)
+type SemanticStabilizerStateDouble = GuppyFunctionDefinition[
     [], tuple[array[qubit, N], array[qubit, N]]  # type: ignore[valid-type]
 ]
-
-type SemanticStabilizerState = GuppyFunctionDefinition[
-    [], array[qubit, K_LOGICAL]  # type: ignore[valid-type]
-]
-type ImplementationStabilizerState = GuppyFunctionDefinition[
-    [], array[qubit, N_PHYSICAL]  # type: ignore[valid-type]
-]
-
-
-type SemanticStabilizerStateDouble = GuppyFunctionDefinition[
-    [], tuple[array[qubit, K_LOGICAL], array[qubit, K_LOGICAL]]  # type: ignore[valid-type]
-]
-type ImplementationStabilizerStateDouble = GuppyFunctionDefinition[
-    [], tuple[array[qubit, N_PHYSICAL], array[qubit, N_PHYSICAL]]  # type: ignore[valid-type]
-]
-
-
-type SemanticCliffordUnitary = GuppyFunctionDefinition[
-    [array[qubit, K_LOGICAL]], None  # type: ignore[valid-type]
-]
-type ImplementationCliffordUnitary = GuppyFunctionDefinition[
-    [array[qubit, N_PHYSICAL]], None  # type: ignore[valid-type]
-]
-
-
+type ImplementationStabilizerStateDouble = (
+    SemanticStabilizerStateDouble
+    | GuppyFunctionDefinition[[], tuple[LogicalBlock[N], LogicalBlock[N]]]  # type: ignore[valid-type, type-arg]
+)
+type SemanticCliffordUnitary = GuppyFunctionDefinition[[array[qubit, N]], None]  # type: ignore[valid-type]
+type ImplementationCliffordUnitary = (
+    SemanticCliffordUnitary | GuppyFunctionDefinition[[LogicalBlock[N]], None]  # type: ignore[valid-type, type-arg]
+)
 type SemanticCliffordUnitaryDouble = GuppyFunctionDefinition[
-    [array[qubit, K_LOGICAL], array[qubit, K_LOGICAL]], None  # type: ignore[valid-type]
+    [array[qubit, N], array[qubit, N]], None  # type: ignore[valid-type]
 ]
-type ImplementationCliffordUnitaryDouble = GuppyFunctionDefinition[
-    [array[qubit, N_PHYSICAL], array[qubit, N_PHYSICAL]], None  # type: ignore[valid-type]
-]
+type ImplementationCliffordUnitaryDouble = (
+    SemanticCliffordUnitaryDouble
+    | GuppyFunctionDefinition[[LogicalBlock[N], LogicalBlock[N]], None]  # type: ignore[valid-type, type-arg]
+)
 
 
 def _convert_pauli(selene_pauli: Pauli) -> pauli.PauliMatrix:
-    "Convert a selene_stim_plugin.state.Pauli to a zixy.qubit.pauli.PauliMatrix."
+    """Convert a selene_stim_plugin.state.Pauli to a zixy.qubit.pauli.PauliMatrix."""
     match selene_pauli:
         case selene_pauli.X:
             return pauli.PauliMatrix.X
@@ -69,7 +55,7 @@ def _convert_pauli(selene_pauli: Pauli) -> pauli.PauliMatrix:
 
 
 def _get_real_phase(selene_phase: Phase) -> Sign:
-    "Convert a selene Pauli phase to zixy. Phase must be real valued."
+    """Convert a selene Pauli phase to zixy. Phase must be real-valued."""
     match selene_phase:
         case Phase.REAL_POSITIVE:
             return Sign(0)
@@ -84,8 +70,11 @@ def _get_real_phase(selene_phase: Phase) -> Sign:
 def selene_stabilizer_to_zixy_signterm(stabilizer: Stabilizer) -> pauli.SignTerm:
     """Convert a selene_stim_plugin.state.Stabilizer to a zixy.qubit.pauli.SignTerm.
 
-    :param stabilizer: A signed pauli Stabilizer in Selene's representation.
-    :return: A Zixy SignTerms instance.
+    Args:
+        stabilizer: A signed Pauli stabilizer in Selene's representation.
+
+    Returns:
+        A Zixy `SignTerm` instance.
     """
     zixy_paulis: tuple[pauli.PauliMatrix, ...] = tuple(
         [_convert_pauli(p) for p in stabilizer.paulis]
@@ -97,10 +86,13 @@ def selene_stabilizer_to_zixy_signterm(stabilizer: Stabilizer) -> pauli.SignTerm
 
 
 def stabilizerlist_to_signterms(stab_list: StabilizerList) -> pauli.SignTerms:
-    """Convert a list of signed Pauli stablizers to zixy's representation.
+    """Convert a list of signed Pauli stabilizers to Zixy's representation.
 
-    :param stab_list: A list of stabilizer's in Selene's representation.
-    :return: a zixy SignTerms instance equivalent to stab_list.
+    Args:
+        stab_list: A list of stabilizers in Selene's representation.
+
+    Returns:
+        A Zixy `SignTerms` instance equivalent to `stab_list`.
     """
     sign_terms = pauli.SignTerms(qubits=len(stab_list.generators[0].paulis))
     for gen in stab_list.generators:
@@ -109,14 +101,10 @@ def stabilizerlist_to_signterms(stab_list: StabilizerList) -> pauli.SignTerms:
     return sign_terms
 
 
-N = guppy.nat_var("N")
-T = guppy.type_var("T", copyable=False, droppable=False)
-
-
 @guppy.struct
 @no_type_check
 class ArraySlicer(Generic[T, N]):  # type: ignore[misc]
-    _queue: Queue[T, N]  # type: ignore[type-arg, valid-type]
+    _queue: Queue[T, N]  # type: ignore[valid-type]
 
     @guppy
     @no_type_check

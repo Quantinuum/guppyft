@@ -1,7 +1,8 @@
 /// Extension providing types for logical operations on the Steane code.
 ///
-/// Currently, there is only a single type defined here:
+/// Currently, there are two types defined here:
 /// - `qubit`: The type of a logical Steane qubit.
+/// - `measurement`: The type of a measurement of a logical Steane qubit.
 use std::sync::{Arc, LazyLock};
 
 use hugr::{

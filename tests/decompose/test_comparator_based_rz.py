@@ -12,7 +12,7 @@ from guppylang import comptime, guppy
 from guppylang.std.angles import angle
 from guppylang.std.debug import state_output
 from guppylang.std.quantum import discard, h, qubit, toffoli
-from selene_sim.backends.bundled_simulators import QuantumReplay, Quest
+from selene_sim.backends.bundled_simulators import Coinflip, QuantumReplay, Quest
 
 from guppyft.decompose._comparator_based_rz import (
     ComparatorBasedRz,
@@ -46,7 +46,7 @@ def test_comparator_based_rz(
     theta: float,
 ) -> None:
     """Test that Rz(theta) gate is approximated within error bound epsilon."""
-    rz_fn = comparator_based_rz_cascade(epsilon)
+    rz_fn = comparator_based_rz_cascade(epsilon, max_attempts=15)
 
     theta = theta / pi
 
@@ -59,9 +59,11 @@ def test_comparator_based_rz(
         state_output("final", target)
         discard(target)
 
-    result = test_circuit.emulator(
-        n_comparator_based_rz_cascade_ancillas(epsilon) + 1
-    ).run()
+    result = (
+        test_circuit.emulator(n_comparator_based_rz_cascade_ancillas(epsilon) + 1)
+        .with_simulator(Quest(random_seed=1234))
+        .run()
+    )
     states = Quest.extract_states_dict(result.results[0].entries)
     final_state = states["final"].get_single_state()
     theta_star = np.angle(final_state[1] / final_state[0]) / np.pi
@@ -91,6 +93,7 @@ def test_comparator_based_rz_replay(theta: float) -> None:
         rz = ComparatorBasedRz(
             comparator,
             inverse_comparator,
+            15,  # max_attempts
         )
         rz.compose(target, theta)
 
@@ -125,3 +128,33 @@ def test_comparator_based_rz_replay(theta: float) -> None:
         assert angle_error < epsilon, (
             f"Angle error {angle_error:.6e} exceeds epsilon {epsilon}"
         )
+
+
+def test_max_attempts_exit() -> None:
+    """Test that the Rz decomposition fails if the number of attempts is exceeded."""
+    epsilon = 0.01
+    rz_fn = comparator_based_rz_cascade(epsilon, max_attempts=3)
+
+    theta = 0.1 / pi
+
+    @guppy
+    @no_type_check
+    def test_circuit() -> None:
+        target = qubit()
+        h(target)
+        rz_fn(target, angle(comptime(theta)))
+        discard(target)
+
+    # Set up a simulator that always returns 1 on measurement, causing all
+    # attempts to fail.
+    simulator = Coinflip(bias=1.0)
+
+    result = (
+        test_circuit.emulator(n_comparator_based_rz_cascade_ancillas(epsilon) + 1)
+        .with_simulator(simulator)
+        .run()
+    )
+
+    tags = result.collated_shots()[0].keys()
+    assert len(tags) == 1
+    assert "exit: Comparator-based Rz decomposition ran out of attempts." in tags

@@ -11,6 +11,8 @@ mod _bindings {
     #[pymodule_export]
     use super::hugr::RsHugr;
     use crate::{implement_ops, replacement};
+    use anyhow::Context;
+    use hugr_core::extension::ExtensionId;
     use itertools::Itertools as _;
     use pyo3::exceptions::PyValueError;
     use pyo3::prelude::*;
@@ -85,8 +87,9 @@ mod _bindings {
     #[pyfunction]
     fn _implement_ops(
         rs_hugr: &mut RsHugr,
-        op_replacements: BTreeMap<(String, String), (Option<RsHugr>, String)>,
-        replaceable_types: HashSet<(String, String)>,
+        op_replacements: BTreeMap<implement_ops::OpId, (Option<RsHugr>, String)>,
+        replaceable_types: HashSet<implement_ops::TypeId>,
+        check_eliminated: Vec<String>,
     ) -> PyResult<()> {
         let hugr = &mut rs_hugr.hugr;
 
@@ -108,9 +111,14 @@ mod _bindings {
             })
             .collect::<PyResult<HashSet<_>>>()?;
 
-        let pass = implement_ops::ImplementOpsPass::new(new_ops, ty_hashset);
+        let check_eliminated = check_eliminated
+            .into_iter()
+            .map(|ext_str| Ok(ExtensionId::new(ext_str)?))
+            .collect::<anyhow::Result<_>>()?;
+
+        let pass = implement_ops::ImplementOpsPass::new(new_ops, ty_hashset, check_eliminated);
         pass.run(hugr)
-            .map_err(|e| PyValueError::new_err(format!("Error replacing operations: {e}")))?;
+            .context("Could not successfully run the implement ops pass")?;
 
         Ok(())
     }

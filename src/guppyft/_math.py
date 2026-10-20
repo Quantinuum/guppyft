@@ -23,7 +23,6 @@ def get_bit(k: int, i: int) -> bool:
 
     Returns:
         bool: True if bit i is 1, False otherwise.
-
     """
     return ((k >> i) & 1) == 1
 
@@ -38,7 +37,6 @@ def floor(x: float) -> int:
 
     Returns:
         int: Largest integer less than or equal to x.
-
     """
     i = int(x)
     if float(i) > x:
@@ -58,7 +56,6 @@ def tan(x: float) -> float:
 
     Returns:
         float: Tangent of x.
-
     """
     pi4a = 7.85398125648498535156e-1
     pi4b = 3.77489470793079817668e-8
