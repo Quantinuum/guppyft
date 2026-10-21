@@ -44,7 +44,7 @@ and adoption of new features.
 
 ## Implementation of QEC primitives
 
-We define a **primitive** as a Guppy function that implements a fundamental building
+We define a **primitive** as a function (usually written in Guppy) that implements a fundamental building
 block of the QEC architecture. As a rule of thumb, these are physical circuits such as
 state preparation, syndrome extraction, or transversal gates. We define these in a
 {py:mod}`~guppyft.code.steane.primitives` module. The physical circuits may be written
@@ -64,17 +64,19 @@ Using the verifier requires three definitions:
    array of $k$ logical qubits.
 2. `impl_function` is a Guppy function that defines the physical implementation on
    an array of $n$ physical qubits.
-3. `code_definition` is the {py:class}`~guppyft.code_def.StabilizerCode` definition.
+3. `code_definition` is the {py:class}`~guppyft.code_def.StabilizerCode` definition, refer to the class docs for information on how to obtain one for your code.
 
 These definitions can then be used to as an assertion in the architecture test suite
 using {py:func}`~guppyft.verify.valid_clifford_implementation`:
 
 ```python
-assert valid_clifford_implementation(
-    semantic_function,
-    impl_function,
-    code_definition,
-)
+from guppyft.verify import valid_clifford_implementation
+
+semantic_function = ... # logical action
+impl_function = ... # physical implementation
+code_definition = ... # stabilizer code reference
+
+assert valid_clifford_implementation(semantic_function, impl_function, code_definition)
 ```
 
 Equivalently, {py:func}`~guppyft.verify.valid_stabilizer_state_preparation` can be
@@ -121,27 +123,39 @@ transforming HUGRs at the logical abstraction layer. This includes:
 
 The steps for defining a logical API are the following:
 
-1. **Logical HUGR extensions** - Define logical operations and types to build HUGRs.
-   This enables creating logical HUGRs, as well as implementing compilation
-   and optimisation passes that transform them.
-   * Generate two HUGR extensions using Rust: one for the operations and one for the
-     types required by the architecture. The extensions are separated so that they can
-     be versioned separately. Follow the Steane examples
-     for [`ops.rs`](https://github.com/Quantinuum/guppyft/blob/main/extensions/src/steane/ops.rs)
-     and [`types.rs`](https://github.com/Quantinuum/guppyft/blob/main/extensions/src/steane/types.rs).
-   * Run `just gen-extensions` to automatically generate the JSON files of the HUGR
-     extension.
-2. **Logical Guppy bindings** - Provide the Guppy interface to create programs
-   directly at the logical level.
-   * Follow the pattern in {py:mod}`guppyft.code.steane.logical`. The logical operations
-     of the code include bindings for the operations and types in the HUGR extensions.
-   * Additionally, developers may define composite logical operations.
-     These composite operations should be written in terms
-     of other logical operations, and should not include any `guppylang.std.quantum`
-     operations An example of a composite operation in the Steane architecture is
-     {py:func}`guppyft.code.steane.logical.t`, which is performed through magic-state
-     injection.
-3. **Define resource structures** - Provide structures to manage logical resources
+### 1. Write logical HUGR extensions
+Define logical operations and types to build HUGRs. This enables creating logical HUGRs,
+as well as implementing compilation and optimisation passes that transform them.
+For the Steane code, the logical operations and types are split into two extensions
+`guppyft.steane.ops` and `guppyft.steane.types`. We recommend keeping to this pattern
+to allow downstream users to rely on (usually slower changing) types without relying on
+(usually faster changing, separately versioned) ops, although that is not mandatory.
+
+One way to write these extensions is by using Rust. Follow the Steane examples
+for [`ops.rs`](https://github.com/Quantinuum/guppyft/blob/main/extensions/src/steane/ops.rs)
+and [`types.rs`](https://github.com/Quantinuum/guppyft/blob/main/extensions/src/steane/types.rs).
+These Rust definitions are used to generate serialised extension definitions in JSON via a custom
+Rust CLI (in [`cli.rs`](https://github.com/Quantinuum/guppyft/blob/main/extensions/src/cli.rs)).
+You may use other means of obtaining this JSON as they are (and become) available.
+
+It will be useful to define Guppy bindings for the logical extensions. Follow the pattern outlined
+in {py:mod}`guppyft.extensions.steane` to create a Python API for your extension to facilitate the remaining
+development.
+
+### 2. Write logical Guppy operations
+Provide the Guppy interface to create programs directly at the logical level. This is separate
+from the logical extension Python API in that you are now writing the actual operations and helpers
+you want people to use. In some cases, the operations directly forward the logical extension operations
+without any modifications. In other cases, you may want to define composite actions that break the
+intended logical semantics down into individual logical extension ops.
+
+Follow the pattern of {py:mod}`guppyft.code.steane.logical`. Take care when defining composite actions:
+You should not include any `guppylang.std.quantum` operations, as they will act on different types and
+a different layer. An example of a composite operation in the Steane architecture is
+{py:func}`guppyft.code.steane.logical.t`, which is performed through magic-state injection.
+
+### 3. (Optional) Define resource structures
+Provide structures to manage logical resources
    at runtime, such as resource state generation. These resources will be
    architecture-dependent and are optional. For example, the Steane architecture uses
    state factories to parallelize preparation of $\ket{0}$ and $T\ket{+}$ states. A
@@ -150,7 +164,9 @@ The steps for defining a logical API are the following:
    {py:class}`~guppyft.std.state_factory.StateFactory` then manages parallel
    preparation of `PreBlock`s. Similar resources could be defined to manage logical
    measurements or QEC cycles.
-4. **Transformation passes** - Define transformation passes between the
+
+### 4. Define Transformation passes
+Define transformation passes between the
    computational, logical and physical abstraction layers. Depending on the chosen
    target milestone, these may be optional.
    * Define a `compile` pass that transforms the computational HUGR into a logical
@@ -196,7 +212,7 @@ subset of these. The encoding pass will fail on user programs outside this subse
 We intend to provide default decompositions for some of these gates in future releases.
 
 We recommend using the [semver](https://semver.org/) convention for the versioning of
-the HUGR extension.
+the HUGR extension(s).
 
 ## End-to-end encoding
 
