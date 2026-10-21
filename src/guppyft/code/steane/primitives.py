@@ -13,6 +13,7 @@ from guppylang.std import quantum as qlib
 from guppylang.std.angles import pi
 from guppylang.std.builtins import Measurement, array, comptime, owned
 from guppylang.std.mem import mem_swap
+from guppylang.std.option import Option, nothing, some
 from zixy.qubit import pauli
 
 from guppyft.code_def import StabilizerCode
@@ -78,6 +79,18 @@ def _parity_check(data_bits: array[bool, N]) -> bool:
 
 @guppy
 @no_type_check
+def _bitstring_to_int(data_bits: array[bool, N]) -> int:
+    """Convert bitstring to int with data_bits[0] being most significant."""
+    out = 0
+    for i in range(N):
+        out <<= 1
+        if data_bits[i]:
+            out += 1
+    return out
+
+
+@guppy
+@no_type_check
 def prep_zero_non_ft() -> LogicalBlock[7]:
     """Prepare Steane block in the logical zero state."""
     blk = LogicalBlock(array(qlib.qubit() for _ in range(7)))
@@ -130,7 +143,12 @@ def _syndrome_helper(
 @guppy.comptime
 @no_type_check
 def _measure_syndromes(blk: LogicalBlock[7]) -> array[qlib.Measurement, 6]:
-    """Syndrome measurement using Figure 5. from Reichardt arXiv:1804.06995."""
+    """Syndrome measurement using Figure 5. from Reichardt arXiv:1804.06995.
+
+    Returns:
+        The stabilizer measurements in the following order:
+        XXXXIII, IIZZIZZ, IZZIZZI, ZZZZIII, IIXXIXX, IXXIXXI
+    """
     relabel = array(0, 4, 1, 6, 3, 5, 2)
 
     # Prepare ancilla state
@@ -394,6 +412,55 @@ def steane_x_qec_cycle(q: LogicalBlock[7], a: LogicalBlock[7] @ owned) -> None:
     h(a)
     if decode(measure_z(a)):
         z(q)
+
+
+@guppy
+@no_type_check
+def reichardt_qec_cycle(q: LogicalBlock[7]) -> None:
+    """Dense syndrome extraction using Figure 5. from Reichardt arXiv:1804.06995.
+
+    This uses only 3 physical ancilla to measure all stabilizers fault-tolerantly.
+    Decoding is done via a code-capacity look-up table, meaning it assumes no
+    errors occur during the syndrome extraction circuit.
+    """
+    # Variable name of stabilizer measurement outcomes follows the list in
+    # the code definition:
+    # x0 -> XXXXIII
+    # x1 -> IXXIXXI
+    # x2 -> IIXXIXX
+    x0, z2, z1, z0, x2, x1 = qlib.collect_measurements(_measure_syndromes(q))
+
+    # The syndrome of X stabilizers is used to correct Z errors
+    z_correction = _code_capacity_lut(array(x0, x1, x2))
+    if z_correction.is_some():
+        qlib.z(q.data_qs[z_correction.unwrap()])
+
+    # The syndrome of Z stabilizers is used to correct X errors
+    x_correction = _code_capacity_lut(array(z0, z1, z2))
+    if x_correction.is_some():
+        qlib.x(q.data_qs[x_correction.unwrap()])
+
+
+@guppy
+@no_type_check
+def _code_capacity_lut(syndrome: array[bool, 3]) -> Option[int]:
+    """Code-capacity look up table decoding. Given the syndrome of X (or Z)
+    stabilizers, it indicates which physical qubit is expected to have received
+    the error, or `nothing` if no error is detected.
+
+    The syndrome must correspond to
+        syndrome[0] -> XXXXIII
+        syndrome[1] -> IXXIXXI
+        syndrome[2] -> IIXXIXX
+    and similarly for Z.
+    """
+    synd_int = _bitstring_to_int(syndrome)
+
+    if synd_int == 0:
+        return nothing()
+    else:
+        lut = array(6, 4, 5, 0, 3, 1, 2)
+        return some(lut[synd_int - 1])
 
 
 N = guppy.nat_var("N")
