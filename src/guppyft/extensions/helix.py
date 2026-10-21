@@ -102,16 +102,16 @@ class HelixOpsExtension:
         return self.cx_between_blocks_def.instantiate([])
 
     @functools.cached_property
-    def cx_swap_def(self) -> OpDef:
-        """Definition of the `cx_swap` operation.
+    def cx_def(self) -> OpDef:
+        """Definition of the `cx` operation.
 
-        For the instantiated operation, see `cx_swap`.
+        For the instantiated operation, see `cx`.
         """
-        return self().get_op("cx_swap")
+        return self().get_op("cx")
 
-    def cx_swap(self) -> ExtOp:
-        """CX from logical qubit 0 to 1 followed by SWAP."""
-        return self.cx_swap_def.instantiate([])
+    def cx(self) -> ExtOp:
+        """CX from logical qubit 0 to 1."""
+        return self.cx_def.instantiate([])
 
     @functools.cached_property
     def cx_transversal_def(self) -> OpDef:
@@ -164,16 +164,16 @@ class HelixOpsExtension:
         return self.free_t_state_def.instantiate([])
 
     @functools.cached_property
-    def hh_swap_def(self) -> OpDef:
-        """Definition of the `hh_swap` operation.
+    def h_all_def(self) -> OpDef:
+        """Definition of the `h_all` operation.
 
-        For the instantiated operation, see `hh_swap`.
+        For the instantiated operation, see `h_all`.
         """
-        return self().get_op("hh_swap")
+        return self().get_op("h_all")
 
-    def hh_swap(self) -> ExtOp:
-        """Hadamard on each logical qubit followed by SWAP."""
-        return self.hh_swap_def.instantiate([])
+    def h_all(self) -> ExtOp:
+        """Hadamard on each logical qubit."""
+        return self.h_all_def.instantiate([])
 
     @functools.cached_property
     def inject_t_def(self) -> OpDef:

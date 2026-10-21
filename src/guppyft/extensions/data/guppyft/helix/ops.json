@@ -47,6 +47,37 @@
       },
       "binary": false
     },
+    "cx": {
+      "extension": "guppyft.helix.ops",
+      "name": "cx",
+      "description": "CX from logical qubit 0 to 1.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.helix.types",
+              "extension_version": "0.1.0",
+              "id": "block",
+              "args": [],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
     "cx_between_blocks": {
       "extension": "guppyft.helix.ops",
       "name": "cx_between_blocks",
@@ -107,37 +138,6 @@
               "args": [],
               "bound": "A"
             },
-            {
-              "t": "Opaque",
-              "extension": "guppyft.helix.types",
-              "extension_version": "0.1.0",
-              "id": "block",
-              "args": [],
-              "bound": "A"
-            }
-          ]
-        }
-      },
-      "binary": false
-    },
-    "cx_swap": {
-      "extension": "guppyft.helix.ops",
-      "name": "cx_swap",
-      "description": "CX from logical qubit 0 to 1 followed by SWAP.",
-      "signature": {
-        "params": [],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.helix.types",
-              "extension_version": "0.1.0",
-              "id": "block",
-              "args": [],
-              "bound": "A"
-            }
-          ],
-          "output": [
             {
               "t": "Opaque",
               "extension": "guppyft.helix.types",
@@ -273,10 +273,10 @@
       },
       "binary": false
     },
-    "hh_swap": {
+    "h_all": {
       "extension": "guppyft.helix.ops",
-      "name": "hh_swap",
-      "description": "Hadamard on each logical qubit followed by SWAP.",
+      "name": "h_all",
+      "description": "Hadamard on each logical qubit.",
       "signature": {
         "params": [],
         "body": {

@@ -51,15 +51,15 @@ class Block:
 
     @guppy
     @no_type_check
-    def cx_swap(self: "Block") -> None:
-        """Apply CX from qubit 0 to 1, then exchange them."""
-        cx_swap(self)
+    def cx(self: "Block") -> None:
+        """Apply CX from qubit 0 to 1."""
+        cx(self)
 
     @guppy
     @no_type_check
-    def hh_swap(self: "Block") -> None:
-        """Apply Hadamard to both qubits, then exchange them."""
-        hh_swap(self)
+    def h_all(self: "Block") -> None:
+        """Apply Hadamard to both qubits."""
+        h_all(self)
 
     @guppy
     @no_type_check
@@ -146,10 +146,10 @@ def cx_between_blocks(control: Block, target: Block, i: int, j: int) -> None:
     """
 
 
-@hugr_op(logical_op(helix_ops.cx_swap_def))
+@hugr_op(logical_op(helix_ops.cx_def))
 @no_type_check
-def cx_swap(block: Block) -> None:
-    """CX from logical qubit 0 to 1 followed by SWAP."""
+def cx(block: Block) -> None:
+    """CX from logical qubit 0 to 1."""
 
 
 @hugr_op(logical_op(helix_ops.cx_transversal_def))
@@ -178,10 +178,10 @@ def free_t_state(resource: TState @ owned) -> None:
     """Discard an unused T-state resource."""
 
 
-@hugr_op(logical_op(helix_ops.hh_swap_def))
+@hugr_op(logical_op(helix_ops.h_all_def))
 @no_type_check
-def hh_swap(block: Block) -> None:
-    """Hadamard on each logical qubit followed by SWAP."""
+def h_all(block: Block) -> None:
+    """Hadamard on each logical qubit."""
 
 
 @hugr_op(logical_op(helix_ops.inject_t_def))

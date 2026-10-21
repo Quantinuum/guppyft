@@ -51,10 +51,10 @@ pub enum HelixOpDef {
     z,
     /// Swap the two qubits in the block.
     swap,
-    /// CX from logical qubit 0 to 1 followed by SWAP.
-    cx_swap,
-    /// Hadamard on each logical qubit followed by SWAP.
-    hh_swap,
+    /// CX from logical qubit 0 to 1.
+    cx,
+    /// Hadamard on each logical qubit.
+    h_all,
     /// Logical CZ.
     cz,
     /// Logical S on both qubits.
@@ -173,7 +173,7 @@ impl MakeOpDef for HelixOpDef {
             alloc_zero | alloc_plus => sig_blocks(0, 1, 0),
             free => sig_blocks(1, 0, 0),
             x | y | z => sig_blocks(1, 1, 1),
-            swap | cx_swap | hh_swap | cz | ss | qec_cycle => sig_blocks(1, 1, 0),
+            swap | cx | h_all | cz | ss | qec_cycle => sig_blocks(1, 1, 0),
             cx_between_blocks => sig_blocks(2, 2, 2),
             cx_transversal => sig_blocks(2, 2, 0),
             measure_xx | measure_zz => {
@@ -402,7 +402,7 @@ mod tests {
                 .add_dataflow_op(EXTENSION.instantiate_extension_op(name, [])?, [a, one])?
                 .outputs_arr();
         }
-        for name in ["swap", "cx_swap", "hh_swap", "cz", "ss", "qec_cycle"] {
+        for name in ["swap", "cx", "h_all", "cz", "ss", "qec_cycle"] {
             [a] = function
                 .add_dataflow_op(EXTENSION.instantiate_extension_op(name, [])?, [a])?
                 .outputs_arr();
