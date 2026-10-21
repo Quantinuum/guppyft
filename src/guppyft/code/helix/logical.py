@@ -81,15 +81,15 @@ class Block:
 
     @guppy
     @no_type_check
-    def measure_xx(self: "Block" @ owned) -> LogicalMeasurement[2]:
+    def measure_x_all(self: "Block" @ owned) -> LogicalMeasurement[2]:
         """Destructively measure both logical qubits in the X basis."""
-        return measure_xx(self)
+        return measure_x_all(self)
 
     @guppy
     @no_type_check
-    def measure_zz(self: "Block" @ owned) -> LogicalMeasurement[2]:
+    def measure_z_all(self: "Block" @ owned) -> LogicalMeasurement[2]:
         """Destructively measure both logical qubits in the Z basis."""
-        return measure_zz(self)
+        return measure_z_all(self)
 
     @guppy
     @no_type_check
@@ -200,15 +200,15 @@ def inject_tdg(block: Block, i: int, resource: TState @ owned) -> None:
     """
 
 
-@hugr_op(logical_op(helix_ops.measure_xx_def), effects=[Effect.ANY])
+@hugr_op(logical_op(helix_ops.measure_x_all_def), effects=[Effect.ANY])
 @no_type_check
-def measure_xx(block: Block @ owned) -> LogicalMeasurement[2]:
+def measure_x_all(block: Block @ owned) -> LogicalMeasurement[2]:
     """Destructively measure both logical qubits in the X basis."""
 
 
-@hugr_op(logical_op(helix_ops.measure_zz_def), effects=[Effect.ANY])
+@hugr_op(logical_op(helix_ops.measure_z_all_def), effects=[Effect.ANY])
 @no_type_check
-def measure_zz(block: Block @ owned) -> LogicalMeasurement[2]:
+def measure_z_all(block: Block @ owned) -> LogicalMeasurement[2]:
     """Destructively measure both logical qubits in the Z basis."""
 
 

@@ -408,9 +408,9 @@
       },
       "binary": false
     },
-    "measure_xx": {
+    "measure_x_all": {
       "extension": "guppyft.helix.ops",
-      "name": "measure_xx",
+      "name": "measure_x_all",
       "description": "Destructively measure both logical qubits in the X basis.",
       "signature": {
         "params": [],
@@ -444,9 +444,9 @@
       },
       "binary": false
     },
-    "measure_zz": {
+    "measure_z_all": {
       "extension": "guppyft.helix.ops",
-      "name": "measure_zz",
+      "name": "measure_z_all",
       "description": "Destructively measure both logical qubits in the Z basis.",
       "signature": {
         "params": [],

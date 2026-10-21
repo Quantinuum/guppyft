@@ -46,7 +46,7 @@ def test_magic_state_signatures() -> None:
         assert getattr(helix_ops, name)().outer_signature() == FunctionType(
             [block, int_t(6), resource], [block]
         )
-    for name in ["measure_xx", "measure_zz"]:
+    for name in ["measure_x_all", "measure_z_all"]:
         assert getattr(helix_ops, name)().outer_signature() == FunctionType(
             [block], [std_types.logical_measurement(2)]
         )
@@ -59,6 +59,6 @@ def test_inject_measure() -> None:
     injected = dfg.add_op(helix_ops.inject_t(), block, index, resource)
     resource = dfg.add_op(helix_ops.prep_t_state())
     injected = dfg.add_op(helix_ops.inject_tdg(), injected, index, resource)
-    measured = dfg.add_op(helix_ops.measure_zz(), injected)
+    measured = dfg.add_op(helix_ops.measure_z_all(), injected)
     dfg.set_outputs(measured)
     validate(dfg.hugr.to_bytes())

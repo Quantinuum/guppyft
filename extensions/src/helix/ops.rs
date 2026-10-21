@@ -66,9 +66,9 @@ pub enum HelixOpDef {
     /// logical qubit in the second block.
     cx_transversal,
     /// Destructively measure both logical qubits in the X basis.
-    measure_xx,
+    measure_x_all,
     /// Destructively measure both logical qubits in the Z basis.
-    measure_zz,
+    measure_z_all,
     /// Perform syndrome extraction and recovery (or a Pauli-frame update).
     /// Ideally preserves the logical state, including external entanglement.
     qec_cycle,
@@ -176,7 +176,7 @@ impl MakeOpDef for HelixOpDef {
             swap | cx | h_all | cz | ss | qec_cycle => sig_blocks(1, 1, 0),
             cx_between_blocks => sig_blocks(2, 2, 2),
             cx_transversal => sig_blocks(2, 2, 0),
-            measure_xx | measure_zz => {
+            measure_x_all | measure_z_all => {
                 Signature::new([block_type()], [logical_measurement_type(2)]).into()
             }
         }
@@ -244,7 +244,7 @@ mod tests {
                 [block.clone(), block.clone()]
             )
         );
-        for name in ["measure_xx", "measure_zz"] {
+        for name in ["measure_x_all", "measure_z_all"] {
             assert_eq!(
                 EXTENSION
                     .instantiate_extension_op(name, [])?
@@ -420,10 +420,16 @@ mod tests {
             )?
             .outputs_arr();
         let [mx] = function
-            .add_dataflow_op(EXTENSION.instantiate_extension_op("measure_xx", [])?, [a])?
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("measure_x_all", [])?,
+                [a],
+            )?
             .outputs_arr();
         let [mz] = function
-            .add_dataflow_op(EXTENSION.instantiate_extension_op("measure_zz", [])?, [b])?
+            .add_dataflow_op(
+                EXTENSION.instantiate_extension_op("measure_z_all", [])?,
+                [b],
+            )?
             .outputs_arr();
         let [unused] = function
             .add_dataflow_op(EXTENSION.instantiate_extension_op("alloc_zero", [])?, [])?

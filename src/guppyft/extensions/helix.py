@@ -208,28 +208,28 @@ class HelixOpsExtension:
         return self.inject_tdg_def.instantiate([])
 
     @functools.cached_property
-    def measure_xx_def(self) -> OpDef:
-        """Definition of the `measure_xx` operation.
+    def measure_x_all_def(self) -> OpDef:
+        """Definition of the `measure_x_all` operation.
 
-        For the instantiated operation, see `measure_xx`.
+        For the instantiated operation, see `measure_x_all`.
         """
-        return self().get_op("measure_xx")
+        return self().get_op("measure_x_all")
 
-    def measure_xx(self) -> ExtOp:
+    def measure_x_all(self) -> ExtOp:
         """Destructively measure both logical qubits in the X basis."""
-        return self.measure_xx_def.instantiate([])
+        return self.measure_x_all_def.instantiate([])
 
     @functools.cached_property
-    def measure_zz_def(self) -> OpDef:
-        """Definition of the `measure_zz` operation.
+    def measure_z_all_def(self) -> OpDef:
+        """Definition of the `measure_z_all` operation.
 
-        For the instantiated operation, see `measure_zz`.
+        For the instantiated operation, see `measure_z_all`.
         """
-        return self().get_op("measure_zz")
+        return self().get_op("measure_z_all")
 
-    def measure_zz(self) -> ExtOp:
+    def measure_z_all(self) -> ExtOp:
         """Destructively measure both logical qubits in the Z basis."""
-        return self.measure_zz_def.instantiate([])
+        return self.measure_z_all_def.instantiate([])
 
     @functools.cached_property
     def prep_t_state_def(self) -> OpDef:
