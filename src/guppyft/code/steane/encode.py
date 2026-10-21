@@ -254,7 +254,7 @@ class SteaneBuilder:
                 guppy_func = guppy(link_name(name)(func))
 
                 # Register in library and for op replacement
-                lib.members.append(guppy_func.id)
+                lib.register_member(guppy_func)
                 ops.with_generated_decl(op_def, name)
 
                 return guppy_func
@@ -643,6 +643,7 @@ class SteaneBuilder:
         @no_type_check
         @link_name("guppyft.steane.gen_state")
         def state_gen_decl() -> STATE: ...
+        @lib.register_member
         @guppy
         @no_type_check
         @link_name("guppyft.steane.gen_state")
@@ -673,6 +674,7 @@ class SteaneBuilder:
         @no_type_check
         @link_name("guppyft.steane.discard_state")
         def state_discard_decl(state: "STATE" @ owned) -> None: ...
+        @lib.register_member
         @guppy
         @no_type_check
         @link_name("guppyft.steane.discard_state")
@@ -698,7 +700,6 @@ class SteaneBuilder:
 
             return wrapper  # type: ignore[no-any-return]
 
-        lib.members.extend((state_gen.id, state_discard.id))
         ops.register_for_elimination_check(steane_ops().name)
         tys = TyReplacements().with_types(
             [
