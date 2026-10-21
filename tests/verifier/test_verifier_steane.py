@@ -163,7 +163,7 @@ def test_hint_override() -> None:
         steane.specify_identity,
         steane.implement_identity_with_shor_extraction_and_incorrect_ancilla_count,
         code_definition=steane.STEANE_DEF,
-        n_impl_ancillas=8,
+        n_impl_ancillas=1,
     )
 
 
