@@ -323,19 +323,19 @@ def _compute_state_prep_tableaux(
     Returns:
         A pair of stabilizer tableaux made up of signed Pauli terms.
     """
-    num_blocks = _count_blocks_state(semantic_function, impl_function)  # type: ignore[arg-type]
+    n_blocks = _count_blocks_state(semantic_function, impl_function)  # type: ignore[arg-type]
 
     n_hinted_qubits = _extract_expected_qubits_hint(impl_function)
 
     # Get the number of qubits required for the simulation of the impl_function.
     # This includes qubits specified with the @expected_qubits hint or n_impl_ancillas.
     n_stab_qubits = _get_n_impl_simulation_qubits(
-        num_blocks * code_definition.n_physical_qubits,
+        n_blocks * code_definition.n_physical_qubits,
         n_hinted_qubits,
         n_impl_ancillas,
     )
 
-    match num_blocks:
+    match n_blocks:
         case 1:
             # Get the k stabilizers for the k qubit state.
             semantic_stabilizers = _compute_stabilizers_single_block_state(
@@ -361,14 +361,14 @@ def _compute_state_prep_tableaux(
         case _:
             raise TypeError(
                 "Unsupported number of code block parameters in semantic_function."
-                + f"Got {num_blocks} blocks. Only 1 and 2 are supported."
+                + f"Got {n_blocks} blocks. Only 1 and 2 are supported."
             )
 
-    # Expand the num_blocks*k logical stabilizers to stabilizers of size num_blocks*n.
-    # We also add the num_blocks*(n-k) stabilizer generators of our code.
-    # We have num_blocks * k + num_blocks*(n-k) = num_blocks*n stabilizers in total.
+    # Expand the n_blocks*k logical stabilizers to stabilizers of size n_blocks*n.
+    # We also add the n_blocks*(n-k) stabilizer generators of our code.
+    # We have n_blocks * k + n_blocks*(n-k) = n_blocks*n stabilizers in total.
     expanded_semantic_stabilizers = get_expanded_stabilizer_set(
-        semantic_stabilizers, code_definition, num_blocks=num_blocks
+        semantic_stabilizers, code_definition, n_blocks=n_blocks
     )
 
     return expanded_semantic_stabilizers, implementation_stabilizers
@@ -487,8 +487,8 @@ def _count_blocks_unitary(
         raise TypeError(
             "semantic_function and impl_function have incompatible signatures"
         )
-    num_blocks = len(sem_signature.parameters)
-    return num_blocks
+    n_blocks = len(sem_signature.parameters)
+    return n_blocks
 
 
 @overload
@@ -531,7 +531,7 @@ def _compute_clifford_tableaux(
         A pair of Clifford tableaux made up of signed Pauli terms.
     """
     n_blocks = _count_blocks_unitary(semantic_function, impl_function)  # type: ignore[arg-type]
-    n_physical_choi_qubits = 2 * num_blocks * code_definition.n_physical_qubits
+    n_physical_choi_qubits = 2 * n_blocks * code_definition.n_physical_qubits
 
     n_hinted_qubits = _extract_expected_qubits_hint(impl_function)
 
@@ -543,7 +543,7 @@ def _compute_clifford_tableaux(
         n_impl_ancillas,
     )
 
-    match num_blocks:
+    match n_blocks:
         case 1:
             # Get the 2k stabilizers for the 2k qubit Choi state encoding the logical.
             semantic_choi_stabilizers = _compute_stabilizers_single_block_unitary(
@@ -573,15 +573,15 @@ def _compute_clifford_tableaux(
         case _:
             raise TypeError(
                 "Unsupported number of code block parameters in semantic_function."
-                + f"Got {num_blocks} blocks. Only 1 and 2 are supported."
+                + f"Got {n_blocks} blocks. Only 1 and 2 are supported."
             )
 
-    # Expand 2*num_blocks*k logical stabilizers to stabilizers of size 2*num_blocks*n.
-    # We also add the 2*num_blocks(n-k) stabilizer generators of our code.
-    # For each code block there are 2(n-k) so we have 2*num_blocks*(n-k) in total.
-    # We have 2*num_blocks*k + 2*num_blocks*(n-k) = 2*num_blocks*n stabilizers in total.
+    # Expand 2*n_blocks*k logical stabilizers to stabilizers of size 2*n_blocks*n.
+    # We also add the 2*n_blocks(n-k) stabilizer generators of our code.
+    # For each code block there are 2(n-k) so we have 2*n_blocks*(n-k) in total.
+    # We have 2*n_blocks*k + 2*n_blocks*(n-k) = 2*n_blocks*n stabilizers in total.
     expanded_semantic_stabilizers = get_expanded_stabilizer_set(
-        semantic_choi_stabilizers, code_definition, num_blocks=2 * num_blocks
+        semantic_choi_stabilizers, code_definition, n_blocks=2 * n_blocks
     )
     return expanded_semantic_stabilizers, implementation_stabilizers
 
