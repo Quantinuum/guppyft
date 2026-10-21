@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, Literal, get_args, get_origin, no_type_check, overload
+from typing import Any, Literal, get_args, get_origin, overload
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -57,7 +57,6 @@ def _compute_stabilizers_single_block_state(
     """
 
     @guppy
-    @no_type_check
     def main() -> None:
         block = _to_array(state_prep_func())
         state_output("total", block)
@@ -85,7 +84,6 @@ def _compute_stabilizers_double_block_state(
     """
 
     @guppy
-    @no_type_check
     def main() -> None:
         block0, block1 = state_prep_func()
         block0_arr = _to_array(block0)
@@ -130,7 +128,6 @@ def _compute_stabilizers_single_block_unitary(
     n = code.n_physical_qubits
 
     @guppy
-    @no_type_check
     def main() -> None:
         controls, targets = choi_prep[comptime(n)]()
 
@@ -177,7 +174,6 @@ def _compute_stabilizers_double_block_unitary(
     n = code.n_physical_qubits
 
     @guppy
-    @no_type_check
     def main() -> None:
         first_controls, first_targets, second_controls, second_targets = choi_prep[
             comptime(n)
