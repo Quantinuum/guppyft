@@ -23,8 +23,8 @@ a wider audience to use the architecture.
 
 | Milestone                        | Target use case                        | Development task                                                                  |
 |----------------------------------|----------------------------------------|-----------------------------------------------------------------------------------|
-| Implementation of QEC primitives | QEC prototyping and benchmarking         | Implement the QEC gadgets in Guppy                                                |
-| Logical API                      | Application and QEC co-design            | Formalize the architecture's gate set                                             |
+| Implementation of QEC primitives | QEC prototyping and benchmarking       | Implement the QEC gadgets in Guppy                                                |
+| Logical API                      | Application and QEC co-design          | Formalize the architecture's gate set                                             |
 | End-to-end encoding              | "Push-button" encoding of applications | Specify how to compile arbitrary programs, and how to manage resources at runtime |
 
 QEC developers are encouraged to target the milestone that best fits
