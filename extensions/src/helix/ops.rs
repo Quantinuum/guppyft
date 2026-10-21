@@ -38,9 +38,9 @@ pub const VERSION: semver::Version = semver::Version::new(0, 1, 0);
 #[non_exhaustive]
 pub enum HelixOpDef {
     /// Prepare the all-zero state on a block.
-    alloc_zero,
+    prep_zero,
     /// Prepare the |++> state on a block.
-    alloc_plus,
+    prep_plus,
     /// Discard a block.
     free,
     /// Apply X to the logical qubit selected by a runtime index.
@@ -170,7 +170,7 @@ impl MakeOpDef for HelixOpDef {
             inject_t | inject_tdg => {
                 Signature::new([block_type(), int_type(6), t_state_type()], [block_type()]).into()
             }
-            alloc_zero | alloc_plus => sig_blocks(0, 1, 0),
+            prep_zero | prep_plus => sig_blocks(0, 1, 0),
             free => sig_blocks(1, 0, 0),
             x | y | z => sig_blocks(1, 1, 1),
             swap | cx | h_all | cz | ss | qec_cycle => sig_blocks(1, 1, 0),
@@ -390,10 +390,10 @@ mod tests {
             Signature::new(vec![], vec![BorrowArray::ty(2, bool_t()); 2]),
         )?;
         let [mut a] = function
-            .add_dataflow_op(EXTENSION.instantiate_extension_op("alloc_zero", [])?, [])?
+            .add_dataflow_op(EXTENSION.instantiate_extension_op("prep_zero", [])?, [])?
             .outputs_arr();
         let [mut b] = function
-            .add_dataflow_op(EXTENSION.instantiate_extension_op("alloc_plus", [])?, [])?
+            .add_dataflow_op(EXTENSION.instantiate_extension_op("prep_plus", [])?, [])?
             .outputs_arr();
         let zero = function.add_load_const(Value::extension(ConstInt::new_u(6, 0)?));
         let one = function.add_load_const(Value::extension(ConstInt::new_u(6, 1)?));
@@ -432,7 +432,7 @@ mod tests {
             )?
             .outputs_arr();
         let [unused] = function
-            .add_dataflow_op(EXTENSION.instantiate_extension_op("alloc_zero", [])?, [])?
+            .add_dataflow_op(EXTENSION.instantiate_extension_op("prep_zero", [])?, [])?
             .outputs_arr();
         function.add_dataflow_op(EXTENSION.instantiate_extension_op("free", [])?, [unused])?;
         let decode = crate::std::ops::EXTENSION.instantiate_extension_op("decode", [2.into()])?;

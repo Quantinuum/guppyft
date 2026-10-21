@@ -9,14 +9,14 @@ from tket.passes import InlineFunctions, Normalize
 from guppyft.code.helix.logical import (
     Block,
     TState,
-    alloc_plus,
-    alloc_zero,
     cx_between_blocks,
     cx_transversal,
     free_t_state,
     inject_t,
     inject_tdg,
+    prep_plus,
     prep_t_state,
+    prep_zero,
 )
 from guppyft.extensions import helix_ops
 
@@ -25,7 +25,7 @@ def test_block_operations() -> None:
     @guppy
     def main() -> None:
         a = Block()
-        b = alloc_plus()
+        b = prep_plus()
         a.x(0)
         a.y(1)
         a.z(0)
@@ -43,7 +43,7 @@ def test_block_operations() -> None:
         a.tdg(1)
         a.measure_x_all().decode()
         b.measure_z_all().decode()
-        alloc_zero().free()
+        prep_zero().free()
         TState().free()
         free_t_state(prep_t_state())
 

@@ -64,28 +64,28 @@ class HelixOpsExtension:
         return Extension.from_json(load_extension_json("guppyft.helix.ops"), registry)
 
     @functools.cached_property
-    def alloc_plus_def(self) -> OpDef:
-        """Definition of the `alloc_plus` operation.
+    def prep_plus_def(self) -> OpDef:
+        """Definition of the `prep_plus` operation.
 
-        For the instantiated operation, see `alloc_plus`.
+        For the instantiated operation, see `prep_plus`.
         """
-        return self().get_op("alloc_plus")
+        return self().get_op("prep_plus")
 
-    def alloc_plus(self) -> ExtOp:
+    def prep_plus(self) -> ExtOp:
         """Prepare the ``|++>`` state on a block."""
-        return self.alloc_plus_def.instantiate([])
+        return self.prep_plus_def.instantiate([])
 
     @functools.cached_property
-    def alloc_zero_def(self) -> OpDef:
-        """Definition of the `alloc_zero` operation.
+    def prep_zero_def(self) -> OpDef:
+        """Definition of the `prep_zero` operation.
 
-        For the instantiated operation, see `alloc_zero`.
+        For the instantiated operation, see `prep_zero`.
         """
-        return self().get_op("alloc_zero")
+        return self().get_op("prep_zero")
 
-    def alloc_zero(self) -> ExtOp:
+    def prep_zero(self) -> ExtOp:
         """Prepare the all-zero state on a block."""
-        return self.alloc_zero_def.instantiate([])
+        return self.prep_zero_def.instantiate([])
 
     @functools.cached_property
     def cx_between_blocks_def(self) -> OpDef:

@@ -20,7 +20,7 @@ from guppyft.std import LogicalMeasurement
 class Block:
     """A block of two logical qubits, prepared as ``|00>`` by construction."""
 
-    @hugr_op(logical_op(helix_ops.alloc_zero_def), effects=[Effect.ANY])
+    @hugr_op(logical_op(helix_ops.prep_zero_def), effects=[Effect.ANY])
     @no_type_check
     def __new__() -> "Block":
         """Prepare a new Block resource."""
@@ -126,15 +126,15 @@ class TState:
         free_t_state(self)
 
 
-@hugr_op(logical_op(helix_ops.alloc_plus_def), effects=[Effect.ANY])
+@hugr_op(logical_op(helix_ops.prep_plus_def), effects=[Effect.ANY])
 @no_type_check
-def alloc_plus() -> Block:
+def prep_plus() -> Block:
     """Prepare the ``|++>`` state on a block."""
 
 
-@hugr_op(logical_op(helix_ops.alloc_zero_def), effects=[Effect.ANY])
+@hugr_op(logical_op(helix_ops.prep_zero_def), effects=[Effect.ANY])
 @no_type_check
-def alloc_zero() -> Block:
+def prep_zero() -> Block:
     """Prepare the all-zero state on a block."""
 
 
