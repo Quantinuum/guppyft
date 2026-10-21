@@ -6,6 +6,7 @@ from guppylang import guppy
 from guppylang.std.builtins import array
 from guppylang_internals.compiler.core import CompilerContext
 from guppylang_internals.decorator import custom_type, hugr_op
+from guppylang_internals.tys import Effect
 from guppylang_internals.tys.arg import Argument
 from guppylang_internals.tys.common import ToHugrContext
 from guppylang_internals.tys.param import ConstParam
@@ -52,7 +53,7 @@ class LogicalMeasurement(Generic[N]):  # type: ignore[misc]
         return decode(self)
 
 
-@hugr_op(_instantiator_for_op(std_ops.decode_def))
+@hugr_op(_instantiator_for_op(std_ops.decode_def), effects=[Effect.ANY])
 @no_type_check
 def decode(meas: LogicalMeasurement[N]) -> array[bool, N]:
     """Decode a logical measurement."""
