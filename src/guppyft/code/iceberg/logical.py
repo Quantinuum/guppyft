@@ -697,7 +697,10 @@ def borrow_more(block: BorrowedBlock[N], indices: array[int, M]) -> array[Qubit,
     """Extract additional dynamic logical qubits from an already-borrowed block."""
 
 
-@custom_function(_borrow_restore_compiler(iceberg_ops.restore_some), effects=())
+@custom_function(
+    _borrow_restore_compiler(iceberg_ops.restore_some),
+    effects=(),  # TODO should this have effects? Analysis says it should
+)
 @no_type_check
 def restore_some(block: BorrowedBlock[N], qubits: array[Qubit, M] @ owned) -> None:
     """Restore some dynamic logical qubits to their originating block."""
