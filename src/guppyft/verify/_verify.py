@@ -561,13 +561,13 @@ def _compute_clifford_tableaux(
             # Get the 4k stabilizers for the 4k qubit Choi state encoding the logical.
             semantic_choi_stabilizers = _compute_stabilizers_double_block_unitary(
                 _identity_code(code_definition.n_logical_qubits),
-                semantic_function,  # type: ignore[arg-type]
+                semantic_function,
                 n_selene_qubits=4 * code_definition.n_logical_qubits,
             )
             # Calculate the 4n stabilizers of the Choi state encoding the physical.
             implementation_stabilizers = _compute_stabilizers_double_block_unitary(
                 code_definition,
-                impl_function,  # type: ignore[arg-type]
+                impl_function,
                 n_selene_qubits=n_physical_choi_qubits,
             )
         case _:
