@@ -3,8 +3,9 @@
 //! A `block` owns two logical qubits, labelled 0 and 1. All code operations
 //! act on blocks.
 //!
-//! A `t_state` owns one magic resource which can be consumed to generate a T or
-//! Tdg gate on a logical qubit.
+//! A `t_state` owns a resource which can be consumed to generate a T or Tdg
+//! gate on a logical qubit. (This may be implemented as a T state prepared on
+//! a different code.)
 //!
 //! Both types are linear.
 use std::sync::{Arc, LazyLock};
