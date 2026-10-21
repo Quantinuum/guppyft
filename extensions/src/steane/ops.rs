@@ -23,7 +23,7 @@ use tket::extension::rotation::rotation_type;
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.steane.ops");
 /// Extension version.
-pub const VERSION: semver::Version = semver::Version::new(0, 2, 2);
+pub const VERSION: semver::Version = semver::Version::new(0, 2, 3);
 
 /// Logical Steane operations.
 #[derive(
@@ -44,9 +44,9 @@ pub enum SteaneOpDef {
     qec_cycle,
     /// X gate.
     x,
-    /// Z gate.
-    y,
     /// Y gate.
+    y,
+    /// Z gate.
     z,
     /// H gate.
     h,

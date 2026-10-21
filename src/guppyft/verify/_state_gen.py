@@ -1,17 +1,22 @@
 from enum import Enum
-from typing import no_type_check
+from typing import Literal, no_type_check, overload
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.builtins import array, comptime
+from guppylang.std.num import nat
 from guppylang.std.quantum import cz, h, qubit, sdg, z
-from zixy._zixy import SymplecticPart
 from zixy.qubit import pauli
 from zixy.qubit.clifford import GateList
 
 from guppyft.code_def import StabilizerCode
+from guppyft.verify._adapters import apply_double_block, apply_single_block
 from guppyft.verify._expansion import get_expanded_stabilizer_set
-from guppyft.verify._utils import SingleBlockUnitary, array_slicer
+from guppyft.verify._utils import (
+    ImplementationCliffordUnitary,
+    ImplementationCliffordUnitaryDouble,
+    array_slicer,
+)
 
 
 class SQClifford(Enum):
@@ -102,7 +107,7 @@ def convert_to_graph_state(tableau: pauli.SignTerms) -> list[SQClifford]:
 
     # Try to solve for X/Y everywhere
     tableau.canonicalize(
-        mode_order=[(q, SymplecticPart.X) for q in all_q],
+        mode_order=[(q, pauli.SymplecticPart.X) for q in all_q],
         to_solve=all_q,
         additional_reduces=[],
     )
@@ -128,7 +133,7 @@ def convert_to_graph_state(tableau: pauli.SignTerms) -> list[SQClifford]:
 
     # Solve for X/Y everywhere. Now it is guaranteed to solve for all qubits.
     tableau.canonicalize(
-        mode_order=[(q, SymplecticPart.X) for q in all_q],
+        mode_order=[(q, pauli.SymplecticPart.X) for q in all_q],
         to_solve=all_q,
         additional_reduces=[],
     )
@@ -150,9 +155,21 @@ def convert_to_graph_state(tableau: pauli.SignTerms) -> list[SQClifford]:
 TWICE_NUM_BLOCKS = guppy.nat_var("TWICE_NUM_BLOCKS")
 
 
+@overload
 def gen_choi_state(
     code: StabilizerCode,
-    clifford_func: SingleBlockUnitary,
+    clifford_func: ImplementationCliffordUnitary,
+    n_blocks: Literal[1],
+) -> GuppyFunctionDefinition[[], array[array[qubit, N], 2]]: ...  # type: ignore[valid-type]
+@overload
+def gen_choi_state(
+    code: StabilizerCode,
+    clifford_func: ImplementationCliffordUnitaryDouble,
+    n_blocks: Literal[2],
+) -> GuppyFunctionDefinition[[], array[array[qubit, N], 4]]: ...  # type: ignore[valid-type]
+def gen_choi_state(
+    code: StabilizerCode,
+    clifford_func: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
     n_blocks: int,
 ) -> GuppyFunctionDefinition[[], array[array[qubit, N], TWICE_NUM_BLOCKS]]:  # type: ignore[valid-type]
     """Generate a Guppy function that prepares the Choi state of a single block
@@ -215,7 +232,7 @@ def gen_choi_state(
                 slicer.discard_empty()
 
                 # Apply the Clifford unitary to the output leg
-                clifford_func(output_leg)
+                output_leg = apply_single_block(output_leg, clifford_func)
 
                 return array(input_leg, output_leg)
 
@@ -236,7 +253,9 @@ def gen_choi_state(
                 slicer.discard_empty()
 
                 # Apply the Clifford unitary to the output legs
-                clifford_func(output0_leg, output1_leg)
+                output0_leg, output1_leg = apply_double_block(
+                    output0_leg, output1_leg, clifford_func
+                )
 
                 return array(input0_leg, output0_leg, input1_leg, output1_leg)
 

@@ -42,14 +42,10 @@ def test_knill_qec_without_errors() -> None:
     @guppy
     @no_type_check
     @expected_qubits(7 + 14)  # 7 data qubits, 14 ancillas
-    def impl_func(arr: array[qubit, 7]) -> None:
-        block = LogicalBlock(array(arr.take(i) for i in range(7)))
-
+    def impl_func(block: LogicalBlock[7]) -> None:
         a0 = prep_zero_non_ft()
         a1 = prep_zero_non_ft()
         knill_qec_cycle(block, a0, a1)
-
-        block.put_into_array(arr)
 
     assert valid_clifford_implementation(specify_identity, impl_func, CODE_DEF)
 
@@ -60,15 +56,11 @@ def test_knill_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
 
     @guppy
     @no_type_check
-    def impl_func(arr: array[qubit, 7]) -> None:
-        block = LogicalBlock(array(arr.take(i) for i in range(7)))
-
+    def impl_func(block: LogicalBlock[7]) -> None:
         _apply_error(block, comptime(error_loc), comptime(is_x_error))
         a0 = prep_zero_non_ft()
         a1 = prep_zero_non_ft()
         knill_qec_cycle(block, a0, a1)
-
-        block.put_into_array(arr)
 
     assert valid_clifford_implementation(
         specify_identity, impl_func, CODE_DEF, n_impl_ancillas=14
@@ -79,15 +71,11 @@ def test_steane_qec_without_errors() -> None:
 
     @guppy
     @no_type_check
-    def impl_func(arr: array[qubit, 7]) -> None:
-        block = LogicalBlock(array(arr.take(i) for i in range(7)))
-
+    def impl_func(block: LogicalBlock[7]) -> None:
         a0 = prep_zero_non_ft()
         steane_x_qec_cycle(block, a0)
         a0 = prep_zero_non_ft()
         steane_z_qec_cycle(block, a0)
-
-        block.put_into_array(arr)
 
     assert valid_clifford_implementation(
         specify_identity, impl_func, CODE_DEF, n_impl_ancillas=7
@@ -101,16 +89,12 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
     @guppy
     @no_type_check
     @expected_qubits(14)
-    def impl_func(arr: array[qubit, 7]) -> None:
-        block = LogicalBlock(array(arr.take(i) for i in range(7)))
-
+    def impl_func(block: LogicalBlock[7]) -> None:
         _apply_error(block, comptime(error_loc), comptime(is_x_error))
         a0 = prep_zero_non_ft()
         steane_x_qec_cycle(block, a0)
         a0 = prep_zero_non_ft()
         steane_z_qec_cycle(block, a0)
-
-        block.put_into_array(arr)
 
     assert valid_clifford_implementation(
         specify_identity, impl_func, CODE_DEF, n_impl_ancillas=7
@@ -126,10 +110,8 @@ def test_steane_measure_syndromes() -> None:
     @guppy
     @no_type_check
     @expected_qubits(10)
-    def impl_func(arr: array[qubit, 7]) -> None:
-        block = LogicalBlock(array(arr.take(i) for i in range(7)))
+    def impl_func(block: LogicalBlock[7]) -> None:
         _measure_syndromes(block)
-        block.put_into_array(arr)
 
     assert valid_clifford_implementation(specify_identity, impl_func, CODE_DEF)
 
@@ -155,14 +137,7 @@ def test_steane_1q_primitives(
     def specify_func(q: array[qubit, 1]) -> None:
         specify_def(q[0])
 
-    @guppy
-    @no_type_check
-    def impl_func(arr: array[qubit, 7]) -> None:
-        block = LogicalBlock(array(arr.take(i) for i in range(7)))
-        implement_def(block)
-        block.put_into_array(arr)
-
-    assert valid_clifford_implementation(specify_func, impl_func, CODE_DEF)
+    assert valid_clifford_implementation(specify_func, implement_def, CODE_DEF)
 
 
 @pytest.mark.parametrize(
@@ -182,18 +157,7 @@ def test_steane_2q_primitives(
     def specify_func(q0: array[qubit, 1], q1: array[qubit, 1]) -> None:
         specify_def(q0[0], q1[0])
 
-    @guppy
-    @no_type_check
-    def impl_func(arr0: array[qubit, 7], arr1: array[qubit, 7]) -> None:
-        blk0 = LogicalBlock(array(arr0.take(i) for i in range(7)))
-        blk1 = LogicalBlock(array(arr1.take(i) for i in range(7)))
-
-        implement_def(blk0, blk1)
-
-        blk0.put_into_array(arr0)
-        blk1.put_into_array(arr1)
-
-    assert valid_clifford_implementation(specify_func, impl_func, CODE_DEF)
+    assert valid_clifford_implementation(specify_func, implement_def, CODE_DEF)
 
 
 def test_t_gate() -> None:

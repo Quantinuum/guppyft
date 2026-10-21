@@ -31,20 +31,13 @@
 //!
 //! Some of the operations (such as `all_x` or `cx_transversal`) operate purely
 //! at the block level. Others (such as `x` or `cx`) take one or more indices
-//! as parameters: these are (64-bit unsigned) integers less than `k`, which
-//! address logical qubits within the block. Some operations also take an angle,
-//! represented as a float in radians.
+//! as value inputs: these are (64-bit unsigned) integers less than `k`, which
+//! address logical qubits within the block. Some operations also take an
+//! angle, represented as a float in radians.
 //!
-//! All operations that take indices come in two versions, "static" and
-//! "dynamic", depending on whether the indices are parameters to the operation
-//! itself (in which case they must be statically known) or dynamic (in which
-//! case they are integer inputs to the operation). The dynamic versions have
-//! names ending in `_d`. For example, `x_d` takes a block and an integer as
-//! inputs, and outputs the block. Note that whereas the static versions are
-//! infallible (validity of indices is checked on construction), the dynamic
-//! versions will panic if the indices are invalid. When frontends generate
-//! dynamic operations compilers should attempt to transform them to static
-//! operations where possible.
+//! For example, `x` takes a block and an integer as inputs, and outputs the
+//! block. Indices may be computed at runtime or supplied by constant nodes.
+//! Operations will panic if indices are invalid.
 
 pub mod ops;
 pub mod types;

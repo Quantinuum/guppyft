@@ -1,11 +1,13 @@
 from typing import no_type_check
 
+import pytest
 from guppylang import guppy
-from guppylang.std.builtins import array, output
-from guppylang.std.quantum import collect_measurements, measure_array, qubit
+from guppylang.std.builtins import array, comptime, output
+from guppylang.std.quantum import collect_measurements, measure_array, qubit, x
 from selene_stim_plugin.state import Stabilizer, StabilizerList
 from zixy.qubit import pauli
 
+from guppyft.verify._adapters import _from_array, _to_array
 from guppyft.verify._utils import (
     array_slicer,
     selene_stabilizer_to_zixy_signterm,
@@ -73,3 +75,20 @@ def test_partition_array_qubit() -> None:
     assert dict_results["slice0"] == [[0, 0, 0, 0, 0]]
     assert dict_results["slice1"] == [[0, 0, 0]]
     assert dict_results["slice2"] == [[0, 0]]
+
+
+@pytest.mark.parametrize("conversion", ["array", "logical_block"])
+def test_block_conversion_preserves_qubit_order(conversion: str) -> None:
+    @guppy
+    @no_type_check
+    def main() -> None:
+        qs = array(qubit(), qubit())
+        x(qs[0])
+        if comptime(conversion == "logical_block"):
+            arr = _to_array(_from_array(qs))
+        else:
+            arr = _to_array(qs)
+        output("measurements", collect_measurements(measure_array(arr)))
+
+    results = main.emulator(n_qubits=2).run().collated_shots()[0]
+    assert results["measurements"] == [[1, 0]]

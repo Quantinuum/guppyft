@@ -9,7 +9,6 @@ Based on https://arxiv.org/abs/2107.07505"""
 from typing import Generic, no_type_check
 
 from guppylang import guppy
-from guppylang.library import link_name
 from guppylang.std import quantum as qlib
 from guppylang.std.angles import pi
 from guppylang.std.builtins import Measurement, array, comptime, owned
@@ -416,7 +415,6 @@ def measure_z(blk: LogicalBlock[7] @ owned) -> RawMeasurement[7]:
 
 
 @guppy
-@link_name("guppyft.steane.decode")
 @no_type_check
 def decode(m: RawMeasurement[7] @ owned) -> bool:
     """Decode Steane measurement of logical block."""

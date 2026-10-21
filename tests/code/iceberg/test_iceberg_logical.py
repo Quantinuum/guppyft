@@ -1,10 +1,15 @@
+import pytest
 from guppylang import guppy
 from guppylang.std.builtins import array, result
 from hugr.build.dfg import Dfg
+from hugr.cli import validate
+from hugr.ext import UsedExtensionResolver
 from hugr.ops import DFG, ExtOp
 from hugr.std.float import FLOAT_T
-from hugr.tys import BoundedNatArg, ExtType
+from hugr.std.int import int_t
+from hugr.tys import BoundedNatArg, ExtType, FunctionType, Option, Type
 from tket.passes import InlineFunctions, Normalize
+from tket_exts import measurement
 
 from guppyft.code.iceberg.logical import (
     Block,
@@ -19,10 +24,12 @@ from guppyft.code.iceberg.logical import (
     measure_all,
     restore,
     try_alloc_dynq,
+    xx_phase_dynq,
+    yy_phase_dynq,
     zz_phase_between_blocks,
     zz_phase_dynq,
 )
-from guppyft.extensions import iceberg_ops, iceberg_types
+from guppyft.extensions import iceberg_ops, iceberg_types, std_types
 
 
 def test_hugr() -> None:
@@ -30,9 +37,9 @@ def test_hugr() -> None:
     block6type = iceberg_types.iceberg_block(6)
     assert block6type.type_def.name == "block"
     assert block6type.args == [BoundedNatArg(6)]
-    block6op = iceberg_ops.all_but_one_rx(6, 2)
-    assert block6op.name() == "guppyft.iceberg.ops.all_but_one_rx<6, 2>"
-    dfg = Dfg(block6type, FLOAT_T)
+    block6op = iceberg_ops.all_but_one_rx(6)
+    assert block6op.name() == "guppyft.iceberg.ops.all_but_one_rx<6>"
+    dfg = Dfg(block6type, int_t(6), FLOAT_T)
     node = dfg.add_op(block6op, *dfg.inputs())
     dfg.set_outputs(node)
     h = dfg.hugr
@@ -46,12 +53,13 @@ def test_hugr() -> None:
     dfg_op = dfg_data.op
     assert isinstance(dfg_op, DFG)
     dfg_sig = dfg_op.signature
-    [in0, in1] = dfg_sig.input
+    [in0, in1, in2] = dfg_sig.input
     assert isinstance(in0, ExtType)
     assert isinstance(in1, ExtType)
     assert in0.type_def.name == "block"
     assert in0.args == [BoundedNatArg(6)]
-    assert in1.type_def.name == "float64"
+    assert in1 == int_t(6)
+    assert in2 == FLOAT_T
 
 
 def test_exported_extensions() -> None:
@@ -65,20 +73,15 @@ def test_exported_extensions() -> None:
         "pre_block": iceberg_types.iceberg_pre_block_def,
         "qubit": iceberg_types.iceberg_qubit_def,
     }
-    assert len(ops_extn.operations) == 89
+    assert len(ops_extn.operations) == 61
+    assert str(ops_extn.version) == "0.2.0"
     for op_name, op_def in ops_extn.operations.items():
-        op_def_name = op_name if op_name.endswith("_dynq") else f"{op_name}_def"
-        assert op_def == iceberg_ops.__getattribute__(op_def_name)
+        assert op_def == iceberg_ops.__getattribute__(f"{op_name}_def")
 
 
-def test_op_instantiations() -> None:
-    ops_extn = iceberg_ops()
-    # Dynamic ops all just take a block size:
-    for op_name, op_def in ops_extn.operations.items():
-        if op_name.endswith("_d"):
-            assert iceberg_ops.__getattribute__(op_name)(3).op_def() == op_def
-    # Other ops that take no indices:
-    for op_name in [
+@pytest.mark.parametrize(
+    "op_name",
+    [
         "all_x",
         "all_y",
         "all_z",
@@ -93,13 +96,6 @@ def test_op_instantiations() -> None:
         "free",
         "measure_syndrome",
         "measure_all",
-    ]:
-        assert (
-            iceberg_ops.__getattribute__(op_name)(3).op_def()
-            == ops_extn.operations[op_name]
-        )
-    # Ops that take a single index:
-    for op_name in [
         "x",
         "y",
         "z",
@@ -116,13 +112,6 @@ def test_op_instantiations() -> None:
         "all_but_one_rz",
         "try_measure_one_x",
         "try_measure_one_z",
-    ]:
-        assert (
-            iceberg_ops.__getattribute__(op_name)(3, 1).op_def()
-            == ops_extn.operations[op_name]
-        )
-    # Ops that take two indices:
-    for op_name in [
         "xx",
         "yy",
         "zz",
@@ -135,17 +124,108 @@ def test_op_instantiations() -> None:
         "xx_phase_between_blocks",
         "yy_phase_between_blocks",
         "zz_phase_between_blocks",
-    ]:
-        assert (
-            iceberg_ops.__getattribute__(op_name)(3, 1, 2).op_def()
-            == ops_extn.operations[op_name]
-        )
-    # Ops that take a variable number of inputs and outputs:
-    for op_name in ["borrow", "borrow_more", "restore_some", "restore"]:
-        assert (
-            iceberg_ops.__getattribute__(op_name)(1, 3).op_def()
-            == ops_extn.operations[op_name]
-        )
+    ],
+)
+def test_op_instantiations(op_name: str) -> None:
+    assert (
+        iceberg_ops.__getattribute__(op_name)(6).op_def()
+        == iceberg_ops().operations[op_name]
+    )
+
+
+@pytest.mark.parametrize(
+    "op_name", ["borrow", "borrow_more", "restore_some", "restore"]
+)
+def test_op_instantiations_variable_in_outs(op_name: str) -> None:
+    assert (
+        iceberg_ops.__getattribute__(op_name)(1, 6).op_def()
+        == iceberg_ops().operations[op_name]
+    )
+
+
+@pytest.mark.parametrize(
+    "opname",
+    [
+        "alloc_dynq",
+        "try_alloc_dynq",
+        "free_dynq",
+        "x_dynq",
+        "y_dynq",
+        "z_dynq",
+        "rx_dynq",
+        "ry_dynq",
+        "rz_dynq",
+        "xx_phase_dynq",
+        "yy_phase_dynq",
+        "zz_phase_dynq",
+        "cx_dynq",
+        "try_measure_x_dynq",
+        "try_measure_z_dynq",
+    ],
+)
+def test_resolve_extensions_dynq(opname: str) -> None:
+    """Regression test for not resolving all dependencies."""
+    op = iceberg_ops.__getattribute__(opname)
+    assert len(op.args) == 0
+    resolver = UsedExtensionResolver()
+    op._resolve_used_extensions(resolver)
+    unused = resolver.result().unresolved_extensions
+    assert iceberg_types().name not in unused
+    assert std_types().name not in unused
+
+
+@pytest.mark.parametrize(
+    ("op_name", "n_blocks", "n_indices", "n_angles"),
+    [
+        ("x", 1, 1, 0),
+        ("y", 1, 1, 0),
+        ("z", 1, 1, 0),
+        ("xx", 1, 2, 0),
+        ("yy", 1, 2, 0),
+        ("zz", 1, 2, 0),
+        ("all_but_one_x", 1, 1, 0),
+        ("all_but_one_z", 1, 1, 0),
+        ("x_with_all_but_one_z", 1, 1, 0),
+        ("z_with_all_but_one_x", 1, 1, 0),
+        ("fan_out", 1, 1, 0),
+        ("fan_in", 1, 1, 0),
+        ("rx", 1, 1, 1),
+        ("ry", 1, 1, 1),
+        ("rz", 1, 1, 1),
+        ("all_but_one_rx", 1, 1, 1),
+        ("all_but_one_rz", 1, 1, 1),
+        ("xx_phase", 1, 2, 1),
+        ("yy_phase", 1, 2, 1),
+        ("zz_phase", 1, 2, 1),
+        ("cx", 1, 2, 0),
+        ("swap", 1, 2, 0),
+        ("xx_phase_between_blocks", 2, 2, 1),
+        ("yy_phase_between_blocks", 2, 2, 1),
+        ("zz_phase_between_blocks", 2, 2, 1),
+        ("cx_between_blocks", 2, 2, 0),
+        ("try_measure_one_x", 1, 1, 0),
+        ("try_measure_one_z", 1, 1, 0),
+    ],
+)
+def test_indexed_op_signatures(
+    op_name: str, n_blocks: int, n_indices: int, n_angles: int
+) -> None:
+    """All indexed operations have value inputs and a single size parameter."""
+    block = iceberg_types.iceberg_block(6)
+    op = getattr(iceberg_ops, op_name)(6)
+    inputs: list[Type] = [block for _ in range(n_blocks)]
+    inputs.extend([int_t(6)] * n_indices)
+    inputs.extend([FLOAT_T] * n_angles)
+    outputs: list[Type] = [block for _ in range(n_blocks)]
+    if op_name.startswith("try_measure_one"):
+        outputs = [Option(measurement.measurement_t), block]
+    assert op.args == [BoundedNatArg(6)]
+    assert op.signature == FunctionType(inputs, outputs)
+    poly_sig = op.op_def().signature.poly_func
+    assert poly_sig is not None
+    assert len(poly_sig.params) == 1
+    assert len(poly_sig.body.input) == len(inputs)
+    assert len(poly_sig.body.output) == len(outputs)
 
 
 def test_guppy_bindings_smoke() -> None:
@@ -287,3 +367,107 @@ def test_guppy_types() -> None:
     assert borrow_output0.type_def.name == "borrowed_block"
     assert restore_input0.type_def.name == "borrowed_block"
     assert restore_output0.type_def.name == "block"
+
+
+def test_dynamic_qubit_bindings_resolve_and_normalize() -> None:
+    """Compile every dynamic-qubit binding through the public logical API."""
+
+    @guppy
+    def main() -> None:
+        q0 = Qubit()
+        q1 = Qubit()
+        q0.x()
+        q0.y()
+        q0.z()
+        q0.rx(0.25)
+        q0.ry(0.5)
+        q0.rz(0.75)
+        xx_phase_dynq(q0, q1, 0.25)
+        yy_phase_dynq(q0, q1, 0.5)
+        zz_phase_dynq(q0, q1, 0.75)
+        cx_dynq(q0, q1)
+        mx = q0.try_measure_x()
+        if mx.is_some():
+            result("x", mx.unwrap().read())
+        else:
+            mx.unwrap_nothing()
+        mz = q1.try_measure_z()
+        if mz.is_some():
+            result("z", mz.unwrap().read())
+        else:
+            mz.unwrap_nothing()
+        allocated = try_alloc_dynq()
+        if allocated.is_some():
+            free_dynq(allocated.unwrap())
+        else:
+            allocated.unwrap_nothing()
+        free_dynq(q0)
+        free_dynq(q1)
+
+    h = main.compile().modules[0]
+    InlineFunctions()(h, inplace=True)
+    Normalize()(h, inplace=True)
+    assert not h.used_extensions().unresolved_extensions
+    dynamic_ops = {
+        data.op.op_def().name
+        for _, data in h.nodes()
+        if isinstance(data.op, ExtOp)
+        and data.op.op_def().get_extension().name == "guppyft.iceberg.ops"
+    }
+    assert dynamic_ops == {
+        "alloc_dynq",
+        "try_alloc_dynq",
+        "free_dynq",
+        "x_dynq",
+        "y_dynq",
+        "z_dynq",
+        "rx_dynq",
+        "ry_dynq",
+        "rz_dynq",
+        "xx_phase_dynq",
+        "yy_phase_dynq",
+        "zz_phase_dynq",
+        "cx_dynq",
+        "try_measure_x_dynq",
+        "try_measure_z_dynq",
+    }
+
+
+@pytest.mark.parametrize("normalize", [False, True])
+def test_borrow_restore_match_extension_signatures(normalize: bool) -> None:
+    """Guppy arrays must lower to variadic ops with static arguments [m, k]."""
+
+    @guppy
+    def main() -> None:
+        block = Block[8]()
+        owner, first = borrow(block, array(0, 1))
+        second = owner.borrow_more(array(2))
+        cx_dynq(first[0], second[0])
+        owner.restore_some(first)
+        block = restore(owner, second)
+        discard(block)
+
+    [h] = main.compile().modules
+    expected = {
+        "borrow": iceberg_ops.borrow(8, 2),
+        "borrow_more": iceberg_ops.borrow_more(8, 1),
+        "restore_some": iceberg_ops.restore_some(8, 2),
+        "restore": iceberg_ops.restore(8, 1),
+    }
+    if normalize:
+        InlineFunctions()(h, inplace=True)
+        Normalize()(h, inplace=True)
+    found = set()
+    for _node, data in h.nodes():
+        op = data.op
+        if (
+            isinstance(op, ExtOp)
+            and op.op_def().get_extension().name == "guppyft.iceberg.ops"
+            and op.op_def().name in expected
+        ):
+            name = op.op_def().name
+            found.add(name)
+            assert op.args == expected[name].args
+            assert op.outer_signature() == expected[name].outer_signature()
+    assert found == expected.keys()
+    validate(h.to_bytes())

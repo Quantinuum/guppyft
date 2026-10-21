@@ -46,9 +46,12 @@ def test_steane_zero_state() -> None:
         steane.implement_non_ft_zero_state,
         code_definition=steane.STEANE_DEF,
     )
+
+
+def test_steane_zero_state_logical_block() -> None:
     assert valid_stabilizer_state_preparation(
         steane.specify_zero_state,
-        steane.implement_non_ft_zero_state,
+        steane.implement_non_ft_zero_state_logical_block,
         code_definition=steane.STEANE_DEF,
     )
 
@@ -90,6 +93,14 @@ def test_steane_h() -> None:
     assert valid_clifford_implementation(
         steane.specify_h,
         steane.implement_h,
+        code_definition=steane.STEANE_DEF,
+    )
+
+
+def test_steane_h_logical_block() -> None:
+    assert valid_clifford_implementation(
+        steane.specify_h,
+        steane.implement_h_logical_block,
         code_definition=steane.STEANE_DEF,
     )
 
@@ -142,7 +153,6 @@ def test_steane_cx() -> None:
         code_definition=steane.STEANE_DEF,
     )
 
-
 # Here we are testing that if n_impl_ancillas and @expected_qubits are specified,
 # n_impl_ancillas number should override the @expected_qubits hint.
 # The @expected_qubits hint for impl function is 7 qubits however the impl requires 8
@@ -153,4 +163,26 @@ def test_hint_override() -> None:
         steane.implement_identity_with_shor_extraction_and_incorrect_ancilla_count,
         code_definition=steane.STEANE_DEF,
         n_impl_ancillas=8,
+
+def test_steane_cx_logical_block() -> None:
+    assert valid_clifford_implementation(
+        steane.specify_cx,
+        steane.implement_cx_logical_block,
+        code_definition=steane.STEANE_DEF,
+    )
+
+
+def test_steane_bell_state_logical_block() -> None:
+    assert valid_stabilizer_state_preparation(
+        steane.specify_bell_state,
+        steane.implement_bell_state_logical_block,
+        code_definition=steane.STEANE_DEF,
+    )
+
+
+def test_steane_h_logical_block_is_not_identity() -> None:
+    assert not valid_clifford_implementation(
+        steane.specify_identity,
+        steane.implement_h_logical_block,
+        code_definition=steane.STEANE_DEF,
     )

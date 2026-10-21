@@ -59,7 +59,7 @@ class StabilizerCode:
             # ComplexSign(k) ~ i^k
             # y_logicals[j] = i * (x_logicals[j] * z_logicals[j])
             # y_term will always have a real (+/-)1 coefficient.
-            y_term = ComplexSign(1) * (self.x_logicals[j] * self.z_logicals[j])
+            y_term = ComplexSign(1) * (self.x_logicals[j] * self.z_logicals[j])  # type: ignore[operator]
             terms.append(y_term)
         return terms.into(pauli.SignTerms)
 
