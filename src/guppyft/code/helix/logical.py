@@ -138,7 +138,7 @@ def prep_zero() -> Block:
     """Prepare the all-zero state on a block."""
 
 
-@hugr_op(logical_op(helix_ops.cx_between_blocks_def))
+@hugr_op(logical_op(helix_ops.cx_between_blocks_def), effects=())
 @no_type_check
 def cx_between_blocks(control: Block, target: Block, i: int, j: int) -> None:
     """Targeted CX from the first block to the second. Runtime indices select
@@ -152,7 +152,7 @@ def cx(block: Block) -> None:
     """CX from logical qubit 0 to 1."""
 
 
-@hugr_op(logical_op(helix_ops.cx_transversal_def))
+@hugr_op(logical_op(helix_ops.cx_transversal_def), effects=())
 @no_type_check
 def cx_transversal(control: Block, target: Block) -> None:
     """Apply CX from each logical qubit in the first block to the corresponding
@@ -160,7 +160,7 @@ def cx_transversal(control: Block, target: Block) -> None:
     """
 
 
-@hugr_op(logical_op(helix_ops.cz_def))
+@hugr_op(logical_op(helix_ops.cz_def), effects=())
 @no_type_check
 def cz(block: Block) -> None:
     """Logical CZ."""
@@ -178,13 +178,13 @@ def free_t_state(resource: TState @ owned) -> None:
     """Discard an unused T-state resource."""
 
 
-@hugr_op(logical_op(helix_ops.h_all_def))
+@hugr_op(logical_op(helix_ops.h_all_def), effects=())
 @no_type_check
 def h_all(block: Block) -> None:
     """Hadamard on each logical qubit."""
 
 
-@hugr_op(logical_op(helix_ops.inject_t_def))
+@hugr_op(logical_op(helix_ops.inject_t_def), effects=())
 @no_type_check
 def inject_t(block: Block, i: int, resource: TState @ owned) -> None:
     """Consume a T-state resource and apply T to the logical qubit selected by a
@@ -192,7 +192,7 @@ def inject_t(block: Block, i: int, resource: TState @ owned) -> None:
     """
 
 
-@hugr_op(logical_op(helix_ops.inject_tdg_def))
+@hugr_op(logical_op(helix_ops.inject_tdg_def), effects=())
 @no_type_check
 def inject_tdg(block: Block, i: int, resource: TState @ owned) -> None:
     """Consume a T-state resource and apply Tdg to the logical qubit selected by
@@ -220,7 +220,7 @@ def prep_t_state() -> TState:
     """
 
 
-@hugr_op(logical_op(helix_ops.qec_cycle_def))
+@hugr_op(logical_op(helix_ops.qec_cycle_def), effects=())
 @no_type_check
 def qec_cycle(block: Block) -> None:
     """Perform syndrome extraction and recovery (or a Pauli-frame update).
@@ -228,31 +228,31 @@ def qec_cycle(block: Block) -> None:
     """
 
 
-@hugr_op(logical_op(helix_ops.ss_def))
+@hugr_op(logical_op(helix_ops.ss_def), effects=())
 @no_type_check
 def ss(block: Block) -> None:
     """Logical S on both qubits."""
 
 
-@hugr_op(logical_op(helix_ops.swap_def))
+@hugr_op(logical_op(helix_ops.swap_def), effects=())
 @no_type_check
 def swap(block: Block) -> None:
     """Swap the two qubits in the block."""
 
 
-@hugr_op(logical_op(helix_ops.x_def))
+@hugr_op(logical_op(helix_ops.x_def), effects=())
 @no_type_check
 def x(block: Block, i: int) -> None:
     """Apply X to the logical qubit selected by a runtime index."""
 
 
-@hugr_op(logical_op(helix_ops.y_def))
+@hugr_op(logical_op(helix_ops.y_def), effects=())
 @no_type_check
 def y(block: Block, i: int) -> None:
     """Apply Y to the logical qubit selected by a runtime index."""
 
 
-@hugr_op(logical_op(helix_ops.z_def))
+@hugr_op(logical_op(helix_ops.z_def), effects=())
 @no_type_check
 def z(block: Block, i: int) -> None:
     """Apply Z to the logical qubit selected by a runtime index."""
