@@ -1,11 +1,16 @@
-"""Guppy functions and types for the Iceberg QEC architecture."""
+"""Guppy functions and types for the Iceberg QEC architecture.
+
+Rotation parameters use Guppy's ``angle`` type. For example, ``pi / 4`` and
+``angle(0.25)`` both represent a rotation by pi/4 radians. To convert a value
+``theta`` in radians, use ``angle(theta / float(pi))``.
+"""
 
 from collections.abc import Callable, Sequence
-from math import pi
 from typing import Generic, no_type_check
 
 from guppylang import guppy
-from guppylang.std.builtins import array, comptime
+from guppylang.std.angles import angle, pi
+from guppylang.std.builtins import array
 from guppylang.std.lang import owned
 from guppylang.std.option import Option
 from guppylang.std.quantum import Measurement
@@ -19,7 +24,7 @@ from hugr import tys as ht
 from hugr.ext import TypeDef
 from hugr.ops import ExtOp
 
-from guppyft.code._util import BorrowRestoreCompiler, logical_op
+from guppyft.code._util import BorrowRestoreCompiler, RotationCompiler, logical_op
 from guppyft.extensions import iceberg_ops, iceberg_types
 from guppyft.std import LogicalMeasurement
 
@@ -156,67 +161,67 @@ class Block(Generic[N]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
-    def rx(self: "Block[N]", i: int, phase: float) -> None:
-        """Rx rotation of `phase` radians on the qubit with index `i`."""
+    def rx(self: "Block[N]", i: int, phase: angle) -> None:
+        """Rx rotation by `phase` on the qubit with index `i`."""
         rx(self, i, phase)
 
     @guppy
     @no_type_check
-    def ry(self: "Block[N]", i: int, phase: float) -> None:
-        """Ry rotation of `phase` radians, implemented using Rx and Rz."""
+    def ry(self: "Block[N]", i: int, phase: angle) -> None:
+        """Ry rotation by `phase`, implemented using Rx and Rz."""
         ry(self, i, phase)
 
     @guppy
     @no_type_check
-    def rz(self: "Block[N]", i: int, phase: float) -> None:
-        """Rz rotation of `phase` radians on the qubit with index `i`."""
+    def rz(self: "Block[N]", i: int, phase: angle) -> None:
+        """Rz rotation by `phase` on the qubit with index `i`."""
         rz(self, i, phase)
 
     @guppy
     @no_type_check
-    def pauli_exp_all_x(self: "Block[N]", phase: float) -> None:
+    def pauli_exp_all_x(self: "Block[N]", phase: angle) -> None:
         r"""Apply the logical all-X Pauli exponential.
 
         .. math::
 
             \exp(-i \theta X^{\otimes k} / 2)
 
-        where :math:`\theta` is ``phase`` in radians and :math:`k` is the
-        number of logical qubits in the block.
+        where :math:`\theta` is the angle represented by ``phase``, in radians,
+        and :math:`k` is the number of logical qubits in the block.
         """
         pauli_exp_all_x(self, phase)
 
     @guppy
     @no_type_check
-    def pauli_exp_all_y(self: "Block[N]", phase: float) -> None:
+    def pauli_exp_all_y(self: "Block[N]", phase: angle) -> None:
         r"""Apply the logical all-Y Pauli exponential.
 
         .. math::
 
             \exp(-i \theta Y^{\otimes k} / 2)
 
-        where :math:`\theta` is ``phase`` in radians and :math:`k` is the
-        number of logical qubits in the block.
+        where :math:`\theta` is the angle represented by ``phase``, in radians,
+        and :math:`k` is the number of logical qubits in the block.
         """
         pauli_exp_all_y(self, phase)
 
     @guppy
     @no_type_check
-    def pauli_exp_all_z(self: "Block[N]", phase: float) -> None:
+    def pauli_exp_all_z(self: "Block[N]", phase: angle) -> None:
         r"""Apply the logical all-Z Pauli exponential.
 
         .. math::
 
             \exp(-i \theta Z^{\otimes k} / 2)
 
-        where :math:`\theta` is ``phase`` in radians and :math:`k` is the
-        number of logical qubits in the block.
+        where :math:`\theta` is the angle represented by ``phase``, in radians,
+        and :math:`k` is the number of logical qubits in the block.
         """
         pauli_exp_all_z(self, phase)
 
     @guppy
     @no_type_check
-    def pauli_exp_all_x_except_at(self: "Block[N]", i: int, phase: float) -> None:
+    def pauli_exp_all_x_except_at(self: "Block[N]", i: int, phase: angle) -> None:
         r"""Apply the Pauli exponential with I at ``i`` and X elsewhere.
 
         .. math::
@@ -225,14 +230,14 @@ class Block(Generic[N]):  # type: ignore[misc]
                 X^{\otimes i} \otimes I \otimes X^{\otimes(k-i-1)}
             ) / 2)
 
-        where :math:`\theta` is ``phase`` in radians and :math:`k` is the
-        number of logical qubits in the block.
+        where :math:`\theta` is the angle represented by ``phase``, in radians,
+        and :math:`k` is the number of logical qubits in the block.
         """
         pauli_exp_all_x_except_at(self, i, phase)
 
     @guppy
     @no_type_check
-    def pauli_exp_all_z_except_at(self: "Block[N]", i: int, phase: float) -> None:
+    def pauli_exp_all_z_except_at(self: "Block[N]", i: int, phase: angle) -> None:
         r"""Apply the Pauli exponential with I at ``i`` and Z elsewhere.
 
         .. math::
@@ -241,14 +246,14 @@ class Block(Generic[N]):  # type: ignore[misc]
                 Z^{\otimes i} \otimes I \otimes Z^{\otimes(k-i-1)}
             ) / 2)
 
-        where :math:`\theta` is ``phase`` in radians and :math:`k` is the
-        number of logical qubits in the block.
+        where :math:`\theta` is the angle represented by ``phase``, in radians,
+        and :math:`k` is the number of logical qubits in the block.
         """
         pauli_exp_all_z_except_at(self, i, phase)
 
     @guppy
     @no_type_check
-    def pauli_exp_all_x_except_z_at(self: "Block[N]", i: int, phase: float) -> None:
+    def pauli_exp_all_x_except_z_at(self: "Block[N]", i: int, phase: angle) -> None:
         r"""Apply the Pauli exponential with Z at ``i`` and X elsewhere.
 
         .. math::
@@ -257,14 +262,14 @@ class Block(Generic[N]):  # type: ignore[misc]
                 X^{\otimes i} \otimes Z \otimes X^{\otimes(k-i-1)}
             ) / 2)
 
-        where :math:`\theta` is ``phase`` in radians and :math:`k` is the
-        number of logical qubits in the block.
+        where :math:`\theta` is the angle represented by ``phase``, in radians,
+        and :math:`k` is the number of logical qubits in the block.
         """
         pauli_exp_all_x_except_z_at(self, i, phase)
 
     @guppy
     @no_type_check
-    def pauli_exp_all_z_except_x_at(self: "Block[N]", i: int, phase: float) -> None:
+    def pauli_exp_all_z_except_x_at(self: "Block[N]", i: int, phase: angle) -> None:
         r"""Apply the Pauli exponential with X at ``i`` and Z elsewhere.
 
         .. math::
@@ -273,8 +278,8 @@ class Block(Generic[N]):  # type: ignore[misc]
                 Z^{\otimes i} \otimes X \otimes Z^{\otimes(k-i-1)}
             ) / 2)
 
-        where :math:`\theta` is ``phase`` in radians and :math:`k` is the
-        number of logical qubits in the block.
+        where :math:`\theta` is the angle represented by ``phase``, in radians,
+        and :math:`k` is the number of logical qubits in the block.
         """
         pauli_exp_all_z_except_x_at(self, i, phase)
 
@@ -286,22 +291,22 @@ class Block(Generic[N]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
-    def xx_phase(self: "Block[N]", i: int, j: int, phase: float) -> None:
-        """XXPhase rotation of `phase` radians on the qubits with indices `i`
+    def xx_phase(self: "Block[N]", i: int, j: int, phase: angle) -> None:
+        """XXPhase rotation by `phase` on the qubits with indices `i`
         and `j`."""
         xx_phase(self, i, j, phase)
 
     @guppy
     @no_type_check
-    def yy_phase(self: "Block[N]", i: int, j: int, phase: float) -> None:
-        """YYPhase rotation of `phase` radians on the qubits with indices `i`
+    def yy_phase(self: "Block[N]", i: int, j: int, phase: angle) -> None:
+        """YYPhase rotation by `phase` on the qubits with indices `i`
         and `j`."""
         yy_phase(self, i, j, phase)
 
     @guppy
     @no_type_check
-    def zz_phase(self: "Block[N]", i: int, j: int, phase: float) -> None:
-        """ZZPhase rotation of `phase` radians on the qubits with indices `i`
+    def zz_phase(self: "Block[N]", i: int, j: int, phase: angle) -> None:
+        """ZZPhase rotation by `phase` on the qubits with indices `i`
         and `j`."""
         zz_phase(self, i, j, phase)
 
@@ -367,20 +372,20 @@ class Qubit:
 
     @guppy
     @no_type_check
-    def rx(self: "Qubit", phase: float) -> None:
-        """Rx rotation of `phase` radians."""
+    def rx(self: "Qubit", phase: angle) -> None:
+        """Rx rotation by `phase`."""
         rx_dynq(self, phase)
 
     @guppy
     @no_type_check
-    def ry(self: "Qubit", phase: float) -> None:
-        """Ry rotation of `phase` radians, implemented using Rx and Rz."""
+    def ry(self: "Qubit", phase: angle) -> None:
+        """Ry rotation by `phase`, implemented using Rx and Rz."""
         ry_dynq(self, phase)
 
     @guppy
     @no_type_check
-    def rz(self: "Qubit", phase: float) -> None:
-        """Rz rotation of `phase` radians."""
+    def rz(self: "Qubit", phase: angle) -> None:
+        """Rz rotation by `phase`."""
         rz_dynq(self, phase)
 
     @guppy
@@ -520,72 +525,72 @@ def fan_in(block: Block[N], i: int) -> None:
     """Fan-in to the qubit with index `i` from all others."""
 
 
-@hugr_op(logical_op(iceberg_ops.rx_def))
+@custom_function(RotationCompiler(iceberg_ops.rx_def))
 @no_type_check
-def rx(block: Block[N], i: int, phase: float) -> None:
-    """Rx rotation of `phase` radians on the qubit with index `i`."""
+def rx(block: Block[N], i: int, phase: angle) -> None:
+    """Rx rotation by `phase` on the qubit with index `i`."""
 
 
 @guppy
 @no_type_check
-def ry(block: Block[N], i: int, phase: float) -> None:
-    """Ry rotation on logical qubit `i`, using Rx and Rz with angles in radians."""
-    rx(block, i, comptime(pi / 2))
+def ry(block: Block[N], i: int, phase: angle) -> None:
+    """Ry rotation by `phase` on logical qubit `i`, implemented using Rx and Rz."""
+    rx(block, i, pi / 2)
     rz(block, i, phase)
-    rx(block, i, comptime(-pi / 2))
+    rx(block, i, -pi / 2)
 
 
-@hugr_op(logical_op(iceberg_ops.rz_def))
+@custom_function(RotationCompiler(iceberg_ops.rz_def))
 @no_type_check
-def rz(block: Block[N], i: int, phase: float) -> None:
-    """Rz rotation of `phase` radians on the qubit with index `i`."""
+def rz(block: Block[N], i: int, phase: angle) -> None:
+    """Rz rotation by `phase` on the qubit with index `i`."""
 
 
-@hugr_op(logical_op(iceberg_ops.pauli_exp_all_x_def))
+@custom_function(RotationCompiler(iceberg_ops.pauli_exp_all_x_def))
 @no_type_check
-def pauli_exp_all_x(block: Block[N], phase: float) -> None:
+def pauli_exp_all_x(block: Block[N], phase: angle) -> None:
     r"""Apply the logical all-X Pauli exponential.
 
     .. math::
 
         \exp(-i \theta X^{\otimes k} / 2)
 
-    where :math:`\theta` is ``phase`` in radians and :math:`k` is the
-    number of logical qubits in the block.
+    where :math:`\theta` is the angle represented by ``phase``, in radians,
+    and :math:`k` is the number of logical qubits in the block.
     """
 
 
-@hugr_op(logical_op(iceberg_ops.pauli_exp_all_y_def))
+@custom_function(RotationCompiler(iceberg_ops.pauli_exp_all_y_def))
 @no_type_check
-def pauli_exp_all_y(block: Block[N], phase: float) -> None:
+def pauli_exp_all_y(block: Block[N], phase: angle) -> None:
     r"""Apply the logical all-Y Pauli exponential.
 
     .. math::
 
         \exp(-i \theta Y^{\otimes k} / 2)
 
-    where :math:`\theta` is ``phase`` in radians and :math:`k` is the
-    number of logical qubits in the block.
+    where :math:`\theta` is the angle represented by ``phase``, in radians,
+    and :math:`k` is the number of logical qubits in the block.
     """
 
 
-@hugr_op(logical_op(iceberg_ops.pauli_exp_all_z_def))
+@custom_function(RotationCompiler(iceberg_ops.pauli_exp_all_z_def))
 @no_type_check
-def pauli_exp_all_z(block: Block[N], phase: float) -> None:
+def pauli_exp_all_z(block: Block[N], phase: angle) -> None:
     r"""Apply the logical all-Z Pauli exponential.
 
     .. math::
 
         \exp(-i \theta Z^{\otimes k} / 2)
 
-    where :math:`\theta` is ``phase`` in radians and :math:`k` is the
-    number of logical qubits in the block.
+    where :math:`\theta` is the angle represented by ``phase``, in radians,
+    and :math:`k` is the number of logical qubits in the block.
     """
 
 
-@hugr_op(logical_op(iceberg_ops.pauli_exp_all_x_except_at_def))
+@custom_function(RotationCompiler(iceberg_ops.pauli_exp_all_x_except_at_def))
 @no_type_check
-def pauli_exp_all_x_except_at(block: Block[N], i: int, phase: float) -> None:
+def pauli_exp_all_x_except_at(block: Block[N], i: int, phase: angle) -> None:
     r"""Apply the Pauli exponential with I at ``i`` and X elsewhere.
 
     .. math::
@@ -594,14 +599,14 @@ def pauli_exp_all_x_except_at(block: Block[N], i: int, phase: float) -> None:
             X^{\otimes i} \otimes I \otimes X^{\otimes(k-i-1)}
         ) / 2)
 
-    where :math:`\theta` is ``phase`` in radians and :math:`k` is the
-    number of logical qubits in the block.
+    where :math:`\theta` is the angle represented by ``phase``, in radians,
+    and :math:`k` is the number of logical qubits in the block.
     """
 
 
-@hugr_op(logical_op(iceberg_ops.pauli_exp_all_z_except_at_def))
+@custom_function(RotationCompiler(iceberg_ops.pauli_exp_all_z_except_at_def))
 @no_type_check
-def pauli_exp_all_z_except_at(block: Block[N], i: int, phase: float) -> None:
+def pauli_exp_all_z_except_at(block: Block[N], i: int, phase: angle) -> None:
     r"""Apply the Pauli exponential with I at ``i`` and Z elsewhere.
 
     .. math::
@@ -610,14 +615,14 @@ def pauli_exp_all_z_except_at(block: Block[N], i: int, phase: float) -> None:
             Z^{\otimes i} \otimes I \otimes Z^{\otimes(k-i-1)}
         ) / 2)
 
-    where :math:`\theta` is ``phase`` in radians and :math:`k` is the
-    number of logical qubits in the block.
+    where :math:`\theta` is the angle represented by ``phase``, in radians,
+    and :math:`k` is the number of logical qubits in the block.
     """
 
 
-@hugr_op(logical_op(iceberg_ops.pauli_exp_all_x_except_z_at_def))
+@custom_function(RotationCompiler(iceberg_ops.pauli_exp_all_x_except_z_at_def))
 @no_type_check
-def pauli_exp_all_x_except_z_at(block: Block[N], i: int, phase: float) -> None:
+def pauli_exp_all_x_except_z_at(block: Block[N], i: int, phase: angle) -> None:
     r"""Apply the Pauli exponential with Z at ``i`` and X elsewhere.
 
     .. math::
@@ -626,14 +631,14 @@ def pauli_exp_all_x_except_z_at(block: Block[N], i: int, phase: float) -> None:
             X^{\otimes i} \otimes Z \otimes X^{\otimes(k-i-1)}
         ) / 2)
 
-    where :math:`\theta` is ``phase`` in radians and :math:`k` is the
-    number of logical qubits in the block.
+    where :math:`\theta` is the angle represented by ``phase``, in radians,
+    and :math:`k` is the number of logical qubits in the block.
     """
 
 
-@hugr_op(logical_op(iceberg_ops.pauli_exp_all_z_except_x_at_def))
+@custom_function(RotationCompiler(iceberg_ops.pauli_exp_all_z_except_x_at_def))
 @no_type_check
-def pauli_exp_all_z_except_x_at(block: Block[N], i: int, phase: float) -> None:
+def pauli_exp_all_z_except_x_at(block: Block[N], i: int, phase: angle) -> None:
     r"""Apply the Pauli exponential with X at ``i`` and Z elsewhere.
 
     .. math::
@@ -642,8 +647,8 @@ def pauli_exp_all_z_except_x_at(block: Block[N], i: int, phase: float) -> None:
             Z^{\otimes i} \otimes X \otimes Z^{\otimes(k-i-1)}
         ) / 2)
 
-    where :math:`\theta` is ``phase`` in radians and :math:`k` is the
-    number of logical qubits in the block.
+    where :math:`\theta` is the angle represented by ``phase``, in radians,
+    and :math:`k` is the number of logical qubits in the block.
     """
 
 
@@ -653,22 +658,22 @@ def all_h(block: Block[N]) -> None:
     """H gate on all qubits."""
 
 
-@hugr_op(logical_op(iceberg_ops.xx_phase_def))
+@custom_function(RotationCompiler(iceberg_ops.xx_phase_def))
 @no_type_check
-def xx_phase(block: Block[N], i: int, j: int, phase: float) -> None:
-    """XXPhase rotation of `phase` radians on the qubits with indices `i` and `j`."""
+def xx_phase(block: Block[N], i: int, j: int, phase: angle) -> None:
+    """XXPhase rotation by `phase` on the qubits with indices `i` and `j`."""
 
 
-@hugr_op(logical_op(iceberg_ops.yy_phase_def))
+@custom_function(RotationCompiler(iceberg_ops.yy_phase_def))
 @no_type_check
-def yy_phase(block: Block[N], i: int, j: int, phase: float) -> None:
-    """YYPhase rotation of `phase` radians on the qubits with indices `i` and `j`."""
+def yy_phase(block: Block[N], i: int, j: int, phase: angle) -> None:
+    """YYPhase rotation by `phase` on the qubits with indices `i` and `j`."""
 
 
-@hugr_op(logical_op(iceberg_ops.zz_phase_def))
+@custom_function(RotationCompiler(iceberg_ops.zz_phase_def))
 @no_type_check
-def zz_phase(block: Block[N], i: int, j: int, phase: float) -> None:
-    """ZZPhase rotation of `phase` radians on the qubits with indices `i` and `j`."""
+def zz_phase(block: Block[N], i: int, j: int, phase: angle) -> None:
+    """ZZPhase rotation by `phase` on the qubits with indices `i` and `j`."""
 
 
 @hugr_op(logical_op(iceberg_ops.cx_def))
@@ -683,30 +688,30 @@ def swap(block: Block[N], i: int, j: int) -> None:
     """Swap of the qubits with indices `i` and `j`."""
 
 
-@hugr_op(logical_op(iceberg_ops.xx_phase_between_blocks_def))
+@custom_function(RotationCompiler(iceberg_ops.xx_phase_between_blocks_def))
 @no_type_check
 def xx_phase_between_blocks(
-    block0: Block[N], block1: Block[N], i0: int, i1: int, phase: float
+    block0: Block[N], block1: Block[N], i0: int, i1: int, phase: angle
 ) -> None:
-    """XXPhase rotation of `phase` radians on the qubit with index `i0` in
+    """XXPhase rotation by `phase` on the qubit with index `i0` in
     block `block0` and the qubit with index `i1` in block `block1`."""
 
 
-@hugr_op(logical_op(iceberg_ops.yy_phase_between_blocks_def))
+@custom_function(RotationCompiler(iceberg_ops.yy_phase_between_blocks_def))
 @no_type_check
 def yy_phase_between_blocks(
-    block0: Block[N], block1: Block[N], i0: int, i1: int, phase: float
+    block0: Block[N], block1: Block[N], i0: int, i1: int, phase: angle
 ) -> None:
-    """YYPhase rotation of `phase` radians on the qubit with index `i0` in
+    """YYPhase rotation by `phase` on the qubit with index `i0` in
     block `block0` and the qubit with index `i1` in block `block1`."""
 
 
-@hugr_op(logical_op(iceberg_ops.zz_phase_between_blocks_def))
+@custom_function(RotationCompiler(iceberg_ops.zz_phase_between_blocks_def))
 @no_type_check
 def zz_phase_between_blocks(
-    block0: Block[N], block1: Block[N], i0: int, i1: int, phase: float
+    block0: Block[N], block1: Block[N], i0: int, i1: int, phase: angle
 ) -> None:
-    """ZZPhase rotation of `phase` radians on the qubit with index `i0` in
+    """ZZPhase rotation by `phase` on the qubit with index `i0` in
     block `block0` and the qubit with index `i1` in block `block1`."""
 
 
@@ -785,25 +790,25 @@ def z_dynq(qubit: Qubit) -> None:
     """Z gate."""
 
 
-@hugr_op(logical_op(iceberg_ops.rx_dynq_def))
+@custom_function(RotationCompiler(iceberg_ops.rx_dynq_def))
 @no_type_check
-def rx_dynq(qubit: Qubit, phase: float) -> None:
-    """Rx rotation of `phase` radians."""
+def rx_dynq(qubit: Qubit, phase: angle) -> None:
+    """Rx rotation by `phase`."""
 
 
 @guppy
 @no_type_check
-def ry_dynq(qubit: Qubit, phase: float) -> None:
-    """Ry rotation of `phase` radians, implemented using Rx and Rz."""
-    rx_dynq(qubit, comptime(pi / 2))
+def ry_dynq(qubit: Qubit, phase: angle) -> None:
+    """Ry rotation by `phase`, implemented using Rx and Rz."""
+    rx_dynq(qubit, pi / 2)
     rz_dynq(qubit, phase)
-    rx_dynq(qubit, comptime(-pi / 2))
+    rx_dynq(qubit, -pi / 2)
 
 
-@hugr_op(logical_op(iceberg_ops.rz_dynq_def))
+@custom_function(RotationCompiler(iceberg_ops.rz_dynq_def))
 @no_type_check
-def rz_dynq(qubit: Qubit, phase: float) -> None:
-    """Rz rotation of `phase` radians."""
+def rz_dynq(qubit: Qubit, phase: angle) -> None:
+    """Rz rotation by `phase`."""
 
 
 @hugr_op(logical_op(iceberg_ops.try_measure_x_dynq_def))
@@ -818,22 +823,22 @@ def try_measure_z_dynq(qubit: Qubit) -> Option[Measurement]:
     """Fallible non-destructive measurement in the Z basis."""
 
 
-@hugr_op(logical_op(iceberg_ops.xx_phase_dynq_def))
+@custom_function(RotationCompiler(iceberg_ops.xx_phase_dynq_def))
 @no_type_check
-def xx_phase_dynq(qubit0: Qubit, qubit1: Qubit, phase: float) -> None:
-    """XXPhase rotation of `phase` radians on two qubits."""
+def xx_phase_dynq(qubit0: Qubit, qubit1: Qubit, phase: angle) -> None:
+    """XXPhase rotation by `phase` on two qubits."""
 
 
-@hugr_op(logical_op(iceberg_ops.yy_phase_dynq_def))
+@custom_function(RotationCompiler(iceberg_ops.yy_phase_dynq_def))
 @no_type_check
-def yy_phase_dynq(qubit0: Qubit, qubit1: Qubit, phase: float) -> None:
-    """YYPhase rotation of `phase` radians on two qubits."""
+def yy_phase_dynq(qubit0: Qubit, qubit1: Qubit, phase: angle) -> None:
+    """YYPhase rotation by `phase` on two qubits."""
 
 
-@hugr_op(logical_op(iceberg_ops.zz_phase_dynq_def))
+@custom_function(RotationCompiler(iceberg_ops.zz_phase_dynq_def))
 @no_type_check
-def zz_phase_dynq(qubit0: Qubit, qubit1: Qubit, phase: float) -> None:
-    """ZZPhase rotation of `phase` radians on two qubits."""
+def zz_phase_dynq(qubit0: Qubit, qubit1: Qubit, phase: angle) -> None:
+    """ZZPhase rotation by `phase` on two qubits."""
 
 
 @hugr_op(logical_op(iceberg_ops.cx_dynq_def))

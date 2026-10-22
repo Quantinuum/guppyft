@@ -1,18 +1,20 @@
 from collections import Counter
-from math import pi
+from math import pi as math_pi
 from typing import no_type_check
 
 import numpy as np
 import pytest
 from guppylang import guppy
+from guppylang.std.angles import angle, pi
 from guppylang.std.builtins import array, result
 from hugr.build.dfg import Dfg
 from hugr.cli import validate
 from hugr.ext import UsedExtensionResolver
-from hugr.ops import DFG, Const, ExtOp, Input, LoadConst, Output
-from hugr.std.float import FLOAT_T, FloatVal
+from hugr.ops import DFG, Const, ExtOp, Input, LoadConst, Output, UnpackTuple
+from hugr.std.float import FLOAT_T
 from hugr.std.int import int_t
 from hugr.tys import BoundedNatArg, ExtType, FunctionType, Option, Type
+from hugr.val import Extension as ExtensionValue
 from tket.passes import InlineFunctions, Normalize
 from tket_exts import measurement, rotation
 
@@ -35,11 +37,20 @@ from guppyft.code.iceberg.logical import (
     pauli_exp_all_z_except_at,
     pauli_exp_all_z_except_x_at,
     restore,
+    rx,
+    rx_dynq,
     ry,
     ry_dynq,
+    rz,
+    rz_dynq,
     try_alloc_dynq,
+    xx_phase,
+    xx_phase_between_blocks,
     xx_phase_dynq,
+    yy_phase,
+    yy_phase_between_blocks,
     yy_phase_dynq,
+    zz_phase,
     zz_phase_between_blocks,
     zz_phase_dynq,
 )
@@ -289,26 +300,27 @@ def test_guppy_bindings_smoke() -> None:
     compilation passes on the result."""
 
     @guppy
+    @no_type_check
     def main() -> None:
         b0 = Block[8]()
         b1 = PreBlock[8]().check().unwrap()
         q0 = Qubit()
         q0.y()
-        q0.rz(-0.5)
+        q0.rz(angle(-0.5))
         bb0, q_arr0 = borrow(b0, array(3))
         cx_dynq(q0, q_arr0[0])
         q_arr1 = bb0.borrow_more(array(1, 2))
-        zz_phase_dynq(q_arr0[0], q_arr1[1], 0.5)
+        zz_phase_dynq(q_arr0[0], q_arr1[1], angle(0.5))
         bb0.restore_some(q_arr1)
         b0 = restore(bb0, q_arr0)
         b0.all_h()
         b0.x(2)
         b0.zz(3, 4)
-        b1.rx(5, 0.5)
-        b1.pauli_exp_all_y(0.25)
-        b1.zz_phase(6, 7, 0.5)
+        b1.rx(5, angle(0.5))
+        b1.pauli_exp_all_y(angle(0.25))
+        b1.zz_phase(6, 7, angle(0.5))
         cx_between_blocks(b0, b1, 7, 3)
-        zz_phase_between_blocks(b0, b1, 1, 0, 0.25)
+        zz_phase_between_blocks(b0, b1, 1, 0, angle(0.25))
         cx_transversal(b0, b1)
         maybe_q1 = try_alloc_dynq()
         if maybe_q1.is_some():
@@ -341,12 +353,24 @@ def test_guppy_bindings_smoke() -> None:
     InlineFunctions()(h, inplace=True)
 
 
-def test_pauli_exponential_bindings_resolve_and_normalize() -> None:
-    """Free functions and methods lower runtime indices/angles to the same ops."""
+@pytest.mark.parametrize("constant_phase", [False, True])
+def test_rotation_bindings_resolve_and_normalize(constant_phase: bool) -> None:
+    """All angle bindings preserve indices, block sizes, and borrowed outputs."""
 
     @guppy
     @no_type_check
-    def main(block: Block[4], i: int, phase: float) -> None:
+    def apply_rotations(
+        block: Block[4],
+        other: Block[4],
+        q0: Qubit,
+        q1: Qubit,
+        i: int,
+        j: int,
+        phase: angle,
+    ) -> None:
+        rx(block, i, phase)
+        ry(block, i, phase)
+        rz(block, i, phase)
         pauli_exp_all_x(block, phase)
         pauli_exp_all_y(block, phase)
         pauli_exp_all_z(block, phase)
@@ -354,6 +378,21 @@ def test_pauli_exponential_bindings_resolve_and_normalize() -> None:
         pauli_exp_all_z_except_at(block, i, phase)
         pauli_exp_all_x_except_z_at(block, i, phase)
         pauli_exp_all_z_except_x_at(block, i, phase)
+        xx_phase(block, i, j, phase)
+        yy_phase(block, i, j, phase)
+        zz_phase(block, i, j, phase)
+        xx_phase_between_blocks(block, other, i, j, phase)
+        yy_phase_between_blocks(block, other, i, j, phase)
+        zz_phase_between_blocks(block, other, i, j, phase)
+        rx_dynq(q0, phase)
+        ry_dynq(q0, phase)
+        rz_dynq(q0, phase)
+        xx_phase_dynq(q0, q1, phase)
+        yy_phase_dynq(q0, q1, phase)
+        zz_phase_dynq(q0, q1, phase)
+        block.rx(i, phase)
+        block.ry(i, phase)
+        block.rz(i, phase)
         block.pauli_exp_all_x(phase)
         block.pauli_exp_all_y(phase)
         block.pauli_exp_all_z(phase)
@@ -361,34 +400,78 @@ def test_pauli_exponential_bindings_resolve_and_normalize() -> None:
         block.pauli_exp_all_z_except_at(i, phase)
         block.pauli_exp_all_x_except_z_at(i, phase)
         block.pauli_exp_all_z_except_x_at(i, phase)
+        block.xx_phase(i, j, phase)
+        block.yy_phase(i, j, phase)
+        block.zz_phase(i, j, phase)
+        q0.rx(phase)
+        q0.ry(phase)
+        q0.rz(phase)
 
+    @guppy
+    @no_type_check
+    def constant_rotations(
+        block: Block[4],
+        other: Block[4],
+        q0: Qubit,
+        q1: Qubit,
+        i: int,
+        j: int,
+    ) -> None:
+        apply_rotations(block, other, q0, q1, i, j, pi / 4)
+
+    main = constant_rotations if constant_phase else apply_rotations
     h = main.compile_function().modules[0]
     InlineFunctions()(h, inplace=True)
     Normalize()(h, inplace=True)
     assert not h.used_extensions().unresolved_extensions
     expected = {
-        "pauli_exp_all_x": 0,
-        "pauli_exp_all_y": 0,
-        "pauli_exp_all_z": 0,
-        "pauli_exp_all_x_except_at": 1,
-        "pauli_exp_all_z_except_at": 1,
-        "pauli_exp_all_x_except_z_at": 1,
-        "pauli_exp_all_z_except_x_at": 1,
+        "rx": 6,
+        "rz": 4,
+        "pauli_exp_all_x": 2,
+        "pauli_exp_all_y": 2,
+        "pauli_exp_all_z": 2,
+        "pauli_exp_all_x_except_at": 2,
+        "pauli_exp_all_z_except_at": 2,
+        "pauli_exp_all_x_except_z_at": 2,
+        "pauli_exp_all_z_except_x_at": 2,
+        "xx_phase": 2,
+        "yy_phase": 2,
+        "zz_phase": 2,
+        "xx_phase_between_blocks": 1,
+        "yy_phase_between_blocks": 1,
+        "zz_phase_between_blocks": 1,
+        "rx_dynq": 6,
+        "rz_dynq": 4,
+        "xx_phase_dynq": 1,
+        "yy_phase_dynq": 1,
+        "zz_phase_dynq": 1,
     }
     found: Counter[str] = Counter()
-    block_type = iceberg_types.iceberg_block(4)
-    for node in h.children(h.entrypoint):
-        op = h[node].op
-        if isinstance(op, ExtOp) and op.op_def().name in expected:
+    for _, data in h.nodes():
+        op = data.op
+        if (
+            isinstance(op, ExtOp)
+            and op.op_def().get_extension().name == iceberg_ops().name
+            and op.op_def().name in expected
+        ):
             name = op.op_def().name
             found[name] += 1
-            inputs: list[Type] = [block_type]
-            inputs.extend([int_t(6)] * expected[name])
-            inputs.append(FLOAT_T)
-            signature = FunctionType(inputs, [block_type])
-            assert op.outer_signature() == signature
-            assert op.args == [BoundedNatArg(4)]
-    assert found == Counter(dict.fromkeys(expected, 2))
+            canonical = getattr(iceberg_ops, name)
+            if not name.endswith("_dynq"):
+                canonical = canonical(4)
+            assert op.outer_signature() == canonical.outer_signature()
+            assert op.args == canonical.args
+    assert found == Counter(expected)
+    if constant_phase:
+        rotations = [
+            data.op.val
+            for _, data in h.nodes()
+            if isinstance(data.op, Const) and data.op.val.type_() == rotation.rotation
+        ]
+        assert rotations
+        for value in rotations:
+            assert isinstance(value, ExtensionValue)
+            assert value.val["half_turns"] in {0.25, 0.5, -0.5}
     validate(h.to_bytes())
 
 
@@ -479,18 +562,19 @@ def test_dynamic_qubit_bindings_resolve_and_normalize() -> None:
     """Compile every dynamic-qubit binding through the public logical API."""
 
     @guppy
+    @no_type_check
     def main() -> None:
         q0 = Qubit()
         q1 = Qubit()
         q0.x()
         q0.y()
         q0.z()
-        q0.rx(0.25)
-        q0.ry(0.5)
-        q0.rz(0.75)
-        xx_phase_dynq(q0, q1, 0.25)
-        yy_phase_dynq(q0, q1, 0.5)
-        zz_phase_dynq(q0, q1, 0.75)
+        q0.rx(angle(0.25))
+        q0.ry(angle(0.5))
+        q0.rz(angle(0.75))
+        xx_phase_dynq(q0, q1, angle(0.25))
+        yy_phase_dynq(q0, q1, angle(0.5))
+        zz_phase_dynq(q0, q1, angle(0.75))
         cx_dynq(q0, q1)
         mx = q0.try_measure_x()
         if mx.is_some():
@@ -546,20 +630,20 @@ def test_ry_compositions(binding: str) -> None:
 
     @guppy
     @no_type_check
-    def block_function(block: Block[4], i: int, phase: float) -> None:
+    def block_function(block: Block[4], i: int, phase: angle) -> None:
         ry(block, i, phase)
 
     @guppy
     @no_type_check
-    def block_method(block: Block[4], i: int, phase: float) -> None:
+    def block_method(block: Block[4], i: int, phase: angle) -> None:
         block.ry(i, phase)
 
     @guppy
-    def dynamic_function(qubit: Qubit, phase: float) -> None:
+    def dynamic_function(qubit: Qubit, phase: angle) -> None:
         ry_dynq(qubit, phase)
 
     @guppy
-    def dynamic_method(qubit: Qubit, phase: float) -> None:
+    def dynamic_method(qubit: Qubit, phase: angle) -> None:
         qubit.ry(phase)
 
     main = {
@@ -579,7 +663,7 @@ def test_ry_compositions(binding: str) -> None:
     ]
     dynamic = binding.startswith("dynamic")
     phase_port = 1 if dynamic else 2
-    for phase in [0.0, pi / 4, -1.3, pi, 2 * pi]:
+    for phase in [0.0, math_pi / 4, -1.3, math_pi, 2 * math_pi]:
         unitary = np.eye(2, dtype=complex)
         wire = input_node.out(0)
         for _ in range(3):
@@ -591,15 +675,22 @@ def test_ry_compositions(binding: str) -> None:
             if not dynamic:
                 assert list(h.linked_ports(target.node.inp(1))) == [input_node.out(1)]
             [angle_wire] = h.linked_ports(target.node.inp(phase_port))
-            if angle_wire == input_node.out(phase_port):
+            angle_op = h[angle_wire.node].op
+            if isinstance(angle_op, ExtOp):
+                assert angle_op.name() == "tket.rotation.from_halfturns_unchecked"
+                [halfturns_wire] = h.linked_ports(angle_wire.node.inp(0))
+                assert isinstance(h[halfturns_wire.node].op, UnpackTuple)
+                assert list(h.linked_ports(halfturns_wire.node.inp(0))) == [
+                    input_node.out(phase_port)
+                ]
                 theta = phase
             else:
                 assert isinstance(h[angle_wire.node].op, LoadConst)
                 [constant_wire] = h.linked_ports(angle_wire.node.inp(0))
                 constant = h[constant_wire.node].op
                 assert isinstance(constant, Const)
-                assert isinstance(constant.val, FloatVal)
-                theta = constant.val.v
+                assert isinstance(constant.val, ExtensionValue)
+                theta = float(constant.val.val["half_turns"]) * math_pi
             pauli = np.array(
                 [[0, 1], [1, 0]] if name.startswith("rx") else [[1, 0], [0, -1]]
             )

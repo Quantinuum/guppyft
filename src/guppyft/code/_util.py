@@ -39,31 +39,32 @@ def logical_op(
 
 
 class RotationCompiler(CustomInoutCallCompiler):
+    """Convert a final Guppy angle input to a rotation for an in-place logical op.
+
+    Preserve the other input types, output types, and static type arguments so
+    indexed operations on generic blocks can share this compiler with qubit gates.
+    """
+
     op_def: OpDef
 
     def __init__(self, op_def: OpDef):
         self.op_def = op_def
 
     def compile_with_inouts(self, args: list[Wire]) -> CallReturnWires:
-        [*qs, angle] = args
+        [*inputs, angle] = args
         [halfturns] = self.builder.add_op(unpack_tuple([FLOAT_T]), angle)
         [rotation] = self.builder.add_op(from_halfturns_unchecked(), halfturns)
 
-        if not qs:
-            func_ty = ht.FunctionType([tket_exts.rotation.rotation], [])
-        else:
-            qubit_ty = self.ty.input[0]
-            func_ty = ht.FunctionType(
-                [qubit_ty for _ in qs] + [tket_exts.rotation.rotation], self.ty.output
-            )
-
-        qs = self.builder.add_op(
-            pure(logical_op(self.op_def)(func_ty, (), self.ctx)),
-            *qs,
+        func_ty = ht.FunctionType(
+            [*self.ty.input[:-1], tket_exts.rotation.rotation], self.ty.output
+        )
+        outputs = self.builder.add_op(
+            pure(logical_op(self.op_def)(func_ty, self.type_args, self.ctx)),
+            *inputs,
             rotation,
         )
 
-        return CallReturnWires(regular_returns=[], inout_returns=list(qs))
+        return CallReturnWires(regular_returns=[], inout_returns=list(outputs))
 
 
 class BorrowRestoreCompiler(CustomInoutCallCompiler):
