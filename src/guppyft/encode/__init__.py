@@ -84,7 +84,7 @@ def encode(
     4. implementing the logical operations with physical gates.
 
     The returned runnable package is guaranteed to be semantically equivalent to the
-    given one.
+    given one. The input package is not modified.
 
     Args:
         hugr: The package to encode, or a Guppy function for convenience.
@@ -104,9 +104,12 @@ def encode(
         "Cannot process module-rooted HUGRs"
     )
 
+    # Passes return new HUGRs, but assigning them must not change the caller's lists.
+    pkg = Package(modules=list(pkg.modules), extensions=list(pkg.extensions))
+
     # 1. Passes with computational -> computational
     for tket_pass in passes or [Normalize()]:
-        tket_pass(pkg.modules[0], inplace=True)
+        pkg.modules[0] = tket_pass(pkg.modules[0], inplace=False)
 
     # 2. Lower computational -> logical
     if spec.compile is not None:
@@ -114,7 +117,7 @@ def encode(
 
     # 3. Passes with logical -> logical
     for tket_pass in spec.logical_passes or []:
-        tket_pass(pkg.modules[0], inplace=True)
+        pkg.modules[0] = tket_pass(pkg.modules[0], inplace=False)
 
     # 4. Lower logical -> physical
     if spec.implement_ops is not None:
