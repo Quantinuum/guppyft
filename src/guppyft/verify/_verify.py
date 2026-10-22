@@ -269,10 +269,10 @@ def _get_n_impl_simulation_qubits(
     """Helper to add any additional implementation qubits specified by the user."""
     if n_impl_ancillas is not None:
         return n_qubits + n_impl_ancillas
-    
+
     if n_hinted_qubits is not None:
         return n_hinted_qubits
-        
+
     return n_qubits
 
 
@@ -322,9 +322,9 @@ def _compute_state_prep_tableaux(
     # Get the number of qubits required for the simulation of the impl_function.
     # This includes qubits specified with the @expected_qubits hint or n_impl_ancillas.
     n_stab_qubits = _get_n_impl_simulation_qubits(
-        n_blocks * code_definition.n_physical_qubits,
-        n_hinted_qubits,
-        n_impl_ancillas,
+        n_qubits=n_blocks * code_definition.n_physical_qubits,
+        n_hinted_qubits=n_hinted_qubits,
+        n_impl_ancillas=n_impl_ancillas,
     )
 
     match n_blocks:
@@ -530,9 +530,9 @@ def _compute_clifford_tableaux(
     # Get the number of qubits required for the simulation of the impl_function.
     # This includes qubits specified with the @expected_qubits hint or n_impl_ancillas.
     n_physical_choi_qubits = _get_n_impl_simulation_qubits(
-        2 * n_blocks * code_definition.n_physical_qubits,
-        n_hinted_qubits,
-        n_impl_ancillas,
+        n_qubits=2 * n_blocks * code_definition.n_physical_qubits,
+        n_hinted_qubits=n_hinted_qubits,
+        n_impl_ancillas=n_impl_ancillas,
     )
 
     match n_blocks:
