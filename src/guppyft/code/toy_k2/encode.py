@@ -9,9 +9,10 @@ from guppylang.decorator import custom_guppy_decorator
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.emulator import EmulatorBuilder, EmulatorInstance
 from guppylang.library import GuppyLibrary, link_name
+from guppylang.std.array import empty_array
 from guppylang.std.builtins import array, comptime, exit, owned
 from guppylang.std.collections import Stack, empty_stack
-from guppylang.std.option import Option, nothing, some
+from guppylang.std.option import some
 from hugr.ext import ExtensionRegistry, OpDef
 from hugr.package import Package
 from hugr.std import _std_extensions
@@ -243,19 +244,19 @@ class ToyK2Builder:
                     blocks.
             """
 
-            blocks: array[Option[RuntimeBlock], comptime(n_blocks)]  # type: ignore[valid-type]
+            blocks: array[RuntimeBlock, comptime(n_blocks)]  # type: ignore[valid-type]
             unalloc_blks: Stack[int, comptime(n_blocks)]  # type: ignore[valid-type]
             avail_dyn_addrs: Stack[tuple[int, int], comptime(n_blocks)]  # type: ignore[valid-type]
 
             @guppy
             @no_type_check
             def take_block(self, blk_id: int) -> RuntimeBlock:
-                return self.blocks[blk_id].take().unwrap()
+                return self.blocks.take(blk_id)
 
             @guppy
             @no_type_check
             def put_block(self, blk_id: int, blk: RuntimeBlock @ owned) -> None:
-                self.blocks[blk_id].swap(some(blk)).unwrap_nothing()
+                self.blocks.put(blk, blk_id)
 
             @guppy
             @no_type_check
@@ -285,12 +286,9 @@ class ToyK2Builder:
                 free the block if it is fully restored."""
                 blk_id, qb_id = addr
                 # Restore the block's address
-                blk = self.take_block(blk_id)
-                blk.restore_addr(qb_id)
-                blk_borrowed = blk.is_borrowed()
-                self.put_block(blk_id, blk)
+                self.blocks[blk_id].restore_addr(qb_id)
                 # Check if the block is fully restored
-                if not blk_borrowed:
+                if not self.blocks[blk_id].is_borrowed():
                     # Release the runtime block
                     logical_block = self.release_block(blk_id)
                     # Free the logical block
@@ -327,9 +325,7 @@ class ToyK2Builder:
                     self.avail_dyn_addrs.push((blk_id, 1))
 
                 # Borrow the selected address from the dynamic block
-                blk = self.take_block(blk_id)
-                blk.borrow_addr(qb_id)
-                self.put_block(blk_id, blk)
+                self.blocks[blk_id].borrow_addr(qb_id)
 
                 return blk_id, qb_id
 
@@ -340,16 +336,15 @@ class ToyK2Builder:
                 blk_ids: array[int, N] @ owned,
                 op_cost: float,
             ) -> None:
-                for i in blk_ids:
-                    blk = self.take_block(i)
+                def helper(blk: RuntimeBlock, op_cost: float) -> None:
                     blk.qed_counter += op_cost
-
                     if blk.qed_counter >= comptime(qed_policy.threshold):
                         k2_primitives.qed_cycle(blk.logical_block)
 
                         blk.qed_counter = 0.0
 
-                    self.put_block(i, blk)
+                for i in blk_ids:
+                    helper(self.blocks[i], op_cost)
 
         @_register_op_replacement(toy_k2_ops.borrow_def)
         @no_type_check
@@ -360,9 +355,7 @@ class ToyK2Builder:
             def _impl(
                 state: STATE @ owned, blk_id: int, qb_id: int
             ) -> tuple[STATE, tuple[int, int], int]:
-                blk = state.blocks.take(blk_id).unwrap()
-                blk.borrow_addr(qb_id)
-                state.blocks.put(some(blk), blk_id)
+                state.blocks[blk_id].borrow_addr(qb_id)
                 return state, (blk_id, qb_id), blk_id
 
             map_global(_impl, blk_id, qb_id)
@@ -377,9 +370,7 @@ class ToyK2Builder:
             def _impl(
                 state: STATE @ owned, blk_id: int, qb_id: int
             ) -> tuple[STATE, tuple[int, int]]:
-                blk = state.blocks.take(blk_id).unwrap()
-                blk.borrow_addr(qb_id)
-                state.blocks.put(some(blk), blk_id)
+                state.blocks[blk_id].borrow_addr(qb_id)
                 return state, (blk_id, qb_id)
 
             map_global(_impl, blk_id, qb_id)
@@ -394,9 +385,7 @@ class ToyK2Builder:
             def _impl(
                 state: STATE @ owned, blk_id: int, qb_id: int
             ) -> tuple[STATE, int]:
-                blk = state.blocks.take(blk_id).unwrap()
-                blk.restore_addr(qb_id)
-                state.blocks.put(some(blk), blk_id)
+                state.blocks[blk_id].restore_addr(qb_id)
                 return state, blk_id
 
             return map_global(_impl, blk_id, addr[1])
@@ -410,9 +399,7 @@ class ToyK2Builder:
             def _impl(
                 state: STATE @ owned, blk_id: int, qb_id: int
             ) -> tuple[STATE, int]:
-                blk = state.blocks.take(blk_id).unwrap()
-                blk.restore_addr(qb_id)
-                state.blocks.put(some(blk), blk_id)
+                state.blocks[blk_id].restore_addr(qb_id)
                 return state, blk_id
 
             return map_global(_impl, blk_id, addr[1])
@@ -448,12 +435,11 @@ class ToyK2Builder:
             @guppy
             @no_type_check
             def _impl(state: STATE @ owned, blk_id: int) -> tuple[STATE, int]:
-                blk = state.take_block(blk_id)
+                def helper(blk: RuntimeBlock) -> None:
+                    k2_primitives.qed_cycle(blk.logical_block)
+                    blk.qed_counter = 0.0
 
-                k2_primitives.qed_cycle(blk.logical_block)
-                blk.qed_counter = 0.0
-
-                state.put_block(blk_id, blk)
+                helper(state.blocks[blk_id])
 
                 return state, blk_id
 
@@ -528,9 +514,7 @@ class ToyK2Builder:
             def _impl(
                 state: STATE @ owned, blk_id: int, qb_id: int
             ) -> tuple[STATE, bool, int]:
-                blk = state.take_block(blk_id)
-                res = k2_primitives.project_z(blk.logical_block, qb_id)
-                state.put_block(blk_id, blk)
+                res = k2_primitives.project_z(state.blocks[blk_id].logical_block, qb_id)
 
                 state.qed_policy(array(blk_id), comptime(qed_policy.costs.project_z))
 
@@ -570,9 +554,7 @@ class ToyK2Builder:
             def _impl(
                 state: STATE @ owned, blk_id: int, target: int
             ) -> tuple[STATE, int]:
-                blk = state.take_block(blk_id)
-                k2_primitives.x(blk.logical_block, target)
-                state.put_block(blk_id, blk)
+                k2_primitives.x(state.blocks[blk_id].logical_block, target)
 
                 state.qed_policy(array(blk_id), comptime(qed_policy.costs.x))
 
@@ -587,9 +569,7 @@ class ToyK2Builder:
             def _impl(
                 state: STATE @ owned, blk_id: int, target: int
             ) -> tuple[STATE, int]:
-                blk = state.take_block(blk_id)
-                k2_primitives.z(blk.logical_block, target)
-                state.put_block(blk_id, blk)
+                k2_primitives.z(state.blocks[blk_id].logical_block, target)
 
                 state.qed_policy(array(blk_id), comptime(qed_policy.costs.z))
 
@@ -602,9 +582,7 @@ class ToyK2Builder:
         def _h_all(blk_id: int) -> int:
             @guppy
             def _impl(state: STATE @ owned, blk_id: int) -> tuple[STATE, int]:
-                blk = state.take_block(blk_id)
-                k2_primitives.h_all(blk.logical_block)
-                state.put_block(blk_id, blk)
+                k2_primitives.h_all(state.blocks[blk_id].logical_block)
 
                 state.qed_policy(array(blk_id), comptime(qed_policy.costs.h_all))
 
@@ -619,9 +597,7 @@ class ToyK2Builder:
             def _impl(
                 state: STATE @ owned, blk_id: int, target: int
             ) -> tuple[STATE, int]:
-                blk = state.take_block(blk_id)
-                k2_primitives.cx_intra(blk.logical_block, target)
-                state.put_block(blk_id, blk)
+                k2_primitives.cx_intra(state.blocks[blk_id].logical_block, target)
 
                 state.qed_policy(array(blk_id), comptime(qed_policy.costs.cx_intra))
 
@@ -636,17 +612,10 @@ class ToyK2Builder:
             def _impl(
                 state: STATE @ owned, ctl_blk_id: int, tgt_blk_id: int
             ) -> tuple[STATE, int, int]:
-                ctl_blk, tgt_blk = (
-                    state.take_block(ctl_blk_id),
-                    state.take_block(tgt_blk_id),
-                )
-
                 k2_primitives.cx_transversal(
-                    ctl_blk.logical_block, tgt_blk.logical_block
+                    state.blocks[ctl_blk_id].logical_block,
+                    state.blocks[tgt_blk_id].logical_block,
                 )
-
-                state.put_block(ctl_blk_id, ctl_blk)
-                state.put_block(tgt_blk_id, tgt_blk)
 
                 state.qed_policy(
                     array(ctl_blk_id, tgt_blk_id),
@@ -662,9 +631,7 @@ class ToyK2Builder:
         def _swap_intra(blk_id: int) -> int:
             @guppy
             def _impl(state: STATE @ owned, blk_id: int) -> tuple[STATE, int]:
-                blk = state.take_block(blk_id)
-                k2_primitives.swap_intra(blk.logical_block)
-                state.put_block(blk_id, blk)
+                k2_primitives.swap_intra(state.blocks[blk_id].logical_block)
 
                 state.qed_policy(array(blk_id), comptime(qed_policy.costs.swap_intra))
 
@@ -836,7 +803,7 @@ class ToyK2Builder:
         @link_name("guppyft.toy_k2.gen_state")
         def state_gen() -> STATE:
             return STATE(
-                array(nothing[RuntimeBlock]() for _ in range(comptime(n_blocks))),
+                empty_array(),
                 Stack(
                     array(some(blk_id) for blk_id in range(comptime(n_blocks))),
                     comptime(n_blocks),
@@ -852,11 +819,10 @@ class ToyK2Builder:
         @no_type_check
         @link_name("guppyft.toy_k2.discard_state")
         def state_discard(state: "STATE" @ owned) -> None:
-            for blk in state.blocks:
-                if blk.is_some():
-                    blk.unwrap().discard()
-                else:
-                    blk.unwrap_nothing()
+            for i in range(len(state.blocks)):
+                if not state.blocks.is_borrowed(i):
+                    state.blocks.take(i).discard()
+            state.blocks.discard_all_taken()
 
         def build_wrapper(
             func: GuppyFunctionDefinition[[], None],
