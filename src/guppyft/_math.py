@@ -10,6 +10,9 @@ Original contribution: @vvandaele (Vivien Vandaele)
 from typing import no_type_check
 
 from guppylang import guppy
+from guppylang.std.builtins import array
+
+N = guppy.nat_var("N")
 
 
 @guppy
@@ -25,6 +28,18 @@ def get_bit(k: int, i: int) -> bool:
         bool: True if bit i is 1, False otherwise.
     """
     return ((k >> i) & 1) == 1
+
+
+@guppy
+@no_type_check
+def bitstring_to_int(data_bits: array[bool, N]) -> int:
+    """Convert bitstring to int with data_bits[0] being most significant."""
+    out = 0
+    for i in range(N):
+        out <<= 1
+        if data_bits[i]:
+            out += 1
+    return out
 
 
 @guppy

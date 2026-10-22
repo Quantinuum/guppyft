@@ -33,6 +33,7 @@ from guppyft.code.steane.primitives import (
     measure_z,
     prep_t_state_ft,
     prep_zero_ft,
+    reichardt_qec_cycle,
     s,
     sdg,
     steane_x_qec_cycle,
@@ -84,6 +85,7 @@ class QECStyle(StrEnum):
 
     Knill = auto()
     Steane = auto()
+    Reichardt = auto()
 
 
 @dataclass
@@ -352,6 +354,13 @@ class SteaneBuilder:
                     steane_x_qec_cycle(q, ancillaX)
                     ancillaZ = state.zero_state_factory.get_state()
                     steane_z_qec_cycle(q, ancillaZ)
+
+            case QECStyle.Reichardt:
+
+                @guppy
+                @no_type_check
+                def qec_cycle_def(state: STATE, q: LogicalBlock[7]) -> None:
+                    reichardt_qec_cycle(q)
 
         @_register_op_replacement(steane_ops.qec_cycle_def)
         @no_type_check

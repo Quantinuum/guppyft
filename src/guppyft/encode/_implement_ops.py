@@ -1,4 +1,5 @@
 from collections.abc import Callable, Iterator, Sequence
+from copy import copy
 from dataclasses import dataclass, field
 from typing import Any, Literal, Self, no_type_check, overload
 
@@ -205,7 +206,9 @@ def implement_ops(
         representation when `as_bytes` is `True`.
     """
     assert len(hugr_pkg.modules) == 1
-    hugr = hugr_pkg.modules[0]
+    # Only the entrypoint is changed before serialization; graph rewrites happen
+    # on a separate Rust HUGR, so a shallow copy preserves the input entrypoint.
+    hugr = copy(hugr_pkg.modules[0])
 
     entrypoint_op = hugr.entrypoint_op()
     assert isinstance(entrypoint_op, (FuncDefn, FuncDecl)), (
