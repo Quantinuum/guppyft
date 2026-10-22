@@ -2,6 +2,7 @@ from typing import Any, no_type_check
 
 import pytest
 from guppylang import guppy
+from guppylang.decorator import expected_qubits
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.builtins import array
 from guppylang.std.lang import comptime
@@ -41,14 +42,13 @@ def test_knill_qec_without_errors() -> None:
 
     @guppy
     @no_type_check
+    @expected_qubits(7 + 14)  # 7 data qubits, 14 ancillas
     def impl_func(block: LogicalBlock[7]) -> None:
         a0 = prep_zero_non_ft()
         a1 = prep_zero_non_ft()
         knill_qec_cycle(block, a0, a1)
 
-    assert valid_clifford_implementation(
-        specify_identity, impl_func, CODE_DEF, n_impl_ancillas=14
-    )
+    assert valid_clifford_implementation(specify_identity, impl_func, CODE_DEF)
 
 
 @pytest.mark.parametrize("error_loc", [0, 1, 2, 3, 4, 5, 6])
@@ -89,6 +89,7 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
 
     @guppy
     @no_type_check
+    @expected_qubits(14)
     def impl_func(block: LogicalBlock[7]) -> None:
         _apply_error(block, comptime(error_loc), comptime(is_x_error))
         a0 = prep_zero_non_ft()
@@ -136,12 +137,11 @@ def test_steane_measure_syndromes() -> None:
 
     @guppy
     @no_type_check
+    @expected_qubits(10)
     def impl_func(block: LogicalBlock[7]) -> None:
         _measure_syndromes(block)
 
-    assert valid_clifford_implementation(
-        specify_identity, impl_func, CODE_DEF, n_impl_ancillas=3
-    )
+    assert valid_clifford_implementation(specify_identity, impl_func, CODE_DEF)
 
 
 @pytest.mark.parametrize(

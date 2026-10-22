@@ -1,11 +1,13 @@
 import inspect
-from typing import Literal, get_args, get_origin, overload
+from typing import Any, Literal, get_args, get_origin, overload
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.builtins import comptime
 from guppylang.std.debug import state_output
 from guppylang.std.quantum import discard_array
+from guppylang_internals.definition.function import RawFunctionDef
+from guppylang_internals.metadata.common import FunctionMetadata
 from selene_sim.backends import Stim
 from selene_sim.build import build
 from selene_stim_plugin import SeleneStimState
@@ -48,8 +50,7 @@ def _compute_stabilizers_single_block_state(
     Args:
         state_prep_func: A Guppy function that prepares the stabilizer state on a single
             code block.
-        num_selene_qubits: An upper bound for the number of qubits used in
-            `state_prep_func`.
+        num_selene_qubits: Number of qubits in the state prepared by state_prep_func.
 
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
@@ -78,8 +79,7 @@ def _compute_stabilizers_double_block_state(
     Args:
         state_prep_func: A Guppy function that prepares the stabilizer state on two code
             blocks.
-        num_selene_qubits: An upper bound for the number of qubits used in
-            `state_prep_func`.
+        num_selene_qubits: Number of qubits in the state prepared by state_prep_func.
 
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
@@ -123,8 +123,7 @@ def _compute_stabilizers_single_block_unitary(
         code: The stabilizer code.
         clifford_func: A Guppy function which implements a Clifford unitary
             on a single code block.
-        num_selene_qubits: An upper bound for the number of qubits used in the Choi
-            state for `clifford_func`.
+        num_selene_qubits: The number of qubits taken as input by `clifford_func`.
 
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
@@ -144,7 +143,7 @@ def _compute_stabilizers_single_block_unitary(
         discard_array(targets)
 
     states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
-        main, num_selene_qubits=num_selene_qubits
+        main, num_selene_qubits
     )
 
     # This is a hack so that we can get a state_output over both the
@@ -172,8 +171,7 @@ def _compute_stabilizers_double_block_unitary(
         code: The stabilizer code.
         clifford_func: A Guppy function which implements a Clifford unitary
             across two code blocks.
-        num_selene_qubits: An upper bound for the number of qubits used in the Choi
-            state for `clifford_func`.
+        num_selene_qubits: The number of qubits taken as input by `clifford_func`.
 
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
@@ -263,6 +261,26 @@ def _count_blocks_state(
         return 1
 
 
+def _get_n_impl_simulation_qubits(
+    *,
+    impl_func: GuppyFunctionDefinition[Any, Any],
+    n_qubits: int,
+    n_impl_ancillas: int | None,
+) -> int:
+    """Helper to add any additional implementation qubits specified by the user."""
+    if n_impl_ancillas is not None:
+        return n_qubits + n_impl_ancillas
+
+    assert isinstance(impl_func.wrapped, RawFunctionDef)
+    assert isinstance(impl_func.wrapped.metadata, FunctionMetadata)
+    if (
+        n_hinted_qubits := impl_func.wrapped.metadata.get_expected_qubits()
+    ) is not None:
+        return n_hinted_qubits
+
+    return n_qubits
+
+
 @overload
 def _compute_state_prep_tableaux(
     semantic_function: SemanticStabilizerState,
@@ -304,10 +322,13 @@ def _compute_state_prep_tableaux(
     """
     num_blocks = _count_blocks_state(semantic_function, impl_function)  # type: ignore[arg-type]
 
-    n_stab_qubits = num_blocks * code_definition.n_physical_qubits
-
-    if n_impl_ancillas is not None:
-        n_stab_qubits += n_impl_ancillas
+    # Get the number of qubits required for the simulation of the impl_function.
+    # This includes qubits specified with the @expected_qubits hint or n_impl_ancillas.
+    n_stab_qubits = _get_n_impl_simulation_qubits(
+        impl_func=impl_function,
+        n_qubits=num_blocks * code_definition.n_physical_qubits,
+        n_impl_ancillas=n_impl_ancillas,
+    )
 
     match num_blocks:
         case 1:
@@ -505,10 +526,14 @@ def _compute_clifford_tableaux(
         A pair of Clifford tableaux made up of signed Pauli terms.
     """
     num_blocks = _count_blocks_unitary(semantic_function, impl_function)  # type: ignore[arg-type]
-    n_physical_choi_qubits = 2 * num_blocks * code_definition.n_physical_qubits
 
-    if n_impl_ancillas is not None:
-        n_physical_choi_qubits += n_impl_ancillas
+    # Get the number of qubits required for the simulation of the impl_function.
+    # This includes qubits specified with the @expected_qubits hint or n_impl_ancillas.
+    n_function_impl_qubits = _get_n_impl_simulation_qubits(
+        impl_func=impl_function,
+        n_qubits=num_blocks * code_definition.n_physical_qubits,
+        n_impl_ancillas=n_impl_ancillas,
+    )
 
     match num_blocks:
         case 1:
@@ -522,7 +547,7 @@ def _compute_clifford_tableaux(
             implementation_stabilizers = _compute_stabilizers_single_block_unitary(
                 code_definition,
                 impl_function,  # type: ignore[arg-type]
-                num_selene_qubits=n_physical_choi_qubits,
+                num_selene_qubits=2 * n_function_impl_qubits,
             )
         case 2:
             # Get the 4k stabilizers for the 4k qubit Choi state encoding the logical.
@@ -535,7 +560,7 @@ def _compute_clifford_tableaux(
             implementation_stabilizers = _compute_stabilizers_double_block_unitary(
                 code_definition,
                 impl_function,
-                num_selene_qubits=n_physical_choi_qubits,
+                num_selene_qubits=2 * n_function_impl_qubits,
             )
         case _:
             raise TypeError(
