@@ -68,6 +68,9 @@ test = [
     "pytest-xdist>=3.8.0",
 ]
 
+[tool.uv.sources]
+guppylang = { git = "https://github.com/quantinuum/guppylang", subdirectory = "guppylang", rev = "d2ce2f7038f74c47abaec2fde7bc1e62a26a0221" }
+
 [tool.mypy]
 strict = true
 allow_redefinition = true
