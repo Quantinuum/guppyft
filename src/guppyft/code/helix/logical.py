@@ -146,7 +146,7 @@ def cx_between_blocks(control: Block, target: Block, i: int, j: int) -> None:
     """
 
 
-@hugr_op(logical_op(helix_ops.cx_def))
+@hugr_op(logical_op(helix_ops.cx_def), effects=())
 @no_type_check
 def cx(block: Block) -> None:
     """CX from logical qubit 0 to 1."""
