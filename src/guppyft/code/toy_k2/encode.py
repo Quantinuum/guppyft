@@ -250,19 +250,9 @@ class ToyK2Builder:
 
             @guppy
             @no_type_check
-            def take_block(self, blk_id: int) -> RuntimeBlock:
-                return self.blocks.take(blk_id)
-
-            @guppy
-            @no_type_check
-            def put_block(self, blk_id: int, blk: RuntimeBlock @ owned) -> None:
-                self.blocks.put(blk, blk_id)
-
-            @guppy
-            @no_type_check
             def release_block(self, blk_id: int) -> LogicalBlock[4]:
                 """Consumes the RuntimeBlock and returns its logical block."""
-                runtime_block = self.take_block(blk_id)
+                runtime_block = self.blocks.take(blk_id)
                 self.unalloc_blks.push(blk_id)
                 return runtime_block.logical_block
 
@@ -275,7 +265,7 @@ class ToyK2Builder:
                 blk_id = self.unalloc_blks.pop()
 
                 runtime_block = RuntimeBlock(logical_block, array(False, False), 0.0)
-                self.put_block(blk_id, runtime_block)
+                self.blocks.put(runtime_block, blk_id)
 
                 return blk_id
 
