@@ -261,24 +261,21 @@ def _count_blocks_state(
         return 1
 
 
-# Helper to extract the number of qubits in an impl function specified
-#  by the @expected_qubits hint. If no hint is given, returns None
-def _extract_expected_qubits_hint(
-    func: GuppyFunctionDefinition[Any, Any],
-) -> int | None:
-    assert isinstance(func.wrapped, RawFunctionDef)
-    assert isinstance(func.wrapped.metadata, FunctionMetadata)
-    return func.wrapped.metadata.get_expected_qubits()
-
-
 def _get_n_impl_simulation_qubits(
-    *, n_qubits: int, n_hinted_qubits: int | None, n_impl_ancillas: int | None
+    *,
+    impl_func: GuppyFunctionDefinition[Any, Any],
+    n_qubits: int,
+    n_impl_ancillas: int | None,
 ) -> int:
     """Helper to add any additional implementation qubits specified by the user."""
     if n_impl_ancillas is not None:
         return n_qubits + n_impl_ancillas
 
-    if n_hinted_qubits is not None:
+    assert isinstance(impl_func.wrapped, RawFunctionDef)
+    assert isinstance(impl_func.wrapped.metadata, FunctionMetadata)
+    if (
+        n_hinted_qubits := impl_func.wrapped.metadata.get_expected_qubits()
+    ) is not None:
         return n_hinted_qubits
 
     return n_qubits
@@ -325,13 +322,11 @@ def _compute_state_prep_tableaux(
     """
     num_blocks = _count_blocks_state(semantic_function, impl_function)  # type: ignore[arg-type]
 
-    n_hinted_qubits = _extract_expected_qubits_hint(impl_function)
-
     # Get the number of qubits required for the simulation of the impl_function.
     # This includes qubits specified with the @expected_qubits hint or n_impl_ancillas.
     n_stab_qubits = _get_n_impl_simulation_qubits(
+        impl_func=impl_function,
         n_qubits=num_blocks * code_definition.n_physical_qubits,
-        n_hinted_qubits=n_hinted_qubits,
         n_impl_ancillas=n_impl_ancillas,
     )
 
@@ -531,15 +526,12 @@ def _compute_clifford_tableaux(
         A pair of Clifford tableaux made up of signed Pauli terms.
     """
     num_blocks = _count_blocks_unitary(semantic_function, impl_function)  # type: ignore[arg-type]
-    n_physical_choi_qubits = 2 * num_blocks * code_definition.n_physical_qubits
-
-    n_hinted_qubits = _extract_expected_qubits_hint(impl_function)
 
     # Get the number of qubits required for the simulation of the impl_function.
     # This includes qubits specified with the @expected_qubits hint or n_impl_ancillas.
     n_physical_choi_qubits = _get_n_impl_simulation_qubits(
+        impl_func=impl_function,
         n_qubits=2 * num_blocks * code_definition.n_physical_qubits,
-        n_hinted_qubits=n_hinted_qubits,
         n_impl_ancillas=n_impl_ancillas,
     )
 
