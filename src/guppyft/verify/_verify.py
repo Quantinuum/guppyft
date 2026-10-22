@@ -560,7 +560,7 @@ def _compute_clifford_tableaux(
             implementation_stabilizers = _compute_stabilizers_double_block_unitary(
                 code_definition,
                 impl_function,
-                num_selene_qubits=4 * n_function_impl_qubits,
+                num_selene_qubits=2 * n_function_impl_qubits,
             )
         case _:
             raise TypeError(
