@@ -529,9 +529,9 @@ def _compute_clifford_tableaux(
 
     # Get the number of qubits required for the simulation of the impl_function.
     # This includes qubits specified with the @expected_qubits hint or n_impl_ancillas.
-    n_physical_choi_qubits = _get_n_impl_simulation_qubits(
+    n_function_impl_qubits = _get_n_impl_simulation_qubits(
         impl_func=impl_function,
-        n_qubits=2 * num_blocks * code_definition.n_physical_qubits,
+        n_qubits=num_blocks * code_definition.n_physical_qubits,
         n_impl_ancillas=n_impl_ancillas,
     )
 
@@ -547,7 +547,7 @@ def _compute_clifford_tableaux(
             implementation_stabilizers = _compute_stabilizers_single_block_unitary(
                 code_definition,
                 impl_function,  # type: ignore[arg-type]
-                num_selene_qubits=n_physical_choi_qubits,
+                num_selene_qubits=2 * n_function_impl_qubits,
             )
         case 2:
             # Get the 4k stabilizers for the 4k qubit Choi state encoding the logical.
@@ -560,7 +560,7 @@ def _compute_clifford_tableaux(
             implementation_stabilizers = _compute_stabilizers_double_block_unitary(
                 code_definition,
                 impl_function,
-                num_selene_qubits=n_physical_choi_qubits,
+                num_selene_qubits=4 * n_function_impl_qubits,
             )
         case _:
             raise TypeError(
