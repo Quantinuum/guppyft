@@ -264,19 +264,15 @@ def _extract_expected_qubits_hint(
 
 
 def _get_n_impl_simulation_qubits(
-    n_qubits: int, n_hinted_qubits: int | None, n_impl_ancillas: int | None
+    *, n_qubits: int, n_hinted_qubits: int | None, n_impl_ancillas: int | None
 ) -> int:
     """Helper to add any additional implementation qubits specified by the user."""
-    # If we have an @expected_qubits hint on our impl function and no
-    # n_impl_ancillas, update the number of qubits used in the simulation
-    if n_hinted_qubits is not None and n_impl_ancillas is None:
-        n_qubits += n_hinted_qubits
-
-    # If n_impl_ancillas is specified, add additional the ancilla qubits in the number
-    #  used for the simulation. If both n_hinted_qubits and n_impl_ancillas
-    # are not None, then n_impl_ancillas overrides the hinted number.
     if n_impl_ancillas is not None:
-        n_qubits += n_impl_ancillas
+        return n_qubits + n_impl_ancillas
+    
+    if n_hinted_qubits is not None:
+        return n_hinted_qubits
+        
     return n_qubits
 
 
