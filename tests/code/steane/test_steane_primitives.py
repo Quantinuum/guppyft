@@ -14,6 +14,7 @@ from guppyft.code.steane.primitives import (
     _measure_syndromes,
     knill_qec_cycle,
     prep_zero_non_ft,
+    reichardt_qec_cycle,
     steane_x_qec_cycle,
     steane_z_qec_cycle,
 )
@@ -94,6 +95,33 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
         steane_x_qec_cycle(block, a0)
         a0 = prep_zero_non_ft()
         steane_z_qec_cycle(block, a0)
+
+    assert valid_clifford_implementation(
+        specify_identity, impl_func, CODE_DEF, n_impl_ancillas=7
+    )
+
+
+def test_reichardt_qec_without_errors() -> None:
+
+    @guppy
+    @no_type_check
+    def impl_func(block: LogicalBlock[7]) -> None:
+        reichardt_qec_cycle(block)
+
+    assert valid_clifford_implementation(
+        specify_identity, impl_func, CODE_DEF, n_impl_ancillas=7
+    )
+
+
+@pytest.mark.parametrize("error_loc", [0, 1, 2, 3, 4, 5, 6])
+@pytest.mark.parametrize("is_x_error", [True, False])
+def test_reichardt_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
+
+    @guppy
+    @no_type_check
+    def impl_func(block: LogicalBlock[7]) -> None:
+        _apply_error(block, comptime(error_loc), comptime(is_x_error))
+        reichardt_qec_cycle(block)
 
     assert valid_clifford_implementation(
         specify_identity, impl_func, CODE_DEF, n_impl_ancillas=7
