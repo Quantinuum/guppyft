@@ -143,7 +143,7 @@ def _syndrome_helper(
 @guppy.comptime
 @no_type_check
 def _measure_syndromes(blk: LogicalBlock[7]) -> array[qlib.Measurement, 6]:
-    """Syndrome measurement using Figure 5. from Reichardt arXiv:1804.06995.
+    """Syndrome measurement using Figure 5 from Reichardt arXiv:1804.06995.
 
     Returns:
         The stabilizer measurements in the following order:
@@ -417,9 +417,9 @@ def steane_x_qec_cycle(q: LogicalBlock[7], a: LogicalBlock[7] @ owned) -> None:
 @guppy
 @no_type_check
 def reichardt_qec_cycle(q: LogicalBlock[7]) -> None:
-    """Dense syndrome extraction using Figure 5. from Reichardt arXiv:1804.06995.
+    """Dense syndrome extraction using Figure 5 from Reichardt arXiv:1804.06995.
 
-    This uses only 3 physical ancilla to measure all stabilizers fault-tolerantly.
+    This uses only 3 physical ancillas to measure all stabilizers fault-tolerantly.
     Decoding is done via a code-capacity look-up table, meaning it assumes no
     errors occur during the syndrome extraction circuit.
     """
