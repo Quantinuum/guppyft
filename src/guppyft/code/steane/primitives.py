@@ -16,6 +16,7 @@ from guppylang.std.mem import mem_swap
 from guppylang.std.option import Option, nothing, some
 from zixy.qubit import pauli
 
+from guppyft._math import bitstring_to_int
 from guppyft.code_def import StabilizerCode
 from guppyft.std import LogicalBlock
 from guppyft.std.state_factory import PreBlock
@@ -74,18 +75,6 @@ def _parity_check(data_bits: array[bool, N]) -> bool:
     out = False
     for i in range(N):
         out ^= data_bits[i]
-    return out
-
-
-@guppy
-@no_type_check
-def _bitstring_to_int(data_bits: array[bool, N]) -> int:
-    """Convert bitstring to int with data_bits[0] being most significant."""
-    out = 0
-    for i in range(N):
-        out <<= 1
-        if data_bits[i]:
-            out += 1
     return out
 
 
@@ -454,7 +443,7 @@ def _code_capacity_lut(syndrome: array[bool, 3]) -> Option[int]:
         syndrome[2] -> IIXXIXX
     and similarly for Z.
     """
-    synd_int = _bitstring_to_int(syndrome)
+    synd_int = bitstring_to_int(syndrome)
 
     if synd_int == 0:
         return nothing()
