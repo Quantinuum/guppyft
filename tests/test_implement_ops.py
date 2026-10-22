@@ -28,9 +28,9 @@ def test_default_build_wrapper(as_bytes: bool) -> None:
         else implement_ops(pkg0, spec)
     )
 
+    assert pkg0.to_str() == before
     [module_after] = pkg0.modules
     assert module_after is module
     assert module.entrypoint == entrypoint
-    assert pkg0.to_str() == before
 
     EmulatorBuilder().build(pkg1, n_qubits=1).run()
