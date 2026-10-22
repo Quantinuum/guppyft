@@ -1,0 +1,32 @@
+{
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "schema_version",
+        "ft_encoding"
+    ],
+    "properties": {
+        "schema_version": {
+            "type": "integer",
+            "enum": [
+                1
+            ]
+        },
+        "ft_encoding": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "name",
+                "params"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "params": {
+                    "type": "object"
+                }
+            }
+        }
+    }
+}

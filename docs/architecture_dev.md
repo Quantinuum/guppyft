@@ -254,6 +254,59 @@ Be mindful that complex classical computation at runtime can hinder
 performance on the quantum device if it causes stalling.
 
 
+## Annotation schema compatibility
+
+Compilation metadata has an envelope `schema_version` and an architecture-specific
+`ft_encoding.params.schema_version`. These versions are independent of each other,
+the Python package version, and HUGR extension versions.
+
+`tests/resources/schemas/` contains one hand-crafted JSON Schema Draft 4 contract
+per architecture and major version, for example `envelope.v1.json` and
+`steane.v1.json`. The filename without `.json` is the schema key. Keep only the
+latest compatible revision for each major. Edit that file in place for compatible
+changes; for a breaking change, retain the old file
+and add a higher major whose key matches its required `schema_version` field.
+There is no separate contract revision counter or duplicate Python contract.
+
+Serialization tests validate against each architecture's highest stored major,
+selected numerically, so a version bump without an updated contract fails, as do
+missing or undeclared fields in covered serialization cases. These samples cannot
+prove that every possible serializer output conforms; cover conditional branches
+and maintain the contracts explicitly.
+
+History tests compare the catalog with `GUPPYFT_SCHEMA_BASE_REF` (default `HEAD`).
+CI selects the PR target commit, merge-group base, or pre-push commit and fetches
+the history needed to read it. Old major entries may be revised compatibly but
+cannot be removed. A new architecture starts at version 1; a new major must break
+compatibility with the previous major. When the catalog does not yet exist at the
+comparison commit, it is treated as an initial introduction. Missing Git references
+fail rather than silently disabling history checks. Local changes are compared
+with the last commit by default; to check the whole branch, select its merge base.
+
+The shared helper uses `jsonsubschema` to check that new output remains readable
+by old consumers. Consumers must ignore unknown object fields, but known fields
+must retain their types and allowed values. Adding ignorable fields is compatible;
+removing required fields, allowing their omission, changing types, and expanding
+enums are breaking changes. Compatible changes must retain the version; breaking
+changes must increase it. Changing only the version is rejected. Changes to units,
+meaning, or implicit defaults still require review and semantic regression tests.
+
+To cover another architecture, add its version-1 catalog entry and test its actual
+annotation after a JSON round trip against both the envelope and latest parameter
+contracts, using default and distinct non-default settings and all serialization
+branches. Catalog history checks discover the new entry automatically. Keep
+contracts closed to catch undeclared output fields; the helper opens old consumer
+objects for comparison. Only the root version is excluded from comparison,
+so independently versioned children should be opaque extension points in their
+parent contract, as `params` is in the envelope. Unsupported schema keywords fail
+explicitly and need review before extending the helper's supported subset.
+
+Run the focused tests with:
+
+```bash
+uv run --group test pytest tests/test_annotation_schema.py
+```
+
 ## Further resources
 
 * Guppy language [documentation](https://docs.quantinuum.com/guppy/).
