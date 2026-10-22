@@ -17,6 +17,7 @@ from zixy.qubit import pauli
 
 from guppyft.code_def import StabilizerCode
 from guppyft.std import LogicalBlock
+from guppyft.std.distillation import Distillation15To1Ops
 from guppyft.std.state_factory import PreBlock, flagged_pre_block
 
 __all__ = [
@@ -25,12 +26,14 @@ __all__ = [
     "cx",
     "cz",
     "decode",
+    "distillation_ops",
     "h",
     "inject_t",
     "inject_tdg",
     "knill_qec_cycle",
     "measure_z",
     "prep_t_state_ft",
+    "prep_t_state_non_ft",
     "prep_zero_ft",
     "prep_zero_non_ft",
     "s",
@@ -235,6 +238,16 @@ def _prep_h_non_ft() -> LogicalBlock[7]:
         qlib.cx(arr[relabel[ctl]], arr[relabel[tgt]])
 
     return LogicalBlock(arr)
+
+
+@guppy
+@no_type_check
+def prep_t_state_non_ft() -> LogicalBlock[7]:
+    """Non-fault-tolerant preparation of a T|+> logical state on a Steane block."""
+    blk = _prep_h_non_ft()
+    sdg(blk)
+    h(blk)
+    return blk
 
 
 @guppy.comptime
@@ -491,3 +504,10 @@ def cz(q0: LogicalBlock[7], q1: LogicalBlock[7]) -> None:
     """Logical CZ gate between two Steane blocks."""
     for i in range(7):
         qlib.cz(q0.data_qs[i], q1.data_qs[i])
+
+
+@guppy
+@no_type_check
+def distillation_ops() -> Distillation15To1Ops[LogicalBlock[7], RawMeasurement[7]]:
+    """Steane operations for 15-to-1 magic state distillation."""
+    return Distillation15To1Ops(prep_t_state_non_ft, h, sdg, z, cx, measure_z, decode)
