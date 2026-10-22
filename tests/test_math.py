@@ -11,9 +11,9 @@ from typing import no_type_check
 
 import pytest
 from guppylang import guppy
-from guppylang.std.builtins import output
+from guppylang.std.builtins import array, output
 
-from guppyft._math import floor, get_bit
+from guppyft._math import bitstring_to_int, floor, get_bit
 
 
 @pytest.mark.parametrize(
@@ -37,6 +37,29 @@ def test_get_bit(k: int, i: int, expected: bool) -> None:
 
     res = test_circuit.emulator(1).run()
     assert res.collated_shots()[0]["bit"][0] == expected
+
+
+@pytest.mark.parametrize(
+    ("bitstring", "integer"),
+    [
+        ([True, False, True], 5),
+        ([False, True, False, False], 4),
+        ([False, False, False], 0),
+        ([True, True, True], 7),
+        ([False, False, True, False], 2),
+        ([True, False, False, True], 9),
+    ],
+)
+def test_bitstring_to_int(bitstring: list[bool], integer: int) -> None:
+    """Test bitstring_to_int converts bitstrings to integers correctly."""
+
+    @guppy
+    @no_type_check
+    def test_circuit() -> None:
+        output("int_val", bitstring_to_int(array(b for b in bitstring)))
+
+    res = test_circuit.emulator(1).run()
+    assert res.collated_shots()[0]["int_val"][0] == integer
 
 
 @pytest.mark.parametrize(
