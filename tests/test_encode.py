@@ -9,8 +9,8 @@ from .utils.identity_code import identity_code_spec
 
 
 @pytest.mark.parametrize("as_bytes", [False, True])
-@pytest.mark.parametrize("implement", [False, True])
-def test_encode_does_not_modify_package(as_bytes: bool, implement: bool) -> None:
+@pytest.mark.parametrize("empty_spec", [False, True])
+def test_encode_does_not_modify_package(as_bytes: bool, empty_spec: bool) -> None:
     @guppy
     def main() -> None:
         q = qubit()
@@ -18,10 +18,10 @@ def test_encode_does_not_modify_package(as_bytes: bool, implement: bool) -> None
         output("q", measure(q).read())
 
     pkg = main.with_minimal_opt().compile()
-    module = pkg.modules[0]
+    [module] = pkg.modules
     entrypoint = module.entrypoint
     before = pkg.to_str()
-    spec = identity_code_spec(n_qubits=1) if implement else EncodeSpec()
+    spec = EncodeSpec() if empty_spec else identity_code_spec(n_qubits=1)
 
     if as_bytes:
         encode(pkg, spec, as_bytes=True)
@@ -29,5 +29,6 @@ def test_encode_does_not_modify_package(as_bytes: bool, implement: bool) -> None
         encode(pkg, spec)
 
     assert pkg.to_str() == before
-    assert pkg.modules[0] is module
+    [module_after] = pkg.modules
+    assert module_after is module
     assert module.entrypoint == entrypoint

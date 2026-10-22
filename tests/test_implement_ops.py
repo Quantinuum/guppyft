@@ -17,7 +17,7 @@ def test_default_build_wrapper(as_bytes: bool) -> None:
         pass
 
     pkg0 = main.compile()
-    module = pkg0.modules[0]
+    [module] = pkg0.modules
     entrypoint = module.entrypoint
     before = pkg0.to_str()
     spec = ImplementOpsSpec(ops=OpReplacements(), tys=TyReplacements())
@@ -28,7 +28,8 @@ def test_default_build_wrapper(as_bytes: bool) -> None:
         else implement_ops(pkg0, spec)
     )
 
-    assert pkg0.modules[0] is module
+    [module_after] = pkg0.modules
+    assert module_after is module
     assert module.entrypoint == entrypoint
     assert pkg0.to_str() == before
 
