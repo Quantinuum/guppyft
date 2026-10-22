@@ -67,6 +67,11 @@ build-docs debug="false" clean="false":
         -b html docs docs/build \
         {{ if debug == "true" { "-D nb_execution_raise_on_error=0" } else { "" } }}
 
+# Build the docs and execute code examples in public API docstrings.
+test-docs:
+    just build-docs
+    uv run --group docs python docs/run_docstring_testcode.py
+
 # Serve the docs html pages on a Python web server. Pass `--debug` or `--clean` as needed.
 [arg("debug", long, value="true")]
 [arg("clean", long, value="true")]
