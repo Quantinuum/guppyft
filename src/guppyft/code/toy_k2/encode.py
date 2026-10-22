@@ -172,16 +172,19 @@ class ToyK2Builder:
         lib = GuppyLibrary(members=[])
         ops = OpReplacements()
 
-        def _register_op_replacement(
+        def _register_op_replacement[**INPUTS, OUTPUT](
             op_def: OpDef,
-        ) -> Callable[[Callable[..., Any]], GuppyFunctionDefinition[Any, Any]]:
+        ) -> Callable[
+            [Callable[INPUTS, OUTPUT]], GuppyFunctionDefinition[INPUTS, OUTPUT]
+        ]:
             @custom_guppy_decorator
             def decorator(
-                func: Callable[..., Any],
-            ) -> GuppyFunctionDefinition[Any, Any]:
+                func: Callable[INPUTS, OUTPUT],
+            ) -> GuppyFunctionDefinition[INPUTS, OUTPUT]:
                 # Generate guppy function
                 name = f"link.{op_def.qualified_name()}"
-                guppy_func = guppy(link_name(name)(func))
+                func2: Callable[INPUTS, OUTPUT] = link_name(name)(func)
+                guppy_func = guppy(func2)
 
                 # Register in library and for op replacement
                 lib.members.append(guppy_func.id)
