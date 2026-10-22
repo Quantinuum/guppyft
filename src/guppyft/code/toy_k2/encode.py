@@ -2,7 +2,7 @@
 
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field, replace
-from typing import Any, Literal, Self, no_type_check, overload
+from typing import Any, Concatenate, Literal, Self, no_type_check, overload
 
 from guppylang import guppy
 from guppylang.decorator import custom_guppy_decorator
@@ -30,7 +30,7 @@ from guppyft.encode import (
     encode,
 )
 from guppyft.extensions import std_ops, std_types, toy_k2_ops, toy_k2_types
-from guppyft.globals import map_global, with_global
+from guppyft.globals import map_global, mapped, with_global
 from guppyft.std import LogicalBlock
 
 N = guppy.nat_var("N")
@@ -194,6 +194,35 @@ class ToyK2Builder:
 
             return decorator
 
+        # We have to declare this rather than use composition of _register_op_replacement
+        # and mapped because _register... adds link_name, which must be done inside @mapped.
+        def _register_op_replacement_mapped[G, **INPUTS, *OUTPUT](
+            op_def: OpDef,
+        ) -> Callable[
+            [Callable[Concatenate[G, INPUTS], G | tuple[G, *OUTPUT]]],
+            GuppyFunctionDefinition[INPUTS, tuple[*OUTPUT]],
+        ]:
+            @custom_guppy_decorator
+            def decorator(
+                func: Callable[Concatenate[G, INPUTS], G | tuple[G, *OUTPUT]],
+            ) -> GuppyFunctionDefinition[INPUTS, tuple[*OUTPUT]]:
+                # Generate guppy function
+                name = f"link.{op_def.qualified_name()}"
+                func2: Callable[Concatenate[G, INPUTS], G | tuple[G, *OUTPUT]] = (
+                    link_name(name)(func)
+                )
+                guppy_func: GuppyFunctionDefinition[INPUTS, tuple[*OUTPUT]] = mapped(
+                    func2
+                )
+
+                # Register in library and for op replacement
+                lib.members.append(guppy_func.id)
+                ops.with_generated_decl(op_def, name)
+
+                return guppy_func
+
+            return decorator
+
         @guppy.struct
         class RuntimeBlock:
             """Represents a logical block at runtime for the ToyK2 architecture.
@@ -339,20 +368,13 @@ class ToyK2Builder:
                 for i in blk_ids:
                     helper(self.blocks[i], op_cost)
 
-        @_register_op_replacement(toy_k2_ops.borrow_def)
+        @_register_op_replacement_mapped(toy_k2_ops.borrow_def)
         @no_type_check
-        def _borrow(blk_id: int, qb_id: int) -> tuple[tuple[int, int], int]:
-
-            @guppy
-            @no_type_check
-            def _impl(
-                state: STATE @ owned, blk_id: int, qb_id: int
-            ) -> tuple[STATE, tuple[int, int], int]:
-                state.blocks[blk_id].borrow_addr(qb_id)
-                return state, (blk_id, qb_id), blk_id
-
-            map_global(_impl, blk_id, qb_id)
-            return (blk_id, qb_id), blk_id
+        def _borrow(
+            state: STATE @ owned, blk_id: int, qb_id: int
+        ) -> tuple[STATE, tuple[int, int], int]:
+            state.blocks[blk_id].borrow_addr(qb_id)
+            return state, (blk_id, qb_id), blk_id
 
         @_register_op_replacement(toy_k2_ops.borrow_more_def)
         @no_type_check

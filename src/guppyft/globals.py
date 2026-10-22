@@ -11,6 +11,8 @@ from typing import (
     override,
 )
 
+from guppylang.decorator import custom_guppy_decorator, guppy
+from guppylang.defs import GuppyFunctionDefinition
 from guppylang_internals.ast_util import with_loc
 from guppylang_internals.checker.errors.generic import ExpectedError
 from guppylang_internals.checker.expr_checker import (
@@ -438,3 +440,54 @@ def map_global[G, **P, *R](  # type: ignore[empty-body]
         The values returned by the called function, excluding the updated global state.
         Returns `None` when the called function returns no values besides the state.
     """
+
+
+@custom_guppy_decorator
+def mapped[G, **INPUTS, *OUTPUT](
+    func: Callable[Concatenate[G, INPUTS], G | tuple[G, *OUTPUT]],
+) -> GuppyFunctionDefinition[INPUTS, tuple[*OUTPUT]]:
+    # Want to output:
+    # @guppy / @guppy.comptime
+    # def foo(ins: INPUTS) -> OUTPUT:
+    #    return map_global(func, ins)
+    # However, we can't do that in guppy... :-()
+    # from guppylang_internals.decorator import custom_function
+    from guppylang_internals.definition.function import CheckedFunctionDef
+    from guppylang_internals.engine import ENGINE
+    from guppylang_internals.nodes import GlobalName
+    # from guppylang_internals.tys import Effect
+    # from guppylang_internals.tys.ty import Type
+    # from guppyft.globals import _GlobalMapChecker, _GlobalOpCompiler, GLOBAL_VAR_NAME, _map_op_instantiate
+    # import ast
+    # from typing import override
+
+    body = guppy(func)
+    checked = ENGINE.get_checked(body.id, ())  # Assume/require monomorphic (!)
+    assert isinstance(checked, CheckedFunctionDef)
+    assert not checked.ty.params
+    assert not checked.ty.comptime_args
+
+    # first_arg = checked.inputs[0].ty
+    # assert isinstance(first_arg, StructType) and first_arg.defn == ENGINE.get_checked(STATE.id, ())
+    # sig = FunctionType(checked.inputs[1:], checked.output)
+    class MappedChecker(_GlobalMapChecker):
+        @override
+        def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
+            breakpoint() # mypy doesn't like __name__ - what should we use?
+            return super().synthesize([GlobalName(body.__name__, body.id), *args])
+
+    class MappedCompiler(_GlobalOpCompiler):
+        def __init__(self) -> None:
+            super().__init__(_map_op_instantiate(GLOBAL_VAR_NAME))
+
+    @custom_function(
+        compiler=MappedCompiler(),
+        checker=MappedChecker(),
+        # signature is not required since we have a checker, and
+        # (TODO CHECK) omitting signature means we are not a higher-order-value
+        # - which wouldn't work anyway since we need custom compilation of calls.
+        effects=[Effect.ANY],
+    )
+    def impl() -> None: ...  # signature ignored by guppy
+
+    return impl  # type: ignore[return-value] # mypy thinks impl is ()->None
