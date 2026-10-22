@@ -282,8 +282,10 @@ class SteaneBuilder:
         # should be `@guppy.declare` and each code can provide an implementation to be
         # linked i.e. `allocate_next_addr`.
         # See https://github.com/Quantinuum/guppyft/issues/179
+        #
+        # Everything but the magic state factory, which can then take it as resources.
         @guppy.struct
-        class STATE:
+        class Core:
             blocks: array[Option[LogicalBlock[7]], comptime(n_blocks)]  # type: ignore[valid-type,type-arg]
             addr_stack: Stack[tuple[int, int], comptime(n_blocks)]  # type: ignore[valid-type]
             qec_counter: array[float, comptime(n_blocks)]  # type: ignore[valid-type]
@@ -293,12 +295,6 @@ class SteaneBuilder:
                 array[Measurement, 1],  # type: ignore[valid-type]
                 NoResources,
                 comptime(self._options.zero_factory_conf.size),  # type: ignore[valid-type]
-            ]
-            magic_state_factory: StateFactory[
-                LogicalBlock[7],  # type: ignore[type-arg,valid-type]
-                array[Measurement, 8],  # type: ignore[valid-type]
-                NoResources,
-                comptime(self._options.magic_factory_conf.size),  # type: ignore[valid-type]
             ]
 
             @guppy
@@ -318,7 +314,7 @@ class SteaneBuilder:
 
             @guppy
             @no_type_check
-            def allocate_next_addr(self: "STATE") -> tuple[int, int]:
+            def allocate_next_addr(self: "Core") -> tuple[int, int]:
                 if len(self.addr_stack) == 0:
                     exit("allocate_next_addr: No more logical qubits to allocate")
                 next_addr = self.addr_stack.pop()
@@ -360,21 +356,31 @@ class SteaneBuilder:
 
                 @guppy
                 @no_type_check
-                def qec_cycle_def(state: STATE, q: LogicalBlock[7]) -> None:
+                def qec_cycle_def(core: Core, q: LogicalBlock[7]) -> None:
                     # Allocate new blocks for the Bell state
-                    ancilla0 = state.zero_state_factory.get_state(NoResources())
-                    ancilla1 = state.zero_state_factory.get_state(NoResources())
+                    ancilla0 = core.zero_state_factory.get_state(NoResources())
+                    ancilla1 = core.zero_state_factory.get_state(NoResources())
                     knill_qec_cycle(q, ancilla0, ancilla1)
 
             case QECStyle.Steane:
 
                 @guppy
                 @no_type_check
-                def qec_cycle_def(state: STATE, q: LogicalBlock[7]) -> None:
-                    ancillaX = state.zero_state_factory.get_state(NoResources())
+                def qec_cycle_def(core: Core, q: LogicalBlock[7]) -> None:
+                    ancillaX = core.zero_state_factory.get_state(NoResources())
                     steane_x_qec_cycle(q, ancillaX)
-                    ancillaZ = state.zero_state_factory.get_state(NoResources())
+                    ancillaZ = core.zero_state_factory.get_state(NoResources())
                     steane_z_qec_cycle(q, ancillaZ)
+
+        @guppy.struct
+        class STATE:
+            core: Core
+            magic_state_factory: StateFactory[
+                LogicalBlock[7],  # type: ignore[type-arg,valid-type]
+                array[Measurement, 8],  # type: ignore[valid-type]
+                NoResources,
+                comptime(self._options.magic_factory_conf.size),  # type: ignore[valid-type]
+            ]
 
         @_register_op_replacement(steane_ops.qec_cycle_def)
         @no_type_check
@@ -384,12 +390,12 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
+                blk = state.core.take_block(blk_id)
 
-                qec_cycle_def(state, blk)
+                qec_cycle_def(state.core, blk)
 
-                state.put_block(blk_id, blk)
-                state.qec_counter[blk_id] = 0.0
+                state.core.put_block(blk_id, blk)
+                state.core.qec_counter[blk_id] = 0.0
 
                 return state, q
 
@@ -406,11 +412,13 @@ class SteaneBuilder:
         def _prep_zero() -> tuple[tuple[int, int]]:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, tuple[int, int]]:
-                blk_id, qb_id = state.allocate_next_addr()
-                blk = state.zero_state_factory.get_state(NoResources())
-                state.put_block(blk_id, blk)
+                blk_id, qb_id = state.core.allocate_next_addr()
+                blk = state.core.zero_state_factory.get_state(NoResources())
+                state.core.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs.prep_zero))
+                state.core.qec_policy(
+                    array(blk_id), comptime(qec_policy.costs.prep_zero)
+                )
 
                 return state, (blk_id, qb_id)
 
@@ -421,11 +429,11 @@ class SteaneBuilder:
         def _prep_t_state() -> tuple[tuple[int, int]]:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, tuple[int, int]]:
-                blk_id, qb_id = state.allocate_next_addr()
+                blk_id, qb_id = state.core.allocate_next_addr()
                 blk = state.magic_state_factory.get_state(NoResources())
-                state.put_block(blk_id, blk)
+                state.core.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs.prep_t))
+                state.core.qec_policy(array(blk_id), comptime(qec_policy.costs.prep_t))
 
                 return state, (blk_id, qb_id)
 
@@ -439,11 +447,11 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int]
             ) -> tuple[STATE, RawMeasurement[7]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
+                blk = state.core.take_block(blk_id)
 
                 res = measure_z(blk)
 
-                state.free_addr(q)
+                state.core.free_addr(q)
                 return state, res
 
             return map_global(_impl, q)
@@ -454,11 +462,11 @@ class SteaneBuilder:
             @guppy
             def _impl(state: STATE @ owned, q: tuple[int, int]) -> STATE:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
+                blk = state.core.take_block(blk_id)
 
                 blk.discard()
 
-                state.free_addr(q)
+                state.core.free_addr(q)
                 return state
 
             return map_global(_impl, q)
@@ -471,11 +479,11 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
+                blk = state.core.take_block(blk_id)
                 x(blk)
-                state.put_block(blk_id, blk)
+                state.core.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs.x))
+                state.core.qec_policy(array(blk_id), comptime(qec_policy.costs.x))
 
                 return state, q
 
@@ -489,11 +497,11 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
+                blk = state.core.take_block(blk_id)
                 y(blk)
-                state.put_block(blk_id, blk)
+                state.core.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs.y))
+                state.core.qec_policy(array(blk_id), comptime(qec_policy.costs.y))
 
                 return state, q
 
@@ -507,11 +515,11 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
+                blk = state.core.take_block(blk_id)
                 z(blk)
-                state.put_block(blk_id, blk)
+                state.core.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs.z))
+                state.core.qec_policy(array(blk_id), comptime(qec_policy.costs.z))
 
                 return state, q
 
@@ -525,11 +533,11 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
+                blk = state.core.take_block(blk_id)
                 h(blk)
-                state.put_block(blk_id, blk)
+                state.core.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs.h))
+                state.core.qec_policy(array(blk_id), comptime(qec_policy.costs.h))
 
                 return state, q
 
@@ -543,11 +551,11 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
+                blk = state.core.take_block(blk_id)
                 s(blk)
-                state.put_block(blk_id, blk)
+                state.core.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs.s))
+                state.core.qec_policy(array(blk_id), comptime(qec_policy.costs.s))
 
                 return state, q
 
@@ -561,11 +569,11 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
+                blk = state.core.take_block(blk_id)
                 sdg(blk)
-                state.put_block(blk_id, blk)
+                state.core.put_block(blk_id, blk)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs.sdg))
+                state.core.qec_policy(array(blk_id), comptime(qec_policy.costs.sdg))
 
                 return state, q
 
@@ -579,13 +587,15 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int], a: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
-                resource = state.take_block(a[0])
+                blk = state.core.take_block(blk_id)
+                resource = state.core.take_block(a[0])
                 inject_t(blk, resource)
-                state.put_block(blk_id, blk)
-                state.free_addr(a)
+                state.core.put_block(blk_id, blk)
+                state.core.free_addr(a)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs.inject_t))
+                state.core.qec_policy(
+                    array(blk_id), comptime(qec_policy.costs.inject_t)
+                )
 
                 return state, q
 
@@ -601,13 +611,15 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int], a: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
-                resource = state.take_block(a[0])
+                blk = state.core.take_block(blk_id)
+                resource = state.core.take_block(a[0])
                 inject_tdg(blk, resource)
-                state.put_block(blk_id, blk)
-                state.free_addr(a)
+                state.core.put_block(blk_id, blk)
+                state.core.free_addr(a)
 
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs.inject_tdg))
+                state.core.qec_policy(
+                    array(blk_id), comptime(qec_policy.costs.inject_tdg)
+                )
 
                 return state, q
 
@@ -622,14 +634,17 @@ class SteaneBuilder:
             def _impl(
                 state: STATE @ owned, ctl: tuple[int, int], tgt: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int], tuple[int, int]]:
-                ctl_blk, tgt_blk = state.take_block(ctl[0]), state.take_block(tgt[0])
+                ctl_blk = state.core.take_block(ctl[0])
+                tgt_blk = state.core.take_block(tgt[0])
 
                 cx(ctl_blk, tgt_blk)
 
-                state.put_block(ctl[0], ctl_blk)
-                state.put_block(tgt[0], tgt_blk)
+                state.core.put_block(ctl[0], ctl_blk)
+                state.core.put_block(tgt[0], tgt_blk)
 
-                state.qec_policy(array(ctl[0], tgt[0]), comptime(qec_policy.costs.cx))
+                state.core.qec_policy(
+                    array(ctl[0], tgt[0]), comptime(qec_policy.costs.cx)
+                )
 
                 return state, ctl, tgt
 
@@ -644,14 +659,17 @@ class SteaneBuilder:
             def _impl(
                 state: STATE @ owned, q0: tuple[int, int], q1: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int], tuple[int, int]]:
-                blk0, blk1 = state.take_block(q0[0]), state.take_block(q1[0])
+                blk0 = state.core.take_block(q0[0])
+                blk1 = state.core.take_block(q1[0])
 
                 cz(blk0, blk1)
 
-                state.put_block(q0[0], blk0)
-                state.put_block(q1[0], blk1)
+                state.core.put_block(q0[0], blk0)
+                state.core.put_block(q1[0], blk1)
 
-                state.qec_policy(array(q0[0], q1[0]), comptime(qec_policy.costs.cz))
+                state.core.qec_policy(
+                    array(q0[0], q1[0]), comptime(qec_policy.costs.cz)
+                )
 
                 return state, q0, q1
 
@@ -671,18 +689,22 @@ class SteaneBuilder:
         @link_name("guppyft.steane.gen_state")
         def state_gen() -> STATE:
             return STATE(
-                array(nothing[LogicalBlock[7]]() for _ in range(comptime(n_blocks))),
-                Stack(
-                    array(some((blk, 1)) for blk in range(comptime(n_blocks))),
-                    comptime(n_blocks),
-                ),
-                # qec_counter
-                array(0.0 for _ in range(comptime(n_blocks))),
-                # Zero state factory
-                StateFactory(
-                    _prep_zero_routine,
-                    comptime(self._options.zero_factory_conf.max_attempts),
-                    empty_queue(),
+                Core(
+                    array(
+                        nothing[LogicalBlock[7]]() for _ in range(comptime(n_blocks))
+                    ),
+                    Stack(
+                        array(some((blk, 1)) for blk in range(comptime(n_blocks))),
+                        comptime(n_blocks),
+                    ),
+                    # qec_counter
+                    array(0.0 for _ in range(comptime(n_blocks))),
+                    # Zero state factory
+                    StateFactory(
+                        _prep_zero_routine,
+                        comptime(self._options.zero_factory_conf.max_attempts),
+                        empty_queue(),
+                    ),
                 ),
                 # Magic state factory
                 StateFactory(
@@ -700,13 +722,13 @@ class SteaneBuilder:
         @no_type_check
         @link_name("guppyft.steane.discard_state")
         def state_discard(state: "STATE" @ owned) -> None:
-            for blk in state.blocks:
+            for blk in state.core.blocks:
                 if blk.is_some():
                     blk.unwrap().discard()
                 else:
                     blk.unwrap_nothing()
 
-            state.zero_state_factory.discard()
+            state.core.zero_state_factory.discard()
             state.magic_state_factory.discard()
 
         def build_wrapper(
