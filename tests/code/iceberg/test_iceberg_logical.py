@@ -14,7 +14,7 @@ from hugr.std.float import FLOAT_T, FloatVal
 from hugr.std.int import int_t
 from hugr.tys import BoundedNatArg, ExtType, FunctionType, Option, Type
 from tket.passes import InlineFunctions, Normalize
-from tket_exts import measurement
+from tket_exts import measurement, rotation
 
 from guppyft.code.iceberg.logical import (
     Block,
@@ -53,7 +53,7 @@ def test_hugr() -> None:
     assert block6type.args == [BoundedNatArg(6)]
     block6op = iceberg_ops.pauli_exp_all_x_except_at(6)
     assert block6op.name() == "guppyft.iceberg.ops.pauli_exp_all_x_except_at<6>"
-    dfg = Dfg(block6type, int_t(6), FLOAT_T)
+    dfg = Dfg(block6type, int_t(6), rotation.rotation)
     node = dfg.add_op(block6op, *dfg.inputs())
     dfg.set_outputs(node)
     h = dfg.hugr
@@ -73,7 +73,7 @@ def test_hugr() -> None:
     assert in0.type_def.name == "block"
     assert in0.args == [BoundedNatArg(6)]
     assert in1 == int_t(6)
-    assert in2 == FLOAT_T
+    assert in2 == rotation.rotation
 
 
 def test_exported_extensions() -> None:
@@ -230,7 +230,7 @@ def test_indexed_op_signatures(
     op = getattr(iceberg_ops, op_name)(6)
     inputs: list[Type] = [block for _ in range(n_blocks)]
     inputs.extend([int_t(6)] * n_indices)
-    inputs.extend([FLOAT_T] * n_angles)
+    inputs.extend([rotation.rotation] * n_angles)
     outputs: list[Type] = [block for _ in range(n_blocks)]
     if op_name.startswith("try_measure_one"):
         outputs = [Option(measurement.measurement_t), block]
@@ -241,6 +241,46 @@ def test_indexed_op_signatures(
     assert len(poly_sig.params) == 1
     assert len(poly_sig.body.input) == len(inputs)
     assert len(poly_sig.body.output) == len(outputs)
+
+
+@pytest.mark.parametrize(
+    "op_name",
+    [
+        "rx",
+        "rz",
+        "pauli_exp_all_x",
+        "pauli_exp_all_y",
+        "pauli_exp_all_z",
+        "pauli_exp_all_x_except_at",
+        "pauli_exp_all_z_except_at",
+        "pauli_exp_all_x_except_z_at",
+        "pauli_exp_all_z_except_x_at",
+        "xx_phase",
+        "yy_phase",
+        "zz_phase",
+        "xx_phase_between_blocks",
+        "yy_phase_between_blocks",
+        "zz_phase_between_blocks",
+        "rx_dynq",
+        "rz_dynq",
+        "xx_phase_dynq",
+        "yy_phase_dynq",
+        "zz_phase_dynq",
+    ],
+)
+def test_rotation_op_hugrs(op_name: str) -> None:
+    """Every angle-bearing op accepts rotations and resolves during serialization."""
+    op = getattr(iceberg_ops, op_name)
+    if not op_name.endswith("_dynq"):
+        op = op(6)
+    signature = op.outer_signature()
+    assert signature.input[-1] == rotation.rotation
+    assert FLOAT_T not in signature.input
+    dfg = Dfg(*signature.input)
+    node = dfg.add_op(op, *dfg.inputs())
+    dfg.set_outputs(*(node.out(i) for i in range(len(signature.output))))
+    assert rotation().name in dfg.hugr.used_extensions().used_extensions.ids()
+    validate(dfg.hugr.to_bytes())
 
 
 def test_guppy_bindings_smoke() -> None:
