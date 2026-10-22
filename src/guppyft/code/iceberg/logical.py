@@ -699,14 +699,17 @@ def borrow_more(block: BorrowedBlock[N], indices: array[int, M]) -> array[Qubit,
 
 @custom_function(
     _borrow_restore_compiler(iceberg_ops.restore_some),
-    effects=(),  # TODO should this have effects? Analysis says it should
+    effects=[Effect.PANIC],  # Panics if `qubits` has some elements borrowed
 )
 @no_type_check
 def restore_some(block: BorrowedBlock[N], qubits: array[Qubit, M] @ owned) -> None:
     """Restore some dynamic logical qubits to their originating block."""
 
 
-@custom_function(_borrow_restore_compiler(iceberg_ops.restore), effects=())
+@custom_function(
+    _borrow_restore_compiler(iceberg_ops.restore),
+    effects=[Effect.PANIC],  # Panics if `qubits` has some elements borrowed
+)
 @no_type_check
 def restore(
     block: BorrowedBlock[N] @ owned, qubits: array[Qubit, M] @ owned
