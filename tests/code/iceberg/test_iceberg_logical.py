@@ -1,3 +1,6 @@
+from collections import Counter
+from typing import no_type_check
+
 import pytest
 from guppylang import guppy
 from guppylang.std.builtins import array, result
@@ -22,6 +25,11 @@ from guppyft.code.iceberg.logical import (
     discard,
     free_dynq,
     measure_all,
+    pauli_exp_all_x,
+    pauli_exp_all_x_except_at,
+    pauli_exp_all_y,
+    pauli_exp_all_z,
+    pauli_exp_all_z_except_at,
     restore,
     try_alloc_dynq,
     xx_phase_dynq,
@@ -37,8 +45,8 @@ def test_hugr() -> None:
     block6type = iceberg_types.iceberg_block(6)
     assert block6type.type_def.name == "block"
     assert block6type.args == [BoundedNatArg(6)]
-    block6op = iceberg_ops.all_but_one_rx(6)
-    assert block6op.name() == "guppyft.iceberg.ops.all_but_one_rx<6>"
+    block6op = iceberg_ops.pauli_exp_all_x_except_at(6)
+    assert block6op.name() == "guppyft.iceberg.ops.pauli_exp_all_x_except_at<6>"
     dfg = Dfg(block6type, int_t(6), FLOAT_T)
     node = dfg.add_op(block6op, *dfg.inputs())
     dfg.set_outputs(node)
@@ -74,7 +82,7 @@ def test_exported_extensions() -> None:
         "qubit": iceberg_types.iceberg_qubit_def,
     }
     assert len(ops_extn.operations) == 61
-    assert str(ops_extn.version) == "0.2.0"
+    assert str(ops_extn.version) == "0.3.0"
     for op_name, op_def in ops_extn.operations.items():
         assert op_def == iceberg_ops.__getattribute__(f"{op_name}_def")
 
@@ -85,9 +93,9 @@ def test_exported_extensions() -> None:
         "all_x",
         "all_y",
         "all_z",
-        "all_rx",
-        "all_ry",
-        "all_rz",
+        "pauli_exp_all_x",
+        "pauli_exp_all_y",
+        "pauli_exp_all_z",
         "all_h",
         "cx_transversal",
         "alloc_zero",
@@ -108,8 +116,8 @@ def test_exported_extensions() -> None:
         "rx",
         "ry",
         "rz",
-        "all_but_one_rx",
-        "all_but_one_rz",
+        "pauli_exp_all_x_except_at",
+        "pauli_exp_all_z_except_at",
         "try_measure_one_x",
         "try_measure_one_z",
         "xx",
@@ -192,8 +200,8 @@ def test_resolve_extensions_dynq(opname: str) -> None:
         ("rx", 1, 1, 1),
         ("ry", 1, 1, 1),
         ("rz", 1, 1, 1),
-        ("all_but_one_rx", 1, 1, 1),
-        ("all_but_one_rz", 1, 1, 1),
+        ("pauli_exp_all_x_except_at", 1, 1, 1),
+        ("pauli_exp_all_z_except_at", 1, 1, 1),
         ("xx_phase", 1, 2, 1),
         ("yy_phase", 1, 2, 1),
         ("zz_phase", 1, 2, 1),
@@ -250,7 +258,7 @@ def test_guppy_bindings_smoke() -> None:
         b0.x(2)
         b0.zz(3, 4)
         b1.rx(5, 0.5)
-        b1.all_ry(0.25)
+        b1.pauli_exp_all_y(0.25)
         b1.zz_phase(6, 7, 0.5)
         cx_between_blocks(b0, b1, 7, 3)
         zz_phase_between_blocks(b0, b1, 1, 0, 0.25)
@@ -284,6 +292,51 @@ def test_guppy_bindings_smoke() -> None:
     h = pkg.modules[0]
     Normalize()(h, inplace=True)
     InlineFunctions()(h, inplace=True)
+
+
+def test_pauli_exponential_bindings_resolve_and_normalize() -> None:
+    """Free functions and methods lower runtime indices/angles to the same ops."""
+
+    @guppy
+    @no_type_check
+    def main(block: Block[4], i: int, phase: float) -> None:
+        pauli_exp_all_x(block, phase)
+        pauli_exp_all_y(block, phase)
+        pauli_exp_all_z(block, phase)
+        pauli_exp_all_x_except_at(block, i, phase)
+        pauli_exp_all_z_except_at(block, i, phase)
+        block.pauli_exp_all_x(phase)
+        block.pauli_exp_all_y(phase)
+        block.pauli_exp_all_z(phase)
+        block.pauli_exp_all_x_except_at(i, phase)
+        block.pauli_exp_all_z_except_at(i, phase)
+
+    h = main.compile_function().modules[0]
+    InlineFunctions()(h, inplace=True)
+    Normalize()(h, inplace=True)
+    assert not h.used_extensions().unresolved_extensions
+    expected = {
+        "pauli_exp_all_x": 0,
+        "pauli_exp_all_y": 0,
+        "pauli_exp_all_z": 0,
+        "pauli_exp_all_x_except_at": 1,
+        "pauli_exp_all_z_except_at": 1,
+    }
+    found: Counter[str] = Counter()
+    block_type = iceberg_types.iceberg_block(4)
+    for node in h.children(h.entrypoint):
+        op = h[node].op
+        if isinstance(op, ExtOp) and op.op_def().name in expected:
+            name = op.op_def().name
+            found[name] += 1
+            inputs: list[Type] = [block_type]
+            inputs.extend([int_t(6)] * expected[name])
+            inputs.append(FLOAT_T)
+            signature = FunctionType(inputs, [block_type])
+            assert op.outer_signature() == signature
+            assert op.args == [BoundedNatArg(4)]
+    assert found == Counter(dict.fromkeys(expected, 2))
+    validate(h.to_bytes())
 
 
 def test_guppy_hugr() -> None:
