@@ -81,7 +81,7 @@ def test_exported_extensions() -> None:
         "pre_block": iceberg_types.iceberg_pre_block_def,
         "qubit": iceberg_types.iceberg_qubit_def,
     }
-    assert len(ops_extn.operations) == 61
+    assert len(ops_extn.operations) == 59
     assert str(ops_extn.version) == "0.3.0"
     for op_name, op_def in ops_extn.operations.items():
         assert op_def == iceberg_ops.__getattribute__(f"{op_name}_def")
@@ -114,7 +114,6 @@ def test_exported_extensions() -> None:
         "fan_out",
         "fan_in",
         "rx",
-        "ry",
         "rz",
         "pauli_exp_all_x_except_at",
         "pauli_exp_all_z_except_at",
@@ -161,7 +160,6 @@ def test_op_instantiations_variable_in_outs(op_name: str) -> None:
         "y_dynq",
         "z_dynq",
         "rx_dynq",
-        "ry_dynq",
         "rz_dynq",
         "xx_phase_dynq",
         "yy_phase_dynq",
@@ -198,7 +196,6 @@ def test_resolve_extensions_dynq(opname: str) -> None:
         ("fan_out", 1, 1, 0),
         ("fan_in", 1, 1, 0),
         ("rx", 1, 1, 1),
-        ("ry", 1, 1, 1),
         ("rz", 1, 1, 1),
         ("pauli_exp_all_x_except_at", 1, 1, 1),
         ("pauli_exp_all_z_except_at", 1, 1, 1),
@@ -433,7 +430,6 @@ def test_dynamic_qubit_bindings_resolve_and_normalize() -> None:
         q0.y()
         q0.z()
         q0.rx(0.25)
-        q0.ry(0.5)
         q0.rz(0.75)
         xx_phase_dynq(q0, q1, 0.25)
         yy_phase_dynq(q0, q1, 0.5)
@@ -475,7 +471,6 @@ def test_dynamic_qubit_bindings_resolve_and_normalize() -> None:
         "y_dynq",
         "z_dynq",
         "rx_dynq",
-        "ry_dynq",
         "rz_dynq",
         "xx_phase_dynq",
         "yy_phase_dynq",

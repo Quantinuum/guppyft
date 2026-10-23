@@ -74,8 +74,6 @@ pub enum IcebergOpDef {
     fan_in,
     /// Rx gate.
     rx,
-    /// Ry gate.
-    ry,
     /// Rz gate.
     rz,
     /// Apply `exp(-i theta P / 2)`, with theta in radians.
@@ -145,8 +143,6 @@ pub enum IcebergOpDef {
     z_dynq,
     /// Rx gate on a dynamic logical qubit.
     rx_dynq,
-    /// Ry gate on a dynamic logical qubit.
-    ry_dynq,
     /// Rz gate on a dynamic logical qubit.
     rz_dynq,
     /// XXPhase gate on two dynamic logical qubits.
@@ -369,7 +365,6 @@ impl MakeOpDef for IcebergOpDef {
             fan_out => sig_1_block(0, 1),
             fan_in => sig_1_block(0, 1),
             rx => sig_1_block(1, 1),
-            ry => sig_1_block(1, 1),
             rz => sig_1_block(1, 1),
             pauli_exp_all_x => sig_1_block(1, 0),
             pauli_exp_all_y => sig_1_block(1, 0),
@@ -484,7 +479,6 @@ impl MakeOpDef for IcebergOpDef {
             y_dynq => sig_qubits_angles(1, 0),
             z_dynq => sig_qubits_angles(1, 0),
             rx_dynq => sig_qubits_angles(1, 1),
-            ry_dynq => sig_qubits_angles(1, 1),
             rz_dynq => sig_qubits_angles(1, 1),
             xx_phase_dynq => sig_qubits_angles(2, 1),
             yy_phase_dynq => sig_qubits_angles(2, 1),
@@ -601,7 +595,7 @@ mod tests {
     fn test_iceberg_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.iceberg.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 61);
+        assert_eq!(EXTENSION.operations().count(), 59);
     }
 
     #[test]
