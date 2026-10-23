@@ -64,7 +64,7 @@ Using the verifier requires three definitions:
    array of $k$ logical qubits.
 2. `impl_function` is a Guppy function that defines the physical implementation on
    an array of $n$ physical qubits.
-3. `code_definition` is the {py:class}`~guppyft.code_def.StabilizerCode` definition, refer to the class docs for information on how to obtain one for your code.
+3. `code_definition` is the {py:class}`~guppyft.code_def.StabilizerCode` definition, refer to the class docs for information on how to provide one for your code.
 
 These definitions can then be used to as an assertion in the architecture test suite
 using {py:func}`~guppyft.verify.valid_clifford_implementation`:
@@ -72,9 +72,9 @@ using {py:func}`~guppyft.verify.valid_clifford_implementation`:
 ```python
 from guppyft.verify import valid_clifford_implementation
 
-semantic_function = ... # logical action
-impl_function = ... # physical implementation
-code_definition = ... # stabilizer code reference
+semantic_function = ...  # logical action
+impl_function = ...  # physical implementation
+code_definition = ...  # stabilizer code reference
 
 assert valid_clifford_implementation(semantic_function, impl_function, code_definition)
 ```
@@ -136,7 +136,7 @@ for [`ops.rs`](https://github.com/Quantinuum/guppyft/blob/main/extensions/src/st
 and [`types.rs`](https://github.com/Quantinuum/guppyft/blob/main/extensions/src/steane/types.rs).
 These Rust definitions are used to generate serialized extension definitions in JSON via a custom
 Rust CLI (in [`cli.rs`](https://github.com/Quantinuum/guppyft/blob/main/extensions/src/cli.rs)).
-You may use other means of obtaining this JSON as they are (and become) available.
+You may use other means of generating this JSON as they are (and become) available.
 
 It will be useful to define Guppy bindings for the logical extensions. Follow the pattern outlined
 in {py:mod}`guppyft.extensions.steane` to create a Python API for your extension to facilitate the remaining
@@ -156,10 +156,10 @@ a different layer. An example of a composite operation in the Steane architectur
 
 ### 3. Define op implementations
 
-Currently, the logical operations are not executable, since they are HUGR ops that are unknown to
-the target machine or emulator. A single logical operation may have many different possible implementations,
-such as non-fault-tolerant, partially fault-tolerant or fully fault-tolerant ones. Replacing an operation
-with its implementation is essentially a HUGR to HUGR transform, so we can write it as such a transformation pass.
+Up to this point, the logical operations are not yet executable, since they are HUGR ops that are unknown to
+the target machine or emulator. A single logical operation may have many different possible implementations to choose
+from. Replacing an operation with its implementation is essentially a HUGR to HUGR transform, so we can write it as such
+a transformation pass.
 
 The Steane architecture (see {py:mod}`guppyft.code.steane.encode`) defines this pass using the
 {py:func}`guppyft.encode.implement_ops` utility and the related {py:class}`guppyft.encode.ImplementOpsSpec`,
@@ -271,8 +271,8 @@ We intend to provide default decompositions for some of these gates in future re
 
 ### Guidelines
 
-Most architectures will have some options for configurability, for example parallelism
-and retry configuration for state factories. To enable this, we recommend an immutable
+Most architectures will have some options for configurability, for example to tune the runtime
+policies that manage state factories and QEC cycle insertion. To enable this, we recommend an immutable
 builder pattern over a single factory function with many parameters, both for flexibility
 and maintenance.
 
