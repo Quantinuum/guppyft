@@ -131,23 +131,33 @@ For the Steane code, the logical operations and types are split into two extensi
 to allow downstream users to rely on (usually slower changing) types without relying on
 (usually faster changing, separately versioned) ops, although that is not mandatory.
 
-One way to write these extensions is by using Rust. Follow the Steane examples
-for [`ops.rs`](https://github.com/Quantinuum/guppyft/blob/main/extensions/src/steane/ops.rs)
-and [`types.rs`](https://github.com/Quantinuum/guppyft/blob/main/extensions/src/steane/types.rs).
-These Rust definitions are used to generate serialized extension definitions in JSON via a custom
-Rust CLI (in [`cli.rs`](https://github.com/Quantinuum/guppyft/blob/main/extensions/src/cli.rs)).
-You may use other means of generating this JSON as they are (and become) available.
+At its core, a HUGR extension is a serialized JSON payload defining opaque types and how
+opaque operations use those types. While you can manually define this payload, we recommend
+using Rust to define the extensions and subsequently export them to JSON.
+During development of the architectures native to Guppy FT, we use the `gen-extensions` command
+from our [`justfile`](https://github.com/Quantinuum/guppyft/blob/main/justfile), which invokes
+a Rust CLI (in [`cli.rs`](https://github.com/Quantinuum/guppyft/blob/main/extensions/src/cli.rs))
+to dump the JSON of all known extensions.
 
-It will be useful to define Guppy bindings for the logical extensions. Follow the pattern outlined
-in {py:mod}`guppyft.extensions.steane` to create a Python API for your extension to facilitate the remaining
-development.
+Follow the Steane examples
+for [`ops.rs`](https://github.com/Quantinuum/guppyft/blob/main/extensions/src/steane/ops.rs)
+and [`types.rs`](https://github.com/Quantinuum/guppyft/blob/main/extensions/src/steane/types.rs)
+to define the extensions, and export them to JSON using a similar mechanism to the above.
+You should obtain payloads similar to
+[`ops.json`](https://github.com/Quantinuum/guppyft/blob/main/src/guppyft//extensions/data/guppyft/steane/ops.json)
+and [`types.json`](https://github.com/Quantinuum/guppyft/blob/main/src/guppyft//extensions/data/guppyft/steane/types.json).
+
+Since you will be developing the architecture in Python, we additionally recommend to create
+a Python API for your extension. Follow the pattern outlined in {py:mod}`guppyft.extensions.steane`.
 
 ### 2. Write logical Guppy operations
-Provide the Guppy interface to create programs directly at the logical level. This is separate
-from the logical extension Python API in that you are now writing the actual operations and helpers
-you want people to use. In some cases, the operations directly forward the logical extension operations
-without any modifications. In other cases, you may want to define composite actions that break the
-intended logical semantics down into individual logical extension ops.
+
+To enable downstream users to write logical programs using Guppy, you will need to provide
+Guppy bindings for each HUGR op. These are special Guppy functions that, when compiled,
+lower directly to HUGR op instantiations. Note that you can provide additional composite
+logical actions by writing Guppy functions that in turn use the bindings. At the same time,
+you can prevent exposure of some HUGR ops by marking their Guppy bindings as private and
+discouraging direct use of them.
 
 Follow the pattern of {py:mod}`guppyft.code.steane.logical`. Take care when defining composite actions:
 You should not include any `guppylang.std.quantum` operations, as they will act on different types and
