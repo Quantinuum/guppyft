@@ -454,30 +454,6 @@ class IcebergOpsExtension:
             ),
         )
 
-    # ry
-
-    @functools.cached_property
-    def ry_def(self) -> OpDef:
-        """Apply an Ry gate to one qubit.
-
-        This is the generic operation definition. For the instantiated operation, see
-        `ry`."""
-        return self().get_op("ry")
-
-    def ry(self, k: int) -> ExtOp:
-        """Apply an Ry gate to one qubit.
-
-        Args:
-            k: The number of logical qubits encoded in the block.
-        """
-        block_type = _ICEBERG_TYPES.iceberg_block(k)
-        return self.ry_def.instantiate(
-            args=[BoundedNatArg(k)],
-            concrete_signature=FunctionType(
-                [block_type, _IDX_T, FLOAT_T], [block_type]
-            ),
-        )
-
     # rz
 
     @functools.cached_property
@@ -1276,21 +1252,6 @@ class IcebergOpsExtension:
     def rx_dynq(self) -> ExtOp:
         """Rx gate on a dynamic logical qubit."""
         return self.rx_dynq_def.instantiate([])
-
-    # ry_dynq
-
-    @functools.cached_property
-    def ry_dynq_def(self) -> OpDef:
-        """Ry gate on a dynamic logical qubit.
-
-        This is the generic operation definition. For the instantiated operation, see
-        `ry_dynq`."""
-        return self().get_op("ry_dynq")
-
-    @functools.cached_property
-    def ry_dynq(self) -> ExtOp:
-        """Ry gate on a dynamic logical qubit."""
-        return self.ry_dynq_def.instantiate([])
 
     # rz_dynq
 
