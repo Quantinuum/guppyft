@@ -1,10 +1,11 @@
 """Guppy functions and types for the Iceberg QEC architecture."""
 
 from collections.abc import Callable, Sequence
+from math import pi
 from typing import Generic, no_type_check
 
 from guppylang import guppy
-from guppylang.std.builtins import array
+from guppylang.std.builtins import array, comptime
 from guppylang.std.lang import owned
 from guppylang.std.option import Option
 from guppylang.std.quantum import Measurement
@@ -158,6 +159,12 @@ class Block(Generic[N]):  # type: ignore[misc]
     def rx(self: "Block[N]", i: int, phase: float) -> None:
         """Rx rotation of `phase` radians on the qubit with index `i`."""
         rx(self, i, phase)
+
+    @guppy
+    @no_type_check
+    def ry(self: "Block[N]", i: int, phase: float) -> None:
+        """Ry rotation of `phase` radians, implemented using Rx and Rz."""
+        ry(self, i, phase)
 
     @guppy
     @no_type_check
@@ -334,6 +341,12 @@ class Qubit:
 
     @guppy
     @no_type_check
+    def ry(self: "Qubit", phase: float) -> None:
+        """Ry rotation of `phase` radians, implemented using Rx and Rz."""
+        ry_dynq(self, phase)
+
+    @guppy
+    @no_type_check
     def rz(self: "Qubit", phase: float) -> None:
         """Rz rotation of `phase` radians."""
         rz_dynq(self, phase)
@@ -479,6 +492,15 @@ def fan_in(block: Block[N], i: int) -> None:
 @no_type_check
 def rx(block: Block[N], i: int, phase: float) -> None:
     """Rx rotation of `phase` radians on the qubit with index `i`."""
+
+
+@guppy
+@no_type_check
+def ry(block: Block[N], i: int, phase: float) -> None:
+    """Ry rotation on logical qubit `i`, using Rx and Rz with angles in radians."""
+    rx(block, i, comptime(pi / 2))
+    rz(block, i, phase)
+    rx(block, i, comptime(-pi / 2))
 
 
 @hugr_op(logical_op(iceberg_ops.rz_def))
@@ -703,6 +725,15 @@ def z_dynq(qubit: Qubit) -> None:
 @no_type_check
 def rx_dynq(qubit: Qubit, phase: float) -> None:
     """Rx rotation of `phase` radians."""
+
+
+@guppy
+@no_type_check
+def ry_dynq(qubit: Qubit, phase: float) -> None:
+    """Ry rotation of `phase` radians, implemented using Rx and Rz."""
+    rx_dynq(qubit, comptime(pi / 2))
+    rz_dynq(qubit, phase)
+    rx_dynq(qubit, comptime(-pi / 2))
 
 
 @hugr_op(logical_op(iceberg_ops.rz_dynq_def))

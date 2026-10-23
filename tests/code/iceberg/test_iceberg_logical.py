@@ -1,14 +1,16 @@
 from collections import Counter
+from math import pi
 from typing import no_type_check
 
+import numpy as np
 import pytest
 from guppylang import guppy
 from guppylang.std.builtins import array, result
 from hugr.build.dfg import Dfg
 from hugr.cli import validate
 from hugr.ext import UsedExtensionResolver
-from hugr.ops import DFG, ExtOp
-from hugr.std.float import FLOAT_T
+from hugr.ops import DFG, Const, ExtOp, Input, LoadConst, Output
+from hugr.std.float import FLOAT_T, FloatVal
 from hugr.std.int import int_t
 from hugr.tys import BoundedNatArg, ExtType, FunctionType, Option, Type
 from tket.passes import InlineFunctions, Normalize
@@ -31,6 +33,8 @@ from guppyft.code.iceberg.logical import (
     pauli_exp_all_z,
     pauli_exp_all_z_except_at,
     restore,
+    ry,
+    ry_dynq,
     try_alloc_dynq,
     xx_phase_dynq,
     yy_phase_dynq,
@@ -430,6 +434,7 @@ def test_dynamic_qubit_bindings_resolve_and_normalize() -> None:
         q0.y()
         q0.z()
         q0.rx(0.25)
+        q0.ry(0.5)
         q0.rz(0.75)
         xx_phase_dynq(q0, q1, 0.25)
         yy_phase_dynq(q0, q1, 0.5)
@@ -479,6 +484,85 @@ def test_dynamic_qubit_bindings_resolve_and_normalize() -> None:
         "try_measure_x_dynq",
         "try_measure_z_dynq",
     }
+
+
+@pytest.mark.parametrize(
+    "binding", ["block_function", "block_method", "dynamic_function", "dynamic_method"]
+)
+def test_ry_compositions(binding: str) -> None:
+    """The public Ry APIs implement the correct unitary using only Rx and Rz."""
+
+    @guppy
+    @no_type_check
+    def block_function(block: Block[4], i: int, phase: float) -> None:
+        ry(block, i, phase)
+
+    @guppy
+    @no_type_check
+    def block_method(block: Block[4], i: int, phase: float) -> None:
+        block.ry(i, phase)
+
+    @guppy
+    def dynamic_function(qubit: Qubit, phase: float) -> None:
+        ry_dynq(qubit, phase)
+
+    @guppy
+    def dynamic_method(qubit: Qubit, phase: float) -> None:
+        qubit.ry(phase)
+
+    main = {
+        "block_function": block_function,
+        "block_method": block_method,
+        "dynamic_function": dynamic_function,
+        "dynamic_method": dynamic_method,
+    }[binding]
+    h = main.compile_function().modules[0]
+    InlineFunctions()(h, inplace=True)
+    Normalize()(h, inplace=True)
+    validate(h.to_bytes())
+    assert not {"ry", "ry_dynq"} & iceberg_ops().operations.keys()
+
+    [input_node] = [
+        node for node in h.children(h.entrypoint) if isinstance(h[node].op, Input)
+    ]
+    dynamic = binding.startswith("dynamic")
+    phase_port = 1 if dynamic else 2
+    for phase in [0.0, pi / 4, -1.3, pi, 2 * pi]:
+        unitary = np.eye(2, dtype=complex)
+        wire = input_node.out(0)
+        for _ in range(3):
+            [target] = h.linked_ports(wire)
+            op = h[target.node].op
+            assert isinstance(op, ExtOp)
+            name = op.op_def().name
+            assert name in ({"rx_dynq", "rz_dynq"} if dynamic else {"rx", "rz"})
+            if not dynamic:
+                assert list(h.linked_ports(target.node.inp(1))) == [input_node.out(1)]
+            [angle_wire] = h.linked_ports(target.node.inp(phase_port))
+            if angle_wire == input_node.out(phase_port):
+                theta = phase
+            else:
+                assert isinstance(h[angle_wire.node].op, LoadConst)
+                [constant_wire] = h.linked_ports(angle_wire.node.inp(0))
+                constant = h[constant_wire.node].op
+                assert isinstance(constant, Const)
+                assert isinstance(constant.val, FloatVal)
+                theta = constant.val.v
+            pauli = np.array(
+                [[0, 1], [1, 0]] if name.startswith("rx") else [[1, 0], [0, -1]]
+            )
+            rotation = np.cos(theta / 2) * np.eye(2) - 1j * np.sin(theta / 2) * pauli
+            unitary = rotation @ unitary
+            wire = target.node.out(0)
+        [output] = h.linked_ports(wire)
+        assert isinstance(h[output.node].op, Output)
+        expected = np.array(
+            [
+                [np.cos(phase / 2), -np.sin(phase / 2)],
+                [np.sin(phase / 2), np.cos(phase / 2)],
+            ]
+        )
+        np.testing.assert_allclose(unitary, expected, atol=1e-14)
 
 
 @pytest.mark.parametrize("normalize", [False, True])
