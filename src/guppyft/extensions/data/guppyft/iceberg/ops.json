@@ -1,158 +1,8 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "name": "guppyft.iceberg.ops",
   "types": {},
   "operations": {
-    "all_but_one_rx": {
-      "extension": "guppyft.iceberg.ops",
-      "name": "all_but_one_rx",
-      "description": "Rx gate on all but one qubit.",
-      "signature": {
-        "params": [
-          {
-            "tp": "BoundedNat",
-            "bound": null
-          }
-        ],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.1",
-              "id": "block",
-              "args": [
-                {
-                  "tya": "Variable",
-                  "idx": 0,
-                  "cached_decl": {
-                    "tp": "BoundedNat",
-                    "bound": null
-                  }
-                }
-              ],
-              "bound": "A"
-            },
-            {
-              "t": "Opaque",
-              "extension": "arithmetic.int.types",
-              "extension_version": "0.1.0",
-              "id": "int",
-              "args": [
-                {
-                  "tya": "BoundedNat",
-                  "n": 6
-                }
-              ],
-              "bound": "C"
-            },
-            {
-              "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
-              "args": [],
-              "bound": "C"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.1",
-              "id": "block",
-              "args": [
-                {
-                  "tya": "Variable",
-                  "idx": 0,
-                  "cached_decl": {
-                    "tp": "BoundedNat",
-                    "bound": null
-                  }
-                }
-              ],
-              "bound": "A"
-            }
-          ]
-        }
-      },
-      "binary": false
-    },
-    "all_but_one_rz": {
-      "extension": "guppyft.iceberg.ops",
-      "name": "all_but_one_rz",
-      "description": "Rz gate on all but one qubit.",
-      "signature": {
-        "params": [
-          {
-            "tp": "BoundedNat",
-            "bound": null
-          }
-        ],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.1",
-              "id": "block",
-              "args": [
-                {
-                  "tya": "Variable",
-                  "idx": 0,
-                  "cached_decl": {
-                    "tp": "BoundedNat",
-                    "bound": null
-                  }
-                }
-              ],
-              "bound": "A"
-            },
-            {
-              "t": "Opaque",
-              "extension": "arithmetic.int.types",
-              "extension_version": "0.1.0",
-              "id": "int",
-              "args": [
-                {
-                  "tya": "BoundedNat",
-                  "n": 6
-                }
-              ],
-              "bound": "C"
-            },
-            {
-              "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
-              "args": [],
-              "bound": "C"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.1",
-              "id": "block",
-              "args": [
-                {
-                  "tya": "Variable",
-                  "idx": 0,
-                  "cached_decl": {
-                    "tp": "BoundedNat",
-                    "bound": null
-                  }
-                }
-              ],
-              "bound": "A"
-            }
-          ]
-        }
-      },
-      "binary": false
-    },
     "all_but_one_x": {
       "extension": "guppyft.iceberg.ops",
       "name": "all_but_one_x",
@@ -316,192 +166,6 @@
                 }
               ],
               "bound": "A"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.1",
-              "id": "block",
-              "args": [
-                {
-                  "tya": "Variable",
-                  "idx": 0,
-                  "cached_decl": {
-                    "tp": "BoundedNat",
-                    "bound": null
-                  }
-                }
-              ],
-              "bound": "A"
-            }
-          ]
-        }
-      },
-      "binary": true
-    },
-    "all_rx": {
-      "extension": "guppyft.iceberg.ops",
-      "name": "all_rx",
-      "description": "Rx gate on all qubits.",
-      "signature": {
-        "params": [
-          {
-            "tp": "BoundedNat",
-            "bound": null
-          }
-        ],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.1",
-              "id": "block",
-              "args": [
-                {
-                  "tya": "Variable",
-                  "idx": 0,
-                  "cached_decl": {
-                    "tp": "BoundedNat",
-                    "bound": null
-                  }
-                }
-              ],
-              "bound": "A"
-            },
-            {
-              "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
-              "args": [],
-              "bound": "C"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.1",
-              "id": "block",
-              "args": [
-                {
-                  "tya": "Variable",
-                  "idx": 0,
-                  "cached_decl": {
-                    "tp": "BoundedNat",
-                    "bound": null
-                  }
-                }
-              ],
-              "bound": "A"
-            }
-          ]
-        }
-      },
-      "binary": true
-    },
-    "all_ry": {
-      "extension": "guppyft.iceberg.ops",
-      "name": "all_ry",
-      "description": "Ry gate on all qubits.",
-      "signature": {
-        "params": [
-          {
-            "tp": "BoundedNat",
-            "bound": null
-          }
-        ],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.1",
-              "id": "block",
-              "args": [
-                {
-                  "tya": "Variable",
-                  "idx": 0,
-                  "cached_decl": {
-                    "tp": "BoundedNat",
-                    "bound": null
-                  }
-                }
-              ],
-              "bound": "A"
-            },
-            {
-              "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
-              "args": [],
-              "bound": "C"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.1",
-              "id": "block",
-              "args": [
-                {
-                  "tya": "Variable",
-                  "idx": 0,
-                  "cached_decl": {
-                    "tp": "BoundedNat",
-                    "bound": null
-                  }
-                }
-              ],
-              "bound": "A"
-            }
-          ]
-        }
-      },
-      "binary": true
-    },
-    "all_rz": {
-      "extension": "guppyft.iceberg.ops",
-      "name": "all_rz",
-      "description": "Rz gate on all qubits.",
-      "signature": {
-        "params": [
-          {
-            "tp": "BoundedNat",
-            "bound": null
-          }
-        ],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.1",
-              "id": "block",
-              "args": [
-                {
-                  "tya": "Variable",
-                  "idx": 0,
-                  "cached_decl": {
-                    "tp": "BoundedNat",
-                    "bound": null
-                  }
-                }
-              ],
-              "bound": "A"
-            },
-            {
-              "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
-              "args": [],
-              "bound": "C"
             }
           ],
           "output": [
@@ -1468,6 +1132,342 @@
         }
       },
       "binary": true
+    },
+    "pauli_exp_all_x": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "pauli_exp_all_x",
+      "description": "Apply `exp(-i theta P / 2)`, with theta in radians.\n`P` is X on every logical qubit.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
+              "id": "float64",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": true
+    },
+    "pauli_exp_all_x_except_at": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "pauli_exp_all_x_except_at",
+      "description": "Apply `exp(-i theta P / 2)`, with theta in radians.\n`P` is X on every logical qubit except `i`, where it is I.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
+              "id": "float64",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "pauli_exp_all_y": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "pauli_exp_all_y",
+      "description": "Apply `exp(-i theta P / 2)`, with theta in radians.\n`P` is Y on every logical qubit.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
+              "id": "float64",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": true
+    },
+    "pauli_exp_all_z": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "pauli_exp_all_z",
+      "description": "Apply `exp(-i theta P / 2)`, with theta in radians.\n`P` is Z on every logical qubit.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
+              "id": "float64",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": true
+    },
+    "pauli_exp_all_z_except_at": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "pauli_exp_all_z_except_at",
+      "description": "Apply `exp(-i theta P / 2)`, with theta in radians.\n`P` is Z on every logical qubit except `i`, where it is I.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.float.types",
+              "extension_version": "0.1.0",
+              "id": "float64",
+              "args": [],
+              "bound": "C"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
     },
     "restore": {
       "extension": "guppyft.iceberg.ops",
