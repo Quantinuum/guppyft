@@ -2,17 +2,17 @@
 
 import functools
 
-from hugr.ext import Extension, OpDef, TypeDef
+from hugr.ext import Extension, ExtensionRegistry, OpDef, TypeDef
 from hugr.ops import ExtOp
-from hugr.std.float import FLOAT_T
-from hugr.std.int import int_t
+from hugr.std.int import INT_TYPES_EXTENSION, int_t
 from hugr.tys import BoundedNatArg, ExtType, FunctionType, Option
-from tket_exts import measurement
+from tket_exts import measurement, rotation
 
-from ._util import load_extension
+from ._util import load_extension, load_extension_json
 
 _IDX_T = int_t(6)
 _MEAS_T = measurement.measurement_t
+_ROTATION_T = rotation.rotation
 
 
 class IcebergTypesExtension:
@@ -96,9 +96,16 @@ class IcebergOpsExtension:
 
     def __call__(self) -> Extension:
         """Returns the Iceberg ops extension."""
-        return load_extension(
-            "guppyft.iceberg.ops", ["guppyft.std.types", "guppyft.iceberg.types"]
+        registry = ExtensionRegistry.from_extensions(
+            [
+                _ICEBERG_TYPES(),
+                load_extension("guppyft.std.types"),
+                INT_TYPES_EXTENSION,
+                measurement(),
+                rotation(),
+            ]
         )
+        return Extension.from_json(load_extension_json("guppyft.iceberg.ops"), registry)
 
     # x
 
@@ -450,7 +457,7 @@ class IcebergOpsExtension:
         return self.rx_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
-                [block_type, _IDX_T, FLOAT_T], [block_type]
+                [block_type, _IDX_T, _ROTATION_T], [block_type]
             ),
         )
 
@@ -474,7 +481,7 @@ class IcebergOpsExtension:
         return self.rz_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
-                [block_type, _IDX_T, FLOAT_T], [block_type]
+                [block_type, _IDX_T, _ROTATION_T], [block_type]
             ),
         )
 
@@ -512,7 +519,7 @@ class IcebergOpsExtension:
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.pauli_exp_all_x_def.instantiate(
             args=[BoundedNatArg(k)],
-            concrete_signature=FunctionType([block_type, FLOAT_T], [block_type]),
+            concrete_signature=FunctionType([block_type, _ROTATION_T], [block_type]),
         )
 
     # pauli_exp_all_y
@@ -549,7 +556,7 @@ class IcebergOpsExtension:
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.pauli_exp_all_y_def.instantiate(
             args=[BoundedNatArg(k)],
-            concrete_signature=FunctionType([block_type, FLOAT_T], [block_type]),
+            concrete_signature=FunctionType([block_type, _ROTATION_T], [block_type]),
         )
 
     # pauli_exp_all_z
@@ -586,7 +593,7 @@ class IcebergOpsExtension:
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         return self.pauli_exp_all_z_def.instantiate(
             args=[BoundedNatArg(k)],
-            concrete_signature=FunctionType([block_type, FLOAT_T], [block_type]),
+            concrete_signature=FunctionType([block_type, _ROTATION_T], [block_type]),
         )
 
     # pauli_exp_all_x_except_at
@@ -628,7 +635,7 @@ class IcebergOpsExtension:
         return self.pauli_exp_all_x_except_at_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
-                [block_type, _IDX_T, FLOAT_T], [block_type]
+                [block_type, _IDX_T, _ROTATION_T], [block_type]
             ),
         )
 
@@ -671,7 +678,7 @@ class IcebergOpsExtension:
         return self.pauli_exp_all_z_except_at_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
-                [block_type, _IDX_T, FLOAT_T], [block_type]
+                [block_type, _IDX_T, _ROTATION_T], [block_type]
             ),
         )
 
@@ -714,7 +721,7 @@ class IcebergOpsExtension:
         return self.pauli_exp_all_x_except_z_at_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
-                [block_type, _IDX_T, FLOAT_T], [block_type]
+                [block_type, _IDX_T, _ROTATION_T], [block_type]
             ),
         )
 
@@ -757,7 +764,7 @@ class IcebergOpsExtension:
         return self.pauli_exp_all_z_except_x_at_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
-                [block_type, _IDX_T, FLOAT_T], [block_type]
+                [block_type, _IDX_T, _ROTATION_T], [block_type]
             ),
         )
 
@@ -803,7 +810,7 @@ class IcebergOpsExtension:
         return self.xx_phase_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
-                [block_type, _IDX_T, _IDX_T, FLOAT_T], [block_type]
+                [block_type, _IDX_T, _IDX_T, _ROTATION_T], [block_type]
             ),
         )
 
@@ -827,7 +834,7 @@ class IcebergOpsExtension:
         return self.yy_phase_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
-                [block_type, _IDX_T, _IDX_T, FLOAT_T], [block_type]
+                [block_type, _IDX_T, _IDX_T, _ROTATION_T], [block_type]
             ),
         )
 
@@ -851,7 +858,7 @@ class IcebergOpsExtension:
         return self.zz_phase_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
-                [block_type, _IDX_T, _IDX_T, FLOAT_T], [block_type]
+                [block_type, _IDX_T, _IDX_T, _ROTATION_T], [block_type]
             ),
         )
 
@@ -921,7 +928,7 @@ class IcebergOpsExtension:
         return self.xx_phase_between_blocks_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
-                [block_type, block_type, _IDX_T, _IDX_T, FLOAT_T],
+                [block_type, block_type, _IDX_T, _IDX_T, _ROTATION_T],
                 [block_type, block_type],
             ),
         )
@@ -948,7 +955,7 @@ class IcebergOpsExtension:
         return self.yy_phase_between_blocks_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
-                [block_type, block_type, _IDX_T, _IDX_T, FLOAT_T],
+                [block_type, block_type, _IDX_T, _IDX_T, _ROTATION_T],
                 [block_type, block_type],
             ),
         )
@@ -975,7 +982,7 @@ class IcebergOpsExtension:
         return self.zz_phase_between_blocks_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
-                [block_type, block_type, _IDX_T, _IDX_T, FLOAT_T],
+                [block_type, block_type, _IDX_T, _IDX_T, _ROTATION_T],
                 [block_type, block_type],
             ),
         )

@@ -1165,9 +1165,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }
@@ -1240,9 +1240,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }
@@ -1315,9 +1315,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }
@@ -1377,9 +1377,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }
@@ -1439,9 +1439,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }
@@ -1514,9 +1514,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }
@@ -1589,9 +1589,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }
@@ -1678,9 +1678,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }
@@ -1726,9 +1726,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }
@@ -1792,9 +1792,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }
@@ -1840,9 +1840,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }
@@ -2575,9 +2575,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }
@@ -2680,9 +2680,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }
@@ -2753,9 +2753,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }
@@ -3018,9 +3018,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }
@@ -3123,9 +3123,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }
@@ -3196,9 +3196,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }
@@ -3528,9 +3528,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }
@@ -3633,9 +3633,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }
@@ -3706,9 +3706,9 @@
             },
             {
               "t": "Opaque",
-              "extension": "arithmetic.float.types",
-              "extension_version": "0.1.0",
-              "id": "float64",
+              "extension": "tket.rotation",
+              "extension_version": "0.2.0",
+              "id": "rotation",
               "args": [],
               "bound": "C"
             }

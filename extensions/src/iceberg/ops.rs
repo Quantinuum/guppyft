@@ -15,11 +15,11 @@ use hugr::{
         },
     },
     ops::{ExtensionOp, OpName},
-    std_extensions::arithmetic::{float_types::float64_type, int_types::int_type},
+    std_extensions::arithmetic::int_types::int_type,
     types::{FuncValueType, PolyFuncTypeRV, Signature, Type, TypeArg, type_param::TypeParam},
 };
 use strum::{EnumIter, EnumString, IntoStaticStr};
-use tket::extension::measurement::measurement_type;
+use tket::extension::{measurement::measurement_type, rotation::rotation_type};
 
 use crate::iceberg::types::{borrowed_block_tv, dynamic_logical_qubit_type, pre_block_tv};
 use crate::std::types::logical_measurement_tv;
@@ -36,6 +36,7 @@ pub const VERSION: semver::Version = semver::Version::new(0, 3, 1);
 /// Those operations that are "addressable", i.e. are associated with one or
 /// more specific logical qubits within the block, take logical qubit indices
 /// as integer inputs. Invalid indices cause a runtime panic.
+/// All angle inputs use the `tket.rotation.rotation` type.
 #[derive(
     Clone, Copy, Debug, DocumentedVariants, Hash, PartialEq, Eq, EnumIter, IntoStaticStr, EnumString,
 )]
@@ -254,7 +255,7 @@ impl ValidateJustArgs for ArgsValidator {
 
 fn vec_of_blocks_and_angles(n_blocks: usize, n_angles: usize) -> Vec<Type> {
     let mut types: Vec<Type> = vec![block_tv(0); n_blocks];
-    types.extend(vec![float64_type(); n_angles]);
+    types.extend(vec![rotation_type(); n_angles]);
     types
 }
 
@@ -265,7 +266,7 @@ fn vec_of_blocks_and_ints_and_angles(
 ) -> Vec<Type> {
     let mut types: Vec<Type> = vec![block_tv(0); n_blocks];
     types.extend(vec![int_type(6); n_indices]);
-    types.extend(vec![float64_type(); n_angles]);
+    types.extend(vec![rotation_type(); n_angles]);
     types
 }
 
@@ -317,11 +318,11 @@ fn sig_2q_phase(n_angles: usize) -> SignatureFunc {
 }
 
 /// Signature of an operation that acts on a number of dynamic logical qubits
-/// with a number of additional angle qubits.
+/// with a number of additional rotation inputs.
 fn sig_qubits_angles(n_qubits: usize, n_angles: usize) -> SignatureFunc {
     let mut in_types: Vec<Type> = vec![dynamic_logical_qubit_type(); n_qubits];
     let out_types: Vec<Type> = in_types.clone();
-    in_types.extend(vec![float64_type(); n_angles]);
+    in_types.extend(vec![rotation_type(); n_angles]);
     Signature::new(in_types, out_types).into()
 }
 
@@ -575,6 +576,7 @@ pub static EXTENSION: LazyLock<Arc<Extension>> = LazyLock::new(|| {
 #[cfg(test)]
 mod tests {
     use strum::IntoEnumIterator;
+    use tket::extension::rotation::ConstRotation;
 
     use hugr::extension::prelude::UnwrapBuilder;
     use hugr::{
@@ -586,10 +588,7 @@ mod tests {
         extension::ExtensionRegistry,
         ops::DataflowOpTrait,
         package::Package,
-        std_extensions::{
-            arithmetic::{float_types::ConstF64, int_types::ConstInt},
-            std_reg,
-        },
+        std_extensions::{arithmetic::int_types::ConstInt, std_reg},
         types::Signature,
     };
 
@@ -620,28 +619,50 @@ mod tests {
     }
 
     #[test]
-    fn test_pauli_exponential_signatures() {
+    fn test_rotation_signatures() {
         use IcebergOpDef::*;
         for k in [2, 4] {
-            for (def, n_indices) in [
-                (pauli_exp_all_x, 0),
-                (pauli_exp_all_y, 0),
-                (pauli_exp_all_z, 0),
-                (pauli_exp_all_x_except_at, 1),
-                (pauli_exp_all_z_except_at, 1),
-                (pauli_exp_all_x_except_z_at, 1),
-                (pauli_exp_all_z_except_x_at, 1),
+            for (def, n_blocks, n_indices, n_qubits) in [
+                (rx, 1, 1, 0),
+                (rz, 1, 1, 0),
+                (pauli_exp_all_x, 1, 0, 0),
+                (pauli_exp_all_y, 1, 0, 0),
+                (pauli_exp_all_z, 1, 0, 0),
+                (pauli_exp_all_x_except_at, 1, 1, 0),
+                (pauli_exp_all_z_except_at, 1, 1, 0),
+                (pauli_exp_all_x_except_z_at, 1, 1, 0),
+                (pauli_exp_all_z_except_x_at, 1, 1, 0),
+                (xx_phase, 1, 2, 0),
+                (yy_phase, 1, 2, 0),
+                (zz_phase, 1, 2, 0),
+                (xx_phase_between_blocks, 2, 2, 0),
+                (yy_phase_between_blocks, 2, 2, 0),
+                (zz_phase_between_blocks, 2, 2, 0),
+                (rx_dynq, 0, 0, 1),
+                (rz_dynq, 0, 0, 1),
+                (xx_phase_dynq, 0, 0, 2),
+                (yy_phase_dynq, 0, 0, 2),
+                (zz_phase_dynq, 0, 0, 2),
             ] {
-                let mut inputs = vec![block_type(k)];
+                let mut outputs = vec![block_type(k); n_blocks];
+                outputs.extend(vec![dynamic_logical_qubit_type(); n_qubits]);
+                let mut inputs = outputs.clone();
                 inputs.extend(vec![int_type(6); n_indices]);
-                inputs.push(float64_type());
+                inputs.push(rotation_type());
+                let args: Vec<TypeArg> = if n_blocks == 0 {
+                    vec![]
+                } else {
+                    vec![k.into()]
+                };
                 assert_eq!(
-                    def.with_size(k)
+                    def.instantiate(&args)
+                        .unwrap()
                         .to_extension_op()
                         .unwrap()
                         .signature()
                         .as_ref(),
-                    &Signature::new(inputs, [block_type(k)])
+                    &Signature::new(inputs, outputs),
+                    "{def:?} with block size {k}"
                 );
             }
         }
@@ -772,7 +793,7 @@ mod tests {
             )
             .unwrap();
         linear.append(allx, [0]).unwrap();
-        let angle = linear.add_constant(ConstF64::new(0.25));
+        let angle = linear.add_constant(ConstRotation::PI_4);
         linear
             .append_and_consume(allrz, [CircuitUnit::Linear(0), CircuitUnit::Wire(angle)])
             .unwrap();

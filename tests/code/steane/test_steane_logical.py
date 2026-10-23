@@ -1,12 +1,14 @@
 from guppylang import guppy
+from guppylang.std.angles import angle, pi
 from guppylang.std.builtins import result
 from hugr.build.dfg import Dfg
 from hugr.cli import validate
-from hugr.ops import DFG
-from hugr.tys import ExtType
+from hugr.ops import DFG, ExtOp
+from hugr.tys import ExtType, FunctionType
 from tket.passes import InlineFunctions, Normalize
+from tket_exts import rotation
 
-from guppyft.code.steane.logical import Qubit, cx, inject_t, prep_t_state
+from guppyft.code.steane.logical import Qubit, cx, inject_t, prep_t_state, rz
 from guppyft.extensions import steane_ops, steane_types
 
 
@@ -119,4 +121,32 @@ def test_guppy_hugr() -> None:
     [h_node] = [child for child in children if "h" in h[child].op.name()]
     assert len(list(h.incoming_links(h_node))) == 1  # CallIndirect
     assert len(list(h.outgoing_links(h_node))) == 1  # free
+    validate(h.to_bytes())
+
+
+def test_rz_constant_and_runtime_angles() -> None:
+    """The shared rotation compiler still supports Steane's qubit-only inputs."""
+
+    @guppy
+    def main(qubit: Qubit, phase: angle) -> None:
+        rz(qubit, phase)
+        rz(qubit, pi / 4)
+
+    h = main.compile_function().modules[0]
+    InlineFunctions()(h, inplace=True)
+    Normalize()(h, inplace=True)
+    rotations = [
+        data.op
+        for node in h.children(h.entrypoint)
+        if isinstance((data := h[node]).op, ExtOp)
+        and data.op.op_def().get_extension().name == steane_ops().name
+        and data.op.op_def().name == "rz"
+    ]
+    qubit_type = steane_types.steane_qubit()
+    assert len(rotations) == 2
+    for op in rotations:
+        assert op.outer_signature() == FunctionType(
+            [qubit_type, rotation.rotation], [qubit_type]
+        )
+        assert op.args == []
     validate(h.to_bytes())
