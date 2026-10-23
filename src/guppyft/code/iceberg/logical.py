@@ -256,6 +256,38 @@ class Block(Generic[N]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
+    def pauli_exp_all_x_except_z_at(self: "Block[N]", i: int, phase: float) -> None:
+        r"""Apply the Pauli exponential with Z at ``i`` and X elsewhere.
+
+        .. math::
+
+            \exp(-i \theta (
+                X^{\otimes i} \otimes Z \otimes X^{\otimes(k-i-1)}
+            ) / 2)
+
+        where :math:`\theta` is ``phase`` in radians and :math:`k` is the
+        number of logical qubits in the block.
+        """
+        pauli_exp_all_x_except_z_at(self, i, phase)
+
+    @guppy
+    @no_type_check
+    def pauli_exp_all_z_except_x_at(self: "Block[N]", i: int, phase: float) -> None:
+        r"""Apply the Pauli exponential with X at ``i`` and Z elsewhere.
+
+        .. math::
+
+            \exp(-i \theta (
+                Z^{\otimes i} \otimes X \otimes Z^{\otimes(k-i-1)}
+            ) / 2)
+
+        where :math:`\theta` is ``phase`` in radians and :math:`k` is the
+        number of logical qubits in the block.
+        """
+        pauli_exp_all_z_except_x_at(self, i, phase)
+
+    @guppy
+    @no_type_check
     def all_h(self: "Block[N]") -> None:
         """H gate on all qubits."""
         all_h(self)
@@ -600,6 +632,38 @@ def pauli_exp_all_z_except_at(block: Block[N], i: int, phase: float) -> None:
 
         \exp(-i \theta (
             Z^{\otimes i} \otimes I \otimes Z^{\otimes(k-i-1)}
+        ) / 2)
+
+    where :math:`\theta` is ``phase`` in radians and :math:`k` is the
+    number of logical qubits in the block.
+    """
+
+
+@hugr_op(logical_op(iceberg_ops.pauli_exp_all_x_except_z_at_def))
+@no_type_check
+def pauli_exp_all_x_except_z_at(block: Block[N], i: int, phase: float) -> None:
+    r"""Apply the Pauli exponential with Z at ``i`` and X elsewhere.
+
+    .. math::
+
+        \exp(-i \theta (
+            X^{\otimes i} \otimes Z \otimes X^{\otimes(k-i-1)}
+        ) / 2)
+
+    where :math:`\theta` is ``phase`` in radians and :math:`k` is the
+    number of logical qubits in the block.
+    """
+
+
+@hugr_op(logical_op(iceberg_ops.pauli_exp_all_z_except_x_at_def))
+@no_type_check
+def pauli_exp_all_z_except_x_at(block: Block[N], i: int, phase: float) -> None:
+    r"""Apply the Pauli exponential with X at ``i`` and Z elsewhere.
+
+    .. math::
+
+        \exp(-i \theta (
+            Z^{\otimes i} \otimes X \otimes Z^{\otimes(k-i-1)}
         ) / 2)
 
     where :math:`\theta` is ``phase`` in radians and :math:`k` is the
