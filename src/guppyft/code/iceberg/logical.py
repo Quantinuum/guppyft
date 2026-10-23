@@ -163,7 +163,15 @@ class Block(Generic[N]):  # type: ignore[misc]
     @guppy
     @no_type_check
     def ry(self: "Block[N]", i: int, phase: float) -> None:
-        """Ry rotation of `phase` radians, implemented using Rx and Rz."""
+        r"""Ry rotation of ``phase`` radians on logical qubit ``i``.
+
+        Ry is not a primitive and is implemented here as
+        .. math::
+
+            R_y(\theta) = R_x(-\pi/2) R_z(\theta) R_x(\pi/2)
+
+        where :math:`\theta` is ``phase``.
+        """
         ry(self, i, phase)
 
     @guppy
@@ -342,7 +350,15 @@ class Qubit:
     @guppy
     @no_type_check
     def ry(self: "Qubit", phase: float) -> None:
-        """Ry rotation of `phase` radians, implemented using Rx and Rz."""
+        r"""Ry rotation of ``phase`` radians on a dynamic logical qubit.
+
+        Ry is not a primitive and is implemented here as
+        .. math::
+
+            R_y(\theta) = R_x(-\pi/2) R_z(\theta) R_x(\pi/2)
+
+        where :math:`\theta` is ``phase``.
+        """
         ry_dynq(self, phase)
 
     @guppy
@@ -497,7 +513,15 @@ def rx(block: Block[N], i: int, phase: float) -> None:
 @guppy
 @no_type_check
 def ry(block: Block[N], i: int, phase: float) -> None:
-    """Ry rotation on logical qubit `i`, using Rx and Rz with angles in radians."""
+    r"""Ry rotation of ``phase`` radians on logical qubit ``i``.
+
+    Ry is not a primitive and is implemented here as
+    .. math::
+
+        R_y(\theta) = R_x(-\pi/2) R_z(\theta) R_x(\pi/2)
+
+    where :math:`\theta` is ``phase``.
+    """
     rx(block, i, comptime(pi / 2))
     rz(block, i, phase)
     rx(block, i, comptime(-pi / 2))
@@ -730,7 +754,15 @@ def rx_dynq(qubit: Qubit, phase: float) -> None:
 @guppy
 @no_type_check
 def ry_dynq(qubit: Qubit, phase: float) -> None:
-    """Ry rotation of `phase` radians, implemented using Rx and Rz."""
+    r"""Ry rotation of ``phase`` radians on a dynamic logical qubit.
+
+    Ry is not a primitive and is implemented here as
+    .. math::
+
+        R_y(\theta) = R_x(-\pi/2) R_z(\theta) R_x(\pi/2)
+
+    where :math:`\theta` is ``phase``.
+    """
     rx_dynq(qubit, comptime(pi / 2))
     rz_dynq(qubit, phase)
     rx_dynq(qubit, comptime(-pi / 2))
