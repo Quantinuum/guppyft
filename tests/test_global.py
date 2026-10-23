@@ -9,7 +9,7 @@ from guppylang.std.builtins import owned, result
 from guppylang.std.qsystem.random import RNG
 from guppylang.std.quantum import discard, discard_array, measure, qubit, x
 
-from guppyft.globals import map_global, with_global
+from guppyft.globals import map_global, mapped, with_global
 
 
 def run_global_test(
@@ -455,3 +455,73 @@ def test_map_global_tuple_type() -> None:
             ],
         },
     )
+
+
+def test_global_mapped_no_args_1_ret() -> None:
+    @mapped()
+    def map_int_return(g: tuple[int, int]) -> tuple[tuple[int, int], int]:
+        return g, 0
+
+    @guppy
+    def main() -> int:
+        return map_int_return()
+
+    main.compile()
+
+
+def test_global_mapped_1_arg_2_rets() -> None:
+    @mapped()
+    def map_int_tuple_return(
+        g: tuple[int, int], x: int
+    ) -> tuple[tuple[int, int], int, int]:
+        a, b = g
+        return g, x + a, x + b
+
+    @guppy
+    def main(x: int) -> None:
+        i, j = map_int_tuple_return(x)
+        result("ret1", i)
+        result("ret2", j)
+
+    main.compile_function()
+
+
+def test_global_mapped_2_args_1_ret() -> None:
+    @mapped()
+    def map_float_return(
+        g: tuple[int, int], f: float, h: float
+    ) -> tuple[tuple[int, int], float]:
+        return g, (f if g[0] > g[1] else h)
+
+    @guppy
+    def main(f: float, g: float) -> float:
+        return map_float_return(f, g)
+
+    main.compile_function()
+
+
+def test_global_mapped_1_arg_no_ret() -> None:
+    @mapped()
+    def map_no_return(g: int, x: int) -> int:
+        g += x
+        return g
+
+    @guppy
+    def main(x: int) -> None:
+        map_no_return(x)
+
+    main.compile_function()
+
+
+def test_global_mapped_tuple_1_arg_no_ret() -> None:
+    @mapped()
+    def map_no_return(g: tuple[int, int], x: int) -> tuple[tuple[int, int]]:
+        a, b = g
+        a += x
+        return ((a, b),)
+
+    @guppy
+    def main(x: int) -> None:
+        map_no_return(x)
+
+    main.compile_function()

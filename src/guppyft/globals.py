@@ -2,11 +2,14 @@
 
 import ast
 from collections.abc import Callable
+from dataclasses import dataclass, field
 from typing import (
+    Any,
     Concatenate,
     ParamSpec,
     TypeVar,
     TypeVarTuple,
+    cast,
     overload,
     override,
 )
@@ -442,52 +445,149 @@ def map_global[G, **P, *R](  # type: ignore[empty-body]
     """
 
 
-@custom_guppy_decorator
-def mapped[G, **INPUTS, *OUTPUT](
-    func: Callable[Concatenate[G, INPUTS], G | tuple[G, *OUTPUT]],
-) -> GuppyFunctionDefinition[INPUTS, tuple[*OUTPUT]]:
-    # Want to output:
-    # @guppy / @guppy.comptime
-    # def foo(ins: INPUTS) -> OUTPUT:
-    #    return map_global(func, ins)
-    # However, we can't do that in guppy... :-()
-    # from guppylang_internals.decorator import custom_function
-    from guppylang_internals.definition.function import CheckedFunctionDef
-    from guppylang_internals.engine import ENGINE
-    from guppylang_internals.nodes import GlobalName
-    # from guppylang_internals.tys import Effect
-    # from guppylang_internals.tys.ty import Type
-    # from guppyft.globals import _GlobalMapChecker, _GlobalOpCompiler, GLOBAL_VAR_NAME, _map_op_instantiate
-    # import ast
-    # from typing import override
+def check_asts_equal(a: ast.expr | None, b: ast.expr | None) -> bool:
+    """Check if two AST expressions are equal."""
+    if a is None or b is None:
+        return a is b
+    return ast.dump(a) == ast.dump(b)
 
-    body = guppy(func)
-    checked = ENGINE.get_checked(body.id, ())  # Assume/require monomorphic (!)
-    assert isinstance(checked, CheckedFunctionDef)
-    assert not checked.ty.params
-    assert not checked.ty.comptime_args
 
-    # first_arg = checked.inputs[0].ty
-    # assert isinstance(first_arg, StructType) and first_arg.defn == ENGINE.get_checked(STATE.id, ())
-    # sig = FunctionType(checked.inputs[1:], checked.output)
-    class MappedChecker(_GlobalMapChecker):
-        @override
-        def synthesize(self, args: list[ast.expr]) -> tuple[ast.expr, Type]:
-            breakpoint() # mypy doesn't like __name__ - what should we use?
-            return super().synthesize([GlobalName(body.__name__, body.id), *args])
+@dataclass
+class mapped:
+    """Decorator that returns a guppy function that uses the decorated function
+    as argument to `map_global`. The decorated function should take the global
+    value as first argument, and return either
+    * a tuple of the new global and the desired return type
+    * just the new value for the global, if no return value is desired.
+    The generated function will remove the global from argument and result type.
+    """
 
-    class MappedCompiler(_GlobalOpCompiler):
-        def __init__(self) -> None:
-            super().__init__(_map_op_instantiate(GLOBAL_VAR_NAME))
+    link_name: str | None = field(default=None)
 
-    @custom_function(
-        compiler=MappedCompiler(),
-        checker=MappedChecker(),
-        # signature is not required since we have a checker, and
-        # (TODO CHECK) omitting signature means we are not a higher-order-value
-        # - which wouldn't work anyway since we need custom compilation of calls.
-        effects=[Effect.ANY],
-    )
-    def impl() -> None: ...  # signature ignored by guppy
+    @overload
+    def __call__[G, **P, R](  # type: ignore[overload-overlap]
+        self,
+        callback_func: Callable[Concatenate[G, P], tuple[G, R]],
+    ) -> GuppyFunctionDefinition[P, R]: ...
+    @overload
+    def __call__[G, **P, *R](
+        self, func: Callable[Concatenate[G, P], tuple[G, *R]]
+    ) -> GuppyFunctionDefinition[P, tuple[*R]]: ...
+    @overload
+    def __call__[G, **P](
+        self, callback_func: Callable[Concatenate[G, P], G]
+    ) -> GuppyFunctionDefinition[P, None]: ...
+    @custom_guppy_decorator  # type: ignore[misc]
+    def __call__[G, **INPUTS, *OUTPUT](
+        self,
+        func: Callable[Concatenate[G, INPUTS], G | tuple[G, *OUTPUT]],
+    ) -> GuppyFunctionDefinition[INPUTS, tuple[*OUTPUT] | None]:
+        """Decorate the guppy function to pass to `map_global`."""
+        # Want to output:
+        # @guppy / @guppy.comptime
+        # def foo(ins: INPUTS) -> OUTPUT:
+        #    return map_global(func, ins)
+        # However, we can't do that in guppy... :-()
 
-    return impl  # type: ignore[return-value] # mypy thinks impl is ()->None
+        from guppylang.decorator import get_calling_frame
+        from guppylang_internals.ast_util import annotate_location
+        from guppylang_internals.definition.common import DefId
+        from guppylang_internals.definition.function import (
+            CheckedFunctionDef,
+            ParsedFunctionDef,
+        )
+        from guppylang_internals.engine import DEF_STORE, ENGINE
+        from guppylang_internals.nodes import GlobalName
+        from guppylang_internals.span import to_span
+
+        wrapped: GuppyFunctionDefinition[
+            Concatenate[G, INPUTS], G | tuple[G, *OUTPUT]
+        ] = guppy(func)
+        # Does calling get_checked here break everything by calling check() -> reset??
+        checked = ENGINE.get_checked(wrapped.id, ())  # Assume/require monomorphic (!)
+        assert isinstance(checked, CheckedFunctionDef)
+        sig = checked.ty
+        assert not sig.params
+        assert not sig.comptime_args
+
+        # 1. build python AST for a function of type `sig` that returns result of
+        # calling `map_global` with `func` as first argument followed by the rest
+        # of the function's arguments
+        first_arg = with_loc(checked.defined_at, GlobalName(checked.name, wrapped.id))
+        original_args = checked.defined_at.args
+        assert not original_args.posonlyargs  # guppy doesn't allow
+        assert not original_args.kwonlyargs  # guppy doesn't allow (right?)
+        assert not original_args.kwarg
+        assert not original_args.vararg
+        assert not original_args.defaults
+        assert not original_args.kw_defaults
+        original_args = checked.defined_at.args.args
+        remaining_args = original_args[1:]  # strip off value of global passed in
+        call_args: list[ast.expr] = [
+            first_arg,
+            *(ast.Name(id=arg.arg, ctx=ast.Load()) for arg in remaining_args),
+        ]
+
+        # Remove the first return value
+        if sig.output == sig.inputs[0].ty:
+            # Note if the "global" type is a tuple, this won't work (due to guppy
+            # unpacking of tuples) and will be rejected by GlobalMapChecker
+            output_ty = NoneType()
+        else:
+            assert isinstance(sig.output, TupleType)
+            assert sig.output.element_types[0] == sig.inputs[0].ty
+            output_tys = sig.output.element_types[1:]
+            output_ty = (
+                output_tys[0]
+                if len(output_tys) == 1 and not isinstance(output_tys[0], TupleType)
+                else TupleType(output_tys)
+            )
+
+        sig = FunctionType(sig.inputs[1:], output_ty)
+        link_name = checked.link_name if self.link_name is None else self.link_name
+        func_name = GlobalName(
+            "map_global",
+            cast("GuppyFunctionDefinition[Any, Any]", map_global).id,
+        )
+        func = ast.FunctionDef(
+            name=checked.name + "_wrapped",
+            args=ast.arguments(
+                posonlyargs=[],
+                args=remaining_args,
+                vararg=None,
+                kwonlyargs=[],
+                kw_defaults=[],
+                kwarg=None,
+                defaults=[],
+            ),
+            body=[
+                ast.Return(
+                    value=ast.Call(
+                        func=func_name,
+                        args=call_args,
+                        keywords=[],
+                    )
+                )
+            ],
+            decorator_list=[],
+            type_comment=None,
+        )
+        annotate_location(func, "<synthetic>", to_span(checked.defined_at).file, 0)
+        ast.copy_location(func, checked.defined_at)
+        ast.fix_missing_locations(func)
+        # func.line_offset = func.lineno
+        func_name.source = "map_global"  # type: ignore[attr-defined]
+
+        # 2. return guppy function just as `def custom_function` does
+        wrapper = ParsedFunctionDef(
+            id=DefId.fresh(),
+            name=checked.name + "_wrapped",
+            defined_at=func,
+            is_static=False,  # ???
+            ty=sig,
+            docstring=checked.docstring,
+            link_name=link_name,
+        )
+
+        DEF_STORE.register_def(wrapper, get_calling_frame())
+        return GuppyFunctionDefinition(wrapper)

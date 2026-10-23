@@ -194,8 +194,9 @@ class ToyK2Builder:
 
             return decorator
 
-        # We have to declare this rather than use composition of _register_op_replacement
-        # and mapped because _register... adds link_name, which must be done inside @mapped.
+        # We have to declare this rather than use @_register_op_replacement and @mapped
+        # separately because _register... specifies the link_name.
+        # Note that really we need all the overload's of mapped.__call__ here...
         def _register_op_replacement_mapped[G, **INPUTS, *OUTPUT](
             op_def: OpDef,
         ) -> Callable[
@@ -204,16 +205,13 @@ class ToyK2Builder:
         ]:
             @custom_guppy_decorator
             def decorator(
-                func: Callable[Concatenate[G, INPUTS], G | tuple[G, *OUTPUT]],
+                func: Callable[Concatenate[G, INPUTS], Any],
             ) -> GuppyFunctionDefinition[INPUTS, tuple[*OUTPUT]]:
                 # Generate guppy function
                 name = f"link.{op_def.qualified_name()}"
-                func2: Callable[Concatenate[G, INPUTS], G | tuple[G, *OUTPUT]] = (
-                    link_name(name)(func)
-                )
-                guppy_func: GuppyFunctionDefinition[INPUTS, tuple[*OUTPUT]] = mapped(
-                    func2
-                )
+                guppy_func: GuppyFunctionDefinition[INPUTS, Any] = mapped(
+                    link_name=name
+                )(func)
 
                 # Register in library and for op replacement
                 lib.members.append(guppy_func.id)
