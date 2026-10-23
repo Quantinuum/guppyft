@@ -29,7 +29,7 @@ use super::types::block_tv;
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.iceberg.ops");
 /// Extension version.
-pub const VERSION: semver::Version = semver::Version::new(0, 3, 0);
+pub const VERSION: semver::Version = semver::Version::new(0, 3, 1);
 
 /// Logical Iceberg operations.
 ///
@@ -91,6 +91,12 @@ pub enum IcebergOpDef {
     /// Apply `exp(-i theta P / 2)`, with theta in radians.
     /// `P` is Z on every logical qubit except `i`, where it is I.
     pauli_exp_all_z_except_at,
+    /// Apply `exp(-i theta P / 2)`, with theta in radians.
+    /// `P` is X on every logical qubit except `i`, where it is Z.
+    pauli_exp_all_x_except_z_at,
+    /// Apply `exp(-i theta P / 2)`, with theta in radians.
+    /// `P` is Z on every logical qubit except `i`, where it is X.
+    pauli_exp_all_z_except_x_at,
     /// H gate on all qubits.
     all_h,
     /// XXPhase gate.
@@ -371,6 +377,8 @@ impl MakeOpDef for IcebergOpDef {
             pauli_exp_all_z => sig_1_block(1, 0),
             pauli_exp_all_x_except_at => sig_1_block(1, 1),
             pauli_exp_all_z_except_at => sig_1_block(1, 1),
+            pauli_exp_all_x_except_z_at => sig_1_block(1, 1),
+            pauli_exp_all_z_except_x_at => sig_1_block(1, 1),
             all_h => sig_1_block(0, 0),
             xx_phase => sig_1_block(1, 2),
             yy_phase => sig_1_block(1, 2),
@@ -595,7 +603,7 @@ mod tests {
     fn test_iceberg_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.iceberg.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 59);
+        assert_eq!(EXTENSION.operations().count(), 61);
     }
 
     #[test]
@@ -621,6 +629,8 @@ mod tests {
                 (pauli_exp_all_z, 0),
                 (pauli_exp_all_x_except_at, 1),
                 (pauli_exp_all_z_except_at, 1),
+                (pauli_exp_all_x_except_z_at, 1),
+                (pauli_exp_all_z_except_x_at, 1),
             ] {
                 let mut inputs = vec![block_type(k)];
                 inputs.extend(vec![int_type(6); n_indices]);

@@ -29,9 +29,11 @@ from guppyft.code.iceberg.logical import (
     measure_all,
     pauli_exp_all_x,
     pauli_exp_all_x_except_at,
+    pauli_exp_all_x_except_z_at,
     pauli_exp_all_y,
     pauli_exp_all_z,
     pauli_exp_all_z_except_at,
+    pauli_exp_all_z_except_x_at,
     restore,
     ry,
     ry_dynq,
@@ -85,8 +87,8 @@ def test_exported_extensions() -> None:
         "pre_block": iceberg_types.iceberg_pre_block_def,
         "qubit": iceberg_types.iceberg_qubit_def,
     }
-    assert len(ops_extn.operations) == 59
-    assert str(ops_extn.version) == "0.3.0"
+    assert len(ops_extn.operations) == 61
+    assert str(ops_extn.version) == "0.3.1"
     for op_name, op_def in ops_extn.operations.items():
         assert op_def == iceberg_ops.__getattribute__(f"{op_name}_def")
 
@@ -121,6 +123,8 @@ def test_exported_extensions() -> None:
         "rz",
         "pauli_exp_all_x_except_at",
         "pauli_exp_all_z_except_at",
+        "pauli_exp_all_x_except_z_at",
+        "pauli_exp_all_z_except_x_at",
         "try_measure_one_x",
         "try_measure_one_z",
         "xx",
@@ -203,6 +207,8 @@ def test_resolve_extensions_dynq(opname: str) -> None:
         ("rz", 1, 1, 1),
         ("pauli_exp_all_x_except_at", 1, 1, 1),
         ("pauli_exp_all_z_except_at", 1, 1, 1),
+        ("pauli_exp_all_x_except_z_at", 1, 1, 1),
+        ("pauli_exp_all_z_except_x_at", 1, 1, 1),
         ("xx_phase", 1, 2, 1),
         ("yy_phase", 1, 2, 1),
         ("zz_phase", 1, 2, 1),
@@ -306,11 +312,15 @@ def test_pauli_exponential_bindings_resolve_and_normalize() -> None:
         pauli_exp_all_z(block, phase)
         pauli_exp_all_x_except_at(block, i, phase)
         pauli_exp_all_z_except_at(block, i, phase)
+        pauli_exp_all_x_except_z_at(block, i, phase)
+        pauli_exp_all_z_except_x_at(block, i, phase)
         block.pauli_exp_all_x(phase)
         block.pauli_exp_all_y(phase)
         block.pauli_exp_all_z(phase)
         block.pauli_exp_all_x_except_at(i, phase)
         block.pauli_exp_all_z_except_at(i, phase)
+        block.pauli_exp_all_x_except_z_at(i, phase)
+        block.pauli_exp_all_z_except_x_at(i, phase)
 
     h = main.compile_function().modules[0]
     InlineFunctions()(h, inplace=True)
@@ -322,6 +332,8 @@ def test_pauli_exponential_bindings_resolve_and_normalize() -> None:
         "pauli_exp_all_z": 0,
         "pauli_exp_all_x_except_at": 1,
         "pauli_exp_all_z_except_at": 1,
+        "pauli_exp_all_x_except_z_at": 1,
+        "pauli_exp_all_z_except_x_at": 1,
     }
     found: Counter[str] = Counter()
     block_type = iceberg_types.iceberg_block(4)
