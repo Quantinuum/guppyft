@@ -242,12 +242,6 @@ such as the $T$ gate implemented in {py:func}`guppyft.code.steane.logical.t`.
 These composite functions should not have corresponding HUGR operations; the
 HUGR extension should only include the fundamental primitives of the architecture.
 
-Since Guppy supports classical logic at runtime, you may provide adaptive decompositions
-of gates. For instance, our reference Steane architecture supports `Rz` gates
-with angles determined at runtime, following the approach
-from ["Single-qubit rotation algorithm with
-logarithmic Toffoli count and gate depth"](https://arxiv.org/pdf/2404.05618).
-
 Defining the op implementation pass efficiently may be tricky, and `implement_ops` provides
 several opportunities for improving pass performance like grouping the actual op implementations
 into a single Guppy library that is linked in later, avoiding duplicate compilation
@@ -277,7 +271,10 @@ into code blocks (to leverage more efficient operations).
 Ideally, any logical compiler would support all quantum operations provided
 by {py:mod}`guppylang.std.quantum`. Naturally, you may choose to support only a
 subset of these. The encoding pass will fail on user programs outside this subset.
-We intend to provide default decompositions for some of these gates in future releases.
+Using an architecture with operations outside of its supported set requires decompositions,
+such as the one we support for computational `Rz` gates with runtime angles, following
+["Single-qubit rotation algorithm with logarithmic Toffoli count and gate depth"](https://arxiv.org/pdf/2404.05618).
+These decompositions are naturally not architecture specific and may be reused.
 
 ### Guidelines
 
