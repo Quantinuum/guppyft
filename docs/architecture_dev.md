@@ -239,9 +239,9 @@ from ["Single-qubit rotation algorithm with
 logarithmic Toffoli count and gate depth"](https://arxiv.org/pdf/2404.05618).
 
 Defining the op implementation pass efficiently may be tricky, and `implement_ops` provides
-several optimization opportunities, like grouping the actual op implementations into a single
-Guppy library that is linked in later, avoiding duplicate compilation of e.g. the global state.
-The Steane architecture leverages most of these opportunities.
+several opportunities for improving pass performance like grouping the actual op implementations
+into a single Guppy library that is linked in later, avoiding duplicate compilation
+of e.g. the global state. The Steane architecture leverages most of these opportunities.
 
 We recommend using the [semver](https://semver.org/) convention for the versioning of
 the HUGR extension(s).
