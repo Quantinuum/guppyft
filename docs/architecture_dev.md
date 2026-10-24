@@ -102,12 +102,12 @@ parallelization. When writing primitives, ensure you defer calling
 
 To see an example of how to defer measurements to maximize parallelism, see the
 fault-tolerant $T\ket{+}$ state preparation in the Steane architecture
-{py:mod}`~guppyft.code.steane.primitives`. We wrap the logical block in a Guppy
-{py:class}`~guppyft.std.state_factory.PreBlock` struct that contains an array
-of {py:class}`~guppylang.std.quantum.Measurement` and a
-{py:meth}`~guppyft.std.state_factory.PreBlock.force_check` method which calls
-{py:meth}`~guppylang.std.quantum.Measurement.read` on all measurements. This enables
-parallelization of state preparation via
+{py:mod}`~guppyft.code.steane.primitives`. We wrap the logical block and its unread
+flag measurements in a Guppy {py:class}`~guppyft.std.state_factory.PreBlock` struct,
+using {py:func}`~guppyft.std.state_factory.flagged_pre_block`. Its
+{py:meth}`~guppyft.std.state_factory.PreBlock.force_check` method only calls
+{py:meth}`~guppylang.std.quantum.Measurement.read` on the flags when the block is
+needed. This enables parallelization of state preparation via
 {py:class}`~guppyft.std.state_factory.StateFactory`.
 
 ## Logical API
