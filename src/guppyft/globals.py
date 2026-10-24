@@ -489,6 +489,8 @@ class mapped:
         #    return map_global(func, ins)
         # However, we can't do that in guppy... :-()
 
+        from copy import deepcopy
+
         from guppylang.decorator import get_calling_frame
         from guppylang_internals.ast_util import annotate_location
         from guppylang_internals.definition.common import DefId
@@ -527,21 +529,53 @@ class mapped:
             first_arg,
             *(ast.Name(id=arg.arg, ctx=ast.Load()) for arg in remaining_args),
         ]
+        original_returns = checked.defined_at.returns
+
+        global_annotation = original_args[0].annotation
+        if (
+            isinstance(global_annotation, ast.BinOp)
+            and isinstance(global_annotation.op, ast.MatMult)
+            and isinstance(global_annotation.right, ast.Name)
+            and global_annotation.right.id == "owned"
+        ):
+            global_annotation = global_annotation.left
 
         # Remove the first return value
         if sig.output == sig.inputs[0].ty:
             # Note if the "global" type is a tuple, this won't work (due to guppy
             # unpacking of tuples) and will be rejected by GlobalMapChecker
             output_ty = NoneType()
+
+            assert check_asts_equal(original_returns, global_annotation)
+            returns = None
         else:
             assert isinstance(sig.output, TupleType)
             assert sig.output.element_types[0] == sig.inputs[0].ty
+            assert isinstance(original_returns, ast.Subscript)
+            assert isinstance(original_returns.value, ast.Name)
+            assert original_returns.value.id == "tuple"
+
             output_tys = sig.output.element_types[1:]
             output_ty = (
                 output_tys[0]
                 if len(output_tys) == 1 and not isinstance(output_tys[0], TupleType)
                 else TupleType(output_tys)
             )
+            if isinstance(original_returns.slice, ast.Tuple):
+                assert check_asts_equal(
+                    original_returns.slice.elts[0], global_annotation
+                )
+                match len(original_returns.slice.elts):
+                    case 1:
+                        returns = None  # Just global state wrapped in a tuple
+                    case 2:
+                        returns = original_returns.slice.elts[1]
+                    case _:
+                        returns = deepcopy(original_returns)
+                        del cast("ast.Tuple", returns.slice).elts[0]
+            else:
+                assert check_asts_equal(original_returns.slice, global_annotation)
+                returns = None
 
         sig = FunctionType(sig.inputs[1:], output_ty)
         link_name = checked.link_name if self.link_name is None else self.link_name
@@ -570,6 +604,7 @@ class mapped:
                 )
             ],
             decorator_list=[],
+            returns=returns,
             type_comment=None,
         )
         annotate_location(func, "<synthetic>", to_span(checked.defined_at).file, 0)
