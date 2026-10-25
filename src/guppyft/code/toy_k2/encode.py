@@ -2,16 +2,17 @@
 
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field, replace
-from typing import Any, Literal, Self, no_type_check, overload
+from typing import Any, Concatenate, Literal, Self, no_type_check, overload
 
 from guppylang import guppy
 from guppylang.decorator import custom_guppy_decorator
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.emulator import EmulatorBuilder, EmulatorInstance
 from guppylang.library import GuppyLibrary, link_name
+from guppylang.std.array import empty_array
 from guppylang.std.builtins import array, comptime, exit, owned
 from guppylang.std.collections import Stack, empty_stack
-from guppylang.std.option import Option, nothing, some
+from guppylang.std.option import some
 from hugr.ext import ExtensionRegistry, OpDef
 from hugr.package import Package
 from hugr.std import _std_extensions
@@ -29,7 +30,7 @@ from guppyft.encode import (
     encode,
 )
 from guppyft.extensions import std_ops, std_types, toy_k2_ops, toy_k2_types
-from guppyft.globals import map_global, with_global
+from guppyft.globals import mapped, with_global
 from guppyft.std import LogicalBlock
 
 N = guppy.nat_var("N")
@@ -171,16 +172,46 @@ class ToyK2Builder:
         lib = GuppyLibrary(members=[])
         ops = OpReplacements()
 
-        def _register_op_replacement(
+        def _register_op_replacement[**INPUTS, OUTPUT](
             op_def: OpDef,
-        ) -> Callable[[Callable[..., Any]], GuppyFunctionDefinition[Any, Any]]:
+        ) -> Callable[
+            [Callable[INPUTS, OUTPUT]], GuppyFunctionDefinition[INPUTS, OUTPUT]
+        ]:
             @custom_guppy_decorator
             def decorator(
-                func: Callable[..., Any],
-            ) -> GuppyFunctionDefinition[Any, Any]:
+                func: Callable[INPUTS, OUTPUT],
+            ) -> GuppyFunctionDefinition[INPUTS, OUTPUT]:
                 # Generate guppy function
                 name = f"link.{op_def.qualified_name()}"
-                guppy_func = guppy(link_name(name)(func))
+                func2: Callable[INPUTS, OUTPUT] = link_name(name)(func)
+                guppy_func = guppy(func2)
+
+                # Register in library and for op replacement
+                lib.members.append(guppy_func.id)
+                ops.with_generated_decl(op_def, name)
+
+                return guppy_func
+
+            return decorator
+
+        # We have to declare this rather than use @_register_op_replacement and @mapped
+        # separately because _register... specifies the link_name.
+        # Note that really we need all the overload's of mapped.__call__ here...
+        def _register_op_replacement_mapped[G, **INPUTS, *OUTPUT](
+            op_def: OpDef,
+        ) -> Callable[
+            [Callable[Concatenate[G, INPUTS], G | tuple[G, *OUTPUT]]],
+            GuppyFunctionDefinition[INPUTS, tuple[*OUTPUT]],
+        ]:
+            @custom_guppy_decorator
+            def decorator(
+                func: Callable[Concatenate[G, INPUTS], Any],
+            ) -> GuppyFunctionDefinition[INPUTS, tuple[*OUTPUT]]:
+                # Generate guppy function
+                name = f"link.{op_def.qualified_name()}"
+                guppy_func: GuppyFunctionDefinition[INPUTS, Any] = mapped(
+                    link_name=name
+                )(func)
 
                 # Register in library and for op replacement
                 lib.members.append(guppy_func.id)
@@ -243,25 +274,15 @@ class ToyK2Builder:
                     blocks.
             """
 
-            blocks: array[Option[RuntimeBlock], comptime(n_blocks)]  # type: ignore[valid-type]
+            blocks: array[RuntimeBlock, comptime(n_blocks)]  # type: ignore[valid-type]
             unalloc_blks: Stack[int, comptime(n_blocks)]  # type: ignore[valid-type]
             avail_dyn_addrs: Stack[tuple[int, int], comptime(n_blocks)]  # type: ignore[valid-type]
 
             @guppy
             @no_type_check
-            def take_block(self, blk_id: int) -> RuntimeBlock:
-                return self.blocks[blk_id].take().unwrap()
-
-            @guppy
-            @no_type_check
-            def put_block(self, blk_id: int, blk: RuntimeBlock @ owned) -> None:
-                self.blocks[blk_id].swap(some(blk)).unwrap_nothing()
-
-            @guppy
-            @no_type_check
             def release_block(self, blk_id: int) -> LogicalBlock[4]:
                 """Consumes the RuntimeBlock and returns its logical block."""
-                runtime_block = self.take_block(blk_id)
+                runtime_block = self.blocks.take(blk_id)
                 self.unalloc_blks.push(blk_id)
                 return runtime_block.logical_block
 
@@ -274,7 +295,7 @@ class ToyK2Builder:
                 blk_id = self.unalloc_blks.pop()
 
                 runtime_block = RuntimeBlock(logical_block, array(False, False), 0.0)
-                self.put_block(blk_id, runtime_block)
+                self.blocks.put(runtime_block, blk_id)
 
                 return blk_id
 
@@ -285,12 +306,9 @@ class ToyK2Builder:
                 free the block if it is fully restored."""
                 blk_id, qb_id = addr
                 # Restore the block's address
-                blk = self.take_block(blk_id)
-                blk.restore_addr(qb_id)
-                blk_borrowed = blk.is_borrowed()
-                self.put_block(blk_id, blk)
+                self.blocks[blk_id].restore_addr(qb_id)
                 # Check if the block is fully restored
-                if not blk_borrowed:
+                if not self.blocks[blk_id].is_borrowed():
                     # Release the runtime block
                     logical_block = self.release_block(blk_id)
                     # Free the logical block
@@ -327,9 +345,7 @@ class ToyK2Builder:
                     self.avail_dyn_addrs.push((blk_id, 1))
 
                 # Borrow the selected address from the dynamic block
-                blk = self.take_block(blk_id)
-                blk.borrow_addr(qb_id)
-                self.put_block(blk_id, blk)
+                self.blocks[blk_id].borrow_addr(qb_id)
 
                 return blk_id, qb_id
 
@@ -340,337 +356,208 @@ class ToyK2Builder:
                 blk_ids: array[int, N] @ owned,
                 op_cost: float,
             ) -> None:
-                for i in blk_ids:
-                    blk = self.take_block(i)
+                def helper(blk: RuntimeBlock, op_cost: float) -> None:
                     blk.qed_counter += op_cost
-
                     if blk.qed_counter >= comptime(qed_policy.threshold):
                         k2_primitives.qed_cycle(blk.logical_block)
 
                         blk.qed_counter = 0.0
 
-                    self.put_block(i, blk)
+                for i in blk_ids:
+                    helper(self.blocks[i], op_cost)
 
-        @_register_op_replacement(toy_k2_ops.borrow_def)
+        @_register_op_replacement_mapped(toy_k2_ops.borrow_def)
         @no_type_check
-        def _borrow(blk_id: int, qb_id: int) -> tuple[tuple[int, int], int]:
+        def _borrow(
+            state: STATE @ owned, blk_id: int, qb_id: int
+        ) -> tuple[STATE, tuple[int, int], int]:
+            state.blocks[blk_id].borrow_addr(qb_id)
+            return state, (blk_id, qb_id), blk_id
 
-            @guppy
-            @no_type_check
-            def _impl(
-                state: STATE @ owned, blk_id: int, qb_id: int
-            ) -> tuple[STATE, tuple[int, int], int]:
-                blk = state.blocks.take(blk_id).unwrap()
-                blk.borrow_addr(qb_id)
-                state.blocks.put(some(blk), blk_id)
-                return state, (blk_id, qb_id), blk_id
-
-            map_global(_impl, blk_id, qb_id)
-            return (blk_id, qb_id), blk_id
-
-        @_register_op_replacement(toy_k2_ops.borrow_more_def)
+        @_register_op_replacement_mapped(toy_k2_ops.borrow_more_def)
         @no_type_check
-        def _borrow_more(blk_id: int, qb_id: int) -> tuple[tuple[int, int], int]:
+        def _borrow_more(
+            state: STATE @ owned, blk_id: int, qb_id: int
+        ) -> tuple[STATE, tuple[int, int], int]:
+            state.blocks[blk_id].borrow_addr(qb_id)
+            return state, (blk_id, qb_id), blk_id
 
-            @guppy
-            @no_type_check
-            def _impl(
-                state: STATE @ owned, blk_id: int, qb_id: int
-            ) -> tuple[STATE, tuple[int, int]]:
-                blk = state.blocks.take(blk_id).unwrap()
-                blk.borrow_addr(qb_id)
-                state.blocks.put(some(blk), blk_id)
-                return state, (blk_id, qb_id)
-
-            map_global(_impl, blk_id, qb_id)
-            return (blk_id, qb_id), blk_id
-
-        @_register_op_replacement(toy_k2_ops.restore_some_def)
+        @_register_op_replacement_mapped(toy_k2_ops.restore_some_def)
         @no_type_check
-        def _restore_some(blk_id: int, addr: tuple[int, int]) -> int:
+        def _restore_some(
+            state: STATE @ owned, blk_id: int, addr: tuple[int, int]
+        ) -> tuple[STATE, int]:
+            state.blocks[blk_id].restore_addr(addr[1])
+            return state, blk_id
 
-            @guppy
-            @no_type_check
-            def _impl(
-                state: STATE @ owned, blk_id: int, qb_id: int
-            ) -> tuple[STATE, int]:
-                blk = state.blocks.take(blk_id).unwrap()
-                blk.restore_addr(qb_id)
-                state.blocks.put(some(blk), blk_id)
-                return state, blk_id
-
-            return map_global(_impl, blk_id, addr[1])
-
-        @_register_op_replacement(toy_k2_ops.restore_def)
+        @_register_op_replacement_mapped(toy_k2_ops.restore_def)
         @no_type_check
-        def _restore(blk_id: int, addr: tuple[int, int]) -> int:
+        def _restore(
+            state: STATE @ owned, blk_id: int, addr: tuple[int, int]
+        ) -> tuple[STATE, int]:
+            state.blocks[blk_id].restore_addr(addr[1])
+            return state, blk_id
 
-            @guppy
-            @no_type_check
-            def _impl(
-                state: STATE @ owned, blk_id: int, qb_id: int
-            ) -> tuple[STATE, int]:
-                blk = state.blocks.take(blk_id).unwrap()
-                blk.restore_addr(qb_id)
-                state.blocks.put(some(blk), blk_id)
-                return state, blk_id
-
-            return map_global(_impl, blk_id, addr[1])
-
-        @_register_op_replacement(toy_k2_ops.alloc_dynq_def)
+        @_register_op_replacement_mapped(toy_k2_ops.alloc_dynq_def)
         @no_type_check
-        def _alloc_dynq() -> tuple[tuple[int, int]]:
+        def _alloc_dynq(state: STATE @ owned) -> tuple[STATE, tuple[int, int]]:
+            blk_q = state.allocate_dyn_addr()
+            return state, blk_q
 
-            @guppy
-            @no_type_check
-            def _impl(state: STATE @ owned) -> tuple[STATE, tuple[int, int]]:
-                blk_id, qb_id = state.allocate_dyn_addr()
-                return state, (blk_id, qb_id)
-
-            return map_global(_impl)
-
-        @_register_op_replacement(toy_k2_ops.free_dynq_def)
+        @_register_op_replacement_mapped(toy_k2_ops.free_dynq_def)
         @no_type_check
-        def _free_dynq(addr: tuple[int, int]) -> None:
+        def _free_dynq(state: STATE @ owned, addr: tuple[int, int]) -> STATE:
+            state.release_dyn_addr(addr)
+            return state
 
-            @guppy
-            @no_type_check
-            def _impl(state: STATE @ owned, addr: tuple[int, int]) -> STATE:
-                state.release_dyn_addr(addr)
-                return state
-
-            return map_global(_impl, addr)
-
-        @_register_op_replacement(toy_k2_ops.qed_cycle_def)
+        @_register_op_replacement_mapped(toy_k2_ops.qed_cycle_def)
         @no_type_check
-        def _qed_cycle(blk_id: int) -> int:
-
-            @guppy
-            @no_type_check
-            def _impl(state: STATE @ owned, blk_id: int) -> tuple[STATE, int]:
-                blk = state.take_block(blk_id)
-
+        def _qed_cycle(state: STATE @ owned, blk_id: int) -> tuple[STATE, int]:
+            def helper(blk: RuntimeBlock) -> None:
                 k2_primitives.qed_cycle(blk.logical_block)
                 blk.qed_counter = 0.0
 
-                state.put_block(blk_id, blk)
+            helper(state.blocks[blk_id])
 
-                return state, blk_id
+            return state, blk_id
 
-            return map_global(_impl, blk_id)
-
-        @_register_op_replacement(toy_k2_ops.prep_zero_ft_def)
+        @_register_op_replacement_mapped(toy_k2_ops.prep_zero_ft_def)
         @no_type_check
-        def _prep_zero_ft() -> int:
-            @guppy
-            def _impl(state: STATE @ owned) -> tuple[STATE, int]:
-                logical_block = k2_primitives.prep_zero_ft().force_check().unwrap()
-                blk_id = state.allocate_block_id(logical_block)
+        def _prep_zero_ft(state: STATE @ owned) -> tuple[STATE, int]:
+            logical_block = k2_primitives.prep_zero_ft().force_check().unwrap()
+            blk_id = state.allocate_block_id(logical_block)
 
-                state.qed_policy(array(blk_id), comptime(qed_policy.costs.prep_zero_ft))
+            state.qed_policy(array(blk_id), comptime(qed_policy.costs.prep_zero_ft))
 
-                return state, blk_id
+            return state, blk_id
 
-            return map_global(_impl)
-
-        @_register_op_replacement(toy_k2_ops.prep_zero_plus_ft_def)
+        @_register_op_replacement_mapped(toy_k2_ops.prep_zero_plus_ft_def)
         @no_type_check
-        def _prep_zero_plus_ft() -> int:
-            @guppy
-            def _impl(state: STATE @ owned) -> tuple[STATE, int]:
-                logical_block = k2_primitives.prep_zero_plus_ft()
-                blk_id = state.allocate_block_id(logical_block)
+        def _prep_zero_plus_ft(state: STATE @ owned) -> tuple[STATE, int]:
+            logical_block = k2_primitives.prep_zero_plus_ft()
+            blk_id = state.allocate_block_id(logical_block)
 
-                state.qed_policy(
-                    array(blk_id), comptime(qed_policy.costs.prep_zero_plus_ft)
-                )
+            state.qed_policy(
+                array(blk_id), comptime(qed_policy.costs.prep_zero_plus_ft)
+            )
 
-                return state, blk_id
+            return state, blk_id
 
-            return map_global(_impl)
-
-        @_register_op_replacement(toy_k2_ops.prep_y_states_non_ft_def)
+        @_register_op_replacement_mapped(toy_k2_ops.prep_y_states_non_ft_def)
         @no_type_check
-        def _prep_y_states_non_ft() -> int:
-            @guppy
-            def _impl(state: STATE @ owned) -> tuple[STATE, int]:
-                logical_block = k2_primitives.prep_y_states_non_ft()
-                blk_id = state.allocate_block_id(logical_block)
+        def _prep_y_states_non_ft(state: STATE @ owned) -> tuple[STATE, int]:
+            logical_block = k2_primitives.prep_y_states_non_ft()
+            blk_id = state.allocate_block_id(logical_block)
 
-                state.qed_policy(
-                    array(blk_id), comptime(qed_policy.costs.prep_y_states_non_ft)
-                )
+            state.qed_policy(
+                array(blk_id), comptime(qed_policy.costs.prep_y_states_non_ft)
+            )
 
-                return state, blk_id
+            return state, blk_id
 
-            return map_global(_impl)
-
-        @_register_op_replacement(toy_k2_ops.prep_t_states_non_ft_def)
+        @_register_op_replacement_mapped(toy_k2_ops.prep_t_states_non_ft_def)
         @no_type_check
-        def _prep_t_states_non_ft() -> int:
-            @guppy
-            def _impl(state: STATE @ owned) -> tuple[STATE, int]:
-                logical_block = k2_primitives.prep_t_states_non_ft()
-                blk_id = state.allocate_block_id(logical_block)
+        def _prep_t_states_non_ft(state: STATE @ owned) -> tuple[STATE, int]:
+            logical_block = k2_primitives.prep_t_states_non_ft()
+            blk_id = state.allocate_block_id(logical_block)
 
-                state.qed_policy(
-                    array(blk_id), comptime(qed_policy.costs.prep_t_states_non_ft)
-                )
+            state.qed_policy(
+                array(blk_id), comptime(qed_policy.costs.prep_t_states_non_ft)
+            )
 
-                return state, blk_id
+            return state, blk_id
 
-            return map_global(_impl)
-
-        @_register_op_replacement(toy_k2_ops.project_z_def)
+        @_register_op_replacement_mapped(toy_k2_ops.project_z_def)
         @no_type_check
-        def _project_z(blk_id: int, qb_id: int) -> tuple[bool, int]:
-            @guppy
-            def _impl(
-                state: STATE @ owned, blk_id: int, qb_id: int
-            ) -> tuple[STATE, bool, int]:
-                blk = state.take_block(blk_id)
-                res = k2_primitives.project_z(blk.logical_block, qb_id)
-                state.put_block(blk_id, blk)
+        def _project_z(
+            state: STATE @ owned, blk_id: int, qb_id: int
+        ) -> tuple[STATE, bool, int]:
+            res = k2_primitives.project_z(state.blocks[blk_id].logical_block, qb_id)
 
-                state.qed_policy(array(blk_id), comptime(qed_policy.costs.project_z))
+            state.qed_policy(array(blk_id), comptime(qed_policy.costs.project_z))
 
-                return state, res, blk_id
+            return state, res, blk_id
 
-            return map_global(_impl, blk_id, qb_id)
-
-        @_register_op_replacement(toy_k2_ops.measure_z_all_def)
+        @_register_op_replacement_mapped(toy_k2_ops.measure_z_all_def)
         @no_type_check
-        def _measure_z_all(blk_id: int) -> tuple[tuple[bool, bool]]:
-            @guppy
-            def _impl(
-                state: STATE @ owned, blk_id: int
-            ) -> tuple[STATE, tuple[bool, bool]]:
-                blk = state.release_block(blk_id)
-                res = k2_primitives.measure_z_all(blk)
+        def _measure_z_all(
+            state: STATE @ owned, blk_id: int
+        ) -> tuple[STATE, tuple[bool, bool]]:
+            blk = state.release_block(blk_id)
+            res = k2_primitives.measure_z_all(blk)
 
-                return state, res
+            return state, res
 
-            return map_global(_impl, blk_id)
-
-        @_register_op_replacement(toy_k2_ops.free_def)
+        @_register_op_replacement_mapped(toy_k2_ops.free_def)
         @no_type_check
-        def _free(blk_id: int) -> None:
-            @guppy
-            def _impl(state: STATE @ owned, blk_id: int) -> STATE:
-                state.release_block(blk_id).discard()
+        def _free(state: STATE @ owned, blk_id: int) -> STATE:
+            state.release_block(blk_id).discard()
 
-                return state
+            return state
 
-            return map_global(_impl, blk_id)
-
-        @_register_op_replacement(toy_k2_ops.x_def)
+        @_register_op_replacement_mapped(toy_k2_ops.x_def)
         @no_type_check
-        def _x(blk_id: int, target: int) -> int:
-            @guppy
-            def _impl(
-                state: STATE @ owned, blk_id: int, target: int
-            ) -> tuple[STATE, int]:
-                blk = state.take_block(blk_id)
-                k2_primitives.x(blk.logical_block, target)
-                state.put_block(blk_id, blk)
+        def _x(state: STATE @ owned, blk_id: int, target: int) -> tuple[STATE, int]:
+            k2_primitives.x(state.blocks[blk_id].logical_block, target)
 
-                state.qed_policy(array(blk_id), comptime(qed_policy.costs.x))
+            state.qed_policy(array(blk_id), comptime(qed_policy.costs.x))
 
-                return state, blk_id
+            return state, blk_id
 
-            return map_global(_impl, blk_id, target)
-
-        @_register_op_replacement(toy_k2_ops.z_def)
+        @_register_op_replacement_mapped(toy_k2_ops.z_def)
         @no_type_check
-        def _z(blk_id: int, target: int) -> int:
-            @guppy
-            def _impl(
-                state: STATE @ owned, blk_id: int, target: int
-            ) -> tuple[STATE, int]:
-                blk = state.take_block(blk_id)
-                k2_primitives.z(blk.logical_block, target)
-                state.put_block(blk_id, blk)
+        def _z(state: STATE @ owned, blk_id: int, target: int) -> tuple[STATE, int]:
+            k2_primitives.z(state.blocks[blk_id].logical_block, target)
 
-                state.qed_policy(array(blk_id), comptime(qed_policy.costs.z))
+            state.qed_policy(array(blk_id), comptime(qed_policy.costs.z))
 
-                return state, blk_id
+            return state, blk_id
 
-            return map_global(_impl, blk_id, target)
-
-        @_register_op_replacement(toy_k2_ops.h_all_def)
+        @_register_op_replacement_mapped(toy_k2_ops.h_all_def)
         @no_type_check
-        def _h_all(blk_id: int) -> int:
-            @guppy
-            def _impl(state: STATE @ owned, blk_id: int) -> tuple[STATE, int]:
-                blk = state.take_block(blk_id)
-                k2_primitives.h_all(blk.logical_block)
-                state.put_block(blk_id, blk)
+        def _h_all(state: STATE @ owned, blk_id: int) -> tuple[STATE, int]:
+            k2_primitives.h_all(state.blocks[blk_id].logical_block)
 
-                state.qed_policy(array(blk_id), comptime(qed_policy.costs.h_all))
+            state.qed_policy(array(blk_id), comptime(qed_policy.costs.h_all))
 
-                return state, blk_id
+            return state, blk_id
 
-            return map_global(_impl, blk_id)
-
-        @_register_op_replacement(toy_k2_ops.cx_intra_def)
+        @_register_op_replacement_mapped(toy_k2_ops.cx_intra_def)
         @no_type_check
-        def _cx_intra(blk_id: int, target: int) -> int:
-            @guppy
-            def _impl(
-                state: STATE @ owned, blk_id: int, target: int
-            ) -> tuple[STATE, int]:
-                blk = state.take_block(blk_id)
-                k2_primitives.cx_intra(blk.logical_block, target)
-                state.put_block(blk_id, blk)
+        def _cx_intra(
+            state: STATE @ owned, blk_id: int, target: int
+        ) -> tuple[STATE, int]:
+            k2_primitives.cx_intra(state.blocks[blk_id].logical_block, target)
 
-                state.qed_policy(array(blk_id), comptime(qed_policy.costs.cx_intra))
+            state.qed_policy(array(blk_id), comptime(qed_policy.costs.cx_intra))
 
-                return state, blk_id
+            return state, blk_id
 
-            return map_global(_impl, blk_id, target)
-
-        @_register_op_replacement(toy_k2_ops.cx_transversal_def)
+        @_register_op_replacement_mapped(toy_k2_ops.cx_transversal_def)
         @no_type_check
-        def _cx_transversal(ctl_blk_id: int, tgt_blk_id: int) -> tuple[int, int]:
-            @guppy
-            def _impl(
-                state: STATE @ owned, ctl_blk_id: int, tgt_blk_id: int
-            ) -> tuple[STATE, int, int]:
-                ctl_blk, tgt_blk = (
-                    state.take_block(ctl_blk_id),
-                    state.take_block(tgt_blk_id),
-                )
+        def _cx_transversal(
+            state: STATE @ owned, ctl_blk_id: int, tgt_blk_id: int
+        ) -> tuple[STATE, int, int]:
+            k2_primitives.cx_transversal(
+                state.blocks[ctl_blk_id].logical_block,
+                state.blocks[tgt_blk_id].logical_block,
+            )
 
-                k2_primitives.cx_transversal(
-                    ctl_blk.logical_block, tgt_blk.logical_block
-                )
+            state.qed_policy(
+                array(ctl_blk_id, tgt_blk_id),
+                comptime(qed_policy.costs.cx_transversal),
+            )
 
-                state.put_block(ctl_blk_id, ctl_blk)
-                state.put_block(tgt_blk_id, tgt_blk)
+            return state, ctl_blk_id, tgt_blk_id
 
-                state.qed_policy(
-                    array(ctl_blk_id, tgt_blk_id),
-                    comptime(qed_policy.costs.cx_transversal),
-                )
-
-                return state, ctl_blk_id, tgt_blk_id
-
-            return map_global(_impl, ctl_blk_id, tgt_blk_id)
-
-        @_register_op_replacement(toy_k2_ops.swap_intra_def)
+        @_register_op_replacement_mapped(toy_k2_ops.swap_intra_def)
         @no_type_check
-        def _swap_intra(blk_id: int) -> int:
-            @guppy
-            def _impl(state: STATE @ owned, blk_id: int) -> tuple[STATE, int]:
-                blk = state.take_block(blk_id)
-                k2_primitives.swap_intra(blk.logical_block)
-                state.put_block(blk_id, blk)
+        def _swap_intra(state: STATE @ owned, blk_id: int) -> tuple[STATE, int]:
+            k2_primitives.swap_intra(state.blocks[blk_id].logical_block)
 
-                state.qed_policy(array(blk_id), comptime(qed_policy.costs.swap_intra))
+            state.qed_policy(array(blk_id), comptime(qed_policy.costs.swap_intra))
 
-                return state, blk_id
-
-            return map_global(_impl, blk_id)
+            return state, blk_id
 
         # NOTE: The following are re-implementations of what we have in
         # `guppyft.code.toy_k2.logical` for the addressable gates.
@@ -836,7 +723,7 @@ class ToyK2Builder:
         @link_name("guppyft.toy_k2.gen_state")
         def state_gen() -> STATE:
             return STATE(
-                array(nothing[RuntimeBlock]() for _ in range(comptime(n_blocks))),
+                empty_array(),
                 Stack(
                     array(some(blk_id) for blk_id in range(comptime(n_blocks))),
                     comptime(n_blocks),
@@ -852,11 +739,10 @@ class ToyK2Builder:
         @no_type_check
         @link_name("guppyft.toy_k2.discard_state")
         def state_discard(state: "STATE" @ owned) -> None:
-            for blk in state.blocks:
-                if blk.is_some():
-                    blk.unwrap().discard()
-                else:
-                    blk.unwrap_nothing()
+            for i in range(len(state.blocks)):
+                if not state.blocks.is_borrowed(i):
+                    state.blocks.take(i).discard()
+            state.blocks.discard_all_taken()
 
         def build_wrapper(
             func: GuppyFunctionDefinition[[], None],
