@@ -69,7 +69,7 @@ test = [
 ]
 
 [tool.uv.sources]
-guppylang = { git = "https://github.com/quantinuum/guppylang", subdirectory = "guppylang", rev = "d2ce2f7038f74c47abaec2fde7bc1e62a26a0221" }
+guppylang = { git = "https://github.com/quantinuum/guppylang", subdirectory = "guppylang", rev = "87c7400a13aa701115aa3f3c569ed19277b84918" }
 
 [tool.mypy]
 strict = true

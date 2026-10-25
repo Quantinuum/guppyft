@@ -627,7 +627,7 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "guppylang", git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang&rev=d2ce2f7038f74c47abaec2fde7bc1e62a26a0221" },
+    { name = "guppylang", git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang&rev=87c7400a13aa701115aa3f3c569ed19277b84918" },
     { name = "guppylang-internals", specifier = ">=1.1.1" },
     { name = "hugr", specifier = ">=0.18.6" },
     { name = "selene-sim", specifier = ">=0.3.0" },
@@ -670,7 +670,7 @@ test = [
 [[package]]
 name = "guppylang"
 version = "1.1.2"
-source = { git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang&rev=d2ce2f7038f74c47abaec2fde7bc1e62a26a0221#d2ce2f7038f74c47abaec2fde7bc1e62a26a0221" }
+source = { git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang&rev=87c7400a13aa701115aa3f3c569ed19277b84918#87c7400a13aa701115aa3f3c569ed19277b84918" }
 dependencies = [
     { name = "guppylang-internals" },
     { name = "numpy" },
@@ -683,7 +683,7 @@ dependencies = [
 [[package]]
 name = "guppylang-internals"
 version = "1.1.2"
-source = { git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang-internals&rev=d2ce2f7038f74c47abaec2fde7bc1e62a26a0221#d2ce2f7038f74c47abaec2fde7bc1e62a26a0221" }
+source = { git = "https://github.com/quantinuum/guppylang?subdirectory=guppylang-internals&rev=87c7400a13aa701115aa3f3c569ed19277b84918#87c7400a13aa701115aa3f3c569ed19277b84918" }
 dependencies = [
     { name = "hugr" },
     { name = "networkx" },
