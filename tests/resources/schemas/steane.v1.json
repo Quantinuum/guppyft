@@ -1,0 +1,131 @@
+{
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "schema_version",
+        "n_blocks",
+        "zero_factory",
+        "magic_factory",
+        "qec_policy"
+    ],
+    "properties": {
+        "schema_version": {
+            "type": "integer",
+            "enum": [
+                1
+            ]
+        },
+        "n_blocks": {
+            "type": "integer"
+        },
+        "zero_factory": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "size",
+                "max_attempts"
+            ],
+            "properties": {
+                "size": {
+                    "type": "integer"
+                },
+                "max_attempts": {
+                    "type": "integer"
+                }
+            }
+        },
+        "magic_factory": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "size",
+                "max_attempts"
+            ],
+            "properties": {
+                "size": {
+                    "type": "integer"
+                },
+                "max_attempts": {
+                    "type": "integer"
+                }
+            }
+        },
+        "qec_policy": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "style",
+                "threshold",
+                "costs"
+            ],
+            "properties": {
+                "style": {
+                    "type": "string",
+                    "enum": [
+                        "knill",
+                        "steane"
+                    ]
+                },
+                "threshold": {
+                    "type": "integer"
+                },
+                "costs": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "prep_zero",
+                        "prep_t",
+                        "x",
+                        "y",
+                        "z",
+                        "h",
+                        "s",
+                        "sdg",
+                        "inject_t",
+                        "inject_tdg",
+                        "cx",
+                        "cz"
+                    ],
+                    "properties": {
+                        "prep_zero": {
+                            "type": "number"
+                        },
+                        "prep_t": {
+                            "type": "number"
+                        },
+                        "x": {
+                            "type": "number"
+                        },
+                        "y": {
+                            "type": "number"
+                        },
+                        "z": {
+                            "type": "number"
+                        },
+                        "h": {
+                            "type": "number"
+                        },
+                        "s": {
+                            "type": "number"
+                        },
+                        "sdg": {
+                            "type": "number"
+                        },
+                        "inject_t": {
+                            "type": "number"
+                        },
+                        "inject_tdg": {
+                            "type": "number"
+                        },
+                        "cx": {
+                            "type": "number"
+                        },
+                        "cz": {
+                            "type": "number"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

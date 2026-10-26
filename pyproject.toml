@@ -61,8 +61,11 @@ lint = [
     "pre-commit>=4.6.2,<5",
     "ruff>=0.16.6",
     "mypy>=2.4.0",
+    "types-jsonschema>=4.23,<5",
 ]
 test = [
+    "jsonschema>=4.23,<5",
+    "jsonsubschema>=0.0.7,<0.1",
     "pytest>=9.1.0",
     "pytest-snapshot>=0.9.0",
     "pytest-xdist>=3.8.0",
