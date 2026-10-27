@@ -454,30 +454,6 @@ class IcebergOpsExtension:
             ),
         )
 
-    # ry
-
-    @functools.cached_property
-    def ry_def(self) -> OpDef:
-        """Apply an Ry gate to one qubit.
-
-        This is the generic operation definition. For the instantiated operation, see
-        `ry`."""
-        return self().get_op("ry")
-
-    def ry(self, k: int) -> ExtOp:
-        """Apply an Ry gate to one qubit.
-
-        Args:
-            k: The number of logical qubits encoded in the block.
-        """
-        block_type = _ICEBERG_TYPES.iceberg_block(k)
-        return self.ry_def.instantiate(
-            args=[BoundedNatArg(k)],
-            concrete_signature=FunctionType(
-                [block_type, _IDX_T, FLOAT_T], [block_type]
-            ),
-        )
-
     # rz
 
     @functools.cached_property
@@ -502,114 +478,283 @@ class IcebergOpsExtension:
             ),
         )
 
-    # all_rx
+    # pauli_exp_all_x
 
     @functools.cached_property
-    def all_rx_def(self) -> OpDef:
-        """Apply an Rx gate to all qubits.
+    def pauli_exp_all_x_def(self) -> OpDef:
+        r"""Apply the logical all-X Pauli exponential.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_rx`."""
-        return self().get_op("all_rx")
+        .. math::
 
-    def all_rx(self, k: int) -> ExtOp:
-        """Apply an Rx gate to all qubits.
+            \exp(-i \theta X^{\otimes k} / 2)
+
+        The operation's angle :math:`\theta` is in radians and :math:`k`
+        is the number of logical qubits in the block.
+
+        This is the generic operation definition. For the instantiated
+        operation, see ``pauli_exp_all_x``.
+        """
+        return self().get_op("pauli_exp_all_x")
+
+    def pauli_exp_all_x(self, k: int) -> ExtOp:
+        r"""Apply the logical all-X Pauli exponential.
+
+        .. math::
+
+            \exp(-i \theta X^{\otimes k} / 2)
+
+        The operation's angle :math:`\theta` is in radians and :math:`k`
+        is the number of logical qubits in the block.
 
         Args:
             k: The number of logical qubits encoded in the block.
         """
         block_type = _ICEBERG_TYPES.iceberg_block(k)
-        return self.all_rx_def.instantiate(
+        return self.pauli_exp_all_x_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType([block_type, FLOAT_T], [block_type]),
         )
 
-    # all_ry
+    # pauli_exp_all_y
 
     @functools.cached_property
-    def all_ry_def(self) -> OpDef:
-        """Apply an Ry gate to all qubits.
+    def pauli_exp_all_y_def(self) -> OpDef:
+        r"""Apply the logical all-Y Pauli exponential.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_ry`."""
-        return self().get_op("all_ry")
+        .. math::
 
-    def all_ry(self, k: int) -> ExtOp:
-        """Apply an Ry gate to all qubits.
+            \exp(-i \theta Y^{\otimes k} / 2)
+
+        The operation's angle :math:`\theta` is in radians and :math:`k`
+        is the number of logical qubits in the block.
+
+        This is the generic operation definition. For the instantiated
+        operation, see ``pauli_exp_all_y``.
+        """
+        return self().get_op("pauli_exp_all_y")
+
+    def pauli_exp_all_y(self, k: int) -> ExtOp:
+        r"""Apply the logical all-Y Pauli exponential.
+
+        .. math::
+
+            \exp(-i \theta Y^{\otimes k} / 2)
+
+        The operation's angle :math:`\theta` is in radians and :math:`k`
+        is the number of logical qubits in the block.
 
         Args:
             k: The number of logical qubits encoded in the block.
         """
         block_type = _ICEBERG_TYPES.iceberg_block(k)
-        return self.all_ry_def.instantiate(
+        return self.pauli_exp_all_y_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType([block_type, FLOAT_T], [block_type]),
         )
 
-    # all_rz
+    # pauli_exp_all_z
 
     @functools.cached_property
-    def all_rz_def(self) -> OpDef:
-        """Apply an Rz gate to all qubits.
+    def pauli_exp_all_z_def(self) -> OpDef:
+        r"""Apply the logical all-Z Pauli exponential.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_rz`."""
-        return self().get_op("all_rz")
+        .. math::
 
-    def all_rz(self, k: int) -> ExtOp:
-        """Apply an Rz gate to all qubits.
+            \exp(-i \theta Z^{\otimes k} / 2)
+
+        The operation's angle :math:`\theta` is in radians and :math:`k`
+        is the number of logical qubits in the block.
+
+        This is the generic operation definition. For the instantiated
+        operation, see ``pauli_exp_all_z``.
+        """
+        return self().get_op("pauli_exp_all_z")
+
+    def pauli_exp_all_z(self, k: int) -> ExtOp:
+        r"""Apply the logical all-Z Pauli exponential.
+
+        .. math::
+
+            \exp(-i \theta Z^{\otimes k} / 2)
+
+        The operation's angle :math:`\theta` is in radians and :math:`k`
+        is the number of logical qubits in the block.
 
         Args:
             k: The number of logical qubits encoded in the block.
         """
         block_type = _ICEBERG_TYPES.iceberg_block(k)
-        return self.all_rz_def.instantiate(
+        return self.pauli_exp_all_z_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType([block_type, FLOAT_T], [block_type]),
         )
 
-    # all_but_one_rx
+    # pauli_exp_all_x_except_at
 
     @functools.cached_property
-    def all_but_one_rx_def(self) -> OpDef:
-        """Apply an Rx gate to all but one qubit.
+    def pauli_exp_all_x_except_at_def(self) -> OpDef:
+        r"""Apply the Pauli exponential with I at ``i`` and X elsewhere.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_but_one_rx`."""
-        return self().get_op("all_but_one_rx")
+        .. math::
 
-    def all_but_one_rx(self, k: int) -> ExtOp:
-        """Apply an Rx gate to all but one qubit.
+            \exp(-i \theta (
+                X^{\otimes i} \otimes I \otimes X^{\otimes(k-i-1)}
+            ) / 2)
+
+        The operation's angle :math:`\theta` is in radians and :math:`k`
+        is the number of logical qubits in the block.
+
+        This is the generic operation definition. For the instantiated
+        operation, see ``pauli_exp_all_x_except_at``.
+        """
+        return self().get_op("pauli_exp_all_x_except_at")
+
+    def pauli_exp_all_x_except_at(self, k: int) -> ExtOp:
+        r"""Apply the Pauli exponential with I at ``i`` and X elsewhere.
+
+        .. math::
+
+            \exp(-i \theta (
+                X^{\otimes i} \otimes I \otimes X^{\otimes(k-i-1)}
+            ) / 2)
+
+        The operation's angle :math:`\theta` is in radians and :math:`k`
+        is the number of logical qubits in the block.
 
         Args:
             k: The number of logical qubits encoded in the block.
         """
         block_type = _ICEBERG_TYPES.iceberg_block(k)
-        return self.all_but_one_rx_def.instantiate(
+        return self.pauli_exp_all_x_except_at_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
                 [block_type, _IDX_T, FLOAT_T], [block_type]
             ),
         )
 
-    # all_but_one_rz
+    # pauli_exp_all_z_except_at
 
     @functools.cached_property
-    def all_but_one_rz_def(self) -> OpDef:
-        """Apply an Rz gate to all but one qubit.
+    def pauli_exp_all_z_except_at_def(self) -> OpDef:
+        r"""Apply the Pauli exponential with I at ``i`` and Z elsewhere.
 
-        This is the generic operation definition. For the instantiated operation, see
-        `all_but_one_rz`."""
-        return self().get_op("all_but_one_rz")
+        .. math::
 
-    def all_but_one_rz(self, k: int) -> ExtOp:
-        """Apply an Rz gate to all but one qubit.
+            \exp(-i \theta (
+                Z^{\otimes i} \otimes I \otimes Z^{\otimes(k-i-1)}
+            ) / 2)
+
+        The operation's angle :math:`\theta` is in radians and :math:`k`
+        is the number of logical qubits in the block.
+
+        This is the generic operation definition. For the instantiated
+        operation, see ``pauli_exp_all_z_except_at``.
+        """
+        return self().get_op("pauli_exp_all_z_except_at")
+
+    def pauli_exp_all_z_except_at(self, k: int) -> ExtOp:
+        r"""Apply the Pauli exponential with I at ``i`` and Z elsewhere.
+
+        .. math::
+
+            \exp(-i \theta (
+                Z^{\otimes i} \otimes I \otimes Z^{\otimes(k-i-1)}
+            ) / 2)
+
+        The operation's angle :math:`\theta` is in radians and :math:`k`
+        is the number of logical qubits in the block.
 
         Args:
             k: The number of logical qubits encoded in the block.
         """
         block_type = _ICEBERG_TYPES.iceberg_block(k)
-        return self.all_but_one_rz_def.instantiate(
+        return self.pauli_exp_all_z_except_at_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [block_type, _IDX_T, FLOAT_T], [block_type]
+            ),
+        )
+
+    # pauli_exp_all_x_except_z_at
+
+    @functools.cached_property
+    def pauli_exp_all_x_except_z_at_def(self) -> OpDef:
+        r"""Apply the Pauli exponential with Z at ``i`` and X elsewhere.
+
+        .. math::
+
+            \exp(-i \theta (
+                X^{\otimes i} \otimes Z \otimes X^{\otimes(k-i-1)}
+            ) / 2)
+
+        The operation's angle :math:`\theta` is in radians and :math:`k`
+        is the number of logical qubits in the block.
+
+        This is the generic operation definition. For the instantiated
+        operation, see ``pauli_exp_all_x_except_z_at``.
+        """
+        return self().get_op("pauli_exp_all_x_except_z_at")
+
+    def pauli_exp_all_x_except_z_at(self, k: int) -> ExtOp:
+        r"""Apply the Pauli exponential with Z at ``i`` and X elsewhere.
+
+        .. math::
+
+            \exp(-i \theta (
+                X^{\otimes i} \otimes Z \otimes X^{\otimes(k-i-1)}
+            ) / 2)
+
+        The operation's angle :math:`\theta` is in radians and :math:`k`
+        is the number of logical qubits in the block.
+
+        Args:
+            k: The number of logical qubits encoded in the block.
+        """
+        block_type = _ICEBERG_TYPES.iceberg_block(k)
+        return self.pauli_exp_all_x_except_z_at_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [block_type, _IDX_T, FLOAT_T], [block_type]
+            ),
+        )
+
+    # pauli_exp_all_z_except_x_at
+
+    @functools.cached_property
+    def pauli_exp_all_z_except_x_at_def(self) -> OpDef:
+        r"""Apply the Pauli exponential with X at ``i`` and Z elsewhere.
+
+        .. math::
+
+            \exp(-i \theta (
+                Z^{\otimes i} \otimes X \otimes Z^{\otimes(k-i-1)}
+            ) / 2)
+
+        The operation's angle :math:`\theta` is in radians and :math:`k`
+        is the number of logical qubits in the block.
+
+        This is the generic operation definition. For the instantiated
+        operation, see ``pauli_exp_all_z_except_x_at``.
+        """
+        return self().get_op("pauli_exp_all_z_except_x_at")
+
+    def pauli_exp_all_z_except_x_at(self, k: int) -> ExtOp:
+        r"""Apply the Pauli exponential with X at ``i`` and Z elsewhere.
+
+        .. math::
+
+            \exp(-i \theta (
+                Z^{\otimes i} \otimes X \otimes Z^{\otimes(k-i-1)}
+            ) / 2)
+
+        The operation's angle :math:`\theta` is in radians and :math:`k`
+        is the number of logical qubits in the block.
+
+        Args:
+            k: The number of logical qubits encoded in the block.
+        """
+        block_type = _ICEBERG_TYPES.iceberg_block(k)
+        return self.pauli_exp_all_z_except_x_at_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
                 [block_type, _IDX_T, FLOAT_T], [block_type]
@@ -1193,21 +1338,6 @@ class IcebergOpsExtension:
     def rx_dynq(self) -> ExtOp:
         """Rx gate on a dynamic logical qubit."""
         return self.rx_dynq_def.instantiate([])
-
-    # ry_dynq
-
-    @functools.cached_property
-    def ry_dynq_def(self) -> OpDef:
-        """Ry gate on a dynamic logical qubit.
-
-        This is the generic operation definition. For the instantiated operation, see
-        `ry_dynq`."""
-        return self().get_op("ry_dynq")
-
-    @functools.cached_property
-    def ry_dynq(self) -> ExtOp:
-        """Ry gate on a dynamic logical qubit."""
-        return self.ry_dynq_def.instantiate([])
 
     # rz_dynq
 

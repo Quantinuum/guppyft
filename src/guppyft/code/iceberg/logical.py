@@ -1,10 +1,11 @@
 """Guppy functions and types for the Iceberg QEC architecture."""
 
 from collections.abc import Callable, Sequence
+from math import pi
 from typing import Generic, no_type_check
 
 from guppylang import guppy
-from guppylang.std.builtins import array
+from guppylang.std.builtins import array, comptime
 from guppylang.std.lang import owned
 from guppylang.std.option import Option
 from guppylang.std.quantum import Measurement
@@ -162,7 +163,15 @@ class Block(Generic[N]):  # type: ignore[misc]
     @guppy
     @no_type_check
     def ry(self: "Block[N]", i: int, phase: float) -> None:
-        """Ry rotation of `phase` radians on the qubit with index `i`."""
+        r"""Ry rotation of ``phase`` radians on logical qubit ``i``.
+
+        Ry is not a primitive and is implemented here as
+        .. math::
+
+            R_y(\theta) = R_x(-\pi/2) R_z(\theta) R_x(\pi/2)
+
+        where :math:`\theta` is ``phase``.
+        """
         ry(self, i, phase)
 
     @guppy
@@ -173,33 +182,109 @@ class Block(Generic[N]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
-    def all_rx(self: "Block[N]", phase: float) -> None:
-        """Rx rotation of `phase` radians on all qubits."""
-        all_rx(self, phase)
+    def pauli_exp_all_x(self: "Block[N]", phase: float) -> None:
+        r"""Apply the logical all-X Pauli exponential.
+
+        .. math::
+
+            \exp(-i \theta X^{\otimes k} / 2)
+
+        where :math:`\theta` is ``phase`` in radians and :math:`k` is the
+        number of logical qubits in the block.
+        """
+        pauli_exp_all_x(self, phase)
 
     @guppy
     @no_type_check
-    def all_ry(self: "Block[N]", phase: float) -> None:
-        """Ry rotation of `phase` radians on all qubits."""
-        all_ry(self, phase)
+    def pauli_exp_all_y(self: "Block[N]", phase: float) -> None:
+        r"""Apply the logical all-Y Pauli exponential.
+
+        .. math::
+
+            \exp(-i \theta Y^{\otimes k} / 2)
+
+        where :math:`\theta` is ``phase`` in radians and :math:`k` is the
+        number of logical qubits in the block.
+        """
+        pauli_exp_all_y(self, phase)
 
     @guppy
     @no_type_check
-    def all_rz(self: "Block[N]", phase: float) -> None:
-        """Rz rotation of `phase` radians on all qubits."""
-        all_rz(self, phase)
+    def pauli_exp_all_z(self: "Block[N]", phase: float) -> None:
+        r"""Apply the logical all-Z Pauli exponential.
+
+        .. math::
+
+            \exp(-i \theta Z^{\otimes k} / 2)
+
+        where :math:`\theta` is ``phase`` in radians and :math:`k` is the
+        number of logical qubits in the block.
+        """
+        pauli_exp_all_z(self, phase)
 
     @guppy
     @no_type_check
-    def all_but_one_rx(self: "Block[N]", i: int, phase: float) -> None:
-        """Rx rotation of `phase` radians on qubits except that with index `i`."""
-        all_but_one_rx(self, i, phase)
+    def pauli_exp_all_x_except_at(self: "Block[N]", i: int, phase: float) -> None:
+        r"""Apply the Pauli exponential with I at ``i`` and X elsewhere.
+
+        .. math::
+
+            \exp(-i \theta (
+                X^{\otimes i} \otimes I \otimes X^{\otimes(k-i-1)}
+            ) / 2)
+
+        where :math:`\theta` is ``phase`` in radians and :math:`k` is the
+        number of logical qubits in the block.
+        """
+        pauli_exp_all_x_except_at(self, i, phase)
 
     @guppy
     @no_type_check
-    def all_but_one_rz(self: "Block[N]", i: int, phase: float) -> None:
-        """Rz rotation of `phase` radians on qubits except that with index `i`."""
-        all_but_one_rz(self, i, phase)
+    def pauli_exp_all_z_except_at(self: "Block[N]", i: int, phase: float) -> None:
+        r"""Apply the Pauli exponential with I at ``i`` and Z elsewhere.
+
+        .. math::
+
+            \exp(-i \theta (
+                Z^{\otimes i} \otimes I \otimes Z^{\otimes(k-i-1)}
+            ) / 2)
+
+        where :math:`\theta` is ``phase`` in radians and :math:`k` is the
+        number of logical qubits in the block.
+        """
+        pauli_exp_all_z_except_at(self, i, phase)
+
+    @guppy
+    @no_type_check
+    def pauli_exp_all_x_except_z_at(self: "Block[N]", i: int, phase: float) -> None:
+        r"""Apply the Pauli exponential with Z at ``i`` and X elsewhere.
+
+        .. math::
+
+            \exp(-i \theta (
+                X^{\otimes i} \otimes Z \otimes X^{\otimes(k-i-1)}
+            ) / 2)
+
+        where :math:`\theta` is ``phase`` in radians and :math:`k` is the
+        number of logical qubits in the block.
+        """
+        pauli_exp_all_x_except_z_at(self, i, phase)
+
+    @guppy
+    @no_type_check
+    def pauli_exp_all_z_except_x_at(self: "Block[N]", i: int, phase: float) -> None:
+        r"""Apply the Pauli exponential with X at ``i`` and Z elsewhere.
+
+        .. math::
+
+            \exp(-i \theta (
+                Z^{\otimes i} \otimes X \otimes Z^{\otimes(k-i-1)}
+            ) / 2)
+
+        where :math:`\theta` is ``phase`` in radians and :math:`k` is the
+        number of logical qubits in the block.
+        """
+        pauli_exp_all_z_except_x_at(self, i, phase)
 
     @guppy
     @no_type_check
@@ -297,7 +382,15 @@ class Qubit:
     @guppy
     @no_type_check
     def ry(self: "Qubit", phase: float) -> None:
-        """Ry rotation of `phase` radians."""
+        r"""Ry rotation of ``phase`` radians on a dynamic logical qubit.
+
+        Ry is not a primitive and is implemented here as
+        .. math::
+
+            R_y(\theta) = R_x(-\pi/2) R_z(\theta) R_x(\pi/2)
+
+        where :math:`\theta` is ``phase``.
+        """
         ry_dynq(self, phase)
 
     @guppy
@@ -449,10 +542,21 @@ def rx(block: Block[N], i: int, phase: float) -> None:
     """Rx rotation of `phase` radians on the qubit with index `i`."""
 
 
-@hugr_op(logical_op(iceberg_ops.ry_def), effects=())
+@guppy
 @no_type_check
 def ry(block: Block[N], i: int, phase: float) -> None:
-    """Ry rotation of `phase` radians on the qubit with index `i`."""
+    r"""Ry rotation of ``phase`` radians on logical qubit ``i``.
+
+    Ry is not a primitive and is implemented here as
+    .. math::
+
+        R_y(\theta) = R_x(-\pi/2) R_z(\theta) R_x(\pi/2)
+
+    where :math:`\theta` is ``phase``.
+    """
+    rx(block, i, comptime(pi / 2))
+    rz(block, i, phase)
+    rx(block, i, comptime(-pi / 2))
 
 
 @hugr_op(logical_op(iceberg_ops.rz_def), effects=())
@@ -461,34 +565,110 @@ def rz(block: Block[N], i: int, phase: float) -> None:
     """Rz rotation of `phase` radians on the qubit with index `i`."""
 
 
-@hugr_op(logical_op(iceberg_ops.all_rx_def), effects=())
+@hugr_op(logical_op(iceberg_ops.pauli_exp_all_x_def))
 @no_type_check
-def all_rx(block: Block[N], phase: float) -> None:
-    """Rx gate on all qubits."""
+def pauli_exp_all_x(block: Block[N], phase: float) -> None:
+    r"""Apply the logical all-X Pauli exponential.
+
+    .. math::
+
+        \exp(-i \theta X^{\otimes k} / 2)
+
+    where :math:`\theta` is ``phase`` in radians and :math:`k` is the
+    number of logical qubits in the block.
+    """
 
 
-@hugr_op(logical_op(iceberg_ops.all_ry_def), effects=())
+@hugr_op(logical_op(iceberg_ops.pauli_exp_all_y_def))
 @no_type_check
-def all_ry(block: Block[N], phase: float) -> None:
-    """Ry gate on all qubits."""
+def pauli_exp_all_y(block: Block[N], phase: float) -> None:
+    r"""Apply the logical all-Y Pauli exponential.
+
+    .. math::
+
+        \exp(-i \theta Y^{\otimes k} / 2)
+
+    where :math:`\theta` is ``phase`` in radians and :math:`k` is the
+    number of logical qubits in the block.
+    """
 
 
-@hugr_op(logical_op(iceberg_ops.all_rz_def), effects=())
+@hugr_op(logical_op(iceberg_ops.pauli_exp_all_z_def), effects=())
 @no_type_check
-def all_rz(block: Block[N], phase: float) -> None:
-    """Rz gate on all qubits."""
+def pauli_exp_all_z(block: Block[N], phase: float) -> None:
+    r"""Apply the logical all-Z Pauli exponential.
+
+    .. math::
+
+        \exp(-i \theta Z^{\otimes k} / 2)
+
+    where :math:`\theta` is ``phase`` in radians and :math:`k` is the
+    number of logical qubits in the block.
+    """
 
 
-@hugr_op(logical_op(iceberg_ops.all_but_one_rx_def), effects=())
+@hugr_op(logical_op(iceberg_ops.pauli_exp_all_x_except_at_def), effects=())
 @no_type_check
-def all_but_one_rx(block: Block[N], i: int, phase: float) -> None:
-    """Rx rotation of `phase` radians on qubits except that with index `i`."""
+def pauli_exp_all_x_except_at(block: Block[N], i: int, phase: float) -> None:
+    r"""Apply the Pauli exponential with I at ``i`` and X elsewhere.
+
+    .. math::
+
+        \exp(-i \theta (
+            X^{\otimes i} \otimes I \otimes X^{\otimes(k-i-1)}
+        ) / 2)
+
+    where :math:`\theta` is ``phase`` in radians and :math:`k` is the
+    number of logical qubits in the block.
+    """
 
 
-@hugr_op(logical_op(iceberg_ops.all_but_one_rz_def), effects=())
+@hugr_op(logical_op(iceberg_ops.pauli_exp_all_z_except_at_def), effects=())
 @no_type_check
-def all_but_one_rz(block: Block[N], i: int, phase: float) -> None:
-    """Rz rotation of `phase` radians on qubits except that with index `i`."""
+def pauli_exp_all_z_except_at(block: Block[N], i: int, phase: float) -> None:
+    r"""Apply the Pauli exponential with I at ``i`` and Z elsewhere.
+
+    .. math::
+
+        \exp(-i \theta (
+            Z^{\otimes i} \otimes I \otimes Z^{\otimes(k-i-1)}
+        ) / 2)
+
+    where :math:`\theta` is ``phase`` in radians and :math:`k` is the
+    number of logical qubits in the block.
+    """
+
+
+@hugr_op(logical_op(iceberg_ops.pauli_exp_all_x_except_z_at_def), effects=())
+@no_type_check
+def pauli_exp_all_x_except_z_at(block: Block[N], i: int, phase: float) -> None:
+    r"""Apply the Pauli exponential with Z at ``i`` and X elsewhere.
+
+    .. math::
+
+        \exp(-i \theta (
+            X^{\otimes i} \otimes Z \otimes X^{\otimes(k-i-1)}
+        ) / 2)
+
+    where :math:`\theta` is ``phase`` in radians and :math:`k` is the
+    number of logical qubits in the block.
+    """
+
+
+@hugr_op(logical_op(iceberg_ops.pauli_exp_all_z_except_x_at_def), effects=())
+@no_type_check
+def pauli_exp_all_z_except_x_at(block: Block[N], i: int, phase: float) -> None:
+    r"""Apply the Pauli exponential with X at ``i`` and Z elsewhere.
+
+    .. math::
+
+        \exp(-i \theta (
+            Z^{\otimes i} \otimes X \otimes Z^{\otimes(k-i-1)}
+        ) / 2)
+
+    where :math:`\theta` is ``phase`` in radians and :math:`k` is the
+    number of logical qubits in the block.
+    """
 
 
 @hugr_op(logical_op(iceberg_ops.all_h_def), effects=())
@@ -635,10 +815,21 @@ def rx_dynq(qubit: Qubit, phase: float) -> None:
     """Rx rotation of `phase` radians."""
 
 
-@hugr_op(logical_op(iceberg_ops.ry_dynq_def), effects=())
+@guppy
 @no_type_check
 def ry_dynq(qubit: Qubit, phase: float) -> None:
-    """Ry rotation of `phase` radians."""
+    r"""Ry rotation of ``phase`` radians on a dynamic logical qubit.
+
+    Ry is not a primitive and is implemented here as
+    .. math::
+
+        R_y(\theta) = R_x(-\pi/2) R_z(\theta) R_x(\pi/2)
+
+    where :math:`\theta` is ``phase``.
+    """
+    rx_dynq(qubit, comptime(pi / 2))
+    rz_dynq(qubit, phase)
+    rx_dynq(qubit, comptime(-pi / 2))
 
 
 @hugr_op(logical_op(iceberg_ops.rz_dynq_def), effects=())

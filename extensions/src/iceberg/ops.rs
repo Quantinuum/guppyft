@@ -29,7 +29,7 @@ use super::types::block_tv;
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.iceberg.ops");
 /// Extension version.
-pub const VERSION: semver::Version = semver::Version::new(0, 2, 0);
+pub const VERSION: semver::Version = semver::Version::new(0, 3, 1);
 
 /// Logical Iceberg operations.
 ///
@@ -74,20 +74,29 @@ pub enum IcebergOpDef {
     fan_in,
     /// Rx gate.
     rx,
-    /// Ry gate.
-    ry,
     /// Rz gate.
     rz,
-    /// Rx gate on all qubits.
-    all_rx,
-    /// Ry gate on all qubits.
-    all_ry,
-    /// Rz gate on all qubits.
-    all_rz,
-    /// Rx gate on all but one qubit.
-    all_but_one_rx,
-    /// Rz gate on all but one qubit.
-    all_but_one_rz,
+    /// Apply `exp(-i theta P / 2)`, with theta in radians.
+    /// `P` is X on every logical qubit.
+    pauli_exp_all_x,
+    /// Apply `exp(-i theta P / 2)`, with theta in radians.
+    /// `P` is Y on every logical qubit.
+    pauli_exp_all_y,
+    /// Apply `exp(-i theta P / 2)`, with theta in radians.
+    /// `P` is Z on every logical qubit.
+    pauli_exp_all_z,
+    /// Apply `exp(-i theta P / 2)`, with theta in radians.
+    /// `P` is X on every logical qubit except `i`, where it is I.
+    pauli_exp_all_x_except_at,
+    /// Apply `exp(-i theta P / 2)`, with theta in radians.
+    /// `P` is Z on every logical qubit except `i`, where it is I.
+    pauli_exp_all_z_except_at,
+    /// Apply `exp(-i theta P / 2)`, with theta in radians.
+    /// `P` is X on every logical qubit except `i`, where it is Z.
+    pauli_exp_all_x_except_z_at,
+    /// Apply `exp(-i theta P / 2)`, with theta in radians.
+    /// `P` is Z on every logical qubit except `i`, where it is X.
+    pauli_exp_all_z_except_x_at,
     /// H gate on all qubits.
     all_h,
     /// XXPhase gate.
@@ -140,8 +149,6 @@ pub enum IcebergOpDef {
     z_dynq,
     /// Rx gate on a dynamic logical qubit.
     rx_dynq,
-    /// Ry gate on a dynamic logical qubit.
-    ry_dynq,
     /// Rz gate on a dynamic logical qubit.
     rz_dynq,
     /// XXPhase gate on two dynamic logical qubits.
@@ -364,13 +371,14 @@ impl MakeOpDef for IcebergOpDef {
             fan_out => sig_1_block(0, 1),
             fan_in => sig_1_block(0, 1),
             rx => sig_1_block(1, 1),
-            ry => sig_1_block(1, 1),
             rz => sig_1_block(1, 1),
-            all_rx => sig_1_block(1, 0),
-            all_ry => sig_1_block(1, 0),
-            all_rz => sig_1_block(1, 0),
-            all_but_one_rx => sig_1_block(1, 1),
-            all_but_one_rz => sig_1_block(1, 1),
+            pauli_exp_all_x => sig_1_block(1, 0),
+            pauli_exp_all_y => sig_1_block(1, 0),
+            pauli_exp_all_z => sig_1_block(1, 0),
+            pauli_exp_all_x_except_at => sig_1_block(1, 1),
+            pauli_exp_all_z_except_at => sig_1_block(1, 1),
+            pauli_exp_all_x_except_z_at => sig_1_block(1, 1),
+            pauli_exp_all_z_except_x_at => sig_1_block(1, 1),
             all_h => sig_1_block(0, 0),
             xx_phase => sig_1_block(1, 2),
             yy_phase => sig_1_block(1, 2),
@@ -479,7 +487,6 @@ impl MakeOpDef for IcebergOpDef {
             y_dynq => sig_qubits_angles(1, 0),
             z_dynq => sig_qubits_angles(1, 0),
             rx_dynq => sig_qubits_angles(1, 1),
-            ry_dynq => sig_qubits_angles(1, 1),
             rz_dynq => sig_qubits_angles(1, 1),
             xx_phase_dynq => sig_qubits_angles(2, 1),
             yy_phase_dynq => sig_qubits_angles(2, 1),
@@ -613,6 +620,34 @@ mod tests {
     }
 
     #[test]
+    fn test_pauli_exponential_signatures() {
+        use IcebergOpDef::*;
+        for k in [2, 4] {
+            for (def, n_indices) in [
+                (pauli_exp_all_x, 0),
+                (pauli_exp_all_y, 0),
+                (pauli_exp_all_z, 0),
+                (pauli_exp_all_x_except_at, 1),
+                (pauli_exp_all_z_except_at, 1),
+                (pauli_exp_all_x_except_z_at, 1),
+                (pauli_exp_all_z_except_x_at, 1),
+            ] {
+                let mut inputs = vec![block_type(k)];
+                inputs.extend(vec![int_type(6); n_indices]);
+                inputs.push(float64_type());
+                assert_eq!(
+                    def.with_size(k)
+                        .to_extension_op()
+                        .unwrap()
+                        .signature()
+                        .as_ref(),
+                    &Signature::new(inputs, [block_type(k)])
+                );
+            }
+        }
+    }
+
+    #[test]
     fn test_concrete_op_roundtrip() {
         for def in IcebergOpDef::iter() {
             let name = def.opdef_id();
@@ -656,7 +691,7 @@ mod tests {
             .instantiate_extension_op("all_x", [6.into()])
             .unwrap();
         let allrz = EXTENSION
-            .instantiate_extension_op("all_rz", [6.into()])
+            .instantiate_extension_op("pauli_exp_all_z", [6.into()])
             .unwrap();
         let rz3 = EXTENSION
             .instantiate_extension_op("rz", [6.into()])
@@ -665,7 +700,7 @@ mod tests {
             .instantiate_extension_op("rx", [6.into()])
             .unwrap();
         let allbutonerz1 = EXTENSION
-            .instantiate_extension_op("all_but_one_rz", [6.into()])
+            .instantiate_extension_op("pauli_exp_all_z_except_at", [6.into()])
             .unwrap();
         let allh = EXTENSION
             .instantiate_extension_op("all_h", [6.into()])
