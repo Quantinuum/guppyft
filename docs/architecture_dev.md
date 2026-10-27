@@ -116,9 +116,9 @@ parallelization of state preparation via
 
 Providing a logical API to the QEC architecture enables describing, creating and
 transforming HUGRs at the logical abstraction layer. This includes:
-* developing compilation and optimization passes that transform logical programs;
-* supporting global management of resources, such as state factories;
-* writing programs at the logical level, which can then take advantage of the above
+* Developing compilation and optimization passes that transform logical programs;
+* Supporting global management of resources, such as state factories;
+* Writing programs at the logical level, which can then take advantage of the above
   features.
 
 The steps for defining a logical API are the following:
@@ -205,8 +205,8 @@ global state, making it available to logical operations. In the
 Steane architecture, {py:class}`~guppyft.code.steane.encode.SteaneBuilder` defines
 the `STATE` struct to track and manage logical resources at runtime, which includes:
 
-- Allocation and freeing of logical blocks.
-- Parallel zero and magic state preparation through state factories.
+- Allocation and freeing of logical blocks;
+- Parallel zero and magic state preparation through state factories;
 - Runtime QEC cycle insertion.
 
 `STATE` tracks available logical-qubit addresses in a stack. Allocating a qubit pops
