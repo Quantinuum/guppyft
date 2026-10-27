@@ -38,7 +38,7 @@ jobs:
       - name: Install stable Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - name: Set up uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
@@ -67,7 +67,7 @@ jobs:
       - name: Install stable Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - name: Set up uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
