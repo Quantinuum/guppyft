@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.12, <4"
 resolution-markers = [
     "python_full_version >= '3.15' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
@@ -627,8 +627,8 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "guppylang", specifier = ">=1.2.0rc0" },
-    { name = "guppylang-internals", specifier = ">=1.2.0rc0" },
+    { name = "guppylang", specifier = ">=1.2.0" },
+    { name = "guppylang-internals", specifier = ">=1.2.0" },
     { name = "hugr", specifier = ">=0.18.6" },
     { name = "selene-sim", specifier = ">=0.3.0,!=0.3.5" },
     { name = "tket", specifier = ">=0.15.8" },
@@ -669,7 +669,7 @@ test = [
 
 [[package]]
 name = "guppylang"
-version = "1.2.0rc0"
+version = "1.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "guppylang-internals" },
@@ -679,14 +679,14 @@ dependencies = [
     { name = "selene-sim" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/aa/c3/a2565d0a8a2b4c64ade7e0c37dfb17b935b869d315d17fcb7865692dfb8e/guppylang-1.2.0rc0.tar.gz", hash = "sha256:c284215d4c96fe70ba9881b1793841a046a2cd58633c66eca86d4ae83ea201fe", size = 104343, upload-time = "2026-10-21T12:37:55.659Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/fa/59/1500ef126d5a004580b5f8830537879c66a096839e6121b65d70561db0b4/guppylang-1.2.0.tar.gz", hash = "sha256:83545a5ac40702e6d26b20d164d0ed0327637b1e49865fd45b8ca5ce919a0be3", size = 104526, upload-time = "2026-10-26T14:01:04.929Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b7/b1/a32032b8d4e819ee92fa76307ff2dffa949ad105af4a15235bd1bf189852/guppylang-1.2.0rc0-py3-none-any.whl", hash = "sha256:f664d2d52f7c5caed193f8618c79f98616c768c8a51a510f0a24e63431705d83", size = 100492, upload-time = "2026-10-21T12:37:53.893Z" },
+    { url = "https://files.pythonhosted.org/packages/43/e4/db0c5ea4fe1374db145f9a9aece734c306f9ef100848ec5d59b26c2b173c/guppylang-1.2.0-py3-none-any.whl", hash = "sha256:d9587bb2dd6e21f354dd79291a4633d39f8786c408d0afb02d40097e16ed7952", size = 100454, upload-time = "2026-10-26T14:01:03.295Z" },
 ]
 
 [[package]]
 name = "guppylang-internals"
-version = "1.2.0rc0"
+version = "1.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "hugr" },
@@ -697,9 +697,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "wasmtime" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2d/18/c986815162855b19a438aac9dd2db0fa1c9b7c0bae13453f1c09cda2b0d6/guppylang_internals-1.2.0rc0.tar.gz", hash = "sha256:a85f3f3174ebf2ee404964d2d48310973531f4d8b645480e14a98fad334ce2cf", size = 280490, upload-time = "2026-10-21T12:37:28.225Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bf/13/cbfe8d2dbda15cbceeaaf39d7852baa68ad69a2dbcdd05f6caec45c6b0ab/guppylang_internals-1.2.0.tar.gz", hash = "sha256:baa8d9d3c936fc5dd998ddc986161e6ab9690bb441f1df9a6f3960e1d51b9252", size = 282864, upload-time = "2026-10-26T13:57:55.287Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/09/1b/263dbdf5a98cb1f48a65ac18085b13e8a067b6d57d6159286a09abbe447a/guppylang_internals-1.2.0rc0-py3-none-any.whl", hash = "sha256:60ea330cbda859a427295aa7244e0e724381ef273cb42bd36e4975300765c673", size = 338665, upload-time = "2026-10-21T12:37:26.329Z" },
+    { url = "https://files.pythonhosted.org/packages/a5/c7/83dfdbf0ecd2f7bd0f7f0b16be3f9062acf9ad4ee793b8a07fdfc105a1fb/guppylang_internals-1.2.0-py3-none-any.whl", hash = "sha256:f6b8b6b6e95ec226873a11d8d434d7b2f5839d01543408471ec880dbb7880899", size = 340950, upload-time = "2026-10-26T13:57:53.589Z" },
 ]
 
 [[package]]
