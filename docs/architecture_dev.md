@@ -164,6 +164,7 @@ You should not include any `guppylang.std.quantum` operations, as they will act 
 a different layer. An example of a composite operation in the Steane architecture is
 {py:func}`guppyft.code.steane.logical.t`, which is performed through magic-state injection.
 
+(3-define-op-implementations)=
 ### 3. Define op implementations
 
 Up to this point, the logical operations are not yet executable, since they are HUGR ops that are unknown to
@@ -197,6 +198,7 @@ final `implement_ops` pass. This abstraction lets developers provide a public
 interface for the logical operations, while keeping the details of the physical
 circuits private.
 
+(tracking-runtime-state)=
 ### Tracking runtime state
 
 A key enabler for Guppy FT is the ability to track and manage logical resources and
