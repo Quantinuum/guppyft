@@ -24,6 +24,7 @@
 
 * Remove `ry` and `ry_dynq` Iceberg operations ([#501](https://github.com/Quantinuum/guppyft/issues/501)) ([7a2e669](https://github.com/Quantinuum/guppyft/commit/7a2e669ea7b3b951467bb00d6f492c25d827d403))
 * Update names and documentation for Iceberg rotation ops ([#498](https://github.com/Quantinuum/guppyft/issues/498)) ([2caa102](https://github.com/Quantinuum/guppyft/commit/2caa102a86a0e4a2cdcfd5725d67c7b3e3853250))
+* Upgrade to guppylang v1.2 ([#480](https://github.com/Quantinuum/guppyft/issues/480))
 
 ## [0.4.0](https://github.com/Quantinuum/guppyft/compare/v0.3.1...v0.4.0) (2026-10-20)
 
