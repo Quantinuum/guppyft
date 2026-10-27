@@ -565,7 +565,7 @@ def rz(block: Block[N], i: int, phase: float) -> None:
     """Rz rotation of `phase` radians on the qubit with index `i`."""
 
 
-@hugr_op(logical_op(iceberg_ops.pauli_exp_all_x_def))
+@hugr_op(logical_op(iceberg_ops.pauli_exp_all_x_def), effects=())
 @no_type_check
 def pauli_exp_all_x(block: Block[N], phase: float) -> None:
     r"""Apply the logical all-X Pauli exponential.
@@ -579,7 +579,7 @@ def pauli_exp_all_x(block: Block[N], phase: float) -> None:
     """
 
 
-@hugr_op(logical_op(iceberg_ops.pauli_exp_all_y_def))
+@hugr_op(logical_op(iceberg_ops.pauli_exp_all_y_def), effects=())
 @no_type_check
 def pauli_exp_all_y(block: Block[N], phase: float) -> None:
     r"""Apply the logical all-Y Pauli exponential.
