@@ -63,7 +63,7 @@ Using the verifier requires three definitions:
 1. `semantic_function` is a Guppy function that defines the logical action on an
    array of $k$ logical qubits.
 2. `impl_function` is a Guppy function that defines the physical implementation on
-   an array of $n$ physical qubits.
+   an array of $n$ physical qubits or instances of `LogicalBlock[n]`.
 3. `code_definition` is the {py:class}`~guppyft.code_def.StabilizerCode` definition, refer to the class docs for information on how to provide one for your code.
 
 These definitions can then be used to as an assertion in the architecture test suite
