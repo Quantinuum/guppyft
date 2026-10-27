@@ -5,7 +5,7 @@ from guppylang.std.array import array
 from guppylang.std.quantum import cx, discard, h, measure, measure_array, qubit, s, sdg
 
 from guppyft.code_def import StabilizerCode
-from guppyft.std import LogicalBlock
+from guppyft.std import QubitBlock
 
 STEANE_DEF = StabilizerCode.from_python_strings(
     n_physical_qubits=7,
@@ -56,8 +56,8 @@ def implement_non_ft_zero_state() -> array[qubit, 7]:
 
 @guppy
 @no_type_check
-def implement_non_ft_zero_state_logical_block() -> LogicalBlock[7]:
-    return LogicalBlock[7](implement_non_ft_zero_state())
+def implement_non_ft_zero_state_logical_block() -> QubitBlock[7]:
+    return QubitBlock[7](implement_non_ft_zero_state())
 
 
 @guppy
@@ -162,7 +162,7 @@ def implement_h(block: array[qubit, 7]) -> None:
 
 @guppy
 @no_type_check
-def implement_h_logical_block(block: LogicalBlock[7]) -> None:
+def implement_h_logical_block(block: QubitBlock[7]) -> None:
     implement_h(block.data_qs)
 
 
@@ -223,13 +223,13 @@ def implement_cx(first_block: array[qubit, 7], second_block: array[qubit, 7]) ->
 @guppy
 @no_type_check
 def implement_cx_logical_block(
-    first_block: LogicalBlock[7], second_block: LogicalBlock[7]
+    first_block: QubitBlock[7], second_block: QubitBlock[7]
 ) -> None:
     implement_cx(first_block.data_qs, second_block.data_qs)
 
 
 @guppy
 @no_type_check
-def implement_bell_state_logical_block() -> tuple[LogicalBlock[7], LogicalBlock[7]]:
+def implement_bell_state_logical_block() -> tuple[QubitBlock[7], QubitBlock[7]]:
     first, second = implement_non_ft_bell_state()
-    return LogicalBlock(first), LogicalBlock(second)
+    return QubitBlock(first), QubitBlock(second)

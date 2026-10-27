@@ -18,7 +18,7 @@ from zixy.qubit import pauli
 
 from guppyft._math import bitstring_to_int
 from guppyft.code_def import StabilizerCode
-from guppyft.std import LogicalBlock
+from guppyft.std import QubitBlock
 from guppyft.std.state_factory import PreBlock
 
 __all__ = [
@@ -80,9 +80,9 @@ def _parity_check(data_bits: array[bool, N]) -> bool:
 
 @guppy
 @no_type_check
-def prep_zero_non_ft() -> LogicalBlock[7]:
+def prep_zero_non_ft() -> QubitBlock[7]:
     """Prepare Steane block in the logical zero state."""
-    blk = LogicalBlock(array(qlib.qubit() for _ in range(7)))
+    blk = QubitBlock(array(qlib.qubit() for _ in range(7)))
 
     plus_ids = array(0, 4, 6)
     for i in plus_ids:
@@ -114,7 +114,7 @@ def prep_zero_ft() -> PreBlock[7, 1]:
 @no_type_check
 def _syndrome_helper(
     a: array[qlib.qubit, 3],
-    blk: LogicalBlock[7],
+    blk: QubitBlock[7],
     idx: tuple[int, int, int] @ comptime,
     reverse_cx: bool @ comptime,
 ) -> None:
@@ -131,7 +131,7 @@ def _syndrome_helper(
 
 @guppy.comptime
 @no_type_check
-def _measure_syndromes(blk: LogicalBlock[7]) -> array[qlib.Measurement, 6]:
+def _measure_syndromes(blk: QubitBlock[7]) -> array[qlib.Measurement, 6]:
     """Syndrome measurement using Figure 5 from Reichardt arXiv:1804.06995.
 
     Returns:
@@ -183,7 +183,7 @@ def _phys_controlled_h(ctl: qlib.qubit, tgt: qlib.qubit) -> None:
 
 @guppy
 @no_type_check
-def _measure_h_operator(blk: LogicalBlock[7]) -> array[qlib.Measurement, 2]:
+def _measure_h_operator(blk: QubitBlock[7]) -> array[qlib.Measurement, 2]:
     """Fault-tolerant measurement of the logical H operator on a Steane block."""
     # Prepare Bell state ancilla
     a = array(qlib.qubit() for _ in range(2))
@@ -205,7 +205,7 @@ def _measure_h_operator(blk: LogicalBlock[7]) -> array[qlib.Measurement, 2]:
 
 @guppy.comptime
 @no_type_check
-def _prep_h_non_ft() -> LogicalBlock[7]:
+def _prep_h_non_ft() -> QubitBlock[7]:
     """Non-fault-tolerant preparation of an |H> = Ry(pi/4)|0> magic state on
     a Steane block.
 
@@ -241,7 +241,7 @@ def _prep_h_non_ft() -> LogicalBlock[7]:
     for ctl, tgt in cx_pairs:
         qlib.cx(arr[relabel[ctl]], arr[relabel[tgt]])
 
-    return LogicalBlock(arr)
+    return QubitBlock(arr)
 
 
 @guppy.comptime
@@ -279,7 +279,7 @@ def prep_t_state_ft() -> PreBlock[7, 8]:
 @guppy
 @no_type_check
 def _inject_t_non_deterministically(
-    blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned
+    blk: QubitBlock[7], t_state: QubitBlock[7] @ owned
 ) -> bool:
     """Inject T gate, but do not apply corrections.
 
@@ -297,7 +297,7 @@ def _inject_t_non_deterministically(
 
 @guppy
 @no_type_check
-def inject_t(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
+def inject_t(blk: QubitBlock[7], t_state: QubitBlock[7] @ owned) -> None:
     """Apply T gate via injection.
 
     Note:
@@ -311,7 +311,7 @@ def inject_t(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
 
 @guppy
 @no_type_check
-def inject_tdg(blk: LogicalBlock[7], t_state: LogicalBlock[7] @ owned) -> None:
+def inject_tdg(blk: QubitBlock[7], t_state: QubitBlock[7] @ owned) -> None:
     """Apply Tdg gate via injection.
 
     Note:
@@ -336,9 +336,9 @@ def _get_syndrome(data_bits: array[bool, 7]) -> array[bool, 3]:
 @guppy
 @no_type_check
 def knill_qec_cycle(
-    q: LogicalBlock[7],
-    a0: LogicalBlock[7] @ owned,
-    a1: LogicalBlock[7] @ owned,
+    q: QubitBlock[7],
+    a0: QubitBlock[7] @ owned,
+    a1: QubitBlock[7] @ owned,
 ) -> None:
     """Implements Knill style syndrome extraction.
 
@@ -365,7 +365,7 @@ def knill_qec_cycle(
 
 @guppy
 @no_type_check
-def steane_z_qec_cycle(q: LogicalBlock[7], a: LogicalBlock[7] @ owned) -> None:
+def steane_z_qec_cycle(q: QubitBlock[7], a: QubitBlock[7] @ owned) -> None:
     """Implements Z syndrome extraction via Steane with one-qubit teleportation.
 
     Notes:
@@ -386,7 +386,7 @@ def steane_z_qec_cycle(q: LogicalBlock[7], a: LogicalBlock[7] @ owned) -> None:
 
 @guppy
 @no_type_check
-def steane_x_qec_cycle(q: LogicalBlock[7], a: LogicalBlock[7] @ owned) -> None:
+def steane_x_qec_cycle(q: QubitBlock[7], a: QubitBlock[7] @ owned) -> None:
     """Implements X syndrome extraction via Steane with one-qubit teleportation.
 
     Notes:
@@ -405,7 +405,7 @@ def steane_x_qec_cycle(q: LogicalBlock[7], a: LogicalBlock[7] @ owned) -> None:
 
 @guppy
 @no_type_check
-def reichardt_qec_cycle(q: LogicalBlock[7]) -> None:
+def reichardt_qec_cycle(q: QubitBlock[7]) -> None:
     """Dense syndrome extraction using Figure 5 from Reichardt arXiv:1804.06995.
 
     This uses only 3 physical ancillas to measure all stabilizers fault-tolerantly.
@@ -465,7 +465,7 @@ class RawMeasurement(Generic[N]):  # type: ignore[misc]
 
 @guppy
 @no_type_check
-def measure_z(blk: LogicalBlock[7] @ owned) -> RawMeasurement[7]:
+def measure_z(blk: QubitBlock[7] @ owned) -> RawMeasurement[7]:
     """Measure Steane block in the Z basis."""
     return RawMeasurement(qlib.measure_array(blk.data_qs))
 
@@ -484,7 +484,7 @@ def decode(m: RawMeasurement[7] @ owned) -> bool:
 
 @guppy
 @no_type_check
-def x(blk: LogicalBlock[7]) -> None:
+def x(blk: QubitBlock[7]) -> None:
     """Logical X gate on a Steane block."""
     for i in range(7):
         qlib.x(blk.data_qs[i])
@@ -492,7 +492,7 @@ def x(blk: LogicalBlock[7]) -> None:
 
 @guppy
 @no_type_check
-def y(blk: LogicalBlock[7]) -> None:
+def y(blk: QubitBlock[7]) -> None:
     """Logical Y gate on a Steane block."""
     # Note:
     # This actually implements a logical -Y gate but as it is a global phase
@@ -503,7 +503,7 @@ def y(blk: LogicalBlock[7]) -> None:
 
 @guppy
 @no_type_check
-def z(blk: LogicalBlock[7]) -> None:
+def z(blk: QubitBlock[7]) -> None:
     """Logical Z gate on a Steane block."""
     for i in range(7):
         qlib.z(blk.data_qs[i])
@@ -511,7 +511,7 @@ def z(blk: LogicalBlock[7]) -> None:
 
 @guppy
 @no_type_check
-def h(blk: LogicalBlock[7]) -> None:
+def h(blk: QubitBlock[7]) -> None:
     """Logical H gate on a Steane block."""
     for i in range(7):
         qlib.h(blk.data_qs[i])
@@ -519,7 +519,7 @@ def h(blk: LogicalBlock[7]) -> None:
 
 @guppy
 @no_type_check
-def s(blk: LogicalBlock[7]) -> None:
+def s(blk: QubitBlock[7]) -> None:
     """Logical S gate on a Steane block."""
     for i in range(7):
         qlib.sdg(blk.data_qs[i])
@@ -527,7 +527,7 @@ def s(blk: LogicalBlock[7]) -> None:
 
 @guppy
 @no_type_check
-def sdg(blk: LogicalBlock[7]) -> None:
+def sdg(blk: QubitBlock[7]) -> None:
     """Logical S dagger gate on a Steane block."""
     for i in range(7):
         qlib.s(blk.data_qs[i])
@@ -535,7 +535,7 @@ def sdg(blk: LogicalBlock[7]) -> None:
 
 @guppy
 @no_type_check
-def cx(ctl: LogicalBlock[7], tgt: LogicalBlock[7]) -> None:
+def cx(ctl: QubitBlock[7], tgt: QubitBlock[7]) -> None:
     """Logical CX gate between two Steane blocks."""
     for i in range(7):
         qlib.cx(ctl.data_qs[i], tgt.data_qs[i])
@@ -543,7 +543,7 @@ def cx(ctl: LogicalBlock[7], tgt: LogicalBlock[7]) -> None:
 
 @guppy
 @no_type_check
-def cz(q0: LogicalBlock[7], q1: LogicalBlock[7]) -> None:
+def cz(q0: QubitBlock[7], q1: QubitBlock[7]) -> None:
     """Logical CZ gate between two Steane blocks."""
     for i in range(7):
         qlib.cz(q0.data_qs[i], q1.data_qs[i])

@@ -10,7 +10,7 @@ from selene_stim_plugin.state import Pauli, Phase, Stabilizer, StabilizerList
 from zixy.container.coeffs import Sign
 from zixy.qubit import pauli
 
-from guppyft.std import LogicalBlock
+from guppyft.std import QubitBlock
 
 N = guppy.nat_var("N")
 T = guppy.type_var("T", copyable=False, droppable=False)
@@ -19,25 +19,25 @@ T = guppy.type_var("T", copyable=False, droppable=False)
 # Guppy checks concrete block sizes when compiling the verification program.
 type SemanticStabilizerState = GuppyFunctionDefinition[[], array[qubit, N]]  # type: ignore[valid-type]
 type ImplementationStabilizerState = (
-    SemanticStabilizerState | GuppyFunctionDefinition[[], LogicalBlock[N]]  # type: ignore[valid-type, type-arg]
+    SemanticStabilizerState | GuppyFunctionDefinition[[], QubitBlock[N]]  # type: ignore[valid-type, type-arg]
 )
 type SemanticStabilizerStateDouble = GuppyFunctionDefinition[
     [], tuple[array[qubit, N], array[qubit, N]]  # type: ignore[valid-type]
 ]
 type ImplementationStabilizerStateDouble = (
     SemanticStabilizerStateDouble
-    | GuppyFunctionDefinition[[], tuple[LogicalBlock[N], LogicalBlock[N]]]  # type: ignore[valid-type, type-arg]
+    | GuppyFunctionDefinition[[], tuple[QubitBlock[N], QubitBlock[N]]]  # type: ignore[valid-type, type-arg]
 )
 type SemanticCliffordUnitary = GuppyFunctionDefinition[[array[qubit, N]], None]  # type: ignore[valid-type]
 type ImplementationCliffordUnitary = (
-    SemanticCliffordUnitary | GuppyFunctionDefinition[[LogicalBlock[N]], None]  # type: ignore[valid-type, type-arg]
+    SemanticCliffordUnitary | GuppyFunctionDefinition[[QubitBlock[N]], None]  # type: ignore[valid-type, type-arg]
 )
 type SemanticCliffordUnitaryDouble = GuppyFunctionDefinition[
     [array[qubit, N], array[qubit, N]], None  # type: ignore[valid-type]
 ]
 type ImplementationCliffordUnitaryDouble = (
     SemanticCliffordUnitaryDouble
-    | GuppyFunctionDefinition[[LogicalBlock[N], LogicalBlock[N]], None]  # type: ignore[valid-type, type-arg]
+    | GuppyFunctionDefinition[[QubitBlock[N], QubitBlock[N]], None]  # type: ignore[valid-type, type-arg]
 )
 
 

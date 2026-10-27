@@ -9,14 +9,14 @@ BLOCK_SIZE = guppy.nat_var("BLOCK_SIZE")
 
 
 @guppy.struct
-class LogicalBlock(Generic[BLOCK_SIZE]):  # type: ignore[misc]
-    """A logical block of ``N`` physical qubits."""
+class QubitBlock(Generic[BLOCK_SIZE]):  # type: ignore[misc]
+    """A block of ``N`` qubits."""
 
     data_qs: array[qubit, BLOCK_SIZE]  # type: ignore[valid-type]
 
     @guppy
     @no_type_check
-    def discard(self: "LogicalBlock[BLOCK_SIZE]" @ owned) -> None:
+    def discard(self: "QubitBlock[BLOCK_SIZE]" @ owned) -> None:
         """Discard the logical block and all qubits in ``data_qs``."""
         discard_array(self.data_qs)
 
