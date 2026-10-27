@@ -115,7 +115,7 @@ parallelization of state preparation via
 ## Logical API
 
 Providing a logical API to the QEC architecture enables describing, creating and
-transforming HUGRs at the logical abstraction layer. This includes:
+transforming HUGRs[^hugr] at the logical abstraction layer. This includes:
 * Developing compilation and optimization passes that transform logical programs;
 * Supporting global management of resources, such as state factories;
 * Writing programs at the logical level, which can then take advantage of the above
@@ -298,3 +298,6 @@ parameters. Usage of this class is illustrated in the end-to-end encoding notebo
   Quantinuum software stack.
 * TKET [repository](https://github.com/Quantinuum/tket2): implements compilation
   and optimisation passes that act on HUGRs.
+
+[^hugr]: HUGR is an IR for mixed quantum-classical programs developed by Quantinuum. The Guppy compiler uses this IR as
+    the compilation target. For more information see https://quantinuum.github.io/hugr/.
