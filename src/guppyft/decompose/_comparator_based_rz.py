@@ -18,6 +18,7 @@ from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.angles import angle
 from guppylang.std.builtins import Function, array, comptime, nat
 from guppylang.std.lang import Drop
+from guppylang.std.math import tan
 from guppylang.std.quantum import (
     cx,
     cz,
@@ -35,7 +36,7 @@ from guppylang.std.quantum import (
     z,
 )
 
-from guppyft._math import floor, get_bit, tan
+from guppyft._math import floor, get_bit
 
 
 @guppy
