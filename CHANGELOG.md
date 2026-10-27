@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.5.0](https://github.com/Quantinuum/guppyft/compare/v0.4.0...v0.5.0) (2026-10-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* Remove `ry` and `ry_dynq` Iceberg operations ([#501](https://github.com/Quantinuum/guppyft/issues/501))
+* Update names and documentation for Iceberg rotation ops ([#498](https://github.com/Quantinuum/guppyft/issues/498))
+
+### Features
+
+* Add `QECStyle.Reichardt` to the Steane architecture ([#491](https://github.com/Quantinuum/guppyft/issues/491)) ([62d51ba](https://github.com/Quantinuum/guppyft/commit/62d51ba4d4f2d30df27ce2566406a7f2fa7e8acc))
+* Add Helix extension with Python and Guppy bindings ([#478](https://github.com/Quantinuum/guppyft/issues/478)) ([8207abc](https://github.com/Quantinuum/guppyft/commit/8207abcd85991a7be34659ed92d55943b8f7770f))
+* Add mixed Pauli exponentials operations to Iceberg ([#503](https://github.com/Quantinuum/guppyft/issues/503)) ([4677899](https://github.com/Quantinuum/guppyft/commit/4677899a45345795f4e80319effa71b32cdf9e1c))
+
+
+### Bug Fixes
+
+* Do not modify input package in place during encoding ([#490](https://github.com/Quantinuum/guppyft/issues/490)) ([b3e2596](https://github.com/Quantinuum/guppyft/commit/b3e2596c9769c24079b4226af97b31d0e3f01497))
+
+
+### Code Refactoring
+
+* Remove `ry` and `ry_dynq` Iceberg operations ([#501](https://github.com/Quantinuum/guppyft/issues/501)) ([7a2e669](https://github.com/Quantinuum/guppyft/commit/7a2e669ea7b3b951467bb00d6f492c25d827d403))
+* Update names and documentation for Iceberg rotation ops ([#498](https://github.com/Quantinuum/guppyft/issues/498)) ([2caa102](https://github.com/Quantinuum/guppyft/commit/2caa102a86a0e4a2cdcfd5725d67c7b3e3853250))
+* Upgrade to guppylang v1.2 ([#480](https://github.com/Quantinuum/guppyft/issues/480))
+
 ## [0.4.0](https://github.com/Quantinuum/guppyft/compare/v0.3.1...v0.4.0) (2026-10-20)
 
 
