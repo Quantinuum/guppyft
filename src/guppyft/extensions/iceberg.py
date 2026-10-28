@@ -1452,7 +1452,7 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def borrow_def(self) -> OpDef:
-        """Extraction of dynamic logical qubit from a borrowed block.
+        """Extraction of a dynamic logical qubit from a borrowed block.
 
         This is the generic operation definition. For the instantiated operation, see
         `borrow`."""
