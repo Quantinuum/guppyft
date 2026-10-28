@@ -5,11 +5,11 @@ from math import pi
 from typing import Generic, no_type_check
 
 from guppylang import guppy
-from guppylang.std.builtins import array, comptime
+from guppylang.std.builtins import comptime
 from guppylang.std.lang import owned
 from guppylang.std.option import Option
 from guppylang.std.quantum import Measurement
-from guppylang_internals.decorator import custom_function, custom_type, hugr_op
+from guppylang_internals.decorator import custom_type, hugr_op
 from guppylang_internals.tys import Effect
 from guppylang_internals.tys.arg import Argument, ConstArg
 from guppylang_internals.tys.common import ToHugrContext
@@ -17,9 +17,8 @@ from guppylang_internals.tys.param import ConstParam
 from guppylang_internals.tys.ty import NumericType
 from hugr import tys as ht
 from hugr.ext import TypeDef
-from hugr.ops import ExtOp
 
-from guppyft.code._util import BorrowRestoreCompiler, logical_op
+from guppyft.code._util import logical_op
 from guppyft.extensions import iceberg_ops, iceberg_types
 from guppyft.std import LogicalMeasurement
 
@@ -38,21 +37,7 @@ def _custom_block_type[T](block_ty_def: TypeDef) -> Callable[[type[T]], type[T]]
     )
 
 
-def _borrow_restore_compiler(
-    instantiate_op: Callable[[int, int], ExtOp],
-) -> BorrowRestoreCompiler:
-    """Instantiate Iceberg ops using the block size and the borrowed array length."""
-
-    def op(m: int, owner_type: ht.ExtType) -> ExtOp:
-        [k] = owner_type.args
-        assert isinstance(k, ht.BoundedNatArg)
-        return instantiate_op(k.n, m)
-
-    return BorrowRestoreCompiler(op, iceberg_types.iceberg_qubit())
-
-
 N = guppy.nat_var("N")
-M = guppy.nat_var("M")
 
 
 @_custom_block_type(iceberg_types.iceberg_block_def)
@@ -63,6 +48,21 @@ class Block(Generic[N]):  # type: ignore[misc]
     @no_type_check
     def __new__() -> "Block[N]":
         """Allocate a block in the all-zero logical state."""
+
+    @guppy
+    @staticmethod
+    @no_type_check
+    def from_borrowed(block: "BorrowedBlock[N]" @ owned) -> "Block[N]":
+        """Convert borrowed block (with all dynamic logical qubits restored) to
+        block."""
+        return from_borrowed(block)
+
+    @guppy
+    @no_type_check
+    def to_borrowed(self: "Block[N]" @ owned) -> "BorrowedBlock[N]":
+        """Convert block to borrowed block to allow dynamic logical qubits to be
+        borrowed."""
+        return to_borrowed(self)
 
     @guppy
     @no_type_check
@@ -418,17 +418,15 @@ class BorrowedBlock(Generic[N]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
-    def borrow_more(
-        self: "BorrowedBlock[N]", indices: array[int, M]
-    ) -> array[Qubit, M]:
-        """Extract dynamic logical qubits from an already-borrowed block."""
-        return borrow_more(self, indices)
+    def borrow(self: "BorrowedBlock[N]", idx: int) -> Qubit:
+        """Extract a dynamic logical qubit from a borrowed block."""
+        return borrow(self, idx)
 
     @guppy
     @no_type_check
-    def restore_some(self: "BorrowedBlock[N]", qubits: array[Qubit, M] @ owned) -> None:
-        """Restore some dynamic logical qubits to their originating block."""
-        restore_some(self, qubits)
+    def restore(self: "BorrowedBlock[N]", qb: Qubit @ owned) -> None:
+        """Restore a dynamic logical qubit to their originating block."""
+        restore(self, qb)
 
 
 @_custom_block_type(iceberg_types.iceberg_pre_block_def)
@@ -874,35 +872,35 @@ def cx_dynq(qubit0: Qubit, qubit1: Qubit) -> None:
     """CX gate on `qubit0` (control) and `qubit1` (target)."""
 
 
-@custom_function(_borrow_restore_compiler(iceberg_ops.borrow), effects=())
-@no_type_check
-def borrow(
-    block: Block[N] @ owned, indices: array[int, M]
-) -> (BorrowedBlock[N], array[Qubit, M]):
-    """Extract dynamic logical qubits from a block."""
-
-
-@custom_function(_borrow_restore_compiler(iceberg_ops.borrow_more), effects=())
-@no_type_check
-def borrow_more(block: BorrowedBlock[N], indices: array[int, M]) -> array[Qubit, M]:
-    """Extract additional dynamic logical qubits from an already-borrowed block."""
-
-
-@custom_function(
-    _borrow_restore_compiler(iceberg_ops.restore_some),
-    effects=[Effect.PANIC],  # Panics if `qubits` has some elements borrowed
+@hugr_op(
+    logical_op(iceberg_ops.borrow_def),
+    effects=[Effect.PANIC],  # Panics if `qubit` has already been borrowed
 )
 @no_type_check
-def restore_some(block: BorrowedBlock[N], qubits: array[Qubit, M] @ owned) -> None:
-    """Restore some dynamic logical qubits to their originating block."""
+def borrow(block: BorrowedBlock[N], idx: int) -> Qubit:
+    """Extract a dynamic logical qubits from a borrowed block."""
 
 
-@custom_function(
-    _borrow_restore_compiler(iceberg_ops.restore),
-    effects=[Effect.PANIC],  # Panics if `qubits` has some elements borrowed
+@hugr_op(logical_op(iceberg_ops.to_borrowed_def), effects=())
+@no_type_check
+def to_borrowed(block: Block[N] @ owned) -> BorrowedBlock[N]:
+    """Convert block to borrowed block to allow dynamic logical qubits to be
+    borrowed."""
+
+
+@hugr_op(
+    logical_op(iceberg_ops.from_borrowed_def),
+    effects=[Effect.PANIC],  # Panics if not all qubits restored borrowed
 )
 @no_type_check
-def restore(
-    block: BorrowedBlock[N] @ owned, qubits: array[Qubit, M] @ owned
-) -> Block[N]:
+def from_borrowed(block: BorrowedBlock[N] @ owned) -> Block[N]:
+    """Convert borrowed block (with all dynamic logical qubits restored) to block."""
+
+
+@hugr_op(
+    logical_op(iceberg_ops.restore_def),
+    effects=[Effect.PANIC],  # Panics if `qubit` does not belong to block
+)
+@no_type_check
+def restore(block: BorrowedBlock[N], qb: Qubit @ owned) -> None:
     """Restore all remaining dynamic logical qubits to their originating block."""

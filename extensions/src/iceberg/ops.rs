@@ -28,7 +28,7 @@ use super::types::block_tv;
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.iceberg.ops");
 /// Extension version.
-pub const VERSION: semver::Version = semver::Version::new(0, 3, 1);
+pub const VERSION: semver::Version = semver::Version::new(0, 4, 1);
 
 /// Logical Iceberg operations.
 ///
@@ -502,7 +502,7 @@ impl MakeOpDef for IcebergOpDef {
                 vec![TypeParam::max_nat_kind()],
                 FuncValueType::new(
                     vec![borrowed_block_tv(0), int_type(6)],
-                    vec![borrowed_block_tv(0), dynamic_logical_qubit_type()],
+                    vec![dynamic_logical_qubit_type(), borrowed_block_tv(0)],
                 ),
             )
             .into(),
@@ -1090,15 +1090,15 @@ mod tests {
             .unwrap();
         let wires: Vec<Wire> = handle.outputs().collect();
         assert_eq!(wires.len(), 2);
-        let bblock = wires[0];
-        let q0 = wires[1];
+        let q0 = wires[0];
+        let bblock = wires[1];
         // Borrow second qubit:
         let handle = dfg_builder
             .add_dataflow_op(borrow.clone(), vec![bblock, i1])
             .unwrap();
         let wires: Vec<Wire> = handle.outputs().collect();
-        let bblock = wires[0];
-        let q1 = wires[1];
+        let q1 = wires[0];
+        let bblock = wires[1];
         // Do a CX on the borrowed qubits:
         let handle = dfg_builder
             .add_dataflow_op(cx_dynq.clone(), vec![q0, q1])
@@ -1113,8 +1113,8 @@ mod tests {
             .unwrap();
         let wires: Vec<Wire> = handle.outputs().collect();
         assert_eq!(wires.len(), 2);
-        let bblock = wires[0];
-        let q2 = wires[1];
+        let q2 = wires[0];
+        let bblock = wires[1];
         // Do a CX with the first and third borrowed qubits.
         let handle = dfg_builder.add_dataflow_op(cx_dynq, vec![q0, q2]).unwrap();
         let wires: Vec<Wire> = handle.outputs().collect();

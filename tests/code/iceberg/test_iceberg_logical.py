@@ -579,24 +579,28 @@ def test_ry_compositions(binding: str) -> None:
 
 @pytest.mark.parametrize("normalize", [False, True])
 def test_borrow_restore_match_extension_signatures(normalize: bool) -> None:
-    """Guppy arrays must lower to variadic ops with static arguments [m, k]."""
+    """Guppy borrow/restore calls must match extension signatures with static k."""
 
     @guppy
     def main() -> None:
         block = Block[8]()
-        owner, first = borrow(block, array(0, 1))
-        second = owner.borrow_more(array(2))
-        cx_dynq(first[0], second[0])
-        owner.restore_some(first)
-        block = restore(owner, second)
+        bblock = block.to_borrowed()
+        qb0 = borrow(bblock, 0)
+        qb1 = borrow(bblock, 1)
+        qb2 = bblock.borrow(2)
+        cx_dynq(qb0, qb1)
+        bblock.restore(qb0)
+        bblock.restore(qb1)
+        bblock.restore(qb2)
+        block = Block.from_borrowed(bblock)
         discard(block)
 
     [h] = main.compile().modules
     expected = {
-        "borrow": iceberg_ops.borrow(8, 2),
-        "borrow_more": iceberg_ops.borrow_more(8, 1),
-        "restore_some": iceberg_ops.restore_some(8, 2),
-        "restore": iceberg_ops.restore(8, 1),
+        "borrow": iceberg_ops.borrow(8),
+        "to_borrowed": iceberg_ops.to_borrowed(8),
+        "from_borrowed": iceberg_ops.from_borrowed(8),
+        "restore": iceberg_ops.restore(8),
     }
     if normalize:
         InlineFunctions()(h, inplace=True)

@@ -1452,78 +1452,76 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def borrow_def(self) -> OpDef:
-        """Extraction of dynamic logical qubits from a block.
+        """Extraction of dynamic logical qubit from a borrowed block.
 
         This is the generic operation definition. For the instantiated operation, see
         `borrow`."""
         return self().get_op("borrow")
 
-    def borrow(self, k: int, m: int) -> ExtOp:
-        """Extraction of dynamic logical qubits from a block.
+    def borrow(self, k: int) -> ExtOp:
+        """Extraction of a dynamic logical qubit from a borrowed block.
+
+        Args:
+            k: The number of logical qubits encoded in the borrowed block.
+        """
+        bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
+        return self.borrow_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [bblock_type, _IDX_T],
+                [_DYNQ_T, bblock_type],
+            ),
+        )
+
+    # to_borrowed
+
+    @functools.cached_property
+    def to_borrowed_def(self) -> OpDef:
+        """Convert a block to a borrowed block.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `to_borrowed`."""
+        return self().get_op("to_borrowed")
+
+    def to_borrowed(self, k: int) -> ExtOp:
+        """Convert a block to a borrowed block.
 
         Args:
             k: The number of logical qubits encoded in the block.
-            m: The number of logical qubits to borrow.
         """
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
-        return self.borrow_def.instantiate(
-            args=[BoundedNatArg(m), BoundedNatArg(k)],
+        return self.to_borrowed_def.instantiate(
+            args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
-                [block_type] + [_IDX_T] * m,  # type: ignore[arg-type]
-                [bblock_type] + [_DYNQ_T] * m,  # type: ignore[arg-type]
-            ),
-        )
-
-    # borrow_more
-
-    @functools.cached_property
-    def borrow_more_def(self) -> OpDef:
-        """Extraction of dynamic logical qubits from an already-borrowed block.
-
-        This is the generic operation definition. For the instantiated operation, see
-        `borrow_more`."""
-        return self().get_op("borrow_more")
-
-    def borrow_more(self, k: int, m: int) -> ExtOp:
-        """Extraction of dynamic logical qubits from an already-borrowed block.
-
-        Args:
-            k: The number of logical qubits encoded in the block.
-            m: The number of logical qubits to borrow.
-        """
-        bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
-        return self.borrow_more_def.instantiate(
-            args=[BoundedNatArg(m), BoundedNatArg(k)],
-            concrete_signature=FunctionType(
-                [bblock_type] + [_IDX_T] * m,  # type: ignore[arg-type]
-                [bblock_type] + [_DYNQ_T] * m,  # type: ignore[arg-type]
-            ),
-        )
-
-    # restore_some
-
-    @functools.cached_property
-    def restore_some_def(self) -> OpDef:
-        """Restoration of some dynamic logical qubits to their originating block.
-
-        This is the generic operation definition. For the instantiated operation, see
-        `restore_some`."""
-        return self().get_op("restore_some")
-
-    def restore_some(self, k: int, m: int) -> ExtOp:
-        """Restoration of some dynamic logical qubits to their originating block.
-
-        Args:
-            k: The number of logical qubits encoded in the block.
-            m: The number of logical qubits to restore.
-        """
-        bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
-        return self.restore_some_def.instantiate(
-            args=[BoundedNatArg(m), BoundedNatArg(k)],
-            concrete_signature=FunctionType(
-                [bblock_type] + [_DYNQ_T] * m,  # type: ignore[arg-type]
+                [block_type],
                 [bblock_type],
+            ),
+        )
+
+    # from_borrowed
+
+    @functools.cached_property
+    def from_borrowed_def(self) -> OpDef:
+        """Convert a complete borrowed block to a block.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `from_borrowed`."""
+        return self().get_op("from_borrowed")
+
+    def from_borrowed(self, k: int) -> ExtOp:
+        """Convert a complete borrowed block to a block.
+
+        Args:
+            k: The number of logical qubits encoded in the block.
+        """
+        block_type = _ICEBERG_TYPES.iceberg_block(k)
+        bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
+        return self.from_borrowed_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [bblock_type],
+                [block_type],
             ),
         )
 
@@ -1531,25 +1529,23 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def restore_def(self) -> OpDef:
-        """Restoration of all dynamic logical qubits to their originating block.
+        """Restoration of a dynamic logical qubit to their originating block.
 
         This is the generic operation definition. For the instantiated operation, see
         `restore`."""
         return self().get_op("restore")
 
-    def restore(self, k: int, m: int) -> ExtOp:
-        """Restoration of all dynamic logical qubits to their originating block.
+    def restore(self, k: int) -> ExtOp:
+        """Restoration of a dynamic logical qubit to their originating block.
 
         Args:
             k: The number of logical qubits encoded in the block.
-            m: The number of logical qubits to restore.
         """
-        block_type = _ICEBERG_TYPES.iceberg_block(k)
         bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
         return self.restore_def.instantiate(
-            args=[BoundedNatArg(m), BoundedNatArg(k)],
+            args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
-                [bblock_type] + [_DYNQ_T] * m,  # type: ignore[arg-type]
-                [block_type],
+                [bblock_type, _DYNQ_T],
+                [bblock_type],
             ),
         )
