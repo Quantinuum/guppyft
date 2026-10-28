@@ -12,8 +12,8 @@ from guppylang.std.quantum import cx, cz, h, qubit, s, sdg, y, z
 from guppyft.code_def import StabilizerCode
 
 CODE_DEF = StabilizerCode.from_python_strings(
-    num_physical_qubits=5,
-    num_logical_qubits=1,
+    n_physical_qubits=5,
+    n_logical_qubits=1,
     distance=3,
     generators=["ZZXIX", "XZZXI", "IXZZX", "XIXZZ"],
     x_logicals=["-YIXIY"],

@@ -5,6 +5,8 @@ pub mod iceberg;
 
 pub mod steane;
 
+pub mod helix;
+
 pub mod std;
 
 #[cfg(feature = "cli")]

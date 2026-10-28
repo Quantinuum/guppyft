@@ -11,6 +11,7 @@ from typing import (
     override,
 )
 
+from guppylang_internals.ast_util import with_loc
 from guppylang_internals.checker.errors.generic import ExpectedError
 from guppylang_internals.checker.expr_checker import (
     ExprChecker,
@@ -164,7 +165,7 @@ class _GlobalWithChecker(CustomCallChecker):
 
         # Use default implementation from the expression checker
         args, ty, inst = synthesize_call(func_ty, args, self.node, self.ctx, self.func)
-        return GlobalCall(self.func, args, inst), ty
+        return with_loc(self.node, GlobalCall(self.func, args, inst)), ty
 
 
 def _with_op_instantiate(
@@ -393,7 +394,7 @@ class _GlobalMapChecker(CustomCallChecker):
 
         # Use default implementation from the expression checker
         args, ty, inst = synthesize_call(func_ty, args, self.node, self.ctx, self.func)
-        return GlobalCall(self.func, args, inst), ty
+        return with_loc(self.node, GlobalCall(self.func, args, inst)), ty
 
 
 @overload

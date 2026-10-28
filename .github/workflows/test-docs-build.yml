@@ -26,10 +26,10 @@ jobs:
             just-version: '1.58.0'
 
         - name: Install uv
-          uses: astral-sh/setup-uv@v7
+          uses: astral-sh/setup-uv@v10.3.2
           with:
               enable-cache: true
-              version: "0.11.3"
+              version: "0.13.6"
 
         - name: Build docs and execute docstring examples
           run: just test-docs

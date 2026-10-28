@@ -87,7 +87,7 @@ def teleportation() -> None:
 
 Notice that our teleportation program is written using only `guppylang` operations, and does not require any knowledge of QEC. The intention at this stage is to ensure that the algorithm is correct, without taking noise into consideration.
 
-We can now select the QEC code architecture that we would like to use to encode our program. In this example, we will use the Steane architecture available in {py:mod}`guppyft.code.steane`. We can define an instance of the architecture using {py:class}`guppyft.code.steane.encoder_spec.SteaneBuilder` by providing the number of logical blocks, `n_blocks`, available during execution. In our case, we need 3 blocks for our teleportation program.
+We can now select the QEC code architecture that we would like to use to encode our program. In this example, we will use the Steane architecture available in {py:mod}`guppyft.code.steane`. We can define an instance of the architecture using {py:class}`~guppyft.code.steane.encode.SteaneBuilder` by providing the number of logical blocks, `n_blocks`, available during execution. In our case, we need 3 blocks for our teleportation program.
 
 ```python
 from guppyft.code.steane.encode import SteaneBuilder
@@ -95,7 +95,7 @@ from guppyft.code.steane.encode import SteaneBuilder
 steane = SteaneBuilder().build(n_blocks=3)
 ```
 
-With our Steane architecture instance, we can encode our program using {py:func}`guppyft.code.steane.encoder_spec.SteaneInstance.encode` to produce a HUGR package composed of lowered, logical primitives.
+With our Steane architecture instance, we can encode our program using {py:meth}`~guppyft.code.steane.encode.SteaneInstance.encode` to produce a HUGR package composed of lowered, logical primitives.
 
 ```python
 pkg = steane.encode(teleportation.compile())

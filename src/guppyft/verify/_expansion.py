@@ -24,7 +24,7 @@ def pad_code_stabilizers(code: StabilizerCode, num_blocks: int) -> pauli.SignTer
         A set of Pauli strings made up of padded stabilizers
         for each code block. Returns Pauli Strings for m blocks.
     """
-    n = code.num_physical_qubits
+    n = code.n_physical_qubits
 
     combined = []
     for i in range(num_blocks):
@@ -34,7 +34,7 @@ def pad_code_stabilizers(code: StabilizerCode, num_blocks: int) -> pauli.SignTer
         ]
 
     return pauli.SignTermSet.from_iterable(
-        combined, num_blocks * code.num_physical_qubits
+        combined, num_blocks * code.n_physical_qubits
     )
 
 
@@ -66,8 +66,8 @@ def expand_pauli_term(
         An expanded `SignTerm` which represents the physical implementation
         of the logical term.
     """
-    n = code.num_physical_qubits
-    k = code.num_logical_qubits
+    n = code.n_physical_qubits
+    k = code.n_logical_qubits
     total_qubit_number = num_blocks * n
 
     # "result_term" is a Pauli String which will store a single physical Pauli term
@@ -140,11 +140,11 @@ def expand_logical_signterms(
     Returns:
         An expanded `SignTerms` tableau.
     """
-    k = code.num_logical_qubits
+    k = code.n_logical_qubits
     num_blocks = len(logical_terms.qubits) // k
 
     expanded_terms = pauli.SignTerms(
-        qubits=Qubits.from_count(num_blocks * code.num_physical_qubits)
+        qubits=Qubits.from_count(num_blocks * code.n_physical_qubits)
     )
     # Expand the logical terms one-by-one using the logical operators
     #  of the Stabilizer code.
