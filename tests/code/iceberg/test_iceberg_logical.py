@@ -5,7 +5,7 @@ from typing import no_type_check
 import numpy as np
 import pytest
 from guppylang import guppy
-from guppylang.std.builtins import array, result
+from guppylang.std.builtins import result
 from hugr.build.dfg import Dfg
 from hugr.cli import validate
 from hugr.ext import UsedExtensionResolver
@@ -26,6 +26,7 @@ from guppyft.code.iceberg.logical import (
     cx_transversal,
     discard,
     free_dynq,
+    from_borrowed,
     measure_all,
     pauli_exp_all_x,
     pauli_exp_all_x_except_at,
@@ -37,6 +38,7 @@ from guppyft.code.iceberg.logical import (
     restore,
     ry,
     ry_dynq,
+    to_borrowed,
     try_alloc_dynq,
     xx_phase_dynq,
     yy_phase_dynq,
@@ -88,7 +90,7 @@ def test_exported_extensions() -> None:
         "qubit": iceberg_types.iceberg_qubit_def,
     }
     assert len(ops_extn.operations) == 61
-    assert str(ops_extn.version) == "0.3.1"
+    assert str(ops_extn.version) == "0.4.0"
     for op_name, op_def in ops_extn.operations.items():
         assert op_def == iceberg_ops.__getattribute__(f"{op_name}_def")
 
@@ -139,21 +141,15 @@ def test_exported_extensions() -> None:
         "xx_phase_between_blocks",
         "yy_phase_between_blocks",
         "zz_phase_between_blocks",
+        "to_borrowed",
+        "borrow",
+        "restore",
+        "from_borrowed",
     ],
 )
 def test_op_instantiations(op_name: str) -> None:
     assert (
         iceberg_ops.__getattribute__(op_name)(6).op_def()
-        == iceberg_ops().operations[op_name]
-    )
-
-
-@pytest.mark.parametrize(
-    "op_name", ["borrow", "borrow_more", "restore_some", "restore"]
-)
-def test_op_instantiations_variable_in_outs(op_name: str) -> None:
-    assert (
-        iceberg_ops.__getattribute__(op_name)(1, 6).op_def()
         == iceberg_ops().operations[op_name]
     )
 
@@ -255,12 +251,16 @@ def test_guppy_bindings_smoke() -> None:
         q0 = Qubit()
         q0.y()
         q0.rz(-0.5)
-        bb0, q_arr0 = borrow(b0, array(3))
-        cx_dynq(q0, q_arr0[0])
-        q_arr1 = bb0.borrow_more(array(1, 2))
-        zz_phase_dynq(q_arr0[0], q_arr1[1], 0.5)
-        bb0.restore_some(q_arr1)
-        b0 = restore(bb0, q_arr0)
+        bb0 = b0.to_borrowed()
+        qb0 = borrow(bb0, 3)
+        cx_dynq(q0, qb0)
+        qb1 = bb0.borrow(1)
+        qb2 = bb0.borrow(2)
+        zz_phase_dynq(qb0, qb2, 0.5)
+        bb0.restore(qb1)
+        bb0.restore(qb2)
+        restore(bb0, qb0)
+        b0 = Block.from_borrowed(bb0)
         b0.all_h()
         b0.x(2)
         b0.zz(3, 4)
@@ -390,49 +390,34 @@ def test_guppy_types() -> None:
     @guppy
     def main() -> None:
         b = Block[8]()
-        bb, q_arr = borrow(b, array(0, 1, 2))
-        b = restore(bb, q_arr)
+        bb = to_borrowed(b)
+        qb = borrow(bb, 0)
+        restore(bb, qb)
+        b = from_borrowed(bb)
         discard(b)
 
     pkg = main.compile()
     h = pkg.modules[0]
 
-    borrow_nodes = [
-        node
-        for node, node_data in h.nodes()
-        if isinstance(node_data.op, ExtOp) and node_data.op.op_def().name == "borrow"
-    ]
-    restore_nodes = [
-        node
-        for node, node_data in h.nodes()
-        if isinstance(node_data.op, ExtOp) and node_data.op.op_def().name == "restore"
-    ]
-    assert len(borrow_nodes) == 1
-    assert len(restore_nodes) == 1
-    borrow_nodedata = h.get(borrow_nodes[0])
-    restore_nodedata = h.get(restore_nodes[0])
-    assert borrow_nodedata is not None
-    assert restore_nodedata is not None
-    borrow_op = borrow_nodedata.op
-    restore_op = restore_nodedata.op
-    assert isinstance(borrow_op, ExtOp)
-    assert isinstance(restore_op, ExtOp)
-    borrow_sig = borrow_op.signature
-    restore_sig = restore_op.signature
-    assert borrow_sig is not None
-    assert restore_sig is not None
-    borrow_input0 = borrow_sig.input[0]
-    borrow_output0 = borrow_sig.output[0]
-    restore_input0 = restore_sig.input[0]
-    restore_output0 = restore_sig.output[0]
-    assert isinstance(borrow_input0, ExtType)
-    assert isinstance(borrow_output0, ExtType)
-    assert isinstance(restore_input0, ExtType)
-    assert isinstance(restore_output0, ExtType)
-    assert borrow_input0.type_def.name == "block"
-    assert borrow_output0.type_def.name == "borrowed_block"
-    assert restore_input0.type_def.name == "borrowed_block"
-    assert restore_output0.type_def.name == "block"
+    block = iceberg_types.iceberg_block(8)
+    borrowed_block = iceberg_types.iceberg_borrowed_block(8)
+    qubit = iceberg_types.iceberg_qubit()
+    expected = {
+        "to_borrowed": FunctionType([block], [borrowed_block]),
+        "borrow": FunctionType([borrowed_block, int_t(6)], [qubit, borrowed_block]),
+        "restore": FunctionType([borrowed_block, qubit], [borrowed_block]),
+        "from_borrowed": FunctionType([borrowed_block], [block]),
+    }
+    found: Counter[str] = Counter()
+    for _node, data in h.nodes():
+        op = data.op
+        if isinstance(op, ExtOp) and op.op_def().name in expected:
+            name = op.op_def().name
+            found[name] += 1
+            assert op.args == [BoundedNatArg(8)]
+            assert op.outer_signature() == expected[name]
+    assert found == Counter(dict.fromkeys(expected, 1))
+    validate(h.to_bytes())
 
 
 def test_dynamic_qubit_bindings_resolve_and_normalize() -> None:
