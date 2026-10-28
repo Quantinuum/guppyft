@@ -1448,24 +1448,24 @@ class IcebergOpsExtension:
         basis."""
         return self.try_measure_z_dynq_def.instantiate([])
 
-    # borrow
+    # take
 
     @functools.cached_property
-    def borrow_def(self) -> OpDef:
+    def take_def(self) -> OpDef:
         """Extraction of a dynamic logical qubit from a borrowed block.
 
         This is the generic operation definition. For the instantiated operation, see
-        `borrow`."""
-        return self().get_op("borrow")
+        `take`."""
+        return self().get_op("take")
 
-    def borrow(self, k: int) -> ExtOp:
+    def take(self, k: int) -> ExtOp:
         """Extraction of a dynamic logical qubit from a borrowed block.
 
         Args:
             k: The number of logical qubits encoded in the borrowed block.
         """
         bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
-        return self.borrow_def.instantiate(
+        return self.take_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
                 [bblock_type, _IDX_T],
@@ -1473,17 +1473,17 @@ class IcebergOpsExtension:
             ),
         )
 
-    # to_borrowed
+    # borrow
 
     @functools.cached_property
-    def to_borrowed_def(self) -> OpDef:
+    def borrow_def(self) -> OpDef:
         """Convert a block to a borrowed block.
 
         This is the generic operation definition. For the instantiated operation, see
-        `to_borrowed`."""
-        return self().get_op("to_borrowed")
+        `borrow`."""
+        return self().get_op("borrow")
 
-    def to_borrowed(self, k: int) -> ExtOp:
+    def borrow(self, k: int) -> ExtOp:
         """Convert a block to a borrowed block.
 
         Args:
@@ -1491,37 +1491,11 @@ class IcebergOpsExtension:
         """
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
-        return self.to_borrowed_def.instantiate(
+        return self.borrow_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
                 [block_type],
                 [bblock_type],
-            ),
-        )
-
-    # from_borrowed
-
-    @functools.cached_property
-    def from_borrowed_def(self) -> OpDef:
-        """Convert a complete borrowed block to a block.
-
-        This is the generic operation definition. For the instantiated operation, see
-        `from_borrowed`."""
-        return self().get_op("from_borrowed")
-
-    def from_borrowed(self, k: int) -> ExtOp:
-        """Convert a complete borrowed block to a block.
-
-        Args:
-            k: The number of logical qubits encoded in the block.
-        """
-        block_type = _ICEBERG_TYPES.iceberg_block(k)
-        bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
-        return self.from_borrowed_def.instantiate(
-            args=[BoundedNatArg(k)],
-            concrete_signature=FunctionType(
-                [bblock_type],
-                [block_type],
             ),
         )
 
@@ -1529,20 +1503,46 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def restore_def(self) -> OpDef:
-        """Restoration of a dynamic logical qubit to their originating block.
+        """Convert a complete borrowed block to a block.
 
         This is the generic operation definition. For the instantiated operation, see
         `restore`."""
         return self().get_op("restore")
 
     def restore(self, k: int) -> ExtOp:
-        """Restoration of a dynamic logical qubit to their originating block.
+        """Convert a complete borrowed block to a block.
+
+        Args:
+            k: The number of logical qubits encoded in the block.
+        """
+        block_type = _ICEBERG_TYPES.iceberg_block(k)
+        bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
+        return self.restore_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [bblock_type],
+                [block_type],
+            ),
+        )
+
+    # put
+
+    @functools.cached_property
+    def put_def(self) -> OpDef:
+        """Return a dynamic logical qubit to its originating block.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `put`."""
+        return self().get_op("put")
+
+    def put(self, k: int) -> ExtOp:
+        """Return a dynamic logical qubit to its originating block.
 
         Args:
             k: The number of logical qubits encoded in the block.
         """
         bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
-        return self.restore_def.instantiate(
+        return self.put_def.instantiate(
             args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
                 [bblock_type, _DYNQ_T],

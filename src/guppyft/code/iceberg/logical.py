@@ -52,17 +52,17 @@ class Block(Generic[N]):  # type: ignore[misc]
     @guppy
     @staticmethod
     @no_type_check
-    def from_borrowed(block: "BorrowedBlock[N]" @ owned) -> "Block[N]":
+    def restore(block: "BorrowedBlock[N]" @ owned) -> "Block[N]":
         """Convert borrowed block (with all dynamic logical qubits restored) to
         block."""
-        return from_borrowed(block)
+        return restore(block)
 
     @guppy
     @no_type_check
-    def to_borrowed(self: "Block[N]" @ owned) -> "BorrowedBlock[N]":
+    def borrow(self: "Block[N]" @ owned) -> "BorrowedBlock[N]":
         """Convert block to borrowed block to allow dynamic logical qubits to be
         borrowed."""
-        return to_borrowed(self)
+        return borrow(self)
 
     @guppy
     @no_type_check
@@ -418,15 +418,15 @@ class BorrowedBlock(Generic[N]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
-    def borrow(self: "BorrowedBlock[N]", idx: int) -> Qubit:
+    def take(self: "BorrowedBlock[N]", idx: int) -> Qubit:
         """Extract a dynamic logical qubit from a borrowed block."""
-        return borrow(self, idx)
+        return take(self, idx)
 
     @guppy
     @no_type_check
-    def restore(self: "BorrowedBlock[N]", qb: Qubit @ owned) -> None:
-        """Restore a dynamic logical qubit to their originating block."""
-        restore(self, qb)
+    def put(self: "BorrowedBlock[N]", qb: Qubit @ owned) -> None:
+        """Return a dynamic logical qubit to its originating block."""
+        put(self, qb)
 
 
 @_custom_block_type(iceberg_types.iceberg_pre_block_def)
@@ -873,34 +873,34 @@ def cx_dynq(qubit0: Qubit, qubit1: Qubit) -> None:
 
 
 @hugr_op(
-    logical_op(iceberg_ops.borrow_def),
+    logical_op(iceberg_ops.take_def),
     effects=[Effect.PANIC],  # Panics if `qubit` has already been borrowed
 )
 @no_type_check
-def borrow(block: BorrowedBlock[N], idx: int) -> Qubit:
-    """Extract a dynamic logical qubits from a borrowed block."""
+def take(block: BorrowedBlock[N], idx: int) -> Qubit:
+    """Extract a dynamic logical qubit from a borrowed block."""
 
 
-@hugr_op(logical_op(iceberg_ops.to_borrowed_def), effects=())
+@hugr_op(logical_op(iceberg_ops.borrow_def), effects=())
 @no_type_check
-def to_borrowed(block: Block[N] @ owned) -> BorrowedBlock[N]:
+def borrow(block: Block[N] @ owned) -> BorrowedBlock[N]:
     """Convert block to borrowed block to allow dynamic logical qubits to be
     borrowed."""
 
 
 @hugr_op(
-    logical_op(iceberg_ops.from_borrowed_def),
-    effects=[Effect.PANIC],  # Panics if not all qubits restored borrowed
+    logical_op(iceberg_ops.restore_def),
+    effects=[Effect.PANIC],  # Panics if not all borrowed qubits have been returned
 )
 @no_type_check
-def from_borrowed(block: BorrowedBlock[N] @ owned) -> Block[N]:
+def restore(block: BorrowedBlock[N] @ owned) -> Block[N]:
     """Convert borrowed block (with all dynamic logical qubits restored) to block."""
 
 
 @hugr_op(
-    logical_op(iceberg_ops.restore_def),
+    logical_op(iceberg_ops.put_def),
     effects=[Effect.PANIC],  # Panics if `qubit` does not belong to block
 )
 @no_type_check
-def restore(block: BorrowedBlock[N], qb: Qubit @ owned) -> None:
-    """Restore all remaining dynamic logical qubits to their originating block."""
+def put(block: BorrowedBlock[N], qb: Qubit @ owned) -> None:
+    """Return a dynamic logical qubit to its originating block."""

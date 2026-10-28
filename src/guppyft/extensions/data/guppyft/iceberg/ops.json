@@ -414,7 +414,7 @@
     "borrow": {
       "extension": "guppyft.iceberg.ops",
       "name": "borrow",
-      "description": "Extraction of dynamic logical qubit from a borrowed block.",
+      "description": "Convert a block to a borrowed block to allow dynamic qubits to be borrowed.",
       "signature": {
         "params": [
           {
@@ -428,7 +428,7 @@
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
               "extension_version": "0.1.1",
-              "id": "borrowed_block",
+              "id": "block",
               "args": [
                 {
                   "tya": "Variable",
@@ -440,30 +440,9 @@
                 }
               ],
               "bound": "A"
-            },
-            {
-              "t": "Opaque",
-              "extension": "arithmetic.int.types",
-              "extension_version": "0.1.0",
-              "id": "int",
-              "args": [
-                {
-                  "tya": "BoundedNat",
-                  "n": 6
-                }
-              ],
-              "bound": "C"
             }
           ],
           "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.1",
-              "id": "qubit",
-              "args": [],
-              "bound": "A"
-            },
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
@@ -1066,60 +1045,6 @@
             }
           ],
           "output": []
-        }
-      },
-      "binary": false
-    },
-    "from_borrowed": {
-      "extension": "guppyft.iceberg.ops",
-      "name": "from_borrowed",
-      "description": "Convert a borrowed block ·with all dynamic qubits restored) to a block.",
-      "signature": {
-        "params": [
-          {
-            "tp": "BoundedNat",
-            "bound": null
-          }
-        ],
-        "body": {
-          "input": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.1",
-              "id": "borrowed_block",
-              "args": [
-                {
-                  "tya": "Variable",
-                  "idx": 0,
-                  "cached_decl": {
-                    "tp": "BoundedNat",
-                    "bound": null
-                  }
-                }
-              ],
-              "bound": "A"
-            }
-          ],
-          "output": [
-            {
-              "t": "Opaque",
-              "extension": "guppyft.iceberg.types",
-              "extension_version": "0.1.1",
-              "id": "block",
-              "args": [
-                {
-                  "tya": "Variable",
-                  "idx": 0,
-                  "cached_decl": {
-                    "tp": "BoundedNat",
-                    "bound": null
-                  }
-                }
-              ],
-              "bound": "A"
-            }
-          ]
         }
       },
       "binary": false
@@ -1734,10 +1659,10 @@
       },
       "binary": false
     },
-    "restore": {
+    "put": {
       "extension": "guppyft.iceberg.ops",
-      "name": "restore",
-      "description": "Restoration of a dynamic logical qubit to their originating block.",
+      "name": "put",
+      "description": "Return a dynamic logical qubit to its originating block.",
       "signature": {
         "params": [
           {
@@ -1779,6 +1704,60 @@
               "extension": "guppyft.iceberg.types",
               "extension_version": "0.1.1",
               "id": "borrowed_block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "restore": {
+      "extension": "guppyft.iceberg.ops",
+      "name": "restore",
+      "description": "Convert a borrowed block (with all dynamic qubits returned) to a block.",
+      "signature": {
+        "params": [
+          {
+            "tp": "BoundedNat",
+            "bound": null
+          }
+        ],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "borrowed_block",
+              "args": [
+                {
+                  "tya": "Variable",
+                  "idx": 0,
+                  "cached_decl": {
+                    "tp": "BoundedNat",
+                    "bound": null
+                  }
+                }
+              ],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "block",
               "args": [
                 {
                   "tya": "Variable",
@@ -2104,10 +2083,10 @@
       },
       "binary": false
     },
-    "to_borrowed": {
+    "take": {
       "extension": "guppyft.iceberg.ops",
-      "name": "to_borrowed",
-      "description": "Convert a block to a borrowed block to allow dynamic qubits to be borrowed.",
+      "name": "take",
+      "description": "Extraction of dynamic logical qubit from a borrowed block.",
       "signature": {
         "params": [
           {
@@ -2121,7 +2100,7 @@
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
               "extension_version": "0.1.1",
-              "id": "block",
+              "id": "borrowed_block",
               "args": [
                 {
                   "tya": "Variable",
@@ -2133,9 +2112,30 @@
                 }
               ],
               "bound": "A"
+            },
+            {
+              "t": "Opaque",
+              "extension": "arithmetic.int.types",
+              "extension_version": "0.1.0",
+              "id": "int",
+              "args": [
+                {
+                  "tya": "BoundedNat",
+                  "n": 6
+                }
+              ],
+              "bound": "C"
             }
           ],
           "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.iceberg.types",
+              "extension_version": "0.1.1",
+              "id": "qubit",
+              "args": [],
+              "bound": "A"
+            },
             {
               "t": "Opaque",
               "extension": "guppyft.iceberg.types",
