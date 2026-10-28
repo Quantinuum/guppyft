@@ -1,6 +1,5 @@
 """Builder and encoding implementation for the Steane QEC architecture."""
 
-import math
 from collections.abc import Callable
 from copy import deepcopy
 from dataclasses import asdict, dataclass, field, replace
@@ -181,7 +180,7 @@ class _SteaneOptions:
     zero_factory_conf: RUSStateFactoryConf
     magic_factory_conf: RUSStateFactoryConf
     qec_policy: QECPolicy
-    adaptive_rz_conf: AdaptiveRzConf
+    adaptive_rz_conf: AdaptiveRzConf | None
 
 
 @dataclass(frozen=True)
@@ -205,7 +204,11 @@ class SteaneInstance:
                 "zero_factory": self._options.zero_factory_conf.to_json(),
                 "magic_factory": self._options.magic_factory_conf.to_json(),
                 "qec_policy": self._options.qec_policy.to_json(),
-                "adaptive_rz_conf": self._options.adaptive_rz_conf.to_json(),
+                "adaptive_rz_conf": (
+                    self._options.adaptive_rz_conf.to_json()
+                    if self._options.adaptive_rz_conf is not None
+                    else None
+                ),
             },
         )
 
@@ -275,7 +278,7 @@ class SteaneBuilder:
             zero_factory_conf=RUSStateFactoryConf(1, 5),
             magic_factory_conf=RUSStateFactoryConf(1, 5),
             qec_policy=QECPolicy(),
-            adaptive_rz_conf=AdaptiveRzConf(),
+            adaptive_rz_conf=None,
         )
     )
 
@@ -283,7 +286,8 @@ class SteaneBuilder:
         """Generate the `ImplementOpsSpec` providing Steane implementations of
         logical ops for a program using `n_blocks` logical blocks."""
         qec_policy = self._options.qec_policy
-        rz_conf = self._options.adaptive_rz_conf
+        # Explicit logical Rz calls remain available with default controller settings.
+        rz_conf = self._options.adaptive_rz_conf or AdaptiveRzConf()
 
         lib = GuppyLibrary(members=[])
         ops = OpReplacements()
@@ -603,16 +607,16 @@ class SteaneBuilder:
 
         @_register_op_replacement(steane_ops.rz_def)
         @no_type_check
-        def _adaptive_rz(q: tuple[int, int], phase: float) -> tuple[tuple[int, int]]:
+        def _adaptive_rz(q: tuple[int, int], phase: angle) -> tuple[tuple[int, int]]:
             @guppy
             def _impl(
-                state: STATE @ owned, q: tuple[int, int], phase: float
+                state: STATE @ owned, q: tuple[int, int], phase: angle
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
                 blk = state.take_block(blk_id)
                 adaptive_rz_controller(
                     blk,
-                    angle(phase / comptime(math.pi)),
+                    phase,
                     comptime(rz_conf.tolerance),
                     comptime(rz_conf.max_rounds),
                     comptime(rz_conf.dephasing),
@@ -786,7 +790,11 @@ class SteaneBuilder:
         )
 
         return ImplementOpsSpec(
-            ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[lib.compile()]
+            ops=ops,
+            tys=tys,
+            build_wrapper=build_wrapper,
+            libs=[lib.compile()],
+            adapt_rotation_inputs=True,
         )
 
     def _gen_encoder_spec(self, n_blocks: int) -> EncodeSpec:
@@ -835,16 +843,18 @@ class SteaneBuilder:
         )
 
         if self._options.adaptive_rz_conf is not None:
-            logical_compiler.compound_op_replacements["tket.quantum", "Rz"] = (
-                _encode_adaptive_rz
+            logical_compiler.op_replacements["tket.quantum", "Rz"] = (
+                "guppyft.steane.ops",
+                "rz",
+                [],
             )
 
         return EncodeSpec(
             compile=logical_compiler, implement_ops=ImplementOps.for_spec(impl_spec)
         )
 
-    def with_adaptive_rz(self, conf: AdaptiveRzConf) -> Self:
-        """Use adaptive Steane rotations to synthesize ordinary Guppy Rz gates."""
+    def with_adaptive_rz(self, conf: AdaptiveRzConf | None) -> Self:
+        """Enable adaptive Steane rotations to synthesize ordinary Guppy Rz gates."""
         return replace(self, _options=replace(self._options, adaptive_rz_conf=conf))
 
     def with_qec_policy(self, qec_policy: QECPolicy) -> Self:

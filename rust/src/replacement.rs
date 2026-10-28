@@ -48,6 +48,7 @@ pub struct ReplacementCompiler {
     compound_op_replacements: BTreeMap<(String, String), Hugr>,
     ty_replacements: BTreeMap<(String, String), (String, String)>,
     additional_extensions: Option<ExtensionRegistry>,
+    adapt_rotation_inputs: bool,
 }
 
 fn get_type_from_registry(
@@ -75,12 +76,14 @@ impl ReplacementCompiler {
         compound_op_replacements: BTreeMap<(String, String), Hugr>,
         ty_replacements: BTreeMap<(String, String), (String, String)>,
         additional_extensions: Option<ExtensionRegistry>,
+        adapt_rotation_inputs: bool,
     ) -> Self {
         Self {
             op_replacements,
             compound_op_replacements,
             ty_replacements,
             additional_extensions,
+            adapt_rotation_inputs,
         }
     }
 
@@ -141,7 +144,7 @@ impl ReplacementCompiler {
             })
             .collect();
 
-        let mut op_replacer = OpReplacer::new(hugr, replacer);
+        let mut op_replacer = OpReplacer::new(hugr, replacer, self.adapt_rotation_inputs);
         for (op_def, replacement) in compound_op_replacements.into_iter() {
             let func_name = replacement
                 .entrypoint_optype()

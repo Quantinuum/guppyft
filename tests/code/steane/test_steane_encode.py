@@ -198,6 +198,7 @@ def test_annotate_steane_encoding() -> None:
                     "size": 1,
                     "max_attempts": 5,
                 },
+                "adaptive_rz_conf": None,
                 "qec_policy": {
                     "style": "steane",
                     "threshold": 1,
@@ -210,6 +211,7 @@ def test_annotate_steane_encoding() -> None:
                         "h": 0.0,
                         "s": 0.0,
                         "sdg": 0.0,
+                        "rz": 0.0,
                         "inject_t": 0.0,
                         "inject_tdg": 0.0,
                         "cx": 0.0,

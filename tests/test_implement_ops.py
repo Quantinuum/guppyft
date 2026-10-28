@@ -1,6 +1,11 @@
+from typing import no_type_check
+
 import pytest
 from guppylang import guppy
 from guppylang.emulator import EmulatorBuilder
+from guppylang.std.angles import angle
+from guppylang.std.platform import output
+from guppylang.std.quantum import qubit, rz
 
 from guppyft.encode import (
     ImplementOpsSpec,
@@ -34,3 +39,32 @@ def test_default_build_wrapper(as_bytes: bool) -> None:
     assert module.entrypoint == entrypoint
 
     EmulatorBuilder().build(pkg1, n_qubits=1).run()
+
+
+@pytest.mark.parametrize("adapt_rotation_inputs", [False, True])
+def test_rotation_input_adaptation(adapt_rotation_inputs: bool) -> None:
+    @guppy
+    def replacement(q: qubit, phase: angle) -> None:
+        output("phase", phase.halfturns)
+        rz(q, phase)
+
+    @guppy
+    @no_type_check
+    def main() -> None:
+        q = qubit()
+        rz(q, angle(0.13))
+        q.discard()
+
+    spec = ImplementOpsSpec(
+        ops=OpReplacements().with_func(("tket.quantum", "Rz"), replacement),
+        tys=TyReplacements(),
+        adapt_rotation_inputs=adapt_rotation_inputs,
+    )
+    pkg = main.with_minimal_opt().compile()
+    if not adapt_rotation_inputs:
+        with pytest.raises(RuntimeError, match="does not have the expected signature"):
+            implement_ops(pkg, spec)
+        return
+    pkg = implement_ops(pkg, spec)
+    results = EmulatorBuilder().build(pkg, n_qubits=1).run().collated_shots()
+    assert results == [{"phase": [0.13]}]
