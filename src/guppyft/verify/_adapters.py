@@ -19,14 +19,14 @@ N = guppy.nat_var("N")
 @guppy
 @no_type_check
 def _from_array(qs: array[qubit, N] @ owned) -> QubitBlock[N]:
-    """Wrap physical qubits in a logical block without changing their order."""
+    """Wrap qubits in a block without changing their order."""
     return QubitBlock(qs)
 
 
 @guppy
 @no_type_check
-def _logical_block_to_array(block: QubitBlock[N] @ owned) -> array[qubit, N]:
-    """Consume a logical block and return its physical qubit array."""
+def _qubit_block_to_array(block: QubitBlock[N] @ owned) -> array[qubit, N]:
+    """Consume a qubit block and return its underlying qubit array."""
     return block.data_qs
 
 
@@ -36,10 +36,10 @@ def _array_to_array(qs: array[qubit, N] @ owned) -> array[qubit, N]:
     return qs
 
 
-@guppy.overload(_array_to_array, _logical_block_to_array)
+@guppy.overload(_array_to_array, _qubit_block_to_array)
 @no_type_check
 def _to_array(block):
-    """Consume an array or LogicalBlock and return its physical qubit array."""
+    """Consume an array or QubitBlock and return its physical qubit array."""
 
 
 @guppy

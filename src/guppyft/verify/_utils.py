@@ -15,7 +15,7 @@ from guppyft.std import QubitBlock
 N = guppy.nat_var("N")
 T = guppy.type_var("T", copyable=False, droppable=False)
 
-# Specifications act on logical qubit arrays; implementations may use LogicalBlock.
+# Specifications act on logical qubit arrays; implementations may use QubitBlock.
 # Guppy checks concrete block sizes when compiling the verification program.
 type SemanticStabilizerState = GuppyFunctionDefinition[[], array[qubit, N]]  # type: ignore[valid-type]
 type ImplementationStabilizerState = (
