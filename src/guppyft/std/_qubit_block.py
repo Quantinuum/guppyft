@@ -5,18 +5,18 @@ from guppylang.std.builtins import array
 from guppylang.std.lang import owned
 from guppylang.std.quantum import discard_array, qubit
 
-BLOCK_SIZE = guppy.nat_var("BLOCK_SIZE")
+_SIZE = guppy.nat_var("_SIZE")
 
 
 @guppy.struct
-class QubitBlock(Generic[BLOCK_SIZE]):  # type: ignore[misc]
+class QubitBlock(Generic[_SIZE]):  # type: ignore[misc]
     """A block of ``N`` qubits."""
 
-    data_qs: array[qubit, BLOCK_SIZE]  # type: ignore[valid-type]
+    data_qs: array[qubit, _SIZE]  # type: ignore[valid-type]
 
     @guppy
     @no_type_check
-    def discard(self: "QubitBlock[BLOCK_SIZE]" @ owned) -> None:
+    def discard(self: "QubitBlock[_SIZE]" @ owned) -> None:
         """Discard the logical block and all qubits in ``data_qs``."""
         discard_array(self.data_qs)
 
