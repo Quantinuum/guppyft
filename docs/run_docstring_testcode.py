@@ -78,7 +78,7 @@ def main() -> None:
                 except Exception as error:
                     location = f"{source_path.relative_to(ROOT)}:{line_number}"
                     raise RuntimeError(
-                        f"testcode example for {object_name} failed at {location}"
+                        f"testcode example failed for `{object_name}` at {location}"
                     ) from error
                 finally:
                     example_path.unlink()
