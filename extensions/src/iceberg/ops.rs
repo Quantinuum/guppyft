@@ -6,8 +6,7 @@ use documented::DocumentedVariants;
 use hugr::{
     Extension,
     extension::{
-        CustomValidator, ExtensionId, OpDef, SignatureError, SignatureFromArgs, SignatureFunc,
-        ValidateJustArgs,
+        CustomValidator, ExtensionId, OpDef, SignatureError, SignatureFunc, ValidateJustArgs,
         prelude::option_type,
         simple_op::{
             HasConcrete, HasDef, MakeExtensionOp, MakeOpDef, MakeRegisteredOp, OpLoadError,
@@ -163,14 +162,14 @@ pub enum IcebergOpDef {
     try_measure_x_dynq,
     /// Fallible non-destructive measurement of a dynamic logical qubit in the Z basis.
     try_measure_z_dynq,
-    /// Extraction of dynamic logical qubits from a block (consuming the block and emitting a borrowed block).
+    /// Convert a block to a borrowed block to allow dynamic qubits to be borrowed.
+    to_borrowed,
+    /// Extraction of dynamic logical qubit from a borrowed block.
     borrow,
-    /// Extraction of dynamic logical qubits from an already-borrowed block.
-    borrow_more,
-    /// Restoration of some dynamic logical qubits to their originating block.
-    restore_some,
-    /// Restoration of all dynamic logical qubits to their originating block (consuming the borrowed block and emitting a block).
+    /// Restoration of a dynamic logical qubit to their originating block.
     restore,
+    /// Convert a borrowed block ·with all dynamic qubits restored) to a block.
+    from_borrowed,
 }
 
 /// Concrete Iceberg logical operation with type arguments set.
@@ -494,74 +493,37 @@ impl MakeOpDef for IcebergOpDef {
             cx_dynq => sig_qubits_angles(2, 0),
             try_measure_x_dynq => sig_qubit_meas(),
             try_measure_z_dynq => sig_qubit_meas(),
-            // The following operations implement SignatureFromArgs:
-            borrow => (*self).into(),
-            borrow_more => (*self).into(),
-            restore_some => (*self).into(),
-            restore => (*self).into(),
+            to_borrowed => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_kind()],
+                FuncValueType::new(vec![block_tv(0)], vec![borrowed_block_tv(0)]),
+            )
+            .into(),
+            borrow => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_kind()],
+                FuncValueType::new(
+                    vec![borrowed_block_tv(0), int_type(6)],
+                    vec![borrowed_block_tv(0), dynamic_logical_qubit_type()],
+                ),
+            )
+            .into(),
+            restore => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_kind()],
+                FuncValueType::new(
+                    vec![borrowed_block_tv(0), dynamic_logical_qubit_type()],
+                    vec![borrowed_block_tv(0)],
+                ),
+            )
+            .into(),
+            from_borrowed => PolyFuncTypeRV::new(
+                vec![TypeParam::max_nat_kind()],
+                FuncValueType::new(vec![borrowed_block_tv(0)], vec![block_tv(0)]),
+            )
+            .into(),
         }
     }
 
     fn description(&self) -> String {
         self.get_variant_docs().into()
-    }
-}
-
-/// Static parameters for borrow and restore operations.
-const STATIC_NAT_PARAM: &[TypeParam; 1] = &[TypeParam::max_nat_kind()];
-
-impl SignatureFromArgs for IcebergOpDef {
-    fn compute_signature(&self, arg_values: &[TypeArg]) -> Result<PolyFuncTypeRV, SignatureError> {
-        let [TypeArg::BoundedNat(m)] = *arg_values else {
-            return Err(SignatureError::InvalidTypeArgs);
-        };
-        let sig = match self {
-            IcebergOpDef::borrow => {
-                let mut in_types: Vec<Type> = vec![block_tv(0)];
-                in_types.extend(vec![int_type(6); m as usize]);
-                let mut out_types: Vec<Type> = vec![borrowed_block_tv(0)];
-                out_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_kind()],
-                    FuncValueType::new(in_types, out_types),
-                )
-            }
-            IcebergOpDef::borrow_more => {
-                let mut in_types: Vec<Type> = vec![borrowed_block_tv(0)];
-                in_types.extend(vec![int_type(6); m as usize]);
-                let mut out_types: Vec<Type> = vec![borrowed_block_tv(0)];
-                out_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_kind()],
-                    FuncValueType::new(in_types, out_types),
-                )
-            }
-            IcebergOpDef::restore_some => {
-                let mut in_types: Vec<Type> = vec![borrowed_block_tv(0)];
-                in_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_kind()],
-                    FuncValueType::new(in_types, vec![borrowed_block_tv(0)]),
-                )
-            }
-            IcebergOpDef::restore => {
-                let mut in_types: Vec<Type> = vec![borrowed_block_tv(0)];
-                in_types.extend(vec![dynamic_logical_qubit_type(); m as usize]);
-                PolyFuncTypeRV::new(
-                    vec![TypeParam::max_nat_kind()],
-                    FuncValueType::new(in_types, vec![block_tv(0)]),
-                )
-            }
-            _ => unreachable!(
-                "Operation {} should not need custom signature computation.",
-                self.opdef_id()
-            ),
-        };
-        Ok(sig)
-    }
-
-    fn static_params(&self) -> &[TypeParam] {
-        STATIC_NAT_PARAM
     }
 }
 
@@ -653,9 +615,9 @@ mod tests {
             let name = def.opdef_id();
             let args: Vec<TypeArg> = match def {
                 IcebergOpDef::borrow
-                | IcebergOpDef::borrow_more
-                | IcebergOpDef::restore_some
-                | IcebergOpDef::restore => vec![2.into(), 6.into()],
+                | IcebergOpDef::to_borrowed
+                | IcebergOpDef::from_borrowed
+                | IcebergOpDef::restore => vec![2.into()],
                 _ if name.ends_with("_dynq") => vec![],
                 _ => vec![6.into()],
             };
@@ -1093,17 +1055,17 @@ mod tests {
 
     #[test]
     fn test_borrow_restore() {
-        let borrow_2 = EXTENSION
-            .instantiate_extension_op("borrow", [2.into(), 6.into()])
+        let borrow = EXTENSION
+            .instantiate_extension_op("borrow", [6.into()])
             .unwrap();
-        let borrowmore_1 = EXTENSION
-            .instantiate_extension_op("borrow_more", [1.into(), 6.into()])
+        let to_borrowed = EXTENSION
+            .instantiate_extension_op("to_borrowed", [6.into()])
             .unwrap();
-        let restoresome_2 = EXTENSION
-            .instantiate_extension_op("restore_some", [2.into(), 6.into()])
+        let from_borrowed = EXTENSION
+            .instantiate_extension_op("from_borrowed", [6.into()])
             .unwrap();
-        let restore_1 = EXTENSION
-            .instantiate_extension_op("restore", [1.into(), 6.into()])
+        let restore = EXTENSION
+            .instantiate_extension_op("restore", [6.into()])
             .unwrap();
         let cx_dynq = EXTENSION.instantiate_extension_op("cx_dynq", []).unwrap();
         let mut dfg_builder = DFGBuilder::new(Signature::new(
@@ -1117,15 +1079,26 @@ mod tests {
         let i0 = wires[1];
         let i1 = wires[2];
         let i2 = wires[3];
-        // Borrow two qubits:
+        // Convert to borrowed block
+        let [bblock] = dfg_builder
+            .add_dataflow_op(to_borrowed, vec![block])
+            .unwrap()
+            .outputs_arr();
+        // Borrow first qubit:
         let handle = dfg_builder
-            .add_dataflow_op(borrow_2, vec![block, i0, i1])
+            .add_dataflow_op(borrow.clone(), vec![bblock, i0])
             .unwrap();
         let wires: Vec<Wire> = handle.outputs().collect();
-        assert_eq!(wires.len(), 3);
+        assert_eq!(wires.len(), 2);
         let bblock = wires[0];
         let q0 = wires[1];
-        let q1 = wires[2];
+        // Borrow second qubit:
+        let handle = dfg_builder
+            .add_dataflow_op(borrow.clone(), vec![bblock, i1])
+            .unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        let bblock = wires[0];
+        let q1 = wires[1];
         // Do a CX on the borrowed qubits:
         let handle = dfg_builder
             .add_dataflow_op(cx_dynq.clone(), vec![q0, q1])
@@ -1134,9 +1107,9 @@ mod tests {
         assert_eq!(wires.len(), 2);
         let q0 = wires[0];
         let q1 = wires[1];
-        // Borrow another qubit:
+        // Borrow third qubit:
         let handle = dfg_builder
-            .add_dataflow_op(borrowmore_1, vec![bblock, i2])
+            .add_dataflow_op(borrow, vec![bblock, i2])
             .unwrap();
         let wires: Vec<Wire> = handle.outputs().collect();
         assert_eq!(wires.len(), 2);
@@ -1150,18 +1123,29 @@ mod tests {
         let q2 = wires[1];
         // Put the last two borrowed qubits back.
         let handle = dfg_builder
-            .add_dataflow_op(restoresome_2, vec![bblock, q1, q2])
+            .add_dataflow_op(restore.clone(), vec![bblock, q1])
+            .unwrap();
+        let wires: Vec<Wire> = handle.outputs().collect();
+        assert_eq!(wires.len(), 1);
+        let bblock = wires[0];
+        let handle = dfg_builder
+            .add_dataflow_op(restore.clone(), vec![bblock, q2])
             .unwrap();
         let wires: Vec<Wire> = handle.outputs().collect();
         assert_eq!(wires.len(), 1);
         let bblock = wires[0];
         // Put the first qubit back.
         let handle = dfg_builder
-            .add_dataflow_op(restore_1, vec![bblock, q0])
+            .add_dataflow_op(restore, vec![bblock, q0])
             .unwrap();
         let wires: Vec<Wire> = handle.outputs().collect();
         assert_eq!(wires.len(), 1);
-        let block = wires[0];
+        let bblock = wires[0];
+        // Convert borrowed block back to block
+        let [block] = dfg_builder
+            .add_dataflow_op(from_borrowed, vec![bblock])
+            .unwrap()
+            .outputs_arr();
         let h = dfg_builder.finish_hugr_with_outputs(vec![block]).unwrap();
         h.validate().unwrap();
     }
