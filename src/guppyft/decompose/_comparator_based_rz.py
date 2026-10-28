@@ -3,7 +3,7 @@
 This is a duplicate of the `comparator_based_rz.py` module in guppy-algos.
 This is a temporary solution to avoid circular imports. We will remove when
 we find the right place for this to live
-See: https://github.com/quantinuum-dev/guppyft/issues/272.
+See: https://github.com/Quantinuum/guppyft/issues/272.
 
 Reference: https://arxiv.org/pdf/2404.05618
 Original contribution: @vvandaele (Vivien Vandaele)
@@ -18,6 +18,7 @@ from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.angles import angle
 from guppylang.std.builtins import Function, array, comptime, nat
 from guppylang.std.lang import Drop
+from guppylang.std.math import tan
 from guppylang.std.quantum import (
     cx,
     cz,
@@ -35,7 +36,7 @@ from guppylang.std.quantum import (
     z,
 )
 
-from guppyft._math import floor, get_bit, tan
+from guppyft._math import floor, get_bit
 
 
 @guppy

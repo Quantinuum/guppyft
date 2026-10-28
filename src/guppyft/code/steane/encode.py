@@ -1,8 +1,10 @@
 """Builder and encoding implementation for the Steane QEC architecture."""
+
 import math
-from collections.abc import Callable, Mapping
-from dataclasses import dataclass, field, replace
-from enum import Enum, auto
+from collections.abc import Callable
+from copy import deepcopy
+from dataclasses import asdict, dataclass, field, replace
+from enum import StrEnum, auto
 from typing import Any, Literal, Self, no_type_check, overload
 
 from guppylang import guppy
@@ -15,9 +17,11 @@ from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.collections import Stack, empty_queue
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.platform import panic
+from hugr import Hugr
 from hugr.ext import ExtensionRegistry, OpDef
 from hugr.package import Package
 from hugr.std import _std_extensions
+from hugr.utils import JsonType
 from tket_exts import rotation
 
 from guppyft.code.steane.primitives import (
@@ -34,6 +38,7 @@ from guppyft.code.steane.primitives import (
     measure_z,
     prep_t_state_ft,
     prep_zero_ft,
+    reichardt_qec_cycle,
     s,
     sdg,
     steane_x_qec_cycle,
@@ -43,13 +48,13 @@ from guppyft.code.steane.primitives import (
     z,
 )
 from guppyft.encode import (
-    EncoderParams,
     EncodeSpec,
     ImplementOps,
     ImplementOpsSpec,
     OpReplacements,
     ReplacementCompiler,
     TyReplacements,
+    annotate_encoding,
     encode,
 )
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
@@ -89,27 +94,12 @@ class AdaptiveRzConf:
     max_dephasing: float = 0.5
     abort_on_dephasing: bool = True
 
+    def to_json(self) -> JsonType:
+        """Serialise the adaptive Rz config to JSON."""
+        return asdict(self)
+
 
 N = guppy.nat_var("N")
-
-
-@dataclass(frozen=True, kw_only=True)
-class SteaneEncoderParams(EncoderParams):
-    """Parameters for a Steane encoding.
-
-    Attributes:
-        n_blocks: Number of logical blocks available to the encoding.
-    """
-
-    n_blocks: int
-
-    def encoding(self) -> str:
-        """Return the identifier for the Steane encoding."""
-        return "steane"
-
-    def params(self) -> Mapping[str, Any]:
-        """Return the Steane-specific encoding parameters."""
-        return {"n_blocks": self.n_blocks}
 
 
 @dataclass(frozen=True)
@@ -124,12 +114,17 @@ class RUSStateFactoryConf:
     size: int
     max_attempts: int
 
+    def to_json(self) -> JsonType:
+        """Serialise the RUS state factory config to JSON."""
+        return asdict(self)
 
-class QECStyle(Enum):
+
+class QECStyle(StrEnum):
     """The style of syndrome extraction to use during a QEC cycle."""
 
     Knill = auto()
     Steane = auto()
+    Reichardt = auto()
 
 
 @dataclass
@@ -146,6 +141,7 @@ class QECPolicy:
         costs: See `OperationCosts`.
     """
 
+    @dataclass
     class OperationCosts:
         """Configuration for operation costs. Used e.g. for applying QEC cycles."""
 
@@ -163,7 +159,7 @@ class QECPolicy:
         cx: float = 0.0
         cz: float = 0.0
 
-        def __setattr__(self, key: str, value: Any) -> None:
+        def __setattr__(self, key: str, value: float) -> None:
             """Set a non-negative cost for a known logical operation."""
             if not hasattr(self, key):
                 raise KeyError(f"Unknown cost key: {key}")
@@ -175,12 +171,43 @@ class QECPolicy:
     threshold: int = 1
     costs: OperationCosts = field(default_factory=OperationCosts)
 
+    def to_json(self) -> JsonType:
+        """Serialise the QEC policy to JSON."""
+        return asdict(self)
+
+
+@dataclass(frozen=True, kw_only=True)
+class _SteaneOptions:
+    zero_factory_conf: RUSStateFactoryConf
+    magic_factory_conf: RUSStateFactoryConf
+    qec_policy: QECPolicy
+    adaptive_rz_conf: AdaptiveRzConf
+
 
 @dataclass(frozen=True)
 class SteaneInstance:
     """A Steane architecture instance built by `SteaneBuilder.build`."""
 
     _spec: EncodeSpec
+    _n_blocks: int
+
+    _options: _SteaneOptions
+
+    def annotate(self, hugr: Package | Hugr[Any]) -> None:
+        """Annotate the current parameters of the Steane code architecture on the given
+        HUGR in metadata. See `guppyft.encode.annotate` for more information."""
+        annotate_encoding(
+            hugr,
+            "steane",
+            {
+                "schema_version": 1,
+                "n_blocks": self._n_blocks,
+                "zero_factory": self._options.zero_factory_conf.to_json(),
+                "magic_factory": self._options.magic_factory_conf.to_json(),
+                "qec_policy": self._options.qec_policy.to_json(),
+                "adaptive_rz_conf": self._options.adaptive_rz_conf.to_json(),
+            },
+        )
 
     @overload
     def encode(self, pkg: Package, *, as_bytes: Literal[False] = False) -> Package: ...
@@ -243,25 +270,20 @@ class SteaneInstance:
 class SteaneBuilder:
     """Steane architecture builder class for creating `SteaneInstance` objects."""
 
-    _zero_factory_conf: RUSStateFactoryConf = field(
-        default_factory=lambda: RUSStateFactoryConf(1, 5)
+    _options: _SteaneOptions = field(
+        default_factory=lambda: _SteaneOptions(
+            zero_factory_conf=RUSStateFactoryConf(1, 5),
+            magic_factory_conf=RUSStateFactoryConf(1, 5),
+            qec_policy=QECPolicy(),
+            adaptive_rz_conf=AdaptiveRzConf(),
+        )
     )
-    _magic_factory_conf: RUSStateFactoryConf = field(
-        default_factory=lambda: RUSStateFactoryConf(1, 5)
-    )
-    _qec_policy: QECPolicy = field(default_factory=QECPolicy)
-    _adaptive_rz_conf: AdaptiveRzConf | None = None
-
-    @classmethod
-    def from_params(cls, params: SteaneEncoderParams) -> SteaneInstance:
-        """Build a Steane instance from encoding parameters."""
-        return cls().build(params.n_blocks)
 
     def _gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
         """Generate the `ImplementOpsSpec` providing Steane implementations of
         logical ops for a program using `n_blocks` logical blocks."""
-        qec_policy = self._qec_policy
-        rz_conf = self._adaptive_rz_conf or AdaptiveRzConf()
+        qec_policy = self._options.qec_policy
+        rz_conf = self._options.adaptive_rz_conf
 
         lib = GuppyLibrary(members=[])
         ops = OpReplacements()
@@ -278,7 +300,7 @@ class SteaneBuilder:
                 guppy_func = guppy(link_name(name)(func))
 
                 # Register in library and for op replacement
-                lib.members.append(guppy_func.id)
+                lib.register_member(guppy_func)
                 ops.with_generated_decl(op_def, name)
 
                 return guppy_func
@@ -288,7 +310,7 @@ class SteaneBuilder:
         # TODO STATE should be generic for all codes. The methods that are code specific
         # should be `@guppy.declare` and each code can provide an implementation to be
         # linked i.e. `allocate_next_addr`.
-        # See https://github.com/quantinuum-dev/guppyft/issues/179
+        # See https://github.com/Quantinuum/guppyft/issues/179
         @guppy.struct
         class STATE:
             blocks: array[Option[LogicalBlock[7]], comptime(n_blocks)]  # type: ignore[valid-type,type-arg]
@@ -296,10 +318,10 @@ class SteaneBuilder:
             qec_counter: array[float, comptime(n_blocks)]  # type: ignore[valid-type]
 
             zero_state_factory: StateFactory[  # type: ignore[type-arg]
-                7, 1, comptime(self._zero_factory_conf.size)  # type: ignore[valid-type]
+                7, 1, comptime(self._options.zero_factory_conf.size)  # type: ignore[valid-type]
             ]
             magic_state_factory: StateFactory[  # type: ignore[type-arg]
-                7, 8, comptime(self._magic_factory_conf.size)  # type: ignore[valid-type]
+                7, 8, comptime(self._options.magic_factory_conf.size)  # type: ignore[valid-type]
             ]
 
             @guppy
@@ -377,6 +399,13 @@ class SteaneBuilder:
                     ancillaZ = state.zero_state_factory.get_state()
                     steane_z_qec_cycle(q, ancillaZ)
 
+            case QECStyle.Reichardt:
+
+                @guppy
+                @no_type_check
+                def qec_cycle_def(state: STATE, q: LogicalBlock[7]) -> None:
+                    reichardt_qec_cycle(q)
+
         @_register_op_replacement(steane_ops.qec_cycle_def)
         @no_type_check
         def _qec_cycle(q: tuple[int, int]) -> tuple[tuple[int, int]]:
@@ -401,7 +430,7 @@ class SteaneBuilder:
         # to easily define these functions from the primitives. I think
         # this could be replaced with `@custom_function` and a custom
         # compiler.
-        # See https://github.com/quantinuum-dev/guppyft/issues/161.
+        # See https://github.com/Quantinuum/guppyft/issues/161.
         @_register_op_replacement(steane_ops.prep_zero_def)
         @no_type_check
         def _prep_zero() -> tuple[tuple[int, int]]:
@@ -691,6 +720,7 @@ class SteaneBuilder:
         @no_type_check
         @link_name("guppyft.steane.gen_state")
         def state_gen_decl() -> STATE: ...
+        @lib.register_member
         @guppy
         @no_type_check
         @link_name("guppyft.steane.gen_state")
@@ -706,13 +736,13 @@ class SteaneBuilder:
                 # Zero state factory
                 StateFactory(
                     prep_zero_ft,
-                    comptime(self._zero_factory_conf.max_attempts),
+                    comptime(self._options.zero_factory_conf.max_attempts),
                     empty_queue(),
                 ),
                 # Magic state factory
                 StateFactory(
                     prep_t_state_ft,
-                    comptime(self._magic_factory_conf.max_attempts),
+                    comptime(self._options.magic_factory_conf.max_attempts),
                     empty_queue(),
                 ),
             )
@@ -721,6 +751,7 @@ class SteaneBuilder:
         @no_type_check
         @link_name("guppyft.steane.discard_state")
         def state_discard_decl(state: "STATE" @ owned) -> None: ...
+        @lib.register_member
         @guppy
         @no_type_check
         @link_name("guppyft.steane.discard_state")
@@ -746,7 +777,6 @@ class SteaneBuilder:
 
             return wrapper  # type: ignore[no-any-return]
 
-        lib.members.extend((state_gen.id, state_discard.id))
         ops.register_for_elimination_check(steane_ops().name)
         tys = TyReplacements().with_types(
             [
@@ -804,7 +834,7 @@ class SteaneBuilder:
             extensions=ext,
         )
 
-        if self._adaptive_rz_conf is not None:
+        if self._options.adaptive_rz_conf is not None:
             logical_compiler.compound_op_replacements["tket.quantum", "Rz"] = (
                 _encode_adaptive_rz
             )
@@ -813,23 +843,25 @@ class SteaneBuilder:
             compile=logical_compiler, implement_ops=ImplementOps.for_spec(impl_spec)
         )
 
-    def with_adaptive_rz(self, conf: AdaptiveRzConf | None = None) -> Self:
+    def with_adaptive_rz(self, conf: AdaptiveRzConf) -> Self:
         """Use adaptive Steane rotations to synthesize ordinary Guppy Rz gates."""
-        return replace(self, _adaptive_rz_conf=conf or AdaptiveRzConf())
+        return replace(self, _options=replace(self._options, adaptive_rz_conf=conf))
 
     def with_qec_policy(self, qec_policy: QECPolicy) -> Self:
         """Set the QEC policy."""
-        return replace(self, _qec_policy=qec_policy)
+        return replace(self, _options=replace(self._options, qec_policy=qec_policy))
 
     def with_zero_factory_conf(self, conf: RUSStateFactoryConf) -> Self:
         """Set the zero state factory configuration."""
-        return replace(self, _zero_factory_conf=conf)
+        return replace(self, _options=replace(self._options, zero_factory_conf=conf))
 
     def with_magic_factory_conf(self, conf: RUSStateFactoryConf) -> Self:
         """Set the magic state factory configuration."""
-        return replace(self, _magic_factory_conf=conf)
+        return replace(self, _options=replace(self._options, magic_factory_conf=conf))
 
     def build(self, n_blocks: int) -> SteaneInstance:
         """Build a `SteaneInstance` configured for `n_blocks` logical blocks."""
         encoder_spec = self._gen_encoder_spec(n_blocks)
-        return SteaneInstance(_spec=encoder_spec)
+        return SteaneInstance(
+            _spec=encoder_spec, _n_blocks=n_blocks, _options=deepcopy(self._options)
+        )

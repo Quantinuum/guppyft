@@ -65,7 +65,6 @@ def test_adaptive_rz_encode(phase: float) -> None:
 
     results = (
         SteaneBuilder()
-        .with_adaptive_rz()
         .build(n_blocks=1)
         .emulator(main.compile(), n_qubits=8)
         .with_seed(7)
@@ -106,7 +105,6 @@ def test_adaptive_zz_inverse_encode() -> None:
     )
     results = (
         SteaneBuilder()
-        .with_adaptive_rz()
         .build(n_blocks=2)
         .emulator(pkg, n_qubits=16)
         .with_simulator(Quest())

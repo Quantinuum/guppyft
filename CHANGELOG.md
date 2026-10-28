@@ -1,5 +1,65 @@
 # Changelog
 
+## [0.5.0](https://github.com/Quantinuum/guppyft/compare/v0.4.0...v0.5.0) (2026-10-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* Remove `ry` and `ry_dynq` Iceberg operations ([#501](https://github.com/Quantinuum/guppyft/issues/501))
+* Update names and documentation for Iceberg rotation ops ([#498](https://github.com/Quantinuum/guppyft/issues/498))
+
+### Features
+
+* Add `QECStyle.Reichardt` to the Steane architecture ([#491](https://github.com/Quantinuum/guppyft/issues/491)) ([62d51ba](https://github.com/Quantinuum/guppyft/commit/62d51ba4d4f2d30df27ce2566406a7f2fa7e8acc))
+* Add Helix extension with Python and Guppy bindings ([#478](https://github.com/Quantinuum/guppyft/issues/478)) ([8207abc](https://github.com/Quantinuum/guppyft/commit/8207abcd85991a7be34659ed92d55943b8f7770f))
+* Add mixed Pauli exponentials operations to Iceberg ([#503](https://github.com/Quantinuum/guppyft/issues/503)) ([4677899](https://github.com/Quantinuum/guppyft/commit/4677899a45345795f4e80319effa71b32cdf9e1c))
+
+
+### Bug Fixes
+
+* Do not modify input package in place during encoding ([#490](https://github.com/Quantinuum/guppyft/issues/490)) ([b3e2596](https://github.com/Quantinuum/guppyft/commit/b3e2596c9769c24079b4226af97b31d0e3f01497))
+
+
+### Code Refactoring
+
+* Remove `ry` and `ry_dynq` Iceberg operations ([#501](https://github.com/Quantinuum/guppyft/issues/501)) ([7a2e669](https://github.com/Quantinuum/guppyft/commit/7a2e669ea7b3b951467bb00d6f492c25d827d403))
+* Update names and documentation for Iceberg rotation ops ([#498](https://github.com/Quantinuum/guppyft/issues/498)) ([2caa102](https://github.com/Quantinuum/guppyft/commit/2caa102a86a0e4a2cdcfd5725d67c7b3e3853250))
+* Upgrade to guppylang v1.2 ([#480](https://github.com/Quantinuum/guppyft/issues/480))
+
+## [0.4.0](https://github.com/Quantinuum/guppyft/compare/v0.3.1...v0.4.0) (2026-10-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* Add support for `LogicalBlock` in verifier ([#199](https://github.com/Quantinuum/guppyft/issues/199))
+* Annotate full Steane params in encoding metadata ([#465](https://github.com/Quantinuum/guppyft/issues/465))
+* Extract op defs in Iceberg op extension Python bindings ([#458](https://github.com/Quantinuum/guppyft/issues/458))
+
+### Features
+
+* Add support for `LogicalBlock` in verifier ([#199](https://github.com/Quantinuum/guppyft/issues/199)) ([eb45488](https://github.com/Quantinuum/guppyft/commit/eb45488de365b31296dad8bfb41701118e164a11))
+* Add unsupported extensions to `ReplacementCompiler` ([#464](https://github.com/Quantinuum/guppyft/issues/464)) ([dc5b86f](https://github.com/Quantinuum/guppyft/commit/dc5b86fccffc3f364f2052b06047ea73c278b4f4))
+* Annotate full Steane params in encoding metadata ([#465](https://github.com/Quantinuum/guppyft/issues/465)) ([550cfbb](https://github.com/Quantinuum/guppyft/commit/550cfbbabcbd984b85884f663a7e5b22b0c10a15))
+
+
+### Bug Fixes
+
+* Add a `CustomInoutCallCompiler` for borrow and restore operations ([#471](https://github.com/Quantinuum/guppyft/issues/471)) ([e8805e1](https://github.com/Quantinuum/guppyft/commit/e8805e1140393408c981c99247299e0eaa2b60ee))
+* Register Iceberg logical bindings with op definition instead of instantiation ([#460](https://github.com/Quantinuum/guppyft/issues/460)) ([f532abc](https://github.com/Quantinuum/guppyft/commit/f532abc1ba21384e74246c2ec59799308348d695))
+* Unpack options for nested type replacements during op replacement ([#461](https://github.com/Quantinuum/guppyft/issues/461)) ([1a68c18](https://github.com/Quantinuum/guppyft/commit/1a68c18416f9be02667a284f4f0edbb6fe99f309))
+
+
+### Documentation
+
+* Correct docstring for Steane types extension ([#462](https://github.com/Quantinuum/guppyft/issues/462)) ([221af1e](https://github.com/Quantinuum/guppyft/commit/221af1efbf9d7c551614621ae53498559a21a208))
+* Correct docstrings for Steane Y and Z ([#463](https://github.com/Quantinuum/guppyft/issues/463)) ([65c5b82](https://github.com/Quantinuum/guppyft/commit/65c5b82540b446540ac18a5ddc782cf257d184d6))
+* Update old quantinuum-dev URLs ([#477](https://github.com/Quantinuum/guppyft/issues/477)) ([692f1bc](https://github.com/Quantinuum/guppyft/commit/692f1bc08a200e9147d3a05e912367a515c35a01))
+
+
+### Code Refactoring
+
+* Extract op defs in Iceberg op extension Python bindings ([#458](https://github.com/Quantinuum/guppyft/issues/458)) ([a5b44b2](https://github.com/Quantinuum/guppyft/commit/a5b44b2618f98cf06e83f573b01f029474239f97))
+
 ## [0.3.1](https://github.com/Quantinuum/guppyft/compare/v0.3.0...v0.3.1) (2026-10-09)
 
 
@@ -135,189 +195,189 @@ Re-releasing due to a version number clash with the empty name reservation packa
 * Refresh public API for Steane architecture and add `SteaneBuilder.from_params` method ([#343](https://github.com/Quantinuum/guppyft/issues/343)) ([faa74f3](https://github.com/Quantinuum/guppyft/commit/faa74f329c48a08d2de2848a0afbf94372165990))
 * Remove RZ decomposition ([#361](https://github.com/Quantinuum/guppyft/issues/361)) ([59cb4fa](https://github.com/Quantinuum/guppyft/commit/59cb4fa3fd7cf61af0fe2a1da8fff886ff4f2bd5))
 
-## [0.0.8](https://github.com/quantinuum-dev/guppyft/compare/v0.0.7...v0.0.8) (2026-09-04)
+## [0.0.8](https://github.com/Quantinuum/guppyft/compare/v0.0.7...v0.0.8) (2026-09-04)
 
 
 ### ⚠ BREAKING CHANGES
 
-* Avoid magic strings when setting QEC policy operation costs ([#301](https://github.com/quantinuum-dev/guppyft/issues/301))
-* Support Hugr content reactive implement ops passes ([#279](https://github.com/quantinuum-dev/guppyft/issues/279))
-* Rename Steane magic preparation and injection to reduce verbosity ([#286](https://github.com/quantinuum-dev/guppyft/issues/286))
-* Inline state factory conf for the Steane code ([#277](https://github.com/quantinuum-dev/guppyft/issues/277))
-* Rename replace encoder to replacement compiler ([#276](https://github.com/quantinuum-dev/guppyft/issues/276))
-* Move logical operations into code-first modules and reduce their API ([#274](https://github.com/quantinuum-dev/guppyft/issues/274))
+* Avoid magic strings when setting QEC policy operation costs ([#301](https://github.com/Quantinuum/guppyft/issues/301))
+* Support Hugr content reactive implement ops passes ([#279](https://github.com/Quantinuum/guppyft/issues/279))
+* Rename Steane magic preparation and injection to reduce verbosity ([#286](https://github.com/Quantinuum/guppyft/issues/286))
+* Inline state factory conf for the Steane code ([#277](https://github.com/Quantinuum/guppyft/issues/277))
+* Rename replace encoder to replacement compiler ([#276](https://github.com/Quantinuum/guppyft/issues/276))
+* Move logical operations into code-first modules and reduce their API ([#274](https://github.com/Quantinuum/guppyft/issues/274))
 
 ### Features
 
-* Check ability to encode / compile before running ([#281](https://github.com/quantinuum-dev/guppyft/issues/281)) ([6a53c77](https://github.com/quantinuum-dev/guppyft/commit/6a53c77de2906fb0e6756c061cc8d3a038f7ec00))
-* Support CZ gate in Steane code ([#297](https://github.com/quantinuum-dev/guppyft/issues/297)) ([e1d2b00](https://github.com/quantinuum-dev/guppyft/commit/e1d2b008c73701e58fdcc6839d90b9fca5b60dde))
-* Support Hugr content reactive implement ops passes ([#279](https://github.com/quantinuum-dev/guppyft/issues/279)) ([3c720d4](https://github.com/quantinuum-dev/guppyft/commit/3c720d47379b47c354f81cb9dcfc4a86474eea2c))
+* Check ability to encode / compile before running ([#281](https://github.com/Quantinuum/guppyft/issues/281)) ([6a53c77](https://github.com/Quantinuum/guppyft/commit/6a53c77de2906fb0e6756c061cc8d3a038f7ec00))
+* Support CZ gate in Steane code ([#297](https://github.com/Quantinuum/guppyft/issues/297)) ([e1d2b00](https://github.com/Quantinuum/guppyft/commit/e1d2b008c73701e58fdcc6839d90b9fca5b60dde))
+* Support Hugr content reactive implement ops passes ([#279](https://github.com/Quantinuum/guppyft/issues/279)) ([3c720d4](https://github.com/Quantinuum/guppyft/commit/3c720d47379b47c354f81cb9dcfc4a86474eea2c))
 
 
 ### Bug Fixes
 
-* Filter type replacements by extensions carried in the encoded hugr ([#275](https://github.com/quantinuum-dev/guppyft/issues/275)) ([dc9e05d](https://github.com/quantinuum-dev/guppyft/commit/dc9e05d82387f764d46fba7435f2ca7485c7479b))
+* Filter type replacements by extensions carried in the encoded hugr ([#275](https://github.com/Quantinuum/guppyft/issues/275)) ([dc9e05d](https://github.com/Quantinuum/guppyft/commit/dc9e05d82387f764d46fba7435f2ca7485c7479b))
 
 
 ### Documentation
 
-* Add landing page with getting started example ([#267](https://github.com/quantinuum-dev/guppyft/issues/267)) ([a2a9c70](https://github.com/quantinuum-dev/guppyft/commit/a2a9c70ac23f9c4fb758d3a8a0273ff711073d54))
-* Improve formatting and grammar in `encode()` docstring ([#284](https://github.com/quantinuum-dev/guppyft/issues/284)) ([2fdbb74](https://github.com/quantinuum-dev/guppyft/commit/2fdbb74abe67a0f940c5a2c70828363b7b5d7dd4))
+* Add landing page with getting started example ([#267](https://github.com/Quantinuum/guppyft/issues/267)) ([a2a9c70](https://github.com/Quantinuum/guppyft/commit/a2a9c70ac23f9c4fb758d3a8a0273ff711073d54))
+* Improve formatting and grammar in `encode()` docstring ([#284](https://github.com/Quantinuum/guppyft/issues/284)) ([2fdbb74](https://github.com/Quantinuum/guppyft/commit/2fdbb74abe67a0f940c5a2c70828363b7b5d7dd4))
 
 
 ### Code Refactoring
 
-* Avoid magic strings when setting QEC policy operation costs ([#301](https://github.com/quantinuum-dev/guppyft/issues/301)) ([6e5ad26](https://github.com/quantinuum-dev/guppyft/commit/6e5ad2660cdf60d1da7d67f6034e4d7de299a7b5))
-* Inline state factory conf for the Steane code ([#277](https://github.com/quantinuum-dev/guppyft/issues/277)) ([72fb199](https://github.com/quantinuum-dev/guppyft/commit/72fb1999a73fa6d53a8001155168c489888ee61c))
-* Move logical operations into code-first modules and reduce their API ([#274](https://github.com/quantinuum-dev/guppyft/issues/274)) ([62a3b35](https://github.com/quantinuum-dev/guppyft/commit/62a3b355c7806d881a4a8755b8c060c28c598ff7))
-* Rename replace encoder to replacement compiler ([#276](https://github.com/quantinuum-dev/guppyft/issues/276)) ([035b360](https://github.com/quantinuum-dev/guppyft/commit/035b360c9a62a844c06647c4c56a37b6a0164f8c))
-* Rename Steane magic preparation and injection to reduce verbosity ([#286](https://github.com/quantinuum-dev/guppyft/issues/286)) ([914f199](https://github.com/quantinuum-dev/guppyft/commit/914f1992b45180e2e07bed3a3f35558113c3af32))
+* Avoid magic strings when setting QEC policy operation costs ([#301](https://github.com/Quantinuum/guppyft/issues/301)) ([6e5ad26](https://github.com/Quantinuum/guppyft/commit/6e5ad2660cdf60d1da7d67f6034e4d7de299a7b5))
+* Inline state factory conf for the Steane code ([#277](https://github.com/Quantinuum/guppyft/issues/277)) ([72fb199](https://github.com/Quantinuum/guppyft/commit/72fb1999a73fa6d53a8001155168c489888ee61c))
+* Move logical operations into code-first modules and reduce their API ([#274](https://github.com/Quantinuum/guppyft/issues/274)) ([62a3b35](https://github.com/Quantinuum/guppyft/commit/62a3b355c7806d881a4a8755b8c060c28c598ff7))
+* Rename replace encoder to replacement compiler ([#276](https://github.com/Quantinuum/guppyft/issues/276)) ([035b360](https://github.com/Quantinuum/guppyft/commit/035b360c9a62a844c06647c4c56a37b6a0164f8c))
+* Rename Steane magic preparation and injection to reduce verbosity ([#286](https://github.com/Quantinuum/guppyft/issues/286)) ([914f199](https://github.com/Quantinuum/guppyft/commit/914f1992b45180e2e07bed3a3f35558113c3af32))
 
-## [0.0.7](https://github.com/quantinuum-dev/guppyft/compare/v0.0.6...v0.0.7) (2026-08-28)
+## [0.0.7](https://github.com/Quantinuum/guppyft/compare/v0.0.6...v0.0.7) (2026-08-28)
 
 
 ### ⚠ BREAKING CHANGES
 
-* Add compound op replacements to ReplaceEncoder and implement t/tdg in Steane architecture ([#247](https://github.com/quantinuum-dev/guppyft/issues/247))
+* Add compound op replacements to ReplaceEncoder and implement t/tdg in Steane architecture ([#247](https://github.com/Quantinuum/guppyft/issues/247))
 
 ### Features
 
-* Add compound op replacements to ReplaceEncoder and implement t/tdg in Steane architecture ([#247](https://github.com/quantinuum-dev/guppyft/issues/247)) ([7cc15a4](https://github.com/quantinuum-dev/guppyft/commit/7cc15a47a31bd240996551763f107065e02a0194))
+* Add compound op replacements to ReplaceEncoder and implement t/tdg in Steane architecture ([#247](https://github.com/Quantinuum/guppyft/issues/247)) ([7cc15a4](https://github.com/Quantinuum/guppyft/commit/7cc15a47a31bd240996551763f107065e02a0194))
 
 
 ### Bug Fixes
 
-* Fix signature of try_measure_one_* instantiations ([#266](https://github.com/quantinuum-dev/guppyft/issues/266)) ([754d580](https://github.com/quantinuum-dev/guppyft/commit/754d58091e15c25f6ad5d101ac44848d853483fe))
+* Fix signature of try_measure_one_* instantiations ([#266](https://github.com/Quantinuum/guppyft/issues/266)) ([754d580](https://github.com/Quantinuum/guppyft/commit/754d58091e15c25f6ad5d101ac44848d853483fe))
 
-## [0.0.6](https://github.com/quantinuum-dev/guppyft/compare/v0.0.5...v0.0.6) (2026-08-28)
+## [0.0.6](https://github.com/Quantinuum/guppyft/compare/v0.0.5...v0.0.6) (2026-08-28)
 
 
 ### ⚠ BREAKING CHANGES
 
-* Add Steane op for invoking QEC cycles ([#255](https://github.com/quantinuum-dev/guppyft/issues/255))
-* Rework Steane spec to builder pattern and add methods for QEC policy and state factories ([#238](https://github.com/quantinuum-dev/guppyft/issues/238))
+* Add Steane op for invoking QEC cycles ([#255](https://github.com/Quantinuum/guppyft/issues/255))
+* Rework Steane spec to builder pattern and add methods for QEC policy and state factories ([#238](https://github.com/Quantinuum/guppyft/issues/238))
 
 ### Features
 
-* Add Steane op for invoking QEC cycles ([#255](https://github.com/quantinuum-dev/guppyft/issues/255)) ([1a8bca3](https://github.com/quantinuum-dev/guppyft/commit/1a8bca3cf395a1dd1ed3e90dce60d58321f3fb03))
-* Add Y, S, Sdg to Steane architecture and test all primitives with verifier ([#245](https://github.com/quantinuum-dev/guppyft/issues/245)) ([f7796f3](https://github.com/quantinuum-dev/guppyft/commit/f7796f3821dfc8d92fed0f04a209d635963d4064))
-* Instantiate concrete signatures in Iceberg Python bindings ([#259](https://github.com/quantinuum-dev/guppyft/issues/259)) ([3f93314](https://github.com/quantinuum-dev/guppyft/commit/3f933149f84a6bb2af6371994e80e205d89cb6b9))
-* Rework Steane spec to builder pattern and add methods for QEC policy and state factories ([#238](https://github.com/quantinuum-dev/guppyft/issues/238)) ([6d20da5](https://github.com/quantinuum-dev/guppyft/commit/6d20da5a102db637a656c894aaba096f8b782218))
+* Add Steane op for invoking QEC cycles ([#255](https://github.com/Quantinuum/guppyft/issues/255)) ([1a8bca3](https://github.com/Quantinuum/guppyft/commit/1a8bca3cf395a1dd1ed3e90dce60d58321f3fb03))
+* Add Y, S, Sdg to Steane architecture and test all primitives with verifier ([#245](https://github.com/Quantinuum/guppyft/issues/245)) ([f7796f3](https://github.com/Quantinuum/guppyft/commit/f7796f3821dfc8d92fed0f04a209d635963d4064))
+* Instantiate concrete signatures in Iceberg Python bindings ([#259](https://github.com/Quantinuum/guppyft/issues/259)) ([3f93314](https://github.com/Quantinuum/guppyft/commit/3f933149f84a6bb2af6371994e80e205d89cb6b9))
+* Rework Steane spec to builder pattern and add methods for QEC policy and state factories ([#238](https://github.com/Quantinuum/guppyft/issues/238)) ([6d20da5](https://github.com/Quantinuum/guppyft/commit/6d20da5a102db637a656c894aaba096f8b782218))
 
 
 ### Documentation
 
-* Add sphinx API docs ([#226](https://github.com/quantinuum-dev/guppyft/issues/226)) ([e833d78](https://github.com/quantinuum-dev/guppyft/commit/e833d78b1d89eb49d647b9611cd9bb995449a852))
+* Add sphinx API docs ([#226](https://github.com/Quantinuum/guppyft/issues/226)) ([e833d78](https://github.com/Quantinuum/guppyft/commit/e833d78b1d89eb49d647b9611cd9bb995449a852))
 
-## [0.0.5](https://github.com/quantinuum-dev/guppyft/compare/v0.0.4...v0.0.5) (2026-08-18)
-
-
-### Features
-
-* Add fallible dynamic qubit allocation to Iceberg extension ([#227](https://github.com/quantinuum-dev/guppyft/issues/227)) ([0b72127](https://github.com/quantinuum-dev/guppyft/commit/0b72127d843f767228ddfac46c3ebf1b77f007d1))
-
-## [0.0.4](https://github.com/quantinuum-dev/guppyft/compare/v0.0.3...v0.0.4) (2026-08-14)
+## [0.0.5](https://github.com/Quantinuum/guppyft/compare/v0.0.4...v0.0.5) (2026-08-18)
 
 
 ### Features
 
-* Add QEC cycle policy to Steane architecture with Steane and Knill primitives ([#214](https://github.com/quantinuum-dev/guppyft/issues/214)) ([06205c9](https://github.com/quantinuum-dev/guppyft/commit/06205c98b59efacfcb415d2a944cb7565d68616b))
-* Reduce serialisation roundtrips in implement ops and offer serialised byte result ([#220](https://github.com/quantinuum-dev/guppyft/issues/220)) ([59c480d](https://github.com/quantinuum-dev/guppyft/commit/59c480d8b76e92ed6c383bcd4c673f2c8e343b8a))
-* Support more Steane operations during encoding ([#219](https://github.com/quantinuum-dev/guppyft/issues/219)) ([ece72a1](https://github.com/quantinuum-dev/guppyft/commit/ece72a1c96c9c6e219c55fa2e00b099c6f745e57))
+* Add fallible dynamic qubit allocation to Iceberg extension ([#227](https://github.com/Quantinuum/guppyft/issues/227)) ([0b72127](https://github.com/Quantinuum/guppyft/commit/0b72127d843f767228ddfac46c3ebf1b77f007d1))
+
+## [0.0.4](https://github.com/Quantinuum/guppyft/compare/v0.0.3...v0.0.4) (2026-08-14)
+
+
+### Features
+
+* Add QEC cycle policy to Steane architecture with Steane and Knill primitives ([#214](https://github.com/Quantinuum/guppyft/issues/214)) ([06205c9](https://github.com/Quantinuum/guppyft/commit/06205c98b59efacfcb415d2a944cb7565d68616b))
+* Reduce serialisation roundtrips in implement ops and offer serialised byte result ([#220](https://github.com/Quantinuum/guppyft/issues/220)) ([59c480d](https://github.com/Quantinuum/guppyft/commit/59c480d8b76e92ed6c383bcd4c673f2c8e343b8a))
+* Support more Steane operations during encoding ([#219](https://github.com/Quantinuum/guppyft/issues/219)) ([ece72a1](https://github.com/Quantinuum/guppyft/commit/ece72a1c96c9c6e219c55fa2e00b099c6f745e57))
 
 
 ### Bug Fixes
 
-* Ensure build wrapper is a function definition ([#222](https://github.com/quantinuum-dev/guppyft/issues/222)) ([3b34c50](https://github.com/quantinuum-dev/guppyft/commit/3b34c50b30c92ef0bbeea033ca2bd79b6b2309f3))
+* Ensure build wrapper is a function definition ([#222](https://github.com/Quantinuum/guppyft/issues/222)) ([3b34c50](https://github.com/Quantinuum/guppyft/commit/3b34c50b30c92ef0bbeea033ca2bd79b6b2309f3))
 
-## [0.0.3](https://github.com/quantinuum-dev/guppyft/compare/v0.0.2...v0.0.3) (2026-08-12)
+## [0.0.3](https://github.com/Quantinuum/guppyft/compare/v0.0.2...v0.0.3) (2026-08-12)
 
 
 ### ⚠ BREAKING CHANGES
 
-* Add type replacements input to replace encoder ([#211](https://github.com/quantinuum-dev/guppyft/issues/211))
-* Add convenience instantiation to Iceberg qubit type ([#208](https://github.com/quantinuum-dev/guppyft/issues/208))
+* Add type replacements input to replace encoder ([#211](https://github.com/Quantinuum/guppyft/issues/211))
+* Add convenience instantiation to Iceberg qubit type ([#208](https://github.com/Quantinuum/guppyft/issues/208))
 
 ### Features
 
-* Add convenience instantiation to Iceberg qubit type ([#208](https://github.com/quantinuum-dev/guppyft/issues/208)) ([b1f2341](https://github.com/quantinuum-dev/guppyft/commit/b1f2341f19342d78c23f91210dc9b6399121cefe))
-* Add decode op and measurement type to Steane extensions ([#194](https://github.com/quantinuum-dev/guppyft/issues/194)) ([bddb7d0](https://github.com/quantinuum-dev/guppyft/commit/bddb7d0cd093071604058707c23c8893b961e2ed))
-* Add encoder spec and encoding pass for Steane architecture ([#158](https://github.com/quantinuum-dev/guppyft/issues/158)) ([e9eb7d3](https://github.com/quantinuum-dev/guppyft/commit/e9eb7d3c352af7d46adc5a4f297519f44bc42905))
-* Add state factories and use for Steane zero state ([#209](https://github.com/quantinuum-dev/guppyft/issues/209)) ([63e0a55](https://github.com/quantinuum-dev/guppyft/commit/63e0a557e42d02e9fec107881558a49469d72ae4))
-* Add type replacements input to replace encoder ([#211](https://github.com/quantinuum-dev/guppyft/issues/211)) ([88e8fb5](https://github.com/quantinuum-dev/guppyft/commit/88e8fb59de7066f46486a45d651a9cae4f408d20))
-* Annotate encoding for packages ([#210](https://github.com/quantinuum-dev/guppyft/issues/210)) ([51fa095](https://github.com/quantinuum-dev/guppyft/commit/51fa09592f511cf28d8d0e84de0dc46d8b6144bc))
+* Add convenience instantiation to Iceberg qubit type ([#208](https://github.com/Quantinuum/guppyft/issues/208)) ([b1f2341](https://github.com/Quantinuum/guppyft/commit/b1f2341f19342d78c23f91210dc9b6399121cefe))
+* Add decode op and measurement type to Steane extensions ([#194](https://github.com/Quantinuum/guppyft/issues/194)) ([bddb7d0](https://github.com/Quantinuum/guppyft/commit/bddb7d0cd093071604058707c23c8893b961e2ed))
+* Add encoder spec and encoding pass for Steane architecture ([#158](https://github.com/Quantinuum/guppyft/issues/158)) ([e9eb7d3](https://github.com/Quantinuum/guppyft/commit/e9eb7d3c352af7d46adc5a4f297519f44bc42905))
+* Add state factories and use for Steane zero state ([#209](https://github.com/Quantinuum/guppyft/issues/209)) ([63e0a55](https://github.com/Quantinuum/guppyft/commit/63e0a557e42d02e9fec107881558a49469d72ae4))
+* Add type replacements input to replace encoder ([#211](https://github.com/Quantinuum/guppyft/issues/211)) ([88e8fb5](https://github.com/Quantinuum/guppyft/commit/88e8fb59de7066f46486a45d651a9cae4f408d20))
+* Annotate encoding for packages ([#210](https://github.com/Quantinuum/guppyft/issues/210)) ([51fa095](https://github.com/Quantinuum/guppyft/commit/51fa09592f511cf28d8d0e84de0dc46d8b6144bc))
 
-## [0.0.2](https://github.com/quantinuum-dev/guppyft/compare/v0.0.1...v0.0.2) (2026-08-07)
+## [0.0.2](https://github.com/Quantinuum/guppyft/compare/v0.0.1...v0.0.2) (2026-08-07)
 
 
 ### Features
 
-* Add `LogicalMeasurement` type and `decode` op in `guppyft.std` extension ([#145](https://github.com/quantinuum-dev/guppyft/issues/145)) ([6fbbc45](https://github.com/quantinuum-dev/guppyft/commit/6fbbc4579f4bd9e2df24d9b38795031d51069026))
-* Add `PreBlock` type and ops to Iceberg extension and bindings ([#139](https://github.com/quantinuum-dev/guppyft/issues/139)) ([b44bdcf](https://github.com/quantinuum-dev/guppyft/commit/b44bdcfac52f04b6c54b672e9928e498a80f473f))
-* Add rust fix/format to justfile ([#162](https://github.com/quantinuum-dev/guppyft/issues/162)) ([8617618](https://github.com/quantinuum-dev/guppyft/commit/86176189918bf8c58236c847faee7a0838e9f6b1))
-* add verifier for logical Cliffords ([#52](https://github.com/quantinuum-dev/guppyft/issues/52)) ([e6b6c0a](https://github.com/quantinuum-dev/guppyft/commit/e6b6c0a8a7c5bc294f83eb297a29c8390b86137a))
-* Extensions for Steane logical ops and types ([#131](https://github.com/quantinuum-dev/guppyft/issues/131)) ([c7c7041](https://github.com/quantinuum-dev/guppyft/commit/c7c7041863b0937a15c174fcec647901497c20e3))
+* Add `LogicalMeasurement` type and `decode` op in `guppyft.std` extension ([#145](https://github.com/Quantinuum/guppyft/issues/145)) ([6fbbc45](https://github.com/Quantinuum/guppyft/commit/6fbbc4579f4bd9e2df24d9b38795031d51069026))
+* Add `PreBlock` type and ops to Iceberg extension and bindings ([#139](https://github.com/Quantinuum/guppyft/issues/139)) ([b44bdcf](https://github.com/Quantinuum/guppyft/commit/b44bdcfac52f04b6c54b672e9928e498a80f473f))
+* Add rust fix/format to justfile ([#162](https://github.com/Quantinuum/guppyft/issues/162)) ([8617618](https://github.com/Quantinuum/guppyft/commit/86176189918bf8c58236c847faee7a0838e9f6b1))
+* add verifier for logical Cliffords ([#52](https://github.com/Quantinuum/guppyft/issues/52)) ([e6b6c0a](https://github.com/Quantinuum/guppyft/commit/e6b6c0a8a7c5bc294f83eb297a29c8390b86137a))
+* Extensions for Steane logical ops and types ([#131](https://github.com/Quantinuum/guppyft/issues/131)) ([c7c7041](https://github.com/Quantinuum/guppyft/commit/c7c7041863b0937a15c174fcec647901497c20e3))
 
 
 ### Bug Fixes
 
-* Fix guppy binding of BorrowedBlock ([#142](https://github.com/quantinuum-dev/guppyft/issues/142)) ([df32f7a](https://github.com/quantinuum-dev/guppyft/commit/df32f7a1399b6fab25379587de25c00c8a4709ac))
+* Fix guppy binding of BorrowedBlock ([#142](https://github.com/Quantinuum/guppyft/issues/142)) ([df32f7a](https://github.com/Quantinuum/guppyft/commit/df32f7a1399b6fab25379587de25c00c8a4709ac))
 
 
 ### Documentation
 
-* Add development guide ([#163](https://github.com/quantinuum-dev/guppyft/issues/163)) ([342d568](https://github.com/quantinuum-dev/guppyft/commit/342d5689bc781538b9b424502b3e876e15ff93b8))
+* Add development guide ([#163](https://github.com/Quantinuum/guppyft/issues/163)) ([342d568](https://github.com/Quantinuum/guppyft/commit/342d5689bc781538b9b424502b3e876e15ff93b8))
 
 ## 0.0.1 (2026-07-09)
 
 
 ### ⚠ BREAKING CHANGES
 
-* Rename angle parameter to phase ([#125](https://github.com/quantinuum-dev/guppyft/issues/125))
-* Custom op checker and compiler for `with` and `map` global ops ([#60](https://github.com/quantinuum-dev/guppyft/issues/60))
-* Rework encoder pass ([#29](https://github.com/quantinuum-dev/guppyft/issues/29))
-* Add support for linear input arguments, use `concrete` function to derive inputs for HUGR op ([#25](https://github.com/quantinuum-dev/guppyft/issues/25))
-* Remove global swap, add global `with` and `map` ([#11](https://github.com/quantinuum-dev/guppyft/issues/11))
-* Auto generate declarations for operations ([#8](https://github.com/quantinuum-dev/guppyft/issues/8))
-* Encoder specs provide wrapper functions instead of setup and teardown ([#6](https://github.com/quantinuum-dev/guppyft/issues/6))
-* Introduce existing encoder pass from Rust and Python ([#1](https://github.com/quantinuum-dev/guppyft/issues/1))
+* Rename angle parameter to phase ([#125](https://github.com/Quantinuum/guppyft/issues/125))
+* Custom op checker and compiler for `with` and `map` global ops ([#60](https://github.com/Quantinuum/guppyft/issues/60))
+* Rework encoder pass ([#29](https://github.com/Quantinuum/guppyft/issues/29))
+* Add support for linear input arguments, use `concrete` function to derive inputs for HUGR op ([#25](https://github.com/Quantinuum/guppyft/issues/25))
+* Remove global swap, add global `with` and `map` ([#11](https://github.com/Quantinuum/guppyft/issues/11))
+* Auto generate declarations for operations ([#8](https://github.com/Quantinuum/guppyft/issues/8))
+* Encoder specs provide wrapper functions instead of setup and teardown ([#6](https://github.com/Quantinuum/guppyft/issues/6))
+* Introduce existing encoder pass from Rust and Python ([#1](https://github.com/Quantinuum/guppyft/issues/1))
 
 ### Features
 
-* Add dynamic logical qubits, borrowed blocks and associated operations to the Iceberg extension ([#70](https://github.com/quantinuum-dev/guppyft/issues/70)) ([426c170](https://github.com/quantinuum-dev/guppyft/commit/426c170baf167f3fc9c28759bfea8b86c40490ab))
-* Add Guppy bindings for Iceberg extension ([#61](https://github.com/quantinuum-dev/guppyft/issues/61)) ([8d47352](https://github.com/quantinuum-dev/guppyft/commit/8d473525921b3c75560e4ce409a4622bb0bef41a))
-* Add Iceberg extension ([#42](https://github.com/quantinuum-dev/guppyft/issues/42)) ([0438129](https://github.com/quantinuum-dev/guppyft/commit/0438129c783b309405e0028690c033f08dda9fcf))
-* Add more ops to Iceberg extension ([#120](https://github.com/quantinuum-dev/guppyft/issues/120)) ([2ff7f3c](https://github.com/quantinuum-dev/guppyft/commit/2ff7f3cfe48c053966e280037d9deb1939540c70))
-* Add support for linear input arguments, use `concrete` function to derive inputs for HUGR op ([#25](https://github.com/quantinuum-dev/guppyft/issues/25)) ([3095687](https://github.com/quantinuum-dev/guppyft/commit/3095687ee7132529a2a38e9536b9c693eb66cc13))
-* Add support for tuple type as the global variable. ([#107](https://github.com/quantinuum-dev/guppyft/issues/107)) ([3fb71ab](https://github.com/quantinuum-dev/guppyft/commit/3fb71ab03c3c874629b7f18a272264c3df12e87a))
-* Allow configuring all tket passes that are run during encoding ([#7](https://github.com/quantinuum-dev/guppyft/issues/7)) ([9148c2c](https://github.com/quantinuum-dev/guppyft/commit/9148c2ccf0778510d0589e28b37b7c93a53fe5a6))
-* Auto generate declarations for operations ([#8](https://github.com/quantinuum-dev/guppyft/issues/8)) ([2536840](https://github.com/quantinuum-dev/guppyft/commit/25368408a63a00b80d655462f20c8daaa6d59343))
-* Custom op checker and compiler for `with` and `map` global ops ([#60](https://github.com/quantinuum-dev/guppyft/issues/60)) ([7b333b0](https://github.com/quantinuum-dev/guppyft/commit/7b333b073b2dd8ef8557d5eec0140ad1e66db9ec))
-* Derive type replacements from implementation signatures and allow ops with custom instantiations ([#122](https://github.com/quantinuum-dev/guppyft/issues/122)) ([bc95f3a](https://github.com/quantinuum-dev/guppyft/commit/bc95f3adb4728d969367d198a7026e75f90ff009))
-* Make `measure_all` return a future array of bool ([#51](https://github.com/quantinuum-dev/guppyft/issues/51)) ([39ac934](https://github.com/quantinuum-dev/guppyft/commit/39ac934c05fc2e7ae215923364975530d3d77427))
-* Remove global swap, add global `with` and `map` ([#11](https://github.com/quantinuum-dev/guppyft/issues/11)) ([c34cbb7](https://github.com/quantinuum-dev/guppyft/commit/c34cbb7433e1746caa90b2fbf005055685322fc7))
-* Rename angle parameter to phase ([#125](https://github.com/quantinuum-dev/guppyft/issues/125)) ([e9da53c](https://github.com/quantinuum-dev/guppyft/commit/e9da53cb8e88495081287a8ad57aba365c0ed37d))
-* Replace `Measurement` type with `bool` during `implement_ops` pass and force early read ([#92](https://github.com/quantinuum-dev/guppyft/issues/92)) ([3ebe29c](https://github.com/quantinuum-dev/guppyft/commit/3ebe29ce8bcaab798fe8d649c7c674790691da87))
-* Restore `CustomValidator` for Iceberg ops ([#103](https://github.com/quantinuum-dev/guppyft/issues/103)) ([de33300](https://github.com/quantinuum-dev/guppyft/commit/de333006bebe25eb0d5d46be2da4bb0358d9bb66))
-* Use `BorrowArray` instead of `Array` for result of `measure_all()`. ([#59](https://github.com/quantinuum-dev/guppyft/issues/59)) ([556341d](https://github.com/quantinuum-dev/guppyft/commit/556341d1d284e86df27fdebfdf455e5c4621d283))
-* Use future-bool types throughout ([#57](https://github.com/quantinuum-dev/guppyft/issues/57)) ([a90a404](https://github.com/quantinuum-dev/guppyft/commit/a90a404915d858bc4630a59740effa88ce280aa5))
+* Add dynamic logical qubits, borrowed blocks and associated operations to the Iceberg extension ([#70](https://github.com/Quantinuum/guppyft/issues/70)) ([426c170](https://github.com/Quantinuum/guppyft/commit/426c170baf167f3fc9c28759bfea8b86c40490ab))
+* Add Guppy bindings for Iceberg extension ([#61](https://github.com/Quantinuum/guppyft/issues/61)) ([8d47352](https://github.com/Quantinuum/guppyft/commit/8d473525921b3c75560e4ce409a4622bb0bef41a))
+* Add Iceberg extension ([#42](https://github.com/Quantinuum/guppyft/issues/42)) ([0438129](https://github.com/Quantinuum/guppyft/commit/0438129c783b309405e0028690c033f08dda9fcf))
+* Add more ops to Iceberg extension ([#120](https://github.com/Quantinuum/guppyft/issues/120)) ([2ff7f3c](https://github.com/Quantinuum/guppyft/commit/2ff7f3cfe48c053966e280037d9deb1939540c70))
+* Add support for linear input arguments, use `concrete` function to derive inputs for HUGR op ([#25](https://github.com/Quantinuum/guppyft/issues/25)) ([3095687](https://github.com/Quantinuum/guppyft/commit/3095687ee7132529a2a38e9536b9c693eb66cc13))
+* Add support for tuple type as the global variable. ([#107](https://github.com/Quantinuum/guppyft/issues/107)) ([3fb71ab](https://github.com/Quantinuum/guppyft/commit/3fb71ab03c3c874629b7f18a272264c3df12e87a))
+* Allow configuring all tket passes that are run during encoding ([#7](https://github.com/Quantinuum/guppyft/issues/7)) ([9148c2c](https://github.com/Quantinuum/guppyft/commit/9148c2ccf0778510d0589e28b37b7c93a53fe5a6))
+* Auto generate declarations for operations ([#8](https://github.com/Quantinuum/guppyft/issues/8)) ([2536840](https://github.com/Quantinuum/guppyft/commit/25368408a63a00b80d655462f20c8daaa6d59343))
+* Custom op checker and compiler for `with` and `map` global ops ([#60](https://github.com/Quantinuum/guppyft/issues/60)) ([7b333b0](https://github.com/Quantinuum/guppyft/commit/7b333b073b2dd8ef8557d5eec0140ad1e66db9ec))
+* Derive type replacements from implementation signatures and allow ops with custom instantiations ([#122](https://github.com/Quantinuum/guppyft/issues/122)) ([bc95f3a](https://github.com/Quantinuum/guppyft/commit/bc95f3adb4728d969367d198a7026e75f90ff009))
+* Make `measure_all` return a future array of bool ([#51](https://github.com/Quantinuum/guppyft/issues/51)) ([39ac934](https://github.com/Quantinuum/guppyft/commit/39ac934c05fc2e7ae215923364975530d3d77427))
+* Remove global swap, add global `with` and `map` ([#11](https://github.com/Quantinuum/guppyft/issues/11)) ([c34cbb7](https://github.com/Quantinuum/guppyft/commit/c34cbb7433e1746caa90b2fbf005055685322fc7))
+* Rename angle parameter to phase ([#125](https://github.com/Quantinuum/guppyft/issues/125)) ([e9da53c](https://github.com/Quantinuum/guppyft/commit/e9da53cb8e88495081287a8ad57aba365c0ed37d))
+* Replace `Measurement` type with `bool` during `implement_ops` pass and force early read ([#92](https://github.com/Quantinuum/guppyft/issues/92)) ([3ebe29c](https://github.com/Quantinuum/guppyft/commit/3ebe29ce8bcaab798fe8d649c7c674790691da87))
+* Restore `CustomValidator` for Iceberg ops ([#103](https://github.com/Quantinuum/guppyft/issues/103)) ([de33300](https://github.com/Quantinuum/guppyft/commit/de333006bebe25eb0d5d46be2da4bb0358d9bb66))
+* Use `BorrowArray` instead of `Array` for result of `measure_all()`. ([#59](https://github.com/Quantinuum/guppyft/issues/59)) ([556341d](https://github.com/Quantinuum/guppyft/commit/556341d1d284e86df27fdebfdf455e5c4621d283))
+* Use future-bool types throughout ([#57](https://github.com/Quantinuum/guppyft/issues/57)) ([a90a404](https://github.com/Quantinuum/guppyft/commit/a90a404915d858bc4630a59740effa88ce280aa5))
 
 
 ### Bug Fixes
 
-* Remove `CustomValidator` for Iceberg ops ([#83](https://github.com/quantinuum-dev/guppyft/issues/83)) ([3e25a1b](https://github.com/quantinuum-dev/guppyft/commit/3e25a1ba3d8a99355fb45754605a9ff74bcc906f))
-* Silence failure for missing HUGR extensions when preparing ops for encoding ([#22](https://github.com/quantinuum-dev/guppyft/issues/22)) ([59e87fe](https://github.com/quantinuum-dev/guppyft/commit/59e87fe859fd1187ad228d0883777199126afa20))
-* Upgrade to latest dependencies and remove git repository references ([#87](https://github.com/quantinuum-dev/guppyft/issues/87)) ([7485d79](https://github.com/quantinuum-dev/guppyft/commit/7485d79f4019c6fa71efd6b254aa4ee4ec94a2a6))
+* Remove `CustomValidator` for Iceberg ops ([#83](https://github.com/Quantinuum/guppyft/issues/83)) ([3e25a1b](https://github.com/Quantinuum/guppyft/commit/3e25a1ba3d8a99355fb45754605a9ff74bcc906f))
+* Silence failure for missing HUGR extensions when preparing ops for encoding ([#22](https://github.com/Quantinuum/guppyft/issues/22)) ([59e87fe](https://github.com/Quantinuum/guppyft/commit/59e87fe859fd1187ad228d0883777199126afa20))
+* Upgrade to latest dependencies and remove git repository references ([#87](https://github.com/Quantinuum/guppyft/issues/87)) ([7485d79](https://github.com/Quantinuum/guppyft/commit/7485d79f4019c6fa71efd6b254aa4ee4ec94a2a6))
 
 
 ### Documentation
 
-* Add README ([#18](https://github.com/quantinuum-dev/guppyft/issues/18)) ([bb76707](https://github.com/quantinuum-dev/guppyft/commit/bb767073310a215b1dee0c902d1ab71c26cc6adb))
-* Improve docstrings for non-destructive measurement ops. ([#50](https://github.com/quantinuum-dev/guppyft/issues/50)) ([7c03f9d](https://github.com/quantinuum-dev/guppyft/commit/7c03f9d94f89834bf33127bcd7d226f29594f319))
+* Add README ([#18](https://github.com/Quantinuum/guppyft/issues/18)) ([bb76707](https://github.com/Quantinuum/guppyft/commit/bb767073310a215b1dee0c902d1ab71c26cc6adb))
+* Improve docstrings for non-destructive measurement ops. ([#50](https://github.com/Quantinuum/guppyft/issues/50)) ([7c03f9d](https://github.com/Quantinuum/guppyft/commit/7c03f9d94f89834bf33127bcd7d226f29594f319))
 
 
 ### Code Refactoring
 
-* Encoder specs provide wrapper functions instead of setup and teardown ([#6](https://github.com/quantinuum-dev/guppyft/issues/6)) ([847b4e4](https://github.com/quantinuum-dev/guppyft/commit/847b4e437dd75afa4a41754b3be18dfb957e168d))
-* Introduce existing encoder pass from Rust and Python ([#1](https://github.com/quantinuum-dev/guppyft/issues/1)) ([3b996c0](https://github.com/quantinuum-dev/guppyft/commit/3b996c05d759beb92d9c4f2b9755eba1538d753a))
-* Rework encoder pass ([#29](https://github.com/quantinuum-dev/guppyft/issues/29)) ([af9836d](https://github.com/quantinuum-dev/guppyft/commit/af9836d495e2b71ac8228a84584973de02438665))
+* Encoder specs provide wrapper functions instead of setup and teardown ([#6](https://github.com/Quantinuum/guppyft/issues/6)) ([847b4e4](https://github.com/Quantinuum/guppyft/commit/847b4e437dd75afa4a41754b3be18dfb957e168d))
+* Introduce existing encoder pass from Rust and Python ([#1](https://github.com/Quantinuum/guppyft/issues/1)) ([3b996c0](https://github.com/Quantinuum/guppyft/commit/3b996c05d759beb92d9c4f2b9755eba1538d753a))
+* Rework encoder pass ([#29](https://github.com/Quantinuum/guppyft/issues/29)) ([af9836d](https://github.com/Quantinuum/guppyft/commit/af9836d495e2b71ac8228a84584973de02438665))

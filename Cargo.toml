@@ -10,12 +10,13 @@ rust-version = "1.91"
 edition = "2024"
 
 [workspace.dependencies]
-tket = "0.22.0"
-hugr = "0.30.2"
-hugr-core = "0.30.2"
+# Binary ECC loading is unused and pulls in an older, vulnerable zstd dependency.
+tket = { version = "0.22.0", default-features = false }
+hugr = "0.30.3"
+hugr-core = "0.30.3"
 itertools = "0.15.0"
 derive_more = { version = "2", features = ["display", "from"] }
-anyhow = "1.0.102"
+anyhow = "1.0.104"
 
 [profile.dev-py]
 inherits = "dev"
