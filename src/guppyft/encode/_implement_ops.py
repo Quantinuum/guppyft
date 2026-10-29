@@ -162,9 +162,9 @@ class ImplementOpsSpec:
     libs: list[Package] = field(default_factory=list)
     """Additional libraries required to run the transformed program."""
     adapt_rotation_inputs: bool = False
-    """Allow implementations to take Guppy `angle` values in place of TKET rotations.
-    Wrappers convert rotation inputs to half-turns without changing other input
-    or output types."""
+    """Allow implementations to take Guppy `angle` values in place of HUGR rotations.
+    Replacement bodies convert rotation inputs to half-turn tuples at function
+    entry. Linked declarations and other input and output types are unchanged."""
 
 
 def _implement_ops(

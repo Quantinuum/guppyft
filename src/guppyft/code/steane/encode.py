@@ -605,7 +605,7 @@ class SteaneBuilder:
 
             return map_global(_impl, q)
 
-        @_register_op_replacement(steane_ops.rz_def)
+        @guppy
         @no_type_check
         def _adaptive_rz(q: tuple[int, int], phase: angle) -> tuple[tuple[int, int]]:
             @guppy
@@ -628,6 +628,9 @@ class SteaneBuilder:
                 return state, q
 
             return map_global(_impl, q, phase)
+
+        # Supply the body so the pass can adapt its rotation input.
+        ops.with_func(steane_ops.rz_def, _adaptive_rz)
 
         @_register_op_replacement(steane_ops.inject_t_def)
         @no_type_check

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/Quantinuum/guppyft/compare/v0.5.0...v0.5.1) (2026-10-28)
+
+
+### Documentation
+
+* Clean split between encoding layers and milestones in architecture dev guide ([#496](https://github.com/Quantinuum/guppyft/issues/496)) ([9bb16c2](https://github.com/Quantinuum/guppyft/commit/9bb16c2099b31e5b1fdc012f5d0e5bef48d06373))
+
 ## [0.5.0](https://github.com/Quantinuum/guppyft/compare/v0.4.0...v0.5.0) (2026-10-27)
 
 

@@ -40,7 +40,8 @@ def _implement_ops(
     `check_eliminated` is a list of extensions to check have been fully eliminated after
     the replacement process.
     `adapt_rotation_inputs` allows implementations to take Guppy angles
-    (tuples of half-turns) in place of TKET rotation inputs.
+    (tuples of half-turns) in place of HUGR rotation inputs by converting at
+    function entry. Linked declarations are unchanged.
     """
 
 def _run_replacement_compiler(
@@ -64,5 +65,6 @@ def _run_replacement_compiler(
     definitions to use when resolving the source/target ops and types, for
     extensions not already registered on `rs_hugr`.
     `adapt_rotation_inputs` allows compound replacements to take Guppy angles
-    (tuples of half-turns) in place of TKET rotation inputs.
+    (tuples of half-turns) in place of HUGR rotation inputs by converting at
+    function entry.
     """
