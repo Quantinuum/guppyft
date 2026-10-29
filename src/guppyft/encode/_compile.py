@@ -66,8 +66,9 @@ class ReplacementCompiler(LogicalCompiler):
     resolve target ops/types that are not already registered on the input Hugr."""
     adapt_rotation_inputs: bool = False
     """Allow compound replacements to take Guppy `angle` values in place of HUGR
-    rotations. Replacement bodies convert rotation inputs to half-turn tuples
-    at function entry. Other input and output types are unchanged."""
+    rotations. Adapter wrappers convert rotation inputs to half-turn tuples before
+    calling the original implementations. Other input and output types are
+    unchanged."""
 
     def __post_init__(self) -> None:
         duplicates = self.op_replacements.keys() & self.compound_op_replacements.keys()

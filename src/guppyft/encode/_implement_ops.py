@@ -163,8 +163,9 @@ class ImplementOpsSpec:
     """Additional libraries required to run the transformed program."""
     adapt_rotation_inputs: bool = False
     """Allow implementations to take Guppy `angle` values in place of HUGR rotations.
-    Replacement bodies convert rotation inputs to half-turn tuples at function
-    entry. Linked declarations and other input and output types are unchanged."""
+    Adapter wrappers convert rotation inputs to half-turn tuples before calling
+    the original implementations. Linked declarations and other input and output
+    types are unchanged."""
 
 
 def _implement_ops(

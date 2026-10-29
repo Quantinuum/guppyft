@@ -13,6 +13,7 @@ from guppylang.std.quantum import h, qubit, rz
 from guppyft.encode import (
     ImplementOpsSpec,
     OpReplacements,
+    ReplacementCompiler,
     TyReplacements,
     implement_ops,
 )
@@ -89,6 +90,66 @@ def test_rotation_input_adaptation(adapt_rotation_inputs: bool) -> None:
     for (_, original), (_, replaced) in zip(
         original_states, replaced_states, strict=True
     ):
+        assert replaced.as_single_state() == pytest.approx(
+            original.as_single_state(), rel=1e-12, abs=1e-12
+        )
+
+
+@pytest.mark.parametrize(
+    "use_replacement_compiler",
+    [False, True],
+    ids=["implement-ops", "replacement-compiler"],
+)
+def test_recursive_rotation_input_adaptation(use_replacement_compiler: bool) -> None:
+    @guppy
+    @no_type_check
+    def replacement(q: qubit, phase: angle) -> None:
+        output("phase", phase.halfturns)
+        if phase.halfturns > 0.25:
+            rz(q, angle(0.25))
+            replacement(q, phase - angle(0.25))
+        else:
+            rz(q, phase)
+
+    @guppy
+    @no_type_check
+    def main() -> None:
+        q = qubit()
+        h(q)
+        for phase in array(0.625, -0.375):
+            rz(q, angle(phase))
+            state_output("q", q)
+        q.discard()
+
+    pkg = main.with_minimal_opt().compile()
+    if use_replacement_compiler:
+        result = ReplacementCompiler(
+            op_replacements={},
+            compound_op_replacements={
+                ("tket.quantum", "Rz"): replacement.compile_function()
+            },
+            adapt_rotation_inputs=True,
+        ).compile(pkg)
+    else:
+        result = implement_ops(
+            pkg,
+            ImplementOpsSpec(
+                ops=OpReplacements().with_func(("tket.quantum", "Rz"), replacement),
+                tys=TyReplacements(),
+                adapt_rotation_inputs=True,
+            ),
+        )
+
+    [original_states] = EmulatorBuilder().build(pkg, n_qubits=1).run().partial_states()
+    replaced_result = EmulatorBuilder().build(result, n_qubits=1).run()
+    [shot] = replaced_result.collated_shots()
+    assert shot["phase"] == [0.625, 0.375, 0.125, -0.375]
+    [replaced_states] = replaced_result.partial_states()
+    assert len(original_states) == len(replaced_states) == 2
+    for (original_tag, original), (replaced_tag, replaced) in zip(
+        original_states, replaced_states, strict=True
+    ):
+        assert original_tag == replaced_tag == "q"
         assert replaced.as_single_state() == pytest.approx(
             original.as_single_state(), rel=1e-12, abs=1e-12
         )

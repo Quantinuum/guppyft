@@ -41,7 +41,8 @@ def _implement_ops(
     the replacement process.
     `adapt_rotation_inputs` allows implementations to take Guppy angles
     (tuples of half-turns) in place of HUGR rotation inputs by converting at
-    function entry. Linked declarations are unchanged.
+    an adapter wrapper's entry. Original functions and linked declarations
+    are unchanged.
     """
 
 def _run_replacement_compiler(
@@ -66,5 +67,5 @@ def _run_replacement_compiler(
     extensions not already registered on `rs_hugr`.
     `adapt_rotation_inputs` allows compound replacements to take Guppy angles
     (tuples of half-turns) in place of HUGR rotation inputs by converting at
-    function entry.
+    an adapter wrapper's entry. Original functions are unchanged.
     """
