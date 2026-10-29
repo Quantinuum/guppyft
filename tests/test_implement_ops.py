@@ -51,7 +51,7 @@ def test_rotation_input_adaptation(adapt_rotation_inputs: bool) -> None:
     @guppy
     def replacement(q: qubit, phase: angle) -> None:
         output("phase", phase.halfturns)
-        rz(q, -phase)
+        rz(q, phase)
 
     @guppy
     @no_type_check
