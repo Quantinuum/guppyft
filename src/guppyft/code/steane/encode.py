@@ -11,6 +11,7 @@ from guppylang.decorator import custom_guppy_decorator
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.emulator import EmulatorBuilder, EmulatorInstance
 from guppylang.library import GuppyLibrary, link_name
+from guppylang.std.angles import angle
 from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.collections import Stack, empty_queue
 from guppylang.std.option import Option, nothing, some
@@ -22,6 +23,9 @@ from hugr.std import _std_extensions
 from hugr.utils import JsonType
 from tket_exts import rotation
 
+from guppyft.code.steane.primitives import (
+    _adaptive_rz as adaptive_rz_controller,
+)
 from guppyft.code.steane.primitives import (
     cx,
     cz,
@@ -59,6 +63,40 @@ from guppyft.std.state_factory import StateFactory
 
 from . import logical as steane_logical
 from .primitives import RawMeasurement
+
+
+@guppy
+@no_type_check
+def _encode_adaptive_rz(q: steane_logical.Qubit, phase: angle) -> None:
+    steane_logical.rz(q, phase)
+
+
+@dataclass(frozen=True)
+class AdaptiveRzConf:
+    """Settings for adaptive Steane rotations.
+
+    Attributes:
+        tolerance: Allowed residual angle in radians.
+        max_rounds: Maximum rounds before stopping execution with an error.
+        dephasing: Physical Z-error probability per qubit per round.
+        max_dephasing: Logical dephasing budget for each call.
+        abort_on_dephasing: If False, continue after exceeding the budget and
+            emit ``adaptive_rz_dephasing_limit_hit=True`` once per affected call.
+            The round limit still stops execution with an error.
+
+    These settings do not add simulator noise.
+    """
+
+    tolerance: float = 1e-10
+    max_rounds: int = 100
+    dephasing: float = 0.0
+    max_dephasing: float = 0.5
+    abort_on_dephasing: bool = True
+
+    def to_json(self) -> JsonType:
+        """Serialise the adaptive Rz config to JSON."""
+        return asdict(self)
+
 
 N = guppy.nat_var("N")
 
@@ -114,6 +152,7 @@ class QECPolicy:
         h: float = 0.0
         s: float = 0.0
         sdg: float = 0.0
+        rz: float = 0.0
         inject_t: float = 0.0
         inject_tdg: float = 0.0
         cx: float = 0.0
@@ -141,6 +180,7 @@ class _SteaneOptions:
     zero_factory_conf: RUSStateFactoryConf
     magic_factory_conf: RUSStateFactoryConf
     qec_policy: QECPolicy
+    adaptive_rz_conf: AdaptiveRzConf | None
 
 
 @dataclass(frozen=True)
@@ -164,6 +204,11 @@ class SteaneInstance:
                 "zero_factory": self._options.zero_factory_conf.to_json(),
                 "magic_factory": self._options.magic_factory_conf.to_json(),
                 "qec_policy": self._options.qec_policy.to_json(),
+                "adaptive_rz_conf": (
+                    self._options.adaptive_rz_conf.to_json()
+                    if self._options.adaptive_rz_conf is not None
+                    else None
+                ),
             },
         )
 
@@ -233,6 +278,7 @@ class SteaneBuilder:
             zero_factory_conf=RUSStateFactoryConf(1, 5),
             magic_factory_conf=RUSStateFactoryConf(1, 5),
             qec_policy=QECPolicy(),
+            adaptive_rz_conf=None,
         )
     )
 
@@ -240,6 +286,8 @@ class SteaneBuilder:
         """Generate the `ImplementOpsSpec` providing Steane implementations of
         logical ops for a program using `n_blocks` logical blocks."""
         qec_policy = self._options.qec_policy
+        # Explicit logical Rz calls remain available with default controller settings.
+        rz_conf = self._options.adaptive_rz_conf or AdaptiveRzConf()
 
         lib = GuppyLibrary(members=[])
         ops = OpReplacements()
@@ -557,6 +605,33 @@ class SteaneBuilder:
 
             return map_global(_impl, q)
 
+        @guppy
+        @no_type_check
+        def _adaptive_rz(q: tuple[int, int], phase: angle) -> tuple[tuple[int, int]]:
+            @guppy
+            def _impl(
+                state: STATE @ owned, q: tuple[int, int], phase: angle
+            ) -> tuple[STATE, tuple[int, int]]:
+                blk_id, _ = q
+                blk = state.take_block(blk_id)
+                adaptive_rz_controller(
+                    blk,
+                    phase,
+                    comptime(rz_conf.tolerance),
+                    comptime(rz_conf.max_rounds),
+                    comptime(rz_conf.dephasing),
+                    comptime(rz_conf.max_dephasing),
+                    comptime(rz_conf.abort_on_dephasing),
+                )
+                state.put_block(blk_id, blk)
+                state.qec_policy(array(blk_id), comptime(qec_policy.costs.rz))
+                return state, q
+
+            return map_global(_impl, q, phase)
+
+        # Supply the body so the pass can adapt its rotation input.
+        ops.with_func(steane_ops.rz_def, _adaptive_rz)
+
         @_register_op_replacement(steane_ops.inject_t_def)
         @no_type_check
         def _inject_t(q: tuple[int, int], a: tuple[int, int]) -> tuple[tuple[int, int]]:
@@ -718,7 +793,11 @@ class SteaneBuilder:
         )
 
         return ImplementOpsSpec(
-            ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[lib.compile()]
+            ops=ops,
+            tys=tys,
+            build_wrapper=build_wrapper,
+            libs=[lib.compile()],
+            adapt_rotation_inputs=True,
         )
 
     def _gen_encoder_spec(self, n_blocks: int) -> EncodeSpec:
@@ -766,9 +845,20 @@ class SteaneBuilder:
             extensions=ext,
         )
 
+        if self._options.adaptive_rz_conf is not None:
+            logical_compiler.op_replacements["tket.quantum", "Rz"] = (
+                "guppyft.steane.ops",
+                "rz",
+                [],
+            )
+
         return EncodeSpec(
             compile=logical_compiler, implement_ops=ImplementOps.for_spec(impl_spec)
         )
+
+    def with_adaptive_rz(self, conf: AdaptiveRzConf | None) -> Self:
+        """Enable adaptive Steane rotations to synthesize ordinary Guppy Rz gates."""
+        return replace(self, _options=replace(self._options, adaptive_rz_conf=conf))
 
     def with_qec_policy(self, qec_policy: QECPolicy) -> Self:
         """Set the QEC policy."""
