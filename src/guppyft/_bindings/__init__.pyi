@@ -25,7 +25,9 @@ def _implement_ops(
     rs_hugr: RsHugr,
     op_replacements: dict[tuple[str, str], tuple[RsHugr | None, str]],
     replaceable_types: set[tuple[str, str]],
-    check_eliminated: list[str]
+    check_eliminated: list[str],
+    *,
+    adapt_rotation_inputs: bool = False,
 ) -> None:
     """
     Replace extension ops in `rs_hugr` to calls to the provided implementations.
@@ -37,6 +39,9 @@ def _implement_ops(
     the corresponding types in the implementation HUGRs.
     `check_eliminated` is a list of extensions to check have been fully eliminated after
     the replacement process.
+    `adapt_rotation_inputs` allows implementations to take Guppy angles
+    (tuples of half-turns) in place of HUGR rotation inputs by converting at
+    function entry. Linked declarations are unchanged.
     """
 
 def _run_replacement_compiler(
@@ -45,6 +50,8 @@ def _run_replacement_compiler(
         compound_op_replacements: dict[tuple[str, str], RsHugr],
         ty_replacements: dict[tuple[str, str], tuple[str, str]],
         extensions: str | None = None,
+        *,
+        adapt_rotation_inputs: bool = False,
     ) -> None:
     """
     Replace extension ops and types in `rs_hugr` according to the given mappings.
@@ -57,4 +64,7 @@ def _run_replacement_compiler(
     `extensions` is an optional JSON-encoded list of additional extension
     definitions to use when resolving the source/target ops and types, for
     extensions not already registered on `rs_hugr`.
+    `adapt_rotation_inputs` allows compound replacements to take Guppy angles
+    (tuples of half-turns) in place of HUGR rotation inputs by converting at
+    function entry.
     """
