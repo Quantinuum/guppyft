@@ -1,0 +1,8 @@
+Error: Type mismatch (at $FILE:15:11)
+   | 
+13 | @guppy
+14 | def foo() -> tuple[int, int]:
+15 |     return map_global(map_func)
+   |            ^^^^^^^^^^^^^^^^^^^^ Expected expression of type `(int, int)`, got `((int, int))`
+
+Guppy compilation failed due to 1 previous error

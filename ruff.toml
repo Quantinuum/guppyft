@@ -26,7 +26,7 @@ select = [
     # "C90",  # mccabe
     # "COM",  # flake8-commas
     # "CPY",  # flake8-copyright
-    # "D",    # pydocstyle
+    "D", # pydocstyle
     "EM", # flake8-errmsg
     # "ERA",  # eradicate
     "EXE", # flake8-executable
@@ -61,7 +61,7 @@ select = [
     "SLOT", # flake8-slots
     "T10", # flake8-debugger
     "T20", # flake8-print
-    "TCH", # flake8-type-checking
+    "TC", # flake8-type-checking
     # "TD",   # flake8-todos
     "TID", # flake8-tidy-imports
     "TRY", # tryceratops
@@ -71,6 +71,8 @@ select = [
 
 ignore = [
     "COM812",
+    "D209", # Don't require multi-line docstrings to have closing quotes on new line.
+    "D205", # Legacy docstrings omit the blank line after the summary
     "ISC001", # conflicting with the formatter
     "EM101",
     "EM102", # Exception must not use a string (an f-string) literal, assign to variable first
@@ -78,3 +80,11 @@ ignore = [
     "TRY003", # Avoid specifying long messages outside the exception class
     "UP046", # Using explicit generic parameters instead of `Generic` supertype. Guppy is not ready for this.
 ]
+
+[lint.per-file-ignores]
+"tests/**/*.py" = ["D"]
+"docs/conf.py" = ["D"]
+".github/scripts/check_extension_versions.py" = ["D"]
+
+[lint.pydocstyle]
+convention = "google"

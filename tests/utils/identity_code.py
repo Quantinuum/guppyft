@@ -14,7 +14,7 @@ from hugr.package import Package
 
 from guppyft.encode import (
     EncodeSpec,
-    EncodingArchitecture,
+    EncodingArchitectureInstance,
     ImplementOps,
     ImplementOpsSpec,
     OpReplacements,
@@ -47,18 +47,15 @@ class IdentityQECPolicy:
 
 
 @dataclass(frozen=True)
-class IdentityInstance(EncodingArchitecture):
+class IdentityInstance(EncodingArchitectureInstance):
     _spec: EncodeSpec
 
-    def _encode(self, pkg: Package) -> Package:
-        return encode(pkg, self._spec)
+    def _encode(self, pkg: Package, *, as_bytes: bool) -> Package | bytes:
+        return encode(pkg, self._spec, as_bytes=as_bytes)
 
-    def _implement_ops(self, pkg: Package) -> Package:
+    def _implement_ops(self, pkg: Package, *, as_bytes: bool) -> Package | bytes:
         assert self._spec.implement_ops is not None
-        return self._spec.implement_ops(pkg)
-
-    def _check_may_encode(self, pkg: Package) -> None:
-        pass
+        return self._spec.implement_ops(pkg, as_bytes=as_bytes)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -71,8 +68,8 @@ class IdentityBuilder:
 
         @guppy.struct
         class STATE:
-            blocks: array[Option[qubit], comptime(n_qubits)]  # type: ignore[type-arg,valid-type]
-            addr_stack: Stack[tuple[int, int], comptime(n_qubits)]  # type: ignore[type-arg,valid-type]
+            blocks: array[Option[qubit], comptime(n_qubits)]  # type: ignore[valid-type]
+            addr_stack: Stack[tuple[int, int], comptime(n_qubits)]  # type: ignore[valid-type]
 
             qec_counter: array[int, comptime(n_qubits)]  # type: ignore[valid-type]
 

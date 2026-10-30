@@ -11,6 +11,9 @@ on:
     types: [ checks_requested ]
   workflow_dispatch: { }
 
+permissions:
+  contents: read
+
 # Limits the number of concurrent runs of this workflow for branches to one. For non-main branches, runs caused by newly
 # pushed commits thus cancel any in-progress runs for the same branch.
 concurrency:
@@ -20,7 +23,7 @@ concurrency:
 env:
   SCCACHE_GHA_ENABLED: "true"
   RUSTC_WRAPPER: "sccache"
-  UV_VERSION: "0.11.7"
+  UV_VERSION: "0.13.6"
 
 jobs:
   check-lockfiles:
@@ -35,7 +38,7 @@ jobs:
       - name: Install stable Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - name: Set up uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
@@ -64,7 +67,7 @@ jobs:
       - name: Install stable Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - name: Set up uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true

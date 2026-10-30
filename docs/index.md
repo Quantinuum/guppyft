@@ -18,6 +18,8 @@ getting_started.md
 architecture_dev.md
 examples_index.md
 api/api.md
+CHANGELOG.md
+Github <https://github.com/Quantinuum/guppyft>
 ```
 
 Guppy FT is an extension of the [Guppy](https://github.com/Quantinuum/guppylang) quantum programming language to aid

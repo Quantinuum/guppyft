@@ -9,13 +9,14 @@ Based on https://arxiv.org/abs/2107.07505"""
 from typing import Generic, no_type_check
 
 from guppylang import guppy
-from guppylang.library import link_name
 from guppylang.std import quantum as qlib
 from guppylang.std.angles import pi
 from guppylang.std.builtins import Measurement, array, comptime, owned
 from guppylang.std.mem import mem_swap
+from guppylang.std.option import Option, nothing, some
 from zixy.qubit import pauli
 
+from guppyft._math import bitstring_to_int
 from guppyft.code_def import StabilizerCode
 from guppyft.std import LogicalBlock
 from guppyft.std.state_factory import PreBlock
@@ -44,8 +45,8 @@ __all__ = [
 ]
 
 CODE_DEF = StabilizerCode.from_python_strings(
-    num_physical_qubits=7,
-    num_logical_qubits=1,
+    n_physical_qubits=7,
+    n_logical_qubits=1,
     distance=3,
     generators=["XXXXIII", "IXXIXXI", "IIXXIXX", "ZZZZIII", "IZZIZZI", "IIZZIZZ"],
     x_logicals=["XXXXXXX"],
@@ -56,7 +57,6 @@ CODE_DEF = StabilizerCode.from_python_strings(
 def _stabilizer_indices() -> list[list[int]]:
     """Report all support sets that exist in the Steane codes generators. Values are
     unique but reported as a nested list so that Guppy can understand them."""
-
     indices = {
         frozenset([i for i, p in enumerate(gen.cmpnt.get_tuple()) if p != pauli.I])  # type: ignore[attr-defined]
         for gen in CODE_DEF.generators
@@ -119,7 +119,6 @@ def _syndrome_helper(
     reverse_cx: bool @ comptime,
 ) -> None:
     """Helper function to perform the cx operations during syndrome extraction."""
-
     if reverse_cx:
         qlib.cx(blk.data_qs[idx[0]], a[0])
         qlib.cx(a[1], blk.data_qs[idx[1]])
@@ -133,8 +132,12 @@ def _syndrome_helper(
 @guppy.comptime
 @no_type_check
 def _measure_syndromes(blk: LogicalBlock[7]) -> array[qlib.Measurement, 6]:
-    """Syndrome measurement using Figure 5. from Reichardt arXiv:1804.06995."""
+    """Syndrome measurement using Figure 5 from Reichardt arXiv:1804.06995.
 
+    Returns:
+        The stabilizer measurements in the following order:
+        XXXXIII, IIZZIZZ, IZZIZZI, ZZZZIII, IIXXIXX, IXXIXXI
+    """
     relabel = array(0, 4, 1, 6, 3, 5, 2)
 
     # Prepare ancilla state
@@ -212,7 +215,6 @@ def _prep_h_non_ft() -> LogicalBlock[7]:
     To match with our definition of the code stabilizers, we relabel qubits
     from Fig 3b from top to bottom as: [1, 0, 4, 5, 2, 6, 3]
     """
-
     relabel = array(1, 0, 4, 5, 2, 6, 3)
 
     arr = array(qlib.qubit() for _ in range(7))
@@ -251,7 +253,6 @@ def _prep_h_ft() -> PreBlock[7, 8]:
     Using Fig. 3b from "Minimizing resource overheads for fault-tolerant
     preparation of encoded states of the Steane code" 10.1038/srep19578.
     """
-
     blk = _prep_h_non_ft()
     m_h = _measure_h_operator(blk)
     m_syn = _measure_syndromes(blk)
@@ -402,6 +403,55 @@ def steane_x_qec_cycle(q: LogicalBlock[7], a: LogicalBlock[7] @ owned) -> None:
         z(q)
 
 
+@guppy
+@no_type_check
+def reichardt_qec_cycle(q: LogicalBlock[7]) -> None:
+    """Dense syndrome extraction using Figure 5 from Reichardt arXiv:1804.06995.
+
+    This uses only 3 physical ancillas to measure all stabilizers fault-tolerantly.
+    Decoding is done via a code-capacity look-up table, meaning it assumes no
+    errors occur during the syndrome extraction circuit.
+    """
+    # Variable name of stabilizer measurement outcomes follows the list in
+    # the code definition:
+    # x0 -> XXXXIII
+    # x1 -> IXXIXXI
+    # x2 -> IIXXIXX
+    x0, z2, z1, z0, x2, x1 = qlib.collect_measurements(_measure_syndromes(q))
+
+    # The syndrome of X stabilizers is used to correct Z errors
+    z_correction = _code_capacity_lut(array(x0, x1, x2))
+    if z_correction.is_some():
+        qlib.z(q.data_qs[z_correction.unwrap()])
+
+    # The syndrome of Z stabilizers is used to correct X errors
+    x_correction = _code_capacity_lut(array(z0, z1, z2))
+    if x_correction.is_some():
+        qlib.x(q.data_qs[x_correction.unwrap()])
+
+
+@guppy
+@no_type_check
+def _code_capacity_lut(syndrome: array[bool, 3]) -> Option[int]:
+    """Code-capacity look up table decoding. Given the syndrome of X (or Z)
+    stabilizers, it indicates which physical qubit is expected to have received
+    the error, or `nothing` if no error is detected.
+
+    The syndrome must correspond to
+        syndrome[0] -> XXXXIII
+        syndrome[1] -> IXXIXXI
+        syndrome[2] -> IIXXIXX
+    and similarly for Z.
+    """
+    synd_int = bitstring_to_int(syndrome)
+
+    if synd_int == 0:
+        return nothing()
+    else:
+        lut = array(6, 4, 5, 0, 3, 1, 2)
+        return some(lut[synd_int - 1])
+
+
 N = guppy.nat_var("N")
 
 
@@ -421,10 +471,9 @@ def measure_z(blk: LogicalBlock[7] @ owned) -> RawMeasurement[7]:
 
 
 @guppy
-@link_name("guppyft.steane.decode")
 @no_type_check
 def decode(m: RawMeasurement[7] @ owned) -> bool:
-    """Decode Steane measurement of logical block"""
+    """Decode Steane measurement of logical block."""
     meas = qlib.collect_measurements(m.measurements)
     synds = _get_syndrome(meas)
     logical_meas = _parity_check(meas)
