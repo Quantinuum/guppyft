@@ -56,6 +56,8 @@ class EncodingArchitectureInstance(Protocol):
     def encode(self, pkg: Package, *, as_bytes: Literal[False] = False) -> Package: ...
     @overload
     def encode(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    @overload
+    def encode(self, pkg: Package, *, as_bytes: bool) -> Package | bytes: ...
     def encode(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
         """Encode a computational package with this instance."""
         return self._encode(pkg, as_bytes=as_bytes)
@@ -68,6 +70,8 @@ class EncodingArchitectureInstance(Protocol):
     ) -> Package: ...
     @overload
     def implement_ops(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    @overload
+    def implement_ops(self, pkg: Package, *, as_bytes: bool) -> Package | bytes: ...
     def implement_ops(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
         """Implement logical ops in `pkg` using this instance's op implementations."""
         return self._implement_ops(pkg, as_bytes=as_bytes)
@@ -122,6 +126,14 @@ def encode(
     passes: list[ComposablePass] | None = None,
     as_bytes: Literal[True],
 ) -> bytes: ...
+@overload
+def encode(
+    hugr: Package | GuppyFunctionDefinition[[], None],
+    spec: EncodeSpec,
+    *,
+    passes: list[ComposablePass] | None = None,
+    as_bytes: bool,
+) -> Package | bytes: ...
 def encode(
     hugr: Package | GuppyFunctionDefinition[[], None],
     spec: EncodeSpec,
@@ -178,7 +190,7 @@ def encode(
 
     # 4. Lower logical -> physical
     if spec.implement_ops is not None:
-        pkg_maybe_bytes = spec.implement_ops(pkg, as_bytes=as_bytes)  # type: ignore[call-overload]
+        pkg_maybe_bytes = spec.implement_ops(pkg, as_bytes=as_bytes)
     else:
         pkg_maybe_bytes = pkg
 

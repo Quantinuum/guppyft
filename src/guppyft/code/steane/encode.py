@@ -170,7 +170,7 @@ class SteaneInstance(AnnotatingArchitectureInstance, EncodingArchitectureInstanc
 
     def _encode(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
         self.check_may_encode(pkg)
-        pkg_bytes: Package | bytes = encode(pkg, self._spec, as_bytes=as_bytes)  # type: ignore[call-overload]
+        pkg_bytes: Package | bytes = encode(pkg, self._spec, as_bytes=as_bytes)
         return pkg_bytes
 
     def compile(self, pkg: Package) -> Package:
@@ -181,7 +181,7 @@ class SteaneInstance(AnnotatingArchitectureInstance, EncodingArchitectureInstanc
 
     def _implement_ops(self, pkg: Package, *, as_bytes: bool) -> Package | bytes:
         assert self._spec.implement_ops is not None
-        pkg_bytes: Package | bytes = self._spec.implement_ops(pkg, as_bytes=as_bytes)  # type: ignore[call-overload]
+        pkg_bytes: Package | bytes = self._spec.implement_ops(pkg, as_bytes=as_bytes)
         return pkg_bytes
 
     def check_may_encode(self, hugr: Package) -> None:
