@@ -1,7 +1,9 @@
+from collections.abc import Callable
 from dataclasses import dataclass, field, replace
 from typing import Any, Self, no_type_check
 
 from guppylang import guppy
+from guppylang.decorator import custom_guppy_decorator
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.library import GuppyLibrary, link_name
 from guppylang.std.angles import angle
@@ -10,7 +12,9 @@ from guppylang.std.collections import Stack
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.qsystem.helios import zz_phase
 from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
+from hugr.ext import OpDef
 from hugr.package import Package
+from tket_exts import measurement, qsystem_helios, quantum
 
 from guppyft.encode import (
     EncodeSpec,
@@ -65,6 +69,28 @@ class IdentityBuilder:
     def _implement_ops_spec(self, n_qubits: int) -> ImplementOpsSpec:
         qec_threshold = self._qec_policy.threshold
         costs = self._qec_policy.costs
+
+        lib = GuppyLibrary(members=[])
+        ops = OpReplacements()
+
+        def _register_op_replacement(
+            op_def: OpDef,
+        ) -> Callable[[Callable[..., Any]], GuppyFunctionDefinition[Any, Any]]:
+            @custom_guppy_decorator
+            def decorator(
+                func: Callable[..., Any],
+            ) -> GuppyFunctionDefinition[Any, Any]:
+                # Generate guppy function
+                name = f"link.{op_def.qualified_name()}"
+                guppy_func = guppy(link_name(name)(func))
+
+                # Register in library and for op replacement
+                lib.register_member(guppy_func)
+                ops.with_generated_decl(op_def, name)
+
+                return guppy_func
+
+            return decorator
 
         @guppy.struct
         class STATE:
@@ -131,8 +157,7 @@ class IdentityBuilder:
                         result("qec_counter", self.qec_counter)
                         self.qec_counter[i] = 0
 
-        @guppy
-        @link_name("link.identity.QAlloc")
+        @_register_op_replacement(quantum.qAlloc.op_def())
         @no_type_check
         def _QAlloc() -> tuple[tuple[int, int]]:
             @guppy
@@ -145,8 +170,7 @@ class IdentityBuilder:
             return map_global(_impl)
 
         # MeasureFree is compiled from `guppylang.std.quantum.measure`
-        @guppy
-        @link_name("link.identity.MeasureFree")
+        @_register_op_replacement(quantum.measure_free.op_def())
         @no_type_check
         def _MeasureFree(q: tuple[int, int]) -> bool:
             @guppy
@@ -163,8 +187,7 @@ class IdentityBuilder:
             return map_global(_impl, q)
 
         # Measure is compiled from `guppylang.std.quantum.project_z`
-        @guppy
-        @link_name("link.identity.Measure")
+        @_register_op_replacement(quantum.measure.op_def())
         @no_type_check
         def _Measure(q: tuple[int, int]) -> tuple[tuple[int, int], bool]:
             @guppy
@@ -183,15 +206,13 @@ class IdentityBuilder:
             return map_global(_impl, q)
 
         # Replacement for `tket.measurement.Read` operation
-        @guppy
-        @link_name("link.identity.Read")
+        @_register_op_replacement(measurement.read.op_def())
         @no_type_check
         def _Read(m: bool) -> bool:
             return m
 
         # QFree is compiled from `guppylang.std.quantum.discard`
-        @guppy
-        @link_name("link.identity.QFree")
+        @_register_op_replacement(quantum.qFree.op_def())
         @no_type_check
         def _QFree(q: tuple[int, int]) -> None:
             @guppy
@@ -205,8 +226,7 @@ class IdentityBuilder:
 
             return map_global(_impl, q)
 
-        @guppy
-        @link_name("link.identity.X")
+        @_register_op_replacement(quantum.X.op_def())
         @no_type_check
         def _X(q: tuple[int, int]) -> tuple[tuple[int, int]]:
             @guppy
@@ -225,8 +245,7 @@ class IdentityBuilder:
 
             return map_global(_impl, q)
 
-        @guppy
-        @link_name("link.identity.CX")
+        @_register_op_replacement(quantum.CX.op_def())
         @no_type_check
         def _CX(
             ctl: tuple[int, int], tgt: tuple[int, int]
@@ -246,8 +265,10 @@ class IdentityBuilder:
 
             return map_global(_impl, ctl, tgt)
 
-        @guppy
-        @link_name("link.identity.ZZPhase")
+        # `tket.qsystem` extensions may not be loaded in programs that only use
+        # `guppyland.std.quantum` operations. `ZZPhase` is included to test
+        # missing extension behaviour during encoding.
+        @_register_op_replacement(qsystem_helios.ZZPhase.op_def())
         @no_type_check
         def _ZZPhase(
             ctl: tuple[int, int], tgt: tuple[int, int], phase: float
@@ -296,35 +317,8 @@ class IdentityBuilder:
         def state_discard(state: STATE @ owned) -> None:
             state.discard()
 
-        lib = GuppyLibrary.from_members(
-            state_gen,
-            state_discard,
-            _QAlloc,
-            _MeasureFree,
-            _Measure,
-            _Read,
-            _QFree,
-            _X,
-            _CX,
-            _ZZPhase,
-        ).compile()
-
-        ops = OpReplacements()
-        ops.with_generated_decls(
-            {
-                ("tket.quantum", "QAlloc"): "link.identity.QAlloc",
-                ("tket.quantum", "MeasureFree"): "link.identity.MeasureFree",
-                ("tket.quantum", "Measure"): "link.identity.Measure",
-                ("tket.measurement", "Read"): "link.identity.Read",
-                ("tket.quantum", "QFree"): "link.identity.QFree",
-                ("tket.quantum", "X"): "link.identity.X",
-                ("tket.quantum", "CX"): "link.identity.CX",
-                # `tket.qsystem` extension may not be loaded in programs that only use
-                # `guppyland.std.quantum` operations. `ZZPhase` is included to test
-                # missing extension behaviour during encoding.
-                ("tket.qsystem.helios", "ZZPhase"): "link.identity.ZZPhase",
-            }
-        )
+        lib.register_member(state_gen)
+        lib.register_member(state_discard)
 
         def build_wrapper(
             func: GuppyFunctionDefinition[[], None],
@@ -338,7 +332,9 @@ class IdentityBuilder:
 
             return wrapper  # type: ignore[no-any-return]
 
-        return ImplementOpsSpec(ops=ops, build_wrapper=build_wrapper, libs=[lib])
+        return ImplementOpsSpec(
+            ops=ops, build_wrapper=build_wrapper, libs=[lib.compile()]
+        )
 
     def _encode_spec(self, n_qubits: int) -> EncodeSpec:
         spec = self._implement_ops_spec(n_qubits)
