@@ -293,6 +293,7 @@ class IdentityBuilder:
         @link_name("link.identity.gen_state")
         @no_type_check
         def state_gen_decl() -> STATE: ...
+        @lib.register_member
         @guppy
         @link_name("link.identity.gen_state")
         @no_type_check
@@ -307,14 +308,12 @@ class IdentityBuilder:
         @link_name("link.identity.discard_state")
         @no_type_check
         def state_discard_decl(state: STATE @ owned) -> None: ...
+        @lib.register_member
         @guppy
         @link_name("link.identity.discard_state")
         @no_type_check
         def state_discard(state: STATE @ owned) -> None:
             state.discard()
-
-        lib.register_member(state_gen)
-        lib.register_member(state_discard)
 
         def build_wrapper(
             func: GuppyFunctionDefinition[[], None],
