@@ -9,6 +9,7 @@ from guppylang.library import GuppyLibrary, link_name
 from guppylang.std.angles import angle
 from guppylang.std.builtins import array, comptime, owned, result
 from guppylang.std.collections import Stack
+from guppylang.std.num import nat
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.qsystem.helios import zz_phase
 from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
@@ -25,8 +26,6 @@ from guppyft.encode import (
     encode,
 )
 from guppyft.globals import map_global, with_global
-
-N = guppy.nat_var("N")
 
 
 @dataclass
@@ -94,10 +93,10 @@ class IdentityBuilder:
 
         @guppy.struct
         class STATE:
-            blocks: array[Option[qubit], comptime(n_qubits)]  # type: ignore[valid-type]
-            addr_stack: Stack[tuple[int, int], comptime(n_qubits)]  # type: ignore[valid-type]
+            blocks: array[Option[qubit], n_qubits]  # type: ignore[valid-type]
+            addr_stack: Stack[tuple[int, int], n_qubits]  # type: ignore[valid-type]
 
-            qec_counter: array[int, comptime(n_qubits)]  # type: ignore[valid-type]
+            qec_counter: array[int, n_qubits]  # type: ignore[valid-type]
 
             @guppy
             @no_type_check
@@ -136,24 +135,24 @@ class IdentityBuilder:
 
             @guppy
             @no_type_check
-            def qec_policy(
+            def qec_policy[N: nat](
                 self: "STATE",
                 blk_ids: array[int, N],
                 op_costs: tuple[int, int],
             ) -> None:
                 op_cost, op_cost_idle = op_costs
                 # Array of idle costs
-                cost_to_apply = array(op_cost_idle for _ in range(comptime(n_qubits)))
+                cost_to_apply = array(op_cost_idle for _ in range(n_qubits))
 
                 # Replace with op noise for necessary blocks
                 for i in blk_ids.copy():
                     cost_to_apply[i] = op_cost
 
                 # Add costs to counter and reset counter
-                for i in range(comptime(n_qubits)):
+                for i in range(n_qubits):
                     self.qec_counter[i] += cost_to_apply[i]
 
-                    if self.qec_counter[i] >= comptime(qec_threshold):
+                    if self.qec_counter[i] >= qec_threshold:
                         result("qec_counter", self.qec_counter)
                         self.qec_counter[i] = 0
 
@@ -299,12 +298,9 @@ class IdentityBuilder:
         @no_type_check
         def state_gen() -> STATE:
             return STATE(
-                array(nothing[qubit]() for _ in range(comptime(n_qubits))),
-                Stack(
-                    array(some((blk, 1)) for blk in range(comptime(n_qubits))),
-                    comptime(n_qubits),
-                ),
-                array(0 for _ in range(comptime(n_qubits))),
+                array(nothing[qubit]() for _ in range(n_qubits)),
+                Stack(array(some((blk, 1)) for blk in range(n_qubits)), n_qubits),
+                array(0 for _ in range(n_qubits)),
             )
 
         @guppy.declare
