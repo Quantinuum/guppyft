@@ -17,9 +17,11 @@ from ._compile import LogicalCompiler, ReplacementCompiler, UncompilableError
 from ._implement_ops import (
     ImplementOps,
     ImplementOpsSpec,
+    OpReplacementDecorator,
     OpReplacements,
     TyReplacements,
     implement_ops,
+    op_replacement_decorator,
 )
 
 __all__ = [
@@ -29,6 +31,7 @@ __all__ = [
     "ImplementOps",
     "ImplementOpsSpec",
     "LogicalCompiler",
+    "OpReplacementDecorator",
     "OpReplacements",
     "ReplacementCompiler",
     "TyReplacements",
@@ -36,6 +39,7 @@ __all__ = [
     "annotate_encoding",
     "encode",
     "implement_ops",
+    "op_replacement_decorator",
 ]
 
 
