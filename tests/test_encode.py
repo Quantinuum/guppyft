@@ -5,7 +5,7 @@ from guppylang.std.quantum import measure, qubit, x
 
 from guppyft.encode import EncodeSpec, encode
 
-from .utils.identity_code import identity_code_spec
+from .utils.identity_code import IdentityBuilder
 
 
 @pytest.mark.parametrize("as_bytes", [False, True])
@@ -21,12 +21,11 @@ def test_encode_does_not_modify_package(as_bytes: bool, empty_spec: bool) -> Non
     [module] = pkg.modules
     entrypoint = module.entrypoint
     before = pkg.to_str()
-    spec = EncodeSpec() if empty_spec else identity_code_spec(n_qubits=1)
 
-    if as_bytes:
-        encode(pkg, spec, as_bytes=True)
+    if empty_spec:
+        encode(pkg, EncodeSpec(), as_bytes=as_bytes)
     else:
-        encode(pkg, spec)
+        IdentityBuilder().build(n_qubits=1).encode(pkg, as_bytes=as_bytes)
 
     assert pkg.to_str() == before
     [module_after] = pkg.modules
