@@ -63,8 +63,8 @@ class IcebergQEDPolicy:
         all_x: float = 0.0
         all_y: float = 0.0
         all_z: float = 0.0
-        all_but_one_x: float = 0.0
-        all_but_one_z: float = 0.0
+        pauli_exp_all_x_except_at: float = 0.0
+        pauli_exp_all_z_except_at: float = 0.0
         all_h: float = 0.0
         x_with_all_but_one_z: float = 0.0
         z_with_all_but_one_x: float = 0.0
