@@ -9,8 +9,8 @@ from guppyft.encode import (
     ImplementOpsSpec,
     OpReplacements,
     TyReplacements,
+    guppy_op_replacement_decorator,
     implement_ops,
-    op_replacement_decorator,
 )
 
 
@@ -43,7 +43,7 @@ def test_default_build_wrapper(as_bytes: bool) -> None:
 def test_op_replacement_decorator() -> None:
     ops = OpReplacements()
     lib = GuppyLibrary(members=[])
-    register_op_replacement = op_replacement_decorator(ops, register_in=lib)
+    register_op_replacement = guppy_op_replacement_decorator(ops, register_in=lib)
 
     @register_op_replacement(quantum.X.op_def())
     def main() -> None:
