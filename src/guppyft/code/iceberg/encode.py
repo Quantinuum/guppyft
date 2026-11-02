@@ -85,7 +85,6 @@ class IcebergQEDPolicy:
         fan_out: float = 0.0
         swap: float = 0.0
         rx: float = 0.0
-        ry: float = 0.0
         rz: float = 0.0
         all_rx: float = 0.0
         all_ry: float = 0.0
