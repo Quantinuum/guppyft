@@ -170,8 +170,7 @@ class IcebergBuilder:
         return replace(self, _options=replace(self._options, init_style=style))
 
     def with_state_prep_rus_attempts(self, max_attempts: int) -> Self:
-        """Set the number of attempts log depth state prep is allowed before it
-        fails."""
+        """Set the number of attempts state prep is allowed before it fails."""
         return replace(
             self, _options=replace(self._options, state_prep_rus_attempts=max_attempts)
         )
