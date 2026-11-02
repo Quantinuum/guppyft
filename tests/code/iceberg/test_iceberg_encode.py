@@ -6,22 +6,22 @@ from hugr.package import Package
 from guppyft.code.iceberg.encode import (
     DynamicQubitReuse,
     IcebergBuilder,
-    IcebergQECPolicy,
+    IcebergQEDPolicy,
     InitStyle,
 )
 
 
-def test_annotate_steane_encoding() -> None:
+def test_annotate_iceberg_encoding() -> None:
     hugr = Hugr[Any]()
     pkg = Package([hugr])
 
-    policy = IcebergQECPolicy()
+    policy = IcebergQEDPolicy()
     policy.threshold = 42
     policy.costs.x = 1000.0
     arch = (
         IcebergBuilder()
         .with_init_style(InitStyle.HALF_DEPTH)
-        .with_qec_policy(policy)
+        .with_qed_policy(policy)
         .with_syndrome_extraction_during_measurement(True)
         .with_state_prep_rus_attempts(5)
         .with_dynamic_qubit_reuse(DynamicQubitReuse.disabled)
@@ -38,7 +38,7 @@ def test_annotate_steane_encoding() -> None:
                 "n_blocks": 4,
                 "block_size": 6,
                 "init_style": "half_depth",
-                "qec_policy": {
+                "qed_policy": {
                     "threshold": 42,
                     "costs": {
                         "idle": 0.0,
@@ -91,9 +91,9 @@ def test_annotated_policy_immutable() -> None:
     hugr = Hugr[Any]()
     pkg = Package([hugr])
 
-    policy = IcebergQECPolicy(threshold=2)
+    policy = IcebergQEDPolicy(threshold=2)
     policy.costs.x = 4.0
-    instance = IcebergBuilder().with_qec_policy(policy).build(n_blocks=4, block_size=6)
+    instance = IcebergBuilder().with_qed_policy(policy).build(n_blocks=4, block_size=6)
 
     policy.threshold = 99
     policy.costs.x = 20.0

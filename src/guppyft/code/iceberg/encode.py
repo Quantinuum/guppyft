@@ -42,21 +42,22 @@ class InitStyle(StrEnum):
 
 
 @dataclass
-class IcebergQECPolicy:
-    """Policy to determine when QEC cycles are injected.
+class IcebergQEDPolicy:
+    """Policy to determine when QED cycles are injected.
 
-    Each logical block accumulates a cost based on `costs`. Once a
-    block's accumulated cost reaches `threshold`, a QEC cycle of the given
-    `style` is performed on that block and its counter is reset.
+    Each logical block accumulates a cost based on `costs`. Once a block's accumulated
+    cost reaches `threshold`, a QED cycle is performed on that block and its counter is
+    reset.
 
     Attributes:
-        threshold: Threshold at which a QEC cycle is triggered.
+        threshold: Threshold at which a QED cycle is triggered.
         costs: See `OperationCosts`.
     """
 
     @dataclass
     class OperationCosts:
-        """Configuration for operation costs. Used e.g. for applying QEC cycles."""
+        """Configuration for operation costs that are used to determined when QED cycles
+        should be performed during runtime."""
 
         idle: float = 0.0
         all_x: float = 0.0
@@ -107,14 +108,14 @@ class IcebergQECPolicy:
     costs: OperationCosts = field(default_factory=OperationCosts)
 
     def to_json(self) -> JsonType:
-        """Serialise the QEC policy to JSON."""
+        """Serialise the QED policy to JSON."""
         return asdict(self)
 
 
 @dataclass(frozen=True, kw_only=True)
 class _IcebergOptions:
     init_style: InitStyle
-    qec_policy: IcebergQECPolicy
+    qed_policy: IcebergQEDPolicy
     syndrome_during_measurement: bool
     state_prep_rus_attempts: int
     dynamic_qubit_reuse: DynamicQubitReuse
@@ -139,7 +140,7 @@ class IcebergInstance:
                 "n_blocks": self._n_blocks,
                 "block_size": self._block_size,
                 "init_style": self._options.init_style,
-                "qec_policy": self._options.qec_policy.to_json(),
+                "qed_policy": self._options.qed_policy.to_json(),
                 "syndrome_during_measurement": self._options.syndrome_during_measurement,  # noqa: E501 ruff format keeps changing this line back
                 "state_prep_rus_attempts": self._options.state_prep_rus_attempts,
                 "dynamic_qubit_reuse": self._options.dynamic_qubit_reuse,
@@ -154,16 +155,16 @@ class IcebergBuilder:
     _options: _IcebergOptions = field(
         default=_IcebergOptions(
             init_style=InitStyle.LOG_DEPTH,
-            qec_policy=IcebergQECPolicy(),
+            qed_policy=IcebergQEDPolicy(),
             syndrome_during_measurement=False,
             state_prep_rus_attempts=3,
             dynamic_qubit_reuse=DynamicQubitReuse.enabled,
         )
     )
 
-    def with_qec_policy(self, qec_policy: IcebergQECPolicy) -> Self:
-        """Set the QEC policy."""
-        return replace(self, _options=replace(self._options, qec_policy=qec_policy))
+    def with_qed_policy(self, qed_policy: IcebergQEDPolicy) -> Self:
+        """Set the QED policy."""
+        return replace(self, _options=replace(self._options, qed_policy=qed_policy))
 
     def with_init_style(self, style: InitStyle) -> Self:
         """Set the state initialization style."""
