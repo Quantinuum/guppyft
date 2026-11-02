@@ -167,7 +167,7 @@ class IcebergBuilder:
         return replace(self, _options=replace(self._options, qed_policy=qed_policy))
 
     def with_init_style(self, style: InitStyle) -> Self:
-        """Set the state initialization style."""
+        """Set the Iceberg block initialization style."""
         return replace(self, _options=replace(self._options, init_style=style))
 
     def with_state_prep_rus_attempts(self, max_attempts: int) -> Self:
