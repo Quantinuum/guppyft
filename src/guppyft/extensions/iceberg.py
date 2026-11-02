@@ -1448,81 +1448,53 @@ class IcebergOpsExtension:
         basis."""
         return self.try_measure_z_dynq_def.instantiate([])
 
+    # take
+
+    @functools.cached_property
+    def take_def(self) -> OpDef:
+        """Extraction of a dynamic logical qubit from a borrowed block.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `take`."""
+        return self().get_op("take")
+
+    def take(self, k: int) -> ExtOp:
+        """Extraction of a dynamic logical qubit from a borrowed block.
+
+        Args:
+            k: The number of logical qubits encoded in the borrowed block.
+        """
+        bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
+        return self.take_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [bblock_type, _IDX_T],
+                [_DYNQ_T, bblock_type],
+            ),
+        )
+
     # borrow
 
     @functools.cached_property
     def borrow_def(self) -> OpDef:
-        """Extraction of dynamic logical qubits from a block.
+        """Convert a block to a borrowed block.
 
         This is the generic operation definition. For the instantiated operation, see
         `borrow`."""
         return self().get_op("borrow")
 
-    def borrow(self, k: int, m: int) -> ExtOp:
-        """Extraction of dynamic logical qubits from a block.
+    def borrow(self, k: int) -> ExtOp:
+        """Convert a block to a borrowed block.
 
         Args:
             k: The number of logical qubits encoded in the block.
-            m: The number of logical qubits to borrow.
         """
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
         return self.borrow_def.instantiate(
-            args=[BoundedNatArg(m), BoundedNatArg(k)],
+            args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
-                [block_type] + [_IDX_T] * m,  # type: ignore[arg-type]
-                [bblock_type] + [_DYNQ_T] * m,  # type: ignore[arg-type]
-            ),
-        )
-
-    # borrow_more
-
-    @functools.cached_property
-    def borrow_more_def(self) -> OpDef:
-        """Extraction of dynamic logical qubits from an already-borrowed block.
-
-        This is the generic operation definition. For the instantiated operation, see
-        `borrow_more`."""
-        return self().get_op("borrow_more")
-
-    def borrow_more(self, k: int, m: int) -> ExtOp:
-        """Extraction of dynamic logical qubits from an already-borrowed block.
-
-        Args:
-            k: The number of logical qubits encoded in the block.
-            m: The number of logical qubits to borrow.
-        """
-        bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
-        return self.borrow_more_def.instantiate(
-            args=[BoundedNatArg(m), BoundedNatArg(k)],
-            concrete_signature=FunctionType(
-                [bblock_type] + [_IDX_T] * m,  # type: ignore[arg-type]
-                [bblock_type] + [_DYNQ_T] * m,  # type: ignore[arg-type]
-            ),
-        )
-
-    # restore_some
-
-    @functools.cached_property
-    def restore_some_def(self) -> OpDef:
-        """Restoration of some dynamic logical qubits to their originating block.
-
-        This is the generic operation definition. For the instantiated operation, see
-        `restore_some`."""
-        return self().get_op("restore_some")
-
-    def restore_some(self, k: int, m: int) -> ExtOp:
-        """Restoration of some dynamic logical qubits to their originating block.
-
-        Args:
-            k: The number of logical qubits encoded in the block.
-            m: The number of logical qubits to restore.
-        """
-        bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
-        return self.restore_some_def.instantiate(
-            args=[BoundedNatArg(m), BoundedNatArg(k)],
-            concrete_signature=FunctionType(
-                [bblock_type] + [_DYNQ_T] * m,  # type: ignore[arg-type]
+                [block_type],
                 [bblock_type],
             ),
         )
@@ -1531,25 +1503,49 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def restore_def(self) -> OpDef:
-        """Restoration of all dynamic logical qubits to their originating block.
+        """Convert a complete borrowed block to a block.
 
         This is the generic operation definition. For the instantiated operation, see
         `restore`."""
         return self().get_op("restore")
 
-    def restore(self, k: int, m: int) -> ExtOp:
-        """Restoration of all dynamic logical qubits to their originating block.
+    def restore(self, k: int) -> ExtOp:
+        """Convert a complete borrowed block to a block.
 
         Args:
             k: The number of logical qubits encoded in the block.
-            m: The number of logical qubits to restore.
         """
         block_type = _ICEBERG_TYPES.iceberg_block(k)
         bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
         return self.restore_def.instantiate(
-            args=[BoundedNatArg(m), BoundedNatArg(k)],
+            args=[BoundedNatArg(k)],
             concrete_signature=FunctionType(
-                [bblock_type] + [_DYNQ_T] * m,  # type: ignore[arg-type]
+                [bblock_type],
                 [block_type],
+            ),
+        )
+
+    # put
+
+    @functools.cached_property
+    def put_def(self) -> OpDef:
+        """Return a dynamic logical qubit to its originating block.
+
+        This is the generic operation definition. For the instantiated operation, see
+        `put`."""
+        return self().get_op("put")
+
+    def put(self, k: int) -> ExtOp:
+        """Return a dynamic logical qubit to its originating block.
+
+        Args:
+            k: The number of logical qubits encoded in the block.
+        """
+        bblock_type = _ICEBERG_TYPES.iceberg_borrowed_block(k)
+        return self.put_def.instantiate(
+            args=[BoundedNatArg(k)],
+            concrete_signature=FunctionType(
+                [bblock_type, _DYNQ_T],
+                [bblock_type],
             ),
         )
