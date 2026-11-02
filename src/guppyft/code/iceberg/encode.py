@@ -171,6 +171,11 @@ class IcebergBuilder:
 
     def with_state_prep_rus_attempts(self, max_attempts: int) -> Self:
         """Set the number of attempts state prep is allowed before it fails."""
+        if max_attempts < 1:
+            raise ValueError(
+                f"Cannot set the maximum state prep RUS attempts lower than 1,"
+                f" {max_attempts} given"
+            )
         return replace(
             self, _options=replace(self._options, state_prep_rus_attempts=max_attempts)
         )
@@ -188,6 +193,15 @@ class IcebergBuilder:
     def build(self, *, n_blocks: int, block_size: int) -> IcebergInstance:
         """Build an `IcebergInstance` configured for `n_blocks` logical blocks each
         with `block_size` logical qubits."""
+        if n_blocks < 0:
+            raise ValueError(
+                f"Cannot set the number of blocks lower than 0, {n_blocks} given"
+            )
+        if block_size < 2 or block_size % 2 != 0:
+            raise ValueError(
+                f"Block size has to be even and at least 2, {block_size} given"
+            )
+
         return IcebergInstance(
             _n_blocks=n_blocks, _block_size=block_size, _options=deepcopy(self._options)
         )

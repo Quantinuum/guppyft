@@ -1,5 +1,6 @@
 from typing import Any
 
+import pytest
 from hugr import Hugr
 from hugr.package import Package
 
@@ -9,6 +10,48 @@ from guppyft.code.iceberg.encode import (
     IcebergQEDPolicy,
     InitStyle,
 )
+
+
+def test_iceberg_invalid_max_attempts() -> None:
+    arch = IcebergBuilder()
+    with pytest.raises(
+        ValueError,
+        match=r"Cannot set the maximum state prep RUS attempts lower than 1, 0 given",
+    ):
+        arch.with_state_prep_rus_attempts(0)
+    with pytest.raises(
+        ValueError,
+        match=r"Cannot set the maximum state prep RUS attempts lower than 1, -5 given",
+    ):
+        arch.with_state_prep_rus_attempts(-5)
+
+
+def test_iceberg_invalid_n_blocks() -> None:
+    arch = IcebergBuilder()
+    with pytest.raises(
+        ValueError,
+        match=r"Cannot set the number of blocks lower than 0, -1 given",
+    ):
+        arch.build(n_blocks=-1, block_size=4)
+
+
+def test_iceberg_invalid_block_size() -> None:
+    arch = IcebergBuilder()
+    with pytest.raises(
+        ValueError,
+        match=r"Block size has to be even and at least 2, 0 given",
+    ):
+        arch.build(n_blocks=2, block_size=0)
+    with pytest.raises(
+        ValueError,
+        match=r"Block size has to be even and at least 2, -2 given",
+    ):
+        arch.build(n_blocks=2, block_size=-2)
+    with pytest.raises(
+        ValueError,
+        match=r"Block size has to be even and at least 2, 3 given",
+    ):
+        arch.build(n_blocks=2, block_size=3)
 
 
 def test_annotate_iceberg_encoding() -> None:
@@ -67,7 +110,6 @@ def test_annotate_iceberg_encoding() -> None:
                         "fan_out": 0.0,
                         "swap": 0.0,
                         "rx": 0.0,
-                        "ry": 0.0,
                         "rz": 0.0,
                         "all_rx": 0.0,
                         "all_ry": 0.0,
@@ -100,6 +142,6 @@ def test_annotated_policy_immutable() -> None:
     instance.annotate(pkg)
 
     compilation = hugr[hugr.module_root].metadata["qnt.nexus.compilation"]
-    policy_val = compilation["ft_encoding"]["params"]["qec_policy"]  # type: ignore[index,call-overload]
+    policy_val = compilation["ft_encoding"]["params"]["qed_policy"]  # type: ignore[index,call-overload]
     assert policy_val["threshold"] == 2  # type: ignore[index,call-overload]
     assert policy_val["costs"]["x"] == 4.0  # type: ignore[index,call-overload]
