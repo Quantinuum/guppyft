@@ -101,7 +101,7 @@ With our Steane architecture instance, we can encode our program using {py:meth}
 pkg = steane.encode(teleportation.compile())
 ```
 
-The resulting package is runnable and fully compatible with Selene, locally or through Nexus Console, and can
+The resulting package is runnable and fully compatible with Selene, locally or through the Nexus Console, and can
 be submitted to quantum devices. `SteaneInstance` includes an `emulator` helper method to aid with emulating the resulting encoded program locally. Below, we demonstrate simulating our encoded program using Stim:
 
 ```python
