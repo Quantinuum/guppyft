@@ -21,7 +21,7 @@ from guppyft.encode import (
     ImplementOpsSpec,
     OpReplacements,
     encode,
-    op_replacement_decorator,
+    guppy_op_replacement_decorator,
 )
 from guppyft.globals import map_global, with_global
 
@@ -69,7 +69,7 @@ class IdentityBuilder:
 
         lib = GuppyLibrary(members=[])
         ops = OpReplacements()
-        _register_op_replacement = op_replacement_decorator(ops, register_in=lib)
+        _register_op_replacement = guppy_op_replacement_decorator(ops, register_in=lib)
 
         @guppy.struct
         class STATE:
