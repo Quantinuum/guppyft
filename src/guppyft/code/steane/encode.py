@@ -99,7 +99,7 @@ class QECPolicy:
     Attributes:
         style: The style of syndrome extraction to use (see `QECStyle`).
         threshold: Threshold at which a QEC cycle is triggered.
-        costs: See `OperationCosts`.
+        costs: See `QECPolicy.OperationCosts`.
     """
 
     @dataclass

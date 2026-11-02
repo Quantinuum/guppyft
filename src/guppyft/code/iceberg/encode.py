@@ -51,7 +51,7 @@ class IcebergQEDPolicy:
 
     Attributes:
         threshold: Threshold at which a QED cycle is triggered.
-        costs: See `OperationCosts`.
+        costs: See `IcebergQEDPolicy.OperationCosts`.
     """
 
     @dataclass
