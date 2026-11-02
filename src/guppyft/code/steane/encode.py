@@ -50,7 +50,7 @@ from guppyft.encode import (
     TyReplacements,
     annotate_encoding,
     encode,
-    op_replacement_decorator,
+    guppy_op_replacement_decorator,
 )
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
@@ -213,7 +213,7 @@ class SteaneBuilder:
 
         lib = GuppyLibrary(members=[])
         ops = OpReplacements()
-        _register_op_replacement = op_replacement_decorator(ops, register_in=lib)
+        _register_op_replacement = guppy_op_replacement_decorator(ops, register_in=lib)
 
         # TODO STATE should be generic for all codes. The methods that are code specific
         # should be `@guppy.declare` and each code can provide an implementation to be

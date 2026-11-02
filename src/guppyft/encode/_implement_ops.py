@@ -279,15 +279,15 @@ class ImplementOps:
         )
 
 
-class OpReplacementDecorator(Protocol):
+class GuppyOpReplacementDecorator(Protocol):
     def __call__(
         self, op_def: OpDef
     ) -> Callable[[Callable[..., Any]], GuppyFunctionDefinition[Any, Any]]: ...
 
 
-def op_replacement_decorator(
+def guppy_op_replacement_decorator(
     ops: OpReplacements, *, register_in: GuppyLibrary
-) -> OpReplacementDecorator:
+) -> GuppyOpReplacementDecorator:
     def _register_op_replacement(
         op_def: OpDef,
     ) -> Callable[[Callable[..., Any]], GuppyFunctionDefinition[Any, Any]]:
