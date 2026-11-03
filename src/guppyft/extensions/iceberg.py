@@ -170,14 +170,14 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def xx_intrablock_def(self) -> OpDef:
-        """Apply an X gate to two qubits.
+        """Apply an X gate to two logical qubits within a block.
 
         This is the generic operation definition. For the instantiated operation, see
         `xx_intrablock`."""
         return self().get_op("xx_intrablock")
 
     def xx_intrablock(self, k: int) -> ExtOp:
-        """Apply an X gate to two qubits.
+        """Apply an X gate to two logical qubits within a block.
 
         Args:
             k: The number of logical qubits encoded in the block.
@@ -192,14 +192,14 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def yy_intrablock_def(self) -> OpDef:
-        """Apply a Y gate to two qubits.
+        """Apply a Y gate to two logical qubits within a block.
 
         This is the generic operation definition. For the instantiated operation, see
         `yy_intrablock`."""
         return self().get_op("yy_intrablock")
 
     def yy_intrablock(self, k: int) -> ExtOp:
-        """Apply a Y gate to two qubits.
+        """Apply a Y gate to two logical qubits within a block.
 
         Args:
             k: The number of logical qubits encoded in the block.
@@ -214,14 +214,14 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def zz_intrablock_def(self) -> OpDef:
-        """Apply a Z gate to two qubits.
+        """Apply a Z gate to two logical qubits within a block.
 
         This is the generic operation definition. For the instantiated operation, see
         `zz_intrablock`."""
         return self().get_op("zz_intrablock")
 
     def zz_intrablock(self, k: int) -> ExtOp:
-        """Apply a Z gate to two qubits.
+        """Apply a Z gate to two logical qubits within a block.
 
         Args:
             k: The number of logical qubits encoded in the block.
@@ -787,14 +787,14 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def xx_phase_intrablock_def(self) -> OpDef:
-        """Apply an XXPhase gate to two qubits within a block.
+        """Apply an XXPhase gate to two logical qubits within a block.
 
         This is the generic operation definition. For the instantiated operation, see
         `xx_phase_intrablock`."""
         return self().get_op("xx_phase_intrablock")
 
     def xx_phase_intrablock(self, k: int) -> ExtOp:
-        """Apply an XXPhase gate to two qubits within a block.
+        """Apply an XXPhase gate to two logical qubits within a block.
 
         Args:
             k: The number of logical qubits encoded in the block.
@@ -811,14 +811,14 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def yy_phase_intrablock_def(self) -> OpDef:
-        """Apply a YYPhase gate to two qubits within a block.
+        """Apply a YYPhase gate to two logical qubits within a block.
 
         This is the generic operation definition. For the instantiated operation, see
         `yy_phase_intrablock`."""
         return self().get_op("yy_phase_intrablock")
 
     def yy_phase_intrablock(self, k: int) -> ExtOp:
-        """Apply a YYPhase gate to two qubits within a block.
+        """Apply a YYPhase gate to two logical qubits within a block.
 
         Args:
             k: The number of logical qubits encoded in the block.
@@ -835,14 +835,14 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def zz_phase_intrablock_def(self) -> OpDef:
-        """Apply a ZZPhase gate to two qubits within a block.
+        """Apply a ZZPhase gate to two logical qubits within a block.
 
         This is the generic operation definition. For the instantiated operation, see
         `zz_phase_intrablock`."""
         return self().get_op("zz_phase_intrablock")
 
     def zz_phase_intrablock(self, k: int) -> ExtOp:
-        """Apply a ZZPhase gate to two qubits within a block.
+        """Apply a ZZPhase gate to two logical qubits within a block.
 
         Args:
             k: The number of logical qubits encoded in the block.
@@ -859,14 +859,14 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def cx_intrablock_def(self) -> OpDef:
-        """Apply a CX gate to two qubits within a block.
+        """Apply a CX gate to two logical qubits within a block.
 
         This is the generic operation definition. For the instantiated operation, see
         `cx_intrablock`."""
         return self().get_op("cx_intrablock")
 
     def cx_intrablock(self, k: int) -> ExtOp:
-        """Apply a CX gate to two qubits within a block.
+        """Apply a CX gate to two logical qubits within a block.
 
         Args:
             k: The number of logical qubits encoded in the block.
@@ -881,14 +881,14 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def swap_intrablock_def(self) -> OpDef:
-        """Apply a SWAP gate to two qubits within a block.
+        """Apply a SWAP gate to two logical qubits within a block.
 
         This is the generic operation definition. For the instantiated operation, see
         `swap_intrablock`."""
         return self().get_op("swap_intrablock")
 
     def swap_intrablock(self, k: int) -> ExtOp:
-        """Apply a SWAP gate to two qubits within a block.
+        """Apply a SWAP gate to two logical qubits within a block.
 
         Args:
             k: The number of logical qubits encoded in the block.
@@ -903,16 +903,18 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def xx_phase_interblock_def(self) -> OpDef:
-        """Apply an XXPhase gate to two qubits on different blocks of the same size with
-        dynamic indices.
+        """Apply an XXPhase gate to one logical qubit in each of two different blocks.
+
+        The blocks must have the same size. The qubit indices are runtime inputs.
 
         This is the generic operation definition. For the instantiated operation, see
         `xx_phase_interblock`."""
         return self().get_op("xx_phase_interblock")
 
     def xx_phase_interblock(self, k: int) -> ExtOp:
-        """Apply an XXPhase gate to two qubits on different blocks of the same size with
-        dynamic indices.
+        """Apply an XXPhase gate to one logical qubit in each of two different blocks.
+
+        The blocks must have the same size. The qubit indices are runtime inputs.
 
         Args:
             k: The number of logical qubits encoded in the blocks.
@@ -930,16 +932,18 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def yy_phase_interblock_def(self) -> OpDef:
-        """Apply a YYPhase gate to two qubits on different blocks of the same size with
-        dynamic indices.
+        """Apply a YYPhase gate to one logical qubit in each of two different blocks.
+
+        The blocks must have the same size. The qubit indices are runtime inputs.
 
         This is the generic operation definition. For the instantiated operation, see
         `yy_phase_interblock`."""
         return self().get_op("yy_phase_interblock")
 
     def yy_phase_interblock(self, k: int) -> ExtOp:
-        """Apply a YYPhase gate to two qubits on different blocks of the same size with
-        dynamic indices.
+        """Apply a YYPhase gate to one logical qubit in each of two different blocks.
+
+        The blocks must have the same size. The qubit indices are runtime inputs.
 
         Args:
             k: The number of logical qubits encoded in the blocks.
@@ -957,16 +961,18 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def zz_phase_interblock_def(self) -> OpDef:
-        """Apply a ZZPhase gate to two qubits on different blocks of the same size with
-        dynamic indices.
+        """Apply a ZZPhase gate to one logical qubit in each of two different blocks.
+
+        The blocks must have the same size. The qubit indices are runtime inputs.
 
         This is the generic operation definition. For the instantiated operation, see
         `zz_phase_interblock`."""
         return self().get_op("zz_phase_interblock")
 
     def zz_phase_interblock(self, k: int) -> ExtOp:
-        """Apply a ZZPhase gate to two qubits on different blocks of the same size with
-        dynamic indices.
+        """Apply a ZZPhase gate to one logical qubit in each of two different blocks.
+
+        The blocks must have the same size. The qubit indices are runtime inputs.
 
         Args:
             k: The number of logical qubits encoded in the blocks.
@@ -984,16 +990,18 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def cx_interblock_def(self) -> OpDef:
-        """Apply a CX gate to two qubits on different blocks of the same size with
-        dynamic indices.
+        """Apply a CX gate to one logical qubit in each of two different blocks.
+
+        The blocks must have the same size. The qubit indices are runtime inputs.
 
         This is the generic operation definition. For the instantiated operation, see
         `cx_interblock`."""
         return self().get_op("cx_interblock")
 
     def cx_interblock(self, k: int) -> ExtOp:
-        """Apply a CX gate to two qubits on different blocks of the same size with
-        dynamic indices.
+        """Apply a CX gate to one logical qubit in each of two different blocks.
+
+        The blocks must have the same size. The qubit indices are runtime inputs.
 
         Args:
             k: The number of logical qubits encoded in the blocks.
@@ -1010,14 +1018,20 @@ class IcebergOpsExtension:
 
     @functools.cached_property
     def cx_all_def(self) -> OpDef:
-        """Apply a CX gate transversally over two blocks of the same size.
+        """Apply CX gates to all corresponding pairs of logical qubits in two blocks.
+
+        The blocks must have the same size. For every index, the qubit in the first
+        block controls a CX targeting the qubit with that index in the second block.
 
         This is the generic operation definition. For the instantiated operation, see
         `cx_all`."""
         return self().get_op("cx_all")
 
     def cx_all(self, k: int) -> ExtOp:
-        """Apply a CX gate transversally over two blocks of the same size.
+        """Apply CX gates to all corresponding pairs of logical qubits in two blocks.
+
+        The blocks must have the same size. For every index, the qubit in the first
+        block controls a CX targeting the qubit with that index in the second block.
 
         Args:
             k: The number of logical qubits encoded in the blocks.

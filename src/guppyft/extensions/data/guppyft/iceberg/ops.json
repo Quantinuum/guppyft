@@ -181,7 +181,7 @@
     "cx_all": {
       "extension": "guppyft.iceberg.ops",
       "name": "cx_all",
-      "description": "CX gate applied transversally over two blocks.",
+      "description": "CX gates between all corresponding pairs of logical qubits in two blocks.",
       "signature": {
         "params": [
           {
@@ -316,7 +316,7 @@
     "cx_interblock": {
       "extension": "guppyft.iceberg.ops",
       "name": "cx_interblock",
-      "description": "CX gate involving two blocks.",
+      "description": "CX gate on one logical qubit in each of two different blocks.",
       "signature": {
         "params": [
           {
@@ -430,7 +430,7 @@
     "cx_intrablock": {
       "extension": "guppyft.iceberg.ops",
       "name": "cx_intrablock",
-      "description": "CX gate.",
+      "description": "CX gate on two logical qubits within a block.",
       "signature": {
         "params": [
           {
@@ -1710,7 +1710,7 @@
     "swap_intrablock": {
       "extension": "guppyft.iceberg.ops",
       "name": "swap_intrablock",
-      "description": "Swap of two qubits within a block.",
+      "description": "Swap of two logical qubits within a block.",
       "signature": {
         "params": [
           {
@@ -2482,7 +2482,7 @@
     "xx_intrablock": {
       "extension": "guppyft.iceberg.ops",
       "name": "xx_intrablock",
-      "description": "X gate on two qubits.",
+      "description": "X gate on two logical qubits within a block.",
       "signature": {
         "params": [
           {
@@ -2617,7 +2617,7 @@
     "xx_phase_interblock": {
       "extension": "guppyft.iceberg.ops",
       "name": "xx_phase_interblock",
-      "description": "XXPhase gate involving two blocks.",
+      "description": "XXPhase gate on one logical qubit in each of two different blocks.",
       "signature": {
         "params": [
           {
@@ -2739,7 +2739,7 @@
     "xx_phase_intrablock": {
       "extension": "guppyft.iceberg.ops",
       "name": "xx_phase_intrablock",
-      "description": "XXPhase gate.",
+      "description": "XXPhase gate on two logical qubits within a block.",
       "signature": {
         "params": [
           {
@@ -2979,7 +2979,7 @@
     "yy_intrablock": {
       "extension": "guppyft.iceberg.ops",
       "name": "yy_intrablock",
-      "description": "Y gate on two qubits.",
+      "description": "Y gate on two logical qubits within a block.",
       "signature": {
         "params": [
           {
@@ -3114,7 +3114,7 @@
     "yy_phase_interblock": {
       "extension": "guppyft.iceberg.ops",
       "name": "yy_phase_interblock",
-      "description": "YYPhase gate involving two blocks.",
+      "description": "YYPhase gate on one logical qubit in each of two different blocks.",
       "signature": {
         "params": [
           {
@@ -3236,7 +3236,7 @@
     "yy_phase_intrablock": {
       "extension": "guppyft.iceberg.ops",
       "name": "yy_phase_intrablock",
-      "description": "YYPhase gate.",
+      "description": "YYPhase gate on two logical qubits within a block.",
       "signature": {
         "params": [
           {
@@ -3610,7 +3610,7 @@
     "zz_intrablock": {
       "extension": "guppyft.iceberg.ops",
       "name": "zz_intrablock",
-      "description": "Z gate on two qubits.",
+      "description": "Z gate on two logical qubits within a block.",
       "signature": {
         "params": [
           {
@@ -3745,7 +3745,7 @@
     "zz_phase_interblock": {
       "extension": "guppyft.iceberg.ops",
       "name": "zz_phase_interblock",
-      "description": "ZZPhase gate involving two blocks.",
+      "description": "ZZPhase gate on one logical qubit in each of two different blocks.",
       "signature": {
         "params": [
           {
@@ -3867,7 +3867,7 @@
     "zz_phase_intrablock": {
       "extension": "guppyft.iceberg.ops",
       "name": "zz_phase_intrablock",
-      "description": "ZZPhase gate.",
+      "description": "ZZPhase gate on two logical qubits within a block.",
       "signature": {
         "params": [
           {

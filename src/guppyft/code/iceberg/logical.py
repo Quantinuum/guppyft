@@ -85,19 +85,19 @@ class Block(Generic[N]):  # type: ignore[misc]
     @guppy
     @no_type_check
     def xx_intrablock(self: "Block[N]", i: int, j: int) -> None:
-        """X gate on the qubits with indices `i` and `j`."""
+        """X gate on logical qubits `i` and `j` within a block."""
         xx_intrablock(self, i, j)
 
     @guppy
     @no_type_check
     def yy_intrablock(self: "Block[N]", i: int, j: int) -> None:
-        """Y gate on the qubits with indices `i` and `j`."""
+        """Y gate on logical qubits `i` and `j` within a block."""
         yy_intrablock(self, i, j)
 
     @guppy
     @no_type_check
     def zz_intrablock(self: "Block[N]", i: int, j: int) -> None:
-        """Z gate on the qubits with indices `i` and `j`."""
+        """Z gate on logical qubits `i` and `j` within a block."""
         zz_intrablock(self, i, j)
 
     @guppy
@@ -295,34 +295,34 @@ class Block(Generic[N]):  # type: ignore[misc]
     @guppy
     @no_type_check
     def xx_phase_intrablock(self: "Block[N]", i: int, j: int, phase: float) -> None:
-        """XXPhase rotation of `phase` radians on the qubits with indices `i`
-        and `j`."""
+        """XXPhase rotation of `phase` radians on logical qubits `i` and `j`
+        within a block."""
         xx_phase_intrablock(self, i, j, phase)
 
     @guppy
     @no_type_check
     def yy_phase_intrablock(self: "Block[N]", i: int, j: int, phase: float) -> None:
-        """YYPhase rotation of `phase` radians on the qubits with indices `i`
-        and `j`."""
+        """YYPhase rotation of `phase` radians on logical qubits `i` and `j`
+        within a block."""
         yy_phase_intrablock(self, i, j, phase)
 
     @guppy
     @no_type_check
     def zz_phase_intrablock(self: "Block[N]", i: int, j: int, phase: float) -> None:
-        """ZZPhase rotation of `phase` radians on the qubits with indices `i`
-        and `j`."""
+        """ZZPhase rotation of `phase` radians on logical qubits `i` and `j`
+        within a block."""
         zz_phase_intrablock(self, i, j, phase)
 
     @guppy
     @no_type_check
     def cx_intrablock(self: "Block[N]", i: int, j: int) -> None:
-        """CX gate on the qubits with indices `i` (control) and `j` (target)."""
+        """CX gate within a block, with logical control `i` and logical target `j`."""
         cx_intrablock(self, i, j)
 
     @guppy
     @no_type_check
     def swap_intrablock(self: "Block[N]", i: int, j: int) -> None:
-        """Swap of the qubits with indices `i` and `j`."""
+        """Swap of logical qubits `i` and `j` within a block."""
         swap_intrablock(self, i, j)
 
     @guppy
@@ -465,19 +465,19 @@ def z(block: Block[N], i: int) -> None:
 @hugr_op(logical_op(iceberg_ops.xx_intrablock_def), effects=())
 @no_type_check
 def xx_intrablock(block: Block[N], i: int, j: int) -> None:
-    """X gate on the qubits with indices `i` and `j`."""
+    """X gate on logical qubits `i` and `j` within a block."""
 
 
 @hugr_op(logical_op(iceberg_ops.yy_intrablock_def), effects=())
 @no_type_check
 def yy_intrablock(block: Block[N], i: int, j: int) -> None:
-    """Y gate on the qubits with indices `i` and `j`."""
+    """Y gate on logical qubits `i` and `j` within a block."""
 
 
 @hugr_op(logical_op(iceberg_ops.zz_intrablock_def), effects=())
 @no_type_check
 def zz_intrablock(block: Block[N], i: int, j: int) -> None:
-    """Z gate on the qubits with indices `i` and `j`."""
+    """Z gate on logical qubits `i` and `j` within a block."""
 
 
 @hugr_op(logical_op(iceberg_ops.x_all_except_at_def), effects=())
@@ -678,31 +678,34 @@ def h_all(block: Block[N]) -> None:
 @hugr_op(logical_op(iceberg_ops.xx_phase_intrablock_def), effects=())
 @no_type_check
 def xx_phase_intrablock(block: Block[N], i: int, j: int, phase: float) -> None:
-    """XXPhase rotation of `phase` radians on the qubits with indices `i` and `j`."""
+    """XXPhase rotation of `phase` radians on logical qubits `i` and `j`
+    within a block."""
 
 
 @hugr_op(logical_op(iceberg_ops.yy_phase_intrablock_def), effects=())
 @no_type_check
 def yy_phase_intrablock(block: Block[N], i: int, j: int, phase: float) -> None:
-    """YYPhase rotation of `phase` radians on the qubits with indices `i` and `j`."""
+    """YYPhase rotation of `phase` radians on logical qubits `i` and `j`
+    within a block."""
 
 
 @hugr_op(logical_op(iceberg_ops.zz_phase_intrablock_def), effects=())
 @no_type_check
 def zz_phase_intrablock(block: Block[N], i: int, j: int, phase: float) -> None:
-    """ZZPhase rotation of `phase` radians on the qubits with indices `i` and `j`."""
+    """ZZPhase rotation of `phase` radians on logical qubits `i` and `j`
+    within a block."""
 
 
 @hugr_op(logical_op(iceberg_ops.cx_intrablock_def), effects=())
 @no_type_check
 def cx_intrablock(block: Block[N], i: int, j: int) -> None:
-    """CX gate on the qubits with indices `i` (control) and `j` (target)."""
+    """CX gate within a block, with logical control `i` and logical target `j`."""
 
 
 @hugr_op(logical_op(iceberg_ops.swap_intrablock_def), effects=())
 @no_type_check
 def swap_intrablock(block: Block[N], i: int, j: int) -> None:
-    """Swap of the qubits with indices `i` and `j`."""
+    """Swap of logical qubits `i` and `j` within a block."""
 
 
 @hugr_op(logical_op(iceberg_ops.xx_phase_interblock_def), effects=())
@@ -710,8 +713,9 @@ def swap_intrablock(block: Block[N], i: int, j: int) -> None:
 def xx_phase_interblock(
     block0: Block[N], block1: Block[N], i0: int, i1: int, phase: float
 ) -> None:
-    """XXPhase rotation of `phase` radians on the qubit with index `i0` in
-    block `block0` and the qubit with index `i1` in block `block1`."""
+    """XXPhase rotation of `phase` radians on two logical qubits in different blocks.
+
+    The targets are index `i0` in `block0` and index `i1` in `block1`."""
 
 
 @hugr_op(logical_op(iceberg_ops.yy_phase_interblock_def), effects=())
@@ -719,8 +723,9 @@ def xx_phase_interblock(
 def yy_phase_interblock(
     block0: Block[N], block1: Block[N], i0: int, i1: int, phase: float
 ) -> None:
-    """YYPhase rotation of `phase` radians on the qubit with index `i0` in
-    block `block0` and the qubit with index `i1` in block `block1`."""
+    """YYPhase rotation of `phase` radians on two logical qubits in different blocks.
+
+    The targets are index `i0` in `block0` and index `i1` in `block1`."""
 
 
 @hugr_op(logical_op(iceberg_ops.zz_phase_interblock_def), effects=())
@@ -728,21 +733,26 @@ def yy_phase_interblock(
 def zz_phase_interblock(
     block0: Block[N], block1: Block[N], i0: int, i1: int, phase: float
 ) -> None:
-    """ZZPhase rotation of `phase` radians on the qubit with index `i0` in
-    block `block0` and the qubit with index `i1` in block `block1`."""
+    """ZZPhase rotation of `phase` radians on two logical qubits in different blocks.
+
+    The targets are index `i0` in `block0` and index `i1` in `block1`."""
 
 
 @hugr_op(logical_op(iceberg_ops.cx_interblock_def), effects=())
 @no_type_check
 def cx_interblock(block0: Block[N], block1: Block[N], i0: int, i1: int) -> None:
-    """CX gate on the qubit with index `i0` in block `block0` and the qubit with
-    index `i1` in block `block1`."""
+    """CX gate on two logical qubits in different blocks.
+
+    The control is index `i0` in `block0`; the target is index `i1` in `block1`."""
 
 
 @hugr_op(logical_op(iceberg_ops.cx_all_def), effects=())
 @no_type_check
 def cx_all(block0: Block[N], block1: Block[N]) -> None:
-    """CX gate applied transversally over `block0` and `block1`."""
+    """CX gates between all corresponding pairs of logical qubits in two blocks.
+
+    For every index `i`, logical qubit `i` in `block0` controls a CX targeting
+    logical qubit `i` in `block1`."""
 
 
 @hugr_op(logical_op(iceberg_ops.free_def), effects=[Effect.ANY])

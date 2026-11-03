@@ -47,11 +47,11 @@ pub enum IcebergOpDef {
     y,
     /// Z gate.
     z,
-    /// X gate on two qubits.
+    /// X gate on two logical qubits within a block.
     xx_intrablock,
-    /// Y gate on two qubits.
+    /// Y gate on two logical qubits within a block.
     yy_intrablock,
-    /// Z gate on two qubits.
+    /// Z gate on two logical qubits within a block.
     zz_intrablock,
     /// X gate on all but one qubit.
     x_all_except_at,
@@ -98,25 +98,25 @@ pub enum IcebergOpDef {
     pauli_exp_z_all_except_x_at,
     /// H gate on all qubits.
     h_all,
-    /// XXPhase gate.
+    /// XXPhase gate on two logical qubits within a block.
     xx_phase_intrablock,
-    /// YYPhase gate.
+    /// YYPhase gate on two logical qubits within a block.
     yy_phase_intrablock,
-    /// ZZPhase gate.
+    /// ZZPhase gate on two logical qubits within a block.
     zz_phase_intrablock,
-    /// CX gate.
+    /// CX gate on two logical qubits within a block.
     cx_intrablock,
-    /// Swap of two qubits within a block.
+    /// Swap of two logical qubits within a block.
     swap_intrablock,
-    /// XXPhase gate involving two blocks.
+    /// XXPhase gate on one logical qubit in each of two different blocks.
     xx_phase_interblock,
-    /// YYPhase gate involving two blocks.
+    /// YYPhase gate on one logical qubit in each of two different blocks.
     yy_phase_interblock,
-    /// ZZPhase gate involving two blocks.
+    /// ZZPhase gate on one logical qubit in each of two different blocks.
     zz_phase_interblock,
-    /// CX gate involving two blocks.
+    /// CX gate on one logical qubit in each of two different blocks.
     cx_interblock,
-    /// CX gate applied transversally over two blocks.
+    /// CX gates between all corresponding pairs of logical qubits in two blocks.
     cx_all,
     /// Prepare the all-zero state on a block.
     alloc_zero,
@@ -699,7 +699,7 @@ mod tests {
         assert_eq!(x3.description(), "X gate.");
         assert_eq!(
             zzphasebetweenblocks.description(),
-            "ZZPhase gate involving two blocks."
+            "ZZPhase gate on one logical qubit in each of two different blocks."
         );
         let mut module_builder = ModuleBuilder::new();
         let mut types: Vec<Type> = vec![block; 2];
