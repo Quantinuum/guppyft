@@ -44,12 +44,12 @@ __all__ = [
 
 
 class AnnotatingArchitectureInstance(Protocol):
-    """An architecture instance capable of annotating a package for delayed / remote
+    """An architecture instance capable of annotating a package for deferred / remote
     encoding. See `guppyft.encode.annotate_encoding` for more information."""
 
     def annotate(self, hugr: Package | Hugr[Any]) -> None:
         """Annotate the current parameters of the architecture on the given HUGR in
-        metadata. See `guppyft.encode.annotate` for more information."""
+        metadata. See `guppyft.encode.annotate_encoding` for more information."""
 
 
 class EncodingArchitectureInstance(Protocol):

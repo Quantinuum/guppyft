@@ -23,6 +23,7 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.viewcode",
     "sphinx.ext.autosummary",
+    "sphinx.ext.doctest",
     "sphinx_tabs.tabs",
     "myst_nb",
     "sphinx.ext.mathjax",
