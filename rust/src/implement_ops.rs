@@ -8,7 +8,7 @@ use hugr::{
     builder::{BuildError, HugrBuilder, ModuleBuilder},
     extension::{ExtensionId, SignatureError, prelude::MakeTuple},
     hugr::{ValidationError, hugrmut::HugrMut},
-    ops::{Call, DataflowOpTrait, ExtensionOp, Input, OpName, OpType, handle::NodeHandle},
+    ops::{Call, DataflowOpTrait, ExtensionOp, OpName, OpType, handle::NodeHandle},
     types::{PolyFuncType, Type, TypeRow},
 };
 use hugr_core::hugr::internal::HugrMutInternals;
@@ -17,7 +17,7 @@ use hugr_core::std_extensions::arithmetic::float_types::float64_type;
 use hugr_core::std_extensions::collections::array::Array;
 use hugr_core::std_extensions::collections::borrow_array::BorrowArray;
 use hugr_core::types::{CustomType, SumType, Transformable, TypeArg, TypeName};
-use hugr_core::{Direction, OutgoingPort, PortIndex, Visibility};
+use hugr_core::{Direction, IncomingPort, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::{BTreeMap, HashMap, HashSet, hash_map::Entry};
 use tket::extension::rotation::{RotationOp, rotation_type};
@@ -305,20 +305,17 @@ fn extract_func_sig(func_hugr: &Hugr, node: Node) -> Option<PolyFuncType> {
     }
 }
 
-/// Preprocess a replacement body to accept rotations at its entry instead of Guppy angles.
-/// Declarations and signatures with any other mismatch are left unchanged.
-fn preprocess_rotation_inputs(func_hugr: &mut Hugr, func_node: Node, expected_sig: &PolyFuncType) {
-    let OpType::FuncDefn(defn) = func_hugr.get_optype(func_node) else {
-        return;
-    };
-    let mut defn = defn.clone();
-    let func_sig = defn.signature_mut();
+/// Normalize a signature copy for validation and record rotation-to-angle input ports.
+fn adapt_rotation_input_types(
+    expected_sig: &PolyFuncType,
+    func_sig: &mut PolyFuncType,
+) -> Vec<usize> {
     if !expected_sig.params().is_empty() || !func_sig.params().is_empty() {
-        return;
+        return Vec::new();
     }
     let rotation_ty = rotation_type();
     let angle_ty = Type::new_tuple([float64_type()]);
-    let rotation_inputs = expected_sig
+    expected_sig
         .body()
         .input
         .iter()
@@ -332,44 +329,35 @@ fn preprocess_rotation_inputs(func_hugr: &mut Hugr, func_node: Node, expected_si
                 None
             }
         })
-        .collect_vec();
-    if rotation_inputs.is_empty() || func_sig != expected_sig {
-        return;
+        .collect()
+}
+
+/// Convert rotation inputs immediately before a call to the original replacement.
+fn insert_rotation_input_conversions<H: HugrMut<Node = Node>>(
+    hugr: &mut H,
+    call: Node,
+    rotation_inputs: &[usize],
+) -> anyhow::Result<()> {
+    if rotation_inputs.is_empty() {
+        return Ok(());
     }
-
-    let [input, _] = func_hugr.get_io(func_node).expect("function has I/O nodes");
-    func_hugr.replace_op(
-        input,
-        Input {
-            types: func_sig.body().input.clone(),
-        },
-    );
-    func_hugr.replace_op(func_node, defn);
-
     let to_halfturns: OpType = RotationOp::to_halfturns.into();
     let make_tuple: OpType = MakeTuple::new([float64_type()].into()).into();
-    func_hugr.use_extensions(
-        to_halfturns
-            .used_extensions()
-            .expect("rotation conversion extensions are available"),
-    );
-    func_hugr.use_extensions(
-        make_tuple
-            .used_extensions()
-            .expect("tuple extensions are available"),
-    );
-    for index in rotation_inputs {
-        let port = OutgoingPort::from(index);
-        let consumers = func_hugr.linked_inputs(input, port).collect_vec();
-        let halfturns = func_hugr.add_node_with_parent(func_node, to_halfturns.clone());
-        let angle = func_hugr.add_node_with_parent(func_node, make_tuple.clone());
-        func_hugr.disconnect(input, port);
-        func_hugr.connect(input, port, halfturns, 0);
-        func_hugr.connect(halfturns, 0, angle, 0);
-        for (consumer, consumer_port) in consumers {
-            func_hugr.connect(angle, 0, consumer, consumer_port);
-        }
+    hugr.use_extensions(to_halfturns.used_extensions()?);
+    hugr.use_extensions(make_tuple.used_extensions()?);
+    for &index in rotation_inputs {
+        let port = IncomingPort::from(index);
+        let (source, source_port) = hugr
+            .single_linked_output(call, port)
+            .with_context(|| format!("Missing rotation input {index} for call {call}"))?;
+        let halfturns = hugr.add_node_before(call, to_halfturns.clone());
+        let angle = hugr.add_node_before(call, make_tuple.clone());
+        hugr.disconnect(call, port);
+        hugr.connect(source, source_port, halfturns, 0);
+        hugr.connect(halfturns, 0, angle, 0);
+        hugr.connect(angle, 0, call, port);
     }
+    Ok(())
 }
 
 #[derive(Clone, Hash, PartialEq, Eq)]
@@ -416,8 +404,15 @@ pub enum OpReplacementError {
 pub(crate) struct OpReplacer<'a, H: HugrMut<Node = Node>> {
     hugr: &'a mut H,
     type_replacer: ReplaceTypes,
-    op_calls: HashMap<OpHashWrapper, (OpType, Hugr, Node)>,
+    op_calls: HashMap<OpHashWrapper, RegisteredReplacement>,
     adapt_rotation_inputs: bool,
+}
+
+struct RegisteredReplacement {
+    call_type: OpType,
+    func_hugr: Hugr,
+    func_node: Node,
+    rotation_inputs: Vec<usize>,
 }
 
 impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
@@ -449,21 +444,24 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
         &self,
         op_id: OpName,
         expected_sig: PolyFuncType,
-        func_hugr: &mut Hugr,
+        func_hugr: &Hugr,
         func_name: &str,
-    ) -> Result<Node, OpReplacementError> {
+    ) -> Result<(Node, Vec<usize>), OpReplacementError> {
         // Extract target function
         let func_node = extract_func_node(func_hugr, func_name).ok_or(
             OpReplacementError::MissingFunctionHugr {
                 name: func_name.to_string(),
             },
         )?;
-        if self.adapt_rotation_inputs {
-            preprocess_rotation_inputs(func_hugr, func_node, &expected_sig);
-        }
         let func_sig = extract_func_sig(func_hugr, func_node).expect("replacement is a function");
+        let mut adapted_sig = func_sig.clone();
+        let rotation_inputs = if self.adapt_rotation_inputs {
+            adapt_rotation_input_types(&expected_sig, &mut adapted_sig)
+        } else {
+            Vec::new()
+        };
 
-        if func_sig != expected_sig {
+        if adapted_sig != expected_sig {
             return Err(OpReplacementError::ExistingFunctionSignatureMismatch {
                 op_id,
                 node: func_node,
@@ -473,7 +471,7 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
             });
         };
 
-        Ok(func_node)
+        Ok((func_node, rotation_inputs))
     }
 
     pub fn register_replacement(
@@ -494,20 +492,27 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
         };
 
         // Extract function if given, otherwise generate a declaration with the expected signature.
-        let (func_hugr, func_node) = if let Some(mut hugr) = func_hugr_opt {
-            let node =
-                self.get_func_node(ext_op.qualified_id(), expected_sig, &mut hugr, func_name)?;
-            (hugr, node)
+        let (func_hugr, func_node, rotation_inputs) = if let Some(hugr) = func_hugr_opt {
+            let (node, rotation_inputs) =
+                self.get_func_node(ext_op.qualified_id(), expected_sig, &hugr, func_name)?;
+            (hugr, node, rotation_inputs)
         } else {
             let mut module_builder = ModuleBuilder::new();
             let decl = module_builder.declare(func_name, expected_sig)?;
-            (module_builder.finish_hugr()?, decl.node())
+            (module_builder.finish_hugr()?, decl.node(), Vec::new())
         };
 
         // Register call for later replacement
         let call_type: OpType = Call::try_new((*ext_op.signature()).clone().into(), [])?.into();
-        self.op_calls
-            .insert(op_hash, (call_type, func_hugr, func_node));
+        self.op_calls.insert(
+            op_hash,
+            RegisteredReplacement {
+                call_type,
+                func_hugr,
+                func_node,
+                rotation_inputs,
+            },
+        );
 
         Ok(())
     }
@@ -542,7 +547,7 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
                 .other_input_port()
                 .map(|p| p.index())
                 .unwrap_or(orig_optype.input_count());
-            *self.hugr.optype_mut(*node) = self.op_calls[hash].0.clone();
+            *self.hugr.optype_mut(*node) = self.op_calls[hash].call_type.clone();
             self.hugr
                 .insert_ports(*node, Direction::Incoming, new_port_index, 1);
         }
@@ -551,10 +556,16 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
         self.type_replacer.run(&mut self.hugr)?;
 
         // Insert all registered HUGRs after signature transform, so their contents are not affected
-        let inserted_func_nodes: HashMap<OpHashWrapper, H::Node> = self
+        let inserted_func_nodes: HashMap<OpHashWrapper, (H::Node, Vec<usize>)> = self
             .op_calls
             .into_iter()
-            .map(|(op_hash, (_, mut func_hugr, func_node))| {
+            .map(|(op_hash, replacement)| {
+                let RegisteredReplacement {
+                    mut func_hugr,
+                    func_node,
+                    rotation_inputs,
+                    ..
+                } = replacement;
                 let children = func_hugr
                     .children(func_hugr.module_root())
                     .map(|n| (n, self.hugr.module_root()))
@@ -579,13 +590,17 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
                             op_hash.op_name
                         )
                     });
-                (op_hash, inserted_func_node)
+                (op_hash, (inserted_func_node, rotation_inputs))
             })
             .collect();
 
         // Connect calls for all instances of ops that should be replaced
         for (node, op_hash) in ops_to_replace {
-            let func_node = inserted_func_nodes.get(&op_hash).unwrap();
+            let (func_node, rotation_inputs) = inserted_func_nodes.get(&op_hash).unwrap();
+            let func_sig = extract_func_sig(self.hugr.as_mut(), *func_node)
+                .expect("replacement is a function");
+            *self.hugr.optype_mut(node) = Call::try_new(func_sig, [])?.into();
+            insert_rotation_input_conversions(self.hugr, node, rotation_inputs)?;
             let func_port = self.hugr.num_outputs(*func_node) - 1;
             let call_in_port = self.hugr.get_optype(node).static_input_port().unwrap();
             self.hugr.connect(*func_node, func_port, node, call_in_port);
@@ -623,7 +638,7 @@ mod tests {
     }
 
     #[test]
-    fn rotation_inputs_are_adapted_in_replacement_bodies() -> anyhow::Result<()> {
+    fn rotation_inputs_are_adapted_at_call_sites() -> anyhow::Result<()> {
         let angle = Type::new_tuple([float64_type()]);
         let expected: PolyFuncType = Signature::new(
             [rotation_type(), qb_t(), angle.clone(), rotation_type()],
@@ -664,7 +679,7 @@ mod tests {
             } else {
                 HashSet::new()
             };
-            let found = Signature::new(
+            let found: PolyFuncType = Signature::new(
                 [angle.clone(), qubit.clone(), angle.clone(), angle.clone()],
                 [
                     qubit.clone(),
@@ -673,11 +688,12 @@ mod tests {
                     angle.clone(),
                     angle.clone(),
                 ],
-            );
+            )
+            .into();
             // Both rotation inputs are observable, with fan-out of the first, plus an
             // ordinary angle input that must remain directly connected to the body.
             let output_inputs = [1, 0, 0, 2, 3];
-            let (replacement, _) = replacement_hugr(found.into(), &output_inputs)?;
+            let (replacement, _) = replacement_hugr(found.clone(), &output_inputs)?;
 
             let mut program = ModuleBuilder::new();
             let mut function =
@@ -713,13 +729,7 @@ mod tests {
                 .collect_vec();
             assert_eq!(calls.len(), 2, "replacement should be called directly");
             let implementation = extract_func_node(&program, "impl").unwrap();
-            let mut adapted_sig = expected.clone();
-            adapted_sig.body_mut().input[1] = qubit.clone();
-            adapted_sig.body_mut().output[0] = qubit;
-            assert_eq!(
-                extract_func_sig(&program, implementation),
-                Some(adapted_sig)
-            );
+            assert_eq!(extract_func_sig(&program, implementation), Some(found));
             let conversions = program
                 .nodes()
                 .filter(|node| {
@@ -733,29 +743,31 @@ mod tests {
                 .collect_vec();
             assert_eq!(
                 conversions.len(),
-                2,
-                "conversions must be shared by all calls"
+                4,
+                "each call needs conversions for its two rotation inputs"
             );
-            for &conversion in &conversions {
-                assert_eq!(program.get_parent(conversion), Some(implementation));
-            }
             let [input, output] = program.get_io(implementation).unwrap();
             for (output_index, input_index) in output_inputs.into_iter().enumerate() {
                 let origin = program.single_linked_output(output, output_index).unwrap();
-                if input_index == 1 || input_index == 2 {
-                    assert_eq!(origin, (input, input_index.into()));
-                } else {
-                    // Trace each adapted output to its own original argument. A graph
-                    // with the two rotation inputs swapped would still type-check.
-                    let (conversion, _) = program.single_linked_output(origin.0, 0).unwrap();
-                    assert!(conversions.contains(&conversion));
-                    assert_eq!(
-                        program.single_linked_output(conversion, 0),
-                        Some((input, input_index.into()))
-                    );
-                }
+                assert_eq!(origin, (input, input_index.into()));
             }
             for call in calls {
+                for index in [0, 3] {
+                    let origin = program.single_linked_output(call, index).unwrap();
+                    // A graph with the two rotation inputs swapped would still
+                    // type-check, so trace each converter to its original argument.
+                    let (conversion, _) = program.single_linked_output(origin.0, 0).unwrap();
+                    assert!(conversions.contains(&conversion));
+                    assert_eq!(program.get_parent(conversion), program.get_parent(call));
+                    assert_eq!(
+                        program.single_linked_output(conversion, 0),
+                        Some((args[index].node(), args[index].source()))
+                    );
+                }
+                assert_eq!(
+                    program.single_linked_output(call, 2),
+                    Some((args[2].node(), args[2].source()))
+                );
                 let static_port = program.get_optype(call).static_input_port().unwrap();
                 let (callee, _) = program.single_linked_output(call, static_port).unwrap();
                 assert_eq!(callee, implementation);
@@ -822,17 +834,12 @@ mod tests {
             ),
         ];
         for (case, expected, found, output_inputs) in invalid {
-            let (mut replacement, _) = replacement_hugr(found.clone(), &output_inputs)?;
+            let (replacement, _) = replacement_hugr(found.clone(), &output_inputs)?;
             let before = replacement.store_str(EnvelopeConfig::text())?;
             let mut program = ModuleBuilder::new().finish_hugr()?;
             let replacer = OpReplacer::new_with_types(&mut program, HashMap::new(), true);
             let error = replacer
-                .get_func_node(
-                    "test.rotate".into(),
-                    expected.clone(),
-                    &mut replacement,
-                    "impl",
-                )
+                .get_func_node("test.rotate".into(), expected.clone(), &replacement, "impl")
                 .expect_err(case);
             let OpReplacementError::ExistingFunctionSignatureMismatch {
                 expected: error_expected,
