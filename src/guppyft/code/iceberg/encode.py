@@ -1,18 +1,15 @@
 """Builder for public configuration of the Iceberg QEC architecture."""
 
-from __future__ import annotations
-
 from copy import deepcopy
 from dataclasses import asdict, dataclass, field, replace
 from enum import StrEnum, auto
-from typing import TYPE_CHECKING, Any, Self
+from typing import Any, Self
+
+from hugr import Hugr
+from hugr.package import Package
+from hugr.utils import JsonType
 
 from guppyft.encode import annotate_encoding
-
-if TYPE_CHECKING:
-    from hugr import Hugr
-    from hugr.package import Package
-    from hugr.utils import JsonType
 
 
 class DynamicQubitReuse(StrEnum):
