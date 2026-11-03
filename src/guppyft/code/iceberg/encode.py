@@ -9,7 +9,7 @@ from hugr import Hugr
 from hugr.package import Package
 from hugr.utils import JsonType
 
-from guppyft.encode import annotate_encoding
+from guppyft.encode import AnnotatingArchitectureInstance, annotate_encoding
 
 
 class DynamicQubitReuse(StrEnum):
@@ -120,7 +120,7 @@ class _IcebergOptions:
 
 
 @dataclass(frozen=True)
-class IcebergInstance:
+class IcebergInstance(AnnotatingArchitectureInstance):
     """An Iceberg architecture instance built by `IcebergBuilder.build`."""
 
     _n_blocks: int
