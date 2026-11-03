@@ -28,7 +28,7 @@ class StabilizerCode:
     * z_logicals - The logical :math:`Z` operators of the stabilizer code.
 
 
-    .. code-block:: python
+    .. testcode:: stabilizer-code
 
         from guppyft.code_def import StabilizerCode
 

@@ -167,7 +167,7 @@ class SteaneInstance(AnnotatingArchitectureInstance, EncodingArchitectureInstanc
             },
         )
 
-    def _encode(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
+    def _encode(self, pkg: Package, *, as_bytes: bool) -> Package | bytes:
         self.check_may_encode(pkg)
         pkg_bytes: Package | bytes = encode(pkg, self._spec, as_bytes=as_bytes)
         return pkg_bytes

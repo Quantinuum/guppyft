@@ -29,11 +29,15 @@
 //!
 //! Use the `free` operation to free a previously allocated block.
 //!
-//! Some of the operations (such as `all_x` or `cx_transversal`) operate purely
-//! at the block level. Others (such as `x` or `cx`) take one or more indices
-//! as value inputs: these are (64-bit unsigned) integers less than `k`, which
-//! address logical qubits within the block. Some operations also take an
-//! angle, represented as a float in radians.
+//! Some of the operations (such as `x_all` or `cx_all`) operate purely at
+//! the block level. Others (such as `x` or `cx_intrablock`) take one or more
+//! indices as value inputs: these are (64-bit unsigned) integers less than
+//! `k`, which address logical qubits within the block. Some operations also
+//! take an angle, represented as a float in radians.
+//!
+//! Addressable two-qubit operations use the suffix `_intrablock` or
+//! `_interblock`. Operations uniform across all logical qubits use `_all`,
+//! followed by `_except_at` or `_except_<pauli>_at` when one qubit differs.
 //!
 //! For example, `x` takes a block and an integer as inputs, and outputs the
 //! block. Indices may be computed at runtime or supplied by constant nodes.
