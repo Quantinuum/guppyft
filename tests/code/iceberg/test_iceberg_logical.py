@@ -22,19 +22,19 @@ from guppyft.code.iceberg.logical import (
     PreBlock,
     Qubit,
     borrow,
-    cx_between_blocks,
+    cx_all,
     cx_dynq,
-    cx_transversal,
+    cx_interblock,
     discard,
     free_dynq,
     measure_all,
-    pauli_exp_all_x,
-    pauli_exp_all_x_except_at,
-    pauli_exp_all_x_except_z_at,
-    pauli_exp_all_y,
-    pauli_exp_all_z,
-    pauli_exp_all_z_except_at,
-    pauli_exp_all_z_except_x_at,
+    pauli_exp_x_all,
+    pauli_exp_x_all_except_at,
+    pauli_exp_x_all_except_z_at,
+    pauli_exp_y_all,
+    pauli_exp_z_all,
+    pauli_exp_z_all_except_at,
+    pauli_exp_z_all_except_x_at,
     put,
     restore,
     ry,
@@ -43,8 +43,8 @@ from guppyft.code.iceberg.logical import (
     try_alloc_dynq,
     xx_phase_dynq,
     yy_phase_dynq,
-    zz_phase_between_blocks,
     zz_phase_dynq,
+    zz_phase_interblock,
 )
 from guppyft.extensions import iceberg_ops, iceberg_types, std_types
 
@@ -54,8 +54,8 @@ def test_hugr() -> None:
     block6type = iceberg_types.iceberg_block(6)
     assert block6type.type_def.name == "block"
     assert block6type.args == [BoundedNatArg(6)]
-    block6op = iceberg_ops.pauli_exp_all_x_except_at(6)
-    assert block6op.name() == "guppyft.iceberg.ops.pauli_exp_all_x_except_at<6>"
+    block6op = iceberg_ops.pauli_exp_x_all_except_at(6)
+    assert block6op.name() == "guppyft.iceberg.ops.pauli_exp_x_all_except_at<6>"
     dfg = Dfg(block6type, int_t(6), FLOAT_T)
     node = dfg.add_op(block6op, *dfg.inputs())
     dfg.set_outputs(node)
@@ -91,7 +91,7 @@ def test_exported_extensions() -> None:
         "qubit": iceberg_types.iceberg_qubit_def,
     }
     assert len(ops_extn.operations) == 61
-    assert str(ops_extn.version) == "0.4.0"
+    assert str(ops_extn.version) == "0.5.0"
     for op_name, op_def in ops_extn.operations.items():
         assert op_def == iceberg_ops.__getattribute__(f"{op_name}_def")
 
@@ -99,14 +99,14 @@ def test_exported_extensions() -> None:
 @pytest.mark.parametrize(
     "op_name",
     [
-        "all_x",
-        "all_y",
-        "all_z",
-        "pauli_exp_all_x",
-        "pauli_exp_all_y",
-        "pauli_exp_all_z",
-        "all_h",
-        "cx_transversal",
+        "x_all",
+        "y_all",
+        "z_all",
+        "pauli_exp_x_all",
+        "pauli_exp_y_all",
+        "pauli_exp_z_all",
+        "h_all",
+        "cx_all",
         "alloc_zero",
         "try_alloc_zero",
         "check_pre_block",
@@ -116,32 +116,32 @@ def test_exported_extensions() -> None:
         "x",
         "y",
         "z",
-        "all_but_one_x",
-        "all_but_one_z",
-        "x_with_all_but_one_z",
-        "z_with_all_but_one_x",
+        "x_all_except_at",
+        "z_all_except_at",
+        "z_all_except_x_at",
+        "x_all_except_z_at",
         "fan_out",
         "fan_in",
         "rx",
         "rz",
-        "pauli_exp_all_x_except_at",
-        "pauli_exp_all_z_except_at",
-        "pauli_exp_all_x_except_z_at",
-        "pauli_exp_all_z_except_x_at",
+        "pauli_exp_x_all_except_at",
+        "pauli_exp_z_all_except_at",
+        "pauli_exp_x_all_except_z_at",
+        "pauli_exp_z_all_except_x_at",
         "try_measure_one_x",
         "try_measure_one_z",
-        "xx",
-        "yy",
-        "zz",
-        "xx_phase",
-        "yy_phase",
-        "zz_phase",
-        "cx",
-        "swap",
-        "cx_between_blocks",
-        "xx_phase_between_blocks",
-        "yy_phase_between_blocks",
-        "zz_phase_between_blocks",
+        "xx_intrablock",
+        "yy_intrablock",
+        "zz_intrablock",
+        "xx_phase_intrablock",
+        "yy_phase_intrablock",
+        "zz_phase_intrablock",
+        "cx_intrablock",
+        "swap_intrablock",
+        "cx_interblock",
+        "xx_phase_interblock",
+        "yy_phase_interblock",
+        "zz_phase_interblock",
         "borrow",
         "take",
         "put",
@@ -191,30 +191,30 @@ def test_resolve_extensions_dynq(opname: str) -> None:
         ("x", 1, 1, 0),
         ("y", 1, 1, 0),
         ("z", 1, 1, 0),
-        ("xx", 1, 2, 0),
-        ("yy", 1, 2, 0),
-        ("zz", 1, 2, 0),
-        ("all_but_one_x", 1, 1, 0),
-        ("all_but_one_z", 1, 1, 0),
-        ("x_with_all_but_one_z", 1, 1, 0),
-        ("z_with_all_but_one_x", 1, 1, 0),
+        ("xx_intrablock", 1, 2, 0),
+        ("yy_intrablock", 1, 2, 0),
+        ("zz_intrablock", 1, 2, 0),
+        ("x_all_except_at", 1, 1, 0),
+        ("z_all_except_at", 1, 1, 0),
+        ("z_all_except_x_at", 1, 1, 0),
+        ("x_all_except_z_at", 1, 1, 0),
         ("fan_out", 1, 1, 0),
         ("fan_in", 1, 1, 0),
         ("rx", 1, 1, 1),
         ("rz", 1, 1, 1),
-        ("pauli_exp_all_x_except_at", 1, 1, 1),
-        ("pauli_exp_all_z_except_at", 1, 1, 1),
-        ("pauli_exp_all_x_except_z_at", 1, 1, 1),
-        ("pauli_exp_all_z_except_x_at", 1, 1, 1),
-        ("xx_phase", 1, 2, 1),
-        ("yy_phase", 1, 2, 1),
-        ("zz_phase", 1, 2, 1),
-        ("cx", 1, 2, 0),
-        ("swap", 1, 2, 0),
-        ("xx_phase_between_blocks", 2, 2, 1),
-        ("yy_phase_between_blocks", 2, 2, 1),
-        ("zz_phase_between_blocks", 2, 2, 1),
-        ("cx_between_blocks", 2, 2, 0),
+        ("pauli_exp_x_all_except_at", 1, 1, 1),
+        ("pauli_exp_z_all_except_at", 1, 1, 1),
+        ("pauli_exp_x_all_except_z_at", 1, 1, 1),
+        ("pauli_exp_z_all_except_x_at", 1, 1, 1),
+        ("xx_phase_intrablock", 1, 2, 1),
+        ("yy_phase_intrablock", 1, 2, 1),
+        ("zz_phase_intrablock", 1, 2, 1),
+        ("cx_intrablock", 1, 2, 0),
+        ("swap_intrablock", 1, 2, 0),
+        ("xx_phase_interblock", 2, 2, 1),
+        ("yy_phase_interblock", 2, 2, 1),
+        ("zz_phase_interblock", 2, 2, 1),
+        ("cx_interblock", 2, 2, 0),
         ("try_measure_one_x", 1, 1, 0),
         ("try_measure_one_z", 1, 1, 0),
     ],
@@ -262,15 +262,15 @@ def test_guppy_bindings_smoke() -> None:
         bb0.put(qb2)
         put(bb0, qb0)
         b0 = Block.restore(bb0)
-        b0.all_h()
+        b0.h_all()
         b0.x(2)
-        b0.zz(3, 4)
+        b0.zz_intrablock(3, 4)
         b1.rx(5, 0.5)
-        b1.pauli_exp_all_y(0.25)
-        b1.zz_phase(6, 7, 0.5)
-        cx_between_blocks(b0, b1, 7, 3)
-        zz_phase_between_blocks(b0, b1, 1, 0, 0.25)
-        cx_transversal(b0, b1)
+        b1.pauli_exp_y_all(0.25)
+        b1.zz_phase_intrablock(6, 7, 0.5)
+        cx_interblock(b0, b1, 7, 3)
+        zz_phase_interblock(b0, b1, 1, 0, 0.25)
+        cx_all(b0, b1)
         maybe_q1 = try_alloc_dynq()
         if maybe_q1.is_some():
             q1 = maybe_q1.unwrap()
@@ -308,33 +308,33 @@ def test_pauli_exponential_bindings_resolve_and_normalize() -> None:
     @guppy
     @no_type_check
     def main(block: Block[4], i: int, phase: float) -> None:
-        pauli_exp_all_x(block, phase)
-        pauli_exp_all_y(block, phase)
-        pauli_exp_all_z(block, phase)
-        pauli_exp_all_x_except_at(block, i, phase)
-        pauli_exp_all_z_except_at(block, i, phase)
-        pauli_exp_all_x_except_z_at(block, i, phase)
-        pauli_exp_all_z_except_x_at(block, i, phase)
-        block.pauli_exp_all_x(phase)
-        block.pauli_exp_all_y(phase)
-        block.pauli_exp_all_z(phase)
-        block.pauli_exp_all_x_except_at(i, phase)
-        block.pauli_exp_all_z_except_at(i, phase)
-        block.pauli_exp_all_x_except_z_at(i, phase)
-        block.pauli_exp_all_z_except_x_at(i, phase)
+        pauli_exp_x_all(block, phase)
+        pauli_exp_y_all(block, phase)
+        pauli_exp_z_all(block, phase)
+        pauli_exp_x_all_except_at(block, i, phase)
+        pauli_exp_z_all_except_at(block, i, phase)
+        pauli_exp_x_all_except_z_at(block, i, phase)
+        pauli_exp_z_all_except_x_at(block, i, phase)
+        block.pauli_exp_x_all(phase)
+        block.pauli_exp_y_all(phase)
+        block.pauli_exp_z_all(phase)
+        block.pauli_exp_x_all_except_at(i, phase)
+        block.pauli_exp_z_all_except_at(i, phase)
+        block.pauli_exp_x_all_except_z_at(i, phase)
+        block.pauli_exp_z_all_except_x_at(i, phase)
 
     h = main.compile_function().modules[0]
     InlineFunctions()(h, inplace=True)
     Normalize()(h, inplace=True)
     assert not h.used_extensions().unresolved_extensions
     expected = {
-        "pauli_exp_all_x": 0,
-        "pauli_exp_all_y": 0,
-        "pauli_exp_all_z": 0,
-        "pauli_exp_all_x_except_at": 1,
-        "pauli_exp_all_z_except_at": 1,
-        "pauli_exp_all_x_except_z_at": 1,
-        "pauli_exp_all_z_except_x_at": 1,
+        "pauli_exp_x_all": 0,
+        "pauli_exp_y_all": 0,
+        "pauli_exp_z_all": 0,
+        "pauli_exp_x_all_except_at": 1,
+        "pauli_exp_z_all_except_at": 1,
+        "pauli_exp_x_all_except_z_at": 1,
+        "pauli_exp_z_all_except_x_at": 1,
     }
     found: Counter[str] = Counter()
     block_type = iceberg_types.iceberg_block(4)
@@ -359,7 +359,7 @@ def test_guppy_hugr() -> None:
     @guppy
     def main() -> None:
         b = Block[8]()
-        b.all_h()
+        b.h_all()
         discard(b)
 
     pkg = main.compile()
@@ -376,13 +376,13 @@ def test_guppy_hugr() -> None:
         "Input",
         "LoadFunc",  # loads the alloc_zero function
         "CallIndirect",
-        "guppyft.iceberg.ops.all_h<8>",
+        "guppyft.iceberg.ops.h_all<8>",
         "guppyft.iceberg.ops.free<8>",
         "Output",
     }
-    [all_h_node] = [child for child in children if "all_h" in h[child].op.name()]
-    assert len(list(h.incoming_links(all_h_node))) == 1  # CallIndirect
-    assert len(list(h.outgoing_links(all_h_node))) == 1  # free
+    [h_all_node] = [child for child in children if "h_all" in h[child].op.name()]
+    assert len(list(h.incoming_links(h_all_node))) == 1  # CallIndirect
+    assert len(list(h.outgoing_links(h_all_node))) == 1  # free
 
 
 def test_guppy_types() -> None:

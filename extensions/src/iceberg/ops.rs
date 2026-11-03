@@ -28,7 +28,7 @@ use super::types::block_tv;
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.iceberg.ops");
 /// Extension version.
-pub const VERSION: semver::Version = semver::Version::new(0, 4, 0);
+pub const VERSION: semver::Version = semver::Version::new(0, 5, 0);
 
 /// Logical Iceberg operations.
 ///
@@ -47,26 +47,26 @@ pub enum IcebergOpDef {
     y,
     /// Z gate.
     z,
-    /// X gate on two qubits.
-    xx,
-    /// Y gate on two qubits.
-    yy,
-    /// Z gate on two qubits.
-    zz,
+    /// X gate on two logical qubits within a block.
+    xx_intrablock,
+    /// Y gate on two logical qubits within a block.
+    yy_intrablock,
+    /// Z gate on two logical qubits within a block.
+    zz_intrablock,
     /// X gate on all but one qubit.
-    all_but_one_x,
+    x_all_except_at,
     /// Z gate on all but one qubit.
-    all_but_one_z,
+    z_all_except_at,
     /// X gate on all qubits.
-    all_x,
+    x_all,
     /// Y gate on all qubits.
-    all_y,
+    y_all,
     /// Z gate on all qubits.
-    all_z,
+    z_all,
     /// X gate on one qubit with Z on all others.
-    x_with_all_but_one_z,
+    z_all_except_x_at,
     /// Z gate on one qubit with X on all others.
-    z_with_all_but_one_x,
+    x_all_except_z_at,
     /// Fan-out from one qubit to all others.
     fan_out,
     /// Fan-in to one qubit from all others.
@@ -77,47 +77,47 @@ pub enum IcebergOpDef {
     rz,
     /// Apply `exp(-i theta P / 2)`, with theta in radians.
     /// `P` is X on every logical qubit.
-    pauli_exp_all_x,
+    pauli_exp_x_all,
     /// Apply `exp(-i theta P / 2)`, with theta in radians.
     /// `P` is Y on every logical qubit.
-    pauli_exp_all_y,
+    pauli_exp_y_all,
     /// Apply `exp(-i theta P / 2)`, with theta in radians.
     /// `P` is Z on every logical qubit.
-    pauli_exp_all_z,
+    pauli_exp_z_all,
     /// Apply `exp(-i theta P / 2)`, with theta in radians.
     /// `P` is X on every logical qubit except `i`, where it is I.
-    pauli_exp_all_x_except_at,
+    pauli_exp_x_all_except_at,
     /// Apply `exp(-i theta P / 2)`, with theta in radians.
     /// `P` is Z on every logical qubit except `i`, where it is I.
-    pauli_exp_all_z_except_at,
+    pauli_exp_z_all_except_at,
     /// Apply `exp(-i theta P / 2)`, with theta in radians.
     /// `P` is X on every logical qubit except `i`, where it is Z.
-    pauli_exp_all_x_except_z_at,
+    pauli_exp_x_all_except_z_at,
     /// Apply `exp(-i theta P / 2)`, with theta in radians.
     /// `P` is Z on every logical qubit except `i`, where it is X.
-    pauli_exp_all_z_except_x_at,
+    pauli_exp_z_all_except_x_at,
     /// H gate on all qubits.
-    all_h,
-    /// XXPhase gate.
-    xx_phase,
-    /// YYPhase gate.
-    yy_phase,
-    /// ZZPhase gate.
-    zz_phase,
-    /// CX gate.
-    cx,
-    /// Swap of two qubits within a block.
-    swap,
-    /// XXPhase gate involving two blocks.
-    xx_phase_between_blocks,
-    /// YYPhase gate involving two blocks.
-    yy_phase_between_blocks,
-    /// ZZPhase gate involving two blocks.
-    zz_phase_between_blocks,
-    /// CX gate involving two blocks.
-    cx_between_blocks,
-    /// CX gate applied transversally over two blocks.
-    cx_transversal,
+    h_all,
+    /// XXPhase gate on two logical qubits within a block.
+    xx_phase_intrablock,
+    /// YYPhase gate on two logical qubits within a block.
+    yy_phase_intrablock,
+    /// ZZPhase gate on two logical qubits within a block.
+    zz_phase_intrablock,
+    /// CX gate on two logical qubits within a block.
+    cx_intrablock,
+    /// Swap of two logical qubits within a block.
+    swap_intrablock,
+    /// XXPhase gate on one logical qubit in each of two different blocks.
+    xx_phase_interblock,
+    /// YYPhase gate on one logical qubit in each of two different blocks.
+    yy_phase_interblock,
+    /// ZZPhase gate on one logical qubit in each of two different blocks.
+    zz_phase_interblock,
+    /// CX gate on one logical qubit in each of two different blocks.
+    cx_interblock,
+    /// CX gates between all corresponding pairs of logical qubits in two blocks.
+    cx_all,
     /// Prepare the all-zero state on a block.
     alloc_zero,
     /// Attempt to prepare the all-zero state on a block.
@@ -357,38 +357,38 @@ impl MakeOpDef for IcebergOpDef {
             x => sig_1_block(0, 1),
             y => sig_1_block(0, 1),
             z => sig_1_block(0, 1),
-            xx => sig_1_block(0, 2),
-            yy => sig_1_block(0, 2),
-            zz => sig_1_block(0, 2),
-            all_but_one_x => sig_1_block(0, 1),
-            all_but_one_z => sig_1_block(0, 1),
-            all_x => sig_1_block(0, 0),
-            all_y => sig_1_block(0, 0),
-            all_z => sig_1_block(0, 0),
-            x_with_all_but_one_z => sig_1_block(0, 1),
-            z_with_all_but_one_x => sig_1_block(0, 1),
+            xx_intrablock => sig_1_block(0, 2),
+            yy_intrablock => sig_1_block(0, 2),
+            zz_intrablock => sig_1_block(0, 2),
+            x_all_except_at => sig_1_block(0, 1),
+            z_all_except_at => sig_1_block(0, 1),
+            x_all => sig_1_block(0, 0),
+            y_all => sig_1_block(0, 0),
+            z_all => sig_1_block(0, 0),
+            z_all_except_x_at => sig_1_block(0, 1),
+            x_all_except_z_at => sig_1_block(0, 1),
             fan_out => sig_1_block(0, 1),
             fan_in => sig_1_block(0, 1),
             rx => sig_1_block(1, 1),
             rz => sig_1_block(1, 1),
-            pauli_exp_all_x => sig_1_block(1, 0),
-            pauli_exp_all_y => sig_1_block(1, 0),
-            pauli_exp_all_z => sig_1_block(1, 0),
-            pauli_exp_all_x_except_at => sig_1_block(1, 1),
-            pauli_exp_all_z_except_at => sig_1_block(1, 1),
-            pauli_exp_all_x_except_z_at => sig_1_block(1, 1),
-            pauli_exp_all_z_except_x_at => sig_1_block(1, 1),
-            all_h => sig_1_block(0, 0),
-            xx_phase => sig_1_block(1, 2),
-            yy_phase => sig_1_block(1, 2),
-            zz_phase => sig_1_block(1, 2),
-            cx => sig_1_block(0, 2),
-            swap => sig_1_block(0, 2),
-            xx_phase_between_blocks => sig_2q_phase(1),
-            yy_phase_between_blocks => sig_2q_phase(1),
-            zz_phase_between_blocks => sig_2q_phase(1),
-            cx_between_blocks => sig_2q_phase(0),
-            cx_transversal => CustomValidator::new(
+            pauli_exp_x_all => sig_1_block(1, 0),
+            pauli_exp_y_all => sig_1_block(1, 0),
+            pauli_exp_z_all => sig_1_block(1, 0),
+            pauli_exp_x_all_except_at => sig_1_block(1, 1),
+            pauli_exp_z_all_except_at => sig_1_block(1, 1),
+            pauli_exp_x_all_except_z_at => sig_1_block(1, 1),
+            pauli_exp_z_all_except_x_at => sig_1_block(1, 1),
+            h_all => sig_1_block(0, 0),
+            xx_phase_intrablock => sig_1_block(1, 2),
+            yy_phase_intrablock => sig_1_block(1, 2),
+            zz_phase_intrablock => sig_1_block(1, 2),
+            cx_intrablock => sig_1_block(0, 2),
+            swap_intrablock => sig_1_block(0, 2),
+            xx_phase_interblock => sig_2q_phase(1),
+            yy_phase_interblock => sig_2q_phase(1),
+            zz_phase_interblock => sig_2q_phase(1),
+            cx_interblock => sig_2q_phase(0),
+            cx_all => CustomValidator::new(
                 PolyFuncTypeRV::new(
                     vec![TypeParam::max_nat_kind()],
                     FuncValueType::new_endo(vec_of_blocks_and_angles(2, 0)),
@@ -586,13 +586,13 @@ mod tests {
         use IcebergOpDef::*;
         for k in [2, 4] {
             for (def, n_indices) in [
-                (pauli_exp_all_x, 0),
-                (pauli_exp_all_y, 0),
-                (pauli_exp_all_z, 0),
-                (pauli_exp_all_x_except_at, 1),
-                (pauli_exp_all_z_except_at, 1),
-                (pauli_exp_all_x_except_z_at, 1),
-                (pauli_exp_all_z_except_x_at, 1),
+                (pauli_exp_x_all, 0),
+                (pauli_exp_y_all, 0),
+                (pauli_exp_z_all, 0),
+                (pauli_exp_x_all_except_at, 1),
+                (pauli_exp_z_all_except_at, 1),
+                (pauli_exp_x_all_except_z_at, 1),
+                (pauli_exp_z_all_except_x_at, 1),
             ] {
                 let mut inputs = vec![block_type(k)];
                 inputs.extend(vec![int_type(6); n_indices]);
@@ -647,13 +647,13 @@ mod tests {
         let x = EXTENSION.instantiate_extension_op("x", [6.into()]).unwrap();
         let z4 = EXTENSION.instantiate_extension_op("z", [6.into()]).unwrap();
         let yy14 = EXTENSION
-            .instantiate_extension_op("yy", [6.into()])
+            .instantiate_extension_op("yy_intrablock", [6.into()])
             .unwrap();
         let allx = EXTENSION
-            .instantiate_extension_op("all_x", [6.into()])
+            .instantiate_extension_op("x_all", [6.into()])
             .unwrap();
         let allrz = EXTENSION
-            .instantiate_extension_op("pauli_exp_all_z", [6.into()])
+            .instantiate_extension_op("pauli_exp_z_all", [6.into()])
             .unwrap();
         let rz3 = EXTENSION
             .instantiate_extension_op("rz", [6.into()])
@@ -662,34 +662,34 @@ mod tests {
             .instantiate_extension_op("rx", [6.into()])
             .unwrap();
         let allbutonerz1 = EXTENSION
-            .instantiate_extension_op("pauli_exp_all_z_except_at", [6.into()])
+            .instantiate_extension_op("pauli_exp_z_all_except_at", [6.into()])
             .unwrap();
         let allh = EXTENSION
-            .instantiate_extension_op("all_h", [6.into()])
+            .instantiate_extension_op("h_all", [6.into()])
             .unwrap();
         let yyphase05 = EXTENSION
-            .instantiate_extension_op("yy_phase", [6.into()])
+            .instantiate_extension_op("yy_phase_intrablock", [6.into()])
             .unwrap();
         let xxphase = EXTENSION
-            .instantiate_extension_op("xx_phase", [6.into()])
+            .instantiate_extension_op("xx_phase_intrablock", [6.into()])
             .unwrap();
         let zzphasebetweenblocks34 = EXTENSION
-            .instantiate_extension_op("zz_phase_between_blocks", [6.into()])
+            .instantiate_extension_op("zz_phase_interblock", [6.into()])
             .unwrap();
         let zzphasebetweenblocks = EXTENSION
-            .instantiate_extension_op("zz_phase_between_blocks", [6.into()])
+            .instantiate_extension_op("zz_phase_interblock", [6.into()])
             .unwrap();
         let cxtransverse = EXTENSION
-            .instantiate_extension_op("cx_transversal", [6.into()])
+            .instantiate_extension_op("cx_all", [6.into()])
             .unwrap();
         let cx23 = EXTENSION
-            .instantiate_extension_op("cx", [6.into()])
+            .instantiate_extension_op("cx_intrablock", [6.into()])
             .unwrap();
-        let cx = EXTENSION
-            .instantiate_extension_op("cx", [6.into()])
+        let cx_intrablock = EXTENSION
+            .instantiate_extension_op("cx_intrablock", [6.into()])
             .unwrap();
         let swap51 = EXTENSION
-            .instantiate_extension_op("swap", [6.into()])
+            .instantiate_extension_op("swap_intrablock", [6.into()])
             .unwrap();
         let rx_dynq = EXTENSION.instantiate_extension_op("rx_dynq", []).unwrap();
         let zz_phase_dynq = EXTENSION
@@ -699,7 +699,7 @@ mod tests {
         assert_eq!(x3.description(), "X gate.");
         assert_eq!(
             zzphasebetweenblocks.description(),
-            "ZZPhase gate involving two blocks."
+            "ZZPhase gate on one logical qubit in each of two different blocks."
         );
         let mut module_builder = ModuleBuilder::new();
         let mut types: Vec<Type> = vec![block; 2];
@@ -852,7 +852,7 @@ mod tests {
             .unwrap();
         linear
             .append_and_consume(
-                cx,
+                cx_intrablock,
                 [
                     CircuitUnit::Linear(0),
                     CircuitUnit::Wire(index2),
@@ -1017,7 +1017,7 @@ mod tests {
             .instantiate_extension_op("try_measure_one_z", [2.into()])
             .unwrap();
         let allh = EXTENSION
-            .instantiate_extension_op("all_h", [2.into()])
+            .instantiate_extension_op("h_all", [2.into()])
             .unwrap();
         let mut dfg_builder = DFGBuilder::new(Signature::new(
             vec![block_type(2)],
@@ -1210,7 +1210,7 @@ mod tests {
         );
         assert!(
             EXTENSION
-                .instantiate_extension_op("xx", [6.into(), 0.into(), 1.into()])
+                .instantiate_extension_op("xx_intrablock", [6.into(), 0.into(), 1.into()])
                 .is_err()
         );
         assert!(
