@@ -10,6 +10,15 @@ from hugr.package import Package
 from hugr.utils import JsonType
 
 from guppyft.encode import AnnotatingArchitectureInstance, annotate_encoding
+from guppyft.std.state_factory._conf import RUSStateFactoryConf
+
+__all__ = [
+    "DynamicQubitReuse",
+    "IcebergBuilder",
+    "IcebergInstance",
+    "IcebergQEDPolicy",
+    "RUSStateFactoryConf",
+]
 
 
 class DynamicQubitReuse(StrEnum):
@@ -107,7 +116,7 @@ class IcebergQEDPolicy:
 class _IcebergOptions:
     qed_policy: IcebergQEDPolicy
     syndrome_during_measurement: bool
-    state_prep_rus_attempts: int
+    state_factory_conf: RUSStateFactoryConf
     dynamic_qubit_reuse: DynamicQubitReuse
 
 
@@ -131,7 +140,7 @@ class IcebergInstance(AnnotatingArchitectureInstance):
                 "block_size": self._block_size,
                 "qed_policy": self._options.qed_policy.to_json(),
                 "syndrome_during_measurement": self._options.syndrome_during_measurement,  # noqa: E501 ruff format keeps changing this line back
-                "state_prep_rus_attempts": self._options.state_prep_rus_attempts,
+                "state_factory": self._options.state_factory_conf.to_json(),
                 "dynamic_qubit_reuse": self._options.dynamic_qubit_reuse,
             },
         )
@@ -145,7 +154,10 @@ class IcebergBuilder:
         default=_IcebergOptions(
             qed_policy=IcebergQEDPolicy(),
             syndrome_during_measurement=False,
-            state_prep_rus_attempts=3,
+            state_factory_conf=RUSStateFactoryConf(
+                size=1,
+                max_attempts=3,
+            ),
             dynamic_qubit_reuse=DynamicQubitReuse.enabled,
         )
     )
@@ -154,16 +166,20 @@ class IcebergBuilder:
         """Set the QED policy."""
         return replace(self, _options=replace(self._options, qed_policy=qed_policy))
 
-    def with_state_prep_rus_attempts(self, max_attempts: int) -> Self:
-        """Set the number of attempts state prep is allowed before it fails."""
-        if max_attempts < 1:
+    def with_state_factory_conf(self, conf: RUSStateFactoryConf) -> Self:
+        """Set the configuration for the state factory producing Iceberg blocks."""
+        if conf.size < 1:
             raise ValueError(
-                f"Cannot set the maximum state prep RUS attempts lower than 1,"
-                f" {max_attempts} given"
+                f"Cannot set the size of the RUS state factory lower than 1,"
+                f" {conf.size} given"
             )
-        return replace(
-            self, _options=replace(self._options, state_prep_rus_attempts=max_attempts)
-        )
+        if conf.max_attempts < 1:
+            raise ValueError(
+                f"Cannot set the max attempts of the RUS state factory lower than 1,"
+                f" {conf.max_attempts} given"
+            )
+
+        return replace(self, _options=replace(self._options, state_factory_conf=conf))
 
     def with_syndrome_extraction_during_measurement(self, enabled: bool) -> Self:
         """Set whether syndromes are extracted and checked when measuring a block."""
