@@ -9,8 +9,8 @@ from hugr import Hugr
 from hugr.package import Package
 from hugr.utils import JsonType
 
+from guppyft._util import PathDict
 from guppyft.encode import AnnotatingArchitectureInstance, annotate_encoding
-from guppyft.util import PathDict
 
 
 @dataclass(frozen=True)

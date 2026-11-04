@@ -21,6 +21,7 @@ from hugr.std import _std_extensions
 from hugr.utils import JsonType
 from tket_exts import rotation
 
+from guppyft._util import PathDict
 from guppyft.code.steane.primitives import (
     cx,
     cz,
@@ -57,7 +58,6 @@ from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
 from guppyft.std import LogicalBlock
 from guppyft.std.state_factory import StateFactory
-from guppyft.util import PathDict
 
 from . import logical as steane_logical
 from .primitives import RawMeasurement

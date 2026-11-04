@@ -1,6 +1,6 @@
 import pytest
 
-from guppyft.util import PathDict
+from guppyft._util import PathDict
 
 
 def test_pathdict_simple() -> None:
