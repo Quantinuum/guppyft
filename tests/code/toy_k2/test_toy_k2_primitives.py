@@ -27,20 +27,10 @@ def test_x(idx: int) -> None:
 
     @guppy
     @no_type_check
-    def impl_func(arr: array[qubit, 4]) -> None:
-        block = LogicalBlock(array(arr.take(i) for i in range(4)))
-
+    def impl_func(block: LogicalBlock[4]) -> None:
         toy_k2.x(block, comptime(idx))
 
-        for i in range(4):
-            arr.put(block.data_qs.take(i), i)
-        block.discard()
-
-    assert valid_clifford_implementation(
-        specify_func,
-        impl_func,
-        CODE_DEF,
-    )
+    assert valid_clifford_implementation(specify_func, impl_func, CODE_DEF)
 
 
 @pytest.mark.parametrize("idx", [0, 1])
@@ -53,20 +43,10 @@ def test_z(idx: int) -> None:
 
     @guppy
     @no_type_check
-    def impl_func(arr: array[qubit, 4]) -> None:
-        block = LogicalBlock(array(arr.take(i) for i in range(4)))
-
+    def impl_func(block: LogicalBlock[4]) -> None:
         toy_k2.z(block, comptime(idx))
 
-        for i in range(4):
-            arr.put(block.data_qs.take(i), i)
-        block.discard()
-
-    assert valid_clifford_implementation(
-        specify_func,
-        impl_func,
-        CODE_DEF,
-    )
+    assert valid_clifford_implementation(specify_func, impl_func, CODE_DEF)
 
 
 def test_h_all() -> None:
@@ -79,20 +59,10 @@ def test_h_all() -> None:
 
     @guppy
     @no_type_check
-    def impl_func(arr: array[qubit, 4]) -> None:
-        block = LogicalBlock(array(arr.take(i) for i in range(4)))
-
+    def impl_func(block: LogicalBlock[4]) -> None:
         toy_k2.h_all(block)
 
-        for i in range(4):
-            arr.put(block.data_qs.take(i), i)
-        block.discard()
-
-    assert valid_clifford_implementation(
-        specify_func,
-        impl_func,
-        CODE_DEF,
-    )
+    assert valid_clifford_implementation(specify_func, impl_func, CODE_DEF)
 
 
 @pytest.mark.parametrize("target", [0, 1])
@@ -105,20 +75,10 @@ def test_cx_intra(target: int) -> None:
 
     @guppy
     @no_type_check
-    def impl_func(arr: array[qubit, 4]) -> None:
-        block = LogicalBlock(array(arr.take(i) for i in range(4)))
-
+    def impl_func(block: LogicalBlock[4]) -> None:
         toy_k2.cx_intra(block, comptime(target))
 
-        for i in range(4):
-            arr.put(block.data_qs.take(i), i)
-        block.discard()
-
-    assert valid_clifford_implementation(
-        specify_func,
-        impl_func,
-        CODE_DEF,
-    )
+    assert valid_clifford_implementation(specify_func, impl_func, CODE_DEF)
 
 
 def test_cx_transversal() -> None:
@@ -131,23 +91,10 @@ def test_cx_transversal() -> None:
 
     @guppy
     @no_type_check
-    def impl_func(ctl: array[qubit, 4], tgt: array[qubit, 4]) -> None:
-        c_block = LogicalBlock(array(ctl.take(i) for i in range(4)))
-        t_block = LogicalBlock(array(tgt.take(i) for i in range(4)))
-
+    def impl_func(c_block: LogicalBlock[4], t_block: LogicalBlock[4]) -> None:
         toy_k2.cx_transversal(c_block, t_block)
 
-        for i in range(4):
-            ctl.put(c_block.data_qs.take(i), i)
-            tgt.put(t_block.data_qs.take(i), i)
-        c_block.discard()
-        t_block.discard()
-
-    assert valid_clifford_implementation(
-        specify_func,
-        impl_func,
-        CODE_DEF,
-    )
+    assert valid_clifford_implementation(specify_func, impl_func, CODE_DEF)
 
 
 def test_swap_intra() -> None:
@@ -159,20 +106,10 @@ def test_swap_intra() -> None:
 
     @guppy
     @no_type_check
-    def impl_func(arr: array[qubit, 4]) -> None:
-        block = LogicalBlock(array(arr.take(i) for i in range(4)))
-
+    def impl_func(block: LogicalBlock[4]) -> None:
         toy_k2.swap_intra(block)
 
-        for i in range(4):
-            arr.put(block.data_qs.take(i), i)
-        block.discard()
-
-    assert valid_clifford_implementation(
-        specify_func,
-        impl_func,
-        CODE_DEF,
-    )
+    assert valid_clifford_implementation(specify_func, impl_func, CODE_DEF)
 
 
 def test_prep_zero() -> None:
@@ -184,13 +121,8 @@ def test_prep_zero() -> None:
 
     @guppy
     @no_type_check
-    def impl_func() -> array[qubit, 4]:
-        block = toy_k2.prep_zero_ft().force_check().unwrap()
-
-        arr = array(block.data_qs.take(i) for i in range(4))
-        block.discard()
-
-        return arr
+    def impl_func() -> LogicalBlock[4]:
+        return toy_k2.prep_zero_ft().force_check().unwrap()
 
     assert valid_stabilizer_state_preparation(
         specify_func,
@@ -211,19 +143,10 @@ def test_prep_zero_plus() -> None:
 
     @guppy
     @no_type_check
-    def impl_func() -> array[qubit, 4]:
-        block = toy_k2.prep_zero_plus_ft()
+    def impl_func() -> LogicalBlock[4]:
+        return toy_k2.prep_zero_plus_ft()
 
-        arr = array(block.data_qs.take(i) for i in range(4))
-        block.discard()
-
-        return arr
-
-    assert valid_stabilizer_state_preparation(
-        specify_func,
-        impl_func,
-        CODE_DEF,
-    )
+    assert valid_stabilizer_state_preparation(specify_func, impl_func, CODE_DEF)
 
 
 def test_prep_y_states() -> None:
@@ -239,19 +162,10 @@ def test_prep_y_states() -> None:
 
     @guppy
     @no_type_check
-    def impl_func() -> array[qubit, 4]:
-        block = toy_k2.prep_y_states_non_ft()
+    def impl_func() -> LogicalBlock[4]:
+        return toy_k2.prep_y_states_non_ft()
 
-        arr = array(block.data_qs.take(i) for i in range(4))
-        block.discard()
-
-        return arr
-
-    assert valid_stabilizer_state_preparation(
-        specify_func,
-        impl_func,
-        CODE_DEF,
-    )
+    assert valid_stabilizer_state_preparation(specify_func, impl_func, CODE_DEF)
 
 
 def test_prep_t_states() -> None:
@@ -329,14 +243,8 @@ def test_qed_cycle_without_errors() -> None:
 
     @guppy
     @no_type_check
-    def impl_func(arr: array[qubit, 4]) -> None:
-        block = LogicalBlock(array(arr.take(i) for i in range(4)))
-
+    def impl_func(block: LogicalBlock[4]) -> None:
         toy_k2.qed_cycle(block)
-
-        for i in range(4):
-            arr.put(block.data_qs.take(i), i)
-        block.discard()
 
     assert valid_clifford_implementation(
         specify_func,
