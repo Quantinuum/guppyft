@@ -9,7 +9,6 @@ from guppyft.code.iceberg.encode import (
     DynamicQubitReuse,
     IcebergBuilder,
     IcebergQEDPolicy,
-    InitStyle,
 )
 from guppyft.extensions import iceberg_ops
 
@@ -65,7 +64,6 @@ def test_annotate_iceberg_encoding() -> None:
     policy.costs.x = 1000.0
     arch = (
         IcebergBuilder()
-        .with_init_style(InitStyle.HALF_DEPTH)
         .with_qed_policy(policy)
         .with_syndrome_extraction_during_measurement(True)
         .with_state_prep_rus_attempts(5)
@@ -82,7 +80,6 @@ def test_annotate_iceberg_encoding() -> None:
                 "schema_version": 1,
                 "n_blocks": 4,
                 "block_size": 6,
-                "init_style": "half_depth",
                 "qed_policy": {
                     "threshold": 42,
                     "costs": {
