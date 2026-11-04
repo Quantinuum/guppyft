@@ -33,7 +33,7 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.HUGRBOT_PAT }}
-      - uses: astral-sh/setup-uv@v8.1.0
+      - uses: astral-sh/setup-uv@v10.3.2
         with:
           enable-cache: true
 

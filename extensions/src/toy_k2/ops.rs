@@ -190,10 +190,8 @@ impl MakeOpDef for ToyK2OpDef {
             cx_intra => sig_addressable(),
             cx_transversal => sig_blocks(2, 2),
             swap_intra => sig_blocks(1, 1),
-            prep_zero_ft => sig_blocks(0, 1),
-            prep_zero_plus_ft => sig_blocks(0, 1),
-            prep_y_states_non_ft => sig_blocks(0, 1),
-            prep_t_states_non_ft => sig_blocks(0, 1),
+            prep_zero_ft | prep_zero_plus_ft => sig_blocks(0, 1),
+            prep_y_states_non_ft | prep_t_states_non_ft => sig_blocks(0, 1),
             qed_cycle => sig_blocks(1, 1),
             free => sig_blocks(1, 0),
             measure_z_all => {
@@ -212,13 +210,8 @@ impl MakeOpDef for ToyK2OpDef {
             }
             alloc_dynq => sig_dynamic_qubits(0, 1),
             free_dynq => sig_dynamic_qubits(1, 0),
-            x_dynq => sig_dynamic_qubits(1, 1),
-            z_dynq => sig_dynamic_qubits(1, 1),
-            h_dynq => sig_dynamic_qubits(1, 1),
-            s_dynq => sig_dynamic_qubits(1, 1),
-            sdg_dynq => sig_dynamic_qubits(1, 1),
-            t_dynq => sig_dynamic_qubits(1, 1),
-            tdg_dynq => sig_dynamic_qubits(1, 1),
+            x_dynq | z_dynq | h_dynq => sig_dynamic_qubits(1, 1),
+            s_dynq | sdg_dynq | t_dynq | tdg_dynq => sig_dynamic_qubits(1, 1),
             cx_dynq => sig_dynamic_qubits(2, 2),
             project_z_dynq => FuncValueType::new(
                 vec![dynamic_qubit_type()],
@@ -523,12 +516,12 @@ mod tests {
     #[test]
     fn test_serialization() {
         let block_type = block_type();
-        let measurent_block_type = block_measurement_type();
+        let measurement_block_type = block_measurement_type();
         let measure_z_all = EXTENSION
             .instantiate_extension_op("measure_z_all", [])
             .unwrap();
         let mut module_builder = ModuleBuilder::new();
-        let signature = Signature::new(vec![block_type], vec![measurent_block_type]);
+        let signature = Signature::new(vec![block_type], vec![measurement_block_type]);
         let mut f_build = module_builder.define_function("main", signature).unwrap();
         let wires: Vec<_> = f_build.input_wires().collect();
         let mut linear = f_build.as_circuit(wires);

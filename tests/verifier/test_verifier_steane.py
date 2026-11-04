@@ -46,9 +46,12 @@ def test_steane_zero_state() -> None:
         steane.implement_non_ft_zero_state,
         code_definition=steane.STEANE_DEF,
     )
+
+
+def test_steane_zero_state_logical_block() -> None:
     assert valid_stabilizer_state_preparation(
         steane.specify_zero_state,
-        steane.implement_non_ft_zero_state,
+        steane.implement_non_ft_zero_state_logical_block,
         code_definition=steane.STEANE_DEF,
     )
 
@@ -90,6 +93,14 @@ def test_steane_h() -> None:
     assert valid_clifford_implementation(
         steane.specify_h,
         steane.implement_h,
+        code_definition=steane.STEANE_DEF,
+    )
+
+
+def test_steane_h_logical_block() -> None:
+    assert valid_clifford_implementation(
+        steane.specify_h,
+        steane.implement_h_logical_block,
         code_definition=steane.STEANE_DEF,
     )
 
@@ -139,5 +150,29 @@ def test_steane_cx() -> None:
     assert valid_clifford_implementation(
         steane.specify_cx,
         steane.implement_cx,
+        code_definition=steane.STEANE_DEF,
+    )
+
+
+def test_steane_cx_logical_block() -> None:
+    assert valid_clifford_implementation(
+        steane.specify_cx,
+        steane.implement_cx_logical_block,
+        code_definition=steane.STEANE_DEF,
+    )
+
+
+def test_steane_bell_state_logical_block() -> None:
+    assert valid_stabilizer_state_preparation(
+        steane.specify_bell_state,
+        steane.implement_bell_state_logical_block,
+        code_definition=steane.STEANE_DEF,
+    )
+
+
+def test_steane_h_logical_block_is_not_identity() -> None:
+    assert not valid_clifford_implementation(
+        steane.specify_identity,
+        steane.implement_h_logical_block,
         code_definition=steane.STEANE_DEF,
     )

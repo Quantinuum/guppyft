@@ -2,6 +2,10 @@
 inouts = "inouts"
 ba = "ba"
 
+[default.extend-identifiers]
+# Ruff's flake8-copyright rule prefix.
+CPY = "CPY"
+
 [type.changelog]
 extend-glob = ["CHANGELOG.md"]
 # Release entries contain Git hashes that can resemble misspelled words.

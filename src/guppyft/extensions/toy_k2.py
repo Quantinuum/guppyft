@@ -1,4 +1,4 @@
-"""ToyK2 code extension."""
+"""ToyK2 code extension for ops and types."""
 
 import functools
 

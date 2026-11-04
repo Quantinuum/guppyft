@@ -69,7 +69,7 @@ pub fn dynamic_qubit_type() -> Type {
     .into()
 }
 
-/// Type of a ToyK2 block logical measurement.
+/// Type of a ToyK2 logical qubit measurement.
 pub fn qubit_measurement_type() -> Type {
     CustomType::new(
         QUBIT_MEASUREMENT_TYPENAME,

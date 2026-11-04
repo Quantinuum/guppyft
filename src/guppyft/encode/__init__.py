@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from typing import Any, Literal, Protocol, overload
 
 from guppylang.defs import GuppyFunctionDefinition
+from guppylang.emulator import EmulatorBuilder, EmulatorInstance
 from hugr import Hugr
-from hugr.metadata import Metadata
 from hugr.ops import Module
 from hugr.package import Package
 from hugr.passes.composable import ComposablePass
@@ -23,8 +23,9 @@ from ._implement_ops import (
 )
 
 __all__ = [
+    "AnnotatingArchitectureInstance",
     "EncodeSpec",
-    "EncoderParams",
+    "EncodingArchitectureInstance",
     "ImplementOps",
     "ImplementOpsSpec",
     "LogicalCompiler",
@@ -36,6 +37,64 @@ __all__ = [
     "encode",
     "implement_ops",
 ]
+
+
+class AnnotatingArchitectureInstance(Protocol):
+    """An architecture instance capable of annotating a package for deferred / remote
+    encoding. See `guppyft.encode.annotate_encoding` for more information."""
+
+    def annotate(self, hugr: Package | Hugr[Any]) -> None:
+        """Annotate the current parameters of the architecture on the given HUGR in
+        metadata. See `guppyft.encode.annotate_encoding` for more information."""
+
+
+class EncodingArchitectureInstance(Protocol):
+    """An architecture instance capable of providing a computational -> physical
+    encoding, and op implementations for a logical -> physical lowering."""
+
+    @overload
+    def encode(self, pkg: Package, *, as_bytes: Literal[False] = False) -> Package: ...
+    @overload
+    def encode(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    @overload
+    def encode(self, pkg: Package, *, as_bytes: bool) -> Package | bytes: ...
+    def encode(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
+        """Encode a computational package with this instance."""
+        return self._encode(pkg, as_bytes=as_bytes)
+
+    def _encode(self, pkg: Package, *, as_bytes: bool) -> Package | bytes: ...
+
+    @overload
+    def implement_ops(
+        self, pkg: Package, *, as_bytes: Literal[False] = False
+    ) -> Package: ...
+    @overload
+    def implement_ops(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    @overload
+    def implement_ops(self, pkg: Package, *, as_bytes: bool) -> Package | bytes: ...
+    def implement_ops(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
+        """Implement logical ops in `pkg` using this instance's op implementations."""
+        return self._implement_ops(pkg, as_bytes=as_bytes)
+
+    def _implement_ops(self, pkg: Package, *, as_bytes: bool) -> Package | bytes: ...
+
+    def emulator(
+        self,
+        pkg: Package,
+        n_qubits: int,
+        builder: EmulatorBuilder | None = None,
+    ) -> EmulatorInstance:
+        """Encode a hugr Package and build an emulator for it.
+
+        Args:
+            pkg: The computational hugr package.
+            n_qubits: Number of physical qubits available to the emulator.
+            builder: Optional `EmulatorBuilder` to use; defaults to a new one.
+        """
+        encoded_pkg = self.encode(pkg, as_bytes=True)
+        if builder is None:
+            builder = EmulatorBuilder()
+        return builder.build(encoded_pkg, n_qubits)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -67,6 +126,14 @@ def encode(
     passes: list[ComposablePass] | None = None,
     as_bytes: Literal[True],
 ) -> bytes: ...
+@overload
+def encode(
+    hugr: Package | GuppyFunctionDefinition[[], None],
+    spec: EncodeSpec,
+    *,
+    passes: list[ComposablePass] | None = None,
+    as_bytes: bool,
+) -> Package | bytes: ...
 def encode(
     hugr: Package | GuppyFunctionDefinition[[], None],
     spec: EncodeSpec,
@@ -86,7 +153,7 @@ def encode(
     4. implementing the logical operations with physical gates.
 
     The returned runnable package is guaranteed to be semantically equivalent to the
-    given one.
+    given one. The input package is not modified.
 
     Args:
         hugr: The package to encode, or a Guppy function for convenience.
@@ -106,9 +173,12 @@ def encode(
         "Cannot process module-rooted HUGRs"
     )
 
+    # Passes return new HUGRs, but assigning them must not change the caller's lists.
+    pkg = Package(modules=list(pkg.modules), extensions=list(pkg.extensions))
+
     # 1. Passes with computational -> computational
     for tket_pass in passes or [Normalize()]:
-        tket_pass(pkg.modules[0], inplace=True)
+        pkg.modules[0] = tket_pass(pkg.modules[0], inplace=False)
 
     # 2. Lower computational -> logical
     if spec.compile is not None:
@@ -116,11 +186,11 @@ def encode(
 
     # 3. Passes with logical -> logical
     for tket_pass in spec.logical_passes or []:
-        tket_pass(pkg.modules[0], inplace=True)
+        pkg.modules[0] = tket_pass(pkg.modules[0], inplace=False)
 
     # 4. Lower logical -> physical
     if spec.implement_ops is not None:
-        pkg_maybe_bytes = spec.implement_ops(pkg, as_bytes=as_bytes)  # type: ignore[call-overload]
+        pkg_maybe_bytes = spec.implement_ops(pkg, as_bytes=as_bytes)
     else:
         pkg_maybe_bytes = pkg
 
@@ -130,40 +200,26 @@ def encode(
     return pkg_maybe_bytes
 
 
-class EncoderParams(Protocol):
-    """Parameters used to annotate an encoded program."""
-
-    def encoding(self) -> str:
-        """The encoding to annotate on a program."""
-
-    def params(self) -> Mapping[str, Any]:
-        """The parameters to annotate on a program. Implementations should return values
-        that support serialization to JSON."""
-
-
-class _MetadataEncoding(Metadata[Mapping[str, Any]]):
-    """Metadata key for annotating parameters with which to encode a program."""
-
-    KEY = "guppyft.encoding"
-
-
-def annotate_encoding(hugr: Package | Hugr[Any], params: EncoderParams) -> None:
+def annotate_encoding(
+    hugr: Package | Hugr[Any], encoding_name: str, params: Mapping[str, Any]
+) -> None:
     """Annotate a HUGR package with encoding parameters.
 
     Args:
         hugr: The package or HUGR to annotate.
+        encoding_name: The name of the encoding to annotate.
         params: The serializable encoding parameters.
 
     Raises:
         ValueError: If `params` cannot be serialized as JSON.
     """
     try:
-        json.dumps(params.params(), check_circular=True)
+        json.dumps(params, check_circular=True)
     except TypeError as e:
         raise ValueError("Could not serialize parameters") from e
 
     for module in hugr.modules if isinstance(hugr, Package) else [hugr]:
-        module[module.module_root].metadata[_MetadataEncoding] = {
-            "encoding": params.encoding(),
-            "params": params.params(),
+        module[module.module_root].metadata["qnt.nexus.compilation"] = {
+            "schema_version": 1,
+            "ft_encoding": {"name": encoding_name, "params": params},
         }

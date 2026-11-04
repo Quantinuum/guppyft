@@ -23,6 +23,12 @@ CODE_DEF = StabilizerCode.from_python_strings(
 
 
 @guppy
+def _check_valid_idx(idx: int) -> None:
+    if idx != 0 and idx != 1:
+        exit("Invalid logical qubit index. Must be 0 or 1.")
+
+
+@guppy
 @no_type_check
 def x(blk: LogicalBlock[4], idx: int) -> None:
     """Logical X gate on the chosen logical qubit.
@@ -31,8 +37,7 @@ def x(blk: LogicalBlock[4], idx: int) -> None:
         blk: The logical block to apply the gate to.
         idx: The index of the logical qubit to apply the gate to (0 or 1).
     """
-    if idx != 0 and idx != 1:
-        exit("Invalid logical qubit index. Must be 0 or 1.")
+    _check_valid_idx(idx)
     phys.x(blk.data_qs[3])
     phys.x(blk.data_qs[idx + 1])
 
@@ -46,8 +51,7 @@ def z(blk: LogicalBlock[4], idx: int) -> None:
         blk: The logical block to apply the gate to.
         idx: The index of the logical qubit to apply the gate to (0 or 1).
     """
-    if idx != 0 and idx != 1:
-        exit("Invalid logical qubit index. Must be 0 or 1.")
+    _check_valid_idx(idx)
     phys.z(blk.data_qs[0])
     phys.z(blk.data_qs[idx + 1])
 
@@ -75,8 +79,7 @@ def cx_intra(blk: LogicalBlock[4], target: int) -> None:
         target: The index of the logical qubit that acts as target (0 or 1).
             The other logical qubit acts as control.
     """
-    if target != 0 and target != 1:
-        exit("Invalid logical qubit index. Must be 0 or 1.")
+    _check_valid_idx(target)
 
     if target == 1:
         mem_swap(blk.data_qs[0], blk.data_qs[1])
@@ -138,11 +141,7 @@ def prep_zero_ft() -> PreBlock[4, 1]:
 @guppy
 @no_type_check
 def prep_zero_plus_ft() -> LogicalBlock[4]:
-    r"""Fault-tolerant preparation of a logical :math:`|0+\rangle` state.
-
-    The logical qubit on address `0` holds the :math:`|0\rangle` state,
-    and the logical qubit on address `1` holds the :math:`|+\rangle` state.
-    """
+    r"""Fault-tolerant preparation of a logical :math:`|0+\rangle` state."""
     # This is a classic example of deterministic FT state preparation: the
     # logical |0+> state is built out of two physical Bell states.
     # A single-qubit X or Z error at any point in the preparation of a physical
@@ -248,8 +247,7 @@ def measure_z_all(blk: LogicalBlock[4] @ owned) -> tuple[bool, bool]:
 @no_type_check
 def project_z(blk: LogicalBlock[4], idx: int) -> bool:
     """Project the chosen qubit onto the Z basis without consuming it."""
-    if idx != 0 and idx != 1:
-        exit("Invalid logical qubit index. Must be 0 or 1.")
+    _check_valid_idx(idx)
 
     # The logical Z observable is measured twice to detect measurement errors.
     # If the two outcomes do not agree, an error is detected.

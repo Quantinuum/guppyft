@@ -38,11 +38,10 @@ from guppyft.code.steane.encode import (
     QECPolicy,
     RUSStateFactoryConf,
     SteaneBuilder,
-    SteaneEncoderParams,
     SteaneInstance,
 )
 from guppyft.decompose import ComparatorRzDecomposer, ToffoliDecomposer
-from guppyft.encode import UncompilableError, annotate_encoding
+from guppyft.encode import UncompilableError
 
 
 def test_encoder(make_steane_instance: Callable[[int], SteaneInstance]) -> None:
@@ -182,23 +181,62 @@ def test_annotate_steane_encoding() -> None:
     hugr = Hugr[Any]()
     pkg = Package([hugr])
 
-    annotate_encoding(pkg, SteaneEncoderParams(n_blocks=4))
+    SteaneBuilder().build(n_blocks=4).annotate(pkg)
 
-    assert hugr[hugr.module_root].metadata["guppyft.encoding"] == {
-        "encoding": "steane",
-        "params": {"n_blocks": 4},
+    assert hugr[hugr.module_root].metadata["qnt.nexus.compilation"] == {
+        "schema_version": 1,
+        "ft_encoding": {
+            "name": "steane",
+            "params": {
+                "schema_version": 1,
+                "n_blocks": 4,
+                "zero_factory": {
+                    "size": 1,
+                    "max_attempts": 5,
+                },
+                "magic_factory": {
+                    "size": 1,
+                    "max_attempts": 5,
+                },
+                "qec_policy": {
+                    "style": "steane",
+                    "threshold": 1,
+                    "costs": {
+                        "prep_zero": 0.0,
+                        "prep_t": 0.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "h": 0.0,
+                        "s": 0.0,
+                        "sdg": 0.0,
+                        "inject_t": 0.0,
+                        "inject_tdg": 0.0,
+                        "cx": 0.0,
+                        "cz": 0.0,
+                    },
+                },
+            },
+        },
     }
 
 
-def test_builder_from_params() -> None:
-    @guppy
-    def main() -> None:
-        q0 = qubit()
-        discard(q0)
+def test_annotated_policy_immutable() -> None:
+    hugr = Hugr[Any]()
+    pkg = Package([hugr])
 
-    SteaneBuilder.from_params(SteaneEncoderParams(n_blocks=1)).encode(
-        main.compile(), as_bytes=True
-    )
+    policy = QECPolicy(threshold=2)
+    policy.costs.x = 4.0
+    instance = SteaneBuilder().with_qec_policy(policy).build(n_blocks=4)
+
+    policy.threshold = 99
+    policy.costs.x = 20.0
+    instance.annotate(pkg)
+
+    compilation = hugr[hugr.module_root].metadata["qnt.nexus.compilation"]
+    policy_val = compilation["ft_encoding"]["params"]["qec_policy"]  # type: ignore[index,call-overload]
+    assert policy_val["threshold"] == 2  # type: ignore[index,call-overload]
+    assert policy_val["costs"]["x"] == 4.0  # type: ignore[index,call-overload]
 
 
 def test_collect_measurement_encode(
