@@ -140,6 +140,22 @@ def prep_zero_ft() -> PreBlock[4, 1]:
 
 @guppy
 @no_type_check
+def prep_zero_ft_rus() -> LogicalBlock[4]:
+    r"""Fault-tolerant preparation of a logical :math:`|00\\rangle` state.
+
+    Unlike `prep_zero_ft`, this function will keep attempting the preparation
+    until it succeeds.
+    """
+    while True:
+        attempt = prep_zero_ft().force_check()
+        if attempt.is_some():
+            return attempt.unwrap()
+        else:
+            attempt.unwrap_nothing()
+
+
+@guppy
+@no_type_check
 def prep_zero_plus_ft() -> LogicalBlock[4]:
     r"""Fault-tolerant preparation of a logical :math:`|0+\rangle` state."""
     # This is a classic example of deterministic FT state preparation: the

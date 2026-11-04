@@ -293,7 +293,7 @@ class ToyK2Builder:
                     blk_id, qb_id = self.avail_dyn_addrs.pop()
                 else:
                     # Otherwise, prepare a new block
-                    logical_block = k2_primitives.prep_zero_ft().force_check().unwrap()
+                    logical_block = k2_primitives.prep_zero_ft_rus()
                     blk_id = self.allocate_block_id(logical_block)
                     # The first address will be returned
                     qb_id = 0
@@ -426,7 +426,7 @@ class ToyK2Builder:
         def _prep_zero_ft() -> int:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, int]:
-                logical_block = k2_primitives.prep_zero_ft().force_check().unwrap()
+                logical_block = k2_primitives.prep_zero_ft_rus()
                 blk_id = state.allocate_block_id(logical_block)
 
                 state.qed_policy(array(blk_id), comptime(qed_policy.costs.prep_zero_ft))
