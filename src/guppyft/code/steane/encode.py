@@ -57,20 +57,28 @@ from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
 from guppyft.std import LogicalBlock
 from guppyft.std.state_factory import StateFactory
-from guppyft.std.state_factory._conf import RUSStateFactoryConf
 
 from . import logical as steane_logical
 from .primitives import RawMeasurement
 
 N = guppy.nat_var("N")
 
-__all__ = [
-    "QECPolicy",
-    "QECStyle",
-    "RUSStateFactoryConf",
-    "SteaneBuilder",
-    "SteaneInstance",
-]
+
+@dataclass(frozen=True)
+class RUSStateFactoryConf:
+    """Steane RUS state factory configuration.
+
+    Attributes:
+        size: Maximum number of states to be produced in parallel.
+        max_attempts: Maximum number of repeat-until-success attempts.
+    """
+
+    size: int
+    max_attempts: int
+
+    def to_json(self) -> JsonType:
+        """Serialise the RUS state factory config to JSON."""
+        return asdict(self)
 
 
 class QECStyle(StrEnum):

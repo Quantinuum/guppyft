@@ -9,7 +9,7 @@ from guppylang.std.lang import Function, owned
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.quantum import Measurement, collect_measurements, qubit
 
-from guppyft.std._logical_block import LogicalBlock
+from ._logical_block import LogicalBlock
 
 __all__ = [
     "PreBlock",
