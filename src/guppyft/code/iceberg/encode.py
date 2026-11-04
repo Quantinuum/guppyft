@@ -10,15 +10,23 @@ from hugr.package import Package
 from hugr.utils import JsonType
 
 from guppyft.encode import AnnotatingArchitectureInstance, annotate_encoding
-from guppyft.std.state_factory._conf import RUSStateFactoryConf
 
-__all__ = [
-    "DynamicQubitReuse",
-    "IcebergBuilder",
-    "IcebergInstance",
-    "IcebergQEDPolicy",
-    "RUSStateFactoryConf",
-]
+
+@dataclass(frozen=True)
+class RUSStateFactoryConf:
+    """Iceberg RUS state factory configuration.
+
+    Attributes:
+        size: Maximum number of states to be produced in parallel.
+        max_attempts: Maximum number of repeat-until-success attempts.
+    """
+
+    size: int
+    max_attempts: int
+
+    def to_json(self) -> JsonType:
+        """Serialise the RUS state factory config to JSON."""
+        return asdict(self)
 
 
 class DynamicQubitReuse(StrEnum):
