@@ -130,7 +130,7 @@ class IcebergQEDPolicy:
 
     @classmethod
     def from_json(cls, values: dict[str, Any]) -> "IcebergQEDPolicy":
-        """Deserialize the QEC policy from JSON."""
+        """Deserialize the QED policy from JSON."""
         cost_values = values["costs"]
         costs = IcebergQEDPolicy.OperationCosts(
             **{
