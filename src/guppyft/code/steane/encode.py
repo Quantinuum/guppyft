@@ -57,6 +57,7 @@ from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
 from guppyft.std import LogicalBlock
 from guppyft.std.state_factory import StateFactory
+from guppyft.util import PathDict
 
 from . import logical as steane_logical
 from .primitives import RawMeasurement
@@ -79,6 +80,14 @@ class RUSStateFactoryConf:
     def to_json(self) -> JsonType:
         """Serialise the RUS state factory config to JSON."""
         return asdict(self)
+
+    @classmethod
+    def from_json(cls, values: dict[str, Any]) -> "RUSStateFactoryConf":
+        """Deserialise the RUS state factory config from JSON."""
+        return cls(
+            size=values["size"],
+            max_attempts=values["max_attempts"],
+        )
 
 
 class QECStyle(StrEnum):
@@ -136,6 +145,31 @@ class QECPolicy:
         """Serialise the QEC policy to JSON."""
         return asdict(self)
 
+    @classmethod
+    def from_json(cls, values: dict[str, Any]) -> "QECPolicy":
+        """Deserialise the QEC policy from JSON."""
+        cost_values = values["costs"]
+        costs = QECPolicy.OperationCosts(
+            prep_zero=cost_values["prep_zero"],
+            prep_t=cost_values["prep_t"],
+            x=cost_values["x"],
+            y=cost_values["y"],
+            z=cost_values["z"],
+            s=cost_values["s"],
+            h=cost_values["h"],
+            sdg=cost_values["sdg"],
+            inject_t=cost_values["inject_t"],
+            inject_tdg=cost_values["inject_tdg"],
+            cx=cost_values["cx"],
+            cz=cost_values["cz"],
+        )
+
+        return cls(
+            style=QECStyle(values["style"]),
+            threshold=values["threshold"],
+            costs=costs,
+        )
+
 
 @dataclass(frozen=True, kw_only=True)
 class _SteaneOptions:
@@ -148,7 +182,7 @@ class _SteaneOptions:
 class SteaneInstance(AnnotatingArchitectureInstance, EncodingArchitectureInstance):
     """A Steane architecture instance built by `SteaneBuilder.build`."""
 
-    _spec: EncodeSpec
+    _spec: EncodeSpec = field(compare=False)
     _n_blocks: int
 
     _options: _SteaneOptions
@@ -759,3 +793,28 @@ class SteaneBuilder:
         return SteaneInstance(
             _spec=encoder_spec, _n_blocks=n_blocks, _options=deepcopy(self._options)
         )
+
+    @classmethod
+    def from_params(cls, params: dict[str, Any]) -> "SteaneBuilder":
+        """Configures the builder according to the given parameters. To be used as the
+        'inverse' of `SteaneInstance.annotate`.
+
+        Note that this returns a builder instance, and any final parameters like
+        `n_blocks` have to be manually extracted."""
+        params = PathDict(params)
+
+        builder = cls()
+        if params["schema_version"] != 1:
+            raise RuntimeError(
+                f"Unknown params schema version: {params['schema_version']}"
+            )
+
+        builder = builder.with_zero_factory_conf(
+            RUSStateFactoryConf.from_json(params["zero_factory"])
+        )
+        builder = builder.with_magic_factory_conf(
+            RUSStateFactoryConf.from_json(params["magic_factory"])
+        )
+        builder = builder.with_qec_policy(QECPolicy.from_json(params["qec_policy"]))
+
+        return builder
