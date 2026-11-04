@@ -3,7 +3,7 @@
 This module contains bindings for the fundamental ops in the HUGR extensions, as well
 as composite operations that comprise multiple logical operations.
 
-The physical implementation for these ops is provided in
+The physical implementations for these ops are provided in
 :py:mod:`~guppyft.code.toy_k2.primitives`.
 """
 
