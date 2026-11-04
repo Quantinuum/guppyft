@@ -31,13 +31,6 @@ class DynamicQubitReuse(StrEnum):
     """Use available fresh qubits, then freed qubits, before preparing another block."""
 
 
-class InitStyle(StrEnum):
-    """The initialisation style of an Iceberg block."""
-
-    HALF_DEPTH = auto()
-    LOG_DEPTH = auto()
-
-
 @dataclass
 class IcebergQEDPolicy:
     """Policy to determine when QED cycles are injected.
@@ -112,7 +105,6 @@ class IcebergQEDPolicy:
 
 @dataclass(frozen=True, kw_only=True)
 class _IcebergOptions:
-    init_style: InitStyle
     qed_policy: IcebergQEDPolicy
     syndrome_during_measurement: bool
     state_prep_rus_attempts: int
@@ -137,7 +129,6 @@ class IcebergInstance(AnnotatingArchitectureInstance):
                 "schema_version": 1,
                 "n_blocks": self._n_blocks,
                 "block_size": self._block_size,
-                "init_style": self._options.init_style,
                 "qed_policy": self._options.qed_policy.to_json(),
                 "syndrome_during_measurement": self._options.syndrome_during_measurement,  # noqa: E501 ruff format keeps changing this line back
                 "state_prep_rus_attempts": self._options.state_prep_rus_attempts,
@@ -152,7 +143,6 @@ class IcebergBuilder:
 
     _options: _IcebergOptions = field(
         default=_IcebergOptions(
-            init_style=InitStyle.LOG_DEPTH,
             qed_policy=IcebergQEDPolicy(),
             syndrome_during_measurement=False,
             state_prep_rus_attempts=3,
@@ -163,10 +153,6 @@ class IcebergBuilder:
     def with_qed_policy(self, qed_policy: IcebergQEDPolicy) -> Self:
         """Set the QED policy."""
         return replace(self, _options=replace(self._options, qed_policy=qed_policy))
-
-    def with_init_style(self, style: InitStyle) -> Self:
-        """Set the Iceberg block initialization style."""
-        return replace(self, _options=replace(self._options, init_style=style))
 
     def with_state_prep_rus_attempts(self, max_attempts: int) -> Self:
         """Set the number of attempts state prep is allowed before it fails."""
