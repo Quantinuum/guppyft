@@ -12,6 +12,7 @@ from typing import no_type_check
 from guppylang import guppy
 from guppylang.std.lang import owned
 from guppylang_internals.decorator import custom_type, hugr_op
+from guppylang_internals.tys import Effect
 
 from guppyft.code._util import logical_op
 from guppyft.extensions import toy_k2_ops, toy_k2_types
@@ -21,7 +22,7 @@ from guppyft.extensions import toy_k2_ops, toy_k2_types
 class QubitMeasurement:
     """Measurement of a logical qubit."""
 
-    @hugr_op(logical_op(toy_k2_ops.decode_qubit_measurement_def))
+    @hugr_op(logical_op(toy_k2_ops.decode_qubit_measurement_def), effects=[Effect.ANY])
     @no_type_check
     def decode(self: "QubitMeasurement") -> bool:
         """Decode the logical qubit measurement."""
@@ -31,7 +32,7 @@ class QubitMeasurement:
 class BlockMeasurement:
     """Measurement of both qubits in a logical block."""
 
-    @hugr_op(logical_op(toy_k2_ops.decode_block_measurement_def))
+    @hugr_op(logical_op(toy_k2_ops.decode_block_measurement_def), effects=[Effect.ANY])
     @no_type_check
     def decode(self: "BlockMeasurement") -> tuple[bool, bool]:
         """Decode the logical block measurement."""
@@ -41,7 +42,7 @@ class BlockMeasurement:
 class Block:
     """A ToyK2 logical block."""
 
-    @hugr_op(logical_op(toy_k2_ops.prep_zero_ft_def))
+    @hugr_op(logical_op(toy_k2_ops.prep_zero_ft_def), effects=[Effect.ANY])
     @no_type_check
     def __new__() -> "Block":
         r"""Fault-tolerant preparation of a logical :math:`|00\\rangle` state."""
@@ -129,7 +130,7 @@ class Block:
 class Qubit:
     """A dynamic ToyK2 logical qubit."""
 
-    @hugr_op(logical_op(toy_k2_ops.alloc_dynq_def))
+    @hugr_op(logical_op(toy_k2_ops.alloc_dynq_def), effects=[Effect.ANY])
     @no_type_check
     def __new__() -> "Qubit":
         r"""Dynamic allocation of a logical qubit in the :math:`|0\\rangle` state."""
@@ -206,19 +207,19 @@ class BorrowedBlock:
         restore_some(self, qubit)
 
 
-@hugr_op(logical_op(toy_k2_ops.free_def))
+@hugr_op(logical_op(toy_k2_ops.free_def), effects=[Effect.ANY])
 @no_type_check
 def free(blk: Block @ owned) -> None:
     """Free a block."""
 
 
-@hugr_op(logical_op(toy_k2_ops.project_z_def))
+@hugr_op(logical_op(toy_k2_ops.project_z_def), effects=[Effect.ANY])
 @no_type_check
 def project_z(blk: Block, idx: int) -> QubitMeasurement:
     """Project the chosen logical qubit onto the Z basis without consuming it."""
 
 
-@hugr_op(logical_op(toy_k2_ops.measure_z_all_def))
+@hugr_op(logical_op(toy_k2_ops.measure_z_all_def), effects=[Effect.ANY])
 @no_type_check
 def measure_z_all(blk: Block @ owned) -> BlockMeasurement:
     """Measure both qubits of the block in the Z basis.
@@ -227,7 +228,7 @@ def measure_z_all(blk: Block @ owned) -> BlockMeasurement:
     """
 
 
-@hugr_op(logical_op(toy_k2_ops.qed_cycle_def))
+@hugr_op(logical_op(toy_k2_ops.qed_cycle_def), effects=[Effect.ANY])
 @no_type_check
 def qed_cycle(blk: Block) -> None:
     """Performs an error detection cycle on the block.
@@ -237,7 +238,7 @@ def qed_cycle(blk: Block) -> None:
     """
 
 
-@hugr_op(logical_op(toy_k2_ops.x_def))
+@hugr_op(logical_op(toy_k2_ops.x_def), effects=())
 @no_type_check
 def x(blk: Block, idx: int) -> None:
     """Logical X gate to the chosen logical qubit.
@@ -248,7 +249,7 @@ def x(blk: Block, idx: int) -> None:
     """
 
 
-@hugr_op(logical_op(toy_k2_ops.z_def))
+@hugr_op(logical_op(toy_k2_ops.z_def), effects=())
 @no_type_check
 def z(blk: Block, idx: int) -> None:
     """Logical Z gate to the chosen logical qubit.
@@ -259,7 +260,7 @@ def z(blk: Block, idx: int) -> None:
     """
 
 
-@hugr_op(logical_op(toy_k2_ops.h_all_def))
+@hugr_op(logical_op(toy_k2_ops.h_all_def), effects=())
 @no_type_check
 def h_all(blk: Block) -> None:
     """Logical Hadamard gate on both logical qubits.
@@ -269,7 +270,7 @@ def h_all(blk: Block) -> None:
     """
 
 
-@hugr_op(logical_op(toy_k2_ops.cx_intra_def))
+@hugr_op(logical_op(toy_k2_ops.cx_intra_def), effects=())
 @no_type_check
 def cx_intra(blk: Block, target: int) -> None:
     """Logical CX within the block, targeting the specified logical qubit.
@@ -281,7 +282,7 @@ def cx_intra(blk: Block, target: int) -> None:
     """
 
 
-@hugr_op(logical_op(toy_k2_ops.cx_transversal_def))
+@hugr_op(logical_op(toy_k2_ops.cx_transversal_def), effects=())
 @no_type_check
 def cx_transversal(control: Block, target: Block) -> None:
     """Transversal logical CX, namely, two parallel CX gates between the blocks.
@@ -292,7 +293,7 @@ def cx_transversal(control: Block, target: Block) -> None:
     """
 
 
-@hugr_op(logical_op(toy_k2_ops.swap_intra_def))
+@hugr_op(logical_op(toy_k2_ops.swap_intra_def), effects=())
 @no_type_check
 def swap_intra(blk: Block) -> None:
     """Logical SWAP within the block, swapping the two logical qubits.
@@ -302,7 +303,7 @@ def swap_intra(blk: Block) -> None:
     """
 
 
-@hugr_op(logical_op(toy_k2_ops.prep_zero_plus_ft_def))
+@hugr_op(logical_op(toy_k2_ops.prep_zero_plus_ft_def), effects=[Effect.ANY])
 @no_type_check
 def prep_zero_plus_ft() -> Block:
     r"""Fault-tolerant preparation of a logical :math:`|0+\rangle` state.
@@ -312,7 +313,7 @@ def prep_zero_plus_ft() -> Block:
     """
 
 
-@hugr_op(logical_op(toy_k2_ops.prep_y_states_non_ft_def))
+@hugr_op(logical_op(toy_k2_ops.prep_y_states_non_ft_def), effects=[Effect.ANY])
 @no_type_check
 def prep_y_states_non_ft() -> Block:
     r"""Non fault-tolerant preparation of a logical :math:`|Y\rangle|Y\rangle` state.
@@ -321,7 +322,7 @@ def prep_y_states_non_ft() -> Block:
     """
 
 
-@hugr_op(logical_op(toy_k2_ops.prep_t_states_non_ft_def))
+@hugr_op(logical_op(toy_k2_ops.prep_t_states_non_ft_def), effects=[Effect.ANY])
 @no_type_check
 def prep_t_states_non_ft() -> Block:
     r"""Non fault-tolerant preparation of a logical :math:`T|+\rangle T|+\rangle` state.
@@ -330,85 +331,85 @@ def prep_t_states_non_ft() -> Block:
     """
 
 
-@hugr_op(logical_op(toy_k2_ops.free_dynq_def))
+@hugr_op(logical_op(toy_k2_ops.free_dynq_def), effects=[Effect.ANY])
 @no_type_check
 def free_dynq(q: Qubit @ owned) -> None:
     """Free a dynamic logical qubit."""
 
 
-@hugr_op(logical_op(toy_k2_ops.x_dynq_def))
+@hugr_op(logical_op(toy_k2_ops.x_dynq_def), effects=())
 @no_type_check
 def x_dynq(q: Qubit) -> None:
     """Apply an X gate to a dynamic logical qubit."""
 
 
-@hugr_op(logical_op(toy_k2_ops.z_dynq_def))
+@hugr_op(logical_op(toy_k2_ops.z_dynq_def), effects=())
 @no_type_check
 def z_dynq(q: Qubit) -> None:
     """Apply a Z gate to a dynamic logical qubit."""
 
 
-@hugr_op(logical_op(toy_k2_ops.h_dynq_def))
+@hugr_op(logical_op(toy_k2_ops.h_dynq_def), effects=[Effect.ANY])
 @no_type_check
 def h_dynq(q: Qubit) -> None:
     """Apply a Hadamard gate to a dynamic logical qubit."""
 
 
-@hugr_op(logical_op(toy_k2_ops.s_dynq_def))
+@hugr_op(logical_op(toy_k2_ops.s_dynq_def), effects=[Effect.ANY])
 @no_type_check
 def s_dynq(q: Qubit) -> None:
     """Apply an S gate to a dynamic logical qubit."""
 
 
-@hugr_op(logical_op(toy_k2_ops.sdg_dynq_def))
+@hugr_op(logical_op(toy_k2_ops.sdg_dynq_def), effects=[Effect.ANY])
 @no_type_check
 def sdg_dynq(q: Qubit) -> None:
     """Apply an Sdg gate to a dynamic logical qubit."""
 
 
-@hugr_op(logical_op(toy_k2_ops.t_dynq_def))
+@hugr_op(logical_op(toy_k2_ops.t_dynq_def), effects=[Effect.ANY])
 @no_type_check
 def t_dynq(q: Qubit) -> None:
     """Apply an T gate to a dynamic logical qubit."""
 
 
-@hugr_op(logical_op(toy_k2_ops.tdg_dynq_def))
+@hugr_op(logical_op(toy_k2_ops.tdg_dynq_def), effects=[Effect.ANY])
 @no_type_check
 def tdg_dynq(q: Qubit) -> None:
     """Apply a Tdg gate to a dynamic logical qubit."""
 
 
-@hugr_op(logical_op(toy_k2_ops.cx_dynq_def))
+@hugr_op(logical_op(toy_k2_ops.cx_dynq_def), effects=())
 @no_type_check
 def cx_dynq(control: Qubit, target: Qubit) -> None:
     """Apply a CX gate to dynamic logical qubits."""
 
 
-@hugr_op(logical_op(toy_k2_ops.project_z_dynq_def))
+@hugr_op(logical_op(toy_k2_ops.project_z_dynq_def), effects=[Effect.ANY])
 @no_type_check
 def project_z_dynq(q: Qubit) -> QubitMeasurement:
     """Project a dynamic logical qubit onto the Z basis without consuming it."""
 
 
-@hugr_op(logical_op(toy_k2_ops.borrow_def))
+@hugr_op(logical_op(toy_k2_ops.borrow_def), effects=[Effect.ANY])
 @no_type_check
 def borrow(block: Block @ owned, idx: int) -> (Qubit, BorrowedBlock):
     """Extract a logical qubit from the specified index in the block."""
 
 
-@hugr_op(logical_op(toy_k2_ops.borrow_more_def))
+@hugr_op(logical_op(toy_k2_ops.borrow_more_def), effects=[Effect.ANY])
 @no_type_check
 def borrow_more(block: BorrowedBlock, idx: int) -> Qubit:
     """Extract an additional logical qubit from the block, from the specified index."""
 
 
-@hugr_op(logical_op(toy_k2_ops.restore_some_def))
+@hugr_op(logical_op(toy_k2_ops.restore_some_def), effects=[Effect.ANY])
 @no_type_check
 def restore_some(block: BorrowedBlock, q: Qubit @ owned) -> None:
     """Restore a previously borrowed logical qubit to its block."""
 
 
-@hugr_op(logical_op(toy_k2_ops.restore_def))
+@hugr_op(logical_op(toy_k2_ops.restore_def), effects=[Effect.ANY])
 @no_type_check
 def restore(block: BorrowedBlock @ owned, q: Qubit @ owned) -> Block:
     """Restore the last of the borrowed logical qubits back to its block."""
