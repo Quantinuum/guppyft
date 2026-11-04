@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.6.0](https://github.com/Quantinuum/guppyft/compare/v0.5.1...v0.6.0) (2026-11-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* Configure full RUS state factory in Iceberg builder ([#520](https://github.com/Quantinuum/guppyft/issues/520))
+* Remove init style configuration from Iceberg ([#519](https://github.com/Quantinuum/guppyft/issues/519))
+* Rename Iceberg ops and bindings for consistency ([#518](https://github.com/Quantinuum/guppyft/issues/518))
+* Modify Iceberg borrow/restore pattern, with ops for taking and putting only single dynamic qubits ([#509](https://github.com/Quantinuum/guppyft/issues/509))
+
+### Features
+
+* Add Iceberg architecture builder and annotation ([#517](https://github.com/Quantinuum/guppyft/issues/517)) ([aa732b7](https://github.com/Quantinuum/guppyft/commit/aa732b79d6ae2a76bbc1b3a349228a251c9379e5))
+* Configure full RUS state factory in Iceberg builder ([#520](https://github.com/Quantinuum/guppyft/issues/520)) ([ea6b73a](https://github.com/Quantinuum/guppyft/commit/ea6b73ae7ba995b1c1782e69f2ed1adfec81fb92))
+
+
+### Documentation
+
+* Rename Nexus Cloud to Nexus Console ([#515](https://github.com/Quantinuum/guppyft/issues/515)) ([985e82d](https://github.com/Quantinuum/guppyft/commit/985e82d187c7bcde287b21aad3cf7a789765f2d4))
+
+
+### Code Refactoring
+
+* Modify Iceberg borrow/restore pattern, with ops for taking and putting only single dynamic qubits ([#509](https://github.com/Quantinuum/guppyft/issues/509)) ([68d0887](https://github.com/Quantinuum/guppyft/commit/68d0887933edf977e07be41c84b6cc110e5d9bfd))
+* Remove init style configuration from Iceberg ([#519](https://github.com/Quantinuum/guppyft/issues/519)) ([e1fb331](https://github.com/Quantinuum/guppyft/commit/e1fb33110a91492816212af8020bce00059c5f73))
+* Rename Iceberg ops and bindings for consistency ([#518](https://github.com/Quantinuum/guppyft/issues/518)) ([3692b7f](https://github.com/Quantinuum/guppyft/commit/3692b7f049cf5759e34d188046dfe1bbe7a2b028))
+
 ## [0.5.1](https://github.com/Quantinuum/guppyft/compare/v0.5.0...v0.5.1) (2026-10-28)
 
 
