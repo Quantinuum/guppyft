@@ -22,7 +22,9 @@ from guppyft.extensions import toy_k2_ops, toy_k2_types
 class QubitMeasurement:
     """Measurement of a logical qubit."""
 
-    @hugr_op(logical_op(toy_k2_ops.decode_qubit_measurement_def), effects=[Effect.ANY])
+    @hugr_op(
+        logical_op(toy_k2_ops.decode_qubit_measurement_def), effects=[Effect.OUTPUT]
+    )
     @no_type_check
     def decode(self: "QubitMeasurement") -> bool:
         """Decode the logical qubit measurement."""
@@ -32,7 +34,9 @@ class QubitMeasurement:
 class BlockMeasurement:
     """Measurement of both qubits in a logical block."""
 
-    @hugr_op(logical_op(toy_k2_ops.decode_block_measurement_def), effects=[Effect.ANY])
+    @hugr_op(
+        logical_op(toy_k2_ops.decode_block_measurement_def), effects=[Effect.OUTPUT]
+    )
     @no_type_check
     def decode(self: "BlockMeasurement") -> tuple[bool, bool]:
         """Decode the logical block measurement."""
@@ -42,7 +46,9 @@ class BlockMeasurement:
 class Block:
     """A ToyK2 logical block."""
 
-    @hugr_op(logical_op(toy_k2_ops.prep_zero_ft_def), effects=[Effect.ANY])
+    @hugr_op(
+        logical_op(toy_k2_ops.prep_zero_ft_def), effects=[Effect.ALLOC, Effect.FREE]
+    )
     @no_type_check
     def __new__() -> "Block":
         r"""Fault-tolerant preparation of a logical :math:`|00\\rangle` state."""
@@ -126,19 +132,22 @@ class Block:
         swap_intra(self)
 
 
-@hugr_op(logical_op(toy_k2_ops.free_def), effects=[Effect.ANY])
+@hugr_op(logical_op(toy_k2_ops.free_def), effects=[Effect.FREE])
 @no_type_check
 def free(blk: Block @ owned) -> None:
     """Free a block."""
 
 
-@hugr_op(logical_op(toy_k2_ops.project_z_def), effects=[Effect.ANY])
+@hugr_op(
+    logical_op(toy_k2_ops.project_z_def),
+    effects=[Effect.OUTPUT, Effect.ALLOC, Effect.FREE],
+)
 @no_type_check
 def project_z(blk: Block, idx: int) -> QubitMeasurement:
     """Project the chosen logical qubit onto the Z basis without consuming it."""
 
 
-@hugr_op(logical_op(toy_k2_ops.measure_z_all_def), effects=[Effect.ANY])
+@hugr_op(logical_op(toy_k2_ops.measure_z_all_def), effects=[Effect.OUTPUT, Effect.FREE])
 @no_type_check
 def measure_z_all(blk: Block @ owned) -> BlockMeasurement:
     """Measure both qubits of the block in the Z basis.
@@ -147,7 +156,10 @@ def measure_z_all(blk: Block @ owned) -> BlockMeasurement:
     """
 
 
-@hugr_op(logical_op(toy_k2_ops.qed_cycle_def), effects=[Effect.ANY])
+@hugr_op(
+    logical_op(toy_k2_ops.qed_cycle_def),
+    effects=[Effect.OUTPUT, Effect.ALLOC, Effect.FREE],
+)
 @no_type_check
 def qed_cycle(blk: Block) -> None:
     """Performs an error detection cycle on the block.
@@ -222,7 +234,7 @@ def swap_intra(blk: Block) -> None:
     """
 
 
-@hugr_op(logical_op(toy_k2_ops.prep_zero_plus_ft_def), effects=[Effect.ANY])
+@hugr_op(logical_op(toy_k2_ops.prep_zero_plus_ft_def), effects=[Effect.ALLOC])
 @no_type_check
 def prep_zero_plus_ft() -> Block:
     r"""Fault-tolerant preparation of a logical :math:`|0+\rangle` state.
@@ -232,7 +244,7 @@ def prep_zero_plus_ft() -> Block:
     """
 
 
-@hugr_op(logical_op(toy_k2_ops.prep_y_states_non_ft_def), effects=[Effect.ANY])
+@hugr_op(logical_op(toy_k2_ops.prep_y_states_non_ft_def), effects=[Effect.ALLOC])
 @no_type_check
 def prep_y_states_non_ft() -> Block:
     r"""Non fault-tolerant preparation of a logical :math:`|Y\rangle|Y\rangle` state.
@@ -241,7 +253,7 @@ def prep_y_states_non_ft() -> Block:
     """
 
 
-@hugr_op(logical_op(toy_k2_ops.prep_t_states_non_ft_def), effects=[Effect.ANY])
+@hugr_op(logical_op(toy_k2_ops.prep_t_states_non_ft_def), effects=[Effect.ALLOC])
 @no_type_check
 def prep_t_states_non_ft() -> Block:
     r"""Non fault-tolerant preparation of a logical :math:`T|+\rangle T|+\rangle` state.
