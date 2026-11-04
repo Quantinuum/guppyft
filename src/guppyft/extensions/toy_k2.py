@@ -420,6 +420,18 @@ class ToyK2OpsExtension:
         return self.project_z_dynq_def.instantiate([])
 
     @functools.cached_property
+    def measure_z_dynq_def(self) -> OpDef:
+        """Destructively measure a dynamic ToyK2 logical qubit in the Z basis.
+
+        This is the generic operation definition. For the instantiated operation,
+        see `measure_z_dynq`."""
+        return self().get_op("measure_z_dynq")
+
+    def measure_z_dynq(self) -> ExtOp:
+        """Destructively measure a dynamic ToyK2 logical qubit in the Z basis."""
+        return self.measure_z_dynq_def.instantiate([])
+
+    @functools.cached_property
     def borrow_def(self) -> OpDef:
         """Extract a dynamic ToyK2 logical qubit from a block.
 

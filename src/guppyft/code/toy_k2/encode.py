@@ -17,7 +17,6 @@ from hugr.ext import ExtensionRegistry, OpDef
 from hugr.package import Package
 from hugr.std import _std_extensions
 
-from guppyft.code.toy_k2 import logical as k2_logical
 from guppyft.code.toy_k2 import primitives as k2_primitives
 from guppyft.encode import (
     EncodeSpec,
@@ -799,6 +798,13 @@ class ToyK2Builder:
             res, _ = _project_z(blk_id, qb_id)
             return res, addr
 
+        @_register_op_replacement(toy_k2_ops.measure_z_dynq_def)
+        @no_type_check
+        def _measure_z_dynq(addr: tuple[int, int]) -> bool:
+            m, _ = _project_z_dynq(addr)
+            _free_dynq(addr)
+            return m
+
         @_register_op_replacement(toy_k2_ops.decode_qubit_measurement_def)
         @no_type_check
         def _no_op_decode1(outcome: bool) -> bool:
@@ -893,6 +899,11 @@ class ToyK2Builder:
                     "project_z_dynq",
                     [],
                 ),
+                ("tket.quantum", "MeasureFree"): (
+                    "guppyft.toy_k2.ops",
+                    "measure_z_dynq",
+                    [],
+                ),
                 ("tket.quantum", "QFree"): ("guppyft.toy_k2.ops", "free_dynq", []),
                 ("tket.measurement", "Read"): (
                     "guppyft.toy_k2.ops",
@@ -908,9 +919,7 @@ class ToyK2Builder:
                 ("tket.quantum", "Tdg"): ("guppyft.toy_k2.ops", "tdg_dynq", []),
                 ("tket.quantum", "CX"): ("guppyft.toy_k2.ops", "cx_dynq", []),
             },
-            compound_op_replacements={
-                ("tket.quantum", "MeasureFree"): k2_logical.measure_z_dynq,
-            },
+            compound_op_replacements={},
             ty_replacements={
                 ("prelude", "qubit"): ("guppyft.toy_k2.types", "dynamic_qubit"),
                 ("tket.measurement", "Measurement"): (
