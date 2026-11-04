@@ -20,6 +20,7 @@ __all__ = [
     "steane",
     "steane_ops",
     "steane_types",
+    "toy_k2",
     "toy_k2_ops",
     "toy_k2_types",
 ]
