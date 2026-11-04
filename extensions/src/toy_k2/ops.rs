@@ -278,7 +278,7 @@ mod tests {
     fn test_toy_k2_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.toy_k2.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 31);
+        assert_eq!(EXTENSION.operations().count(), 32);
     }
 
     #[test]
