@@ -78,12 +78,12 @@ class RUSStateFactoryConf:
     max_attempts: int
 
     def to_json(self) -> JsonType:
-        """Serialise the RUS state factory config to JSON."""
+        """Serialize the RUS state factory config to JSON."""
         return asdict(self)
 
     @classmethod
     def from_json(cls, values: dict[str, Any]) -> "RUSStateFactoryConf":
-        """Deserialise the RUS state factory config from JSON."""
+        """Deserialize the RUS state factory config from JSON."""
         return cls(
             size=values["size"],
             max_attempts=values["max_attempts"],
@@ -142,12 +142,12 @@ class QECPolicy:
     costs: OperationCosts = field(default_factory=OperationCosts)
 
     def to_json(self) -> JsonType:
-        """Serialise the QEC policy to JSON."""
+        """Serialize the QEC policy to JSON."""
         return asdict(self)
 
     @classmethod
     def from_json(cls, values: dict[str, Any]) -> "QECPolicy":
-        """Deserialise the QEC policy from JSON."""
+        """Deserialize the QEC policy from JSON."""
         cost_values = values["costs"]
         costs = QECPolicy.OperationCosts(
             **{

@@ -31,28 +31,11 @@ class RUSStateFactoryConf:
 
     @classmethod
     def from_json(cls, values: dict[str, Any]) -> "RUSStateFactoryConf":
-        """Deserialise the RUS state factory config from JSON."""
+        """Deserialize the RUS state factory config from JSON."""
         return cls(
             size=values["size"],
             max_attempts=values["max_attempts"],
         )
-
-
-@dataclass(frozen=True)
-class RUSStateFactoryConf:
-    """Iceberg RUS state factory configuration.
-
-    Attributes:
-        size: Maximum number of states to be produced in parallel.
-        max_attempts: Maximum number of repeat-until-success attempts.
-    """
-
-    size: int
-    max_attempts: int
-
-    def to_json(self) -> JsonType:
-        """Serialize the RUS state factory config to JSON."""
-        return asdict(self)
 
 
 class DynamicQubitReuse(StrEnum):
@@ -142,12 +125,12 @@ class IcebergQEDPolicy:
     costs: OperationCosts = field(default_factory=OperationCosts)
 
     def to_json(self) -> JsonType:
-        """Serialise the QED policy to JSON."""
+        """Serialize the QED policy to JSON."""
         return asdict(self)
 
     @classmethod
     def from_json(cls, values: dict[str, Any]) -> "IcebergQEDPolicy":
-        """Deserialise the QEC policy from JSON."""
+        """Deserialize the QEC policy from JSON."""
         cost_values = values["costs"]
         costs = IcebergQEDPolicy.OperationCosts(
             **{
