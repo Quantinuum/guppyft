@@ -263,6 +263,11 @@ class SteaneBuilder:
                     exit("allocate_next_addr: No more logical qubits to allocate")
                 next_addr = self.addr_stack.pop()
 
+                if not self.blocks.is_borrowed(next_addr[0]):
+                    # Since Steane is k=1, blocks are either not allocated, or
+                    # completely filled, so this should never happen.
+                    panic("allocate_next_addr: Next block was already allocated.")
+
                 # Reset qec_counter for block
                 self.qec_counter[next_addr[0]] = 0.0
 
