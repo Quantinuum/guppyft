@@ -26,7 +26,7 @@ class RUSStateFactoryConf:
     max_attempts: int
 
     def to_json(self) -> JsonType:
-        """Serialise the RUS state factory config to JSON."""
+        """Serialize the RUS state factory config to JSON."""
         return asdict(self)
 
     @classmethod
