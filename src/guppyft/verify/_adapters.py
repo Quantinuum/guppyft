@@ -11,22 +11,22 @@ from guppylang.std.builtins import array
 from guppylang.std.lang import Function, owned
 from guppylang.std.quantum import qubit
 
-from guppyft.std import LogicalBlock
+from guppyft.std import QubitBlock
 
 N = guppy.nat_var("N")
 
 
 @guppy
 @no_type_check
-def _from_array(qs: array[qubit, N] @ owned) -> LogicalBlock[N]:
-    """Wrap physical qubits in a logical block without changing their order."""
-    return LogicalBlock(qs)
+def _from_array(qs: array[qubit, N] @ owned) -> QubitBlock[N]:
+    """Wrap qubits in a block without changing their order."""
+    return QubitBlock(qs)
 
 
 @guppy
 @no_type_check
-def _logical_block_to_array(block: LogicalBlock[N] @ owned) -> array[qubit, N]:
-    """Consume a logical block and return its physical qubit array."""
+def _qubit_block_to_array(block: QubitBlock[N] @ owned) -> array[qubit, N]:
+    """Consume a qubit block and return its underlying qubit array."""
     return block.data_qs
 
 
@@ -36,10 +36,10 @@ def _array_to_array(qs: array[qubit, N] @ owned) -> array[qubit, N]:
     return qs
 
 
-@guppy.overload(_array_to_array, _logical_block_to_array)
+@guppy.overload(_array_to_array, _qubit_block_to_array)
 @no_type_check
 def _to_array(block):
-    """Consume an array or LogicalBlock and return its physical qubit array."""
+    """Consume an array or QubitBlock and return its physical qubit array."""
 
 
 @guppy
@@ -56,7 +56,7 @@ def _apply_single_array(
 @no_type_check
 def _apply_single_logical_block(
     qs: array[qubit, N] @ owned,
-    implementation: Function[[LogicalBlock[N]], None],
+    implementation: Function[[QubitBlock[N]], None],
 ) -> array[qubit, N]:
     block = _from_array(qs)
     implementation(block)
@@ -85,7 +85,7 @@ def _apply_double_array(
 def _apply_double_logical_block(
     first: array[qubit, N] @ owned,
     second: array[qubit, N] @ owned,
-    implementation: Function[[LogicalBlock[N], LogicalBlock[N]], None],
+    implementation: Function[[QubitBlock[N], QubitBlock[N]], None],
 ) -> tuple[array[qubit, N], array[qubit, N]]:
     first_block = _from_array(first)
     second_block = _from_array(second)

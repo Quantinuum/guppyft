@@ -55,7 +55,7 @@ from guppyft.encode import (
 )
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
-from guppyft.std import LogicalBlock
+from guppyft.std import QubitBlock
 from guppyft.std.state_factory import StateFactory
 
 from . import logical as steane_logical
@@ -240,7 +240,7 @@ class SteaneBuilder:
         # See https://github.com/Quantinuum/guppyft/issues/179
         @guppy.struct
         class STATE:
-            blocks: array[Option[LogicalBlock[7]], comptime(n_blocks)]  # type: ignore[valid-type,type-arg]
+            blocks: array[Option[QubitBlock[7]], comptime(n_blocks)]  # type: ignore[valid-type,type-arg]
             addr_stack: Stack[tuple[int, int], comptime(n_blocks)]  # type: ignore[valid-type]
             qec_counter: array[float, comptime(n_blocks)]  # type: ignore[valid-type]
 
@@ -253,12 +253,12 @@ class SteaneBuilder:
 
             @guppy
             @no_type_check
-            def take_block(self, blk_id: int) -> LogicalBlock[7]:
+            def take_block(self, blk_id: int) -> QubitBlock[7]:
                 return self.blocks[blk_id].take().unwrap()
 
             @guppy
             @no_type_check
-            def put_block(self, blk_id: int, blk: LogicalBlock[7] @ owned) -> None:
+            def put_block(self, blk_id: int, blk: QubitBlock[7] @ owned) -> None:
                 self.blocks[blk_id].swap(some(blk)).unwrap_nothing()
 
             @guppy
@@ -310,7 +310,7 @@ class SteaneBuilder:
 
                 @guppy
                 @no_type_check
-                def qec_cycle_def(state: STATE, q: LogicalBlock[7]) -> None:
+                def qec_cycle_def(state: STATE, q: QubitBlock[7]) -> None:
                     # Allocate new blocks for the Bell state
                     ancilla0 = state.zero_state_factory.get_state()
                     ancilla1 = state.zero_state_factory.get_state()
@@ -320,7 +320,7 @@ class SteaneBuilder:
 
                 @guppy
                 @no_type_check
-                def qec_cycle_def(state: STATE, q: LogicalBlock[7]) -> None:
+                def qec_cycle_def(state: STATE, q: QubitBlock[7]) -> None:
                     ancillaX = state.zero_state_factory.get_state()
                     steane_x_qec_cycle(q, ancillaX)
                     ancillaZ = state.zero_state_factory.get_state()
@@ -330,7 +330,7 @@ class SteaneBuilder:
 
                 @guppy
                 @no_type_check
-                def qec_cycle_def(state: STATE, q: LogicalBlock[7]) -> None:
+                def qec_cycle_def(state: STATE, q: QubitBlock[7]) -> None:
                     reichardt_qec_cycle(q)
 
         @_register_op_replacement(steane_ops.qec_cycle_def)
@@ -629,7 +629,7 @@ class SteaneBuilder:
         @link_name("guppyft.steane.gen_state")
         def state_gen() -> STATE:
             return STATE(
-                array(nothing[LogicalBlock[7]]() for _ in range(comptime(n_blocks))),
+                array(nothing[QubitBlock[7]]() for _ in range(comptime(n_blocks))),
                 Stack(
                     array(some((blk, 1)) for blk in range(comptime(n_blocks))),
                     comptime(n_blocks),

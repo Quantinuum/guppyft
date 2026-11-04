@@ -18,7 +18,7 @@ from guppyft.code.steane.primitives import (
     steane_x_qec_cycle,
     steane_z_qec_cycle,
 )
-from guppyft.std import LogicalBlock
+from guppyft.std import QubitBlock
 from guppyft.verify import valid_clifford_implementation
 
 
@@ -30,7 +30,7 @@ def specify_identity(block: array[qubit, 1]) -> None:
 
 @guppy
 @no_type_check
-def _apply_error(block: LogicalBlock[7], loc: int, is_x_error: bool) -> None:
+def _apply_error(block: QubitBlock[7], loc: int, is_x_error: bool) -> None:
     if is_x_error:
         x(block.data_qs[loc])
     else:
@@ -41,7 +41,7 @@ def test_knill_qec_without_errors() -> None:
 
     @guppy
     @no_type_check
-    def impl_func(block: LogicalBlock[7]) -> None:
+    def impl_func(block: QubitBlock[7]) -> None:
         a0 = prep_zero_non_ft()
         a1 = prep_zero_non_ft()
         knill_qec_cycle(block, a0, a1)
@@ -57,7 +57,7 @@ def test_knill_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
 
     @guppy
     @no_type_check
-    def impl_func(block: LogicalBlock[7]) -> None:
+    def impl_func(block: QubitBlock[7]) -> None:
         _apply_error(block, comptime(error_loc), comptime(is_x_error))
         a0 = prep_zero_non_ft()
         a1 = prep_zero_non_ft()
@@ -72,7 +72,7 @@ def test_steane_qec_without_errors() -> None:
 
     @guppy
     @no_type_check
-    def impl_func(block: LogicalBlock[7]) -> None:
+    def impl_func(block: QubitBlock[7]) -> None:
         a0 = prep_zero_non_ft()
         steane_x_qec_cycle(block, a0)
         a0 = prep_zero_non_ft()
@@ -89,7 +89,7 @@ def test_steane_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
 
     @guppy
     @no_type_check
-    def impl_func(block: LogicalBlock[7]) -> None:
+    def impl_func(block: QubitBlock[7]) -> None:
         _apply_error(block, comptime(error_loc), comptime(is_x_error))
         a0 = prep_zero_non_ft()
         steane_x_qec_cycle(block, a0)
@@ -105,7 +105,7 @@ def test_reichardt_qec_without_errors() -> None:
 
     @guppy
     @no_type_check
-    def impl_func(block: LogicalBlock[7]) -> None:
+    def impl_func(block: QubitBlock[7]) -> None:
         reichardt_qec_cycle(block)
 
     assert valid_clifford_implementation(
@@ -119,7 +119,7 @@ def test_reichardt_qec_with_errors(error_loc: int, is_x_error: bool) -> None:
 
     @guppy
     @no_type_check
-    def impl_func(block: LogicalBlock[7]) -> None:
+    def impl_func(block: QubitBlock[7]) -> None:
         _apply_error(block, comptime(error_loc), comptime(is_x_error))
         reichardt_qec_cycle(block)
 
@@ -136,7 +136,7 @@ def test_steane_measure_syndromes() -> None:
 
     @guppy
     @no_type_check
-    def impl_func(block: LogicalBlock[7]) -> None:
+    def impl_func(block: QubitBlock[7]) -> None:
         _measure_syndromes(block)
 
     assert valid_clifford_implementation(

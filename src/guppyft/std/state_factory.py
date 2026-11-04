@@ -9,7 +9,7 @@ from guppylang.std.lang import Function, owned
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.quantum import Measurement, collect_measurements, qubit
 
-from ._logical_block import LogicalBlock
+from ._qubit_block import QubitBlock
 
 __all__ = [
     "PreBlock",
@@ -44,18 +44,18 @@ class PreBlock(Generic[BLOCK_SIZE, N_FLAGS]):  # type: ignore[misc]
         N_FLAGS: Size of the results array
 
     Attributes:
-        logical_block (LogicalBlock[N]): The candidate logical block
+        logical_block (QubitBlock[N]): The candidate logical block
         flag_outcomes (array[Measurement, N_FLAGS]): Array of measurement outcomes.
     """
 
-    logical_block: LogicalBlock[BLOCK_SIZE]  # type: ignore[type-arg, valid-type]
+    logical_block: QubitBlock[BLOCK_SIZE]  # type: ignore[type-arg, valid-type]
     flag_outcomes: array[Measurement, N_FLAGS]  # type: ignore[valid-type]
 
     @guppy
     @no_type_check
     def force_check(
         self: "PreBlock[BLOCK_SIZE, N_FLAGS]" @ owned,
-    ) -> Option[LogicalBlock[BLOCK_SIZE]]:
+    ) -> Option[QubitBlock[BLOCK_SIZE]]:
         """If preparation was successful, return the block, otherwise return `nothing`.
 
         Calling this forces the measurement of the flags to take place (if they had
@@ -72,10 +72,10 @@ class PreBlock(Generic[BLOCK_SIZE, N_FLAGS]):  # type: ignore[misc]
 
 @guppy
 @no_type_check
-def _qalloc_dirty() -> LogicalBlock[BLOCK_SIZE]:
+def _qalloc_dirty() -> QubitBlock[BLOCK_SIZE]:
     """Allocate resources for a codeblock, but the qubits are not in a valid logical
     state."""
-    return LogicalBlock(array(qubit() for _ in range(BLOCK_SIZE)))
+    return QubitBlock(array(qubit() for _ in range(BLOCK_SIZE)))
 
 
 @guppy.struct
@@ -102,7 +102,7 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]):  # type: ignore[mi
     @no_type_check
     def get_state(
         self: "StateFactory[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]",
-    ) -> LogicalBlock[BLOCK_SIZE]:
+    ) -> QubitBlock[BLOCK_SIZE]:
         """Parallel RUS preparation, up to `self.max_attempts` retries.
 
         All `BATCH_SIZE` state preparations may be run in parallel. If any of them
