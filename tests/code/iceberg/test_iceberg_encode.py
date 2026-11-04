@@ -89,10 +89,8 @@ def test_annotate_iceberg_encoding() -> None:
 
     metadata = hugr[hugr.module_root].metadata["qnt.nexus.compilation"]
     assert isinstance(metadata, dict)
-    reconstructed_arch = IcebergBuilder.from_params(
-        metadata["ft_encoding"]["params"]
-    ).build(n_blocks=4, block_size=6)
-    assert arch == reconstructed_arch
+    arch_rec = IcebergBuilder.instance_from_params(metadata["ft_encoding"]["params"])
+    assert arch == arch_rec
 
     assert hugr[hugr.module_root].metadata["qnt.nexus.compilation"] == {
         "schema_version": 1,

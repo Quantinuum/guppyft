@@ -237,12 +237,9 @@ class IcebergBuilder:
         )
 
     @classmethod
-    def from_params(cls, params: dict[str, Any]) -> "IcebergBuilder":
-        """Configures the builder according to the given parameters. To be used as the
-        'inverse' of `IcebergInstance.annotate`.
-
-        Note that this returns a builder instance, and any final parameters like
-        `n_blocks` and `block_size` have to be manually extracted."""
+    def instance_from_params(cls, params: dict[str, Any]) -> "IcebergInstance":
+        """Produces an instance with the builder according to the given parameters. To
+        be used as the 'inverse' of `IcebergInstance.annotate`."""
         params = PathDict(params)
 
         builder = cls()
@@ -262,4 +259,6 @@ class IcebergBuilder:
         )
         builder = builder.with_dynamic_qubit_reuse(params["dynamic_qubit_reuse"])
 
-        return builder
+        return builder.build(
+            n_blocks=params["n_blocks"], block_size=params["block_size"]
+        )

@@ -786,12 +786,9 @@ class SteaneBuilder:
         )
 
     @classmethod
-    def from_params(cls, params: dict[str, Any]) -> "SteaneBuilder":
-        """Configures the builder according to the given parameters. To be used as the
-        'inverse' of `SteaneInstance.annotate`.
-
-        Note that this returns a builder instance, and any final parameters like
-        `n_blocks` have to be manually extracted."""
+    def instance_from_params(cls, params: dict[str, Any]) -> "SteaneInstance":
+        """Produces an instance with the builder according to the given parameters. To
+        be used as the 'inverse' of `SteaneInstance.annotate`."""
         params = PathDict(params)
 
         builder = cls()
@@ -808,4 +805,4 @@ class SteaneBuilder:
         )
         builder = builder.with_qec_policy(QECPolicy.from_json(params["qec_policy"]))
 
-        return builder
+        return builder.build(n_blocks=params["n_blocks"])
