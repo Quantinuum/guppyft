@@ -1,6 +1,7 @@
 """Builder and encoding implementation for the ToyK2 architecture."""
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable
+from copy import deepcopy
 from dataclasses import dataclass, field, replace
 from typing import Any, Literal, Self, no_type_check, overload
 
@@ -19,7 +20,6 @@ from hugr.std import _std_extensions
 from guppyft.code.toy_k2 import logical as k2_logical
 from guppyft.code.toy_k2 import primitives as k2_primitives
 from guppyft.encode import (
-    EncoderParams,
     EncodeSpec,
     ImplementOps,
     ImplementOpsSpec,
@@ -33,25 +33,6 @@ from guppyft.globals import map_global, with_global
 from guppyft.std import LogicalBlock
 
 N = guppy.nat_var("N")
-
-
-@dataclass(frozen=True, kw_only=True)
-class ToyK2EncoderParams(EncoderParams):
-    """Parameters for a ToyK2 encoding.
-
-    Attributes:
-        n_blocks: Number of logical blocks available to the encoding.
-    """
-
-    n_blocks: int
-
-    def encoding(self) -> str:
-        """Return the identifier for the ToyK2 encoding."""
-        return "toy_k2"
-
-    def params(self) -> Mapping[str, Any]:
-        """Return the ToyK2-specific encoding parameters."""
-        return {"n_blocks": self.n_blocks}
 
 
 @dataclass
@@ -95,11 +76,18 @@ class QEDPolicy:
     costs: OperationCosts = field(default_factory=OperationCosts)
 
 
+@dataclass(frozen=True, kw_only=True)
+class _ToyK2Options:
+    qed_policy: QEDPolicy
+
+
 @dataclass(frozen=True)
 class ToyK2Instance:
     """A ToyK2 architecture instance built by `ToyK2Builder.build`."""
 
     _spec: EncodeSpec
+
+    _options: _ToyK2Options
 
     @overload
     def encode(self, pkg: Package, *, as_bytes: Literal[False] = False) -> Package: ...
@@ -108,7 +96,7 @@ class ToyK2Instance:
     def encode(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
         """Encode a computational package with the ToyK2 instance."""
         self.check_may_encode(pkg)
-        pkg_bytes: Package | bytes = encode(pkg, self._spec, as_bytes=as_bytes)  # type: ignore[call-overload]
+        pkg_bytes: Package | bytes = encode(pkg, self._spec, as_bytes=as_bytes)
         return pkg_bytes
 
     @overload
@@ -120,7 +108,7 @@ class ToyK2Instance:
     def implement_ops(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
         """Implement logical ops in `pkg` using this instance's op implementations."""
         assert self._spec.implement_ops is not None
-        pkg_bytes: Package | bytes = self._spec.implement_ops(pkg, as_bytes=as_bytes)  # type: ignore[call-overload]
+        pkg_bytes: Package | bytes = self._spec.implement_ops(pkg, as_bytes=as_bytes)
         return pkg_bytes
 
     def check_may_encode(self, hugr: Package) -> None:
@@ -156,17 +144,16 @@ class ToyK2Instance:
 class ToyK2Builder:
     """ToyK2 architecture builder class for creating `ToyK2Instance` objects."""
 
-    _qed_policy: QEDPolicy = field(default_factory=QEDPolicy)
-
-    @classmethod
-    def from_params(cls, params: ToyK2EncoderParams) -> ToyK2Instance:
-        """Build a ToyK2 instance from encoding parameters."""
-        return cls().build(params.n_blocks)
+    _options: _ToyK2Options = field(
+        default_factory=lambda: _ToyK2Options(
+            qed_policy=QEDPolicy(),
+        )
+    )
 
     def _gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
         """Generate the `ImplementOpsSpec` providing ToyK2 implementations of
         logical ops for a program using `n_blocks` logical blocks."""
-        qed_policy = self._qed_policy
+        qed_policy = self._options.qed_policy
 
         lib = GuppyLibrary(members=[])
         ops = OpReplacements()
@@ -940,9 +927,9 @@ class ToyK2Builder:
 
     def with_qed_policy(self, qed_policy: QEDPolicy) -> Self:
         """Set the QED policy."""
-        return replace(self, _qed_policy=qed_policy)
+        return replace(self, _options=replace(self._options, qed_policy=qed_policy))
 
     def build(self, n_blocks: int) -> ToyK2Instance:
         """Build a `ToyK2Instance` configured for `n_blocks` logical blocks."""
         encoder_spec = self._gen_encoder_spec(n_blocks)
-        return ToyK2Instance(_spec=encoder_spec)
+        return ToyK2Instance(_spec=encoder_spec, _options=deepcopy(self._options))
