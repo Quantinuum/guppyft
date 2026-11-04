@@ -168,7 +168,7 @@ class IcebergInstance(AnnotatingArchitectureInstance):
                 "n_blocks": self._n_blocks,
                 "block_size": self._block_size,
                 "qed_policy": self._options.qed_policy.to_json(),
-                "syndrome_extraction_during_measurement": self._options.syndrome_during_measurement,  # noqa: E501 ruff format keeps changing this line back
+                "syndrome_during_measurement": self._options.syndrome_during_measurement,  # noqa: E501 ruff format keeps changing this line back
                 "state_factory": self._options.state_factory_conf.to_json(),
                 "dynamic_qubit_reuse": self._options.dynamic_qubit_reuse,
             },
@@ -255,7 +255,7 @@ class IcebergBuilder:
             RUSStateFactoryConf.from_json(params["state_factory"])
         )
         builder = builder.with_syndrome_extraction_during_measurement(
-            params["syndrome_extraction_during_measurement"]
+            params["syndrome_during_measurement"]
         )
         builder = builder.with_dynamic_qubit_reuse(params["dynamic_qubit_reuse"])
 

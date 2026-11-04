@@ -142,7 +142,7 @@ def test_annotate_iceberg_encoding() -> None:
                         "swap_intrablock": 37.0,
                     },
                 },
-                "syndrome_extraction_during_measurement": True,
+                "syndrome_during_measurement": True,
                 "state_factory": {
                     "size": 50,
                     "max_attempts": 51,
