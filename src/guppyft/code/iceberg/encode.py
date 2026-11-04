@@ -1,7 +1,7 @@
 """Builder for public configuration of the Iceberg QEC architecture."""
 
 from copy import deepcopy
-from dataclasses import asdict, dataclass, field, replace
+from dataclasses import asdict, dataclass, field, fields, replace
 from enum import StrEnum, auto
 from typing import Any, Self
 
@@ -10,6 +10,7 @@ from hugr.package import Package
 from hugr.utils import JsonType
 
 from guppyft.encode import AnnotatingArchitectureInstance, annotate_encoding
+from guppyft.util import PathDict
 
 
 @dataclass(frozen=True)
@@ -27,6 +28,14 @@ class RUSStateFactoryConf:
     def to_json(self) -> JsonType:
         """Serialise the RUS state factory config to JSON."""
         return asdict(self)
+
+    @classmethod
+    def from_json(cls, values: dict[str, Any]) -> "RUSStateFactoryConf":
+        """Deserialise the RUS state factory config from JSON."""
+        return cls(
+            size=values["size"],
+            max_attempts=values["max_attempts"],
+        )
 
 
 class DynamicQubitReuse(StrEnum):
@@ -118,6 +127,18 @@ class IcebergQEDPolicy:
     def to_json(self) -> JsonType:
         """Serialise the QED policy to JSON."""
         return asdict(self)
+
+    @classmethod
+    def from_json(cls, values: dict[str, Any]) -> "IcebergQEDPolicy":
+        """Deserialise the QEC policy from JSON."""
+        cost_values = values["costs"]
+        costs = IcebergQEDPolicy.OperationCosts(
+            **{
+                cost_field.name: cost_values[cost_field.name]
+                for cost_field in fields(IcebergQEDPolicy.OperationCosts)
+            }
+        )
+        return cls(threshold=values["threshold"], costs=costs)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -214,3 +235,31 @@ class IcebergBuilder:
         return IcebergInstance(
             _n_blocks=n_blocks, _block_size=block_size, _options=deepcopy(self._options)
         )
+
+    @classmethod
+    def from_params(cls, params: dict[str, Any]) -> "IcebergBuilder":
+        """Configures the builder according to the given parameters. To be used as the
+        'inverse' of `IcebergInstance.annotate`.
+
+        Note that this returns a builder instance, and any final parameters like
+        `n_blocks` and `block_size` have to be manually extracted."""
+        params = PathDict(params)
+
+        builder = cls()
+        if params["schema_version"] != 1:
+            raise RuntimeError(
+                f"Unsupported params schema version: {params['schema_version']}"
+            )
+
+        builder = builder.with_qed_policy(
+            IcebergQEDPolicy.from_json(params["qed_policy"])
+        )
+        builder = builder.with_state_factory_conf(
+            RUSStateFactoryConf.from_json(params["state_factory"])
+        )
+        builder = builder.with_syndrome_extraction_during_measurement(
+            params["syndrome_extraction_during_measurement"]
+        )
+        builder = builder.with_dynamic_qubit_reuse(params["dynamic_qubit_reuse"])
+
+        return builder
