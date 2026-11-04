@@ -2,7 +2,7 @@
 
 from collections.abc import Callable
 from copy import deepcopy
-from dataclasses import asdict, dataclass, field, replace
+from dataclasses import asdict, dataclass, field, fields, replace
 from enum import StrEnum, auto
 from typing import Any, Self, no_type_check
 
@@ -150,20 +150,11 @@ class QECPolicy:
         """Deserialise the QEC policy from JSON."""
         cost_values = values["costs"]
         costs = QECPolicy.OperationCosts(
-            prep_zero=cost_values["prep_zero"],
-            prep_t=cost_values["prep_t"],
-            x=cost_values["x"],
-            y=cost_values["y"],
-            z=cost_values["z"],
-            s=cost_values["s"],
-            h=cost_values["h"],
-            sdg=cost_values["sdg"],
-            inject_t=cost_values["inject_t"],
-            inject_tdg=cost_values["inject_tdg"],
-            cx=cost_values["cx"],
-            cz=cost_values["cz"],
+            **{
+                cost_field.name: cost_values[cost_field.name]
+                for cost_field in fields(QECPolicy.OperationCosts)
+            }
         )
-
         return cls(
             style=QECStyle(values["style"]),
             threshold=values["threshold"],
@@ -806,7 +797,7 @@ class SteaneBuilder:
         builder = cls()
         if params["schema_version"] != 1:
             raise RuntimeError(
-                f"Unknown params schema version: {params['schema_version']}"
+                f"Unsupported params schema version: {params['schema_version']}"
             )
 
         builder = builder.with_zero_factory_conf(
