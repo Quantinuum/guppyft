@@ -9,6 +9,7 @@ from guppyft.code.iceberg.encode import (
     DynamicQubitReuse,
     IcebergBuilder,
     IcebergQEDPolicy,
+    RUSStateFactoryConf,
 )
 from guppyft.extensions import iceberg_ops
 
@@ -17,14 +18,26 @@ def test_iceberg_invalid_max_attempts() -> None:
     arch = IcebergBuilder()
     with pytest.raises(
         ValueError,
-        match=r"Cannot set the maximum state prep RUS attempts lower than 1, 0 given",
+        match=r"Cannot set the size of the RUS state factory lower than 1, 0 given",
     ):
-        arch.with_state_prep_rus_attempts(0)
+        arch.with_state_factory_conf(RUSStateFactoryConf(max_attempts=5, size=0))
     with pytest.raises(
         ValueError,
-        match=r"Cannot set the maximum state prep RUS attempts lower than 1, -5 given",
+        match=r"Cannot set the size of the RUS state factory lower than 1, -5 given",
     ):
-        arch.with_state_prep_rus_attempts(-5)
+        arch.with_state_factory_conf(RUSStateFactoryConf(max_attempts=5, size=-5))
+    with pytest.raises(
+        ValueError,
+        match=r"Cannot set the max attempts of the RUS state factory lower than 1, "
+        r"0 given",
+    ):
+        arch.with_state_factory_conf(RUSStateFactoryConf(max_attempts=0, size=5))
+    with pytest.raises(
+        ValueError,
+        match=r"Cannot set the max attempts of the RUS state factory lower than 1, "
+        r"-5 given",
+    ):
+        arch.with_state_factory_conf(RUSStateFactoryConf(max_attempts=-5, size=5))
 
 
 def test_iceberg_invalid_n_blocks() -> None:
@@ -66,7 +79,7 @@ def test_annotate_iceberg_encoding() -> None:
         IcebergBuilder()
         .with_qed_policy(policy)
         .with_syndrome_extraction_during_measurement(True)
-        .with_state_prep_rus_attempts(5)
+        .with_state_factory_conf(RUSStateFactoryConf(size=50, max_attempts=51))
         .with_dynamic_qubit_reuse(DynamicQubitReuse.disabled)
         .build(n_blocks=4, block_size=6)
     )
@@ -123,7 +136,10 @@ def test_annotate_iceberg_encoding() -> None:
                     },
                 },
                 "syndrome_during_measurement": True,
-                "state_prep_rus_attempts": 5,
+                "state_factory": {
+                    "size": 50,
+                    "max_attempts": 51,
+                },
                 "dynamic_qubit_reuse": "disabled",
             },
         },
