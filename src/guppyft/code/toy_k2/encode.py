@@ -201,13 +201,14 @@ class ToyK2Builder:
 
             Attributes:
                 blocks: Stores the runtime blocks.
-                unalloc_blks: Stack of block that have not yet been allocated.
+                free_block_ids: Stack of block IDs that have not yet been
+                    allocated.
                 available_dyn_addrs: Stack of available addresses on existing
                     dynamic blocks.
             """
 
             blocks: array[RuntimeBlock, n_blocks]  # type: ignore[valid-type]
-            unalloc_blks: Stack[int, n_blocks]  # type: ignore[valid-type]
+            free_block_ids: Stack[int, n_blocks]  # type: ignore[valid-type]
             available_dyn_addrs: Stack[tuple[int, int], n_blocks]  # type: ignore[valid-type]
 
             @guppy
@@ -215,16 +216,16 @@ class ToyK2Builder:
             def release_block(self, blk_id: int) -> LogicalBlock[4]:
                 """Consumes the RuntimeBlock and returns its logical block."""
                 runtime_block = self.blocks.take(blk_id)
-                self.unalloc_blks.push(blk_id)
+                self.free_block_ids.push(blk_id)
                 return runtime_block.logical_block
 
             @guppy
             @no_type_check
             def allocate_block_id(self, logical_block: LogicalBlock[4] @ owned) -> int:
                 """Reserve a new RuntimeBlock containing the given LogicalBlock."""
-                if len(self.unalloc_blks) == 0:
+                if len(self.free_block_ids) == 0:
                     exit("allocate_blk_id: No more logical blocks to allocate")
-                blk_id = self.unalloc_blks.pop()
+                blk_id = self.free_block_ids.pop()
 
                 runtime_block = RuntimeBlock(logical_block, array(False, False), 0.0)
                 self.blocks.put(runtime_block, blk_id)
