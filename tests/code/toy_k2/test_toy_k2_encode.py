@@ -49,6 +49,7 @@ def test_encoder() -> None:
 
 
 def test_encoder_smoke() -> None:
+    """Smoke tests all computational ops supported by the architecture."""
 
     @guppy
     def main() -> None:
