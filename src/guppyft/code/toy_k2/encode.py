@@ -206,9 +206,9 @@ class ToyK2Builder:
                     blocks.
             """
 
-            blocks: array[RuntimeBlock, comptime(n_blocks)]  # type: ignore[valid-type]
-            unalloc_blks: Stack[int, comptime(n_blocks)]  # type: ignore[valid-type]
-            avail_dyn_addrs: Stack[tuple[int, int], comptime(n_blocks)]  # type: ignore[valid-type]
+            blocks: array[RuntimeBlock, n_blocks]  # type: ignore[valid-type]
+            unalloc_blks: Stack[int, n_blocks]  # type: ignore[valid-type]
+            avail_dyn_addrs: Stack[tuple[int, int], n_blocks]  # type: ignore[valid-type]
 
             @guppy
             @no_type_check
@@ -250,9 +250,7 @@ class ToyK2Builder:
                     # structure with fast deletion (e.g. a set).
                     # Generally, this stack will be small, though, so it
                     # shouldn't be a performance bottleneck.
-                    aux_stack: Stack[tuple[int, int], comptime(n_blocks)] = (
-                        empty_stack()
-                    )
+                    aux_stack: Stack[tuple[int, int], n_blocks] = empty_stack()
                     for _ in range(len(self.avail_dyn_addrs)):
                         addr = self.avail_dyn_addrs.pop()
                         if addr[0] != blk_id:
@@ -764,8 +762,8 @@ class ToyK2Builder:
             return STATE(
                 empty_array(),
                 Stack(
-                    array(some(blk_id) for blk_id in range(comptime(n_blocks))),
-                    comptime(n_blocks),
+                    array(some(blk_id) for blk_id in range(n_blocks)),
+                    n_blocks,
                 ),
                 empty_stack(),
             )
