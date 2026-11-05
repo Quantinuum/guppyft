@@ -48,7 +48,7 @@ class Block:
 
     @hugr_op(
         logical_op(toy_k2_ops.prep_zero_ft_def), effects=[Effect.ALLOC, Effect.FREE]
-    )
+    )  # Effect.FREE due to freeing of ancilla qubits
     @no_type_check
     def __new__() -> "Block":
         r"""Fault-tolerant preparation of a logical :math:`|00\\rangle` state."""
@@ -141,7 +141,7 @@ def free(blk: Block @ owned) -> None:
 @hugr_op(
     logical_op(toy_k2_ops.project_z_def),
     effects=[Effect.OUTPUT, Effect.ALLOC, Effect.FREE],
-)
+)  # Effect.ALLOC and Effect.FREE due to allocation and freeing of ancilla qubits
 @no_type_check
 def project_z(blk: Block, idx: int) -> QubitMeasurement:
     """Project the chosen logical qubit onto the Z basis without consuming it."""
@@ -159,7 +159,7 @@ def measure_z_all(blk: Block @ owned) -> BlockMeasurement:
 @hugr_op(
     logical_op(toy_k2_ops.qed_cycle_def),
     effects=[Effect.OUTPUT, Effect.ALLOC, Effect.FREE],
-)
+)  # Effect.ALLOC and Effect.FREE due to allocation and freeing of ancilla qubits
 @no_type_check
 def qed_cycle(blk: Block) -> None:
     """Performs an error detection cycle on the block.
