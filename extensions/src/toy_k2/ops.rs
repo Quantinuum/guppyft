@@ -18,7 +18,7 @@ use strum::{EnumIter, EnumString, IntoStaticStr};
 /// The extension identifier.
 pub const EXTENSION_ID: ExtensionId = ExtensionId::new_unchecked("guppyft.toy_k2.ops");
 /// Extension version.
-pub const VERSION: semver::Version = semver::Version::new(0, 1, 0);
+pub const VERSION: semver::Version = semver::Version::new(0, 1, 1);
 
 /// Logical ToyK2 operations.
 #[derive(
@@ -81,6 +81,8 @@ pub enum ToyK2OpDef {
     cx_dynq,
     /// Project a dynamic logical qubit onto the Z basis without consuming it.
     project_z_dynq,
+    /// Destructively measure a dynamic logical qubit in the Z basis.
+    measure_z_dynq,
     /// Extraction of dynamic logical qubits from a block (consuming the block and emitting a borrowed block).
     borrow,
     /// Extraction of dynamic logical qubits from an already-borrowed block.
@@ -218,6 +220,10 @@ impl MakeOpDef for ToyK2OpDef {
                 vec![qubit_measurement_type(), dynamic_qubit_type()],
             )
             .into(),
+            measure_z_dynq => {
+                FuncValueType::new(vec![dynamic_qubit_type()], vec![qubit_measurement_type()])
+                    .into()
+            }
             borrow => FuncValueType::new(
                 vec![block_type(), int_type(6)],
                 vec![dynamic_qubit_type(), borrowed_block_type()],
@@ -272,7 +278,7 @@ mod tests {
     fn test_toy_k2_ops_extension() {
         assert_eq!(EXTENSION.name() as &str, "guppyft.toy_k2.ops");
         assert_eq!(EXTENSION.types().count(), 0);
-        assert_eq!(EXTENSION.operations().count(), 31);
+        assert_eq!(EXTENSION.operations().count(), 32);
     }
 
     #[test]

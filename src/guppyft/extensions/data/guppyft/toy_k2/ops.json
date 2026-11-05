@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "name": "guppyft.toy_k2.ops",
   "types": {},
   "operations": {
@@ -457,6 +457,37 @@
               "extension": "guppyft.toy_k2.types",
               "extension_version": "0.1.0",
               "id": "block_measurement",
+              "args": [],
+              "bound": "C"
+            }
+          ]
+        }
+      },
+      "binary": false
+    },
+    "measure_z_dynq": {
+      "extension": "guppyft.toy_k2.ops",
+      "name": "measure_z_dynq",
+      "description": "Destructively measure a dynamic logical qubit in the Z basis.",
+      "signature": {
+        "params": [],
+        "body": {
+          "input": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "dynamic_qubit",
+              "args": [],
+              "bound": "A"
+            }
+          ],
+          "output": [
+            {
+              "t": "Opaque",
+              "extension": "guppyft.toy_k2.types",
+              "extension_version": "0.1.0",
+              "id": "qubit_measurement",
               "args": [],
               "bound": "C"
             }
