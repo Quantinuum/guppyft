@@ -262,6 +262,11 @@ class SteaneBuilder:
 
             return decorator
 
+        ZeroFactory = guppy.type_alias(
+            "ZeroFactory",
+            "StateFactory[7, 1, comptime(self._options.zero_factory_conf.size)]",
+        )
+
         # TODO STATE should be generic for all codes. The methods that are code specific
         # should be `@guppy.declare` and each code can provide an implementation to be
         # linked i.e. `allocate_next_addr`.
@@ -272,9 +277,7 @@ class SteaneBuilder:
             addr_stack: Stack[tuple[int, int], n_blocks]  # type: ignore[valid-type]
             qec_counter: array[float, n_blocks]  # type: ignore[valid-type]
 
-            zero_state_factory: StateFactory[  # type: ignore[type-arg]
-                7, 1, comptime(self._options.zero_factory_conf.size)  # type: ignore[valid-type]
-            ]
+            zero_state_factory: ZeroFactory  # type: ignore[valid-type]
             magic_state_factory: StateFactory[  # type: ignore[type-arg]
                 7, 8, comptime(self._options.magic_factory_conf.size)  # type: ignore[valid-type]
             ]
@@ -314,7 +317,7 @@ class SteaneBuilder:
                     if self.qec_counter[i] >= comptime(qec_policy.threshold):
                         blk = self.blocks.take(i)
 
-                        qec_cycle_def(self, blk)
+                        qec_cycle_def(self.zero_state_factory, blk)
 
                         self.blocks.put(blk, i)
                         self.qec_counter[i] = 0.0
@@ -324,27 +327,33 @@ class SteaneBuilder:
 
                 @guppy
                 @no_type_check
-                def qec_cycle_def(state: STATE, q: LogicalBlock[7]) -> None:
+                def qec_cycle_def(
+                    zero_factory: ZeroFactory, q: LogicalBlock[7]
+                ) -> None:
                     # Allocate new blocks for the Bell state
-                    ancilla0 = state.zero_state_factory.get_state()
-                    ancilla1 = state.zero_state_factory.get_state()
+                    ancilla0 = zero_factory.get_state()
+                    ancilla1 = zero_factory.get_state()
                     knill_qec_cycle(q, ancilla0, ancilla1)
 
             case QECStyle.Steane:
 
                 @guppy
                 @no_type_check
-                def qec_cycle_def(state: STATE, q: LogicalBlock[7]) -> None:
-                    ancillaX = state.zero_state_factory.get_state()
+                def qec_cycle_def(
+                    zero_factory: ZeroFactory, q: LogicalBlock[7]
+                ) -> None:
+                    ancillaX = zero_factory.get_state()
                     steane_x_qec_cycle(q, ancillaX)
-                    ancillaZ = state.zero_state_factory.get_state()
+                    ancillaZ = zero_factory.get_state()
                     steane_z_qec_cycle(q, ancillaZ)
 
             case QECStyle.Reichardt:
 
                 @guppy
                 @no_type_check
-                def qec_cycle_def(state: STATE, q: LogicalBlock[7]) -> None:
+                def qec_cycle_def(
+                    zero_factory: ZeroFactory, q: LogicalBlock[7]
+                ) -> None:
                     reichardt_qec_cycle(q)
 
         @_register_op_replacement(steane_ops.qec_cycle_def)
@@ -357,7 +366,7 @@ class SteaneBuilder:
                 blk_id, _ = q
                 blk = state.blocks.take(blk_id)
 
-                qec_cycle_def(state, blk)
+                qec_cycle_def(state.zero_state_factory, blk)
 
                 state.blocks.put(blk, blk_id)
                 state.qec_counter[blk_id] = 0.0
