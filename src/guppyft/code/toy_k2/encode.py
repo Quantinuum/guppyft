@@ -146,7 +146,7 @@ class ToyK2Builder:
                 guppy_func = guppy(link_name(name)(func))
 
                 # Register in library and for op replacement
-                lib.members.append(guppy_func.id)
+                lib.register_member(guppy_func)
                 ops.with_generated_decl(op_def, name)
 
                 return guppy_func
@@ -755,6 +755,7 @@ class ToyK2Builder:
         @no_type_check
         @link_name("guppyft.toy_k2.gen_state")
         def state_gen_decl() -> STATE: ...
+        @lib.register_member
         @guppy
         @no_type_check
         @link_name("guppyft.toy_k2.gen_state")
@@ -772,6 +773,7 @@ class ToyK2Builder:
         @no_type_check
         @link_name("guppyft.toy_k2.discard_state")
         def state_discard_decl(state: "STATE" @ owned) -> None: ...
+        @lib.register_member
         @guppy
         @no_type_check
         @link_name("guppyft.toy_k2.discard_state")
@@ -793,7 +795,6 @@ class ToyK2Builder:
 
             return wrapper  # type: ignore[no-any-return]
 
-        lib.members.extend((state_gen.id, state_discard.id))
         ops.register_for_elimination_check(toy_k2_ops().name)
         tys = TyReplacements().with_types(
             [
