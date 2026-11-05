@@ -202,13 +202,13 @@ class ToyK2Builder:
             Attributes:
                 blocks: Stores the runtime blocks.
                 unalloc_blks: Stack of block that have not yet been allocated.
-                avail_dyn_addrs: Stack of available addresses on existing dynamic
-                    blocks.
+                available_dyn_addrs: Stack of available addresses on existing
+                    dynamic blocks.
             """
 
             blocks: array[RuntimeBlock, n_blocks]  # type: ignore[valid-type]
             unalloc_blks: Stack[int, n_blocks]  # type: ignore[valid-type]
-            avail_dyn_addrs: Stack[tuple[int, int], n_blocks]  # type: ignore[valid-type]
+            available_dyn_addrs: Stack[tuple[int, int], n_blocks]  # type: ignore[valid-type]
 
             @guppy
             @no_type_check
@@ -246,25 +246,25 @@ class ToyK2Builder:
                     # Free the logical block
                     logical_block.discard()
                     # Remove the remaining addresses of this block from the stack
-                    # NOTE: Ideally, `avail_dyn_addrs` would be a data
+                    # NOTE: Ideally, `available_dyn_addrs` would be a data
                     # structure with fast deletion (e.g. a set).
                     # Generally, this stack will be small, though, so it
                     # shouldn't be a performance bottleneck.
                     aux_stack: Stack[tuple[int, int], n_blocks] = empty_stack()
-                    for _ in range(len(self.avail_dyn_addrs)):
-                        addr = self.avail_dyn_addrs.pop()
+                    for _ in range(len(self.available_dyn_addrs)):
+                        addr = self.available_dyn_addrs.pop()
                         if addr[0] != blk_id:
                             aux_stack.push(addr)
                     for addr in aux_stack:
-                        self.avail_dyn_addrs.push(addr)
+                        self.available_dyn_addrs.push(addr)
 
             @guppy
             @no_type_check
             def allocate_dyn_addr(self: "STATE") -> tuple[int, int]:
                 """Find or create a dynamic block and return an address from
                 it to be used as a dynamic logical qubit."""
-                if len(self.avail_dyn_addrs) > 0:
-                    blk_id, qb_id = self.avail_dyn_addrs.pop()
+                if len(self.available_dyn_addrs) > 0:
+                    blk_id, qb_id = self.available_dyn_addrs.pop()
                 else:
                     # Otherwise, prepare a new block
                     logical_block = k2_primitives.prep_zero_ft_rus()
@@ -272,7 +272,7 @@ class ToyK2Builder:
                     # The first address will be returned
                     qb_id = 0
                     # And the other address is added to the stack
-                    self.avail_dyn_addrs.push((blk_id, 1))
+                    self.available_dyn_addrs.push((blk_id, 1))
 
                 # Borrow the selected address from the dynamic block
                 self.blocks[blk_id].borrow_addr(qb_id)
