@@ -56,13 +56,11 @@ def test_encoder_smoke() -> None:
         q0 = qlib.qubit()
         q1 = qlib.qubit()
         qlib.x(q0)
-        # qlib.y(q0)  # TODO: Consider adding
         qlib.z(q0)
         qlib.h(q0)
         qlib.s(q0)
         qlib.sdg(q0)
         qlib.cx(q0, q1)
-        # qlib.cz(q0, q1)  # TODO: Consider adding
         output("q0", qlib.measure(q0).read())
         qlib.discard(q1)
 
@@ -179,7 +177,7 @@ def test_encode_classical() -> None:
     assert res == [{}]
 
 
-@pytest.mark.xfail(reason="CZ not currently supported")  # TODO
+@pytest.mark.xfail(reason="CZ not currently supported")
 def test_realtime_rz_encoder() -> None:
 
     @guppy
