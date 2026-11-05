@@ -12,10 +12,7 @@ from hugr import Hugr
 from hugr.cli import validate
 from selene_sim.backends.bundled_simulators import Coinflip
 
-from guppyft.code.toy_k2.encode import (
-    QEDPolicy,
-    ToyK2Builder,
-)
+from guppyft.code.toy_k2.encode import QEDPolicy, ToyK2Builder
 from guppyft.decompose import ComparatorRzDecomposer, ToffoliDecomposer
 from guppyft.encode import UncompilableError
 
@@ -82,7 +79,7 @@ def test_encoder_missing_op() -> None:
             r"Operation not yet supported during encoding."
         ),
     ):
-        ToyK2Builder().build(n_blocks=1).encode(pkg, as_bytes=True)
+        ToyK2Builder().build(n_blocks=1).encode(pkg)
 
 
 def test_builder_methods() -> None:
