@@ -3,12 +3,11 @@
 from collections.abc import Callable
 from copy import deepcopy
 from dataclasses import dataclass, field, replace
-from typing import Any, Literal, Self, no_type_check, overload
+from typing import Any, Self, no_type_check
 
 from guppylang import guppy
 from guppylang.decorator import custom_guppy_decorator
 from guppylang.defs import GuppyFunctionDefinition
-from guppylang.emulator import EmulatorBuilder, EmulatorInstance
 from guppylang.library import GuppyLibrary, link_name
 from guppylang.std.array import empty_array
 from guppylang.std.builtins import array, comptime, exit, owned
@@ -21,6 +20,7 @@ from hugr.std import _std_extensions
 from guppyft.code.toy_k2 import primitives as k2_primitives
 from guppyft.encode import (
     EncodeSpec,
+    EncodingArchitectureInstance,
     ImplementOps,
     ImplementOpsSpec,
     OpReplacements,
@@ -82,31 +82,25 @@ class _ToyK2Options:
 
 
 @dataclass(frozen=True)
-class ToyK2Instance:
+class ToyK2Instance(EncodingArchitectureInstance):
     """A ToyK2 architecture instance built by `ToyK2Builder.build`."""
 
     _spec: EncodeSpec
 
     _options: _ToyK2Options
 
-    @overload
-    def encode(self, pkg: Package, *, as_bytes: Literal[False] = False) -> Package: ...
-    @overload
-    def encode(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
-    def encode(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
-        """Encode a computational package with the ToyK2 instance."""
+    def _encode(self, pkg: Package, *, as_bytes: bool) -> Package | bytes:
         self.check_may_encode(pkg)
         pkg_bytes: Package | bytes = encode(pkg, self._spec, as_bytes=as_bytes)
         return pkg_bytes
 
-    @overload
-    def implement_ops(
-        self, pkg: Package, *, as_bytes: Literal[False] = False
-    ) -> Package: ...
-    @overload
-    def implement_ops(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
-    def implement_ops(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
-        """Implement logical ops in `pkg` using this instance's op implementations."""
+    def compile(self, pkg: Package) -> Package:
+        """Compile a computational package to logical with the ToyK2 instance."""
+        self.check_may_encode(pkg)
+        assert self._spec.compile is not None
+        return self._spec.compile(pkg)
+
+    def _implement_ops(self, pkg: Package, *, as_bytes: bool) -> Package | bytes:
         assert self._spec.implement_ops is not None
         pkg_bytes: Package | bytes = self._spec.implement_ops(pkg, as_bytes=as_bytes)
         return pkg_bytes
@@ -120,24 +114,6 @@ class ToyK2Instance:
         assert self._spec.compile is not None
         if (error := self._spec.compile.check_may_compile(hugr)) is not None:
             raise error
-
-    def emulator(
-        self,
-        pkg: Package,
-        n_qubits: int,
-        builder: EmulatorBuilder | None = None,
-    ) -> EmulatorInstance:
-        """Encode a hugr Package and build an emulator for it.
-
-        Args:
-            pkg: The computational hugr package.
-            n_qubits: Number of physical qubits available to the emulator.
-            builder: Optional `EmulatorBuilder` to use; defaults to a new one.
-        """
-        encoded_pkg = self.encode(pkg, as_bytes=True)
-        if builder is None:
-            builder = EmulatorBuilder()
-        return builder.build(encoded_pkg, n_qubits)
 
 
 @dataclass(frozen=True, kw_only=True)
