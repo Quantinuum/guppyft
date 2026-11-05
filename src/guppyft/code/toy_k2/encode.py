@@ -237,14 +237,13 @@ class ToyK2Builder:
                 """Restore the dynamic logical qubit back to its block and
                 free the block if it is fully restored."""
                 blk_id, qb_id = addr
-                # Restore the block's address
                 self.blocks[blk_id].restore_addr(qb_id)
-                # Check if the block is fully restored
+
                 if not self.blocks[blk_id].is_borrowed():
-                    # Release the runtime block
+                    # It is fully restored, so release it and discard the block
                     logical_block = self.release_block(blk_id)
-                    # Free the logical block
                     logical_block.discard()
+
                     # Remove the remaining addresses of this block from the stack
                     # NOTE: Ideally, `available_dyn_addrs` would be a data
                     # structure with fast deletion (e.g. a set).
