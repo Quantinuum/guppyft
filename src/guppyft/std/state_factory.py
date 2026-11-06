@@ -85,18 +85,21 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]):  # type: ignore[mi
     Args:
         BLOCK_SIZE: Number of physical qubits in the logical block.
         N_FLAGS: Number of flag outcomes each `PreBlock` tracks.
-        BATCH_SIZE: Number of states produced in the same batch.
+        BATCH_SIZE: Maximum number of states produced in the same batch.
 
     Attributes:
         prep_routine: Function to prepare a state.
         max_attempts: Maximum number of repeat-until-success attempts.
         batch: The Queue of elements in the batch. Provide an empty
           queue with `guppylang.std.collections.queue.empty_queue`.
+        available_blocks: Additional blocks that may be prepared. The caller must
+          refresh this shared-resource allowance before each state request.
     """
 
     prep_routine: Function[[], PreBlock[BLOCK_SIZE, N_FLAGS]]  # type: ignore[type-arg,valid-type]
     max_attempts: int
     batch: Queue[PreBlock[BLOCK_SIZE, N_FLAGS], BATCH_SIZE]  # type: ignore[type-arg,valid-type]
+    available_blocks: int
 
     @guppy
     @no_type_check
@@ -105,17 +108,28 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]):  # type: ignore[mi
     ) -> LogicalBlock[BLOCK_SIZE]:
         """Parallel RUS preparation, up to `self.max_attempts` retries.
 
-        All `BATCH_SIZE` state preparations may be run in parallel. If any of them
-        succeeds, the state is returned. Surplus states are stored and can be fetched by
-        subsequent calls to this function.
+        Prepare up to `BATCH_SIZE` states in parallel, limited by available blocks
+        and remaining attempts. Return the first successful state and retain surplus
+        candidates for subsequent calls.
         """
         if BATCH_SIZE <= 0:
             panic("StateFactory: BATCH_SIZE must be greater than zero")
 
-        for _ in range(self.max_attempts):
+        for attempt in range(self.max_attempts):
             # If empty, request a new batch
             if len(self.batch) == 0:
-                for _ in range(BATCH_SIZE):
+                count: int = BATCH_SIZE
+                if self.available_blocks < BATCH_SIZE:
+                    count = self.available_blocks
+                # Prevent preparing more blocks than remaining attempts
+                remaining_attempts = self.max_attempts - attempt
+                if remaining_attempts < count:
+                    count = remaining_attempts
+                if count <= 0:
+                    exit("StateFactory: no free blocks available")
+
+                self.available_blocks = self.available_blocks - count
+                for _ in range(count):
                     self.batch.push(self.prep_routine())
 
             # Pop an element from batch and check if it successfully prepared a state
@@ -127,6 +141,7 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]):  # type: ignore[mi
                 return state.unwrap()
             else:
                 state.unwrap_nothing()
+                self.available_blocks = self.available_blocks + 1
 
         exit("StateFactory ran out of attempts!")
         return _qalloc_dirty()  # Unreachable, but required by the Guppy checker
