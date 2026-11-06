@@ -795,7 +795,7 @@ class SteaneBuilder:
             )
 
         if (zero_factory_params := params.get("zero_factory")) is not None:
-            builder = builder.with_magic_factory_conf(
+            builder = builder.with_zero_factory_conf(
                 RUSStateFactoryConf.from_json(
                     zero_factory_params,
                     defaults_from=builder._options.zero_factory_conf,
