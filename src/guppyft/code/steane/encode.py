@@ -1,13 +1,11 @@
 """Builder and encoding implementation for the Steane QEC architecture."""
 
-from collections.abc import Callable
 from copy import deepcopy
 from dataclasses import asdict, dataclass, field, replace
 from enum import StrEnum, auto
 from typing import Any, Self, no_type_check
 
 from guppylang import guppy
-from guppylang.decorator import custom_guppy_decorator
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.library import GuppyLibrary, link_name
 from guppylang.std.array import empty_array
@@ -15,7 +13,7 @@ from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.collections import Stack, empty_queue
 from guppylang.std.option import some
 from hugr import Hugr
-from hugr.ext import ExtensionRegistry, OpDef
+from hugr.ext import ExtensionRegistry
 from hugr.package import Package
 from hugr.std import _std_extensions
 from hugr.utils import JsonType
@@ -52,6 +50,7 @@ from guppyft.encode import (
     TyReplacements,
     annotate_encoding,
     encode,
+    guppy_op_replacement_decorator,
 )
 from guppyft.extensions import std_ops, std_types, steane_ops, steane_types
 from guppyft.globals import map_global, with_global
@@ -214,25 +213,7 @@ class SteaneBuilder:
 
         lib = GuppyLibrary(members=[])
         ops = OpReplacements()
-
-        def _register_op_replacement(
-            op_def: OpDef,
-        ) -> Callable[[Callable[..., Any]], GuppyFunctionDefinition[Any, Any]]:
-            @custom_guppy_decorator
-            def decorator(
-                func: Callable[..., Any],
-            ) -> GuppyFunctionDefinition[Any, Any]:
-                # Generate guppy function
-                name = f"link.{op_def.qualified_name()}"
-                guppy_func = guppy(link_name(name)(func))
-
-                # Register in library and for op replacement
-                lib.register_member(guppy_func)
-                ops.with_generated_decl(op_def, name)
-
-                return guppy_func
-
-            return decorator
+        _register_op_replacement = guppy_op_replacement_decorator(ops, register_in=lib)
 
         # TODO STATE should be generic for all codes. The methods that are code specific
         # should be `@guppy.declare` and each code can provide an implementation to be

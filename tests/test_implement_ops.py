@@ -1,11 +1,15 @@
 import pytest
 from guppylang import guppy
 from guppylang.emulator import EmulatorBuilder
+from guppylang.library import GuppyLibrary
+from tket_exts import quantum
 
+from guppyft._util import get_link_name
 from guppyft.encode import (
     ImplementOpsSpec,
     OpReplacements,
     TyReplacements,
+    guppy_op_replacement_decorator,
     implement_ops,
 )
 
@@ -34,3 +38,19 @@ def test_default_build_wrapper(as_bytes: bool) -> None:
     assert module.entrypoint == entrypoint
 
     EmulatorBuilder().build(pkg1, n_qubits=1).run()
+
+
+def test_op_replacement_decorator() -> None:
+    ops = OpReplacements()
+    lib = GuppyLibrary(members=[])
+    register_op_replacement = guppy_op_replacement_decorator(ops, register_in=lib)
+
+    @register_op_replacement(quantum.X.op_def())
+    def main() -> None:
+        pass
+
+    assert [main.id] == lib.members
+    [registered_op] = list(ops.__iter__())
+    op, (_, link_name) = registered_op
+    assert op == ("tket.quantum", "X")
+    assert get_link_name(main) == link_name == "link.tket.quantum.X"

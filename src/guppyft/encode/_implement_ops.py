@@ -1,11 +1,12 @@
 from collections.abc import Callable, Iterator, Sequence
 from copy import copy
 from dataclasses import dataclass, field
-from typing import Any, Literal, Self, no_type_check, overload
+from typing import Any, Literal, Protocol, Self, no_type_check, overload
 
 from guppylang import guppy
+from guppylang.decorator import custom_guppy_decorator
 from guppylang.defs import GuppyFunctionDefinition
-from guppylang.library import link_name
+from guppylang.library import GuppyLibrary, link_name
 from hugr import Hugr
 from hugr.build import DefinitionBuilder
 from hugr.ext import OpDef, TypeDef
@@ -276,3 +277,34 @@ class ImplementOps:
         return ImplementOps(
             lambda pkg, as_bytes: implement_ops(pkg, spec_gen(pkg), as_bytes=as_bytes)  # type: ignore[call-overload]
         )
+
+
+class GuppyOpReplacementDecorator(Protocol):
+    def __call__(
+        self, op_def: OpDef
+    ) -> Callable[[Callable[..., Any]], GuppyFunctionDefinition[Any, Any]]: ...
+
+
+def guppy_op_replacement_decorator(
+    ops: OpReplacements, *, register_in: GuppyLibrary
+) -> GuppyOpReplacementDecorator:
+    def _register_op_replacement(
+        op_def: OpDef,
+    ) -> Callable[[Callable[..., Any]], GuppyFunctionDefinition[Any, Any]]:
+        @custom_guppy_decorator
+        def decorator(
+            func: Callable[..., Any],
+        ) -> GuppyFunctionDefinition[Any, Any]:
+            # Generate guppy function
+            name = f"link.{op_def.qualified_name()}"
+            guppy_func = guppy(link_name(name)(func))
+
+            # Register in library and for op replacement
+            register_in.register_member(guppy_func)
+            ops.with_generated_decl(op_def, name)
+
+            return guppy_func
+
+        return decorator
+
+    return _register_op_replacement
