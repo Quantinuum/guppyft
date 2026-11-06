@@ -2,7 +2,7 @@
 
 from collections.abc import Callable
 from copy import deepcopy
-from dataclasses import asdict, dataclass, field, fields, replace
+from dataclasses import asdict, dataclass, field, replace
 from enum import StrEnum, auto
 from typing import Any, Self, no_type_check
 
@@ -82,11 +82,13 @@ class RUSStateFactoryConf:
         return asdict(self)
 
     @classmethod
-    def from_json(cls, values: dict[str, Any]) -> "RUSStateFactoryConf":
+    def from_json(
+        cls, values: dict[str, Any], *, defaults_from: "RUSStateFactoryConf"
+    ) -> "RUSStateFactoryConf":
         """Deserialize the RUS state factory config from JSON."""
         return cls(
-            size=values["size"],
-            max_attempts=values["max_attempts"],
+            size=values.get("size") or defaults_from.size,
+            max_attempts=values.get("max_attempts") or defaults_from.max_attempts,
         )
 
 
@@ -148,18 +150,13 @@ class QECPolicy:
     @classmethod
     def from_json(cls, values: dict[str, Any]) -> "QECPolicy":
         """Deserialize the QEC policy from JSON."""
-        cost_values = values["costs"]
-        costs = QECPolicy.OperationCosts(
-            **{
-                cost_field.name: cost_values[cost_field.name]
-                for cost_field in fields(QECPolicy.OperationCosts)
-            }
-        )
-        return cls(
-            style=QECStyle(values["style"]),
-            threshold=values["threshold"],
-            costs=costs,
-        )
+        costs = QECPolicy.OperationCosts(**values.get("costs", {}))
+        policy = cls(costs=costs)
+        if (style := values.get("style")) is not None:
+            policy.style = QECStyle(style)
+        if (threshold := values.get("threshold")) is not None:
+            policy.threshold = threshold
+        return policy
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -797,12 +794,21 @@ class SteaneBuilder:
                 f"Unsupported params schema version: {params['schema_version']}"
             )
 
-        builder = builder.with_zero_factory_conf(
-            RUSStateFactoryConf.from_json(params["zero_factory"])
-        )
-        builder = builder.with_magic_factory_conf(
-            RUSStateFactoryConf.from_json(params["magic_factory"])
-        )
-        builder = builder.with_qec_policy(QECPolicy.from_json(params["qec_policy"]))
+        if (zero_factory_params := params.get("zero_factory")) is not None:
+            builder = builder.with_magic_factory_conf(
+                RUSStateFactoryConf.from_json(
+                    zero_factory_params,
+                    defaults_from=builder._options.zero_factory_conf,
+                )
+            )
+        if (magic_factory_params := params.get("magic_factory")) is not None:
+            builder = builder.with_magic_factory_conf(
+                RUSStateFactoryConf.from_json(
+                    magic_factory_params,
+                    defaults_from=builder._options.magic_factory_conf,
+                )
+            )
+        if (qec_policy_params := params.get("qec_policy")) is not None:
+            builder = builder.with_qec_policy(QECPolicy.from_json(qec_policy_params))
 
         return builder.build(n_blocks=params["n_blocks"])

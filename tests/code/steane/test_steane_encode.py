@@ -43,7 +43,7 @@ from guppyft.code.steane.encode import (
     SteaneInstance,
 )
 from guppyft.decompose import ComparatorRzDecomposer, ToffoliDecomposer
-from guppyft.encode import UncompilableError
+from guppyft.encode import EncodeSpec, UncompilableError
 
 
 def test_encoder(make_steane_instance: Callable[[int], SteaneInstance]) -> None:
@@ -239,6 +239,72 @@ def test_annotate_steane_encoding() -> None:
             },
         },
     }
+
+
+def test_from_params_subclassing() -> None:
+    """Assert that `from_params` invokes subclass builder constructors."""
+
+    class SteaneSubInstance(SteaneInstance):
+        def i_am(self) -> str:
+            return f"I am the instance subclass with n_blocks={self._n_blocks}"
+
+    class SteaneSubBuilder(SteaneBuilder):
+        def build(self, n_blocks: int) -> SteaneInstance:
+            return SteaneSubInstance(
+                _spec=EncodeSpec(), _n_blocks=n_blocks, _options=self._options
+            )
+
+    arch = SteaneSubBuilder.instance_from_params(
+        {
+            "schema_version": 1,
+            "n_blocks": 4,
+        }
+    )
+    assert isinstance(arch, SteaneSubInstance)
+    assert arch.i_am() == "I am the instance subclass with n_blocks=4"
+
+
+def test_from_params_minimal() -> None:
+    arch = SteaneBuilder.instance_from_params(
+        {
+            "schema_version": 1,
+            "n_blocks": 4,
+        }
+    )
+
+    assert arch == SteaneBuilder().build(n_blocks=4)
+
+
+def test_from_params_defaults() -> None:
+    """Assert that a key (e.g. the QED policy) can be partially specified."""
+    arch = SteaneBuilder.instance_from_params(
+        {
+            "schema_version": 1,
+            "n_blocks": 4,
+            "qec_policy": {
+                "costs": {
+                    "x": 42.0,
+                }
+            },
+        }
+    )
+
+    policy = QECPolicy()
+    policy.costs.x = 42.0
+
+    assert arch == SteaneBuilder().with_qec_policy(policy).build(n_blocks=4)
+
+
+def test_from_params_invalid_style() -> None:
+    """Assert that a key (e.g. the QED policy) can be partially specified."""
+    params = {
+        "schema_version": 1,
+        "n_blocks": 4,
+        "qec_policy": {"style": "invalid"},
+    }
+
+    with pytest.raises(ValueError, match=r"'invalid' is not a valid QECStyle"):
+        _ = SteaneBuilder.instance_from_params(params)
 
 
 def test_annotated_policy_immutable() -> None:
