@@ -295,7 +295,8 @@ class SteaneBuilder:
             @no_type_check
             def get_zero_state(self) -> LogicalBlock[7]:
                 # TODO Reclaim surplus candidates from the other factory when needed.
-                self.zero_state_factory.set_available_blocks(self.free_blocks())
+                free_blocks = self.free_blocks()
+                self.zero_state_factory.set_available_blocks(free_blocks)
                 blk = self.zero_state_factory.get_state()
                 self.data_block_count += 1
                 return blk
@@ -303,7 +304,8 @@ class SteaneBuilder:
             @guppy
             @no_type_check
             def get_magic_state(self) -> LogicalBlock[7]:
-                self.magic_state_factory.set_available_blocks(self.free_blocks())
+                free_blocks = self.free_blocks()
+                self.magic_state_factory.set_available_blocks(free_blocks)
                 blk = self.magic_state_factory.get_state()
                 self.data_block_count += 1
                 return blk
