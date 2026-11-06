@@ -240,9 +240,9 @@ class SteaneBuilder:
         # See https://github.com/Quantinuum/guppyft/issues/179
         @guppy.struct
         class STATE:
-            blocks: array[LogicalBlock[7], comptime(n_blocks)]  # type: ignore[valid-type,type-arg]
-            addr_stack: Stack[tuple[int, int], comptime(n_blocks)]  # type: ignore[valid-type]
-            qec_counter: array[float, comptime(n_blocks)]  # type: ignore[valid-type]
+            blocks: array[LogicalBlock[7], n_blocks]  # type: ignore[valid-type,type-arg]
+            addr_stack: Stack[tuple[int, int], n_blocks]  # type: ignore[valid-type]
+            qec_counter: array[float, n_blocks]  # type: ignore[valid-type]
 
             zero_state_factory: StateFactory[  # type: ignore[type-arg]
                 7, 1, comptime(self._options.zero_factory_conf.size)  # type: ignore[valid-type]
@@ -590,12 +590,9 @@ class SteaneBuilder:
         def state_gen() -> STATE:
             return STATE(
                 empty_array(),
-                Stack(
-                    array(some((blk, 1)) for blk in range(comptime(n_blocks))),
-                    comptime(n_blocks),
-                ),
+                Stack(array(some((blk, 1)) for blk in range(n_blocks)), n_blocks),
                 # qec_counter
-                array(0.0 for _ in range(comptime(n_blocks))),
+                array(0.0 for _ in range(n_blocks)),
                 # Zero state factory
                 StateFactory(
                     prep_zero_ft,
