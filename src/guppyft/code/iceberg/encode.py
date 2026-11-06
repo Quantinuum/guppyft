@@ -40,7 +40,7 @@ class RUSStateFactoryConf:
             size=values["size"]
             if values.get("size") is not None
             else defaults_from.size,
-            max_attempts=values["size"]
+            max_attempts=values["max_attempts"]
             if values.get("max_attempts") is not None
             else defaults_from.max_attempts,
         )
