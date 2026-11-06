@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.6.1](https://github.com/Quantinuum/guppyft/compare/v0.6.0...v0.6.1) (2026-11-06)
+
+
+### Features
+
+* Add `implement_ops` and `encode` pass to the `toy_k2` architecture ([#407](https://github.com/Quantinuum/guppyft/issues/407)) ([83abe1f](https://github.com/Quantinuum/guppyft/commit/83abe1f323065d75e558519c033afd7e89a6509e))
+* Add HUGR extension for `toy_k2` architecture ([#321](https://github.com/Quantinuum/guppyft/issues/321)) ([cc0466f](https://github.com/Quantinuum/guppyft/commit/cc0466f963fcf703e977ab4bce84dbf47c7167d1))
+* Add logical Guppy bindings to the `toy_k2` architecture ([#326](https://github.com/Quantinuum/guppyft/issues/326)) ([002b1f8](https://github.com/Quantinuum/guppyft/commit/002b1f82554bee728e3aa5e8775ce3eb0b8cd054))
+* Add primitives for the `toy_k2` architecture ([#315](https://github.com/Quantinuum/guppyft/issues/315)) ([b679062](https://github.com/Quantinuum/guppyft/commit/b6790627ad5b770f816e809b39544c4f5350bf37))
+* Deserialisation for Iceberg and Steane builders ([#522](https://github.com/Quantinuum/guppyft/issues/522)) ([f6605af](https://github.com/Quantinuum/guppyft/commit/f6605af35e3e449250d9776888735f2f86081146))
+
 ## [0.6.0](https://github.com/Quantinuum/guppyft/compare/v0.5.1...v0.6.0) (2026-11-04)
 
 

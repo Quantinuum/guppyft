@@ -9,7 +9,10 @@ from hugr import Hugr
 from hugr.package import Package
 from hugr.utils import JsonType
 
+from guppyft._util import PathDict
 from guppyft.encode import AnnotatingArchitectureInstance, annotate_encoding
+
+_SCHEMA_VERSION = 1
 
 
 @dataclass(frozen=True)
@@ -27,6 +30,20 @@ class RUSStateFactoryConf:
     def to_json(self) -> JsonType:
         """Serialize the RUS state factory config to JSON."""
         return asdict(self)
+
+    @classmethod
+    def from_json(
+        cls, values: dict[str, Any], *, defaults_from: "RUSStateFactoryConf"
+    ) -> "RUSStateFactoryConf":
+        """Deserialize the RUS state factory config from JSON."""
+        return cls(
+            size=values["size"]
+            if values.get("size") is not None
+            else defaults_from.size,
+            max_attempts=values["max_attempts"]
+            if values.get("max_attempts") is not None
+            else defaults_from.max_attempts,
+        )
 
 
 class DynamicQubitReuse(StrEnum):
@@ -116,8 +133,17 @@ class IcebergQEDPolicy:
     costs: OperationCosts = field(default_factory=OperationCosts)
 
     def to_json(self) -> JsonType:
-        """Serialise the QED policy to JSON."""
+        """Serialize the QED policy to JSON."""
         return asdict(self)
+
+    @classmethod
+    def from_json(cls, values: dict[str, Any]) -> "IcebergQEDPolicy":
+        """Deserialize the QED policy from JSON."""
+        costs = IcebergQEDPolicy.OperationCosts(**values.get("costs", {}))
+        policy = cls(costs=costs)
+        if (threshold := values.get("threshold")) is not None:
+            policy.threshold = threshold
+        return policy
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -143,7 +169,7 @@ class IcebergInstance(AnnotatingArchitectureInstance):
             hugr,
             "iceberg",
             {
-                "schema_version": 1,
+                "schema_version": _SCHEMA_VERSION,
                 "n_blocks": self._n_blocks,
                 "block_size": self._block_size,
                 "qed_policy": self._options.qed_policy.to_json(),
@@ -213,4 +239,40 @@ class IcebergBuilder:
 
         return IcebergInstance(
             _n_blocks=n_blocks, _block_size=block_size, _options=deepcopy(self._options)
+        )
+
+    @classmethod
+    def instance_from_params(cls, params: dict[str, Any]) -> "IcebergInstance":
+        """Produces an instance with the builder according to the given parameters. To
+        be used as the 'inverse' of `IcebergInstance.annotate`."""
+        params = PathDict(params)
+
+        builder = cls()
+        if params["schema_version"] != _SCHEMA_VERSION:
+            raise RuntimeError(
+                f"Unsupported params schema version: {params['schema_version']}"
+            )
+
+        if (qed_policy_params := params.get("qed_policy")) is not None:
+            builder = builder.with_qed_policy(
+                IcebergQEDPolicy.from_json(qed_policy_params)
+            )
+        if (state_factory_params := params.get("state_factory")) is not None:
+            builder = builder.with_state_factory_conf(
+                RUSStateFactoryConf.from_json(
+                    state_factory_params,
+                    defaults_from=builder._options.state_factory_conf,
+                )
+            )
+        if (
+            syndrome_during_measurement := params.get("syndrome_during_measurement")
+        ) is not None:
+            builder = builder.with_syndrome_extraction_during_measurement(
+                syndrome_during_measurement
+            )
+        if (dynamic_qubit_reuse := params.get("dynamic_qubit_reuse")) is not None:
+            builder = builder.with_dynamic_qubit_reuse(dynamic_qubit_reuse)
+
+        return builder.build(
+            n_blocks=params["n_blocks"], block_size=params["block_size"]
         )

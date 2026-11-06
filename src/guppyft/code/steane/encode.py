@@ -22,6 +22,7 @@ from hugr.std import _std_extensions
 from hugr.utils import JsonType
 from tket_exts import rotation
 
+from guppyft._util import PathDict
 from guppyft.code.steane.primitives import (
     cx,
     cz,
@@ -62,6 +63,8 @@ from guppyft.std.state_factory import StateFactory
 from . import logical as steane_logical
 from .primitives import RawMeasurement
 
+_SCHEMA_VERSION = 1
+
 N = guppy.nat_var("N")
 
 
@@ -78,8 +81,22 @@ class RUSStateFactoryConf:
     max_attempts: int
 
     def to_json(self) -> JsonType:
-        """Serialise the RUS state factory config to JSON."""
+        """Serialize the RUS state factory config to JSON."""
         return asdict(self)
+
+    @classmethod
+    def from_json(
+        cls, values: dict[str, Any], *, defaults_from: "RUSStateFactoryConf"
+    ) -> "RUSStateFactoryConf":
+        """Deserialize the RUS state factory config from JSON."""
+        return cls(
+            size=values["size"]
+            if values.get("size") is not None
+            else defaults_from.size,
+            max_attempts=values["max_attempts"]
+            if values.get("max_attempts") is not None
+            else defaults_from.max_attempts,
+        )
 
 
 class QECStyle(StrEnum):
@@ -134,8 +151,19 @@ class QECPolicy:
     costs: OperationCosts = field(default_factory=OperationCosts)
 
     def to_json(self) -> JsonType:
-        """Serialise the QEC policy to JSON."""
+        """Serialize the QEC policy to JSON."""
         return asdict(self)
+
+    @classmethod
+    def from_json(cls, values: dict[str, Any]) -> "QECPolicy":
+        """Deserialize the QEC policy from JSON."""
+        costs = QECPolicy.OperationCosts(**values.get("costs", {}))
+        policy = cls(costs=costs)
+        if (style := values.get("style")) is not None:
+            policy.style = QECStyle(style)
+        if (threshold := values.get("threshold")) is not None:
+            policy.threshold = threshold
+        return policy
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -149,7 +177,7 @@ class _SteaneOptions:
 class SteaneInstance(AnnotatingArchitectureInstance, EncodingArchitectureInstance):
     """A Steane architecture instance built by `SteaneBuilder.build`."""
 
-    _spec: EncodeSpec
+    _spec: EncodeSpec = field(compare=False)
     _n_blocks: int
 
     _options: _SteaneOptions
@@ -161,7 +189,7 @@ class SteaneInstance(AnnotatingArchitectureInstance, EncodingArchitectureInstanc
             hugr,
             "steane",
             {
-                "schema_version": 1,
+                "schema_version": _SCHEMA_VERSION,
                 "n_blocks": self._n_blocks,
                 "zero_factory": self._options.zero_factory_conf.to_json(),
                 "magic_factory": self._options.magic_factory_conf.to_json(),
@@ -241,9 +269,9 @@ class SteaneBuilder:
         # See https://github.com/Quantinuum/guppyft/issues/179
         @guppy.struct
         class STATE:
-            blocks: array[LogicalBlock[7], comptime(n_blocks)]  # type: ignore[valid-type,type-arg]
-            addr_stack: Stack[tuple[int, int], comptime(n_blocks)]  # type: ignore[valid-type]
-            qec_counter: array[float, comptime(n_blocks)]  # type: ignore[valid-type]
+            blocks: array[LogicalBlock[7], n_blocks]  # type: ignore[valid-type,type-arg]
+            addr_stack: Stack[tuple[int, int], n_blocks]  # type: ignore[valid-type]
+            qec_counter: array[float, n_blocks]  # type: ignore[valid-type]
             # Blocks held by the program or gadgets, excluding factory queues
             data_block_count: int
 
@@ -659,12 +687,9 @@ class SteaneBuilder:
         def state_gen() -> STATE:
             return STATE(
                 empty_array(),
-                Stack(
-                    array(some((blk, 1)) for blk in range(comptime(n_blocks))),
-                    comptime(n_blocks),
-                ),
+                Stack(array(some((blk, 1)) for blk in range(n_blocks)), n_blocks),
                 # qec_counter
-                array(0.0 for _ in range(comptime(n_blocks))),
+                array(0.0 for _ in range(n_blocks)),
                 # Data blocks count
                 0,
                 # Zero state factory
@@ -788,3 +813,34 @@ class SteaneBuilder:
         return SteaneInstance(
             _spec=encoder_spec, _n_blocks=n_blocks, _options=deepcopy(self._options)
         )
+
+    @classmethod
+    def instance_from_params(cls, params: dict[str, Any]) -> "SteaneInstance":
+        """Produces an instance with the builder according to the given parameters. To
+        be used as the 'inverse' of `SteaneInstance.annotate`."""
+        params = PathDict(params)
+
+        builder = cls()
+        if params["schema_version"] != _SCHEMA_VERSION:
+            raise RuntimeError(
+                f"Unsupported params schema version: {params['schema_version']}"
+            )
+
+        if (zero_factory_params := params.get("zero_factory")) is not None:
+            builder = builder.with_zero_factory_conf(
+                RUSStateFactoryConf.from_json(
+                    zero_factory_params,
+                    defaults_from=builder._options.zero_factory_conf,
+                )
+            )
+        if (magic_factory_params := params.get("magic_factory")) is not None:
+            builder = builder.with_magic_factory_conf(
+                RUSStateFactoryConf.from_json(
+                    magic_factory_params,
+                    defaults_from=builder._options.magic_factory_conf,
+                )
+            )
+        if (qec_policy_params := params.get("qec_policy")) is not None:
+            builder = builder.with_qec_policy(QECPolicy.from_json(qec_policy_params))
+
+        return builder.build(n_blocks=params["n_blocks"])
