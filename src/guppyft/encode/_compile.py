@@ -64,6 +64,10 @@ class ReplacementCompiler(LogicalCompiler):
     extensions: ExtensionRegistry | None = None
     """Optional JSON-encoded list of additional extension definitions, used to
     resolve target ops/types that are not already registered on the input Hugr."""
+    adapt_rotation_inputs: bool = False
+    """Allow compound replacements to take Guppy `angle` values in place of HUGR
+    rotations. Call sites convert rotation inputs to half-turn tuples. Replacement
+    function signatures and other input and output types are unchanged."""
 
     def __post_init__(self) -> None:
         duplicates = self.op_replacements.keys() & self.compound_op_replacements.keys()
@@ -117,5 +121,6 @@ class ReplacementCompiler(LogicalCompiler):
             rs_compound_op_replacements,
             self.ty_replacements,
             extension_registry_to_json(self.extensions) if self.extensions else None,
+            adapt_rotation_inputs=self.adapt_rotation_inputs,
         )
         return Package.from_bytes(rs_hugr.to_bytes())
