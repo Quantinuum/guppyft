@@ -296,7 +296,6 @@ def test_from_params_defaults() -> None:
 
 
 def test_from_params_invalid_style() -> None:
-    """Assert that a key (e.g. the QED policy) can be partially specified."""
     params = {
         "schema_version": 1,
         "n_blocks": 4,

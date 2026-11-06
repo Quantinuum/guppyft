@@ -213,6 +213,21 @@ def test_from_params_defaults() -> None:
     )
 
 
+def test_from_params_invalid_factory_conf() -> None:
+    params = {
+        "schema_version": 1,
+        "n_blocks": 4,
+        "block_size": 6,
+        "state_factory": {"size": 0},
+    }
+
+    with pytest.raises(
+        ValueError,
+        match=r"Cannot set the size of the RUS state factory lower than 1, 0 given",
+    ):
+        _ = IcebergBuilder.instance_from_params(params)
+
+
 def test_annotated_policy_immutable() -> None:
     hugr = Hugr[Any]()
     pkg = Package([hugr])

@@ -35,8 +35,12 @@ class RUSStateFactoryConf:
     ) -> "RUSStateFactoryConf":
         """Deserialize the RUS state factory config from JSON."""
         return cls(
-            size=values.get("size") or defaults_from.size,
-            max_attempts=values.get("max_attempts") or defaults_from.max_attempts,
+            size=values["size"]
+            if values.get("size") is not None
+            else defaults_from.size,
+            max_attempts=values["size"]
+            if values.get("max_attempts") is not None
+            else defaults_from.max_attempts,
         )
 
 
