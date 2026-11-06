@@ -1,7 +1,7 @@
 """Builder for public configuration of the Iceberg QEC architecture."""
 
 from copy import deepcopy
-from dataclasses import asdict, dataclass, field, fields, replace
+from dataclasses import asdict, dataclass, field, replace
 from enum import StrEnum, auto
 from typing import Any, Self
 
@@ -30,11 +30,13 @@ class RUSStateFactoryConf:
         return asdict(self)
 
     @classmethod
-    def from_json(cls, values: dict[str, Any]) -> "RUSStateFactoryConf":
+    def from_json(
+        cls, values: dict[str, Any], *, defaults_from: "RUSStateFactoryConf"
+    ) -> "RUSStateFactoryConf":
         """Deserialize the RUS state factory config from JSON."""
         return cls(
-            size=values["size"],
-            max_attempts=values["max_attempts"],
+            size=values.get("size") or defaults_from.size,
+            max_attempts=values.get("max_attempts") or defaults_from.max_attempts,
         )
 
 
@@ -131,14 +133,11 @@ class IcebergQEDPolicy:
     @classmethod
     def from_json(cls, values: dict[str, Any]) -> "IcebergQEDPolicy":
         """Deserialize the QED policy from JSON."""
-        cost_values = values["costs"]
-        costs = IcebergQEDPolicy.OperationCosts(
-            **{
-                cost_field.name: cost_values[cost_field.name]
-                for cost_field in fields(IcebergQEDPolicy.OperationCosts)
-            }
-        )
-        return cls(threshold=values["threshold"], costs=costs)
+        costs = IcebergQEDPolicy.OperationCosts(**values.get("costs", {}))
+        policy = cls(costs=costs)
+        if (threshold := values.get("threshold")) is not None:
+            policy.threshold = threshold
+        return policy
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -248,16 +247,25 @@ class IcebergBuilder:
                 f"Unsupported params schema version: {params['schema_version']}"
             )
 
-        builder = builder.with_qed_policy(
-            IcebergQEDPolicy.from_json(params["qed_policy"])
-        )
-        builder = builder.with_state_factory_conf(
-            RUSStateFactoryConf.from_json(params["state_factory"])
-        )
-        builder = builder.with_syndrome_extraction_during_measurement(
-            params["syndrome_during_measurement"]
-        )
-        builder = builder.with_dynamic_qubit_reuse(params["dynamic_qubit_reuse"])
+        if (qed_policy_params := params.get("qed_policy")) is not None:
+            builder = builder.with_qed_policy(
+                IcebergQEDPolicy.from_json(qed_policy_params)
+            )
+        if (state_factory_params := params.get("state_factory")) is not None:
+            builder = builder.with_state_factory_conf(
+                RUSStateFactoryConf.from_json(
+                    state_factory_params,
+                    defaults_from=builder._options.state_factory_conf,
+                )
+            )
+        if (
+            syndrome_during_measurement := params.get("syndrome_during_measurement")
+        ) is not None:
+            builder = builder.with_syndrome_extraction_during_measurement(
+                syndrome_during_measurement
+            )
+        if (dynamic_qubit_reuse := params.get("dynamic_qubit_reuse")) is not None:
+            builder = builder.with_dynamic_qubit_reuse(dynamic_qubit_reuse)
 
         return builder.build(
             n_blocks=params["n_blocks"], block_size=params["block_size"]

@@ -8,6 +8,7 @@ from hugr.package import Package
 from guppyft.code.iceberg.encode import (
     DynamicQubitReuse,
     IcebergBuilder,
+    IcebergInstance,
     IcebergQEDPolicy,
     RUSStateFactoryConf,
 )
@@ -151,6 +152,65 @@ def test_annotate_iceberg_encoding() -> None:
             },
         },
     }
+
+
+def test_from_params_subclassing() -> None:
+    """Assert that `from_params` invokes subclass builder constructors."""
+
+    class IcebergSubInstance(IcebergInstance):
+        def i_am(self) -> str:
+            return f"I am the instance subclass with n_blocks={self._n_blocks}"
+
+    class IcebergSubBuilder(IcebergBuilder):
+        def build(self, *, n_blocks: int, block_size: int) -> IcebergInstance:
+            return IcebergSubInstance(
+                _n_blocks=n_blocks, _block_size=block_size, _options=self._options
+            )
+
+    arch = IcebergSubBuilder.instance_from_params(
+        {
+            "schema_version": 1,
+            "n_blocks": 4,
+            "block_size": 6,
+        }
+    )
+    assert isinstance(arch, IcebergSubInstance)
+    assert arch.i_am() == "I am the instance subclass with n_blocks=4"
+
+
+def test_from_params_minimal() -> None:
+    arch = IcebergBuilder.instance_from_params(
+        {
+            "schema_version": 1,
+            "n_blocks": 4,
+            "block_size": 6,
+        }
+    )
+
+    assert arch == IcebergBuilder().build(n_blocks=4, block_size=6)
+
+
+def test_from_params_defaults() -> None:
+    """Assert that a key (e.g. the QED policy) can be partially specified."""
+    arch = IcebergBuilder.instance_from_params(
+        {
+            "schema_version": 1,
+            "n_blocks": 4,
+            "block_size": 6,
+            "qed_policy": {
+                "costs": {
+                    "x": 42,
+                }
+            },
+        }
+    )
+
+    policy = IcebergQEDPolicy()
+    policy.costs.x = 42
+
+    assert arch == IcebergBuilder().with_qed_policy(policy).build(
+        n_blocks=4, block_size=6
+    )
 
 
 def test_annotated_policy_immutable() -> None:
