@@ -295,7 +295,7 @@ class SteaneBuilder:
             @no_type_check
             def get_zero_state(self) -> LogicalBlock[7]:
                 # TODO Reclaim surplus candidates from the other factory when needed.
-                self.zero_state_factory.available_blocks = self.free_blocks()
+                self.zero_state_factory.set_available_blocks(self.free_blocks())
                 blk = self.zero_state_factory.get_state()
                 self.data_block_count += 1
                 return blk
@@ -303,7 +303,7 @@ class SteaneBuilder:
             @guppy
             @no_type_check
             def get_magic_state(self) -> LogicalBlock[7]:
-                self.magic_state_factory.available_blocks = self.free_blocks()
+                self.magic_state_factory.set_available_blocks(self.free_blocks())
                 blk = self.magic_state_factory.get_state()
                 self.data_block_count += 1
                 return blk
@@ -321,10 +321,10 @@ class SteaneBuilder:
                 as input. This allows the number of available blocks to be managed
                 by `STATE`."""
                 if self.free_blocks() + len(self.zero_state_factory.batch) < N:
-                    exit("with_zero_states: not enough blocks for QEC resources")
+                    exit("with_zero_states: not enough blocks for gadget")
                 zero_states = array(self.get_zero_state() for _ in range(N))
                 gadget(q, zero_states)
-                self.data_block_count += N
+                self.data_block_count -= N
 
             @guppy
             @no_type_check
@@ -697,14 +697,14 @@ class SteaneBuilder:
                     prep_zero_ft,
                     comptime(self._options.zero_factory_conf.max_attempts),
                     empty_queue(),
-                    0,
+                    comptime(self._options.zero_factory_conf.size),
                 ),
                 # Magic state factory
                 StateFactory(
                     prep_t_state_ft,
                     comptime(self._options.magic_factory_conf.max_attempts),
                     empty_queue(),
-                    0,
+                    comptime(self._options.magic_factory_conf.size),
                 ),
             )
 

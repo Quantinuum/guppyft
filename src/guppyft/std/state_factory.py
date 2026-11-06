@@ -92,14 +92,22 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]):  # type: ignore[mi
         max_attempts: Maximum number of repeat-until-success attempts.
         batch: The Queue of elements in the batch. Provide an empty
           queue with `guppylang.std.collections.queue.empty_queue`.
-        available_blocks: Additional blocks that may be prepared. The caller must
-          refresh this shared-resource allowance before each state request.
+        available_blocks: Additional blocks that may be prepared, capped at
+          BATCH_SIZE. Refresh with set_available_blocks before each state request.
     """
 
     prep_routine: Function[[], PreBlock[BLOCK_SIZE, N_FLAGS]]  # type: ignore[type-arg,valid-type]
     max_attempts: int
     batch: Queue[PreBlock[BLOCK_SIZE, N_FLAGS], BATCH_SIZE]  # type: ignore[type-arg,valid-type]
     available_blocks: int
+
+    @guppy
+    @no_type_check
+    def set_available_blocks(self, available_blocks: int) -> None:
+        """Update the shared-resource allowance, capped at the batch capacity."""
+        self.available_blocks = available_blocks
+        if self.available_blocks > BATCH_SIZE:
+            self.available_blocks = int(BATCH_SIZE)
 
     @guppy
     @no_type_check
@@ -118,9 +126,7 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]):  # type: ignore[mi
         for attempt in range(self.max_attempts):
             # If empty, request a new batch
             if len(self.batch) == 0:
-                count: int = BATCH_SIZE
-                if self.available_blocks < BATCH_SIZE:
-                    count = self.available_blocks
+                count = self.available_blocks
                 # Prevent preparing more blocks than remaining attempts
                 remaining_attempts = self.max_attempts - attempt
                 if remaining_attempts < count:
@@ -128,7 +134,7 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]):  # type: ignore[mi
                 if count <= 0:
                     exit("StateFactory: no free blocks available")
 
-                self.available_blocks = self.available_blocks - count
+                self.available_blocks -= count
                 for _ in range(count):
                     self.batch.push(self.prep_routine())
 
@@ -141,7 +147,8 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]):  # type: ignore[mi
                 return state.unwrap()
             else:
                 state.unwrap_nothing()
-                self.available_blocks = self.available_blocks + 1
+                if self.available_blocks < BATCH_SIZE:
+                    self.available_blocks += 1
 
         exit("StateFactory ran out of attempts!")
         return _qalloc_dirty()  # Unreachable, but required by the Guppy checker
