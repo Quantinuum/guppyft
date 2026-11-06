@@ -62,6 +62,8 @@ from guppyft.std.state_factory import StateFactory
 from . import logical as steane_logical
 from .primitives import RawMeasurement
 
+_SCHEMA_VERSION = 1
+
 N = guppy.nat_var("N")
 
 
@@ -186,7 +188,7 @@ class SteaneInstance(AnnotatingArchitectureInstance, EncodingArchitectureInstanc
             hugr,
             "steane",
             {
-                "schema_version": 1,
+                "schema_version": _SCHEMA_VERSION,
                 "n_blocks": self._n_blocks,
                 "zero_factory": self._options.zero_factory_conf.to_json(),
                 "magic_factory": self._options.magic_factory_conf.to_json(),
@@ -793,7 +795,7 @@ class SteaneBuilder:
         params = PathDict(params)
 
         builder = cls()
-        if params["schema_version"] != 1:
+        if params["schema_version"] != _SCHEMA_VERSION:
             raise RuntimeError(
                 f"Unsupported params schema version: {params['schema_version']}"
             )

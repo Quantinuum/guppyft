@@ -12,6 +12,8 @@ from hugr.utils import JsonType
 from guppyft._util import PathDict
 from guppyft.encode import AnnotatingArchitectureInstance, annotate_encoding
 
+_SCHEMA_VERSION = 1
+
 
 @dataclass(frozen=True)
 class RUSStateFactoryConf:
@@ -167,7 +169,7 @@ class IcebergInstance(AnnotatingArchitectureInstance):
             hugr,
             "iceberg",
             {
-                "schema_version": 1,
+                "schema_version": _SCHEMA_VERSION,
                 "n_blocks": self._n_blocks,
                 "block_size": self._block_size,
                 "qed_policy": self._options.qed_policy.to_json(),
@@ -246,7 +248,7 @@ class IcebergBuilder:
         params = PathDict(params)
 
         builder = cls()
-        if params["schema_version"] != 1:
+        if params["schema_version"] != _SCHEMA_VERSION:
             raise RuntimeError(
                 f"Unsupported params schema version: {params['schema_version']}"
             )
