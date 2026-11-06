@@ -665,7 +665,7 @@ class SteaneBuilder:
                 ),
                 # qec_counter
                 array(0.0 for _ in range(comptime(n_blocks))),
-                # Blocks acquired from factories, including QEC resource blocks
+                # Data blocks count
                 0,
                 # Zero state factory
                 StateFactory(
