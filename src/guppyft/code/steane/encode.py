@@ -14,6 +14,7 @@ from guppylang.std.array import empty_array
 from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.collections import Stack, empty_queue
 from guppylang.std.option import some
+from guppylang.std.platform import panic
 from hugr import Hugr
 from hugr.ext import ExtensionRegistry, OpDef
 from hugr.package import Package
@@ -271,6 +272,8 @@ class SteaneBuilder:
             blocks: array[LogicalBlock[7], n_blocks]  # type: ignore[valid-type,type-arg]
             addr_stack: Stack[tuple[int, int], n_blocks]  # type: ignore[valid-type]
             qec_counter: array[float, n_blocks]  # type: ignore[valid-type]
+            # Blocks held by the program or gadgets, excluding factory queues
+            data_block_count: int
 
             zero_state_factory: StateFactory[  # type: ignore[type-arg]
                 7, 1, comptime(self._options.zero_factory_conf.size)  # type: ignore[valid-type]
@@ -280,9 +283,57 @@ class SteaneBuilder:
             ]
 
             @guppy
+            def free_blocks(self) -> int:
+                return (
+                    n_blocks
+                    - self.data_block_count
+                    - len(self.zero_state_factory.batch)
+                    - len(self.magic_state_factory.batch)
+                )
+
+            @guppy
+            @no_type_check
+            def get_zero_state(self) -> LogicalBlock[7]:
+                # TODO Reclaim surplus candidates from the other factory when needed.
+                free_blocks = self.free_blocks()
+                self.zero_state_factory.set_available_blocks(free_blocks)
+                blk = self.zero_state_factory.get_state()
+                self.data_block_count += 1
+                return blk
+
+            @guppy
+            @no_type_check
+            def get_magic_state(self) -> LogicalBlock[7]:
+                free_blocks = self.free_blocks()
+                self.magic_state_factory.set_available_blocks(free_blocks)
+                blk = self.magic_state_factory.get_state()
+                self.data_block_count += 1
+                return blk
+
+            @guppy
+            @no_type_check
+            def with_zero_states(
+                self,
+                q: LogicalBlock[7],
+                gadget: Callable[
+                    [LogicalBlock[7], array[LogicalBlock[7], N] @ owned], None
+                ],
+            ) -> None:
+                """Helper method to call qec gadgets that require zero states
+                as input. This allows the number of available blocks to be managed
+                by `STATE`."""
+                if self.free_blocks() + len(self.zero_state_factory.batch) < N:
+                    exit("with_zero_states: not enough blocks for gadget")
+                zero_states = array(self.get_zero_state() for _ in range(N))
+                gadget(q, zero_states)
+                self.data_block_count -= N
+
+            @guppy
             @no_type_check
             def free_addr(self, addr: tuple[int, int]) -> None:
+                # Callers have already consumed the corresponding physical block.
                 self.addr_stack.push(addr)
+                self.data_block_count -= 1
 
             @guppy
             @no_type_check
@@ -324,21 +375,41 @@ class SteaneBuilder:
 
                 @guppy
                 @no_type_check
+                def qec_gadget(
+                    q: LogicalBlock[7], zero_states: array[LogicalBlock[7], 2] @ owned
+                ) -> None:
+                    a0, a1 = zero_states
+                    knill_qec_cycle(q, a0, a1)
+
+                @guppy
+                @no_type_check
                 def qec_cycle_def(state: STATE, q: LogicalBlock[7]) -> None:
-                    # Allocate new blocks for the Bell state
-                    ancilla0 = state.zero_state_factory.get_state()
-                    ancilla1 = state.zero_state_factory.get_state()
-                    knill_qec_cycle(q, ancilla0, ancilla1)
+                    state.with_zero_states(q, qec_gadget)
 
             case QECStyle.Steane:
 
                 @guppy
                 @no_type_check
+                def qec_x_gadget(
+                    q: LogicalBlock[7], zero_states: array[LogicalBlock[7], 1] @ owned
+                ) -> None:
+                    (a,) = zero_states
+                    steane_x_qec_cycle(q, a)
+
+                @guppy
+                @no_type_check
+                def qec_z_gadget(
+                    q: LogicalBlock[7], zero_states: array[LogicalBlock[7], 1] @ owned
+                ) -> None:
+                    (a,) = zero_states
+                    steane_z_qec_cycle(q, a)
+
+                @guppy
+                @no_type_check
                 def qec_cycle_def(state: STATE, q: LogicalBlock[7]) -> None:
-                    ancillaX = state.zero_state_factory.get_state()
-                    steane_x_qec_cycle(q, ancillaX)
-                    ancillaZ = state.zero_state_factory.get_state()
-                    steane_z_qec_cycle(q, ancillaZ)
+                    # Consume the first resource before acquiring the second.
+                    state.with_zero_states(q, qec_x_gadget)
+                    state.with_zero_states(q, qec_z_gadget)
 
             case QECStyle.Reichardt:
 
@@ -378,7 +449,7 @@ class SteaneBuilder:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, tuple[int, int]]:
                 blk_id, qb_id = state.allocate_next_addr()
-                blk = state.zero_state_factory.get_state()
+                blk = state.get_zero_state()
                 state.blocks.put(blk, blk_id)
 
                 state.qec_policy(array(blk_id), comptime(qec_policy.costs.prep_zero))
@@ -393,7 +464,7 @@ class SteaneBuilder:
             @guppy
             def _impl(state: STATE @ owned) -> tuple[STATE, tuple[int, int]]:
                 blk_id, qb_id = state.allocate_next_addr()
-                blk = state.magic_state_factory.get_state()
+                blk = state.get_magic_state()
                 state.blocks.put(blk, blk_id)
 
                 state.qec_policy(array(blk_id), comptime(qec_policy.costs.prep_t))
@@ -621,17 +692,21 @@ class SteaneBuilder:
                 Stack(array(some((blk, 1)) for blk in range(n_blocks)), n_blocks),
                 # qec_counter
                 array(0.0 for _ in range(n_blocks)),
+                # Data blocks count
+                0,
                 # Zero state factory
                 StateFactory(
                     prep_zero_ft,
                     comptime(self._options.zero_factory_conf.max_attempts),
                     empty_queue(),
+                    comptime(self._options.zero_factory_conf.size),
                 ),
                 # Magic state factory
                 StateFactory(
                     prep_t_state_ft,
                     comptime(self._options.magic_factory_conf.max_attempts),
                     empty_queue(),
+                    comptime(self._options.magic_factory_conf.size),
                 ),
             )
 
@@ -734,7 +809,8 @@ class SteaneBuilder:
         return replace(self, _options=replace(self._options, magic_factory_conf=conf))
 
     def build(self, n_blocks: int) -> SteaneInstance:
-        """Build a `SteaneInstance` configured for `n_blocks` logical blocks."""
+        """Build a `SteaneInstance` limited to `n_blocks` across program blocks,
+        factory candidates and QEC resource blocks."""
         encoder_spec = self._gen_encoder_spec(n_blocks)
         return SteaneInstance(
             _spec=encoder_spec, _n_blocks=n_blocks, _options=deepcopy(self._options)
