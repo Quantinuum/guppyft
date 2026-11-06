@@ -269,7 +269,7 @@ class SteaneBuilder:
                 # TODO Reclaim surplus candidates from the other factory when needed.
                 self.zero_state_factory.available_blocks = self.free_blocks()
                 blk = self.zero_state_factory.get_state()
-                self.data_block_count = self.data_block_count + 1
+                self.data_block_count += 1
                 return blk
 
             @guppy
@@ -277,7 +277,7 @@ class SteaneBuilder:
             def get_magic_state(self) -> LogicalBlock[7]:
                 self.magic_state_factory.available_blocks = self.free_blocks()
                 blk = self.magic_state_factory.get_state()
-                self.data_block_count = self.data_block_count + 1
+                self.data_block_count += 1
                 return blk
 
             @guppy
@@ -296,7 +296,7 @@ class SteaneBuilder:
                     exit("with_zero_states: not enough blocks for QEC resources")
                 zero_states = array(self.get_zero_state() for _ in range(N))
                 gadget(q, zero_states)
-                self.data_block_count = self.data_block_count - N
+                self.data_block_count += N
 
             @guppy
             @no_type_check
