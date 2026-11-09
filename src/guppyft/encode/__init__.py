@@ -15,10 +15,12 @@ from tket.passes import Normalize
 
 from ._compile import LogicalCompiler, ReplacementCompiler, UncompilableError
 from ._implement_ops import (
+    GuppyOpReplacementDecorator,
     ImplementOps,
     ImplementOpsSpec,
     OpReplacements,
     TyReplacements,
+    guppy_op_replacement_decorator,
     implement_ops,
 )
 
@@ -26,6 +28,7 @@ __all__ = [
     "AnnotatingArchitectureInstance",
     "EncodeSpec",
     "EncodingArchitectureInstance",
+    "GuppyOpReplacementDecorator",
     "ImplementOps",
     "ImplementOpsSpec",
     "LogicalCompiler",
@@ -35,6 +38,7 @@ __all__ = [
     "UncompilableError",
     "annotate_encoding",
     "encode",
+    "guppy_op_replacement_decorator",
     "implement_ops",
 ]
 
