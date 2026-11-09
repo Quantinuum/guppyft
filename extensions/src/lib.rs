@@ -5,6 +5,8 @@ pub mod iceberg;
 
 pub mod steane;
 
+pub mod toy_k2;
+
 pub mod helix;
 
 pub mod std;

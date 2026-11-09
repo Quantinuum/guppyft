@@ -4,17 +4,16 @@ from collections.abc import Callable
 from copy import deepcopy
 from dataclasses import asdict, dataclass, field, replace
 from enum import StrEnum, auto
-from typing import Any, Literal, Self, no_type_check, overload
+from typing import Any, Self, no_type_check
 
 from guppylang import guppy
 from guppylang.decorator import custom_guppy_decorator
 from guppylang.defs import GuppyFunctionDefinition
-from guppylang.emulator import EmulatorBuilder, EmulatorInstance
 from guppylang.library import GuppyLibrary, link_name
+from guppylang.std.array import empty_array
 from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.collections import Stack, empty_queue
-from guppylang.std.option import Option, nothing, some
-from guppylang.std.platform import panic
+from guppylang.std.option import some
 from hugr import Hugr
 from hugr.ext import ExtensionRegistry, OpDef
 from hugr.package import Package
@@ -22,6 +21,7 @@ from hugr.std import _std_extensions
 from hugr.utils import JsonType
 from tket_exts import rotation
 
+from guppyft._util import PathDict
 from guppyft.code.steane.primitives import (
     cx,
     cz,
@@ -43,7 +43,9 @@ from guppyft.code.steane.primitives import (
     z,
 )
 from guppyft.encode import (
+    AnnotatingArchitectureInstance,
     EncodeSpec,
+    EncodingArchitectureInstance,
     ImplementOps,
     ImplementOpsSpec,
     OpReplacements,
@@ -59,6 +61,8 @@ from guppyft.std.state_factory import StateFactory
 
 from . import logical as steane_logical
 from .primitives import RawMeasurement
+
+_SCHEMA_VERSION = 1
 
 N = guppy.nat_var("N")
 
@@ -76,8 +80,22 @@ class RUSStateFactoryConf:
     max_attempts: int
 
     def to_json(self) -> JsonType:
-        """Serialise the RUS state factory config to JSON."""
+        """Serialize the RUS state factory config to JSON."""
         return asdict(self)
+
+    @classmethod
+    def from_json(
+        cls, values: dict[str, Any], *, defaults_from: "RUSStateFactoryConf"
+    ) -> "RUSStateFactoryConf":
+        """Deserialize the RUS state factory config from JSON."""
+        return cls(
+            size=values["size"]
+            if values.get("size") is not None
+            else defaults_from.size,
+            max_attempts=values["max_attempts"]
+            if values.get("max_attempts") is not None
+            else defaults_from.max_attempts,
+        )
 
 
 class QECStyle(StrEnum):
@@ -99,7 +117,7 @@ class QECPolicy:
     Attributes:
         style: The style of syndrome extraction to use (see `QECStyle`).
         threshold: Threshold at which a QEC cycle is triggered.
-        costs: See `OperationCosts`.
+        costs: See `QECPolicy.OperationCosts`.
     """
 
     @dataclass
@@ -132,8 +150,19 @@ class QECPolicy:
     costs: OperationCosts = field(default_factory=OperationCosts)
 
     def to_json(self) -> JsonType:
-        """Serialise the QEC policy to JSON."""
+        """Serialize the QEC policy to JSON."""
         return asdict(self)
+
+    @classmethod
+    def from_json(cls, values: dict[str, Any]) -> "QECPolicy":
+        """Deserialize the QEC policy from JSON."""
+        costs = QECPolicy.OperationCosts(**values.get("costs", {}))
+        policy = cls(costs=costs)
+        if (style := values.get("style")) is not None:
+            policy.style = QECStyle(style)
+        if (threshold := values.get("threshold")) is not None:
+            policy.threshold = threshold
+        return policy
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -144,10 +173,10 @@ class _SteaneOptions:
 
 
 @dataclass(frozen=True)
-class SteaneInstance:
+class SteaneInstance(AnnotatingArchitectureInstance, EncodingArchitectureInstance):
     """A Steane architecture instance built by `SteaneBuilder.build`."""
 
-    _spec: EncodeSpec
+    _spec: EncodeSpec = field(compare=False)
     _n_blocks: int
 
     _options: _SteaneOptions
@@ -159,7 +188,7 @@ class SteaneInstance:
             hugr,
             "steane",
             {
-                "schema_version": 1,
+                "schema_version": _SCHEMA_VERSION,
                 "n_blocks": self._n_blocks,
                 "zero_factory": self._options.zero_factory_conf.to_json(),
                 "magic_factory": self._options.magic_factory_conf.to_json(),
@@ -167,14 +196,9 @@ class SteaneInstance:
             },
         )
 
-    @overload
-    def encode(self, pkg: Package, *, as_bytes: Literal[False] = False) -> Package: ...
-    @overload
-    def encode(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
-    def encode(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
-        """Encode a computational package with the Steane instance."""
+    def _encode(self, pkg: Package, *, as_bytes: bool) -> Package | bytes:
         self.check_may_encode(pkg)
-        pkg_bytes: Package | bytes = encode(pkg, self._spec, as_bytes=as_bytes)  # type: ignore[call-overload]
+        pkg_bytes: Package | bytes = encode(pkg, self._spec, as_bytes=as_bytes)
         return pkg_bytes
 
     def compile(self, pkg: Package) -> Package:
@@ -183,16 +207,9 @@ class SteaneInstance:
         assert self._spec.compile is not None
         return self._spec.compile(pkg)
 
-    @overload
-    def implement_ops(
-        self, pkg: Package, *, as_bytes: Literal[False] = False
-    ) -> Package: ...
-    @overload
-    def implement_ops(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
-    def implement_ops(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
-        """Implement logical ops in `pkg` using this instance's op implementations."""
+    def _implement_ops(self, pkg: Package, *, as_bytes: bool) -> Package | bytes:
         assert self._spec.implement_ops is not None
-        pkg_bytes: Package | bytes = self._spec.implement_ops(pkg, as_bytes=as_bytes)  # type: ignore[call-overload]
+        pkg_bytes: Package | bytes = self._spec.implement_ops(pkg, as_bytes=as_bytes)
         return pkg_bytes
 
     def check_may_encode(self, hugr: Package) -> None:
@@ -204,24 +221,6 @@ class SteaneInstance:
         assert self._spec.compile is not None
         if (error := self._spec.compile.check_may_compile(hugr)) is not None:
             raise error
-
-    def emulator(
-        self,
-        pkg: Package,
-        n_qubits: int,
-        builder: EmulatorBuilder | None = None,
-    ) -> EmulatorInstance:
-        """Encode a hugr Package and build an emulator for it.
-
-        Args:
-            pkg: The computational hugr package.
-            n_qubits: Number of physical qubits available to the emulator.
-            builder: Optional `EmulatorBuilder` to use; defaults to a new one.
-        """
-        encoded_pkg = self.encode(pkg, as_bytes=True)
-        if builder is None:
-            builder = EmulatorBuilder()
-        return builder.build(encoded_pkg, n_qubits)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -269,9 +268,9 @@ class SteaneBuilder:
         # See https://github.com/Quantinuum/guppyft/issues/179
         @guppy.struct
         class STATE:
-            blocks: array[Option[LogicalBlock[7]], comptime(n_blocks)]  # type: ignore[valid-type,type-arg]
-            addr_stack: Stack[tuple[int, int], comptime(n_blocks)]  # type: ignore[valid-type]
-            qec_counter: array[float, comptime(n_blocks)]  # type: ignore[valid-type]
+            blocks: array[LogicalBlock[7], n_blocks]  # type: ignore[valid-type,type-arg]
+            addr_stack: Stack[tuple[int, int], n_blocks]  # type: ignore[valid-type]
+            qec_counter: array[float, n_blocks]  # type: ignore[valid-type]
 
             zero_state_factory: StateFactory[  # type: ignore[type-arg]
                 7, 1, comptime(self._options.zero_factory_conf.size)  # type: ignore[valid-type]
@@ -279,16 +278,6 @@ class SteaneBuilder:
             magic_state_factory: StateFactory[  # type: ignore[type-arg]
                 7, 8, comptime(self._options.magic_factory_conf.size)  # type: ignore[valid-type]
             ]
-
-            @guppy
-            @no_type_check
-            def take_block(self, blk_id: int) -> LogicalBlock[7]:
-                return self.blocks[blk_id].take().unwrap()
-
-            @guppy
-            @no_type_check
-            def put_block(self, blk_id: int, blk: LogicalBlock[7] @ owned) -> None:
-                self.blocks[blk_id].swap(some(blk)).unwrap_nothing()
 
             @guppy
             @no_type_check
@@ -302,14 +291,10 @@ class SteaneBuilder:
                     exit("allocate_next_addr: No more logical qubits to allocate")
                 next_addr = self.addr_stack.pop()
 
-                blk = self.blocks[next_addr[0]].take()
-
-                if blk.is_some():
+                if not self.blocks.is_borrowed(next_addr[0]):
                     # Since Steane is k=1, blocks are either not allocated, or
                     # completely filled, so this should never happen.
-                    panic("allocate_next_addr: Next block was not nothing.")
-
-                self.blocks[next_addr[0]].swap(blk).unwrap_nothing()
+                    panic("allocate_next_addr: Next block was already allocated.")
 
                 # Reset qec_counter for block
                 self.qec_counter[next_addr[0]] = 0.0
@@ -327,11 +312,11 @@ class SteaneBuilder:
                     self.qec_counter[i] = self.qec_counter[i] + op_cost
 
                     if self.qec_counter[i] >= comptime(qec_policy.threshold):
-                        blk = self.take_block(i)
+                        blk = self.blocks.take(i)
 
                         qec_cycle_def(self, blk)
 
-                        self.put_block(i, blk)
+                        self.blocks.put(blk, i)
                         self.qec_counter[i] = 0.0
 
         match qec_policy.style:
@@ -370,11 +355,11 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
+                blk = state.blocks.take(blk_id)
 
                 qec_cycle_def(state, blk)
 
-                state.put_block(blk_id, blk)
+                state.blocks.put(blk, blk_id)
                 state.qec_counter[blk_id] = 0.0
 
                 return state, q
@@ -394,7 +379,7 @@ class SteaneBuilder:
             def _impl(state: STATE @ owned) -> tuple[STATE, tuple[int, int]]:
                 blk_id, qb_id = state.allocate_next_addr()
                 blk = state.zero_state_factory.get_state()
-                state.put_block(blk_id, blk)
+                state.blocks.put(blk, blk_id)
 
                 state.qec_policy(array(blk_id), comptime(qec_policy.costs.prep_zero))
 
@@ -409,7 +394,7 @@ class SteaneBuilder:
             def _impl(state: STATE @ owned) -> tuple[STATE, tuple[int, int]]:
                 blk_id, qb_id = state.allocate_next_addr()
                 blk = state.magic_state_factory.get_state()
-                state.put_block(blk_id, blk)
+                state.blocks.put(blk, blk_id)
 
                 state.qec_policy(array(blk_id), comptime(qec_policy.costs.prep_t))
 
@@ -425,7 +410,7 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int]
             ) -> tuple[STATE, RawMeasurement[7]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
+                blk = state.blocks.take(blk_id)
 
                 res = measure_z(blk)
 
@@ -440,7 +425,7 @@ class SteaneBuilder:
             @guppy
             def _impl(state: STATE @ owned, q: tuple[int, int]) -> STATE:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
+                blk = state.blocks.take(blk_id)
 
                 blk.discard()
 
@@ -457,9 +442,7 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
-                x(blk)
-                state.put_block(blk_id, blk)
+                x(state.blocks[blk_id])
 
                 state.qec_policy(array(blk_id), comptime(qec_policy.costs.x))
 
@@ -475,9 +458,7 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
-                y(blk)
-                state.put_block(blk_id, blk)
+                y(state.blocks[blk_id])
 
                 state.qec_policy(array(blk_id), comptime(qec_policy.costs.y))
 
@@ -493,9 +474,7 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
-                z(blk)
-                state.put_block(blk_id, blk)
+                z(state.blocks[blk_id])
 
                 state.qec_policy(array(blk_id), comptime(qec_policy.costs.z))
 
@@ -511,9 +490,7 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
-                h(blk)
-                state.put_block(blk_id, blk)
+                h(state.blocks[blk_id])
 
                 state.qec_policy(array(blk_id), comptime(qec_policy.costs.h))
 
@@ -529,9 +506,7 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
-                s(blk)
-                state.put_block(blk_id, blk)
+                s(state.blocks[blk_id])
 
                 state.qec_policy(array(blk_id), comptime(qec_policy.costs.s))
 
@@ -547,9 +522,7 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
-                sdg(blk)
-                state.put_block(blk_id, blk)
+                sdg(state.blocks[blk_id])
 
                 state.qec_policy(array(blk_id), comptime(qec_policy.costs.sdg))
 
@@ -565,10 +538,8 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int], a: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
-                resource = state.take_block(a[0])
-                inject_t(blk, resource)
-                state.put_block(blk_id, blk)
+                resource = state.blocks.take(a[0])
+                inject_t(state.blocks[blk_id], resource)
                 state.free_addr(a)
 
                 state.qec_policy(array(blk_id), comptime(qec_policy.costs.inject_t))
@@ -587,10 +558,8 @@ class SteaneBuilder:
                 state: STATE @ owned, q: tuple[int, int], a: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int]]:
                 blk_id, _ = q
-                blk = state.take_block(blk_id)
-                resource = state.take_block(a[0])
-                inject_tdg(blk, resource)
-                state.put_block(blk_id, blk)
+                resource = state.blocks.take(a[0])
+                inject_tdg(state.blocks[blk_id], resource)
                 state.free_addr(a)
 
                 state.qec_policy(array(blk_id), comptime(qec_policy.costs.inject_tdg))
@@ -608,12 +577,7 @@ class SteaneBuilder:
             def _impl(
                 state: STATE @ owned, ctl: tuple[int, int], tgt: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int], tuple[int, int]]:
-                ctl_blk, tgt_blk = state.take_block(ctl[0]), state.take_block(tgt[0])
-
-                cx(ctl_blk, tgt_blk)
-
-                state.put_block(ctl[0], ctl_blk)
-                state.put_block(tgt[0], tgt_blk)
+                cx(state.blocks[ctl[0]], state.blocks[tgt[0]])
 
                 state.qec_policy(array(ctl[0], tgt[0]), comptime(qec_policy.costs.cx))
 
@@ -630,12 +594,7 @@ class SteaneBuilder:
             def _impl(
                 state: STATE @ owned, q0: tuple[int, int], q1: tuple[int, int]
             ) -> tuple[STATE, tuple[int, int], tuple[int, int]]:
-                blk0, blk1 = state.take_block(q0[0]), state.take_block(q1[0])
-
-                cz(blk0, blk1)
-
-                state.put_block(q0[0], blk0)
-                state.put_block(q1[0], blk1)
+                cz(state.blocks[q0[0]], state.blocks[q1[0]])
 
                 state.qec_policy(array(q0[0], q1[0]), comptime(qec_policy.costs.cz))
 
@@ -658,13 +617,10 @@ class SteaneBuilder:
         @link_name("guppyft.steane.gen_state")
         def state_gen() -> STATE:
             return STATE(
-                array(nothing[LogicalBlock[7]]() for _ in range(comptime(n_blocks))),
-                Stack(
-                    array(some((blk, 1)) for blk in range(comptime(n_blocks))),
-                    comptime(n_blocks),
-                ),
+                empty_array(),
+                Stack(array(some((blk, 1)) for blk in range(n_blocks)), n_blocks),
                 # qec_counter
-                array(0.0 for _ in range(comptime(n_blocks))),
+                array(0.0 for _ in range(n_blocks)),
                 # Zero state factory
                 StateFactory(
                     prep_zero_ft,
@@ -688,12 +644,7 @@ class SteaneBuilder:
         @no_type_check
         @link_name("guppyft.steane.discard_state")
         def state_discard(state: "STATE" @ owned) -> None:
-            for blk in state.blocks:
-                if blk.is_some():
-                    blk.unwrap().discard()
-                else:
-                    blk.unwrap_nothing()
-
+            state.blocks.discard_all_taken()
             state.zero_state_factory.discard()
             state.magic_state_factory.discard()
 
@@ -788,3 +739,34 @@ class SteaneBuilder:
         return SteaneInstance(
             _spec=encoder_spec, _n_blocks=n_blocks, _options=deepcopy(self._options)
         )
+
+    @classmethod
+    def instance_from_params(cls, params: dict[str, Any]) -> "SteaneInstance":
+        """Produces an instance with the builder according to the given parameters. To
+        be used as the 'inverse' of `SteaneInstance.annotate`."""
+        params = PathDict(params)
+
+        builder = cls()
+        if params["schema_version"] != _SCHEMA_VERSION:
+            raise RuntimeError(
+                f"Unsupported params schema version: {params['schema_version']}"
+            )
+
+        if (zero_factory_params := params.get("zero_factory")) is not None:
+            builder = builder.with_zero_factory_conf(
+                RUSStateFactoryConf.from_json(
+                    zero_factory_params,
+                    defaults_from=builder._options.zero_factory_conf,
+                )
+            )
+        if (magic_factory_params := params.get("magic_factory")) is not None:
+            builder = builder.with_magic_factory_conf(
+                RUSStateFactoryConf.from_json(
+                    magic_factory_params,
+                    defaults_from=builder._options.magic_factory_conf,
+                )
+            )
+        if (qec_policy_params := params.get("qec_policy")) is not None:
+            builder = builder.with_qec_policy(QECPolicy.from_json(qec_policy_params))
+
+        return builder.build(n_blocks=params["n_blocks"])
