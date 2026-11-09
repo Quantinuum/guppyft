@@ -81,18 +81,18 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   check-py:
-    name: 🐍 Test Python code (${{ matrix.python-version.py }})
+    name: 🐍 Test Python code (${{ matrix.group.py }})
     needs: changes
     if: ${{ needs.changes.outputs.python == 'true' }}
     runs-on: ubuntu-latest
     env:
-      PYTHON_VERSION: ${{ matrix.python-version.py }}
+      PYTHON_VERSION: ${{ matrix.group.py }}
       LLVM_SYS_211_PREFIX: /usr/lib/llvm-21
       GUPPYFT_RUN_LONG_TESTS: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.run_long_tests) }}
 
     strategy:
       matrix:
-        python-version:
+        group:
         - { py: "3.12", coverage: false }
         - { py: "3.14", coverage: true }
       fail-fast: false
@@ -112,14 +112,14 @@ jobs:
         run: uv sync --frozen --python ${{ env.PYTHON_VERSION }}
 
       - name: Run tests
-        if: ${{ !matrix.python-version.coverage }}
+        if: ${{ !matrix.group.coverage }}
         run: uv run pytest -n auto
 
       - name: Run Python tests with coverage
-        if: ${{ matrix.python-version.coverage }}
+        if: ${{ matrix.group.coverage }}
         run: uv run pytest -n auto --cov=src/guppyft --cov-report=xml
       - name: Upload Python coverage to codecov.io
-        if: ${{ matrix.python-version.coverage }}
+        if: ${{ matrix.group.coverage }}
         uses: codecov/codecov-action@v7
         with:
           files: coverage.xml
