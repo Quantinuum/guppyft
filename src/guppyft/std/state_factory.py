@@ -117,19 +117,19 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, MAX_BATCH_SIZE]):  # type: ignor
         """
         if MAX_BATCH_SIZE <= 0:
             panic("StateFactory: MAX_BATCH_SIZE must be greater than zero")
+        if limit < 0:
+            exit("StateFactory: limit must be non-negative")
         if limit > MAX_BATCH_SIZE:
             limit = int(MAX_BATCH_SIZE)
 
         for attempt in range(self.max_attempts):
             # If empty, request a new batch
             if len(self.batch) == 0:
-                count = limit
+                if limit == 0:
+                    exit("StateFactory: no free blocks available")
                 # Prevent preparing more blocks than remaining attempts
                 remaining_attempts = self.max_attempts - attempt
-                if remaining_attempts < count:
-                    count = remaining_attempts
-                if count <= 0:
-                    exit("StateFactory: no free blocks available")
+                count = remaining_attempts if remaining_attempts < limit else limit
 
                 for _ in range(count):
                     self.batch.push(self.prep_routine())
