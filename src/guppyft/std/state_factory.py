@@ -18,7 +18,7 @@ __all__ = [
 
 BLOCK_SIZE = guppy.nat_var("BLOCK_SIZE")
 N_FLAGS = guppy.nat_var("N_FLAGS")
-MAX_BATCH_SIZE = guppy.nat_var("BATCH_SIZE")
+MAX_BATCH_SIZE = guppy.nat_var("MAX_BATCH_SIZE")
 
 
 @guppy
@@ -116,7 +116,7 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, MAX_BATCH_SIZE]):  # type: ignor
         checked first, even when `limit` is zero.
         """
         if MAX_BATCH_SIZE <= 0:
-            panic("StateFactory: QUEUE_SIZE must be greater than zero")
+            panic("StateFactory: MAX_BATCH_SIZE must be greater than zero")
         if limit > MAX_BATCH_SIZE:
             limit = int(MAX_BATCH_SIZE)
 
