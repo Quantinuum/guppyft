@@ -317,7 +317,7 @@ class SteaneBuilder:
                     [LogicalBlock[7], array[LogicalBlock[7], N] @ owned], None
                 ],
             ) -> None:
-                """Helper method to call qec gadgets that require zero states
+                """Helper method to call QEC gadgets that require zero states
                 as input. This allows the number of available blocks to be managed
                 by `STATE`."""
                 if self.free_blocks() + len(self.zero_state_factory.batch) < N:
