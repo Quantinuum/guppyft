@@ -43,7 +43,7 @@ def test_default_build_wrapper(as_bytes: bool) -> None:
     EmulatorBuilder().build(pkg1, n_qubits=1).run()
 
 
-def test_no_measurement_in_program() -> None:
+def test_preserves_packaged_extensions_for_opaque_ops() -> None:
     """Regression test for implementing ops on a hugr with opaque ops where the
     extensions are packaged but not resolved."""
 
