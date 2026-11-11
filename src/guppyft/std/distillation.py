@@ -179,6 +179,9 @@ class DistillationFactory[Q, M: Drop, C, BATCH_SIZE: nat]:
     basis teleports :math:`T\ket{+}` onto qubit 0, and the X stabilizer parities
     detect faulty injections.
 
+    With several levels, the input states of each round are accepted outputs of rounds
+    one level below, and level 1 uses noisy :math:`T\ket{+}` states.
+
     Circuit taken from Fig. 8 of:
     https://journals.aps.org/prxquantum/pdf/10.1103/PRXQuantum.2.020341
 
@@ -193,8 +196,10 @@ class DistillationFactory[Q, M: Drop, C, BATCH_SIZE: nat]:
         prep_zero: Prepares a qubit in the logical zero state, given the context.
         qec: Applies a QEC cycle to a qubit, given the context.
         qec_policy: When to apply `qec` to the qubits of a round.
-        max_attempts: Maximum number of rounds checked before giving up.
-        batch: Rounds whose outcomes are unread. Provide an empty queue with
+        levels: Number of distillation levels, at least 1.
+        max_attempts: Maximum number of rounds checked for each state before giving
+            up, at every level.
+        batch: Top-level rounds whose outcomes are unread. Provide an empty queue with
             `guppylang.std.collections.queue.empty_queue`.
     """
 
@@ -202,6 +207,7 @@ class DistillationFactory[Q, M: Drop, C, BATCH_SIZE: nat]:
     prep_zero: Function[[C], Q]  # type: ignore[type-arg,valid-type,misc]
     qec: Function[[C, Q], None]  # type: ignore[type-arg,valid-type]
     qec_policy: DistillationQECPolicy
+    levels: int
     max_attempts: int
     batch: Queue[DistillationPreBlock[Q, M], BATCH_SIZE]
 
@@ -216,11 +222,14 @@ class DistillationFactory[Q, M: Drop, C, BATCH_SIZE: nat]:
         """
         if BATCH_SIZE <= 0:  # type: ignore[misc]
             panic("DistillationFactory: BATCH_SIZE must be greater than zero")
+        levels = self.levels
+        if levels < 1:
+            panic("DistillationFactory: levels must be at least 1")
 
         for _ in range(self.max_attempts):
             if len(self.batch) == 0:
                 for _ in range(BATCH_SIZE):  # type: ignore[misc]
-                    pre_block = self._prepare(context)
+                    pre_block = self._round(levels, context)
                     self.batch.push(pre_block)
 
             state = self.batch.pop().force_check()
@@ -242,8 +251,8 @@ class DistillationFactory[Q, M: Drop, C, BATCH_SIZE: nat]:
 
     @guppy
     @no_type_check
-    def _prepare(self, context: C) -> DistillationPreBlock[Q, M]:
-        """Run one round without reading its X-basis outcomes."""
+    def _round(self, level: int, context: C) -> DistillationPreBlock[Q, M]:
+        """Run one round of `level` without reading its X-basis outcomes."""
         costs = self.qec_policy
         qs = array(self.prep_zero(context) for _ in range(comptime(_N_BLOCKS)))
         counters = array(0.0 for _ in range(comptime(_N_BLOCKS)))
@@ -259,7 +268,10 @@ class DistillationFactory[Q, M: Drop, C, BATCH_SIZE: nat]:
             self._charge(context, qs, counters, t, costs.cx)
 
         for j in range(1, comptime(_N_BLOCKS)):
-            t_state = self.ops.prep_noisy_t()
+            if level == 1:
+                t_state = self.ops.prep_noisy_t()
+            else:
+                t_state = self._accepted(level - 1, context)
             _inject_tdg(self.ops, qs[j], t_state)
             self._charge(context, qs, counters, j, costs.inject_tdg)
             self.ops.h(qs[j])
@@ -272,6 +284,19 @@ class DistillationFactory[Q, M: Drop, C, BATCH_SIZE: nat]:
         qs.discard_all_taken()
 
         return DistillationPreBlock(out, self.ops, outcomes)
+
+    @guppy
+    @no_type_check
+    def _accepted(self, level: int, context: C) -> Q:
+        """Run rounds of `level` one at a time until one passes its checks."""
+        for _ in range(self.max_attempts):
+            state = self._round(level, context).force_check()
+            if state.is_some():
+                return state.unwrap()
+            state.unwrap_nothing()
+        exit("DistillationFactory ran out of attempts!")
+        # Unreachable, but required by the Guppy checker
+        return self.ops.prep_noisy_t()
 
     @guppy
     @no_type_check

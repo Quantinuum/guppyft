@@ -86,7 +86,7 @@ def test_distills_t_state() -> None:
         ops = DistillationOps(_prep_t, h, sdg, z, cx, measure, _read)
         policy = DistillationQECPolicy(1.0, 0.0, 0.0, 0.0, 0.0)
         factory: DistillationFactory[qubit, Measurement, _NoContext, 1] = (
-            DistillationFactory(ops, _zero, _no_qec, policy, 1, empty_queue())
+            DistillationFactory(ops, _zero, _no_qec, policy, 1, 1, empty_queue())
         )
         q = factory.get_state(_NoContext())
         factory.discard()
@@ -153,8 +153,9 @@ def _zero_with_calls(calls: _QECCalls) -> qubit:
     return qubit()
 
 
+@pytest.mark.parametrize("levels", [1, 2, 3])
 @pytest.mark.parametrize(
-    ("policy", "expected_calls"),
+    ("policy", "calls_per_round"),
     [
         ((1.0, 0.0, 0.0, 0.0, 0.0), 0),
         # 16 zero states, 5 H, 25 CX on two blocks, 15 injections each followed by H
@@ -165,10 +166,14 @@ def _zero_with_calls(calls: _QECCalls) -> qubit:
     ],
 )
 def test_qec_policy(
-    policy: tuple[float, float, float, float, float], expected_calls: int
+    policy: tuple[float, float, float, float, float],
+    calls_per_round: int,
+    levels: int,
 ) -> None:
     """Uses S|+> inputs with Z corrections, which distil S|+> through the same circuit
     and can be simulated by a stabilizer simulator."""
+    # Without errors, every round is accepted: 1 at the top, 15 per round below
+    n_rounds = sum(15**k for k in range(levels))
 
     @guppy
     @no_type_check
@@ -183,7 +188,13 @@ def test_qec_policy(
         )
         factory: DistillationFactory[qubit, Measurement, _QECCalls, 1] = (
             DistillationFactory(
-                ops, _zero_with_calls, _count_qec, qec_policy, 1, empty_queue()
+                ops,
+                _zero_with_calls,
+                _count_qec,
+                qec_policy,
+                comptime(levels),
+                1,
+                empty_queue(),
             )
         )
         calls = _QECCalls(0)
@@ -194,8 +205,9 @@ def test_qec_policy(
         h(q)
         output("m", measure(q).read())
 
-    shot = main.emulator(n_qubits=17).stabilizer_sim().run().collated_shots()[0]
-    assert shot["qec_calls"] == [expected_calls]
+    emulator = main.emulator(n_qubits=16 * levels + 1).stabilizer_sim()
+    shot = emulator.run().collated_shots()[0]
+    assert shot["qec_calls"] == [calls_per_round * n_rounds]
     assert shot["m"] == [False]
 
 
@@ -231,6 +243,7 @@ def _s_factory_program(max_attempts: int) -> GuppyFunctionDefinition[[], None]:
                 _counted_zero,
                 _no_qec_counted,
                 policy,
+                1,
                 comptime(max_attempts),
                 empty_queue(),
             )
@@ -259,4 +272,76 @@ def test_factory_exits_when_out_of_attempts() -> None:
     main = _s_factory_program(max_attempts=0)
     result = main.emulator(n_qubits=20).stabilizer_sim().run()
     tags = result.collated_shots()[0].keys()
+    assert "exit: DistillationFactory ran out of attempts!" in tags
+
+
+@guppy
+@no_type_check
+def _coin() -> bool:
+    c = qubit()
+    h(c)
+    return measure(c).read()
+
+
+@guppy
+@no_type_check
+def _prep_s_half_noisy() -> qubit:
+    q = _prep_s()
+    if _coin():
+        z(q)
+    return q
+
+
+@guppy
+@no_type_check
+def _prep_s_noisy() -> qubit:
+    q = _prep_s()
+    if _coin() and _coin() and _coin() and _coin():
+        z(q)
+    return q
+
+
+def test_retries_inner_rounds() -> None:
+    """S|+> inputs with a Z error with probability 1/16, so some level 1 rounds fail."""
+
+    @guppy
+    @no_type_check
+    def main() -> None:
+        ops = DistillationOps(_prep_s_noisy, h, z, z, cx, measure, _read)
+        policy = DistillationQECPolicy(1.0, 0.0, 0.0, 0.0, 0.0)
+        factory: DistillationFactory[qubit, Measurement, _ZeroCount, 1] = (
+            DistillationFactory(
+                ops, _counted_zero, _no_qec_counted, policy, 2, 100, empty_queue()
+            )
+        )
+        zeros = _ZeroCount(0)
+        q = factory.get_state(zeros)
+        factory.discard()
+        output("rounds", zeros.n // 16)
+        sdg(q)
+        h(q)
+        output("m", measure(q).read())
+
+    emulator = main.emulator(n_qubits=34).stabilizer_sim().with_seed(1)
+    shot = emulator.run().collated_shots()[0]
+    assert shot["rounds"][0] > 16
+    assert shot["m"] == [False]
+
+
+def test_exits_when_lower_level_out_of_attempts() -> None:
+    """S|+> inputs with a Z error with probability 1/2, so level 1 rounds fail often."""
+
+    @guppy
+    @no_type_check
+    def main() -> None:
+        ops = DistillationOps(_prep_s_half_noisy, h, z, z, cx, measure, _read)
+        policy = DistillationQECPolicy(1.0, 0.0, 0.0, 0.0, 0.0)
+        factory: DistillationFactory[qubit, Measurement, _NoContext, 1] = (
+            DistillationFactory(ops, _zero, _no_qec, policy, 2, 1, empty_queue())
+        )
+        measure(factory.get_state(_NoContext())).read()
+        factory.discard()
+
+    emulator = main.emulator(n_qubits=34).stabilizer_sim().with_seed(1)
+    tags = emulator.run().collated_shots()[0].keys()
     assert "exit: DistillationFactory ran out of attempts!" in tags
