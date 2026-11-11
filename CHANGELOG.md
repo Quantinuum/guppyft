@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.2](https://github.com/Quantinuum/guppyft/compare/v0.6.1...v0.6.2) (2026-11-11)
+
+
+### Bug Fixes
+
+* Include extensions when serialising hugrs for op implementation ([#536](https://github.com/Quantinuum/guppyft/issues/536)) ([cdbbb1d](https://github.com/Quantinuum/guppyft/commit/cdbbb1d9c630fcd4e3a51932ccb47be285c77278))
+
 ## [0.6.1](https://github.com/Quantinuum/guppyft/compare/v0.6.0...v0.6.1) (2026-11-06)
 
 
