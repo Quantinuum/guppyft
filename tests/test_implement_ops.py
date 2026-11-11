@@ -1,6 +1,10 @@
+from typing import TYPE_CHECKING
+
 import pytest
-from guppylang import guppy
+from guppylang import guppy, qubit
 from guppylang.emulator import EmulatorBuilder
+from guppylang.std.quantum import discard
+from hugr.ops import ExtOp
 
 from guppyft.encode import (
     ImplementOpsSpec,
@@ -8,6 +12,9 @@ from guppyft.encode import (
     TyReplacements,
     implement_ops,
 )
+
+if TYPE_CHECKING:
+    from hugr.package import Package
 
 
 @pytest.mark.parametrize("as_bytes", [False, True])
@@ -34,3 +41,24 @@ def test_default_build_wrapper(as_bytes: bool) -> None:
     assert module.entrypoint == entrypoint
 
     EmulatorBuilder().build(pkg1, n_qubits=1).run()
+
+
+def test_no_measurement_in_program() -> None:
+    """Regression test for implementing ops on a hugr with opaque ops where the
+    extensions are packaged but not resolved."""
+
+    @guppy
+    def main() -> None:
+        discard(qubit())
+
+    pkg1: Package = main.compile()
+
+    [hugr] = pkg1.modules
+    for node_data in hugr.values():
+        if isinstance(node_data.op, ExtOp):
+            node_data.op = node_data.op.to_custom_op()  # Make all ops opaque
+
+    spec = ImplementOpsSpec(ops=OpReplacements(), tys=TyReplacements())
+    pkg2 = implement_ops(pkg1, spec)
+
+    assert {e.name for e in pkg1.extensions}.issubset({e.name for e in pkg2.extensions})
