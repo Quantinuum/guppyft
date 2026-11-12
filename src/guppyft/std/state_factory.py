@@ -152,7 +152,7 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, MAX_BATCH_SIZE]):  # type: ignor
             else:
                 state.unwrap_nothing()
 
-        return exit("StateFactory ran out of attempts!", _qalloc_dirty[BLOCK_SIZE]())
+        return exit("StateFactory ran out of attempts!")
 
     @guppy
     @no_type_check
