@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.3](https://github.com/Quantinuum/guppyft/compare/v0.6.2...v0.6.3) (2026-11-12)
+
+
+### Features
+
+* Dynamically change `StateFactory` size based available blocks ([#533](https://github.com/Quantinuum/guppyft/issues/533)) ([15ee3bb](https://github.com/Quantinuum/guppyft/commit/15ee3bb3df94f8c2fb2ebc82d6178ec0123c50a1))
+
+
+### Performance Improvements
+
+* Cache extensions loaded from json ([#543](https://github.com/Quantinuum/guppyft/issues/543)) ([dfb95d4](https://github.com/Quantinuum/guppyft/commit/dfb95d4b443e1c677d1fbfc539a255327178863d))
+
 ## [0.6.2](https://github.com/Quantinuum/guppyft/compare/v0.6.1...v0.6.2) (2026-11-11)
 
 
