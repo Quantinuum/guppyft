@@ -4,6 +4,7 @@ import pytest
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.std.builtins import array
+from guppylang.std.collections import empty_queue
 from guppylang.std.lang import comptime
 from guppylang.std.platform import output
 from guppylang.std.quantum import cx, cz, h, qubit, s, sdg, x, y, z
@@ -11,6 +12,7 @@ from guppylang.std.quantum import cx, cz, h, qubit, s, sdg, x, y, z
 from guppyft.code.steane import primitives as steane_primitives
 from guppyft.code.steane.primitives import (
     CODE_DEF,
+    RawMeasurement,
     _measure_syndromes,
     knill_qec_cycle,
     prep_zero_non_ft,
@@ -19,6 +21,7 @@ from guppyft.code.steane.primitives import (
     steane_z_qec_cycle,
 )
 from guppyft.std import LogicalBlock
+from guppyft.std.distillation import DistillationFactory, DistillationQECPolicy
 from guppyft.verify import valid_clifford_implementation
 
 
@@ -204,3 +207,53 @@ def test_t_gate() -> None:
     res = test.emulator(n_qubits=20).run().collated_shots()
 
     assert res == [{"res": [1]}]
+
+
+def test_t_gate_with_non_ft_t_state() -> None:
+
+    @guppy
+    def test() -> None:
+        blk = steane_primitives.prep_zero_non_ft()
+        steane_primitives.h(blk)
+        for _ in range(4):
+            a = steane_primitives.prep_t_state_non_ft()
+            steane_primitives.inject_t(blk, a)
+        steane_primitives.h(blk)
+        res = steane_primitives.measure_z(blk)
+        output("res", steane_primitives.decode(res))
+
+    res = test.emulator(n_qubits=14).run().collated_shots()
+
+    assert res == [{"res": [1]}]
+
+
+@guppy.struct
+class _NoContext:
+    pass
+
+
+def test_distillation_ops() -> None:
+    # A distillation round needs more than 112 qubits, so only check it compiles.
+
+    @guppy
+    @no_type_check
+    def no_qec(context: _NoContext, q: LogicalBlock[7]) -> None:
+        pass
+
+    @guppy
+    @no_type_check
+    def prep_zero(context: _NoContext) -> LogicalBlock[7]:
+        return steane_primitives.prep_zero_non_ft()
+
+    @guppy
+    @no_type_check
+    def test() -> None:
+        policy = DistillationQECPolicy(1.0, 0.0, 0.0, 0.0, 0.0)
+        ops = steane_primitives.distillation_ops()
+        factory: DistillationFactory[
+            LogicalBlock[7], RawMeasurement[7], _NoContext, 1
+        ] = DistillationFactory(ops, prep_zero, no_qec, policy, 1, empty_queue())
+        factory.get_state(_NoContext()).discard()
+        factory.discard()
+
+    test.compile()
