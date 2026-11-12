@@ -81,7 +81,8 @@ def test_qec_cycle(make_steane_instance: Callable[[int], SteaneInstance]) -> Non
         result("q", q.measure_z().decode())
 
     pkg = main.compile()
-    phys_pkg = make_steane_instance(1).implement_ops(pkg)
+    # One data block and one QEC resource block share the block limit.
+    phys_pkg = make_steane_instance(2).implement_ops(pkg)
 
     hugr = phys_pkg.modules[0]
     qec_cycle = next(

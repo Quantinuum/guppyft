@@ -18,7 +18,7 @@ __all__ = [
 
 BLOCK_SIZE = guppy.nat_var("BLOCK_SIZE")
 N_FLAGS = guppy.nat_var("N_FLAGS")
-BATCH_SIZE = guppy.nat_var("BATCH_SIZE")
+MAX_BATCH_SIZE = guppy.nat_var("MAX_BATCH_SIZE")
 
 
 @guppy
@@ -79,13 +79,13 @@ def _qalloc_dirty() -> LogicalBlock[BLOCK_SIZE]:
 
 
 @guppy.struct
-class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]):  # type: ignore[misc]
+class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, MAX_BATCH_SIZE]):  # type: ignore[misc]
     """State factory, making preparation attempts in parallel.
 
     Args:
         BLOCK_SIZE: Number of physical qubits in the logical block.
         N_FLAGS: Number of flag outcomes each `PreBlock` tracks.
-        BATCH_SIZE: Number of states produced in the same batch.
+        MAX_BATCH_SIZE: Maximum number of states produced in the same batch.
 
     Attributes:
         prep_routine: Function to prepare a state.
@@ -96,26 +96,50 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]):  # type: ignore[mi
 
     prep_routine: Function[[], PreBlock[BLOCK_SIZE, N_FLAGS]]  # type: ignore[type-arg,valid-type]
     max_attempts: int
-    batch: Queue[PreBlock[BLOCK_SIZE, N_FLAGS], BATCH_SIZE]  # type: ignore[type-arg,valid-type]
+    batch: Queue[PreBlock[BLOCK_SIZE, N_FLAGS], MAX_BATCH_SIZE]  # type: ignore[type-arg,valid-type]
 
     @guppy
     @no_type_check
     def get_state(
-        self: "StateFactory[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]",
+        self: "StateFactory[BLOCK_SIZE, N_FLAGS, MAX_BATCH_SIZE]",
     ) -> LogicalBlock[BLOCK_SIZE]:
-        """Parallel RUS preparation, up to `self.max_attempts` retries.
+        """Supply a state using the configured maximum batch size."""
+        return self.get_state_with_batch_size_limit(int(MAX_BATCH_SIZE))
 
-        All `BATCH_SIZE` state preparations may be run in parallel. If any of them
-        succeeds, the state is returned. Surplus states are stored and can be fetched by
-        subsequent calls to this function.
+    @guppy
+    @no_type_check
+    def get_state_with_batch_size_limit(
+        self: "StateFactory[BLOCK_SIZE, N_FLAGS, MAX_BATCH_SIZE]", batch_size_limit: int
+    ) -> LogicalBlock[BLOCK_SIZE]:
+        """Supply a state with at most `batch_size_limit` candidates prepared per batch.
+        Batch size is bounded by `MAX_BATCH_SIZE` and remaining attempts. Cached
+        candidates are checked first, even when `batch_size_limit` is zero.
         """
-        if BATCH_SIZE <= 0:
-            panic("StateFactory: BATCH_SIZE must be greater than zero")
+        if MAX_BATCH_SIZE <= 0:
+            panic("StateFactory: MAX_BATCH_SIZE must be greater than zero")
+        if batch_size_limit < 0:
+            exit("StateFactory: batch_size_limit must be non-negative")
+        if batch_size_limit > MAX_BATCH_SIZE:
+            batch_size_limit = int(MAX_BATCH_SIZE)
 
-        for _ in range(self.max_attempts):
+        for attempt in range(self.max_attempts):
             # If empty, request a new batch
             if len(self.batch) == 0:
-                for _ in range(BATCH_SIZE):
+                # If `batch_size_limit == 0`, any cached blocks in the
+                # queue will be checked first. If none were successful,
+                # no further attempts will be made and the program will
+                # exit.
+                if batch_size_limit == 0:
+                    exit("StateFactory: batch_size_limit set to zero")
+                # Prevent preparing more blocks than remaining attempts
+                remaining_attempts = self.max_attempts - attempt
+                count = (
+                    remaining_attempts
+                    if remaining_attempts < batch_size_limit
+                    else batch_size_limit
+                )
+
+                for _ in range(count):
                     self.batch.push(self.prep_routine())
 
             # Pop an element from batch and check if it successfully prepared a state
@@ -128,12 +152,13 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]):  # type: ignore[mi
             else:
                 state.unwrap_nothing()
 
-        exit("StateFactory ran out of attempts!")
-        return _qalloc_dirty()  # Unreachable, but required by the Guppy checker
+        return exit("StateFactory ran out of attempts!")
 
     @guppy
     @no_type_check
-    def discard(self: "StateFactory[BLOCK_SIZE, N_FLAGS, BATCH_SIZE]" @ owned) -> None:
+    def discard(
+        self: "StateFactory[BLOCK_SIZE, N_FLAGS, MAX_BATCH_SIZE]" @ owned,
+    ) -> None:
         """Discard all state-preparation candidates in the batch."""
         for blk in self.batch:
             blk.logical_block.discard()
