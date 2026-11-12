@@ -332,6 +332,7 @@ class SteaneBuilder:
                             comptime(qec_policy.costs.cx),
                             comptime(qec_policy.costs.inject_tdg),
                         ),
+                        1,
                         comptime(self._options.magic_factory_conf.max_attempts),
                         empty_queue(),
                     )

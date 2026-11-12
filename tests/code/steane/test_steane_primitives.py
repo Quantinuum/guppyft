@@ -252,7 +252,7 @@ def test_distillation_ops() -> None:
         ops = steane_primitives.distillation_ops()
         factory: DistillationFactory[
             LogicalBlock[7], RawMeasurement[7], _NoContext, 1
-        ] = DistillationFactory(ops, prep_zero, no_qec, policy, 1, empty_queue())
+        ] = DistillationFactory(ops, prep_zero, no_qec, policy, 1, 1, empty_queue())
         factory.get_state(_NoContext()).discard()
         factory.discard()
 
