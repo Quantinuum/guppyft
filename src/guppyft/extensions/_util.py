@@ -2,7 +2,6 @@
 
 import functools
 import pkgutil
-from collections.abc import Sequence
 
 from hugr.ext import Extension, ExtensionRegistry
 
@@ -17,9 +16,10 @@ def load_extension_json(name: str) -> str:
     return json_str.decode()
 
 
-def load_extension(name: str, dependencies: Sequence[str] | None = None) -> Extension:
+@functools.cache
+def load_extension(name: str, dependencies: tuple[str, ...] | None = None) -> Extension:
     if dependencies is None:
-        dependencies = []
+        dependencies = ()
 
     registry = ExtensionRegistry.from_extensions(
         [Extension.from_json(load_extension_json(dep)) for dep in dependencies]
