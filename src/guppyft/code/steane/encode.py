@@ -296,7 +296,7 @@ class SteaneBuilder:
             def get_zero_state(self) -> LogicalBlock[7]:
                 # TODO Reclaim surplus candidates from the other factory when needed.
                 limit = self.free_blocks() + len(self.zero_state_factory.batch)
-                blk = self.zero_state_factory.get_state_with_limit(limit)
+                blk = self.zero_state_factory.get_state_with_batch_size_limit(limit)
                 self.data_block_count += 1
                 return blk
 
@@ -304,7 +304,7 @@ class SteaneBuilder:
             @no_type_check
             def get_magic_state(self) -> LogicalBlock[7]:
                 limit = self.free_blocks() + len(self.magic_state_factory.batch)
-                blk = self.magic_state_factory.get_state_with_limit(limit)
+                blk = self.magic_state_factory.get_state_with_batch_size_limit(limit)
                 self.data_block_count += 1
                 return blk
 

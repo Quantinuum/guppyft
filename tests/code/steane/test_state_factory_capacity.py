@@ -20,8 +20,8 @@ def test_state_factory_respects_shared_block_limit(factory_size: int) -> None:
 
     n_blocks = 3
     # Three seven-qubit blocks, plus one verification ancilla per preparation in
-    # the largest batch. Both cases get the same physical capacity. There is no
-    # room for the fourth block produced by a second full batch of size two.
+    # the largest batch. Both cases of `factory_size` get the same physical capacity.
+    # There is no room for the fourth block produced by a second full batch of size two.
     n_qubits = 7 * n_blocks + 1
     result = (
         SteaneBuilder()

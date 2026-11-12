@@ -104,11 +104,11 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, MAX_BATCH_SIZE]):  # type: ignor
         self: "StateFactory[BLOCK_SIZE, N_FLAGS, MAX_BATCH_SIZE]",
     ) -> LogicalBlock[BLOCK_SIZE]:
         """Supply a state using the configured maximum batch size."""
-        return self.get_state_with_limit(int(MAX_BATCH_SIZE))
+        return self.get_state_with_batch_size_limit(int(MAX_BATCH_SIZE))
 
     @guppy
     @no_type_check
-    def get_state_with_limit(
+    def get_state_with_batch_size_limit(
         self: "StateFactory[BLOCK_SIZE, N_FLAGS, MAX_BATCH_SIZE]", limit: int
     ) -> LogicalBlock[BLOCK_SIZE]:
         """Supply a state with at most `limit` candidates prepared per batch. Batch size
