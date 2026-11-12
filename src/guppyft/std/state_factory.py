@@ -111,22 +111,26 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, MAX_BATCH_SIZE]):  # type: ignor
     def get_state_with_batch_size_limit(
         self: "StateFactory[BLOCK_SIZE, N_FLAGS, MAX_BATCH_SIZE]", batch_size_limit: int
     ) -> LogicalBlock[BLOCK_SIZE]:
-        """Supply a state with at most `limit` candidates prepared per batch. Batch size
-        is bounded by `MAX_BATCH_SIZE` and remaining attempts. Cached candidates are
-        checked first, even when `limit` is zero.
+        """Supply a state with at most `batch_size_limit` candidates prepared per batch.
+        Batch size is bounded by `MAX_BATCH_SIZE` and remaining attempts. Cached
+        candidates are checked first, even when `batch_size_limit` is zero.
         """
         if MAX_BATCH_SIZE <= 0:
             panic("StateFactory: MAX_BATCH_SIZE must be greater than zero")
         if batch_size_limit < 0:
-            exit("StateFactory: limit must be non-negative")
+            exit("StateFactory: batch_size_limit must be non-negative")
         if batch_size_limit > MAX_BATCH_SIZE:
             batch_size_limit = int(MAX_BATCH_SIZE)
 
         for attempt in range(self.max_attempts):
             # If empty, request a new batch
             if len(self.batch) == 0:
+                # If `batch_size_limit == 0`, any cached blocks in the
+                # queue will be checked first. If none were successful,
+                # no further attempts will be made and the program will
+                # exit.
                 if batch_size_limit == 0:
-                    exit("StateFactory: no free blocks available")
+                    exit("StateFactory: batch_size_limit set to zero")
                 # Prevent preparing more blocks than remaining attempts
                 remaining_attempts = self.max_attempts - attempt
                 count = (
@@ -148,8 +152,7 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, MAX_BATCH_SIZE]):  # type: ignor
             else:
                 state.unwrap_nothing()
 
-        exit("StateFactory ran out of attempts!")
-        return _qalloc_dirty()  # Unreachable, but required by the Guppy checker
+        return exit("StateFactory ran out of attempts!", _qalloc_dirty[BLOCK_SIZE]())
 
     @guppy
     @no_type_check

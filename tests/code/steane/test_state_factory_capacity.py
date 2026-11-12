@@ -80,4 +80,4 @@ def test_zero_factory_exits_when_no_blocks_are_available() -> None:
         .collated_shots()
     )
 
-    assert result == [{"exit: StateFactory: no free blocks available": [1]}]
+    assert result == [{"exit: StateFactory: batch_size_limit set to zero": [1]}]
