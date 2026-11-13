@@ -40,13 +40,14 @@ mod _bindings {
     }
 
     #[pyfunction]
-    #[pyo3(signature = (rs_hugr, op_replacements, compound_op_replacements, ty_replacements, extensions=None))]
+    #[pyo3(signature = (rs_hugr, op_replacements, compound_op_replacements, ty_replacements, extensions=None, linearizers=None))]
     fn _run_replacement_compiler(
         rs_hugr: &mut RsHugr,
         op_replacements: BTreeMap<(String, String), (String, String, Vec<PyTypeArgValue>)>,
         compound_op_replacements: BTreeMap<(String, String), RsHugr>,
         ty_replacements: BTreeMap<(String, String), (String, String)>,
         extensions: Option<String>,
+        linearizers: Option<replacement::Linearizers>,
     ) -> PyResult<()> {
         let op_replacements = op_replacements
             .into_iter()
@@ -76,6 +77,7 @@ mod _bindings {
             compound_op_replacements,
             ty_replacements,
             extensions,
+            linearizers.unwrap_or_default(),
         );
         compiler.run(hugr).map_err(|e| {
             PyValueError::new_err(format!("Error running replacement compiler: {e}"))
@@ -85,11 +87,13 @@ mod _bindings {
     }
 
     #[pyfunction]
+    #[pyo3(signature = (rs_hugr, op_replacements, replaceable_types, check_eliminated, linearizers=None))]
     fn _implement_ops(
         rs_hugr: &mut RsHugr,
         op_replacements: BTreeMap<implement_ops::OpId, (Option<RsHugr>, String)>,
         replaceable_types: HashSet<implement_ops::TypeId>,
         check_eliminated: Vec<String>,
+        linearizers: Option<Vec<(RsHugr, RsHugr)>>,
     ) -> PyResult<()> {
         let hugr = &mut rs_hugr.hugr;
 
@@ -116,7 +120,12 @@ mod _bindings {
             .map(|ext_str| Ok(ExtensionId::new(ext_str)?))
             .collect::<anyhow::Result<_>>()?;
 
-        let pass = implement_ops::ImplementOpsPass::new(new_ops, ty_hashset, check_eliminated);
+        let mut pass = implement_ops::ImplementOpsPass::new(new_ops, ty_hashset, check_eliminated);
+        pass.linearizers = linearizers
+            .unwrap_or_default()
+            .into_iter()
+            .map(|(copy, free)| (copy.hugr, free.hugr))
+            .collect();
         pass.run(hugr)
             .context("Could not successfully run the implement ops pass")?;
 

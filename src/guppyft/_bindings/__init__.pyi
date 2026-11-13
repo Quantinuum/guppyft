@@ -25,7 +25,8 @@ def _implement_ops(
     rs_hugr: RsHugr,
     op_replacements: dict[tuple[str, str], tuple[RsHugr | None, str]],
     replaceable_types: set[tuple[str, str]],
-    check_eliminated: list[str]
+    check_eliminated: list[str],
+    linearizers: list[tuple[RsHugr, RsHugr]] | None = None,
 ) -> None:
     """
     Replace extension ops in `rs_hugr` to calls to the provided implementations.
@@ -37,6 +38,8 @@ def _implement_ops(
     the corresponding types in the implementation HUGRs.
     `check_eliminated` is a list of extensions to check have been fully eliminated after
     the replacement process.
+    `linearizers` contains copy/free function HUGRs for replacement linear
+    extension types, inferred from each copy function's single input.
     """
 
 def _run_replacement_compiler(
@@ -45,6 +48,9 @@ def _run_replacement_compiler(
         compound_op_replacements: dict[tuple[str, str], RsHugr],
         ty_replacements: dict[tuple[str, str], tuple[str, str]],
         extensions: str | None = None,
+        linearizers: dict[
+            tuple[str, str], tuple[tuple[str, str], tuple[str, str]]
+        ] | None = None,
     ) -> None:
     """
     Replace extension ops and types in `rs_hugr` according to the given mappings.
@@ -57,4 +63,7 @@ def _run_replacement_compiler(
     `extensions` is an optional JSON-encoded list of additional extension
     definitions to use when resolving the source/target ops and types, for
     extensions not already registered on `rs_hugr`.
+    `linearizers` maps each replacement linear type to its copy and discard
+    extension ops, all identified by `(extension_name, name)` without type args.
+    Copy has signature `T -> (T, T)` and discard `T -> ()`.
     """

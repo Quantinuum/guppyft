@@ -26,3 +26,11 @@ inherits = "release"
 lto = "fat"
 strip = "symbols"
 panic = "abort"
+
+# Match the HUGR pointer contract used by the local Guppy Cell build.
+[patch.crates-io]
+hugr = { git = "https://github.com/quantinuum/hugr", rev = "793b1014f490eca899cae0f49d46b3187bfc8da6" }
+hugr-core = { git = "https://github.com/quantinuum/hugr", rev = "793b1014f490eca899cae0f49d46b3187bfc8da6" }
+hugr-model = { git = "https://github.com/quantinuum/hugr", rev = "793b1014f490eca899cae0f49d46b3187bfc8da6" }
+hugr-cli = { git = "https://github.com/quantinuum/hugr", rev = "793b1014f490eca899cae0f49d46b3187bfc8da6" }
+hugr-llvm = { git = "https://github.com/quantinuum/hugr", rev = "793b1014f490eca899cae0f49d46b3187bfc8da6" }

@@ -161,10 +161,24 @@ class ImplementOpsSpec:
     teardown the environment required for the op implementations."""
     libs: list[Package] = field(default_factory=list)
     """Additional libraries required to run the transformed program."""
+    linearizers: list[
+        tuple[GuppyFunctionDefinition[Any, Any], GuppyFunctionDefinition[Any, Any]]
+    ] = field(default_factory=list)
+    """Copy/free functions for linear extension types introduced by replacement.
+
+    Each pair has signatures T -> (T, T) and T -> (), with T inferred from
+    the copy function. Compound types are handled structurally by TKET.
+    Linearization runs before implementation libraries are linked.
+    """
 
 
 def _implement_ops(
-    pkg_bytes: bytes, ops: OpReplacements, tys: set[tuple[str, str]]
+    pkg_bytes: bytes,
+    ops: OpReplacements,
+    tys: set[tuple[str, str]],
+    linearizers: list[
+        tuple[GuppyFunctionDefinition[Any, Any], GuppyFunctionDefinition[Any, Any]]
+    ],
 ) -> bytes:
     rs_hugr = RsHugr.from_bytes(pkg_bytes)
 
@@ -176,7 +190,13 @@ def _implement_ops(
         for key, (func_opt, name) in ops
     }
 
-    _implement_ops_binding(rs_hugr, rs_ops, tys, list(ops.iter_eliminated()))
+    _implement_ops_binding(
+        rs_hugr,
+        rs_ops,
+        tys,
+        list(ops.iter_eliminated()),
+        [(to_rs_hugr(copy), to_rs_hugr(free)) for copy, free in linearizers],
+    )
 
     return rs_hugr.to_bytes()
 
@@ -223,7 +243,9 @@ def implement_ops(
     # Reset entrypoint, marking module as non-executable, to avoid linking conflicts
     hugr.entrypoint = hugr.module_root
     # Run rewrite, replacing ops with function calls to the functions in `spec.ops`
-    hugr_pkg_bytes = _implement_ops(copy_pkg.to_bytes(), spec.ops, spec.tys.tys)
+    hugr_pkg_bytes = _implement_ops(
+        copy_pkg.to_bytes(), spec.ops, spec.tys.tys, spec.linearizers
+    )
 
     # Build, compile, and link wrapper program
     @guppy.declare

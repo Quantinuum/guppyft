@@ -64,6 +64,16 @@ class ReplacementCompiler(LogicalCompiler):
     extensions: ExtensionRegistry | None = None
     """Optional JSON-encoded list of additional extension definitions, used to
     resolve target ops/types that are not already registered on the input Hugr."""
+    linearizers: dict[tuple[str, str], tuple[tuple[str, str], tuple[str, str]]] = field(
+        default_factory=dict
+    )
+    """Map a replacement linear type to its `(copy_op, discard_op)` identifiers.
+
+    Registers TKET's linearizer to make implicit copies and drops explicit when
+    replacing copyable types such as Measurement. Copy must have signature
+    `T -> (T, T)` and discard `T -> ()`. Types and ops must take no type args.
+    Run after monomorphization and before linking physical implementations.
+    """
 
     def __post_init__(self) -> None:
         duplicates = self.op_replacements.keys() & self.compound_op_replacements.keys()
@@ -117,5 +127,6 @@ class ReplacementCompiler(LogicalCompiler):
             rs_compound_op_replacements,
             self.ty_replacements,
             extension_registry_to_json(self.extensions) if self.extensions else None,
+            self.linearizers,
         )
         return Package.from_bytes(rs_hugr.to_bytes())

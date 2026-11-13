@@ -5,7 +5,7 @@
 use crate::implement_ops::{OpReplacementError, OpReplacer};
 use hugr::hugr::ValidationError;
 use hugr::ops::ExtensionOp;
-use hugr::types::{CustomType, TypeArg};
+use hugr::types::{CustomType, Type, TypeArg};
 use hugr::{
     Hugr, HugrView, Node,
     builder::BuildError,
@@ -16,8 +16,12 @@ use hugr_core::extension::resolution::ExtensionResolutionError;
 use hugr_core::hugr::internal::HugrMutInternals;
 use std::collections::BTreeMap;
 use std::sync::Arc;
+use tket::extension::guppy::{DROP_OP_NAME, GUPPY_EXTENSION};
 use tket::passes::ReplaceTypes;
-use tket::passes::replace_types::NodeTemplate;
+use tket::passes::replace_types::handlers::register_linear_array_op_replacements;
+use tket::passes::replace_types::{Linearizer, NodeTemplate};
+
+pub type Linearizers = BTreeMap<(String, String), ((String, String), (String, String))>;
 
 #[derive(derive_more::Error, Debug, derive_more::Display, derive_more::From)]
 #[non_exhaustive]
@@ -48,6 +52,7 @@ pub struct ReplacementCompiler {
     compound_op_replacements: BTreeMap<(String, String), Hugr>,
     ty_replacements: BTreeMap<(String, String), (String, String)>,
     additional_extensions: Option<ExtensionRegistry>,
+    linearizers: Linearizers,
 }
 
 fn get_type_from_registry(
@@ -75,12 +80,14 @@ impl ReplacementCompiler {
         compound_op_replacements: BTreeMap<(String, String), Hugr>,
         ty_replacements: BTreeMap<(String, String), (String, String)>,
         additional_extensions: Option<ExtensionRegistry>,
+        linearizers: Linearizers,
     ) -> Self {
         Self {
             op_replacements,
             compound_op_replacements,
             ty_replacements,
             additional_extensions,
+            linearizers,
         }
     }
 
@@ -91,7 +98,42 @@ impl ReplacementCompiler {
             registry.extend(additional_extensions);
         }
 
-        let mut replacer = ReplaceTypes::new_empty();
+        let mut replacer = if self.linearizers.is_empty() {
+            ReplaceTypes::new_empty()
+        } else {
+            let mut replacer = ReplaceTypes::default();
+            register_linear_array_op_replacements(&mut replacer);
+            // Guppy emits explicit drops for arrays and other affine values.
+            // Expand them before the logical element type becomes a Cell pointer.
+            replacer.set_replace_parametrized_op(
+                GUPPY_EXTENSION.get_op(DROP_OP_NAME.as_str()).unwrap(),
+                |args, rt| {
+                    let [ty] = args else {
+                        unreachable!("Guppy drop expects one type argument")
+                    };
+                    let ty = Type::try_from(ty.clone()).unwrap();
+                    Ok(Some(rt.get_linearizer().copy_discard_op(&ty, 0)?))
+                },
+            );
+            replacer
+        };
+        for ((ext, name), (copy, discard)) in self.linearizers {
+            let ty = get_type_from_registry(registry, &ext, &name)
+                .map_err(anyhow::Error::msg)?
+                .ok_or_else(|| anyhow::anyhow!("Unknown linearizer type: {ext}.{name}"))?;
+            let instantiate = |(ext, name): (String, String)| -> anyhow::Result<NodeTemplate> {
+                let op = registry
+                    .get(&ext)
+                    .ok_or_else(|| ReplacementCompilerError::UnknownExtension(ext.clone()))?
+                    .instantiate_extension_op(&name, [])?;
+                Ok(NodeTemplate::SingleOp(op.into()))
+            };
+            replacer.linearizer_mut().register_simple(
+                ty,
+                instantiate(copy)?,
+                instantiate(discard)?,
+            )?;
+        }
         for ((src_ext, src_op), (tgt_ext, tgt_op, tgt_args)) in self.op_replacements.into_iter() {
             let Some(src_def) = registry.get(&src_ext).and_then(|e| e.get_op(&src_op)) else {
                 continue;

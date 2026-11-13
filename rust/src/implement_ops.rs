@@ -5,21 +5,32 @@
 use anyhow::Context;
 use hugr::{
     Hugr, HugrView, Node,
-    builder::{BuildError, HugrBuilder, ModuleBuilder},
+    builder::{
+        BuildError, Container, DFGBuilder, Dataflow, DataflowHugr, DataflowSubContainer,
+        HugrBuilder, ModuleBuilder,
+    },
     extension::{ExtensionId, SignatureError},
     hugr::{ValidationError, hugrmut::HugrMut},
-    ops::{Call, DataflowOpTrait, ExtensionOp, OpName, OpType, handle::NodeHandle},
-    types::{PolyFuncType, Type, TypeRow},
+    ops::{
+        Call, DataflowOpTrait, ExtensionOp, OpName, OpType,
+        handle::{FuncID, NodeHandle},
+    },
+    types::{PolyFuncType, Signature, Type, TypeRow},
 };
 use hugr_core::hugr::internal::HugrMutInternals;
-use hugr_core::hugr::linking::NodeLinkingError;
+use hugr_core::hugr::linking::{NameLinkingPolicy, NodeLinkingError, OnMultiDefn};
 use hugr_core::std_extensions::collections::array::Array;
 use hugr_core::std_extensions::collections::borrow_array::BorrowArray;
+use hugr_core::std_extensions::ptr::{self, PtrOp};
 use hugr_core::types::{CustomType, SumType, Transformable, TypeArg, TypeName};
 use hugr_core::{Direction, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::{BTreeMap, HashMap, HashSet, hash_map::Entry};
+use tket::extension::guppy::{DROP_OP_NAME, GUPPY_EXTENSION};
+use tket::passes::inline_funcs::{InlineFuncsHeuristic, InlineFunctionsPass};
+use tket::passes::mangle_name;
 use tket::passes::replace_types::handlers::register_linear_array_op_replacements;
+use tket::passes::replace_types::{Linearizer, NodeTemplate};
 use tket::passes::utils::unpack_container::type_unpack::array_args;
 use tket::passes::{
     ComposablePass, PassScope, ReplaceTypes, WithScope, replace_types::ReplaceTypesError,
@@ -53,6 +64,7 @@ pub type OpReplacements = BTreeMap<OpId, (Option<Hugr>, String)>;
 pub struct ImplementOpsPass {
     scope: PassScope,
     pub op_replacements: OpReplacements,
+    pub linearizers: Vec<(Hugr, Hugr)>,
     replaceable_types: HashSet<(ExtensionId, TypeName)>,
     check_eliminated: HashSet<ExtensionId>,
 }
@@ -226,6 +238,36 @@ impl ImplementOpsPass {
             .context("Could not build type replacement map")?;
 
         let mut state = OpReplacer::new_with_types(hugr, type_map);
+        for (copy, free) in &self.linearizers {
+            let sig = extract_func_sig(copy, copy.entrypoint())
+                .context("Linearizer copy must be a function")?
+                .instantiate(&[])?;
+            anyhow::ensure!(sig.input.len() == 1, "Linearizer copy needs one input");
+            let ty = sig.input[0]
+                .as_extension()
+                .context("Linearizer input must be an extension type")?
+                .clone();
+            state.type_replacer.linearizer_mut().register_simple(
+                ty,
+                linearizer_template(copy.clone())?,
+                linearizer_template(free.clone())?,
+            )?;
+        }
+        if !self.linearizers.is_empty() {
+            register_linear_pointer_ops(&mut state.type_replacer);
+            // Guppy emits explicit drops for affine containers. Expand these
+            // through the same linearizer before their elements become linear.
+            state.type_replacer.set_replace_parametrized_op(
+                GUPPY_EXTENSION.get_op(DROP_OP_NAME.as_str()).unwrap(),
+                |args, rt| {
+                    let [ty] = args else {
+                        unreachable!("Guppy drop expects one type argument")
+                    };
+                    let ty = Type::try_from(ty.clone()).unwrap();
+                    Ok(Some(rt.get_linearizer().copy_discard_op(&ty, 0)?))
+                },
+            );
+        }
         for (ext_op, func_hugr, func_name) in op_funcs {
             state
                 .register_replacement(&ext_op, func_hugr, func_name)
@@ -241,6 +283,104 @@ impl ImplementOpsPass {
             .context("Could not validate hugr after replacement")?;
         Ok(())
     }
+}
+
+// Measurement is copyable in the source program, but its implementation may
+// contain a linear Cell handle. Existing Cell[Measurement].read()/write() would
+// then instantiate ptr.Read/Write with an illegal non-Copyable payload. Lower
+// those accesses to ptr.Map, explicitly copying/releasing through the configured
+// linearizer, preserving source access semantics without copying linear handles.
+fn register_linear_pointer_ops(replacer: &mut ReplaceTypes) {
+    for (name, write) in [("Read", false), ("Write", true)] {
+        replacer.set_replace_parametrized_op(
+            ptr::EXTENSION.get_op(name).unwrap(),
+            move |args, rt| {
+                let [arg] = args else {
+                    unreachable!("Pointer read/write expects one type argument")
+                };
+                let ty = Type::try_from(arg.clone()).unwrap();
+                if ty.copyable() {
+                    return Ok(None);
+                }
+                let ownership = rt
+                    .get_linearizer()
+                    .copy_discard_op(&ty, if write { 0 } else { 2 })?;
+                let inputs = if write { vec![ty.clone()] } else { vec![] };
+                let outputs = if write { vec![] } else { vec![ty.clone()] };
+                let pointer_ty = ptr::ptr_type(ty.clone());
+                let mut builder = DFGBuilder::new(Signature::new(
+                    [pointer_ty.clone()]
+                        .into_iter()
+                        .chain(inputs.clone())
+                        .collect_vec(),
+                    [pointer_ty]
+                        .into_iter()
+                        .chain(outputs.clone())
+                        .collect_vec(),
+                ))
+                .unwrap();
+                let callback = {
+                    let mut module = builder.module_root_builder();
+                    let mut function = module
+                        .define_function_vis(
+                            mangle_name(&format!("__guppyft_cell_{name}"), &[ty.clone().into()]),
+                            Signature::new(
+                                [ty.clone()].into_iter().chain(inputs.clone()).collect_vec(),
+                                [ty.clone()]
+                                    .into_iter()
+                                    .chain(outputs.clone())
+                                    .collect_vec(),
+                            ),
+                            Visibility::Public,
+                        )
+                        .unwrap();
+                    let values = function.input_wires().collect_vec();
+                    let owned = ownership.add(&mut function, [values[0]]).unwrap();
+                    let returned = if write {
+                        vec![values[1]]
+                    } else {
+                        owned.outputs().collect_vec()
+                    };
+                    function.finish_with_outputs(returned).unwrap()
+                };
+                let values = builder.input_wires().collect_vec();
+                let callback = builder.load_func(callback.handle(), &[]).unwrap();
+                let mapped = builder
+                    .add_dataflow_op(
+                        PtrOp::map(ty, inputs, outputs),
+                        [values[0], callback]
+                            .into_iter()
+                            .chain(values.iter().skip(1).copied()),
+                    )
+                    .unwrap();
+                Ok(Some(NodeTemplate::LinkedHugr(
+                    Box::new(builder.finish_hugr_with_outputs(mapped.outputs()).unwrap()),
+                    NameLinkingPolicy::default().on_multiple_defn(OnMultiDefn::UseTarget),
+                )))
+            },
+        );
+    }
+}
+
+// Inline the small ownership helpers so composed templates have no external
+// static function edges. TODO: support recursive helpers via linked templates.
+fn linearizer_template(func: Hugr) -> anyhow::Result<NodeTemplate> {
+    let sig = extract_func_sig(&func, func.entrypoint())
+        .context("Linearizer must be a function")?
+        .instantiate(&[])?;
+    let mut builder = DFGBuilder::new(sig)?;
+    let function = FuncID::<true>::from(
+        builder
+            .module_root_builder()
+            .add_hugr(func)
+            .inserted_entrypoint,
+    );
+    let call = builder.call(&function, &[], builder.input_wires())?;
+    let mut template = builder.finish_hugr_with_outputs(call.outputs())?;
+    InlineFunctionsPass::default()
+        .with_heuristic(InlineFuncsHeuristic::All)
+        .run(&mut template)?;
+    Ok(NodeTemplate::CompoundOp(Box::new(template)))
 }
 
 fn extract_func_node(func_hugr: &Hugr, func_name: &str) -> Option<Node> {
