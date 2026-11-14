@@ -20,6 +20,7 @@ author = "Quantinuum"
 
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx_autodoc_typehints",
     "sphinx.ext.coverage",
     "sphinx.ext.viewcode",
     "sphinx.ext.autosummary",
