@@ -1,4 +1,3 @@
-from dataclasses import replace
 from typing import Any, no_type_check
 
 import pytest
@@ -76,12 +75,11 @@ def test_replace_rotation_with_angle_function(adapt_rotation_inputs: bool) -> No
         op_replacements={},
         compound_op_replacements={("tket.quantum", "Rz"): replacement_pkg},
         extensions=_std_extensions(),
+        adapt_rotation_inputs=adapt_rotation_inputs,
     )
-    if adapt_rotation_inputs is not None:
-        compiler = replace(compiler, adapt_rotation_inputs=adapt_rotation_inputs)
     pkg = main.with_minimal_opt().compile()
     before = pkg.to_str()
-    if adapt_rotation_inputs is not True:
+    if not adapt_rotation_inputs:
         with pytest.raises(ValueError, match="does not have the expected signature"):
             compiler.compile(pkg)
         assert pkg.to_str() == before

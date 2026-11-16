@@ -1,15 +1,14 @@
 """Abstractions for constructing QEC architectures."""
 
+from __future__ import annotations
+
 import json
-from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Literal, overload
+from typing import TYPE_CHECKING, Any, Literal, Protocol, overload
 
 from guppylang.defs import GuppyFunctionDefinition
-from hugr import Hugr
 from hugr.ops import Module
 from hugr.package import Package
-from hugr.passes.composable import ComposablePass
 from tket.passes import Normalize
 
 from ._compile import LogicalCompiler, ReplacementCompiler, UncompilableError
@@ -21,8 +20,17 @@ from ._implement_ops import (
     implement_ops,
 )
 
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+    from guppylang.emulator import EmulatorBuilder, EmulatorInstance
+    from hugr import Hugr
+    from hugr.passes.composable import ComposablePass
+
 __all__ = [
+    "AnnotatingArchitectureInstance",
     "EncodeSpec",
+    "EncodingArchitectureInstance",
     "ImplementOps",
     "ImplementOpsSpec",
     "LogicalCompiler",
@@ -34,6 +42,66 @@ __all__ = [
     "encode",
     "implement_ops",
 ]
+
+
+class AnnotatingArchitectureInstance(Protocol):
+    """An architecture instance capable of annotating a package for deferred / remote
+    encoding. See `guppyft.encode.annotate_encoding` for more information."""
+
+    def annotate(self, hugr: Package | Hugr[Any]) -> None:
+        """Annotate the current parameters of the architecture on the given HUGR in
+        metadata. See `guppyft.encode.annotate_encoding` for more information."""
+
+
+class EncodingArchitectureInstance(Protocol):
+    """An architecture instance capable of providing a computational -> physical
+    encoding, and op implementations for a logical -> physical lowering."""
+
+    @overload
+    def encode(self, pkg: Package, *, as_bytes: Literal[False] = False) -> Package: ...
+    @overload
+    def encode(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    @overload
+    def encode(self, pkg: Package, *, as_bytes: bool) -> Package | bytes: ...
+    def encode(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
+        """Encode a computational package with this instance."""
+        return self._encode(pkg, as_bytes=as_bytes)
+
+    def _encode(self, pkg: Package, *, as_bytes: bool) -> Package | bytes: ...
+
+    @overload
+    def implement_ops(
+        self, pkg: Package, *, as_bytes: Literal[False] = False
+    ) -> Package: ...
+    @overload
+    def implement_ops(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    @overload
+    def implement_ops(self, pkg: Package, *, as_bytes: bool) -> Package | bytes: ...
+    def implement_ops(self, pkg: Package, *, as_bytes: bool = False) -> Package | bytes:
+        """Implement logical ops in `pkg` using this instance's op implementations."""
+        return self._implement_ops(pkg, as_bytes=as_bytes)
+
+    def _implement_ops(self, pkg: Package, *, as_bytes: bool) -> Package | bytes: ...
+
+    def emulator(
+        self,
+        pkg: Package,
+        n_qubits: int,
+        builder: EmulatorBuilder | None = None,
+    ) -> EmulatorInstance:
+        """Encode a hugr Package and build an emulator for it.
+
+        Args:
+            pkg: The computational hugr package.
+            n_qubits: Number of physical qubits available to the emulator.
+            builder: Optional `EmulatorBuilder` to use; defaults to a new one.
+        """
+        from guppylang.emulator import EmulatorBuilder
+
+        encoded_pkg = self.encode(pkg, as_bytes=True)
+        if builder is None:
+            builder = EmulatorBuilder()
+        return builder.build(encoded_pkg, n_qubits)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -65,6 +133,14 @@ def encode(
     passes: list[ComposablePass] | None = None,
     as_bytes: Literal[True],
 ) -> bytes: ...
+@overload
+def encode(
+    hugr: Package | GuppyFunctionDefinition[[], None],
+    spec: EncodeSpec,
+    *,
+    passes: list[ComposablePass] | None = None,
+    as_bytes: bool,
+) -> Package | bytes: ...
 def encode(
     hugr: Package | GuppyFunctionDefinition[[], None],
     spec: EncodeSpec,
@@ -121,7 +197,7 @@ def encode(
 
     # 4. Lower logical -> physical
     if spec.implement_ops is not None:
-        pkg_maybe_bytes = spec.implement_ops(pkg, as_bytes=as_bytes)  # type: ignore[call-overload]
+        pkg_maybe_bytes = spec.implement_ops(pkg, as_bytes=as_bytes)
     else:
         pkg_maybe_bytes = pkg
 

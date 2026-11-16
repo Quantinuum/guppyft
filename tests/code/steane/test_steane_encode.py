@@ -1,6 +1,7 @@
 import os
 import re
 from collections.abc import Callable
+from dataclasses import fields
 from pathlib import Path
 from typing import Any
 
@@ -35,13 +36,15 @@ from hugr.package import Package
 from selene_sim.backends.bundled_simulators import Coinflip
 
 from guppyft.code.steane.encode import (
+    AdaptiveRzConf,
     QECPolicy,
+    QECStyle,
     RUSStateFactoryConf,
     SteaneBuilder,
     SteaneInstance,
 )
 from guppyft.decompose import ComparatorRzDecomposer, ToffoliDecomposer
-from guppyft.encode import UncompilableError
+from guppyft.encode import EncodeSpec, UncompilableError
 
 
 def test_encoder(make_steane_instance: Callable[[int], SteaneInstance]) -> None:
@@ -149,7 +152,7 @@ def test_builder_methods() -> None:
         SteaneBuilder()
         .with_qec_policy(my_policy)
         .with_zero_factory_conf(zero_factory_conf)
-        .build(n_blocks=1)
+        .build(n_blocks=2)  # One data block and one QEC resource block.
         .emulator(pkg, n_qubits=20)
         .run()
         .collated_shots()
@@ -177,13 +180,36 @@ def test_encoder_control_flow(
     assert res == [{"q1": [0]}]
 
 
-def test_annotate_steane_encoding() -> None:
+@pytest.mark.parametrize(
+    "adaptive_rz_conf",
+    [None, AdaptiveRzConf(max_rounds=23, abort_on_dephasing=False)],
+)
+def test_annotate_steane_encoding(adaptive_rz_conf: AdaptiveRzConf | None) -> None:
     hugr = Hugr[Any]()
     pkg = Package([hugr])
 
-    SteaneBuilder().build(n_blocks=4).annotate(pkg)
+    qec_policy = QECPolicy()
+    qec_policy.style = QECStyle.Knill
+    qec_policy.threshold = 99
+    for i, field in enumerate(fields(qec_policy.costs)):
+        qec_policy.costs.__setattr__(field.name, i + 1.0)
 
-    assert hugr[hugr.module_root].metadata["qnt.nexus.compilation"] == {
+    arch = (
+        SteaneBuilder()
+        .with_zero_factory_conf(RUSStateFactoryConf(size=1000, max_attempts=1001))
+        .with_magic_factory_conf(RUSStateFactoryConf(size=2000, max_attempts=2001))
+        .with_qec_policy(qec_policy)
+        .with_adaptive_rz(adaptive_rz_conf)
+        .build(n_blocks=4)
+    )
+    arch.annotate(pkg)
+
+    metadata = hugr[hugr.module_root].metadata["qnt.nexus.compilation"]
+    assert isinstance(metadata, dict)
+    arch_rec = SteaneBuilder.instance_from_params(metadata["ft_encoding"]["params"])
+    assert arch == arch_rec
+
+    assert metadata == {
         "schema_version": 1,
         "ft_encoding": {
             "name": "steane",
@@ -191,36 +217,103 @@ def test_annotate_steane_encoding() -> None:
                 "schema_version": 1,
                 "n_blocks": 4,
                 "zero_factory": {
-                    "size": 1,
-                    "max_attempts": 5,
+                    "size": 1000,
+                    "max_attempts": 1001,
                 },
                 "magic_factory": {
-                    "size": 1,
-                    "max_attempts": 5,
+                    "size": 2000,
+                    "max_attempts": 2001,
                 },
-                "adaptive_rz_conf": None,
+                "adaptive_rz_conf": (
+                    adaptive_rz_conf.to_json() if adaptive_rz_conf is not None else None
+                ),
                 "qec_policy": {
-                    "style": "steane",
-                    "threshold": 1,
+                    "style": "knill",
+                    "threshold": 99,
                     "costs": {
-                        "prep_zero": 0.0,
-                        "prep_t": 0.0,
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0,
-                        "h": 0.0,
-                        "s": 0.0,
-                        "sdg": 0.0,
-                        "rz": 0.0,
-                        "inject_t": 0.0,
-                        "inject_tdg": 0.0,
-                        "cx": 0.0,
-                        "cz": 0.0,
+                        "prep_zero": 1.0,
+                        "prep_t": 2.0,
+                        "x": 3.0,
+                        "y": 4.0,
+                        "z": 5.0,
+                        "h": 6.0,
+                        "s": 7.0,
+                        "sdg": 8.0,
+                        "rz": 9.0,
+                        "inject_t": 10.0,
+                        "inject_tdg": 11.0,
+                        "cx": 12.0,
+                        "cz": 13.0,
                     },
                 },
             },
         },
     }
+
+
+def test_from_params_subclassing() -> None:
+    """Assert that `from_params` invokes subclass builder constructors."""
+
+    class SteaneSubInstance(SteaneInstance):
+        def i_am(self) -> str:
+            return f"I am the instance subclass with n_blocks={self._n_blocks}"
+
+    class SteaneSubBuilder(SteaneBuilder):
+        def build(self, n_blocks: int) -> SteaneInstance:
+            return SteaneSubInstance(
+                _spec=EncodeSpec(), _n_blocks=n_blocks, _options=self._options
+            )
+
+    arch = SteaneSubBuilder.instance_from_params(
+        {
+            "schema_version": 1,
+            "n_blocks": 4,
+        }
+    )
+    assert isinstance(arch, SteaneSubInstance)
+    assert arch.i_am() == "I am the instance subclass with n_blocks=4"
+
+
+def test_from_params_minimal() -> None:
+    arch = SteaneBuilder.instance_from_params(
+        {
+            "schema_version": 1,
+            "n_blocks": 4,
+        }
+    )
+
+    assert arch == SteaneBuilder().build(n_blocks=4)
+
+
+def test_from_params_defaults() -> None:
+    """Assert that a key (e.g. the QED policy) can be partially specified."""
+    arch = SteaneBuilder.instance_from_params(
+        {
+            "schema_version": 1,
+            "n_blocks": 4,
+            "qec_policy": {
+                "costs": {
+                    "x": 42.0,
+                }
+            },
+        }
+    )
+
+    policy = QECPolicy()
+    policy.costs.x = 42.0
+
+    assert arch == SteaneBuilder().with_qec_policy(policy).build(n_blocks=4)
+
+
+def test_from_params_invalid_style() -> None:
+    params = {
+        "schema_version": 1,
+        "n_blocks": 4,
+        "qec_policy": {"style": "invalid"},
+    }
+
+    with pytest.raises(ValueError, match=r"'invalid' is not a valid QECStyle"):
+        _ = SteaneBuilder.instance_from_params(params)
 
 
 def test_annotated_policy_immutable() -> None:

@@ -287,6 +287,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "chacha20"
+version = "0.10.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "65c35e4b699c7e15ccbe7ee35c005e4fc0a278d22238a2857e6ce2dadeda1b06"
+dependencies = [
+ "cfg-if",
+ "cpufeatures",
+ "rand_core 0.10.1",
+]
+
+[[package]]
 name = "chrono"
 version = "0.4.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -372,6 +383,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1d07550c9036bf2ae0c684c4297d503f838287c83c53686d05370d0e139ae570"
 
 [[package]]
+name = "console"
+version = "0.16.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e96a4956774c13c126a8b5af4daa79384f4d826534c95a02d76afb39e2ab64e3"
+dependencies = [
+ "encode_unicode",
+ "libc",
+ "unicode-width",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
 name = "convert_case"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -402,6 +425,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 
 [[package]]
+name = "cpufeatures"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5ca28b0ae3115b884660db4118d803791fd6756b6e88f39c0f3f7859060d7566"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "crossbeam-channel"
 version = "0.5.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -426,6 +458,16 @@ version = "0.9.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dc74980687109a3b14c72fd458107bf0baa1da1a1a805e178d15501ba9b86d9d"
 dependencies = [
+ "crossbeam-utils",
+]
+
+[[package]]
+name = "crossbeam-skiplist"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "df29de440c58ca2cc6e587ec3d22347551a32435fbde9d2bff64e78a9ffa151b"
+dependencies = [
+ "crossbeam-epoch",
  "crossbeam-utils",
 ]
 
@@ -656,6 +698,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9eb1aa714776b75c7e67e1da744b81a129b3ff919c8712b5e1b32252c1f07cc7"
 
 [[package]]
+name = "encode_unicode"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "34aa73646ffb006b8f5147f3dc182bd4bcb190227ce861fc4a4844bf8e3cb2c0"
+
+[[package]]
 name = "enum_dispatch"
 version = "0.3.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -786,6 +834,7 @@ dependencies = [
  "cfg-if",
  "libc",
  "r-efi",
+ "rand_core 0.10.1",
 ]
 
 [[package]]
@@ -1000,6 +1049,19 @@ dependencies = [
  "rayon",
  "serde",
  "serde_core",
+]
+
+[[package]]
+name = "indicatif"
+version = "0.18.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9433806cd6b4ec1aba79c021c7e4c58fb4c3b9977c085062e611ac929998fb0c"
+dependencies = [
+ "console",
+ "portable-atomic",
+ "unicode-width",
+ "unit-prefix",
+ "web-time",
 ]
 
 [[package]]
@@ -1250,7 +1312,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f59006ce1e204c30956638535b74d317bca99477b9356dfaec54c37f6f600ab"
 dependencies = [
  "num-traits",
- "rand",
+ "rand 0.8.8",
  "serde",
 ]
 
@@ -1532,8 +1594,19 @@ version = "0.8.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e058c7de0b26af77780c769414d6257830bb240f3c38477dbc2c16e5f54d6d4c"
 dependencies = [
- "rand_core",
+ "rand_core 0.6.4",
  "serde",
+]
+
+[[package]]
+name = "rand"
+version = "0.10.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "65c9fb96cbc91e3478eaae79a69fcd3f1ae4ad052e471fe6732fff548984b4af"
+dependencies = [
+ "chacha20",
+ "getrandom",
+ "rand_core 0.10.1",
 ]
 
 [[package]]
@@ -1544,6 +1617,12 @@ checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
  "serde",
 ]
+
+[[package]]
+name = "rand_core"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "63b8176103e19a2643978565ca18b50549f6101881c443590420e4dc998a3c69"
 
 [[package]]
 name = "rayon"
@@ -2064,10 +2143,125 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fd3ca314f692efd6c868f8408f53fe444634a845f96c028b97d35f6a1f79f0ee"
 
 [[package]]
-name = "tket"
-version = "0.22.0"
+name = "tk-pg-bitpacked"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "881c70cf0b69b9366893511ba5df33ea7d53bf67156bb60a2d25835e8467d9a7"
+checksum = "4ac5978f450bdb660b33a39ef2d814a00777353b8bbe736a2274697f97a7e873"
+dependencies = [
+ "rand 0.10.3",
+ "tk-pg-core",
+]
+
+[[package]]
+name = "tk-pg-canonical-form"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ec2cfdaa1a34c42cd0abb932853cfec441565e0d5815ef97f1a4bf3f82c4fc1c"
+dependencies = [
+ "tk-pg-core",
+ "tk-pg-ir-kernels",
+ "tk-pg-qm-tableau",
+ "tk-pg-utils",
+]
+
+[[package]]
+name = "tk-pg-core"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "703f758b506384accb7121c59c0318e8c0d00b562946a7ede678965bd650f896"
+dependencies = [
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "tk-pg-greedy-synth"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0ba45cdd7d6248cc83ae701aec806f0c0defbc84d81850e00ff0451fac42a616"
+dependencies = [
+ "crossbeam-skiplist",
+ "indexmap 2.14.2",
+ "indicatif",
+ "rand 0.10.3",
+ "rayon",
+ "tk-pg-bitpacked",
+ "tk-pg-canonical-form",
+ "tk-pg-core",
+ "tk-pg-optimize",
+ "tk-pg-qm-tableau",
+]
+
+[[package]]
+name = "tk-pg-ir-kernels"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4581a002eb23b2bca39c935f8630aa6adf219e329b2bbd81963ede838efb49c1"
+dependencies = [
+ "tk-pg-core",
+ "tk-pg-utils",
+]
+
+[[package]]
+name = "tk-pg-optimize"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f19550dca4c18b1d8c2c276c5277192b0c3c558dcb8011d641c5c33465716a07"
+dependencies = [
+ "tk-pg-core",
+ "tk-pg-ir-kernels",
+ "tk-pg-qm-tableau",
+ "tk-pg-utils",
+]
+
+[[package]]
+name = "tk-pg-qm-tableau"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2a3b908cdf9a8449f9c0cf6462eed0b13e92f9992cbe3bd76dfe6626ea90e801"
+dependencies = [
+ "rand 0.10.3",
+ "rayon",
+ "tk-pg-bitpacked",
+ "tk-pg-core",
+ "tk-pg-ir-kernels",
+ "tk-pg-utils",
+]
+
+[[package]]
+name = "tk-pg-rebase"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7718864d3c7fe5e808a044c45a3eb7c39edc735daa7af12cc9ea197517391a95"
+dependencies = [
+ "tk-pg-core",
+]
+
+[[package]]
+name = "tk-pg-t-optimize"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ca73baa987a3ece292a559382390465927c0f011809e2bc67c4d07e759eb127"
+dependencies = [
+ "bitvec",
+ "tk-pg-canonical-form",
+ "tk-pg-core",
+ "tk-pg-ir-kernels",
+ "tk-pg-qm-tableau",
+]
+
+[[package]]
+name = "tk-pg-utils"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4586fc656fe8200262b724b7d92e84368ea710fa1051f015007ec7483402f580"
+
+[[package]]
+name = "tket"
+version = "0.22.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "df5eedd8f6eb9aa9bd27622249f75ebd029dbcdf3107d13e0c1b21efc86baffd"
 dependencies = [
  "ascent",
  "bytemuck",
@@ -2097,6 +2291,12 @@ dependencies = [
  "smol_str",
  "strum",
  "thiserror 2.0.21",
+ "tk-pg-canonical-form",
+ "tk-pg-core",
+ "tk-pg-greedy-synth",
+ "tk-pg-optimize",
+ "tk-pg-rebase",
+ "tk-pg-t-optimize",
  "tket-json-rs",
  "tracing",
  "typetag",
@@ -2237,6 +2437,12 @@ name = "unicode-xid"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ebc1c04c71510c7f702b52b7c350734c9ff1295c464a03335b00bb84fc54f853"
+
+[[package]]
+name = "unit-prefix"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "81e544489bf3d8ef66c953931f56617f423cd4b5494be343d9b9d3dda037b9a3"
 
 [[package]]
 name = "utf8parse"

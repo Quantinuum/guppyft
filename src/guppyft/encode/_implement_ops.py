@@ -162,9 +162,9 @@ class ImplementOpsSpec:
     libs: list[Package] = field(default_factory=list)
     """Additional libraries required to run the transformed program."""
     adapt_rotation_inputs: bool = False
-    """Allow implementations to take Guppy `angle` values in place of HUGR rotations.
-    Replacement bodies convert rotation inputs to half-turn tuples at function
-    entry. Linked declarations and other input and output types are unchanged."""
+    """Expect Guppy `angle` tuples for top-level HUGR rotation inputs in implementations
+    and generated declarations. Call sites insert `to_halfturns` and wrap the resulting
+    floats in tuples. Other input and output types are unchanged."""
 
 
 def _implement_ops(
@@ -222,7 +222,8 @@ def implement_ops(
     assert len(hugr_pkg.modules) == 1
     # Only the entrypoint is changed before serialization; graph rewrites happen
     # on a separate Rust HUGR, so a shallow copy preserves the input entrypoint.
-    hugr = copy(hugr_pkg.modules[0])
+    copy_pkg = Package([copy(hugr_pkg.modules[0])], hugr_pkg.extensions)
+    hugr = copy_pkg.modules[0]
 
     entrypoint_op = hugr.entrypoint_op()
     assert isinstance(entrypoint_op, (FuncDefn, FuncDecl)), (
@@ -237,7 +238,7 @@ def implement_ops(
     hugr.entrypoint = hugr.module_root
     # Run rewrite, replacing ops with function calls to the functions in `spec.ops`
     hugr_pkg_bytes = _implement_ops(
-        hugr.to_bytes(),
+        copy_pkg.to_bytes(),
         spec.ops,
         spec.tys.tys,
         adapt_rotation_inputs=spec.adapt_rotation_inputs,
@@ -279,6 +280,8 @@ class ImplementOps:
     ) -> Package: ...
     @overload
     def __call__(self, pkg: Package, *, as_bytes: Literal[True]) -> bytes: ...
+    @overload
+    def __call__(self, pkg: Package, *, as_bytes: bool) -> Package | bytes: ...
     def __call__(self, pkg: Package, as_bytes: bool = False) -> Package | bytes:
         return self._runner(pkg, as_bytes)
 
