@@ -151,7 +151,7 @@ def test_builder_methods() -> None:
         SteaneBuilder()
         .with_qec_policy(my_policy)
         .with_zero_factory_conf(zero_factory_conf)
-        .build(n_blocks=1)
+        .build(n_blocks=2)  # One data block and one QEC resource block.
         .emulator(pkg, n_qubits=20)
         .run()
         .collated_shots()

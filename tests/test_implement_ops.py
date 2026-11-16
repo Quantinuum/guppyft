@@ -1,14 +1,15 @@
 from dataclasses import replace
-from typing import no_type_check
+from typing import TYPE_CHECKING, no_type_check
 
 import pytest
-from guppylang import guppy
+from guppylang import guppy, qubit
 from guppylang.emulator import EmulatorBuilder
 from guppylang.std.angles import angle
 from guppylang.std.builtins import array
 from guppylang.std.debug import state_output
 from guppylang.std.platform import output
-from guppylang.std.quantum import h, qubit, rz
+from guppylang.std.quantum import discard, h, rz
+from hugr.ops import ExtOp
 
 from guppyft.encode import (
     ImplementOpsSpec,
@@ -16,6 +17,9 @@ from guppyft.encode import (
     TyReplacements,
     implement_ops,
 )
+
+if TYPE_CHECKING:
+    from hugr.package import Package
 
 
 @pytest.mark.parametrize("as_bytes", [False, True])
@@ -92,3 +96,24 @@ def test_rotation_input_adaptation(adapt_rotation_inputs: bool) -> None:
         assert replaced.as_single_state() == pytest.approx(
             original.as_single_state(), rel=1e-12, abs=1e-12
         )
+
+
+def test_preserves_packaged_extensions_for_opaque_ops() -> None:
+    """Regression test for implementing ops on a hugr with opaque ops where the
+    extensions are packaged but not resolved."""
+
+    @guppy
+    def main() -> None:
+        discard(qubit())
+
+    pkg1: Package = main.compile()
+
+    [hugr] = pkg1.modules
+    for node_data in hugr.values():
+        if isinstance(node_data.op, ExtOp):
+            node_data.op = node_data.op.to_custom_op()  # Make all ops opaque
+
+    spec = ImplementOpsSpec(ops=OpReplacements(), tys=TyReplacements())
+    pkg2 = implement_ops(pkg1, spec)
+
+    assert {e.name for e in pkg1.extensions}.issubset({e.name for e in pkg2.extensions})

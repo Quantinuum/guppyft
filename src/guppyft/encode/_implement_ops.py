@@ -222,7 +222,8 @@ def implement_ops(
     assert len(hugr_pkg.modules) == 1
     # Only the entrypoint is changed before serialization; graph rewrites happen
     # on a separate Rust HUGR, so a shallow copy preserves the input entrypoint.
-    hugr = copy(hugr_pkg.modules[0])
+    copy_pkg = Package([copy(hugr_pkg.modules[0])], hugr_pkg.extensions)
+    hugr = copy_pkg.modules[0]
 
     entrypoint_op = hugr.entrypoint_op()
     assert isinstance(entrypoint_op, (FuncDefn, FuncDecl)), (
@@ -237,7 +238,7 @@ def implement_ops(
     hugr.entrypoint = hugr.module_root
     # Run rewrite, replacing ops with function calls to the functions in `spec.ops`
     hugr_pkg_bytes = _implement_ops(
-        hugr.to_bytes(),
+        copy_pkg.to_bytes(),
         spec.ops,
         spec.tys.tys,
         adapt_rotation_inputs=spec.adapt_rotation_inputs,
