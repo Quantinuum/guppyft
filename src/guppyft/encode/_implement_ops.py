@@ -162,9 +162,9 @@ class ImplementOpsSpec:
     libs: list[Package] = field(default_factory=list)
     """Additional libraries required to run the transformed program."""
     adapt_rotation_inputs: bool = False
-    """Allow implementations to take Guppy `angle` values in place of HUGR rotations.
-    Call sites convert rotation inputs to half-turn tuples. Replacement function
-    signatures and other input and output types are unchanged."""
+    """Expect Guppy `angle` tuples for top-level HUGR rotation inputs in implementations
+    and generated declarations. Call sites insert `to_halfturns` and wrap the resulting
+    floats in tuples. Other input and output types are unchanged."""
 
 
 def _implement_ops(

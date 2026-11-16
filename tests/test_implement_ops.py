@@ -1,4 +1,3 @@
-from dataclasses import replace
 from typing import TYPE_CHECKING, no_type_check
 
 import pytest
@@ -70,9 +69,8 @@ def test_rotation_input_adaptation(adapt_rotation_inputs: bool) -> None:
     spec = ImplementOpsSpec(
         ops=OpReplacements().with_func(("tket.quantum", "Rz"), replacement),
         tys=TyReplacements(),
+        adapt_rotation_inputs=adapt_rotation_inputs,
     )
-    if adapt_rotation_inputs is not None:
-        spec = replace(spec, adapt_rotation_inputs=adapt_rotation_inputs)
     pkg = main.with_minimal_opt().compile()
     before = pkg.to_str()
     if not adapt_rotation_inputs:

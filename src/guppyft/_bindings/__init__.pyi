@@ -39,9 +39,9 @@ def _implement_ops(
     the corresponding types in the implementation HUGRs.
     `check_eliminated` is a list of extensions to check have been fully eliminated after
     the replacement process.
-    `adapt_rotation_inputs` allows implementations to take Guppy angles
-    (tuples of half-turns) in place of HUGR rotation inputs by converting at
-    call sites. Replacement definitions and linked declarations keep their signatures.
+    `adapt_rotation_inputs` changes expected top-level rotation inputs to Guppy
+    angle tuples, including in generated declarations. Call sites insert
+    `to_halfturns` and wrap the resulting floats in tuples.
     """
 
 def _run_replacement_compiler(
@@ -64,7 +64,7 @@ def _run_replacement_compiler(
     `extensions` is an optional JSON-encoded list of additional extension
     definitions to use when resolving the source/target ops and types, for
     extensions not already registered on `rs_hugr`.
-    `adapt_rotation_inputs` allows compound replacements to take Guppy angles
-    (tuples of half-turns) in place of HUGR rotation inputs by converting at
-    call sites. Replacement functions keep their signatures.
+    `adapt_rotation_inputs` changes expected top-level rotation inputs to Guppy
+    angle tuples. Call sites insert `to_halfturns` and wrap the resulting floats
+    in tuples. Replacement functions keep their signatures.
     """

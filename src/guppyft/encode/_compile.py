@@ -65,9 +65,9 @@ class ReplacementCompiler(LogicalCompiler):
     """Optional JSON-encoded list of additional extension definitions, used to
     resolve target ops/types that are not already registered on the input Hugr."""
     adapt_rotation_inputs: bool = False
-    """Allow compound replacements to take Guppy `angle` values in place of HUGR
-    rotations. Call sites convert rotation inputs to half-turn tuples. Replacement
-    function signatures and other input and output types are unchanged."""
+    """Expect Guppy `angle` tuples for top-level HUGR rotation inputs in compound
+    replacements. Call sites insert `to_halfturns` and wrap the resulting floats in
+    tuples. Other input and output types are unchanged."""
 
     def __post_init__(self) -> None:
         duplicates = self.op_replacements.keys() & self.compound_op_replacements.keys()

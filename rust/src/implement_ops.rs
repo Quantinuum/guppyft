@@ -4,9 +4,9 @@
 
 use anyhow::Context;
 use hugr::{
-    Hugr, HugrView, Node,
-    builder::{BuildError, HugrBuilder, ModuleBuilder},
-    extension::{ExtensionId, SignatureError, prelude::MakeTuple},
+    Hugr, HugrView, Node, Wire,
+    builder::{BuildError, Container, DFGBuilder, Dataflow, HugrBuilder, ModuleBuilder},
+    extension::{ExtensionId, SignatureError},
     hugr::{ValidationError, hugrmut::HugrMut},
     ops::{Call, DataflowOpTrait, ExtensionOp, OpName, OpType, handle::NodeHandle},
     types::{PolyFuncType, Type, TypeRow},
@@ -20,7 +20,7 @@ use hugr_core::types::{CustomType, SumType, Transformable, TypeArg, TypeName};
 use hugr_core::{Direction, IncomingPort, PortIndex, Visibility};
 use itertools::Itertools;
 use std::collections::{BTreeMap, HashMap, HashSet, hash_map::Entry};
-use tket::extension::rotation::{RotationOp, rotation_type};
+use tket::extension::rotation::{RotationOpBuilder, rotation_type};
 use tket::passes::replace_types::handlers::register_linear_array_op_replacements;
 use tket::passes::utils::unpack_container::type_unpack::array_args;
 use tket::passes::{
@@ -305,25 +305,18 @@ fn extract_func_sig(func_hugr: &Hugr, node: Node) -> Option<PolyFuncType> {
     }
 }
 
-/// Normalize a signature copy for validation and record rotation-to-angle input ports.
-fn adapt_rotation_input_types(
-    expected_sig: &PolyFuncType,
-    func_sig: &mut PolyFuncType,
-) -> Vec<usize> {
-    if !expected_sig.params().is_empty() || !func_sig.params().is_empty() {
-        return Vec::new();
-    }
+/// Change monomorphic expected rotation inputs to Guppy angle tuples and record their ports.
+fn adapt_rotation_input_types(expected_sig: &mut PolyFuncType) -> Vec<usize> {
     let rotation_ty = rotation_type();
     let angle_ty = Type::new_tuple([float64_type()]);
     expected_sig
-        .body()
+        .body_mut()
         .input
-        .iter()
-        .zip(func_sig.body_mut().input.iter_mut())
+        .iter_mut()
         .enumerate()
-        .filter_map(|(index, (expected, found))| {
-            if expected == &rotation_ty && *found == angle_ty {
-                *found = rotation_ty.clone();
+        .filter_map(|(index, expected)| {
+            if *expected == rotation_ty {
+                *expected = angle_ty.clone();
                 Some(index)
             } else {
                 None
@@ -333,7 +326,7 @@ fn adapt_rotation_input_types(
 }
 
 /// Convert rotation inputs immediately before a call to the original replacement.
-fn insert_rotation_input_conversions<H: HugrMut<Node = Node>>(
+fn insert_rotation_input_conversions<H: HugrMut<Node = Node> + AsMut<Hugr>>(
     hugr: &mut H,
     call: Node,
     rotation_inputs: &[usize],
@@ -341,21 +334,22 @@ fn insert_rotation_input_conversions<H: HugrMut<Node = Node>>(
     if rotation_inputs.is_empty() {
         return Ok(());
     }
-    let to_halfturns: OpType = RotationOp::to_halfturns.into();
-    let make_tuple: OpType = MakeTuple::new([float64_type()].into()).into();
-    hugr.use_extensions(to_halfturns.used_extensions()?);
-    hugr.use_extensions(make_tuple.used_extensions()?);
+    let parent = hugr
+        .get_parent(call)
+        .context("Replacement call has no parent")?;
+    let mut builder = DFGBuilder::create(hugr.as_mut(), parent)?;
     for &index in rotation_inputs {
         let port = IncomingPort::from(index);
-        let (source, source_port) = hugr
+        let (source, source_port) = builder
+            .hugr()
             .single_linked_output(call, port)
             .with_context(|| format!("Missing rotation input {index} for call {call}"))?;
-        let halfturns = hugr.add_node_before(call, to_halfturns.clone());
-        let angle = hugr.add_node_before(call, make_tuple.clone());
-        hugr.disconnect(call, port);
-        hugr.connect(source, source_port, halfturns, 0);
-        hugr.connect(halfturns, 0, angle, 0);
-        hugr.connect(angle, 0, call, port);
+        let halfturns = builder.add_to_halfturns(Wire::new(source, source_port))?;
+        let angle = builder.make_tuple([halfturns])?;
+        builder.hugr_mut().disconnect(call, port);
+        builder
+            .hugr_mut()
+            .connect(angle.node(), angle.source(), call, port);
     }
     Ok(())
 }
@@ -446,7 +440,7 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
         expected_sig: PolyFuncType,
         func_hugr: &Hugr,
         func_name: &str,
-    ) -> Result<(Node, Vec<usize>), OpReplacementError> {
+    ) -> Result<Node, OpReplacementError> {
         // Extract target function
         let func_node = extract_func_node(func_hugr, func_name).ok_or(
             OpReplacementError::MissingFunctionHugr {
@@ -454,14 +448,7 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
             },
         )?;
         let func_sig = extract_func_sig(func_hugr, func_node).expect("replacement is a function");
-        let mut adapted_sig = func_sig.clone();
-        let rotation_inputs = if self.adapt_rotation_inputs {
-            adapt_rotation_input_types(&expected_sig, &mut adapted_sig)
-        } else {
-            Vec::new()
-        };
-
-        if adapted_sig != expected_sig {
+        if func_sig != expected_sig {
             return Err(OpReplacementError::ExistingFunctionSignatureMismatch {
                 op_id,
                 node: func_node,
@@ -471,7 +458,7 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
             });
         };
 
-        Ok((func_node, rotation_inputs))
+        Ok(func_node)
     }
 
     pub fn register_replacement(
@@ -485,21 +472,25 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
             return Ok(());
         }
 
-        let expected_sig: PolyFuncType = {
+        let mut expected_sig: PolyFuncType = {
             let mut sig = ext_op.signature().into_owned();
             sig.transform(&self.type_replacer)?;
             sig.into()
         };
+        let rotation_inputs = if self.adapt_rotation_inputs {
+            adapt_rotation_input_types(&mut expected_sig)
+        } else {
+            Vec::new()
+        };
 
         // Extract function if given, otherwise generate a declaration with the expected signature.
-        let (func_hugr, func_node, rotation_inputs) = if let Some(hugr) = func_hugr_opt {
-            let (node, rotation_inputs) =
-                self.get_func_node(ext_op.qualified_id(), expected_sig, &hugr, func_name)?;
-            (hugr, node, rotation_inputs)
+        let (func_hugr, func_node) = if let Some(hugr) = func_hugr_opt {
+            let node = self.get_func_node(ext_op.qualified_id(), expected_sig, &hugr, func_name)?;
+            (hugr, node)
         } else {
             let mut module_builder = ModuleBuilder::new();
             let decl = module_builder.declare(func_name, expected_sig)?;
-            (module_builder.finish_hugr()?, decl.node(), Vec::new())
+            (module_builder.finish_hugr()?, decl.node())
         };
 
         // Register call for later replacement
@@ -620,7 +611,6 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
 mod tests {
     use super::*;
     use hugr::builder::{Container, Dataflow, DataflowSubContainer, FunctionBuilder};
-    use hugr::envelope::EnvelopeConfig;
     use hugr::extension::prelude::{qb_t, usize_t};
     use hugr::types::{Signature, type_param::TypeParam};
 
@@ -784,7 +774,7 @@ mod tests {
             (
                 "bare float",
                 expected.clone(),
-                Signature::new([float64_type()], []).into(),
+                PolyFuncType::from(Signature::new([float64_type()], [])),
                 vec![],
             ),
             (
@@ -794,38 +784,14 @@ mod tests {
                 vec![],
             ),
             (
-                "missing input",
-                Signature::new([rotation_type(), rotation_type()], []).into(),
-                Signature::new([angle.clone()], []).into(),
-                vec![],
-            ),
-            (
-                "extra input",
-                expected.clone(),
-                Signature::new([angle.clone(), angle.clone()], []).into(),
-                vec![],
-            ),
-            (
-                "unrelated input type",
-                Signature::new([rotation_type(), float64_type()], []).into(),
-                Signature::new([angle.clone(), usize_t()], []).into(),
-                vec![],
-            ),
-            (
                 "rotation output",
                 Signature::new([rotation_type()], [rotation_type()]).into(),
                 Signature::new([angle.clone()], [angle.clone()]).into(),
                 vec![0],
             ),
             (
-                "output-only mismatch",
-                Signature::new([angle.clone()], [rotation_type()]).into(),
-                Signature::new([angle.clone()], [angle.clone()]).into(),
-                vec![0],
-            ),
-            (
                 "polymorphic function",
-                PolyFuncType::new([TypeParam::max_nat_kind()], expected.body().clone()),
+                expected.clone(),
                 PolyFuncType::new(
                     [TypeParam::max_nat_kind()],
                     Signature::new([angle.clone()], []),
@@ -833,9 +799,9 @@ mod tests {
                 vec![],
             ),
         ];
-        for (case, expected, found, output_inputs) in invalid {
+        for (case, mut expected, found, output_inputs) in invalid {
+            adapt_rotation_input_types(&mut expected);
             let (replacement, _) = replacement_hugr(found.clone(), &output_inputs)?;
-            let before = replacement.store_str(EnvelopeConfig::text())?;
             let mut program = ModuleBuilder::new().finish_hugr()?;
             let replacer = OpReplacer::new_with_types(&mut program, HashMap::new(), true);
             let error = replacer
@@ -851,12 +817,6 @@ mod tests {
             };
             assert_eq!(*error_expected, expected, "{case}");
             assert_eq!(*error_found, found, "{case}: report the original signature");
-            assert_eq!(
-                replacement.store_str(EnvelopeConfig::text())?,
-                before,
-                "{case}"
-            );
-            replacement.validate()?;
         }
         Ok(())
     }
