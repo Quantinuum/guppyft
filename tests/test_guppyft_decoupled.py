@@ -23,14 +23,14 @@ def break_module(key: str) -> None:
 def broken_selene() -> Generator[None]:
     old_modules = sys.modules.copy()
 
-    # Break all selene_sim, selene_core, and plugin imports
+    # Break all selene_sim, selene_core, and selene _plugin imports
     for key in list(sys.modules.keys()):
-        if key.startswith(("selene_sim", "selene_core")) or key.endswith("plugin"):
+        if key.startswith(("selene_sim", "selene_core")) or key.endswith("_plugin"):
             break_module(key)
 
-    # Purge cached guppylang imports
+    # Purge cached guppylang and guppyft imports
     for key in list(sys.modules.keys()):
-        if key.startswith("guppylang"):
+        if key.startswith(("guppylang", "guppyft")):
             del sys.modules[key]
 
     try:
