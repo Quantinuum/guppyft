@@ -161,10 +161,18 @@ class ImplementOpsSpec:
     teardown the environment required for the op implementations."""
     libs: list[Package] = field(default_factory=list)
     """Additional libraries required to run the transformed program."""
+    adapt_rotation_inputs: bool = False
+    """Expect Guppy `angle` tuples for top-level HUGR rotation inputs in implementations
+    and generated declarations. Call sites insert `to_halfturns` and wrap the resulting
+    floats in tuples. Other input and output types are unchanged."""
 
 
 def _implement_ops(
-    pkg_bytes: bytes, ops: OpReplacements, tys: set[tuple[str, str]]
+    pkg_bytes: bytes,
+    ops: OpReplacements,
+    tys: set[tuple[str, str]],
+    *,
+    adapt_rotation_inputs: bool = False,
 ) -> bytes:
     rs_hugr = RsHugr.from_bytes(pkg_bytes)
 
@@ -176,7 +184,13 @@ def _implement_ops(
         for key, (func_opt, name) in ops
     }
 
-    _implement_ops_binding(rs_hugr, rs_ops, tys, list(ops.iter_eliminated()))
+    _implement_ops_binding(
+        rs_hugr,
+        rs_ops,
+        tys,
+        list(ops.iter_eliminated()),
+        adapt_rotation_inputs=adapt_rotation_inputs,
+    )
 
     return rs_hugr.to_bytes()
 
@@ -223,7 +237,12 @@ def implement_ops(
     # Reset entrypoint, marking module as non-executable, to avoid linking conflicts
     hugr.entrypoint = hugr.module_root
     # Run rewrite, replacing ops with function calls to the functions in `spec.ops`
-    hugr_pkg_bytes = _implement_ops(copy_pkg.to_bytes(), spec.ops, spec.tys.tys)
+    hugr_pkg_bytes = _implement_ops(
+        copy_pkg.to_bytes(),
+        spec.ops,
+        spec.tys.tys,
+        adapt_rotation_inputs=spec.adapt_rotation_inputs,
+    )
 
     # Build, compile, and link wrapper program
     @guppy.declare
