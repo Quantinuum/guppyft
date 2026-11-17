@@ -5,7 +5,7 @@
 
 ### Features
 
-* Dynamically change `StateFactory` size based available blocks ([#533](https://github.com/Quantinuum/guppyft/issues/533)) ([15ee3bb](https://github.com/Quantinuum/guppyft/commit/15ee3bb3df94f8c2fb2ebc82d6178ec0123c50a1))
+* Dynamically change `StateFactory` size based on available blocks ([#533](https://github.com/Quantinuum/guppyft/issues/533)) ([15ee3bb](https://github.com/Quantinuum/guppyft/commit/15ee3bb3df94f8c2fb2ebc82d6178ec0123c50a1))
 * Insert `to_halfturn` ops for rotation types in `implement_ops` pass ([#510](https://github.com/Quantinuum/guppyft/issues/510)) ([aa804d3](https://github.com/Quantinuum/guppyft/commit/aa804d3a410a8f2468bad7f1d124c31cbed2e161))
 
 
