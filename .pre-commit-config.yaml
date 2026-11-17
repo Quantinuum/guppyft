@@ -66,6 +66,12 @@ repos:
         language: system
         files: \.py$
         pass_filenames: false
+      - id: marimo-check
+        name: marimo check
+        description: Check reactive notebook dependencies and formatting.
+        entry: uv run marimo check --strict
+        language: system
+        files: ^examples/.*\.py$
       - id: cargo-fmt
         name: cargo format
         description: Format rust code with `cargo fmt`.

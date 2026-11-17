@@ -55,7 +55,7 @@ docs = [
     "sphinx-copybutton>=0.5.2",
 ]
 examples = [
-    "ipykernel>=7.3.0",
+    "marimo>=0.25.2",
 ]
 lint = [
     "pre-commit>=4.6.2,<5",
@@ -74,7 +74,7 @@ test = [
 [tool.mypy]
 strict = true
 allow_redefinition = true
-exclude = ["tests/error"]
+exclude = ["tests/error", "examples/", "docs/build/"]
 
 [build-system]
 requires = ["maturin>=1.15.0,<2.0"]
