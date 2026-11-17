@@ -165,11 +165,11 @@ class QECPolicy:
         h: float = 0.0
         s: float = 0.0
         sdg: float = 0.0
-        rz: float = 0.0
         inject_t: float = 0.0
         inject_tdg: float = 0.0
         cx: float = 0.0
         cz: float = 0.0
+        rz: float = 0.0
 
         def __setattr__(self, key: str, value: float) -> None:
             """Set a non-negative cost for a known logical operation."""
