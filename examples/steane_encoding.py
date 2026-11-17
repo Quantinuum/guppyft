@@ -279,6 +279,8 @@ def _(mo):
     In quantum programs with complex control flow, it can be useful to use information obtained during runtime to determine when to insert a QEC cycle. Guppy FT supports dynamic insertion of QEC cycles depending on the logical gates that have been performed.
 
     In this demonstration, each logical operation is assigned a cost, which is tracked on a per-block basis. At runtime, once a threshold is reached, a QEC cycle is inserted, and the tracking counter is reset to 0.
+
+    The block budget includes data, factory candidates, and QEC resources. This program needs two data blocks and one spare block for syndrome extraction. The X and Z syndrome extractions use that spare block sequentially, so `n_blocks=3` is sufficient. Including a preparation flag ancilla, the physical budget is `3 * 7 + 1 = 22` qubits.
     """)
     return
 
@@ -295,7 +297,7 @@ def _(SteaneBuilder):
     qec_policy.costs.cx = 1.0
 
     # We can now provide the `qec_policy` to define our Steane architecture.
-    _steane_qec = SteaneBuilder().with_qec_policy(qec_policy).build(n_blocks=2)
+    _steane_qec = SteaneBuilder().with_qec_policy(qec_policy).build(n_blocks=3)
     return (qec_policy,)
 
 
@@ -324,7 +326,7 @@ def _(SteaneBuilder, guppy, output, qec_policy, qlib):
     encoded_with_qec_cycles = (
         SteaneBuilder()
         .with_qec_policy(qec_policy)
-        .build(n_blocks=2)
+        .build(n_blocks=3)
         .encode(my_program.compile())
     )
     return encoded_with_qec_cycles, encoded_without_qec_cycles, my_program
@@ -353,6 +355,11 @@ def _(CircuitExtractor, EmulatorBuilder, Stim, encoded_without_qec_cycles):
         .with_event_hook(_logger)
     ).run()
 
+    # Early exits are output records too; require a completed shot before counting.
+    _shots = _results.collated_shots()
+    assert len(_shots) == 1, _shots
+    assert set(_shots[0]) == {"q0", "q1"}, _shots
+
     n_meas_no_qec = sum(
         1
         for cmd in _logger.shots[0].get_user_circuit().get_commands()
@@ -374,6 +381,11 @@ def _(CircuitExtractor, EmulatorBuilder, Stim, encoded_with_qec_cycles):
         .with_event_hook(_logger)
     ).run()
 
+    # Early exits are output records too; require a completed shot before counting.
+    _shots = _results.collated_shots()
+    assert len(_shots) == 1, _shots
+    assert set(_shots[0]) == {"q0", "q1"}, _shots
+
     n_meas_qec = sum(
         1
         for cmd in _logger.shots[0].get_user_circuit().get_commands()
@@ -384,6 +396,7 @@ def _(CircuitExtractor, EmulatorBuilder, Stim, encoded_with_qec_cycles):
 
 @app.cell
 def _(n_meas_no_qec, n_meas_qec):
+    assert n_meas_qec - n_meas_no_qec == 32
     print("Number of physical measurements performed:")
     print(f"\tWithout QEC cycles: {n_meas_no_qec}")
     print(f"\tWith QEC cycles: {n_meas_qec}")
@@ -405,7 +418,7 @@ def _(mo):
 
     Fault-tolerant state preparation often uses a repeat-until-success (RUS) scheme that measures flag ancilla qubits to verify that the state preparation succeeds. In order to run state preparation in parallel, we need to defer reading the measurement outcome on these ancilla qubits, as described in Guppy's language guide (see [Measurement section](https://docs.quantinuum.com/guppy/language_guide/measurement.html)). Our Steane architecture defines a `StateFactory` that handles deferral of measurements and parallelizes RUS state preparation. Users can configure the parameters of the factory both for zero states and magic states.
 
-    The following example configures an architecture instance that prepares zero states in batches of 2, making up to 5 RUS attempts per request.
+    The following example configures an architecture instance that prepares zero states in batches of up to 2, making up to 5 RUS attempts per request. We allow four blocks so that a batch of two resource states can be prepared while both data blocks are live.
     """)
     return
 
@@ -422,7 +435,7 @@ def _(SteaneBuilder, my_program, qec_policy):
         SteaneBuilder()
         .with_qec_policy(qec_policy)
         .with_zero_factory_conf(factory_conf)
-        .build(n_blocks=2)
+        .build(n_blocks=4)
     )
     _qec_factory_encoded = steane_code_factories.encode(my_program.compile())
     return
