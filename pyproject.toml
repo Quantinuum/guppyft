@@ -42,6 +42,7 @@ repository = "https://github.com/quantinuum/guppyft"
 [dependency-groups]
 dev = [
     "maturin>=1.15.0,<2",
+    "nbformat>=5.11.1",
     { include-group = "examples" },
     { include-group = "lint" },
     { include-group = "test" },
