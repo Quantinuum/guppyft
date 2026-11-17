@@ -43,7 +43,7 @@ nb_merge_streams = True  # Accumulates all stdout streams into one, same with st
 
 # Don't execute this notebook in the docs build.
 # This is because qnexus server calls are made in the code cells.
-nb_execution_excludepatterns = ["examples/iceberg_in_nexus.ipynb"]
+nb_execution_excludepatterns = ["examples/iceberg_demo.ipynb"]
 # ----------------------
 
 
