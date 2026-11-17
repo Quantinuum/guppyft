@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.3](https://github.com/Quantinuum/guppyft/compare/v0.6.2...v0.6.3) (2026-11-16)
+
+
+### Features
+
+* Dynamically change `StateFactory` size based on available blocks ([#533](https://github.com/Quantinuum/guppyft/issues/533)) ([15ee3bb](https://github.com/Quantinuum/guppyft/commit/15ee3bb3df94f8c2fb2ebc82d6178ec0123c50a1))
+* Insert `to_halfturns` ops for rotation types in `implement_ops` pass ([#510](https://github.com/Quantinuum/guppyft/issues/510)) ([aa804d3](https://github.com/Quantinuum/guppyft/commit/aa804d3a410a8f2468bad7f1d124c31cbed2e161))
+
+
+### Performance Improvements
+
+* Cache extensions loaded from json ([#543](https://github.com/Quantinuum/guppyft/issues/543)) ([dfb95d4](https://github.com/Quantinuum/guppyft/commit/dfb95d4b443e1c677d1fbfc539a255327178863d))
+
 ## [0.6.2](https://github.com/Quantinuum/guppyft/compare/v0.6.1...v0.6.2) (2026-11-11)
 
 
