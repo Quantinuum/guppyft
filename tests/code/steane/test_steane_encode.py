@@ -180,11 +180,7 @@ def test_encoder_control_flow(
     assert res == [{"q1": [0]}]
 
 
-@pytest.mark.parametrize(
-    "adaptive_rz_conf",
-    [None, AdaptiveRzConf(max_rounds=23, abort_on_dephasing=False)],
-)
-def test_annotate_steane_encoding(adaptive_rz_conf: AdaptiveRzConf | None) -> None:
+def test_annotate_steane_encoding() -> None:
     hugr = Hugr[Any]()
     pkg = Package([hugr])
 
@@ -199,7 +195,7 @@ def test_annotate_steane_encoding(adaptive_rz_conf: AdaptiveRzConf | None) -> No
         .with_zero_factory_conf(RUSStateFactoryConf(size=1000, max_attempts=1001))
         .with_magic_factory_conf(RUSStateFactoryConf(size=2000, max_attempts=2001))
         .with_qec_policy(qec_policy)
-        .with_adaptive_rz(adaptive_rz_conf)
+        .with_adaptive_rz(AdaptiveRzConf(max_rounds=23, abort_on_dephasing=False))
         .build(n_blocks=4)
     )
     arch.annotate(pkg)
@@ -224,9 +220,6 @@ def test_annotate_steane_encoding(adaptive_rz_conf: AdaptiveRzConf | None) -> No
                     "size": 2000,
                     "max_attempts": 2001,
                 },
-                "adaptive_rz_conf": (
-                    adaptive_rz_conf.to_json() if adaptive_rz_conf is not None else None
-                ),
                 "qec_policy": {
                     "style": "knill",
                     "threshold": 99,
@@ -239,12 +232,19 @@ def test_annotate_steane_encoding(adaptive_rz_conf: AdaptiveRzConf | None) -> No
                         "h": 6.0,
                         "s": 7.0,
                         "sdg": 8.0,
-                        "rz": 9.0,
-                        "inject_t": 10.0,
-                        "inject_tdg": 11.0,
-                        "cx": 12.0,
-                        "cz": 13.0,
+                        "inject_t": 9.0,
+                        "inject_tdg": 10.0,
+                        "cx": 11.0,
+                        "cz": 12.0,
+                        "rz": 13.0,
                     },
+                },
+                "adaptive_rz_conf": {
+                    "tolerance": 1e-10,
+                    "max_rounds": 23,
+                    "dephasing": 0.0,
+                    "max_dephasing": 0.5,
+                    "abort_on_dephasing": False,
                 },
             },
         },
