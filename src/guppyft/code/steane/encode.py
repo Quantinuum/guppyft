@@ -74,14 +74,12 @@ class AdaptiveRzConf:
 
     Attributes:
         tolerance: Allowed residual angle in radians.
-        max_rounds: Maximum rounds before stopping execution with an error.
-        dephasing: Physical Z-error probability per qubit per round.
+        max_rounds: Maximum rounds before stopping execution with an exit.
+        dephasing: Physical Z-error probability per physical qubit per round.
         max_dephasing: Logical dephasing budget for each call.
         abort_on_dephasing: If False, continue after exceeding the budget and
             emit ``adaptive_rz_dephasing_limit_hit=True`` once per affected call.
             The round limit still stops execution with an error.
-
-    These settings do not add simulator noise.
     """
 
     tolerance: float = 1e-10
@@ -219,21 +217,20 @@ class SteaneInstance(AnnotatingArchitectureInstance, EncodingArchitectureInstanc
     def annotate(self, hugr: Package | Hugr[Any]) -> None:
         """Annotate the current parameters of the Steane code architecture on the given
         HUGR in metadata. See `guppyft.encode.annotate` for more information."""
+        params: dict[str, JsonType] = {
+            "schema_version": _SCHEMA_VERSION,
+            "n_blocks": self._n_blocks,
+            "zero_factory": self._options.zero_factory_conf.to_json(),
+            "magic_factory": self._options.magic_factory_conf.to_json(),
+            "qec_policy": self._options.qec_policy.to_json(),
+        }
+        if self._options.adaptive_rz_conf is not None:
+            params["adaptive_rz_conf"] = self._options.adaptive_rz_conf.to_json()
+
         annotate_encoding(
             hugr,
             "steane",
-            {
-                "schema_version": _SCHEMA_VERSION,
-                "n_blocks": self._n_blocks,
-                "zero_factory": self._options.zero_factory_conf.to_json(),
-                "magic_factory": self._options.magic_factory_conf.to_json(),
-                "qec_policy": self._options.qec_policy.to_json(),
-                "adaptive_rz_conf": (
-                    self._options.adaptive_rz_conf.to_json()
-                    if self._options.adaptive_rz_conf is not None
-                    else None
-                ),
-            },
+            params,
         )
 
     def _encode(self, pkg: Package, *, as_bytes: bool) -> Package | bytes:
@@ -869,7 +866,7 @@ class SteaneBuilder:
             compile=logical_compiler, implement_ops=ImplementOps.for_spec(impl_spec)
         )
 
-    def with_adaptive_rz(self, conf: AdaptiveRzConf | None) -> Self:
+    def with_adaptive_rz_conf(self, conf: AdaptiveRzConf | None) -> Self:
         """Enable adaptive Steane rotations to synthesize ordinary Guppy Rz gates."""
         return replace(self, _options=replace(self._options, adaptive_rz_conf=conf))
 
@@ -922,6 +919,8 @@ class SteaneBuilder:
         if (qec_policy_params := params.get("qec_policy")) is not None:
             builder = builder.with_qec_policy(QECPolicy.from_json(qec_policy_params))
         if (adaptive_rz_params := params.get("adaptive_rz_conf")) is not None:
-            builder = builder.with_adaptive_rz(AdaptiveRzConf(**adaptive_rz_params))
+            builder = builder.with_adaptive_rz_conf(
+                AdaptiveRzConf(**adaptive_rz_params)
+            )
 
         return builder.build(n_blocks=params["n_blocks"])

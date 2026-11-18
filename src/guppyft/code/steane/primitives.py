@@ -692,7 +692,7 @@ def adaptive_rz(
 ) -> float:
     """Apply an adaptive logical Rz and return this call's logical dephasing.
 
-    - phase and tolerance are in radians
+    - tolerance is in radians
     - dephasing is the physical Z-error probability per qubit per round
     - max_rounds and max_dephasing limit this call; exceeding either aborts
 

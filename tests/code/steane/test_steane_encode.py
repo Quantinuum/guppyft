@@ -195,7 +195,7 @@ def test_annotate_steane_encoding() -> None:
         .with_zero_factory_conf(RUSStateFactoryConf(size=1000, max_attempts=1001))
         .with_magic_factory_conf(RUSStateFactoryConf(size=2000, max_attempts=2001))
         .with_qec_policy(qec_policy)
-        .with_adaptive_rz(AdaptiveRzConf(max_rounds=23, abort_on_dephasing=False))
+        .with_adaptive_rz_conf(AdaptiveRzConf(max_rounds=23, abort_on_dephasing=False))
         .build(n_blocks=4)
     )
     arch.annotate(pkg)
