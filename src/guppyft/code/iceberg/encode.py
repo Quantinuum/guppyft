@@ -145,10 +145,17 @@ class IcebergQEDPolicy:
             policy.threshold = threshold
         return policy
 
+    @classmethod
+    def null_policy(cls) -> "IcebergQEDPolicy":
+        """Create a null QED policy where all operations have zero cost
+        and no QED is performed."""
+        costs = IcebergQEDPolicy.OperationCosts()
+        return cls(costs=costs)
+
 
 @dataclass(frozen=True, kw_only=True)
 class _IcebergOptions:
-    qed_policy: IcebergQEDPolicy
+    qed_policy: IcebergQEDPolicy | None
     syndrome_during_measurement: bool
     state_factory_conf: RUSStateFactoryConf
     dynamic_qubit_reuse: DynamicQubitReuse
@@ -165,6 +172,7 @@ class IcebergInstance(AnnotatingArchitectureInstance):
     def annotate(self, hugr: Package | Hugr[Any]) -> None:
         """Annotate the current parameters of the Iceberg code architecture on the given
         HUGR's metadata. See `guppyft.encode.annotate_encoding` for more information."""
+        assert isinstance(self._options.qed_policy, IcebergQEDPolicy)
         annotate_encoding(
             hugr,
             "iceberg",
@@ -186,7 +194,7 @@ class IcebergBuilder:
 
     _options: _IcebergOptions = field(
         default=_IcebergOptions(
-            qed_policy=IcebergQEDPolicy(),
+            qed_policy=None,
             syndrome_during_measurement=False,
             state_factory_conf=RUSStateFactoryConf(
                 size=1,
@@ -228,6 +236,12 @@ class IcebergBuilder:
     def build(self, *, n_blocks: int, block_size: int) -> IcebergInstance:
         """Build an `IcebergInstance` configured for `n_blocks` logical blocks each
         with `block_size` logical qubits."""
+        if self._options.qed_policy is None:
+            raise ValueError(
+                "An IcebergQEDPolicy must be provided to IcebergBuilder"
+                " via the with_qed_policy method."
+            )
+
         if n_blocks < 0:
             raise ValueError(
                 f"Cannot set the number of blocks lower than 0, {n_blocks} given"
