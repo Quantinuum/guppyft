@@ -170,8 +170,9 @@ class ImplementOpsSpec:
     ] = field(default=lambda x: x)
     """Allows creating a wrapper around the transformed program, e.g. to setup and
     teardown the environment required for the op implementations."""
-    libs: list[Package] = field(default_factory=list)
-    """Additional libraries required to run the transformed program."""
+    libs: list[Package | bytes] = field(default_factory=list)
+    """Additional libraries required to run the transformed program, either as a HUGR
+    package or the same in serialised form (using Package.to_bytes)."""
     adapt_rotation_inputs: bool = False
     """Expect Guppy `angle` tuples for top-level HUGR rotation inputs in implementations
     and generated declarations. Call sites insert `to_halfturns` and wrap the resulting
@@ -268,9 +269,8 @@ def implement_ops(
         wrapper()
 
     pkg: Package = outer_wrapper.compile()
-    pkg_bytes = link_packages(
-        pkg.to_bytes(), hugr_pkg_bytes, *[lib.to_bytes() for lib in spec.libs]
-    )
+    libraries = [lib if isinstance(lib, bytes) else lib.to_bytes() for lib in spec.libs]
+    pkg_bytes = link_packages(pkg.to_bytes(), hugr_pkg_bytes, *libraries)
 
     if as_bytes:
         return pkg_bytes
