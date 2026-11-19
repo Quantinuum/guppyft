@@ -296,6 +296,7 @@ def identity_code_spec(
             ("tket.qsystem.helios", "ZZPhase"): "link.identity.ZZPhase",
         }
     )
+    ops.gen_missing_decls_from_lib(lib)
 
     def build_wrapper(
         func: GuppyFunctionDefinition[[], None],

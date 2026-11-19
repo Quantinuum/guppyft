@@ -731,6 +731,8 @@ class SteaneBuilder:
 
             return wrapper  # type: ignore[no-any-return]
 
+        compiled_lib = lib.compile()
+        ops.gen_missing_decls_from_lib(compiled_lib)
         ops.register_for_elimination_check(steane_ops().name)
         tys = TyReplacements().with_types(
             [
@@ -740,7 +742,7 @@ class SteaneBuilder:
         )
 
         return ImplementOpsSpec(
-            ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[lib.compile()]
+            ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[compiled_lib]
         )
 
     def _gen_encoder_spec(self, n_blocks: int) -> EncodeSpec:
