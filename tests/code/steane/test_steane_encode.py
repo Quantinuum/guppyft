@@ -36,6 +36,7 @@ from hugr.package import Package
 from selene_sim.backends.bundled_simulators import Coinflip
 
 from guppyft.code.steane.encode import (
+    AdaptiveRzConf,
     QECPolicy,
     QECStyle,
     RUSStateFactoryConf,
@@ -194,6 +195,7 @@ def test_annotate_steane_encoding() -> None:
         .with_zero_factory_conf(RUSStateFactoryConf(size=1000, max_attempts=1001))
         .with_magic_factory_conf(RUSStateFactoryConf(size=2000, max_attempts=2001))
         .with_qec_policy(qec_policy)
+        .with_adaptive_rz_conf(AdaptiveRzConf(max_rounds=23, abort_on_dephasing=False))
         .build(n_blocks=4)
     )
     arch.annotate(pkg)
@@ -234,7 +236,15 @@ def test_annotate_steane_encoding() -> None:
                         "inject_tdg": 10.0,
                         "cx": 11.0,
                         "cz": 12.0,
+                        "rz": 13.0,
                     },
+                },
+                "adaptive_rz_conf": {
+                    "tolerance": 1e-10,
+                    "max_rounds": 23,
+                    "dephasing": 0.0,
+                    "max_dephasing": 0.5,
+                    "abort_on_dephasing": False,
                 },
             },
         },
