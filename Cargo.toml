@@ -13,7 +13,7 @@ edition = "2024"
 # Binary ECC loading is unused and pulls in an older, vulnerable zstd dependency.
 tket = { version = "0.22.0", default-features = false }
 hugr = "0.30.3"
-hugr-core = "0.30.3"
+hugr-core = "0.31.0"
 itertools = "0.15.0"
 derive_more = { version = "2", features = ["display", "from"] }
 anyhow = "1.0.104"

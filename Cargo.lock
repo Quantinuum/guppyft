@@ -844,7 +844,7 @@ dependencies = [
  "anyhow",
  "derive_more 2.1.1",
  "hugr",
- "hugr-core",
+ "hugr-core 0.31.0",
  "itertools 0.15.0",
  "pyo3",
  "tket",
@@ -911,8 +911,8 @@ version = "0.30.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "34b9fab5c01c0b2b8c1456514745d9e85032ab736ff8cf809c66701db826c41b"
 dependencies = [
- "hugr-core",
- "hugr-model",
+ "hugr-core 0.30.3",
+ "hugr-model 0.30.3",
 ]
 
 [[package]]
@@ -950,7 +950,7 @@ dependencies = [
  "downcast-rs",
  "enum_dispatch",
  "html-escape",
- "hugr-model",
+ "hugr-model 0.30.3",
  "indexmap 2.14.2",
  "itertools 0.15.0",
  "ordered-float",
@@ -976,10 +976,67 @@ dependencies = [
 ]
 
 [[package]]
+name = "hugr-core"
+version = "0.31.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f5fe0c64ed3e244b7da948ac862aae309ed9aa0b04be999d4fe87a6ccd89482c"
+dependencies = [
+ "base64",
+ "delegate",
+ "derive_more 2.1.1",
+ "downcast-rs",
+ "enum_dispatch",
+ "html-escape",
+ "hugr-model 0.31.0",
+ "indexmap 2.14.2",
+ "itertools 0.15.0",
+ "ordered-float",
+ "pastey",
+ "petgraph",
+ "portgraph",
+ "regex",
+ "rustc-hash",
+ "schemars 1.2.3",
+ "semver",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "smallvec",
+ "smol_str",
+ "static_assertions",
+ "strum",
+ "thiserror 2.0.21",
+ "tracing",
+ "typetag",
+]
+
+[[package]]
 name = "hugr-model"
 version = "0.30.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1b60176a5fc54c266a752df5a800c06788b562634a6bc57406f5df372aea45a6"
+dependencies = [
+ "base64",
+ "bumpalo",
+ "capnp",
+ "derive_more 2.1.1",
+ "indexmap 2.14.2",
+ "itertools 0.15.0",
+ "ordered-float",
+ "pest",
+ "pest_derive",
+ "pretty",
+ "rustc-hash",
+ "semver",
+ "smol_str",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "hugr-model"
+version = "0.31.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "87cec9261948f29ae6c517175088a2ad1e06f317282de1350f4cffdd9fe3002f"
 dependencies = [
  "base64",
  "bumpalo",
@@ -2273,7 +2330,7 @@ dependencies = [
  "derive_more 2.1.1",
  "fxhash",
  "hugr",
- "hugr-core",
+ "hugr-core 0.30.3",
  "indexmap 2.14.2",
  "itertools 0.15.0",
  "lazy_static",
