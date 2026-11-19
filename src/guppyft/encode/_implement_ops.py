@@ -86,14 +86,15 @@ class OpReplacements:
 
         return self
 
-    def gen_missing_decls_from_lib(self, lib: Package) -> Self:
-        # Build index of names missing declaration/definition
-        missing: dict[str, tuple[str, str]] = {
+    def _ops_missing_declarations(self) -> dict[str, tuple[str, str]]:
+        return {
             f_name: op_key
             for op_key, (func_opt, f_name) in self._ops.items()
             if func_opt is None
         }
-        if not missing:
+
+    def gen_missing_decls_from_lib(self, lib: Package) -> Self:
+        if not (missing := self._ops_missing_declarations()):
             return self
 
         for module in lib.modules:
@@ -112,6 +113,16 @@ class OpReplacements:
 
     def register_for_elimination_check(self, ext_id: str) -> None:
         self._check_eliminated.append(ext_id)
+
+    def check_finished(self) -> None:
+        missing = self._ops_missing_declarations()
+        if missing:
+            missing_str = [
+                f"{f_name} (for {ext_name}.{op_name})"
+                for f_name, (ext_name, op_name) in missing.items()
+            ]
+            msg = f"Function declarations are missing: {', '.join(missing_str)}"
+            raise ValueError(f"Op replacement spec is unfinished: {msg}")
 
 
 class TyReplacements:
@@ -230,13 +241,10 @@ def implement_ops(
         "Provided a non-function entrypoint HUGR!"
     )
 
-    # Add function declaration for missing ops to use during type replacement
-    for lib in spec.libs:
-        spec.ops.gen_missing_decls_from_lib(lib)
-
     # Reset entrypoint, marking module as non-executable, to avoid linking conflicts
     hugr.entrypoint = hugr.module_root
     # Run rewrite, replacing ops with function calls to the functions in `spec.ops`
+    spec.ops.check_finished()
     hugr_pkg_bytes = _implement_ops(
         copy_pkg.to_bytes(),
         spec.ops,
