@@ -155,7 +155,7 @@ impl ReplacementCompiler {
             assert!(op_def.params()?.is_empty());
             op_replacer.register_replacement(
                 &ExtensionOp::new(op_def, [])?,
-                Some(replacement),
+                replacement,
                 &func_name,
             )?;
         }

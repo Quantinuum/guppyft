@@ -186,14 +186,10 @@ def _implement_ops(
     adapt_rotation_inputs: bool = False,
 ) -> bytes:
     rs_hugr = RsHugr.from_bytes(pkg_bytes)
-
-    rs_ops = {
-        key: (
-            func_opt if func_opt is None else to_rs_hugr(func_opt),
-            name,
-        )
-        for key, (func_opt, name) in ops
-    }
+    rs_ops: dict[tuple[str, str], tuple[RsHugr, str]] = {}
+    for key, (func_opt, name) in ops:
+        assert func_opt is not None
+        rs_ops[key] = (to_rs_hugr(func_opt), name)
 
     _implement_ops_binding(
         rs_hugr,
