@@ -47,7 +47,7 @@ def test_iceberg_invalid_n_blocks() -> None:
         ValueError,
         match=r"Cannot set the number of blocks lower than 0, -1 given",
     ):
-        arch.build(n_blocks=-1, block_size=4)
+        arch.with_n_blocks(-1)
 
 
 def test_iceberg_invalid_block_size() -> None:
@@ -56,17 +56,17 @@ def test_iceberg_invalid_block_size() -> None:
         ValueError,
         match=r"Block size has to be even and at least 2, 0 given",
     ):
-        arch.build(n_blocks=2, block_size=0)
+        arch.with_block_size(0)
     with pytest.raises(
         ValueError,
         match=r"Block size has to be even and at least 2, -2 given",
     ):
-        arch.build(n_blocks=2, block_size=-2)
+        arch.with_block_size(-2)
     with pytest.raises(
         ValueError,
         match=r"Block size has to be even and at least 2, 3 given",
     ):
-        arch.build(n_blocks=2, block_size=3)
+        arch.with_block_size(3)
 
 
 def test_annotate_iceberg_encoding() -> None:
@@ -79,12 +79,12 @@ def test_annotate_iceberg_encoding() -> None:
         policy.costs.__setattr__(field.name, i + 1.0)
 
     arch = (
-        IcebergBuilder()
+        IcebergBuilder.new(n_blocks=4, block_size=6)
         .with_qed_policy(policy)
         .with_syndrome_extraction_during_measurement(True)
         .with_state_factory_conf(RUSStateFactoryConf(size=50, max_attempts=51))
         .with_dynamic_qubit_reuse(DynamicQubitReuse.disabled)
-        .build(n_blocks=4, block_size=6)
+        .build()
     )
     arch.annotate(pkg)
 
@@ -159,13 +159,11 @@ def test_from_params_subclassing() -> None:
 
     class IcebergSubInstance(IcebergInstance):
         def i_am(self) -> str:
-            return f"I am the instance subclass with n_blocks={self._n_blocks}"
+            return f"I am the instance subclass with n_blocks={self._options.n_blocks}"
 
     class IcebergSubBuilder(IcebergBuilder):
-        def build(self, *, n_blocks: int, block_size: int) -> IcebergInstance:
-            return IcebergSubInstance(
-                _n_blocks=n_blocks, _block_size=block_size, _options=self._options
-            )
+        def build(self) -> IcebergInstance:
+            return IcebergSubInstance(_options=self._options)
 
     arch = IcebergSubBuilder.instance_from_params(
         {
@@ -187,7 +185,7 @@ def test_from_params_minimal() -> None:
         }
     )
 
-    assert arch == IcebergBuilder().build(n_blocks=4, block_size=6)
+    assert arch == IcebergBuilder.new(n_blocks=4, block_size=6).build()
 
 
 def test_from_params_defaults() -> None:
@@ -208,8 +206,9 @@ def test_from_params_defaults() -> None:
     policy = IcebergQEDPolicy()
     policy.costs.x = 42
 
-    assert arch == IcebergBuilder().with_qed_policy(policy).build(
-        n_blocks=4, block_size=6
+    assert (
+        arch
+        == IcebergBuilder.new(n_blocks=4, block_size=6).with_qed_policy(policy).build()
     )
 
 
@@ -234,7 +233,9 @@ def test_annotated_policy_immutable() -> None:
 
     policy = IcebergQEDPolicy(threshold=2)
     policy.costs.x = 4.0
-    instance = IcebergBuilder().with_qed_policy(policy).build(n_blocks=4, block_size=6)
+    instance = (
+        IcebergBuilder.new(n_blocks=4, block_size=6).with_qed_policy(policy).build()
+    )
 
     policy.threshold = 99
     policy.costs.x = 20.0
