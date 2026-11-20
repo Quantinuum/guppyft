@@ -187,3 +187,34 @@ def test_missing_op_declaration_error() -> None:
         match=r"Op replacement spec is unfinished: Function declarations are missing: test.guppyft.replacement \(for tket.quantum.Z\)",  # noqa: E501
     ):
         implement_ops(pkg1, spec)
+
+
+def test_library_as_bytes() -> None:
+    lib = GuppyLibrary()
+    ops = OpReplacements()
+
+    @lib.register_member
+    @guppy
+    @link_name("test.guppyft.replacement")
+    @no_type_check
+    def replacement(q: qubit) -> None:
+        x(q)
+
+    @guppy
+    @no_type_check
+    def main() -> None:
+        q = qubit()
+        z(q)  # Intentionally replace Z with X to observe an encoding change
+        output("res", q.measure().read())
+
+    ops.with_generated_decl(("tket.quantum", "Z"), "test.guppyft.replacement")
+    compiled_lib = lib.compile()
+    ops.gen_missing_decls_from_lib(compiled_lib)
+    lib_bytes = compiled_lib.to_bytes()
+
+    spec = ImplementOpsSpec(ops=ops, tys=TyReplacements(), libs=[lib_bytes])
+    pkg1 = main.with_minimal_opt().compile()
+    pkg2 = implement_ops(pkg1, spec)
+
+    [shot] = list(EmulatorBuilder().build(pkg2, n_qubits=1).run())
+    assert shot.as_dict() == {"res": 1}
