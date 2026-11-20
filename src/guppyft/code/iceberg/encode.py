@@ -259,21 +259,23 @@ class IcebergBuilder:
         """Set whether dynamic qubits should be reset and reused."""
         return replace(self, _options=replace(self._options, dynamic_qubit_reuse=conf))
 
-    def build(self) -> IcebergInstance:
-        """Build an `IcebergInstance`."""
+    def _ensure_required_options_set(self) -> None:
         # TODO move validation into options class
         if self._options._n_blocks is None:
             raise ValueError("Option `n_blocks` is required but not set!")
         if self._options._block_size is None:
             raise ValueError("Option `block_size` is required but not set!")
+
+    def build(self) -> IcebergInstance:
+        """Build an `IcebergInstance`."""
+        self._ensure_required_options_set()
         return IcebergInstance(_options=deepcopy(self._options))
 
     @classmethod
     def new(cls, *, n_blocks: int, block_size: int) -> Self:
         """Create a new builder with some initial options. Note that the builder
         configuration is not guaranteed to be complete yet."""
-        builder = cls()
-        return builder.with_n_blocks(n_blocks).with_block_size(block_size)
+        return cls().with_n_blocks(n_blocks).with_block_size(block_size)
 
     @classmethod
     def instance_from_params(cls, params: dict[str, Any]) -> "IcebergInstance":
