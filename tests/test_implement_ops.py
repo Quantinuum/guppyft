@@ -118,10 +118,17 @@ def test_preserves_packaged_extensions_for_opaque_ops() -> None:
     assert {e.name for e in pkg1.extensions}.issubset({e.name for e in pkg2.extensions})
 
 
-def test_missing_op_explicit_generation() -> None:
+@pytest.mark.parametrize("from_headers", [False, True])
+def test_missing_op_explicit_generation(from_headers: bool) -> None:
+    header_lib = GuppyLibrary()
     lib = GuppyLibrary()
     ops = OpReplacements()
 
+    @header_lib.register_member
+    @guppy.declare
+    @link_name("test.guppyft.replacement")
+    @no_type_check
+    def replacement_decl(q: qubit) -> None: ...
     @lib.register_member
     @guppy
     @link_name("test.guppyft.replacement")
@@ -138,7 +145,10 @@ def test_missing_op_explicit_generation() -> None:
 
     ops.with_generated_decl(("tket.quantum", "Z"), "test.guppyft.replacement")
     compiled_lib = lib.compile()
-    ops.gen_missing_decls_from_lib(compiled_lib)
+    if from_headers:
+        ops.gen_missing_decls_from_lib(header_lib.compile())
+    else:
+        ops.gen_missing_decls_from_lib(compiled_lib)
 
     spec = ImplementOpsSpec(ops=ops, tys=TyReplacements(), libs=[compiled_lib])
     pkg1 = main.with_minimal_opt().compile()
