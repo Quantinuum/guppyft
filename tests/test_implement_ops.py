@@ -179,10 +179,17 @@ def test_missing_op_declaration_error() -> None:
         implement_ops(pkg1, spec)
 
 
-def test_library_as_bytes() -> None:
+@pytest.mark.parametrize("from_headers", [False, True])
+def test_library_as_bytes(from_headers: bool) -> None:
+    header_lib = GuppyLibrary()
     lib = GuppyLibrary()
     ops = OpReplacements()
 
+    @header_lib.register_member
+    @guppy.declare
+    @link_name("test.guppyft.replacement")
+    @no_type_check
+    def replacement_decl(q: qubit) -> None: ...
     @lib.register_member
     @guppy
     @link_name("test.guppyft.replacement")
@@ -199,7 +206,10 @@ def test_library_as_bytes() -> None:
 
     ops.with_generated_decl(("tket.quantum", "Z"), "test.guppyft.replacement")
     compiled_lib = lib.compile()
-    ops.gen_missing_decls_from_lib(compiled_lib)
+    if from_headers:
+        ops.gen_missing_decls_from_lib(header_lib.compile())
+    else:
+        ops.gen_missing_decls_from_lib(compiled_lib)
     lib_bytes = compiled_lib.to_bytes()
 
     spec = ImplementOpsSpec(ops=ops, tys=TyReplacements(), libs=[lib_bytes])

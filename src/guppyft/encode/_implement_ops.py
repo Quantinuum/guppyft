@@ -6,8 +6,7 @@ from typing import Any, Literal, Self, no_type_check, overload
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.library import link_name
-from hugr import Hugr
-from hugr.build import DefinitionBuilder
+from hugr import Hugr, build
 from hugr.ext import OpDef, TypeDef
 from hugr.ops import FuncDecl, FuncDefn
 from hugr.package import Package, link_packages
@@ -97,15 +96,14 @@ class OpReplacements:
         if not (missing := self._ops_missing_declarations()):
             return self
 
-        for module in lib.modules:
-            for _, data in module.nodes():
-                if isinstance(data.op, FuncDefn) and data.op.f_name in missing:
-                    op_key = missing.pop(data.op.f_name)
-                    h: Hugr[Any] = Hugr()
-                    DefinitionBuilder(h).module_root_builder().declare_function(
-                        data.op.f_name, data.op.signature, data.op.visibility
-                    )
-                    self._ops[op_key] = (h, data.op.f_name)
+        for lib_module in lib.modules:
+            for _, data in lib_module.nodes():
+                op = data.op
+                if isinstance(op, (FuncDefn, FuncDecl)) and op.f_name in missing:
+                    op_key = missing.pop(op.f_name)
+                    mod = build.Module()
+                    mod.declare_function(op.f_name, op.signature, op.visibility)
+                    self._ops[op_key] = (mod.hugr, op.f_name)
                     if not missing:
                         return self
 
