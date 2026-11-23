@@ -295,9 +295,7 @@ def test_no_qed_policy_error() -> None:
 
 
 def test_no_qed_policy_error_with_params() -> None:
-    with pytest.raises(
-        ValueError, match="Could not find required key `qed_policy` at path <root>"
-    ):
+    with pytest.raises(KeyError, match="Could not find required key `qed_policy`"):
         IcebergBuilder.from_params(
             params={
                 "schema_version": 1,
