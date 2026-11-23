@@ -1,5 +1,5 @@
-from dataclasses import fields
-from typing import Any
+from dataclasses import dataclass, fields, replace
+from typing import Any, Self
 
 import pytest
 from hugr import Hugr
@@ -155,25 +155,41 @@ def test_annotate_iceberg_encoding() -> None:
 
 
 def test_from_params_subclassing() -> None:
-    """Assert that `from_params` invokes subclass builder constructors."""
+    """Assert that `from_params` invokes subclass builder constructors and subclasses
+    can extend the builder pattern."""
 
+    @dataclass(frozen=True)
     class IcebergSubInstance(IcebergInstance):
+        _additional_opt: int
+
         def i_am(self) -> str:
-            return f"I am the instance subclass with n_blocks={self._options.n_blocks}"
+            return (
+                f"I am the instance subclass with n_blocks={self._options.n_blocks} "
+                f"and opt={self._additional_opt}"
+            )
 
+    @dataclass(frozen=True)
     class IcebergSubBuilder(IcebergBuilder):
-        def build(self) -> IcebergInstance:
-            return IcebergSubInstance(_options=self._options)
+        _additional_opt: int = 1
 
-    arch = IcebergSubBuilder.instance_from_params(
+        def with_additional_option(self, opt: int) -> Self:
+            return replace(self, _additional_opt=opt)
+
+        def build(self) -> IcebergInstance:
+            return IcebergSubInstance(
+                _options=self._options, _additional_opt=self._additional_opt
+            )
+
+    builder = IcebergSubBuilder.from_params(
         {
             "schema_version": 1,
             "n_blocks": 4,
             "block_size": 6,
         }
     )
+    arch = builder.with_additional_option(5).build()
     assert isinstance(arch, IcebergSubInstance)
-    assert arch.i_am() == "I am the instance subclass with n_blocks=4"
+    assert arch.i_am() == "I am the instance subclass with n_blocks=4 and opt=5"
 
 
 def test_from_params_minimal() -> None:

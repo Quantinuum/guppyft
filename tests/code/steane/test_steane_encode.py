@@ -1,9 +1,9 @@
 import os
 import re
 from collections.abc import Callable
-from dataclasses import fields
+from dataclasses import dataclass, fields, replace
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
 import pytest
 from guppylang import guppy
@@ -242,24 +242,42 @@ def test_annotate_steane_encoding() -> None:
 
 
 def test_from_params_subclassing() -> None:
-    """Assert that `from_params` invokes subclass builder constructors."""
+    """Assert that `from_params` invokes subclass builder constructors and subclasses
+    can extend the builder pattern."""
 
+    @dataclass(frozen=True)
     class SteaneSubInstance(SteaneInstance):
+        _additional_opt: int
+
         def i_am(self) -> str:
-            return f"I am the instance subclass with n_blocks={self._options.n_blocks}"
+            return (
+                f"I am the instance subclass with n_blocks={self._options.n_blocks} "
+                f"and opt={self._additional_opt}"
+            )
 
+    @dataclass(frozen=True)
     class SteaneSubBuilder(SteaneBuilder):
-        def build(self) -> SteaneInstance:
-            return SteaneSubInstance(_spec=EncodeSpec(), _options=self._options)
+        _additional_opt: int = 1
 
-    arch = SteaneSubBuilder.instance_from_params(
+        def with_additional_option(self, opt: int) -> Self:
+            return replace(self, _additional_opt=opt)
+
+        def build(self) -> SteaneInstance:
+            return SteaneSubInstance(
+                _spec=EncodeSpec(),
+                _options=self._options,
+                _additional_opt=self._additional_opt,
+            )
+
+    builder = SteaneSubBuilder.from_params(
         {
             "schema_version": 1,
             "n_blocks": 4,
         }
     )
+    arch = builder.with_additional_option(5).build()
     assert isinstance(arch, SteaneSubInstance)
-    assert arch.i_am() == "I am the instance subclass with n_blocks=4"
+    assert arch.i_am() == "I am the instance subclass with n_blocks=4 and opt=5"
 
 
 def test_from_params_minimal() -> None:

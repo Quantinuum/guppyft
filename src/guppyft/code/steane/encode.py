@@ -852,7 +852,7 @@ class SteaneBuilder:
         return cls.from_params(params).build()
 
     @classmethod
-    def from_params(cls, params: dict[str, Any]) -> "SteaneBuilder":
+    def from_params(cls, params: dict[str, Any]) -> Self:
         """Produces a builder according to the given parameters."""
         params = PathDict(params)
 
