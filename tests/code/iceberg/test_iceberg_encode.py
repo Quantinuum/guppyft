@@ -42,7 +42,7 @@ def test_iceberg_invalid_max_attempts() -> None:
 
 
 def test_iceberg_invalid_n_blocks() -> None:
-    arch = IcebergBuilder().with_qed_policy(IcebergQEDPolicy.disabled())
+    arch = IcebergBuilder()
     with pytest.raises(
         ValueError,
         match=r"Cannot set the number of blocks lower than 0, -1 given",
@@ -51,7 +51,7 @@ def test_iceberg_invalid_n_blocks() -> None:
 
 
 def test_iceberg_invalid_block_size() -> None:
-    arch = IcebergBuilder().with_qed_policy(IcebergQEDPolicy.disabled())
+    arch = IcebergBuilder()
     with pytest.raises(
         ValueError,
         match=r"Block size has to be even and at least 2, 0 given",
