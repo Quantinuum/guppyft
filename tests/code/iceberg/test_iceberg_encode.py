@@ -185,6 +185,11 @@ def test_from_params_subclassing() -> None:
             "schema_version": 1,
             "n_blocks": 4,
             "block_size": 6,
+            "qed_policy": {
+                "costs": {
+                    "x": 42,
+                }
+            },
         }
     )
     arch = builder.with_additional_option(5).build()
@@ -239,6 +244,11 @@ def test_from_params_invalid_factory_conf() -> None:
         "schema_version": 1,
         "n_blocks": 4,
         "block_size": 6,
+        "qed_policy": {
+            "costs": {
+                "x": 42,
+            }
+        },
         "state_factory": {"size": 0},
     }
 
