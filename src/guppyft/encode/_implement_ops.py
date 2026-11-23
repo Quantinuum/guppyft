@@ -85,7 +85,7 @@ class OpReplacements:
 
         return self
 
-    def _ops_missing_declarations(self) -> dict[str, tuple[str, str]]:
+    def _hugr_names_missing_implementations(self) -> dict[str, tuple[str, str]]:
         return {
             f_name: op_key
             for op_key, (func_opt, f_name) in self._ops.items()
@@ -93,7 +93,7 @@ class OpReplacements:
         }
 
     def gen_missing_decls_from_lib(self, lib: Package) -> Self:
-        if not (missing := self._ops_missing_declarations()):
+        if not (missing := self._hugr_names_missing_implementations()):
             return self
 
         for lib_module in lib.modules:
@@ -117,7 +117,7 @@ class OpReplacements:
         self._check_eliminated.append(ext_id)
 
     def check_finished(self) -> None:
-        missing = self._ops_missing_declarations()
+        missing = self._hugr_names_missing_implementations()
         if missing:
             missing_str = [
                 f"{f_name} (for {ext_name}.{op_name})"
