@@ -92,7 +92,7 @@ We can now select the QEC code architecture that we would like to use to encode 
 ```python
 from guppyft.code.steane.encode import SteaneBuilder
 
-steane = SteaneBuilder().build(n_blocks=3)
+steane = SteaneBuilder.new(n_blocks=3).build()
 ```
 
 With our Steane architecture instance, we can encode our program using {py:meth}`~guppyft.code.steane.encode.SteaneInstance.encode` to produce a HUGR package composed of lowered, logical primitives.
