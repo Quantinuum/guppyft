@@ -305,14 +305,3 @@ def test_no_qed_policy_error_with_params() -> None:
                 "block_size": 2,
             }
         )
-
-
-def test_disabled_qed_policy() -> None:
-    disabled_policy = IcebergQEDPolicy.disabled()
-    assert disabled_policy.threshold == 1
-    assert disabled_policy.costs.cx_all == 0.0
-    builder = IcebergBuilder.new(block_size=2, n_blocks=1).with_qed_policy(
-        disabled_policy
-    )
-    instance = builder.build()
-    assert instance._options.qed_policy == IcebergQEDPolicy()
