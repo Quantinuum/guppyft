@@ -199,12 +199,7 @@ def test_from_params_subclassing() -> None:
 
 def test_from_params_minimal() -> None:
     arch = IcebergBuilder.instance_from_params(
-        {
-            "schema_version": 1,
-            "n_blocks": 4,
-            "block_size": 6,
-            "qed_policy": IcebergQEDPolicy().to_json(),
-        }
+        {"schema_version": 1, "n_blocks": 4, "block_size": 6, "qed_policy": {}}
     )
 
     assert (
