@@ -315,6 +315,12 @@ class IcebergBuilder:
             builder = builder.with_qed_policy(
                 IcebergQEDPolicy.from_json(qed_policy_params)
             )
+        else:
+            raise ValueError(
+                "Explicit configuration of the QED policy is required. Use "
+                "builder.with_qed_policy(IcebergQEDPolicy.disabled())"
+                "if you do not want to use QED."
+            )
         if (state_factory_params := params.get("state_factory")) is not None:
             builder = builder.with_state_factory_conf(
                 RUSStateFactoryConf.from_json(

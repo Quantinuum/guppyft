@@ -306,3 +306,16 @@ def test_disabled_qed_policy() -> None:
     )
     instance = builder.build()
     assert instance._options.qed_policy == IcebergQEDPolicy()
+
+
+def test_required_using_with_params() -> None:
+    with pytest.raises(
+        ValueError, match="Explicit configuration of the QED policy is required"
+    ):
+        IcebergBuilder.from_params(
+            params={
+                "schema_version": 1,
+                "n_blocks": 2,
+                "block_size": 2,
+            }
+        )
