@@ -303,10 +303,8 @@ def test_null_policy() -> None:
     null_policy = IcebergQEDPolicy.null_policy()
     assert null_policy.threshold == 1
     assert null_policy.costs.cx_all == 0.0
-    instance = (
-        IcebergBuilder()
-        .with_qed_policy(null_policy)
-        .new(block_size=2, n_blocks=1)
-        .build()
+    builder = (
+        IcebergBuilder().new(block_size=2, n_blocks=1).with_qed_policy(null_policy)
     )
+    instance = builder.build()
     assert instance._options.qed_policy == IcebergQEDPolicy()
