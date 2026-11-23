@@ -99,7 +99,11 @@ class OpReplacements:
         for lib_module in lib.modules:
             for _, data in lib_module.nodes():
                 op = data.op
-                if isinstance(op, (FuncDefn, FuncDecl)) and op.f_name in missing:
+                if (
+                    isinstance(op, (FuncDefn, FuncDecl))
+                    and op.visibility == "Public"
+                    and op.f_name in missing
+                ):
                     op_key = missing.pop(op.f_name)
                     mod = build.Module()
                     mod.declare_function(op.f_name, op.signature, op.visibility)

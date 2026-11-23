@@ -187,3 +187,43 @@ def test_missing_op_declaration_error() -> None:
         match=r"Op replacement spec is unfinished: Function declarations are missing: test.guppyft.replacement \(for tket.quantum.Z\)",  # noqa: E501
     ):
         implement_ops(pkg1, spec)
+
+
+def test_missing_op_declaration_error_due_to_private_header() -> None:
+    """Ensures that op replacements private to the library (i.e. neither a declaration
+    nor included as a top level member) are not used to fill missing declarations."""
+    lib = GuppyLibrary()
+    ops = OpReplacements()
+
+    @guppy
+    @link_name("test.guppyft.replacement")
+    @no_type_check
+    def replacement(q: qubit) -> None:
+        x(q)
+
+    # Register caller only, making `replacement` a private library member
+    @lib.register_member
+    @guppy
+    @no_type_check
+    def replacement_caller(q: qubit) -> None:
+        replacement(q)
+
+    @guppy
+    @no_type_check
+    def main() -> None:
+        q = qubit()
+        z(q)
+        output("res", q.measure().read())
+
+    ops.with_generated_decl(("tket.quantum", "Z"), "test.guppyft.replacement")
+    compiled_lib = lib.compile()
+    ops.gen_missing_decls_from_lib(compiled_lib)
+
+    spec = ImplementOpsSpec(ops=ops, tys=TyReplacements(), libs=[lib.compile()])
+    pkg1 = main.with_minimal_opt().compile()
+
+    with pytest.raises(
+        ValueError,
+        match=r"Op replacement spec is unfinished: Function declarations are missing: test.guppyft.replacement \(for tket.quantum.Z\)",  # noqa: E501
+    ):
+        implement_ops(pkg1, spec)
