@@ -279,7 +279,7 @@ class IcebergBuilder:
         if self._options.qed_policy is None:
             raise ValueError(
                 "Explicit configuration of the QED policy is required. Use "
-                "`builder.with_qed_policy(IcebergQEDPolicy.disabled())` "
+                "builder.with_qed_policy(IcebergQEDPolicy.disabled())"
                 "if you do not want to use QED."
             )
 
