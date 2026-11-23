@@ -1,34 +1,36 @@
 """Abstractions for constructing QEC architectures."""
 
+from __future__ import annotations
+
 import json
-from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Literal, Protocol, overload
+from typing import TYPE_CHECKING, Any, Literal, Protocol, overload
 
 from guppylang.defs import GuppyFunctionDefinition
-from guppylang.emulator import EmulatorBuilder, EmulatorInstance
-from hugr import Hugr
 from hugr.ops import Module
 from hugr.package import Package
-from hugr.passes.composable import ComposablePass
 from tket.passes import Normalize
 
 from ._compile import LogicalCompiler, ReplacementCompiler, UncompilableError
 from ._implement_ops import (
-    GuppyOpReplacementDecorator,
     ImplementOps,
     ImplementOpsSpec,
     OpReplacements,
     TyReplacements,
-    guppy_op_replacement_decorator,
     implement_ops,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+    from guppylang.emulator import EmulatorBuilder, EmulatorInstance
+    from hugr import Hugr
+    from hugr.passes.composable import ComposablePass
 
 __all__ = [
     "AnnotatingArchitectureInstance",
     "EncodeSpec",
     "EncodingArchitectureInstance",
-    "GuppyOpReplacementDecorator",
     "ImplementOps",
     "ImplementOpsSpec",
     "LogicalCompiler",
@@ -38,7 +40,6 @@ __all__ = [
     "UncompilableError",
     "annotate_encoding",
     "encode",
-    "guppy_op_replacement_decorator",
     "implement_ops",
 ]
 
@@ -95,6 +96,8 @@ class EncodingArchitectureInstance(Protocol):
             n_qubits: Number of physical qubits available to the emulator.
             builder: Optional `EmulatorBuilder` to use; defaults to a new one.
         """
+        from guppylang.emulator import EmulatorBuilder
+
         encoded_pkg = self.encode(pkg, as_bytes=True)
         if builder is None:
             builder = EmulatorBuilder()

@@ -23,20 +23,24 @@ class RsHugr:
 
 def _implement_ops(
     rs_hugr: RsHugr,
-    op_replacements: dict[tuple[str, str], tuple[RsHugr | None, str]],
+    op_replacements: dict[tuple[str, str], tuple[RsHugr, str]],
     replaceable_types: set[tuple[str, str]],
-    check_eliminated: list[str]
+    check_eliminated: list[str],
+    *,
+    adapt_rotation_inputs: bool = False,
 ) -> None:
     """
     Replace extension ops in `rs_hugr` to calls to the provided implementations.
 
-    `op_replacements` maps each `(extension_name, op_name)` pair to either a
-    compiled implementation HUGR or `None` if only a declaration should be
-    generated, together with the function name to use.
+    `op_replacements` maps each `(extension_name, op_name)` pair to a compiled
+    implementation HUGR.
     `replaceable_types` is a set of extension types that should be replaced by
     the corresponding types in the implementation HUGRs.
     `check_eliminated` is a list of extensions to check have been fully eliminated after
     the replacement process.
+    `adapt_rotation_inputs` changes expected top-level rotation inputs to Guppy
+    angle tuples, including in generated declarations. Call sites insert
+    `to_halfturns` and wrap the resulting floats in tuples.
     """
 
 def _run_replacement_compiler(
@@ -45,6 +49,8 @@ def _run_replacement_compiler(
         compound_op_replacements: dict[tuple[str, str], RsHugr],
         ty_replacements: dict[tuple[str, str], tuple[str, str]],
         extensions: str | None = None,
+        *,
+        adapt_rotation_inputs: bool = False,
     ) -> None:
     """
     Replace extension ops and types in `rs_hugr` according to the given mappings.
@@ -57,4 +63,7 @@ def _run_replacement_compiler(
     `extensions` is an optional JSON-encoded list of additional extension
     definitions to use when resolving the source/target ops and types, for
     extensions not already registered on `rs_hugr`.
+    `adapt_rotation_inputs` changes expected top-level rotation inputs to Guppy
+    angle tuples. Call sites insert `to_halfturns` and wrap the resulting floats
+    in tuples. Replacement functions keep their signatures.
     """

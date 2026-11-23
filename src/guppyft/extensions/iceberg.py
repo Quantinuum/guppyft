@@ -97,7 +97,7 @@ class IcebergOpsExtension:
     def __call__(self) -> Extension:
         """Returns the Iceberg ops extension."""
         return load_extension(
-            "guppyft.iceberg.ops", ["guppyft.std.types", "guppyft.iceberg.types"]
+            "guppyft.iceberg.ops", ("guppyft.std.types", "guppyft.iceberg.types")
         )
 
     # x

@@ -1,7 +1,9 @@
+from collections.abc import Callable
 from dataclasses import dataclass, field, replace
 from typing import Any, Self, no_type_check
 
 from guppylang import guppy
+from guppylang.decorator import custom_guppy_decorator
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.library import GuppyLibrary, link_name
 from guppylang.std.angles import angle
@@ -11,6 +13,7 @@ from guppylang.std.num import nat
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.qsystem.helios import zz_phase
 from guppylang.std.quantum import cx, discard, measure, project_z, qubit, x
+from hugr.ext import OpDef
 from hugr.package import Package
 from tket_exts import measurement, qsystem_helios, quantum
 
@@ -21,7 +24,6 @@ from guppyft.encode import (
     ImplementOpsSpec,
     OpReplacements,
     encode,
-    guppy_op_replacement_decorator,
 )
 from guppyft.globals import map_global, with_global
 
@@ -69,7 +71,25 @@ class IdentityBuilder:
 
         lib = GuppyLibrary(members=[])
         ops = OpReplacements()
-        _register_op_replacement = guppy_op_replacement_decorator(ops, register_in=lib)
+
+        def _register_op_replacement(
+            op_def: OpDef,
+        ) -> Callable[[Callable[..., Any]], GuppyFunctionDefinition[Any, Any]]:
+            @custom_guppy_decorator
+            def decorator(
+                func: Callable[..., Any],
+            ) -> GuppyFunctionDefinition[Any, Any]:
+                # Generate guppy function
+                name = f"link.{op_def.qualified_name()}"
+                guppy_func = guppy(link_name(name)(func))
+
+                # Register in library and for op replacement
+                lib.register_member(guppy_func)
+                ops.with_generated_decl(op_def, name)
+
+                return guppy_func
+
+            return decorator
 
         @guppy.struct
         class STATE:
@@ -307,8 +327,11 @@ class IdentityBuilder:
 
             return wrapper  # type: ignore[no-any-return]
 
+        compiled_lib = lib.compile()
+        ops.gen_missing_decls_from_lib(compiled_lib)
+
         return ImplementOpsSpec(
-            ops=ops, build_wrapper=build_wrapper, libs=[lib.compile()]
+            ops=ops, build_wrapper=build_wrapper, libs=[compiled_lib]
         )
 
     def _encode_spec(self, n_qubits: int) -> EncodeSpec:
