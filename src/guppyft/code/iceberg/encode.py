@@ -147,8 +147,7 @@ class IcebergQEDPolicy:
 
     @classmethod
     def disabled(cls) -> "IcebergQEDPolicy":
-        """Create a null QED policy where all operations have zero cost
-        and no QED is performed."""
+        """Create a QED policy that effectively disables QED cycles."""
         costs = cls.OperationCosts()
         return cls(costs=costs)
 
