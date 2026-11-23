@@ -157,7 +157,7 @@ class IcebergQEDPolicy:
 class _IcebergOptions:
     _n_blocks: int | None
     _block_size: int | None
-    qed_policy: IcebergQEDPolicy | None
+    _qed_policy: IcebergQEDPolicy | None
     syndrome_during_measurement: bool
     state_factory_conf: RUSStateFactoryConf
     dynamic_qubit_reuse: DynamicQubitReuse
@@ -178,6 +178,10 @@ class _IcebergOptions:
     def block_size(self) -> int:
         return self._required_value(self._block_size, "block_size")
 
+    @property
+    def qed_policy(self) -> IcebergQEDPolicy:
+        return self._required_value(self._qed_policy, "qed_policy")
+
 
 @dataclass(frozen=True)
 class IcebergInstance(AnnotatingArchitectureInstance):
@@ -188,7 +192,6 @@ class IcebergInstance(AnnotatingArchitectureInstance):
     def annotate(self, hugr: Package | Hugr[Any]) -> None:
         """Annotate the current parameters of the Iceberg code architecture on the given
         HUGR's metadata. See `guppyft.encode.annotate_encoding` for more information."""
-        assert isinstance(self._options.qed_policy, IcebergQEDPolicy)
         annotate_encoding(
             hugr,
             "iceberg",
@@ -212,7 +215,7 @@ class IcebergBuilder:
         default=_IcebergOptions(
             _n_blocks=None,
             _block_size=None,
-            qed_policy=None,
+            _qed_policy=None,
             syndrome_during_measurement=False,
             state_factory_conf=RUSStateFactoryConf(
                 size=1,
@@ -240,7 +243,7 @@ class IcebergBuilder:
 
     def with_qed_policy(self, qed_policy: IcebergQEDPolicy) -> Self:
         """Set the QED policy."""
-        return replace(self, _options=replace(self._options, qed_policy=qed_policy))
+        return replace(self, _options=replace(self._options, _qed_policy=qed_policy))
 
     def with_state_factory_conf(self, conf: RUSStateFactoryConf) -> Self:
         """Set the configuration for the state factory producing Iceberg blocks."""
@@ -276,7 +279,8 @@ class IcebergBuilder:
         if self._options.qed_policy is None:
             raise ValueError(
                 "Explicit configuration of the QED policy is required. Use "
-                "`builder.with_qed_policy(IcebergQEDPolicy.disabled())` if you do not want to use QED."
+                "`builder.with_qed_policy(IcebergQEDPolicy.disabled())` "
+                "if you do not want to use QED."
             )
 
     def build(self) -> IcebergInstance:
