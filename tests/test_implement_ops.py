@@ -3,11 +3,12 @@ from typing import TYPE_CHECKING, no_type_check
 import pytest
 from guppylang import guppy, qubit
 from guppylang.emulator import EmulatorBuilder
+from guppylang.library import GuppyLibrary, link_name
 from guppylang.std.angles import angle
 from guppylang.std.builtins import array
 from guppylang.std.debug import state_output
 from guppylang.std.platform import output
-from guppylang.std.quantum import discard, h, rz
+from guppylang.std.quantum import discard, h, rz, x, z
 from hugr.ops import ExtOp
 
 from guppyft.encode import (
@@ -115,3 +116,114 @@ def test_preserves_packaged_extensions_for_opaque_ops() -> None:
     pkg2 = implement_ops(pkg1, spec)
 
     assert {e.name for e in pkg1.extensions}.issubset({e.name for e in pkg2.extensions})
+
+
+@pytest.mark.parametrize("from_headers", [False, True])
+def test_missing_op_explicit_generation(from_headers: bool) -> None:
+    header_lib = GuppyLibrary()
+    lib = GuppyLibrary()
+    ops = OpReplacements()
+
+    @header_lib.register_member
+    @guppy.declare
+    @link_name("test.guppyft.replacement")
+    @no_type_check
+    def replacement_decl(q: qubit) -> None: ...
+    @lib.register_member
+    @guppy
+    @link_name("test.guppyft.replacement")
+    @no_type_check
+    def replacement(q: qubit) -> None:
+        x(q)
+
+    @guppy
+    @no_type_check
+    def main() -> None:
+        q = qubit()
+        z(q)  # Intentionally replace Z with X to observe an encoding change
+        output("res", q.measure().read())
+
+    ops.with_generated_decl(("tket.quantum", "Z"), "test.guppyft.replacement")
+    compiled_lib = lib.compile()
+    if from_headers:
+        ops.gen_missing_decls_from_lib(header_lib.compile())
+    else:
+        ops.gen_missing_decls_from_lib(compiled_lib)
+
+    spec = ImplementOpsSpec(ops=ops, tys=TyReplacements(), libs=[compiled_lib])
+    pkg1 = main.with_minimal_opt().compile()
+    pkg2 = implement_ops(pkg1, spec)
+
+    [shot] = list(EmulatorBuilder().build(pkg2, n_qubits=1).run())
+    assert shot.as_dict() == {"res": 1}
+
+
+def test_missing_op_declaration_error() -> None:
+    lib = GuppyLibrary()
+    ops = OpReplacements()
+
+    @lib.register_member
+    @guppy
+    @link_name("test.guppyft.replacement")
+    @no_type_check
+    def replacement(q: qubit) -> None:
+        x(q)
+
+    @guppy
+    @no_type_check
+    def main() -> None:
+        q = qubit()
+        z(q)
+        output("res", q.measure().read())
+
+    ops.with_generated_decl(("tket.quantum", "Z"), "test.guppyft.replacement")
+    # Forget to generate missing declarations from the library
+
+    spec = ImplementOpsSpec(ops=ops, tys=TyReplacements(), libs=[lib.compile()])
+    pkg1 = main.with_minimal_opt().compile()
+
+    with pytest.raises(
+        ValueError,
+        match=r"Op replacement spec is unfinished: Function declarations are missing: test.guppyft.replacement \(for tket.quantum.Z\)",  # noqa: E501
+    ):
+        implement_ops(pkg1, spec)
+
+
+def test_missing_op_declaration_error_due_to_private_header() -> None:
+    """Ensures that op replacements private to the library (i.e. neither a declaration
+    nor included as a top level member) are not used to fill missing declarations."""
+    lib = GuppyLibrary()
+    ops = OpReplacements()
+
+    @guppy
+    @link_name("test.guppyft.replacement")
+    @no_type_check
+    def replacement(q: qubit) -> None:
+        x(q)
+
+    # Register caller only, making `replacement` a private library member
+    @lib.register_member
+    @guppy
+    @no_type_check
+    def replacement_caller(q: qubit) -> None:
+        replacement(q)
+
+    @guppy
+    @no_type_check
+    def main() -> None:
+        q = qubit()
+        z(q)
+        output("res", q.measure().read())
+
+    ops.with_generated_decl(("tket.quantum", "Z"), "test.guppyft.replacement")
+    compiled_lib = lib.compile()
+    ops.gen_missing_decls_from_lib(compiled_lib)
+
+    spec = ImplementOpsSpec(ops=ops, tys=TyReplacements(), libs=[lib.compile()])
+    pkg1 = main.with_minimal_opt().compile()
+
+    with pytest.raises(
+        ValueError,
+        match=r"Op replacement spec is unfinished: Function declarations are missing: test.guppyft.replacement \(for tket.quantum.Z\)",  # noqa: E501
+    ):
+        implement_ops(pkg1, spec)

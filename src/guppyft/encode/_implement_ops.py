@@ -6,8 +6,7 @@ from typing import Any, Literal, Self, no_type_check, overload
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.library import link_name
-from hugr import Hugr
-from hugr.build import DefinitionBuilder
+from hugr import Hugr, build
 from hugr.ext import OpDef, TypeDef
 from hugr.ops import FuncDecl, FuncDefn
 from hugr.package import Package, link_packages
@@ -86,25 +85,29 @@ class OpReplacements:
 
         return self
 
-    def gen_missing_decls_from_lib(self, lib: Package) -> Self:
-        # Build index of names missing declaration/definition
-        missing: dict[str, tuple[str, str]] = {
+    def _hugr_names_missing_implementations(self) -> dict[str, tuple[str, str]]:
+        return {
             f_name: op_key
             for op_key, (func_opt, f_name) in self._ops.items()
             if func_opt is None
         }
-        if not missing:
+
+    def gen_missing_decls_from_lib(self, lib: Package) -> Self:
+        if not (missing := self._hugr_names_missing_implementations()):
             return self
 
-        for module in lib.modules:
-            for _, data in module.nodes():
-                if isinstance(data.op, FuncDefn) and data.op.f_name in missing:
-                    op_key = missing.pop(data.op.f_name)
-                    h: Hugr[Any] = Hugr()
-                    DefinitionBuilder(h).module_root_builder().declare_function(
-                        data.op.f_name, data.op.signature, data.op.visibility
-                    )
-                    self._ops[op_key] = (h, data.op.f_name)
+        for lib_module in lib.modules:
+            for _, data in lib_module.nodes():
+                op = data.op
+                if (
+                    isinstance(op, (FuncDefn, FuncDecl))
+                    and op.visibility == "Public"
+                    and op.f_name in missing
+                ):
+                    op_key = missing.pop(op.f_name)
+                    mod = build.Module()
+                    mod.declare_function(op.f_name, op.signature, op.visibility)
+                    self._ops[op_key] = (mod.hugr, op.f_name)
                     if not missing:
                         return self
 
@@ -112,6 +115,16 @@ class OpReplacements:
 
     def register_for_elimination_check(self, ext_id: str) -> None:
         self._check_eliminated.append(ext_id)
+
+    def check_finished(self) -> None:
+        missing = self._hugr_names_missing_implementations()
+        if missing:
+            missing_str = [
+                f"{f_name} (for {ext_name}.{op_name})"
+                for f_name, (ext_name, op_name) in missing.items()
+            ]
+            msg = f"Function declarations are missing: {', '.join(missing_str)}"
+            raise ValueError(f"Op replacement spec is unfinished: {msg}")
 
 
 class TyReplacements:
@@ -175,14 +188,10 @@ def _implement_ops(
     adapt_rotation_inputs: bool = False,
 ) -> bytes:
     rs_hugr = RsHugr.from_bytes(pkg_bytes)
-
-    rs_ops = {
-        key: (
-            func_opt if func_opt is None else to_rs_hugr(func_opt),
-            name,
-        )
-        for key, (func_opt, name) in ops
-    }
+    rs_ops: dict[tuple[str, str], tuple[RsHugr, str]] = {}
+    for key, (func_opt, name) in ops:
+        assert func_opt is not None
+        rs_ops[key] = (to_rs_hugr(func_opt), name)
 
     _implement_ops_binding(
         rs_hugr,
@@ -230,13 +239,10 @@ def implement_ops(
         "Provided a non-function entrypoint HUGR!"
     )
 
-    # Add function declaration for missing ops to use during type replacement
-    for lib in spec.libs:
-        spec.ops.gen_missing_decls_from_lib(lib)
-
     # Reset entrypoint, marking module as non-executable, to avoid linking conflicts
     hugr.entrypoint = hugr.module_root
     # Run rewrite, replacing ops with function calls to the functions in `spec.ops`
+    spec.ops.check_finished()
     hugr_pkg_bytes = _implement_ops(
         copy_pkg.to_bytes(),
         spec.ops,
