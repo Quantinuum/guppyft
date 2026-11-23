@@ -292,7 +292,7 @@ def test_no_qed_policy_error() -> None:
     builder = IcebergBuilder()
 
     with pytest.raises(
-        ValueError, match="An IcebergQEDPolicy is required to build an IcebergInstance"
+        ValueError, match="Explicit configuration of the QED policy is required"
     ):
         builder.new(block_size=2, n_blocks=1).build()
 

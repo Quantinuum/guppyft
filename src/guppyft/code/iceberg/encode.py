@@ -276,7 +276,7 @@ class IcebergBuilder:
             raise ValueError("Option `n_blocks` is required but not set!")
         if self._options._block_size is None:
             raise ValueError("Option `block_size` is required but not set!")
-        if self._options.qed_policy is None:
+        if self._options._qed_policy is None:
             raise ValueError(
                 "Explicit configuration of the QED policy is required. Use "
                 "builder.with_qed_policy(IcebergQEDPolicy.disabled())"
