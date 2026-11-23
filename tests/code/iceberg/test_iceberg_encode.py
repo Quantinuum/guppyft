@@ -202,7 +202,12 @@ def test_from_params_minimal() -> None:
         }
     )
 
-    assert arch == IcebergBuilder.new(n_blocks=4, block_size=6).build()
+    assert (
+        arch
+        == IcebergBuilder.new(n_blocks=4, block_size=6)
+        .with_qed_policy(IcebergQEDPolicy())
+        .build()
+    )
 
 
 def test_from_params_defaults() -> None:
@@ -289,9 +294,9 @@ def test_no_qed_policy_error() -> None:
     assert builder._options.qed_policy is None
 
     with pytest.raises(
-        ValueError, match="An IcebergQEDPolicy must be provided to IcebergBuilder"
+        ValueError, match="An IcebergQEDPolicy is required to build an IcebergInstance"
     ):
-        builder.build(block_size=2, n_blocks=1)
+        builder.new(block_size=2, n_blocks=1).build()
 
 
 def test_null_policy() -> None:
@@ -299,6 +304,9 @@ def test_null_policy() -> None:
     assert null_policy.threshold == 1
     assert null_policy.costs.cx_all == 0.0
     instance = (
-        IcebergBuilder().with_qed_policy(null_policy).build(block_size=2, n_blocks=1)
+        IcebergBuilder()
+        .with_qed_policy(null_policy)
+        .new(block_size=2, n_blocks=1)
+        .build()
     )
     assert instance._options.qed_policy == IcebergQEDPolicy()

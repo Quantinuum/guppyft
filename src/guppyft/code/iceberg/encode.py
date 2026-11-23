@@ -273,6 +273,11 @@ class IcebergBuilder:
             raise ValueError("Option `n_blocks` is required but not set!")
         if self._options._block_size is None:
             raise ValueError("Option `block_size` is required but not set!")
+        if self._options.qed_policy is None:
+            raise ValueError(
+                "An IcebergQEDPolicy is required to build an IcebergInstance."
+                "Set a policy with the IcebergBuilder.with_qed_policy method."
+            )
 
     def build(self) -> IcebergInstance:
         """Build an `IcebergInstance`."""
