@@ -146,10 +146,10 @@ class IcebergQEDPolicy:
         return policy
 
     @classmethod
-    def null_policy(cls) -> "IcebergQEDPolicy":
+    def disabled(cls) -> "IcebergQEDPolicy":
         """Create a null QED policy where all operations have zero cost
         and no QED is performed."""
-        costs = IcebergQEDPolicy.OperationCosts()
+        costs = cls.OperationCosts()
         return cls(costs=costs)
 
 
@@ -275,8 +275,8 @@ class IcebergBuilder:
             raise ValueError("Option `block_size` is required but not set!")
         if self._options.qed_policy is None:
             raise ValueError(
-                "An IcebergQEDPolicy is required to build an IcebergInstance."
-                "Set a policy with the IcebergBuilder.with_qed_policy method."
+                "Explicit configuration of the QED policy is required. Use "
+                "`builder.with_qed_policy(IcebergQEDPolicy.disabled())` if you do not want to use QED."
             )
 
     def build(self) -> IcebergInstance:

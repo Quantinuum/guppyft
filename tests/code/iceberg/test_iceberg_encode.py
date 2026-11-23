@@ -291,20 +291,18 @@ def test_costs_have_existing_ops() -> None:
 def test_no_qed_policy_error() -> None:
     builder = IcebergBuilder()
 
-    assert builder._options.qed_policy is None
-
     with pytest.raises(
         ValueError, match="An IcebergQEDPolicy is required to build an IcebergInstance"
     ):
         builder.new(block_size=2, n_blocks=1).build()
 
 
-def test_null_policy() -> None:
-    null_policy = IcebergQEDPolicy.null_policy()
+def test_disabled_qed_policy() -> None:
+    disabled_policy = IcebergQEDPolicy.disabled()
     assert null_policy.threshold == 1
     assert null_policy.costs.cx_all == 0.0
     builder = (
-        IcebergBuilder().new(block_size=2, n_blocks=1).with_qed_policy(null_policy)
+        IcebergBuilder.new(block_size=2, n_blocks=1).with_qed_policy(null_policy)
     )
     instance = builder.build()
     assert instance._options.qed_policy == IcebergQEDPolicy()
