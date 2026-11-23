@@ -148,18 +148,34 @@ class IcebergQEDPolicy:
 
 @dataclass(frozen=True, kw_only=True)
 class _IcebergOptions:
+    _n_blocks: int | None
+    _block_size: int | None
     qed_policy: IcebergQEDPolicy
     syndrome_during_measurement: bool
     state_factory_conf: RUSStateFactoryConf
     dynamic_qubit_reuse: DynamicQubitReuse
+
+    @classmethod
+    def _required_value[V](cls, v: V | None, name: str) -> V:
+        if v is None:
+            raise ValueError(
+                f"{name} is not set (should have been validated upon build)!"
+            )
+        return v
+
+    @property
+    def n_blocks(self) -> int:
+        return self._required_value(self._n_blocks, "n_blocks")
+
+    @property
+    def block_size(self) -> int:
+        return self._required_value(self._block_size, "block_size")
 
 
 @dataclass(frozen=True)
 class IcebergInstance(AnnotatingArchitectureInstance):
     """An Iceberg architecture instance built by `IcebergBuilder.build`."""
 
-    _n_blocks: int
-    _block_size: int
     _options: _IcebergOptions
 
     def annotate(self, hugr: Package | Hugr[Any]) -> None:
@@ -170,8 +186,8 @@ class IcebergInstance(AnnotatingArchitectureInstance):
             "iceberg",
             {
                 "schema_version": _SCHEMA_VERSION,
-                "n_blocks": self._n_blocks,
-                "block_size": self._block_size,
+                "n_blocks": self._options.n_blocks,
+                "block_size": self._options.block_size,
                 "qed_policy": self._options.qed_policy.to_json(),
                 "syndrome_during_measurement": self._options.syndrome_during_measurement,  # noqa: E501 ruff format keeps changing this line back
                 "state_factory": self._options.state_factory_conf.to_json(),
@@ -186,6 +202,8 @@ class IcebergBuilder:
 
     _options: _IcebergOptions = field(
         default=_IcebergOptions(
+            _n_blocks=None,
+            _block_size=None,
             qed_policy=IcebergQEDPolicy(),
             syndrome_during_measurement=False,
             state_factory_conf=RUSStateFactoryConf(
@@ -195,6 +213,22 @@ class IcebergBuilder:
             dynamic_qubit_reuse=DynamicQubitReuse.enabled,
         )
     )
+
+    def with_n_blocks(self, n_blocks: int) -> Self:
+        """Set the number of logical blocks the architecture can use."""
+        if n_blocks < 0:
+            raise ValueError(
+                f"Cannot set the number of blocks lower than 0, {n_blocks} given"
+            )
+        return replace(self, _options=replace(self._options, _n_blocks=n_blocks))
+
+    def with_block_size(self, block_size: int) -> Self:
+        """Set the number of logical qubits in a single block."""
+        if block_size < 2 or block_size % 2 != 0:
+            raise ValueError(
+                f"Block size has to be even and at least 2, {block_size} given"
+            )
+        return replace(self, _options=replace(self._options, _block_size=block_size))
 
     def with_qed_policy(self, qed_policy: IcebergQEDPolicy) -> Self:
         """Set the QED policy."""
@@ -225,29 +259,36 @@ class IcebergBuilder:
         """Set whether dynamic qubits should be reset and reused."""
         return replace(self, _options=replace(self._options, dynamic_qubit_reuse=conf))
 
-    def build(self, *, n_blocks: int, block_size: int) -> IcebergInstance:
-        """Build an `IcebergInstance` configured for `n_blocks` logical blocks each
-        with `block_size` logical qubits."""
-        if n_blocks < 0:
-            raise ValueError(
-                f"Cannot set the number of blocks lower than 0, {n_blocks} given"
-            )
-        if block_size < 2 or block_size % 2 != 0:
-            raise ValueError(
-                f"Block size has to be even and at least 2, {block_size} given"
-            )
+    def _ensure_required_options_set(self) -> None:
+        # TODO move validation into options class
+        if self._options._n_blocks is None:
+            raise ValueError("Option `n_blocks` is required but not set!")
+        if self._options._block_size is None:
+            raise ValueError("Option `block_size` is required but not set!")
 
-        return IcebergInstance(
-            _n_blocks=n_blocks, _block_size=block_size, _options=deepcopy(self._options)
-        )
+    def build(self) -> IcebergInstance:
+        """Build an `IcebergInstance`."""
+        self._ensure_required_options_set()
+        return IcebergInstance(_options=deepcopy(self._options))
+
+    @classmethod
+    def new(cls, *, n_blocks: int, block_size: int) -> Self:
+        """Create a new builder with some initial options. Note that the builder
+        configuration is not guaranteed to be complete yet."""
+        return cls().with_n_blocks(n_blocks).with_block_size(block_size)
 
     @classmethod
     def instance_from_params(cls, params: dict[str, Any]) -> "IcebergInstance":
         """Produces an instance with the builder according to the given parameters. To
         be used as the 'inverse' of `IcebergInstance.annotate`."""
+        return cls.from_params(params).build()
+
+    @classmethod
+    def from_params(cls, params: dict[str, Any]) -> Self:
+        """Produces a builder according to the given parameters."""
         params = PathDict(params)
 
-        builder = cls()
+        builder = cls.new(n_blocks=params["n_blocks"], block_size=params["block_size"])
         if params["schema_version"] != _SCHEMA_VERSION:
             raise RuntimeError(
                 f"Unsupported params schema version: {params['schema_version']}"
@@ -273,6 +314,4 @@ class IcebergBuilder:
         if (dynamic_qubit_reuse := params.get("dynamic_qubit_reuse")) is not None:
             builder = builder.with_dynamic_qubit_reuse(dynamic_qubit_reuse)
 
-        return builder.build(
-            n_blocks=params["n_blocks"], block_size=params["block_size"]
-        )
+        return builder
