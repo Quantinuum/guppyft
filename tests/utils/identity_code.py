@@ -63,9 +63,11 @@ class IdentityInstance(EncodingArchitectureInstance):
 
 @dataclass(frozen=True, kw_only=True)
 class IdentityBuilder:
+    _n_qubits: int | None = None
     _qec_policy: IdentityQECPolicy = field(default_factory=IdentityQECPolicy)
 
-    def _implement_ops_spec(self, n_qubits: int) -> ImplementOpsSpec:
+    def _implement_ops_spec(self) -> ImplementOpsSpec:
+        n_qubits = self._n_qubits
         qec_threshold = self._qec_policy.threshold
         costs = self._qec_policy.costs
 
@@ -334,14 +336,24 @@ class IdentityBuilder:
             ops=ops, build_wrapper=build_wrapper, libs=[compiled_lib]
         )
 
-    def _encode_spec(self, n_qubits: int) -> EncodeSpec:
-        spec = self._implement_ops_spec(n_qubits)
+    def _encode_spec(self) -> EncodeSpec:
+        spec = self._implement_ops_spec()
         return EncodeSpec(implement_ops=ImplementOps.for_spec(spec))
+
+    @classmethod
+    def new(cls, n_qubits: int) -> Self:
+        """Construct a new minimal builder instance. Note that this instance is not
+        guaranteed to be complete yet."""
+        return cls().with_n_qubits(n_qubits)
 
     def with_qec_policy(self, qec_policy: IdentityQECPolicy) -> Self:
         """Set the QEC policy."""
         return replace(self, _qec_policy=qec_policy)
 
-    def build(self, n_qubits: int) -> IdentityInstance:
+    def with_n_qubits(self, n_qubits: int) -> Self:
+        """Set the number of logical/physical qubits."""
+        return replace(self, _n_qubits=n_qubits)
+
+    def build(self) -> IdentityInstance:
         """Build an `IdentityInstance` configured for `n_qubits` logical qubits."""
-        return IdentityInstance(_spec=self._encode_spec(n_qubits))
+        return IdentityInstance(_spec=self._encode_spec())

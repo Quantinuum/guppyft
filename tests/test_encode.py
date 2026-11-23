@@ -25,7 +25,7 @@ def test_encode_does_not_modify_package(as_bytes: bool, empty_spec: bool) -> Non
     if empty_spec:
         encode(pkg, EncodeSpec(), as_bytes=as_bytes)
     else:
-        IdentityBuilder().build(n_qubits=1).encode(pkg, as_bytes=as_bytes)
+        IdentityBuilder.new(n_qubits=1).build().encode(pkg, as_bytes=as_bytes)
 
     assert pkg.to_str() == before
     [module_after] = pkg.modules
