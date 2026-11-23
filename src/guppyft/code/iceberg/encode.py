@@ -210,9 +210,9 @@ class IcebergBuilder:
 
     _options: _IcebergOptions = field(
         default=_IcebergOptions(
-            qed_policy=None,
             _n_blocks=None,
             _block_size=None,
+            qed_policy=None,
             syndrome_during_measurement=False,
             state_factory_conf=RUSStateFactoryConf(
                 size=1,
