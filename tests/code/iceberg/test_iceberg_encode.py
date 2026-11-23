@@ -185,6 +185,7 @@ def test_from_params_subclassing() -> None:
             "schema_version": 1,
             "n_blocks": 4,
             "block_size": 6,
+            "qed_policy": {},
         }
     )
     arch = builder.with_additional_option(5).build()
@@ -194,14 +195,15 @@ def test_from_params_subclassing() -> None:
 
 def test_from_params_minimal() -> None:
     arch = IcebergBuilder.instance_from_params(
-        {
-            "schema_version": 1,
-            "n_blocks": 4,
-            "block_size": 6,
-        }
+        {"schema_version": 1, "n_blocks": 4, "block_size": 6, "qed_policy": {}}
     )
 
-    assert arch == IcebergBuilder.new(n_blocks=4, block_size=6).build()
+    assert (
+        arch
+        == IcebergBuilder.new(n_blocks=4, block_size=6)
+        .with_qed_policy(IcebergQEDPolicy())
+        .build()
+    )
 
 
 def test_from_params_defaults() -> None:
@@ -233,6 +235,7 @@ def test_from_params_invalid_factory_conf() -> None:
         "schema_version": 1,
         "n_blocks": 4,
         "block_size": 6,
+        "qed_policy": {},
         "state_factory": {"size": 0},
     }
 
@@ -280,3 +283,23 @@ def test_costs_have_existing_ops() -> None:
     }
 
     assert costs == ops
+
+
+def test_no_qed_policy_error() -> None:
+    builder = IcebergBuilder()
+
+    with pytest.raises(
+        ValueError, match="Explicit configuration of the QED policy is required"
+    ):
+        builder.new(block_size=2, n_blocks=1).build()
+
+
+def test_no_qed_policy_error_with_params() -> None:
+    with pytest.raises(KeyError, match="Could not find required key `qed_policy`"):
+        IcebergBuilder.from_params(
+            params={
+                "schema_version": 1,
+                "n_blocks": 2,
+                "block_size": 2,
+            }
+        )

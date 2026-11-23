@@ -145,12 +145,18 @@ class IcebergQEDPolicy:
             policy.threshold = threshold
         return policy
 
+    @classmethod
+    def disabled(cls) -> "IcebergQEDPolicy":
+        """Create a QED policy that effectively disables QED cycles."""
+        costs = cls.OperationCosts()
+        return cls(costs=costs)
+
 
 @dataclass(frozen=True, kw_only=True)
 class _IcebergOptions:
     _n_blocks: int | None
     _block_size: int | None
-    qed_policy: IcebergQEDPolicy
+    _qed_policy: IcebergQEDPolicy | None
     syndrome_during_measurement: bool
     state_factory_conf: RUSStateFactoryConf
     dynamic_qubit_reuse: DynamicQubitReuse
@@ -170,6 +176,10 @@ class _IcebergOptions:
     @property
     def block_size(self) -> int:
         return self._required_value(self._block_size, "block_size")
+
+    @property
+    def qed_policy(self) -> IcebergQEDPolicy:
+        return self._required_value(self._qed_policy, "qed_policy")
 
 
 @dataclass(frozen=True)
@@ -204,7 +214,7 @@ class IcebergBuilder:
         default=_IcebergOptions(
             _n_blocks=None,
             _block_size=None,
-            qed_policy=IcebergQEDPolicy(),
+            _qed_policy=None,
             syndrome_during_measurement=False,
             state_factory_conf=RUSStateFactoryConf(
                 size=1,
@@ -232,7 +242,7 @@ class IcebergBuilder:
 
     def with_qed_policy(self, qed_policy: IcebergQEDPolicy) -> Self:
         """Set the QED policy."""
-        return replace(self, _options=replace(self._options, qed_policy=qed_policy))
+        return replace(self, _options=replace(self._options, _qed_policy=qed_policy))
 
     def with_state_factory_conf(self, conf: RUSStateFactoryConf) -> Self:
         """Set the configuration for the state factory producing Iceberg blocks."""
@@ -265,6 +275,12 @@ class IcebergBuilder:
             raise ValueError("Option `n_blocks` is required but not set!")
         if self._options._block_size is None:
             raise ValueError("Option `block_size` is required but not set!")
+        if self._options._qed_policy is None:
+            raise ValueError(
+                "Explicit configuration of the QED policy is required. Use "
+                "builder.with_qed_policy(IcebergQEDPolicy.disabled())"
+                "if you do not want to use QED."
+            )
 
     def build(self) -> IcebergInstance:
         """Build an `IcebergInstance`."""
@@ -294,10 +310,9 @@ class IcebergBuilder:
                 f"Unsupported params schema version: {params['schema_version']}"
             )
 
-        if (qed_policy_params := params.get("qed_policy")) is not None:
-            builder = builder.with_qed_policy(
-                IcebergQEDPolicy.from_json(qed_policy_params)
-            )
+        qed_policy_params = params["qed_policy"]
+        builder = builder.with_qed_policy(IcebergQEDPolicy.from_json(qed_policy_params))
+
         if (state_factory_params := params.get("state_factory")) is not None:
             builder = builder.with_state_factory_conf(
                 RUSStateFactoryConf.from_json(
