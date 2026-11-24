@@ -82,6 +82,42 @@ def test_adaptive_rz_encode(phase: float) -> None:
     assert results == [{"result": [0]}] * 20
 
 
+@pytest.mark.parametrize("phase", [0.7, -0.7])
+def test_adaptive_rz_encode_probabilities(phase: float) -> None:
+    @guppy
+    @no_type_check
+    def main() -> None:
+        for measure_y in comptime([False, True]):
+            q = qubit()
+            h(q)
+            rz(q, angle(comptime(phase / math.pi)))
+            if measure_y:
+                sdg(q)
+            h(q)
+            output("result", measure(q).read())
+
+    results = (
+        SteaneBuilder()
+        .with_adaptive_rz_conf(AdaptiveRzConf())
+        .build(n_blocks=1)
+        .emulator(main.with_minimal_opt().compile(), n_qubits=8)
+        .with_simulator(Quest())
+        .with_seed(7)
+        .with_shots(512)
+        .run()
+        .collated_shots()
+    )
+    for i, measure_y in enumerate([False, True]):
+        # Rz(phase)|+> has <X> = cos(phase) and <Y> = sin(phase).
+        expectation = math.sin(phase) if measure_y else math.cos(phase)
+        expected_minus = (1 - expectation) / 2
+        stderr = math.sqrt(expected_minus * (1 - expected_minus) / len(results))
+        observed_minus = sum(shot["result"][i] == 1 for shot in results) / len(results)
+        assert observed_minus == pytest.approx(
+            expected_minus, abs=6 * stderr + 1 / len(results)
+        )
+
+
 def test_adaptive_zz_inverse_encode() -> None:
     @guppy
     @no_type_check
@@ -171,15 +207,15 @@ def test_in_place_z_correction(error_qubit: int) -> None:
 def test_adaptive_rz_weight_three_inverse(phase: float) -> None:
     @guppy
     @no_type_check
-    def main() -> None:
+    def main(phase: float) -> None:
         blk = primitives.prep_zero_non_ft()
         primitives.h(blk)
-        adaptive_rz(blk, angle(comptime(phase / math.pi)), 1e-10, 100, 0.0, 0.5)
+        adaptive_rz(blk, angle(phase / float(pi)), 1e-10, 100, 0.0, 0.5)
 
         # Z_L * ZZZZIII = IIIIZZZ: undo the phase on qubits 4, 5, 6.
         cx(blk.data_qs[4], blk.data_qs[6])
         cx(blk.data_qs[5], blk.data_qs[6])
-        rz(blk.data_qs[6], angle(comptime(-phase / math.pi)))
+        rz(blk.data_qs[6], angle(-phase / float(pi)))
         cx(blk.data_qs[5], blk.data_qs[6])
         cx(blk.data_qs[4], blk.data_qs[6])
 
@@ -189,7 +225,11 @@ def test_adaptive_rz_weight_three_inverse(phase: float) -> None:
         output("logical", primitives.decode(primitives.measure_z(blk)))
 
     results = (
-        main.emulator(n_qubits=8).with_seed(7).with_shots(20).run().collated_shots()
+        main.emulator(n_qubits=8)
+        .with_seed(7)
+        .with_shots(20)
+        .run(phase=phase)
+        .collated_shots()
     )
     assert results == [{"syndromes": [[0, 0, 0]], "logical": [0]}] * 20
 
