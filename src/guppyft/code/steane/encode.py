@@ -206,7 +206,7 @@ class _SteaneOptions:
     zero_factory_conf: RUSStateFactoryConf
     magic_factory_conf: RUSStateFactoryConf
     qec_policy: QECPolicy
-    adaptive_rz_conf: AdaptiveRzConf | None
+    adaptive_rz_conf: AdaptiveRzConf | None = None
 
     @classmethod
     def _required_value[V](cls, v: V | None, name: str) -> V:
@@ -280,7 +280,6 @@ class SteaneBuilder:
             zero_factory_conf=RUSStateFactoryConf(1, 5),
             magic_factory_conf=RUSStateFactoryConf(1, 5),
             qec_policy=QECPolicy(),
-            adaptive_rz_conf=None,
         )
     )
 
