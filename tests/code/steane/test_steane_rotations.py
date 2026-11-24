@@ -11,6 +11,7 @@ from guppylang.std.builtins import comptime
 from guppylang.std.platform import output
 from guppylang.std.quantum import cx, h, measure, qubit, rz, sdg, z
 from selene_sim.backends.bundled_simulators import Quest
+from selene_sim.event_hooks.instruction_log import CircuitExtractor
 
 from guppyft.code.steane import logical, primitives
 from guppyft.code.steane.encode import AdaptiveRzConf, SteaneBuilder
@@ -63,11 +64,16 @@ def test_adaptive_rz_encode(phase: float) -> None:
         h(q)
         output("result", measure(q).read())
 
+    pkg = main.with_minimal_opt().compile()
+    assert (
+        sum(data.op.name() == "tket.quantum.Rz" for _, data in pkg.modules[0].nodes())
+        == 2
+    )
     results = (
         SteaneBuilder()
         .with_adaptive_rz_conf(AdaptiveRzConf())
         .build(n_blocks=1)
-        .emulator(main.compile(), n_qubits=8)
+        .emulator(pkg, n_qubits=8)
         .with_seed(7)
         .with_shots(20)
         .run()
@@ -376,3 +382,28 @@ def test_encoded_dephasing_budget_report(max_dephasing: float) -> None:
     if max_dephasing == 0.0:
         expected["adaptive_rz_dephasing_limit_hit"] = [1, 1]
     assert results == [expected] * 5
+
+
+@pytest.mark.parametrize("phase", [0.13, -0.31])
+def test_adaptive_rz_periodicity(phase: float) -> None:
+    @guppy
+    @no_type_check
+    def main(phase: float) -> None:
+        blk = primitives.prep_zero_non_ft()
+        primitives.h(blk)
+        adaptive_rz(blk, angle(phase / float(pi)), 1e-10, 100, 0.0, 0.5)
+        primitives.h(blk)
+        output("logical", primitives.decode(primitives.measure_z(blk)))
+
+    emulator = main.emulator(n_qubits=8).with_seed(7)
+    counts = []
+    results = []
+    for shifted_phase in [phase, 40 * math.pi + phase, -40 * math.pi + phase]:
+        logger = CircuitExtractor()
+        results.append(
+            emulator.with_event_hook(logger).run(phase=shifted_phase).collated_shots()
+        )
+        counts.append(len(logger.shots[0].get_user_circuit().get_commands()))
+    assert results[0] == results[1] == results[2]
+    # Wrapping may leave up to four S gates, each applied to seven qubits.
+    assert max(counts) - min(counts) <= 28

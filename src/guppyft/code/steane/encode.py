@@ -72,9 +72,12 @@ from .primitives import RawMeasurement
 class AdaptiveRzConf:
     """Settings for adaptive Steane rotations.
 
+    Dephasing settings configure the controller's noise model; they do not add
+    simulator noise.
+
     Attributes:
         tolerance: Allowed residual angle in radians.
-        max_rounds: Maximum rounds before stopping execution with an exit.
+        max_rounds: Maximum rounds before stopping execution with an error.
         dephasing: Physical Z-error probability per physical qubit per round.
         max_dephasing: Logical dephasing budget for each call.
         abort_on_dephasing: If False, continue after exceeding the budget and
@@ -867,7 +870,10 @@ class SteaneBuilder:
         )
 
     def with_adaptive_rz_conf(self, conf: AdaptiveRzConf | None) -> Self:
-        """Enable adaptive Steane rotations to synthesize ordinary Guppy Rz gates."""
+        """Enable adaptive Steane rotations to synthesize ordinary Guppy Rz gates.
+
+        Pass `None` to disable automatic Rz encoding.
+        """
         return replace(self, _options=replace(self._options, adaptive_rz_conf=conf))
 
     def with_qec_policy(self, qec_policy: QECPolicy) -> Self:

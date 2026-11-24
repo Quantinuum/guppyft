@@ -730,7 +730,7 @@ def _adaptive_rz(
     if float(phase) - float(phase) != 0.0:
         panic("Adaptive Rz requires a finite angle")
     remaining = float(phase)
-    remaining -= -2.0 * float(pi) * float(floor(float(phase) / (2.0 * float(pi))))
+    remaining -= 2.0 * float(pi) * float(floor(float(phase) / (2.0 * float(pi))))
     total_dephasing = 0.0
     dephasing_limit_hit = False
     rounds = 0
