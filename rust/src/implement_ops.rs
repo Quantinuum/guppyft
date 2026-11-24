@@ -5,10 +5,10 @@
 use anyhow::Context;
 use hugr::{
     Hugr, HugrView, Node, Wire,
-    builder::{BuildError, Container, DFGBuilder, Dataflow, HugrBuilder, ModuleBuilder},
+    builder::{BuildError, Container, DFGBuilder, Dataflow},
     extension::{ExtensionId, SignatureError},
     hugr::{ValidationError, hugrmut::HugrMut},
-    ops::{Call, DataflowOpTrait, ExtensionOp, OpName, OpType, handle::NodeHandle},
+    ops::{Call, DataflowOpTrait, ExtensionOp, OpName, OpType},
     types::{PolyFuncType, Type, TypeRow},
 };
 use hugr_core::hugr::internal::HugrMutInternals;
@@ -49,7 +49,7 @@ pub enum ImplementOpsPassError {
 
 pub type OpId = (String, String);
 pub type TypeId = (String, String);
-pub type OpReplacements = BTreeMap<OpId, (Option<Hugr>, String)>;
+pub type OpReplacements = BTreeMap<OpId, (Hugr, String)>;
 
 #[derive(Debug, Clone, Default)]
 pub struct ImplementOpsPass {
@@ -150,7 +150,7 @@ impl ImplementOpsPass {
             }
         }
 
-        let op_funcs: Vec<(ExtensionOp, Option<Hugr>, &str)> = hugr
+        let op_funcs: Vec<(ExtensionOp, Hugr, &str)> = hugr
             .nodes()
             .filter_map(|n| hugr.get_optype(n).as_extension_op())
             .unique_by(|&op| OpHashWrapper::from(op))
@@ -171,13 +171,6 @@ impl ImplementOpsPass {
             .try_fold(
                 HashMap::new(),
                 |mut map, (ext_op, func_hugr, func_name)| -> anyhow::Result<_> {
-                    let func_hugr =
-                        func_hugr
-                            .as_ref()
-                            .ok_or(ImplementOpsPassError::MissingFunctionHugr {
-                                name: func_name.to_string(),
-                            })?;
-
                     let src_sig = ext_op.signature();
                     let tgt_node = extract_func_node(func_hugr, func_name).ok_or(
                         ImplementOpsPassError::MissingFunctionHugr {
@@ -464,7 +457,7 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
     pub fn register_replacement(
         &mut self,
         ext_op: &ExtensionOp,
-        func_hugr_opt: Option<Hugr>,
+        func_hugr: Hugr,
         func_name: &str,
     ) -> anyhow::Result<()> {
         let op_hash = OpHashWrapper::from(ext_op);
@@ -483,15 +476,8 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
             Vec::new()
         };
 
-        // Extract function if given, otherwise generate a declaration with the expected signature.
-        let (func_hugr, func_node) = if let Some(hugr) = func_hugr_opt {
-            let node = self.get_func_node(ext_op.qualified_id(), expected_sig, &hugr, func_name)?;
-            (hugr, node)
-        } else {
-            let mut module_builder = ModuleBuilder::new();
-            let decl = module_builder.declare(func_name, expected_sig)?;
-            (module_builder.finish_hugr()?, decl.node())
-        };
+        let func_node =
+            self.get_func_node(ext_op.qualified_id(), expected_sig, &func_hugr, func_name)?;
 
         // Register call for later replacement
         let call_type: OpType = Call::try_new((*ext_op.signature()).clone().into(), [])?.into();
@@ -610,9 +596,13 @@ impl<'a, H: HugrMut<Node = Node>> OpReplacer<'a, H> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use hugr::builder::{Container, Dataflow, DataflowSubContainer, FunctionBuilder};
+    use hugr::builder::{
+        Container, Dataflow, DataflowSubContainer, FunctionBuilder, ModuleBuilder,
+    };
     use hugr::extension::prelude::{qb_t, usize_t};
     use hugr::types::{Signature, type_param::TypeParam};
+    use hugr_core::builder::HugrBuilder;
+    use hugr_core::ops::handle::NodeHandle;
 
     fn replacement_hugr(
         signature: PolyFuncType,
@@ -705,7 +695,7 @@ mod tests {
             ImplementOpsPass::new(
                 BTreeMap::from([(
                     ("test".to_string(), "rotate".to_string()),
-                    (Some(replacement), "impl".to_string()),
+                    (replacement, "impl".to_string()),
                 )]),
                 replaceable_types,
                 HashSet::from([extension.name().clone()]),

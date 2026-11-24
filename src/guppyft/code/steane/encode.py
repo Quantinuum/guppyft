@@ -10,7 +10,6 @@ from guppylang import guppy
 from guppylang.decorator import custom_guppy_decorator
 from guppylang.defs import GuppyFunctionDefinition
 from guppylang.library import GuppyLibrary, link_name
-from guppylang.std.angles import angle
 from guppylang.std.array import empty_array
 from guppylang.std.builtins import array, comptime, owned
 from guppylang.std.collections import Stack, empty_queue
@@ -24,9 +23,6 @@ from hugr.utils import JsonType
 from tket_exts import rotation
 
 from guppyft._util import PathDict
-from guppyft.code.steane.primitives import (
-    _adaptive_rz as adaptive_rz_controller,
-)
 from guppyft.code.steane.primitives import (
     cx,
     cz,
@@ -66,35 +62,6 @@ from guppyft.std.state_factory import StateFactory
 
 from . import logical as steane_logical
 from .primitives import RawMeasurement
-
-
-@dataclass(frozen=True)
-class AdaptiveRzConf:
-    """Settings for adaptive Steane rotations.
-
-    Dephasing settings configure the controller's noise model; they do not add
-    simulator noise.
-
-    Attributes:
-        tolerance: Allowed residual angle in radians.
-        max_rounds: Maximum rounds before stopping execution with an error.
-        dephasing: Physical Z-error probability per physical qubit per round.
-        max_dephasing: Logical dephasing budget for each call.
-        abort_on_dephasing: If False, continue after exceeding the budget and
-            emit ``adaptive_rz_dephasing_limit_hit=True`` once per affected call.
-            The round limit still stops execution with an error.
-    """
-
-    tolerance: float = 1e-10
-    max_rounds: int = 100
-    dephasing: float = 0.0
-    max_dephasing: float = 0.5
-    abort_on_dephasing: bool = True
-
-    def to_json(self) -> JsonType:
-        """Serialise the adaptive Rz config to JSON."""
-        return asdict(self)
-
 
 _SCHEMA_VERSION = 1
 
@@ -170,7 +137,6 @@ class QECPolicy:
         inject_tdg: float = 0.0
         cx: float = 0.0
         cz: float = 0.0
-        rz: float = 0.0
 
         def __setattr__(self, key: str, value: float) -> None:
             """Set a non-negative cost for a known logical operation."""
@@ -202,10 +168,22 @@ class QECPolicy:
 
 @dataclass(frozen=True, kw_only=True)
 class _SteaneOptions:
+    _n_blocks: int | None
     zero_factory_conf: RUSStateFactoryConf
     magic_factory_conf: RUSStateFactoryConf
     qec_policy: QECPolicy
-    adaptive_rz_conf: AdaptiveRzConf | None
+
+    @classmethod
+    def _required_value[V](cls, v: V | None, name: str) -> V:
+        if v is None:
+            raise ValueError(
+                f"{name} is not set (should have been validated upon build)!"
+            )
+        return v
+
+    @property
+    def n_blocks(self) -> int:
+        return self._required_value(self._n_blocks, "n_blocks")
 
 
 @dataclass(frozen=True)
@@ -213,27 +191,21 @@ class SteaneInstance(AnnotatingArchitectureInstance, EncodingArchitectureInstanc
     """A Steane architecture instance built by `SteaneBuilder.build`."""
 
     _spec: EncodeSpec = field(compare=False)
-    _n_blocks: int
-
     _options: _SteaneOptions
 
     def annotate(self, hugr: Package | Hugr[Any]) -> None:
         """Annotate the current parameters of the Steane code architecture on the given
         HUGR in metadata. See `guppyft.encode.annotate` for more information."""
-        params: dict[str, JsonType] = {
-            "schema_version": _SCHEMA_VERSION,
-            "n_blocks": self._n_blocks,
-            "zero_factory": self._options.zero_factory_conf.to_json(),
-            "magic_factory": self._options.magic_factory_conf.to_json(),
-            "qec_policy": self._options.qec_policy.to_json(),
-        }
-        if self._options.adaptive_rz_conf is not None:
-            params["adaptive_rz_conf"] = self._options.adaptive_rz_conf.to_json()
-
         annotate_encoding(
             hugr,
             "steane",
-            params,
+            {
+                "schema_version": _SCHEMA_VERSION,
+                "n_blocks": self._options.n_blocks,
+                "zero_factory": self._options.zero_factory_conf.to_json(),
+                "magic_factory": self._options.magic_factory_conf.to_json(),
+                "qec_policy": self._options.qec_policy.to_json(),
+            },
         )
 
     def _encode(self, pkg: Package, *, as_bytes: bool) -> Package | bytes:
@@ -269,19 +241,18 @@ class SteaneBuilder:
 
     _options: _SteaneOptions = field(
         default_factory=lambda: _SteaneOptions(
+            _n_blocks=None,
             zero_factory_conf=RUSStateFactoryConf(1, 5),
             magic_factory_conf=RUSStateFactoryConf(1, 5),
             qec_policy=QECPolicy(),
-            adaptive_rz_conf=None,
         )
     )
 
-    def _gen_implement_spec(self, n_blocks: int) -> ImplementOpsSpec:
+    def _gen_implement_spec(self) -> ImplementOpsSpec:
         """Generate the `ImplementOpsSpec` providing Steane implementations of
         logical ops for a program using `n_blocks` logical blocks."""
+        n_blocks = self._options.n_blocks
         qec_policy = self._options.qec_policy
-        # Explicit logical Rz calls remain available with default controller settings.
-        rz_conf = self._options.adaptive_rz_conf or AdaptiveRzConf()
 
         lib = GuppyLibrary(members=[])
         ops = OpReplacements()
@@ -641,30 +612,6 @@ class SteaneBuilder:
 
             return map_global(_impl, q)
 
-        @_register_op_replacement(steane_ops.rz_def)
-        @no_type_check
-        def _adaptive_rz(q: tuple[int, int], phase: angle) -> tuple[tuple[int, int]]:
-            @guppy
-            def _impl(
-                state: STATE @ owned, q: tuple[int, int], phase: angle
-            ) -> tuple[STATE, tuple[int, int]]:
-                blk_id, _ = q
-                blk = state.blocks.take(blk_id)
-                adaptive_rz_controller(
-                    blk,
-                    phase,
-                    comptime(rz_conf.tolerance),
-                    comptime(rz_conf.max_rounds),
-                    comptime(rz_conf.dephasing),
-                    comptime(rz_conf.max_dephasing),
-                    comptime(rz_conf.abort_on_dephasing),
-                )
-                state.blocks.put(blk, blk_id)
-                state.qec_policy(array(blk_id), comptime(qec_policy.costs.rz))
-                return state, q
-
-            return map_global(_impl, q, phase)
-
         @_register_op_replacement(steane_ops.inject_t_def)
         @no_type_check
         def _inject_t(q: tuple[int, int], a: tuple[int, int]) -> tuple[tuple[int, int]]:
@@ -797,6 +744,8 @@ class SteaneBuilder:
 
             return wrapper  # type: ignore[no-any-return]
 
+        compiled_lib = lib.compile()
+        ops.gen_missing_decls_from_lib(compiled_lib)
         ops.register_for_elimination_check(steane_ops().name)
         tys = TyReplacements().with_types(
             [
@@ -806,17 +755,13 @@ class SteaneBuilder:
         )
 
         return ImplementOpsSpec(
-            ops=ops,
-            tys=tys,
-            build_wrapper=build_wrapper,
-            libs=[lib.compile()],
-            adapt_rotation_inputs=True,
+            ops=ops, tys=tys, build_wrapper=build_wrapper, libs=[compiled_lib]
         )
 
-    def _gen_encoder_spec(self, n_blocks: int) -> EncodeSpec:
+    def _gen_encoder_spec(self) -> EncodeSpec:
         """Generate the full `EncoderSpec` (logical encoding + op implementations)
         for a program using `n_blocks` logical blocks."""
-        impl_spec = self._gen_implement_spec(n_blocks)
+        impl_spec = self._gen_implement_spec()
 
         ext = ExtensionRegistry.from_extensions(
             [steane_ops(), steane_types(), std_ops(), std_types(), rotation()]
@@ -858,23 +803,18 @@ class SteaneBuilder:
             extensions=ext,
         )
 
-        if self._options.adaptive_rz_conf is not None:
-            logical_compiler.op_replacements["tket.quantum", "Rz"] = (
-                "guppyft.steane.ops",
-                "rz",
-                [],
-            )
-
         return EncodeSpec(
             compile=logical_compiler, implement_ops=ImplementOps.for_spec(impl_spec)
         )
 
-    def with_adaptive_rz_conf(self, conf: AdaptiveRzConf | None) -> Self:
-        """Enable adaptive Steane rotations to synthesize ordinary Guppy Rz gates.
-
-        Pass `None` to disable automatic Rz encoding.
-        """
-        return replace(self, _options=replace(self._options, adaptive_rz_conf=conf))
+    def with_n_blocks(self, n_blocks: int) -> Self:
+        """Limit the number of logical blocks the architecture can use across program
+        blocks, factory candidates and QEC resource blocks."""
+        if n_blocks < 0:
+            raise ValueError(
+                f"Cannot set the number of blocks lower than 0, {n_blocks} given"
+            )
+        return replace(self, _options=replace(self._options, _n_blocks=n_blocks))
 
     def with_qec_policy(self, qec_policy: QECPolicy) -> Self:
         """Set the QEC policy."""
@@ -888,21 +828,35 @@ class SteaneBuilder:
         """Set the magic state factory configuration."""
         return replace(self, _options=replace(self._options, magic_factory_conf=conf))
 
-    def build(self, n_blocks: int) -> SteaneInstance:
-        """Build a `SteaneInstance` limited to `n_blocks` across program blocks,
-        factory candidates and QEC resource blocks."""
-        encoder_spec = self._gen_encoder_spec(n_blocks)
-        return SteaneInstance(
-            _spec=encoder_spec, _n_blocks=n_blocks, _options=deepcopy(self._options)
-        )
+    def _ensure_required_options_set(self) -> None:
+        # TODO move validation into options class
+        if self._options._n_blocks is None:
+            raise ValueError("Option `n_blocks` is required but not set!")
+
+    def build(self) -> SteaneInstance:
+        """Build a `SteaneInstance`."""
+        self._ensure_required_options_set()
+        encoder_spec = self._gen_encoder_spec()
+        return SteaneInstance(_spec=encoder_spec, _options=deepcopy(self._options))
+
+    @classmethod
+    def new(cls, *, n_blocks: int) -> Self:
+        """Create a new builder with some initial options. Note that the builder
+        configuration is not guaranteed to be complete yet."""
+        return cls().with_n_blocks(n_blocks)
 
     @classmethod
     def instance_from_params(cls, params: dict[str, Any]) -> "SteaneInstance":
         """Produces an instance with the builder according to the given parameters. To
         be used as the 'inverse' of `SteaneInstance.annotate`."""
+        return cls.from_params(params).build()
+
+    @classmethod
+    def from_params(cls, params: dict[str, Any]) -> Self:
+        """Produces a builder according to the given parameters."""
         params = PathDict(params)
 
-        builder = cls()
+        builder = cls.new(n_blocks=params["n_blocks"])
         if params["schema_version"] != _SCHEMA_VERSION:
             raise RuntimeError(
                 f"Unsupported params schema version: {params['schema_version']}"
@@ -924,9 +878,5 @@ class SteaneBuilder:
             )
         if (qec_policy_params := params.get("qec_policy")) is not None:
             builder = builder.with_qec_policy(QECPolicy.from_json(qec_policy_params))
-        if (adaptive_rz_params := params.get("adaptive_rz_conf")) is not None:
-            builder = builder.with_adaptive_rz_conf(
-                AdaptiveRzConf(**adaptive_rz_params)
-            )
 
-        return builder.build(n_blocks=params["n_blocks"])
+        return builder

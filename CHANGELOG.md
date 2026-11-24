@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.7.0](https://github.com/Quantinuum/guppyft/compare/v0.6.3...v0.7.0) (2026-11-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* Require configuration of the QED policy in the Iceberg builder ([#551](https://github.com/Quantinuum/guppyft/issues/551))
+* Require all builder options to be set prior to building instances ([#564](https://github.com/Quantinuum/guppyft/issues/564))
+* Require generating declarations from ops explicitly ([#560](https://github.com/Quantinuum/guppyft/issues/560))
+
+### Features
+
+* Accept libraries for op implementation serialised as bytes ([#561](https://github.com/Quantinuum/guppyft/issues/561)) ([03222f3](https://github.com/Quantinuum/guppyft/commit/03222f3e00c0d75a863dab424635a132a891140a))
+
+
+### Code Refactoring
+
+* Require all builder options to be set prior to building instances ([#564](https://github.com/Quantinuum/guppyft/issues/564)) ([a1bbabe](https://github.com/Quantinuum/guppyft/commit/a1bbabedda6087e2362576f3564fdb1c967e3da0))
+* Require configuration of the QED policy in the Iceberg builder ([#551](https://github.com/Quantinuum/guppyft/issues/551)) ([9bf187b](https://github.com/Quantinuum/guppyft/commit/9bf187b03212d1972e7827a549287518d20fb07b))
+* Require generating declarations from ops explicitly ([#560](https://github.com/Quantinuum/guppyft/issues/560)) ([60036aa](https://github.com/Quantinuum/guppyft/commit/60036aaf66387b6f607322fde1cdaf59a06dc35a))
+
+## [0.6.3](https://github.com/Quantinuum/guppyft/compare/v0.6.2...v0.6.3) (2026-11-16)
+
+
+### Features
+
+* Dynamically change `StateFactory` size based on available blocks ([#533](https://github.com/Quantinuum/guppyft/issues/533)) ([15ee3bb](https://github.com/Quantinuum/guppyft/commit/15ee3bb3df94f8c2fb2ebc82d6178ec0123c50a1))
+* Insert `to_halfturns` ops for rotation types in `implement_ops` pass ([#510](https://github.com/Quantinuum/guppyft/issues/510)) ([aa804d3](https://github.com/Quantinuum/guppyft/commit/aa804d3a410a8f2468bad7f1d124c31cbed2e161))
+
+
+### Performance Improvements
+
+* Cache extensions loaded from json ([#543](https://github.com/Quantinuum/guppyft/issues/543)) ([dfb95d4](https://github.com/Quantinuum/guppyft/commit/dfb95d4b443e1c677d1fbfc539a255327178863d))
+
 ## [0.6.2](https://github.com/Quantinuum/guppyft/compare/v0.6.1...v0.6.2) (2026-11-11)
 
 
