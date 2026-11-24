@@ -11,6 +11,8 @@ from hugr.ops import Module
 from hugr.package import Package
 from tket.passes import Normalize
 
+from guppyft._trace import tracing
+
 from ._compile import LogicalCompiler, ReplacementCompiler, UncompilableError
 from ._implement_ops import (
     ImplementOps,
@@ -173,7 +175,11 @@ def encode(
         The encoded runnable package, or its serialized representation when `as_bytes`
         is `True`.
     """
-    pkg = hugr.compile_function() if isinstance(hugr, GuppyFunctionDefinition) else hugr
+    if isinstance(hugr, GuppyFunctionDefinition):
+        with tracing("compile_function"):
+            pkg = hugr.compile_function()
+    else:
+        pkg = hugr
 
     assert len(pkg.modules) == 1, "Given package contains more than one module"
     assert not isinstance(pkg.modules[0].entrypoint_op(), Module), (
@@ -184,20 +190,24 @@ def encode(
     pkg = Package(modules=list(pkg.modules), extensions=list(pkg.extensions))
 
     # 1. Passes with computational -> computational
-    for tket_pass in passes or [Normalize()]:
-        pkg.modules[0] = tket_pass(pkg.modules[0], inplace=False)
+    with tracing("computational_passes"):
+        for tket_pass in passes or [Normalize()]:
+            pkg.modules[0] = tket_pass(pkg.modules[0], inplace=False)
 
     # 2. Lower computational -> logical
-    if spec.compile is not None:
-        pkg = spec.compile(pkg)
+    with tracing("logical_compilation"):
+        if spec.compile is not None:
+            pkg = spec.compile(pkg)
 
     # 3. Passes with logical -> logical
-    for tket_pass in spec.logical_passes or []:
-        pkg.modules[0] = tket_pass(pkg.modules[0], inplace=False)
+    with tracing("logical_passes"):
+        for tket_pass in spec.logical_passes or []:
+            pkg.modules[0] = tket_pass(pkg.modules[0], inplace=False)
 
     # 4. Lower logical -> physical
     if spec.implement_ops is not None:
-        pkg_maybe_bytes = spec.implement_ops(pkg, as_bytes=as_bytes)
+        with tracing("implement_ops"):
+            pkg_maybe_bytes = spec.implement_ops(pkg, as_bytes=as_bytes)
     else:
         pkg_maybe_bytes = pkg
 

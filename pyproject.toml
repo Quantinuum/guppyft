@@ -33,6 +33,7 @@ dependencies = [
     "tket-exts>=0.14.0",
     "zixy~=0.4.0",
     "selene-sim>=0.3.0,!=0.3.5",
+    "opentelemetry-api>=1.45.2",
 ]
 
 [project.urls]
