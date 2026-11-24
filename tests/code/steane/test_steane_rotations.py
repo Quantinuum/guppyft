@@ -70,9 +70,9 @@ def test_adaptive_rz_encode(phase: float) -> None:
         == 2
     )
     results = (
-        SteaneBuilder()
+        SteaneBuilder.new(n_blocks=1)
         .with_adaptive_rz_conf(AdaptiveRzConf())
-        .build(n_blocks=1)
+        .build()
         .emulator(pkg, n_qubits=8)
         .with_seed(7)
         .with_shots(20)
@@ -97,9 +97,9 @@ def test_adaptive_rz_encode_probabilities(phase: float) -> None:
             output("result", measure(q).read())
 
     results = (
-        SteaneBuilder()
+        SteaneBuilder.new(n_blocks=1)
         .with_adaptive_rz_conf(AdaptiveRzConf())
-        .build(n_blocks=1)
+        .build()
         .emulator(main.with_minimal_opt().compile(), n_qubits=8)
         .with_simulator(Quest())
         .with_seed(7)
@@ -147,9 +147,9 @@ def test_adaptive_zz_inverse_encode() -> None:
         == 2
     )
     results = (
-        SteaneBuilder()
+        SteaneBuilder.new(n_blocks=2)
         .with_adaptive_rz_conf(AdaptiveRzConf())
-        .build(n_blocks=2)
+        .build()
         .emulator(pkg, n_qubits=16)
         .with_simulator(Quest())
         .with_seed(7)
@@ -171,11 +171,11 @@ def test_round_limit(abort_on_dephasing: bool) -> None:
         output("result", measure(q).read())
 
     emulator = (
-        SteaneBuilder()
+        SteaneBuilder.new(n_blocks=1)
         .with_adaptive_rz_conf(
             AdaptiveRzConf(max_rounds=1, abort_on_dephasing=abort_on_dephasing)
         )
-        .build(n_blocks=1)
+        .build()
         .emulator(main.compile(), n_qubits=8)
         .with_seed(7)
         .with_shots(40)
@@ -245,7 +245,7 @@ def test_explicit_adaptive_rz() -> None:
         output("logical", q.measure_z().decode())
 
     # Explicit adaptive_rz should work with the default builder too.
-    pkg = SteaneBuilder().build(n_blocks=1).implement_ops(main.compile())
+    pkg = SteaneBuilder.new(n_blocks=1).build().implement_ops(main.compile())
     results = (
         EmulatorBuilder()
         .build(pkg, n_qubits=8)
@@ -380,9 +380,9 @@ def test_encoded_dephasing_budget() -> None:
         qlib.discard(q)
 
     emulator = (
-        SteaneBuilder()
+        SteaneBuilder.new(n_blocks=1)
         .with_adaptive_rz_conf(AdaptiveRzConf(dephasing=0.02, max_dephasing=0.0))
-        .build(n_blocks=1)
+        .build()
         .emulator(main.compile(), n_qubits=8)
     )
     with pytest.raises(EmulatorError, match="Adaptive Rz exceeded max_dephasing"):
@@ -403,7 +403,7 @@ def test_encoded_dephasing_budget_report(max_dephasing: float) -> None:
         output("completed", True)
 
     results = (
-        SteaneBuilder()
+        SteaneBuilder.new(n_blocks=1)
         .with_adaptive_rz_conf(
             AdaptiveRzConf(
                 dephasing=0.02,
@@ -411,7 +411,7 @@ def test_encoded_dephasing_budget_report(max_dephasing: float) -> None:
                 abort_on_dephasing=False,
             )
         )
-        .build(n_blocks=1)
+        .build()
         .emulator(main.with_minimal_opt().compile(), n_qubits=8)
         .with_seed(7)
         .with_shots(5)
