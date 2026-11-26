@@ -93,8 +93,9 @@ class CudaQDecoder:
         """
 
 
-# TODO: Replace these helpers with `array.to_nat()` and `array_from_nat` when
-# released in Guppy. See https://github.com/Quantinuum/guppylang/pull/2485.
+# TODO: Consider replacing these helpers with `array.to_nat()` and `array_from_nat`
+# when released in Guppy (see https://github.com/Quantinuum/guppylang/pull/2485).
+# Changes should be tested with the real decoding device.
 @guppy
 def pack_int[N: nat](data: array[bool, N]) -> int:
     """Pack at most 64 bits, most significant bit first."""
