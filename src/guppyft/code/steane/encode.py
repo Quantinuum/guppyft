@@ -12,7 +12,7 @@ from guppylang.defs import GuppyFunctionDefinition
 from guppylang.library import GuppyLibrary, link_name
 from guppylang.std.array import empty_array
 from guppylang.std.builtins import array, comptime, owned
-from guppylang.std.collections import Stack, empty_queue
+from guppylang.std.collections import Stack
 from guppylang.std.option import some
 from guppylang.std.platform import panic
 from hugr import Hugr
@@ -706,16 +706,13 @@ class SteaneBuilder:
                 # Data blocks count
                 0,
                 # Zero state factory
-                StateFactory(
-                    prep_zero_ft,
-                    comptime(self._options.zero_factory_conf.max_attempts),
-                    empty_queue(),
+                StateFactory.new(
+                    prep_zero_ft, comptime(self._options.zero_factory_conf.max_attempts)
                 ),
                 # Magic state factory
-                StateFactory(
+                StateFactory.new(
                     prep_t_state_ft,
                     comptime(self._options.magic_factory_conf.max_attempts),
-                    empty_queue(),
                 ),
             )
 
