@@ -1,6 +1,27 @@
-import pytest
+from typing import no_type_check
 
-from guppyft._util import PathDict
+import pytest
+from guppylang import guppy
+from guppylang.library import link_name
+
+from guppyft._util import PathDict, get_link_name
+
+
+def test_link_name() -> None:
+    @guppy
+    @no_type_check
+    @link_name("custom.link.name")
+    def func() -> None:
+        return func_decl()
+
+    @guppy.declare
+    @no_type_check
+    @link_name("custom.link.name.for.decl")
+    def func_decl() -> None: ...
+
+    _ = func.compile_function()
+    assert get_link_name(func) == "custom.link.name"
+    assert get_link_name(func_decl) == "custom.link.name.for.decl"
 
 
 def test_pathdict_simple() -> None:

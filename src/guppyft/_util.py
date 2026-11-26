@@ -1,7 +1,7 @@
 from typing import Any, overload
 
 from guppylang.defs import GuppyFunctionDefinition
-from guppylang_internals.definition.declaration import CheckedFunctionDecl
+from guppylang_internals.definition.declaration import ParsedFunctionDecl
 from guppylang_internals.definition.function import ParsedFunctionDef
 from guppylang_internals.engine import ENGINE
 from hugr.ext import ExtensionRegistry
@@ -12,10 +12,13 @@ from hugr.ext import ExtensionRegistry
 def get_link_name(func: GuppyFunctionDefinition[Any, Any]) -> str:
     """Extracts the link name from a function, if possible (i.e. if the function is a
     definition or a declaration)."""
-    match ENGINE.get_parsed(func.id):
+    parsed = ENGINE.parsed.get(func.id)
+    if parsed is None:
+        raise ValueError(f"Function with ID {func.id} has not been compiled yet!")
+    match parsed:
         case ParsedFunctionDef(link_name=name):
             return name
-        case CheckedFunctionDecl(link_name=name):
+        case ParsedFunctionDecl(link_name=name):
             return name
         case _:
             raise ValueError(f"Unknown link name for function with ID {func.id}")
