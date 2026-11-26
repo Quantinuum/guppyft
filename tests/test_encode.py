@@ -59,6 +59,10 @@ def test_encode_traces(monkeypatch: pytest.MonkeyPatch, as_bytes: bool) -> None:
     finally:
         provider.shutdown()
 
+    for span in spans:
+        assert span.instrumentation_scope is not None
+        assert span.instrumentation_scope.name == "guppyft"
+
     implementation: TraceStructure = [
         ("serialise_user_pkg", []),
         ("implement", []),
