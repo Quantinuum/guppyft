@@ -60,6 +60,18 @@ myst_heading_anchors = 2
 autosummary_ignore_module_all = False  # Respect __all__ if specified
 
 
+# Skip private members marked with :meta private: in the docstring
+def skip_private(app, what, name, obj, skip, options):  # type: ignore[no-untyped-def]
+    docstring = getattr(obj, "__doc__", None) or ""
+    if any(line.strip() == ":meta private:" for line in docstring.splitlines()):
+        return True
+    return None
+
+
+def setup(app):  # type: ignore[no-untyped-def]
+    app.connect("autodoc-skip-member", skip_private)
+
+
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "hugr": ("https://quantinuum.github.io/hugr/", None),
