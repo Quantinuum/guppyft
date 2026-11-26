@@ -37,7 +37,8 @@ def teleport() -> None:
 
 
 # Use Steane architecture to encode the program
-steane = SteaneBuilder().build(n_blocks=3)
+
+steane = SteaneBuilder.new(n_blocks=3).build()
 teleport_encoded = steane.encode(teleport.compile())
 ```
 
