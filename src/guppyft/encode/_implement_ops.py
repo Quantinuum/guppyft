@@ -63,7 +63,8 @@ class OpReplacements:
         op: tuple[str, str] | OpDef,
         func: GuppyFunctionDefinition[Any, Any],
     ) -> Self:
-        return self._insert_for_op(op, (func, get_link_name(func)))
+        [func_module] = func.compile_function().modules
+        return self._insert_for_op(op, (func_module, get_link_name(func)))
 
     def with_funcs(
         self, funcs: dict[tuple[str, str], GuppyFunctionDefinition[Any, Any]]
