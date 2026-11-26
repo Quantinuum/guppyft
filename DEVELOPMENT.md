@@ -87,3 +87,14 @@ just build-docs --clean
 ```
 
 The built docs can be found in `docs/build/`.
+You can serve the HTML pages locally on a Python web server using:
+
+```bash
+just serve-docs
+```
+
+You can use the following to test all code snippets in the docstrings:
+
+```bash
+just test-docs
+```
