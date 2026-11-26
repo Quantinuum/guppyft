@@ -70,3 +70,20 @@ To run only the Rust or Python tests, use:
 just test-rust
 just test-python
 ```
+
+## 📜 Generating docs
+
+You can generate the docs locally by running:
+
+```bash
+just build-docs
+```
+
+This takes a bit to generate the docs from notebooks. It automatically caches
+so that the next time completes faster. If you wish build docs from scratch use:
+
+```bash
+just build-docs --clean
+```
+
+The built docs can be found in `docs/build/`.
