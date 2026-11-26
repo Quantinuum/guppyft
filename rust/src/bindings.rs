@@ -90,7 +90,7 @@ mod _bindings {
     #[pyo3(signature = (rs_hugr, op_replacements, replaceable_types, check_eliminated, *, adapt_rotation_inputs=false))]
     fn _implement_ops(
         rs_hugr: &mut RsHugr,
-        op_replacements: BTreeMap<implement_ops::OpId, (Option<RsHugr>, String)>,
+        op_replacements: BTreeMap<implement_ops::OpId, (RsHugr, String)>,
         replaceable_types: HashSet<implement_ops::TypeId>,
         check_eliminated: Vec<String>,
         adapt_rotation_inputs: bool,
@@ -99,7 +99,7 @@ mod _bindings {
 
         let new_ops = op_replacements
             .into_iter()
-            .map(|(k, (rs_hugr, func_name))| (k, (rs_hugr.map(|x| x.hugr), func_name)))
+            .map(|(k, (rs_hugr, func_name))| (k, (rs_hugr.hugr, func_name)))
             .collect();
 
         let ty_hashset = replaceable_types

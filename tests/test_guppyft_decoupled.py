@@ -53,7 +53,12 @@ def test_use_emulator() -> None:
         def f() -> None:
             pass
 
-        _ = SteaneBuilder().build(n_blocks=1).emulator(f.compile(), n_qubits=1).run()
+        _ = (
+            SteaneBuilder.new(n_blocks=1)
+            .build()
+            .emulator(f.compile(), n_qubits=1)
+            .run()
+        )
 
 
 @pytest.mark.forked
@@ -70,4 +75,4 @@ def test_guppyft_decoupled_from_selene() -> None:
         def f() -> None:
             pass
 
-        _ = SteaneBuilder().build(n_blocks=1).encode(f.compile())
+        _ = SteaneBuilder.new(n_blocks=1).build().encode(f.compile())

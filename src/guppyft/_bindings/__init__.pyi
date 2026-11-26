@@ -23,7 +23,7 @@ class RsHugr:
 
 def _implement_ops(
     rs_hugr: RsHugr,
-    op_replacements: dict[tuple[str, str], tuple[RsHugr | None, str]],
+    op_replacements: dict[tuple[str, str], tuple[RsHugr, str]],
     replaceable_types: set[tuple[str, str]],
     check_eliminated: list[str],
     *,
@@ -32,9 +32,8 @@ def _implement_ops(
     """
     Replace extension ops in `rs_hugr` to calls to the provided implementations.
 
-    `op_replacements` maps each `(extension_name, op_name)` pair to either a
-    compiled implementation HUGR or `None` if only a declaration should be
-    generated, together with the function name to use.
+    `op_replacements` maps each `(extension_name, op_name)` pair to a compiled
+    implementation HUGR.
     `replaceable_types` is a set of extension types that should be replaced by
     the corresponding types in the implementation HUGRs.
     `check_eliminated` is a list of extensions to check have been fully eliminated after

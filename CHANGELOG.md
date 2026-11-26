@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.7.0](https://github.com/Quantinuum/guppyft/compare/v0.6.3...v0.7.0) (2026-11-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* Require configuration of the QED policy in the Iceberg builder ([#551](https://github.com/Quantinuum/guppyft/issues/551))
+* Require all builder options to be set prior to building instances ([#564](https://github.com/Quantinuum/guppyft/issues/564))
+* Require generating declarations from ops explicitly ([#560](https://github.com/Quantinuum/guppyft/issues/560))
+
+### Features
+
+* Accept libraries for op implementation serialised as bytes ([#561](https://github.com/Quantinuum/guppyft/issues/561)) ([03222f3](https://github.com/Quantinuum/guppyft/commit/03222f3e00c0d75a863dab424635a132a891140a))
+
+
+### Code Refactoring
+
+* Require all builder options to be set prior to building instances ([#564](https://github.com/Quantinuum/guppyft/issues/564)) ([a1bbabe](https://github.com/Quantinuum/guppyft/commit/a1bbabedda6087e2362576f3564fdb1c967e3da0))
+* Require configuration of the QED policy in the Iceberg builder ([#551](https://github.com/Quantinuum/guppyft/issues/551)) ([9bf187b](https://github.com/Quantinuum/guppyft/commit/9bf187b03212d1972e7827a549287518d20fb07b))
+* Require generating declarations from ops explicitly ([#560](https://github.com/Quantinuum/guppyft/issues/560)) ([60036aa](https://github.com/Quantinuum/guppyft/commit/60036aaf66387b6f607322fde1cdaf59a06dc35a))
+
 ## [0.6.3](https://github.com/Quantinuum/guppyft/compare/v0.6.2...v0.6.3) (2026-11-16)
 
 
