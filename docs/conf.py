@@ -40,10 +40,6 @@ nb_execution_show_tb = True  # Show traceback if cell execution fails
 nb_execution_raise_on_error = True  # Cell execution failures are errors not warnings
 nb_execution_timeout = 90  # Cells which take >90s give timeout error.
 nb_merge_streams = True  # Accumulates all stdout streams into one, same with stderr
-
-# Don't execute this notebook in the docs build.
-# This is because qnexus server calls are made in the code cells.
-nb_execution_excludepatterns = ["examples/iceberg_encoding.ipynb"]
 # ----------------------
 
 
