@@ -1,9 +1,9 @@
 import os
 import re
 from collections.abc import Callable
-from dataclasses import fields
+from dataclasses import dataclass, fields, replace
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
 import pytest
 from guppylang import guppy
@@ -148,10 +148,10 @@ def test_builder_methods() -> None:
     zero_factory_conf = RUSStateFactoryConf(1, 2)
 
     res = (
-        SteaneBuilder()
+        SteaneBuilder.new(n_blocks=2)  # One data block and one QEC resource block.
         .with_qec_policy(my_policy)
         .with_zero_factory_conf(zero_factory_conf)
-        .build(n_blocks=2)  # One data block and one QEC resource block.
+        .build()
         .emulator(pkg, n_qubits=20)
         .run()
         .collated_shots()
@@ -190,11 +190,11 @@ def test_annotate_steane_encoding() -> None:
         qec_policy.costs.__setattr__(field.name, i + 1.0)
 
     arch = (
-        SteaneBuilder()
+        SteaneBuilder.new(n_blocks=4)
         .with_zero_factory_conf(RUSStateFactoryConf(size=1000, max_attempts=1001))
         .with_magic_factory_conf(RUSStateFactoryConf(size=2000, max_attempts=2001))
         .with_qec_policy(qec_policy)
-        .build(n_blocks=4)
+        .build()
     )
     arch.annotate(pkg)
 
@@ -242,26 +242,42 @@ def test_annotate_steane_encoding() -> None:
 
 
 def test_from_params_subclassing() -> None:
-    """Assert that `from_params` invokes subclass builder constructors."""
+    """Assert that `from_params` invokes subclass builder constructors and subclasses
+    can extend the builder pattern."""
 
+    @dataclass(frozen=True)
     class SteaneSubInstance(SteaneInstance):
-        def i_am(self) -> str:
-            return f"I am the instance subclass with n_blocks={self._n_blocks}"
+        _additional_opt: int
 
-    class SteaneSubBuilder(SteaneBuilder):
-        def build(self, n_blocks: int) -> SteaneInstance:
-            return SteaneSubInstance(
-                _spec=EncodeSpec(), _n_blocks=n_blocks, _options=self._options
+        def i_am(self) -> str:
+            return (
+                f"I am the instance subclass with n_blocks={self._options.n_blocks} "
+                f"and opt={self._additional_opt}"
             )
 
-    arch = SteaneSubBuilder.instance_from_params(
+    @dataclass(frozen=True)
+    class SteaneSubBuilder(SteaneBuilder):
+        _additional_opt: int = 1
+
+        def with_additional_option(self, opt: int) -> Self:
+            return replace(self, _additional_opt=opt)
+
+        def build(self) -> SteaneInstance:
+            return SteaneSubInstance(
+                _spec=EncodeSpec(),
+                _options=self._options,
+                _additional_opt=self._additional_opt,
+            )
+
+    builder = SteaneSubBuilder.from_params(
         {
             "schema_version": 1,
             "n_blocks": 4,
         }
     )
+    arch = builder.with_additional_option(5).build()
     assert isinstance(arch, SteaneSubInstance)
-    assert arch.i_am() == "I am the instance subclass with n_blocks=4"
+    assert arch.i_am() == "I am the instance subclass with n_blocks=4 and opt=5"
 
 
 def test_from_params_minimal() -> None:
@@ -272,7 +288,7 @@ def test_from_params_minimal() -> None:
         }
     )
 
-    assert arch == SteaneBuilder().build(n_blocks=4)
+    assert arch == SteaneBuilder.new(n_blocks=4).build()
 
 
 def test_from_params_defaults() -> None:
@@ -292,7 +308,7 @@ def test_from_params_defaults() -> None:
     policy = QECPolicy()
     policy.costs.x = 42.0
 
-    assert arch == SteaneBuilder().with_qec_policy(policy).build(n_blocks=4)
+    assert arch == SteaneBuilder.new(n_blocks=4).with_qec_policy(policy).build()
 
 
 def test_from_params_invalid_style() -> None:
@@ -312,7 +328,7 @@ def test_annotated_policy_immutable() -> None:
 
     policy = QECPolicy(threshold=2)
     policy.costs.x = 4.0
-    instance = SteaneBuilder().with_qec_policy(policy).build(n_blocks=4)
+    instance = SteaneBuilder.new(n_blocks=4).with_qec_policy(policy).build()
 
     policy.threshold = 99
     policy.costs.x = 20.0

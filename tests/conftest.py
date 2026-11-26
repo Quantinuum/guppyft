@@ -10,6 +10,6 @@ from guppyft.code.steane.encode import SteaneBuilder, SteaneInstance
 def make_steane_instance() -> Callable[[int], SteaneInstance]:
     @cache
     def build(n_blocks: int) -> SteaneInstance:
-        return SteaneBuilder().build(n_blocks=n_blocks)
+        return SteaneBuilder.new(n_blocks=n_blocks).build()
 
     return build

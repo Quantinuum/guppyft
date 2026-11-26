@@ -73,7 +73,7 @@ def _(custom_t_example):
     logical_pkg = custom_t_example.compile()
 
     # Create an instance of a Steane architecture and use it to produce a runnable program
-    steane_arch = SteaneBuilder().build(n_blocks=3)
+    steane_arch = SteaneBuilder.new(n_blocks=3).build()
     physical_pkg = steane_arch.implement_ops(logical_pkg)
     return SteaneBuilder, physical_pkg
 
@@ -165,14 +165,14 @@ def _(SteaneBuilder):
 
     # We can now provide the `qec_policy` to define our Steane architecture.
     configured_steane_arch = (
-        SteaneBuilder()
+        SteaneBuilder.new(n_blocks=3)
         .with_qec_policy(qec_policy)
         .with_zero_factory_conf(factory_conf)
-        .build(n_blocks=3)
+        .build()
     )
 
     # We also create a default Steane architecture instance for comparison
-    default_steane_arch = SteaneBuilder().build(n_blocks=3)
+    default_steane_arch = SteaneBuilder.new(n_blocks=3).build()
     return configured_steane_arch, default_steane_arch
 
 

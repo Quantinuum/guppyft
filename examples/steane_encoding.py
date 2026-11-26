@@ -108,7 +108,7 @@ def _():
     # to the total number of logical blocks available
     # during program execution.
 
-    steane = SteaneBuilder().build(n_blocks=3)
+    steane = SteaneBuilder.new(n_blocks=3).build()
     return SteaneBuilder, steane
 
 
@@ -236,7 +236,7 @@ def _(SteaneBuilder, array, guppy, output, qlib):
                 output("q", qlib.measure(q).read())
 
     _dyn_alloc_encoded = (
-        SteaneBuilder().build(n_blocks=3).encode(dynamic_allocation.compile())
+        SteaneBuilder.new(n_blocks=3).build().encode(dynamic_allocation.compile())
     )
     return
 
@@ -267,7 +267,7 @@ def _(SteaneBuilder, guppy, output, qlib, teleport_primitive):
         output("src", qlib.measure(src).read())
 
     # Encode with three logical blocks to demonstrate qubit reuse.
-    _reuse_encoded = SteaneBuilder().build(n_blocks=3).encode(qubit_reuse.compile())
+    _reuse_encoded = SteaneBuilder.new(n_blocks=3).build().encode(qubit_reuse.compile())
     return
 
 
@@ -297,7 +297,7 @@ def _(SteaneBuilder):
     qec_policy.costs.cx = 1.0
 
     # We can now provide the `qec_policy` to define our Steane architecture.
-    _steane_qec = SteaneBuilder().with_qec_policy(qec_policy).build(n_blocks=3)
+    _steane_qec = SteaneBuilder.new(n_blocks=3).with_qec_policy(qec_policy).build()
     return (qec_policy,)
 
 
@@ -321,12 +321,12 @@ def _(SteaneBuilder, guppy, output, qec_policy, qlib):
 
     # Encode two programs with, and without our QEC policy.
     encoded_without_qec_cycles = (
-        SteaneBuilder().build(n_blocks=2).encode(my_program.compile())
+        SteaneBuilder.new(n_blocks=2).build().encode(my_program.compile())
     )
     encoded_with_qec_cycles = (
-        SteaneBuilder()
+        SteaneBuilder.new(n_blocks=3)
         .with_qec_policy(qec_policy)
-        .build(n_blocks=3)
+        .build()
         .encode(my_program.compile())
     )
     return encoded_with_qec_cycles, encoded_without_qec_cycles, my_program
@@ -432,10 +432,10 @@ def _(SteaneBuilder, my_program, qec_policy):
 
     # Use the factory configuration to define our Steane architecture.
     steane_code_factories = (
-        SteaneBuilder()
+        SteaneBuilder.new(n_blocks=4)
         .with_qec_policy(qec_policy)
         .with_zero_factory_conf(factory_conf)
-        .build(n_blocks=4)
+        .build()
     )
     _qec_factory_encoded = steane_code_factories.encode(my_program.compile())
     return

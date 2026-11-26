@@ -117,7 +117,7 @@ def _(pkg, rz_decomposer):
     ).run()
     unencoded_two_qubit_depth = logger.shots[0].get_user_circuit().depth_2q()
 
-    steane = SteaneBuilder().build(n_blocks=10)
+    steane = SteaneBuilder.new(n_blocks=10).build()
     _results = (
         steane.emulator(pkg, n_qubits=73)
         .with_simulator(Coinflip(bias=0.0))  # Set bias=0.0 to select success branches

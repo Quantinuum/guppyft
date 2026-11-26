@@ -5,19 +5,19 @@ resolution-markers = [
     "python_full_version >= '3.15' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
     "python_full_version >= '3.15' and sys_platform == 'win32'",
     "python_full_version >= '3.15' and sys_platform == 'emscripten'",
-    "(python_full_version >= '3.15' and platform_machine != 'x86_64' and sys_platform == 'darwin') or (python_full_version >= '3.15' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32')",
+    "python_full_version >= '3.15' and ((platform_machine != 'x86_64' and sys_platform == 'darwin') or (sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'))",
     "python_full_version == '3.14.*' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
     "python_full_version == '3.14.*' and sys_platform == 'win32'",
     "python_full_version == '3.14.*' and sys_platform == 'emscripten'",
-    "(python_full_version == '3.14.*' and platform_machine != 'x86_64' and sys_platform == 'darwin') or (python_full_version == '3.14.*' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32')",
+    "python_full_version == '3.14.*' and ((platform_machine != 'x86_64' and sys_platform == 'darwin') or (sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'))",
     "python_full_version == '3.13.*' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
     "python_full_version == '3.13.*' and sys_platform == 'win32'",
     "python_full_version == '3.13.*' and sys_platform == 'emscripten'",
-    "(python_full_version == '3.13.*' and platform_machine != 'x86_64' and sys_platform == 'darwin') or (python_full_version == '3.13.*' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32')",
+    "python_full_version == '3.13.*' and ((platform_machine != 'x86_64' and sys_platform == 'darwin') or (sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'))",
     "python_full_version < '3.13' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
     "python_full_version < '3.13' and sys_platform == 'win32'",
     "python_full_version < '3.13' and sys_platform == 'emscripten'",
-    "(python_full_version < '3.13' and platform_machine != 'x86_64' and sys_platform == 'darwin') or (python_full_version < '3.13' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32')",
+    "python_full_version < '3.13' and ((platform_machine != 'x86_64' and sys_platform == 'darwin') or (sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'))",
 ]
 
 [[package]]
@@ -643,7 +643,7 @@ wheels = [
 
 [[package]]
 name = "guppyft"
-version = "0.6.3"
+version = "0.7.0"
 source = { editable = "." }
 dependencies = [
     { name = "guppylang" },
@@ -1219,16 +1219,16 @@ source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.15' and sys_platform == 'win32'",
     "python_full_version >= '3.15' and sys_platform == 'emscripten'",
-    "(python_full_version >= '3.15' and platform_machine != 'x86_64' and sys_platform == 'darwin') or (python_full_version >= '3.15' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32')",
+    "python_full_version >= '3.15' and ((platform_machine != 'x86_64' and sys_platform == 'darwin') or (sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'))",
     "python_full_version == '3.14.*' and sys_platform == 'win32'",
     "python_full_version == '3.14.*' and sys_platform == 'emscripten'",
-    "(python_full_version == '3.14.*' and platform_machine != 'x86_64' and sys_platform == 'darwin') or (python_full_version == '3.14.*' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32')",
+    "python_full_version == '3.14.*' and ((platform_machine != 'x86_64' and sys_platform == 'darwin') or (sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'))",
     "python_full_version == '3.13.*' and sys_platform == 'win32'",
     "python_full_version == '3.13.*' and sys_platform == 'emscripten'",
-    "(python_full_version == '3.13.*' and platform_machine != 'x86_64' and sys_platform == 'darwin') or (python_full_version == '3.13.*' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32')",
+    "python_full_version == '3.13.*' and ((platform_machine != 'x86_64' and sys_platform == 'darwin') or (sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'))",
     "python_full_version < '3.13' and sys_platform == 'win32'",
     "python_full_version < '3.13' and sys_platform == 'emscripten'",
-    "(python_full_version < '3.13' and platform_machine != 'x86_64' and sys_platform == 'darwin') or (python_full_version < '3.13' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32')",
+    "python_full_version < '3.13' and ((platform_machine != 'x86_64' and sys_platform == 'darwin') or (sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'))",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/11/c5/907cec40688a34eb489cded74d555e1ee4af8cf49d83e03dba2c2d4cfe27/llvmlite-0.50.0.tar.gz", hash = "sha256:f2a2cd6ec9ffcc1b7147dea0d7a49efebf17a2b434e0c2844fe175999d571eb4", size = 194522, upload-time = "2026-09-29T18:44:46.782Z" }
 wheels = [
@@ -2791,7 +2791,7 @@ wheels = [
 
 [[package]]
 name = "selene-core"
-version = "0.3.3"
+version = "0.3.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "hugr" },
@@ -2806,20 +2806,21 @@ dependencies = [
     { name = "ziglang" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/24/ff/42377efce2fdf19a89fd82b887c953a8b2356a9b06d1f5a1a4bb092a8b04/selene_core-0.3.3-py3-none-any.whl", hash = "sha256:d5c78451d00f13c523d68a4e1aa3723b3a321ea9d069f10776348be84c458982", size = 40671, upload-time = "2026-10-16T15:59:08.604Z" },
+    { url = "https://files.pythonhosted.org/packages/98/d3/adc263e449855024b56b8aa6c19db775b6c32836c2fd6529aa6d2069ff82/selene_core-0.3.4-py3-none-any.whl", hash = "sha256:190e468ec72de3ef963802653def69a145dc99c0d98b82035184ba48fd871122", size = 40578, upload-time = "2026-11-13T12:23:29.006Z" },
 ]
 
 [[package]]
 name = "selene-formats"
-version = "0.1.2"
+version = "0.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "msgpack" },
     { name = "pydantic" },
+    { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/15/be/8f5956d40cb64e5285dc13b212539968bee96f9ed8cfe04f22955a7e5238/selene_formats-0.1.2.tar.gz", hash = "sha256:310ab7d4227017527da87390f4df6f4a05cf79b6d44fe3046a943bb83205558f", size = 43719, upload-time = "2026-10-22T15:04:03.818Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/fd/8d/bf0168b00a0deb37d8f715a29f55e90c82ca67d4d3ec62e913a68e749967/selene_formats-0.2.0.tar.gz", hash = "sha256:3ea209aeac9f79859ee253cc226e91dda68cc712df17840c1d17c5b0fa289d06", size = 58489, upload-time = "2026-11-13T11:36:23.45Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8f/5c/dfe2bef457743929463ca34bc1bd2c47ae903efaafe79261403a7f52bef5/selene_formats-0.1.2-py3-none-any.whl", hash = "sha256:db983286daeffba04c2b85b86336ebed07bae37ba9f6695285e8dec889254c40", size = 12372, upload-time = "2026-10-22T15:04:02.576Z" },
+    { url = "https://files.pythonhosted.org/packages/5b/3d/715a44a4f8aeccc89d0a83e4ed4ae67f1f2205399cea47bb6447324cc6c0/selene_formats-0.2.0-py3-none-any.whl", hash = "sha256:2a689d0d0919622efbff6948e18cb57c7294d0367d122ff164b02bada5a49220", size = 15396, upload-time = "2026-11-13T11:36:22.096Z" },
 ]
 
 [[package]]
@@ -2840,7 +2841,7 @@ wheels = [
 
 [[package]]
 name = "selene-sim"
-version = "0.3.7"
+version = "0.3.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
@@ -2850,11 +2851,11 @@ dependencies = [
     { name = "tqdm" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/eb/5f/bc7b104837f616dfd770bf5f9eb742b7b91d06947ab3fb1c0649fc699ea7/selene_sim-0.3.7-py3-none-macosx_12_0_arm64.whl", hash = "sha256:ea114f3e80cdad55646b2e1eebc4bb2777de723ffffdc2151c5f529f72beb6ee", size = 21397494, upload-time = "2026-10-20T13:07:32.911Z" },
-    { url = "https://files.pythonhosted.org/packages/eb/8a/b6809fd7c7376aea668880e0d24c6ef5484ab49880fc4cfbb5463abb475a/selene_sim-0.3.7-py3-none-macosx_12_0_x86_64.whl", hash = "sha256:1c190dc51458d6d97a09cf2cde349c57106a6f8704a1caf6e9e64f624339b887", size = 22068752, upload-time = "2026-10-20T13:07:36.505Z" },
-    { url = "https://files.pythonhosted.org/packages/9c/ef/00ff49b238510958e3bc2b5405611a6704c6d4c0541f7d131f371c561eb1/selene_sim-0.3.7-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:815725c3cb410428752eed2259eb9ade28ef4e6d2456951cd3a3c4649c9fa760", size = 8455522, upload-time = "2026-10-20T13:07:39.106Z" },
-    { url = "https://files.pythonhosted.org/packages/93/54/7c934a4545c6caa63ef5872dfba52699f185dcde1858b576e83b71a15e18/selene_sim-0.3.7-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:76629a0de4568ec092739e40b95fbdf469b0cd4ac205b607784f3c0e507bba20", size = 8789894, upload-time = "2026-10-20T13:07:41.884Z" },
-    { url = "https://files.pythonhosted.org/packages/f4/50/25d9a438fc739d3b2080520ddef8a543ec77491c7ae377150b5602498cf4/selene_sim-0.3.7-py3-none-win_amd64.whl", hash = "sha256:db51b04268be40d61c72f9b0ba5148b398184fe1045045e98721521b9144b080", size = 14288920, upload-time = "2026-10-20T13:07:44.657Z" },
+    { url = "https://files.pythonhosted.org/packages/8e/e5/8d2d76e534b40926ce1d478fb35533e41409baa5f81a642752813ac603e4/selene_sim-0.3.8-py3-none-macosx_12_0_arm64.whl", hash = "sha256:f13b55949e650fe878af67d692bc6edb4e71ad1c042591ce5679ef43b6d60a56", size = 21419682, upload-time = "2026-11-13T12:54:37.621Z" },
+    { url = "https://files.pythonhosted.org/packages/14/90/5affc3e5fbbe20c961b12bb72389631c91a644d4c3dbfc546d7a8ddba451/selene_sim-0.3.8-py3-none-macosx_12_0_x86_64.whl", hash = "sha256:978efb53dd011d91f71f6ad9461d2b24d9153d0eae6de64dee0b6f053070b51f", size = 22088867, upload-time = "2026-11-13T12:54:40.16Z" },
+    { url = "https://files.pythonhosted.org/packages/3c/b2/3c1d71d9a32f9d0bf2c3e76c3299f8c2aa95817d03c1dc79cd49ed60e170/selene_sim-0.3.8-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:baa6aba0e312b4ff536b2a18980eccb63927dbf34e4ebbb54c58da34cfa9d0b6", size = 8461611, upload-time = "2026-11-13T12:54:42.27Z" },
+    { url = "https://files.pythonhosted.org/packages/2e/b8/935839331c7bf834bb3788ff28de8f5d5c4b7ed8fc396e3770eb120a5570/selene_sim-0.3.8-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:b680255c3c38aeb8ce3d88b2f18fcf52574eb0c328d02a1eee02844c3906a273", size = 8800839, upload-time = "2026-11-13T12:54:44.267Z" },
+    { url = "https://files.pythonhosted.org/packages/f5/21/d282941c4d5e6b96d12721b9799eed10324bbb282e800b74fccaccc9c771/selene_sim-0.3.8-py3-none-win_amd64.whl", hash = "sha256:b25e8ddb5091b27061313b20eb576fd893d5ae7fb12c89b55f2cbbe72934cb9c", size = 14302984, upload-time = "2026-11-13T12:54:46.233Z" },
 ]
 
 [[package]]
@@ -2910,7 +2911,7 @@ resolution-markers = [
     "python_full_version < '3.13' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
     "python_full_version < '3.13' and sys_platform == 'win32'",
     "python_full_version < '3.13' and sys_platform == 'emscripten'",
-    "(python_full_version < '3.13' and platform_machine != 'x86_64' and sys_platform == 'darwin') or (python_full_version < '3.13' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32')",
+    "python_full_version < '3.13' and ((platform_machine != 'x86_64' and sys_platform == 'darwin') or (sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'))",
 ]
 dependencies = [
     { name = "alabaster" },
@@ -2944,15 +2945,15 @@ resolution-markers = [
     "python_full_version >= '3.15' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
     "python_full_version >= '3.15' and sys_platform == 'win32'",
     "python_full_version >= '3.15' and sys_platform == 'emscripten'",
-    "(python_full_version >= '3.15' and platform_machine != 'x86_64' and sys_platform == 'darwin') or (python_full_version >= '3.15' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32')",
+    "python_full_version >= '3.15' and ((platform_machine != 'x86_64' and sys_platform == 'darwin') or (sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'))",
     "python_full_version == '3.14.*' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
     "python_full_version == '3.14.*' and sys_platform == 'win32'",
     "python_full_version == '3.14.*' and sys_platform == 'emscripten'",
-    "(python_full_version == '3.14.*' and platform_machine != 'x86_64' and sys_platform == 'darwin') or (python_full_version == '3.14.*' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32')",
+    "python_full_version == '3.14.*' and ((platform_machine != 'x86_64' and sys_platform == 'darwin') or (sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'))",
     "python_full_version == '3.13.*' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
     "python_full_version == '3.13.*' and sys_platform == 'win32'",
     "python_full_version == '3.13.*' and sys_platform == 'emscripten'",
-    "(python_full_version == '3.13.*' and platform_machine != 'x86_64' and sys_platform == 'darwin') or (python_full_version == '3.13.*' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32')",
+    "python_full_version == '3.13.*' and ((platform_machine != 'x86_64' and sys_platform == 'darwin') or (sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'))",
 ]
 dependencies = [
     { name = "alabaster" },
