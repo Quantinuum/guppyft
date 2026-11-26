@@ -4,7 +4,7 @@ from typing import Generic, no_type_check
 
 from guppylang import guppy
 from guppylang.std.builtins import array, exit, panic
-from guppylang.std.collections import Queue
+from guppylang.std.collections import Queue, empty_queue
 from guppylang.std.lang import Function, owned
 from guppylang.std.option import Option, nothing, some
 from guppylang.std.quantum import Measurement, collect_measurements, qubit
@@ -97,6 +97,15 @@ class StateFactory(Generic[BLOCK_SIZE, N_FLAGS, MAX_BATCH_SIZE]):  # type: ignor
     prep_routine: Function[[], PreBlock[BLOCK_SIZE, N_FLAGS]]  # type: ignore[type-arg,valid-type]
     max_attempts: int
     batch: Queue[PreBlock[BLOCK_SIZE, N_FLAGS], MAX_BATCH_SIZE]  # type: ignore[type-arg,valid-type]
+
+    @guppy
+    @no_type_check
+    @staticmethod
+    def new(
+        prep_routine: Function[[], PreBlock[BLOCK_SIZE, N_FLAGS]], max_attempts: int
+    ) -> "StateFactory[BLOCK_SIZE, N_FLAGS, MAX_BATCH_SIZE]":
+        """Create a new empty state factory."""
+        return StateFactory(prep_routine, max_attempts, empty_queue())
 
     @guppy
     @no_type_check
