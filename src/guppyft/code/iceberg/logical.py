@@ -37,132 +37,132 @@ def _custom_block_type[T](block_ty_def: TypeDef) -> Callable[[type[T]], type[T]]
     )
 
 
-N = guppy.nat_var("N")
+k = guppy.nat_var("k")
 
 
 @_custom_block_type(iceberg_types.iceberg_block_def)
-class Block(Generic[N]):  # type: ignore[misc]
-    """An Iceberg logical block containing `N` logical qubits."""
+class Block(Generic[k]):  # type: ignore[misc]
+    """An Iceberg logical block containing `k` logical qubits."""
 
     @hugr_op(logical_op(iceberg_ops.alloc_zero_def), effects=[Effect.ANY])
     @no_type_check
-    def __new__() -> "Block[N]":
+    def __new__() -> "Block[k]":
         """Allocate a block in the all-zero logical state."""
 
     @guppy
     @staticmethod
     @no_type_check
-    def restore(block: "BorrowedBlock[N]" @ owned) -> "Block[N]":
+    def restore(block: "BorrowedBlock[k]" @ owned) -> "Block[k]":
         """Convert borrowed block (with all dynamic logical qubits restored) to
         block."""
         return restore(block)
 
     @guppy
     @no_type_check
-    def borrow(self: "Block[N]" @ owned) -> "BorrowedBlock[N]":
+    def borrow(self: "Block[k]" @ owned) -> "BorrowedBlock[k]":
         """Convert block to borrowed block to allow dynamic logical qubits to be
         borrowed."""
         return borrow(self)
 
     @guppy
     @no_type_check
-    def x(self: "Block[N]", i: int) -> None:
+    def x(self: "Block[k]", i: int) -> None:
         """X gate on the qubit with index `i`."""
         x(self, i)
 
     @guppy
     @no_type_check
-    def y(self: "Block[N]", i: int) -> None:
+    def y(self: "Block[k]", i: int) -> None:
         """Y gate on the qubit with index `i`."""
         y(self, i)
 
     @guppy
     @no_type_check
-    def z(self: "Block[N]", i: int) -> None:
+    def z(self: "Block[k]", i: int) -> None:
         """Z gate on the qubit with index `i`."""
         z(self, i)
 
     @guppy
     @no_type_check
-    def xx_intrablock(self: "Block[N]", i: int, j: int) -> None:
+    def xx_intrablock(self: "Block[k]", i: int, j: int) -> None:
         """X gate on logical qubits `i` and `j` within a block."""
         xx_intrablock(self, i, j)
 
     @guppy
     @no_type_check
-    def yy_intrablock(self: "Block[N]", i: int, j: int) -> None:
+    def yy_intrablock(self: "Block[k]", i: int, j: int) -> None:
         """Y gate on logical qubits `i` and `j` within a block."""
         yy_intrablock(self, i, j)
 
     @guppy
     @no_type_check
-    def zz_intrablock(self: "Block[N]", i: int, j: int) -> None:
+    def zz_intrablock(self: "Block[k]", i: int, j: int) -> None:
         """Z gate on logical qubits `i` and `j` within a block."""
         zz_intrablock(self, i, j)
 
     @guppy
     @no_type_check
-    def x_all_except_at(self: "Block[N]", i: int) -> None:
+    def x_all_except_at(self: "Block[k]", i: int) -> None:
         """X gate on all qubits except that with index `i`."""
         x_all_except_at(self, i)
 
     @guppy
     @no_type_check
-    def z_all_except_at(self: "Block[N]", i: int) -> None:
+    def z_all_except_at(self: "Block[k]", i: int) -> None:
         """Z gate on all qubits except that with index `i`."""
         z_all_except_at(self, i)
 
     @guppy
     @no_type_check
-    def x_all(self: "Block[N]") -> None:
+    def x_all(self: "Block[k]") -> None:
         """X gate on all qubits."""
         x_all(self)
 
     @guppy
     @no_type_check
-    def y_all(self: "Block[N]") -> None:
+    def y_all(self: "Block[k]") -> None:
         """Y gate on all qubits."""
         y_all(self)
 
     @guppy
     @no_type_check
-    def z_all(self: "Block[N]") -> None:
+    def z_all(self: "Block[k]") -> None:
         """Z gate on all qubits."""
         z_all(self)
 
     @guppy
     @no_type_check
-    def z_all_except_x_at(self: "Block[N]", i: int) -> None:
+    def z_all_except_x_at(self: "Block[k]", i: int) -> None:
         """X gate on the qubit with index `i`; Z on all others."""
         z_all_except_x_at(self, i)
 
     @guppy
     @no_type_check
-    def x_all_except_z_at(self: "Block[N]", i: int) -> None:
+    def x_all_except_z_at(self: "Block[k]", i: int) -> None:
         """Z gate on the qubit with index `i`; X on all others."""
         x_all_except_z_at(self, i)
 
     @guppy
     @no_type_check
-    def fan_out(self: "Block[N]", i: int) -> None:
+    def fan_out(self: "Block[k]", i: int) -> None:
         """Fan-out from the qubit with index `i` to all others."""
         fan_out(self, i)
 
     @guppy
     @no_type_check
-    def fan_in(self: "Block[N]", i: int) -> None:
+    def fan_in(self: "Block[k]", i: int) -> None:
         """Fan-in to the qubit with index `i` from all others."""
         fan_in(self, i)
 
     @guppy
     @no_type_check
-    def rx(self: "Block[N]", i: int, phase: float) -> None:
+    def rx(self: "Block[k]", i: int, phase: float) -> None:
         """Rx rotation of `phase` radians on the qubit with index `i`."""
         rx(self, i, phase)
 
     @guppy
     @no_type_check
-    def ry(self: "Block[N]", i: int, phase: float) -> None:
+    def ry(self: "Block[k]", i: int, phase: float) -> None:
         r"""Ry rotation of ``phase`` radians on logical qubit ``i``.
 
         Ry is not a primitive and is implemented here as
@@ -176,13 +176,13 @@ class Block(Generic[N]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
-    def rz(self: "Block[N]", i: int, phase: float) -> None:
+    def rz(self: "Block[k]", i: int, phase: float) -> None:
         """Rz rotation of `phase` radians on the qubit with index `i`."""
         rz(self, i, phase)
 
     @guppy
     @no_type_check
-    def pauli_exp_x_all(self: "Block[N]", phase: float) -> None:
+    def pauli_exp_x_all(self: "Block[k]", phase: float) -> None:
         r"""Apply the logical all-X Pauli exponential.
 
         .. math::
@@ -196,7 +196,7 @@ class Block(Generic[N]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
-    def pauli_exp_y_all(self: "Block[N]", phase: float) -> None:
+    def pauli_exp_y_all(self: "Block[k]", phase: float) -> None:
         r"""Apply the logical all-Y Pauli exponential.
 
         .. math::
@@ -210,7 +210,7 @@ class Block(Generic[N]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
-    def pauli_exp_z_all(self: "Block[N]", phase: float) -> None:
+    def pauli_exp_z_all(self: "Block[k]", phase: float) -> None:
         r"""Apply the logical all-Z Pauli exponential.
 
         .. math::
@@ -224,7 +224,7 @@ class Block(Generic[N]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
-    def pauli_exp_x_all_except_at(self: "Block[N]", i: int, phase: float) -> None:
+    def pauli_exp_x_all_except_at(self: "Block[k]", i: int, phase: float) -> None:
         r"""Apply the Pauli exponential with I at ``i`` and X elsewhere.
 
         .. math::
@@ -240,7 +240,7 @@ class Block(Generic[N]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
-    def pauli_exp_z_all_except_at(self: "Block[N]", i: int, phase: float) -> None:
+    def pauli_exp_z_all_except_at(self: "Block[k]", i: int, phase: float) -> None:
         r"""Apply the Pauli exponential with I at ``i`` and Z elsewhere.
 
         .. math::
@@ -256,7 +256,7 @@ class Block(Generic[N]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
-    def pauli_exp_x_all_except_z_at(self: "Block[N]", i: int, phase: float) -> None:
+    def pauli_exp_x_all_except_z_at(self: "Block[k]", i: int, phase: float) -> None:
         r"""Apply the Pauli exponential with Z at ``i`` and X elsewhere.
 
         .. math::
@@ -272,7 +272,7 @@ class Block(Generic[N]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
-    def pauli_exp_z_all_except_x_at(self: "Block[N]", i: int, phase: float) -> None:
+    def pauli_exp_z_all_except_x_at(self: "Block[k]", i: int, phase: float) -> None:
         r"""Apply the Pauli exponential with X at ``i`` and Z elsewhere.
 
         .. math::
@@ -288,59 +288,59 @@ class Block(Generic[N]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
-    def h_all(self: "Block[N]") -> None:
+    def h_all(self: "Block[k]") -> None:
         """H gate on all qubits."""
         h_all(self)
 
     @guppy
     @no_type_check
-    def xx_phase_intrablock(self: "Block[N]", i: int, j: int, phase: float) -> None:
+    def xx_phase_intrablock(self: "Block[k]", i: int, j: int, phase: float) -> None:
         """XXPhase rotation of `phase` radians on logical qubits `i` and `j`
         within a block."""
         xx_phase_intrablock(self, i, j, phase)
 
     @guppy
     @no_type_check
-    def yy_phase_intrablock(self: "Block[N]", i: int, j: int, phase: float) -> None:
+    def yy_phase_intrablock(self: "Block[k]", i: int, j: int, phase: float) -> None:
         """YYPhase rotation of `phase` radians on logical qubits `i` and `j`
         within a block."""
         yy_phase_intrablock(self, i, j, phase)
 
     @guppy
     @no_type_check
-    def zz_phase_intrablock(self: "Block[N]", i: int, j: int, phase: float) -> None:
+    def zz_phase_intrablock(self: "Block[k]", i: int, j: int, phase: float) -> None:
         """ZZPhase rotation of `phase` radians on logical qubits `i` and `j`
         within a block."""
         zz_phase_intrablock(self, i, j, phase)
 
     @guppy
     @no_type_check
-    def cx_intrablock(self: "Block[N]", i: int, j: int) -> None:
+    def cx_intrablock(self: "Block[k]", i: int, j: int) -> None:
         """CX gate within a block, with logical control `i` and logical target `j`."""
         cx_intrablock(self, i, j)
 
     @guppy
     @no_type_check
-    def swap_intrablock(self: "Block[N]", i: int, j: int) -> None:
+    def swap_intrablock(self: "Block[k]", i: int, j: int) -> None:
         """Swap of logical qubits `i` and `j` within a block."""
         swap_intrablock(self, i, j)
 
     @guppy
     @no_type_check
-    def measure_syndrome(self: "Block[N]") -> tuple[Measurement, Measurement]:
+    def measure_syndrome(self: "Block[k]") -> tuple[Measurement, Measurement]:
         """Syndrome measurement."""
         return measure_syndrome(self)
 
     @guppy
     @no_type_check
-    def try_measure_one_x(self: "Block[N]", i: int) -> Option[Measurement]:
+    def try_measure_one_x(self: "Block[k]", i: int) -> Option[Measurement]:
         """Fallible non-destructive measurement in the X basis of the qubit
         with index `i`."""
         return try_measure_one_x(self, i)
 
     @guppy
     @no_type_check
-    def try_measure_one_z(self: "Block[N]", i: int) -> Option[Measurement]:
+    def try_measure_one_z(self: "Block[k]", i: int) -> Option[Measurement]:
         """Fallible non-destructive measurement in the Z basis of the qubit
         with index `i`."""
         return try_measure_one_z(self, i)
@@ -413,136 +413,136 @@ class Qubit:
 
 
 @_custom_block_type(iceberg_types.iceberg_borrowed_block_def)
-class BorrowedBlock(Generic[N]):  # type: ignore[misc]
+class BorrowedBlock(Generic[k]):  # type: ignore[misc]
     """A borrowed Iceberg logical block."""
 
     @guppy
     @no_type_check
-    def take(self: "BorrowedBlock[N]", idx: int) -> Qubit:
+    def take(self: "BorrowedBlock[k]", idx: int) -> Qubit:
         """Extract a dynamic logical qubit from a borrowed block."""
         return take(self, idx)
 
     @guppy
     @no_type_check
-    def put(self: "BorrowedBlock[N]", qb: Qubit @ owned) -> None:
+    def put(self: "BorrowedBlock[k]", qb: Qubit @ owned) -> None:
         """Return a dynamic logical qubit to its originating block."""
         put(self, qb)
 
 
 @_custom_block_type(iceberg_types.iceberg_pre_block_def)
-class PreBlock(Generic[N]):  # type: ignore[misc]
+class PreBlock(Generic[k]):  # type: ignore[misc]
     """A candidate Iceberg logical block whose preparation may have failed."""
 
     @hugr_op(logical_op(iceberg_ops.try_alloc_zero_def), effects=[Effect.ANY])
     @no_type_check
-    def __new__() -> "PreBlock[N]":
+    def __new__() -> "PreBlock[k]":
         """Attempt to allocate a block in the all-zero logical state."""
 
     @hugr_op(logical_op(iceberg_ops.check_pre_block_def), effects=())
     @no_type_check
-    def check(self: "PreBlock[N]" @ owned) -> Option[Block[N]]:
+    def check(self: "PreBlock[k]" @ owned) -> Option[Block[k]]:
         """Check whether state preparation succeeded."""
 
 
 @hugr_op(logical_op(iceberg_ops.x_def), effects=())
 @no_type_check
-def x(block: Block[N], i: int) -> None:
+def x(block: Block[k], i: int) -> None:
     """X gate on the qubit with index `i`."""
 
 
 @hugr_op(logical_op(iceberg_ops.y_def), effects=())
 @no_type_check
-def y(block: Block[N], i: int) -> None:
+def y(block: Block[k], i: int) -> None:
     """Y gate on the qubit with index `i`."""
 
 
 @hugr_op(logical_op(iceberg_ops.z_def), effects=())
 @no_type_check
-def z(block: Block[N], i: int) -> None:
+def z(block: Block[k], i: int) -> None:
     """Z gate on the qubit with index `i`."""
 
 
 @hugr_op(logical_op(iceberg_ops.xx_intrablock_def), effects=())
 @no_type_check
-def xx_intrablock(block: Block[N], i: int, j: int) -> None:
+def xx_intrablock(block: Block[k], i: int, j: int) -> None:
     """X gate on logical qubits `i` and `j` within a block."""
 
 
 @hugr_op(logical_op(iceberg_ops.yy_intrablock_def), effects=())
 @no_type_check
-def yy_intrablock(block: Block[N], i: int, j: int) -> None:
+def yy_intrablock(block: Block[k], i: int, j: int) -> None:
     """Y gate on logical qubits `i` and `j` within a block."""
 
 
 @hugr_op(logical_op(iceberg_ops.zz_intrablock_def), effects=())
 @no_type_check
-def zz_intrablock(block: Block[N], i: int, j: int) -> None:
+def zz_intrablock(block: Block[k], i: int, j: int) -> None:
     """Z gate on logical qubits `i` and `j` within a block."""
 
 
 @hugr_op(logical_op(iceberg_ops.x_all_except_at_def), effects=())
 @no_type_check
-def x_all_except_at(block: Block[N], i: int) -> None:
+def x_all_except_at(block: Block[k], i: int) -> None:
     """X gate on all qubits except that with index `i`."""
 
 
 @hugr_op(logical_op(iceberg_ops.z_all_except_at_def), effects=())
 @no_type_check
-def z_all_except_at(block: Block[N], i: int) -> None:
+def z_all_except_at(block: Block[k], i: int) -> None:
     """Z gate on all qubits except that with index `i`."""
 
 
 @hugr_op(logical_op(iceberg_ops.x_all_def), effects=())
 @no_type_check
-def x_all(block: Block[N]) -> None:
+def x_all(block: Block[k]) -> None:
     """X gate on all qubits."""
 
 
 @hugr_op(logical_op(iceberg_ops.y_all_def), effects=())
 @no_type_check
-def y_all(block: Block[N]) -> None:
+def y_all(block: Block[k]) -> None:
     """Y gate on all qubits."""
 
 
 @hugr_op(logical_op(iceberg_ops.z_all_def), effects=())
 @no_type_check
-def z_all(block: Block[N]) -> None:
+def z_all(block: Block[k]) -> None:
     """Z gate on all qubits."""
 
 
 @hugr_op(logical_op(iceberg_ops.z_all_except_x_at_def), effects=())
 @no_type_check
-def z_all_except_x_at(block: Block[N], i: int) -> None:
+def z_all_except_x_at(block: Block[k], i: int) -> None:
     """X gate on the qubit with index `i`; Z on all others."""
 
 
 @hugr_op(logical_op(iceberg_ops.x_all_except_z_at_def), effects=())
 @no_type_check
-def x_all_except_z_at(block: Block[N], i: int) -> None:
+def x_all_except_z_at(block: Block[k], i: int) -> None:
     """Z gate on the qubit with index `i`; X on all others."""
 
 
 @hugr_op(logical_op(iceberg_ops.fan_out_def), effects=())
 @no_type_check
-def fan_out(block: Block[N], i: int) -> None:
+def fan_out(block: Block[k], i: int) -> None:
     """Fan-out from the qubit with index `i` to all others."""
 
 
 @hugr_op(logical_op(iceberg_ops.fan_in_def), effects=())
 @no_type_check
-def fan_in(block: Block[N], i: int) -> None:
+def fan_in(block: Block[k], i: int) -> None:
     """Fan-in to the qubit with index `i` from all others."""
 
 
 @hugr_op(logical_op(iceberg_ops.rx_def), effects=())
 @no_type_check
-def rx(block: Block[N], i: int, phase: float) -> None:
+def rx(block: Block[k], i: int, phase: float) -> None:
     """Rx rotation of `phase` radians on the qubit with index `i`."""
 
 
 @guppy
 @no_type_check
-def ry(block: Block[N], i: int, phase: float) -> None:
+def ry(block: Block[k], i: int, phase: float) -> None:
     r"""Ry rotation of ``phase`` radians on logical qubit ``i``.
 
     Ry is not a primitive and is implemented here as
@@ -559,13 +559,13 @@ def ry(block: Block[N], i: int, phase: float) -> None:
 
 @hugr_op(logical_op(iceberg_ops.rz_def), effects=())
 @no_type_check
-def rz(block: Block[N], i: int, phase: float) -> None:
+def rz(block: Block[k], i: int, phase: float) -> None:
     """Rz rotation of `phase` radians on the qubit with index `i`."""
 
 
 @hugr_op(logical_op(iceberg_ops.pauli_exp_x_all_def), effects=())
 @no_type_check
-def pauli_exp_x_all(block: Block[N], phase: float) -> None:
+def pauli_exp_x_all(block: Block[k], phase: float) -> None:
     r"""Apply the logical all-X Pauli exponential.
 
     .. math::
@@ -579,7 +579,7 @@ def pauli_exp_x_all(block: Block[N], phase: float) -> None:
 
 @hugr_op(logical_op(iceberg_ops.pauli_exp_y_all_def), effects=())
 @no_type_check
-def pauli_exp_y_all(block: Block[N], phase: float) -> None:
+def pauli_exp_y_all(block: Block[k], phase: float) -> None:
     r"""Apply the logical all-Y Pauli exponential.
 
     .. math::
@@ -593,7 +593,7 @@ def pauli_exp_y_all(block: Block[N], phase: float) -> None:
 
 @hugr_op(logical_op(iceberg_ops.pauli_exp_z_all_def), effects=())
 @no_type_check
-def pauli_exp_z_all(block: Block[N], phase: float) -> None:
+def pauli_exp_z_all(block: Block[k], phase: float) -> None:
     r"""Apply the logical all-Z Pauli exponential.
 
     .. math::
@@ -607,7 +607,7 @@ def pauli_exp_z_all(block: Block[N], phase: float) -> None:
 
 @hugr_op(logical_op(iceberg_ops.pauli_exp_x_all_except_at_def), effects=())
 @no_type_check
-def pauli_exp_x_all_except_at(block: Block[N], i: int, phase: float) -> None:
+def pauli_exp_x_all_except_at(block: Block[k], i: int, phase: float) -> None:
     r"""Apply the Pauli exponential with I at ``i`` and X elsewhere.
 
     .. math::
@@ -623,7 +623,7 @@ def pauli_exp_x_all_except_at(block: Block[N], i: int, phase: float) -> None:
 
 @hugr_op(logical_op(iceberg_ops.pauli_exp_z_all_except_at_def), effects=())
 @no_type_check
-def pauli_exp_z_all_except_at(block: Block[N], i: int, phase: float) -> None:
+def pauli_exp_z_all_except_at(block: Block[k], i: int, phase: float) -> None:
     r"""Apply the Pauli exponential with I at ``i`` and Z elsewhere.
 
     .. math::
@@ -639,7 +639,7 @@ def pauli_exp_z_all_except_at(block: Block[N], i: int, phase: float) -> None:
 
 @hugr_op(logical_op(iceberg_ops.pauli_exp_x_all_except_z_at_def), effects=())
 @no_type_check
-def pauli_exp_x_all_except_z_at(block: Block[N], i: int, phase: float) -> None:
+def pauli_exp_x_all_except_z_at(block: Block[k], i: int, phase: float) -> None:
     r"""Apply the Pauli exponential with Z at ``i`` and X elsewhere.
 
     .. math::
@@ -655,7 +655,7 @@ def pauli_exp_x_all_except_z_at(block: Block[N], i: int, phase: float) -> None:
 
 @hugr_op(logical_op(iceberg_ops.pauli_exp_z_all_except_x_at_def), effects=())
 @no_type_check
-def pauli_exp_z_all_except_x_at(block: Block[N], i: int, phase: float) -> None:
+def pauli_exp_z_all_except_x_at(block: Block[k], i: int, phase: float) -> None:
     r"""Apply the Pauli exponential with X at ``i`` and Z elsewhere.
 
     .. math::
@@ -671,47 +671,47 @@ def pauli_exp_z_all_except_x_at(block: Block[N], i: int, phase: float) -> None:
 
 @hugr_op(logical_op(iceberg_ops.h_all_def), effects=())
 @no_type_check
-def h_all(block: Block[N]) -> None:
+def h_all(block: Block[k]) -> None:
     """H gate on all qubits."""
 
 
 @hugr_op(logical_op(iceberg_ops.xx_phase_intrablock_def), effects=())
 @no_type_check
-def xx_phase_intrablock(block: Block[N], i: int, j: int, phase: float) -> None:
+def xx_phase_intrablock(block: Block[k], i: int, j: int, phase: float) -> None:
     """XXPhase rotation of `phase` radians on logical qubits `i` and `j`
     within a block."""
 
 
 @hugr_op(logical_op(iceberg_ops.yy_phase_intrablock_def), effects=())
 @no_type_check
-def yy_phase_intrablock(block: Block[N], i: int, j: int, phase: float) -> None:
+def yy_phase_intrablock(block: Block[k], i: int, j: int, phase: float) -> None:
     """YYPhase rotation of `phase` radians on logical qubits `i` and `j`
     within a block."""
 
 
 @hugr_op(logical_op(iceberg_ops.zz_phase_intrablock_def), effects=())
 @no_type_check
-def zz_phase_intrablock(block: Block[N], i: int, j: int, phase: float) -> None:
+def zz_phase_intrablock(block: Block[k], i: int, j: int, phase: float) -> None:
     """ZZPhase rotation of `phase` radians on logical qubits `i` and `j`
     within a block."""
 
 
 @hugr_op(logical_op(iceberg_ops.cx_intrablock_def), effects=())
 @no_type_check
-def cx_intrablock(block: Block[N], i: int, j: int) -> None:
+def cx_intrablock(block: Block[k], i: int, j: int) -> None:
     """CX gate within a block, with logical control `i` and logical target `j`."""
 
 
 @hugr_op(logical_op(iceberg_ops.swap_intrablock_def), effects=())
 @no_type_check
-def swap_intrablock(block: Block[N], i: int, j: int) -> None:
+def swap_intrablock(block: Block[k], i: int, j: int) -> None:
     """Swap of logical qubits `i` and `j` within a block."""
 
 
 @hugr_op(logical_op(iceberg_ops.xx_phase_interblock_def), effects=())
 @no_type_check
 def xx_phase_interblock(
-    block0: Block[N], block1: Block[N], i0: int, i1: int, phase: float
+    block0: Block[k], block1: Block[k], i0: int, i1: int, phase: float
 ) -> None:
     """XXPhase rotation of `phase` radians on two logical qubits in different blocks.
 
@@ -721,7 +721,7 @@ def xx_phase_interblock(
 @hugr_op(logical_op(iceberg_ops.yy_phase_interblock_def), effects=())
 @no_type_check
 def yy_phase_interblock(
-    block0: Block[N], block1: Block[N], i0: int, i1: int, phase: float
+    block0: Block[k], block1: Block[k], i0: int, i1: int, phase: float
 ) -> None:
     """YYPhase rotation of `phase` radians on two logical qubits in different blocks.
 
@@ -731,7 +731,7 @@ def yy_phase_interblock(
 @hugr_op(logical_op(iceberg_ops.zz_phase_interblock_def), effects=())
 @no_type_check
 def zz_phase_interblock(
-    block0: Block[N], block1: Block[N], i0: int, i1: int, phase: float
+    block0: Block[k], block1: Block[k], i0: int, i1: int, phase: float
 ) -> None:
     """ZZPhase rotation of `phase` radians on two logical qubits in different blocks.
 
@@ -740,7 +740,7 @@ def zz_phase_interblock(
 
 @hugr_op(logical_op(iceberg_ops.cx_interblock_def), effects=())
 @no_type_check
-def cx_interblock(block0: Block[N], block1: Block[N], i0: int, i1: int) -> None:
+def cx_interblock(block0: Block[k], block1: Block[k], i0: int, i1: int) -> None:
     """CX gate on two logical qubits in different blocks.
 
     The control is index `i0` in `block0`; the target is index `i1` in `block1`."""
@@ -748,7 +748,7 @@ def cx_interblock(block0: Block[N], block1: Block[N], i0: int, i1: int) -> None:
 
 @hugr_op(logical_op(iceberg_ops.cx_all_def), effects=())
 @no_type_check
-def cx_all(block0: Block[N], block1: Block[N]) -> None:
+def cx_all(block0: Block[k], block1: Block[k]) -> None:
     """CX gates between all corresponding pairs of logical qubits in two blocks.
 
     For every index `i`, logical qubit `i` in `block0` controls a CX targeting
@@ -757,32 +757,32 @@ def cx_all(block0: Block[N], block1: Block[N]) -> None:
 
 @hugr_op(logical_op(iceberg_ops.free_def), effects=[Effect.ANY])
 @no_type_check
-def discard(block: Block[N] @ owned) -> None:
+def discard(block: Block[k] @ owned) -> None:
     """Free `block`."""
 
 
 @hugr_op(logical_op(iceberg_ops.measure_syndrome_def), effects=())
 @no_type_check
-def measure_syndrome(block: Block[N]) -> tuple[Measurement, Measurement]:
+def measure_syndrome(block: Block[k]) -> tuple[Measurement, Measurement]:
     """Syndrome measurement."""
 
 
 @hugr_op(logical_op(iceberg_ops.measure_all_def), effects=[Effect.ANY])
 @no_type_check
-def measure_all(block: Block[N] @ owned) -> LogicalMeasurement[N]:
+def measure_all(block: Block[k] @ owned) -> LogicalMeasurement[k]:
     """Destructive measurement of all qubits in `block`."""
 
 
 @hugr_op(logical_op(iceberg_ops.try_measure_one_x_def), effects=())
 @no_type_check
-def try_measure_one_x(block: Block[N], i: int) -> Option[Measurement]:
+def try_measure_one_x(block: Block[k], i: int) -> Option[Measurement]:
     """Fallible non-destructive measurement in the X basis of the qubit with
     index `i`."""
 
 
 @hugr_op(logical_op(iceberg_ops.try_measure_one_z_def), effects=())
 @no_type_check
-def try_measure_one_z(block: Block[N], i: int) -> Option[Measurement]:
+def try_measure_one_z(block: Block[k], i: int) -> Option[Measurement]:
     """Fallible non-destructive measurement in the Z basis of the qubit with
     index `i`."""
 
@@ -887,13 +887,13 @@ def cx_dynq(qubit0: Qubit, qubit1: Qubit) -> None:
     effects=[Effect.PANIC],  # Panics if `qubit` has already been borrowed
 )
 @no_type_check
-def take(block: BorrowedBlock[N], idx: int) -> Qubit:
+def take(block: BorrowedBlock[k], idx: int) -> Qubit:
     """Extract a dynamic logical qubit from a borrowed block."""
 
 
 @hugr_op(logical_op(iceberg_ops.borrow_def), effects=())
 @no_type_check
-def borrow(block: Block[N] @ owned) -> BorrowedBlock[N]:
+def borrow(block: Block[k] @ owned) -> BorrowedBlock[k]:
     """Convert block to borrowed block to allow dynamic logical qubits to be
     borrowed."""
 
@@ -903,7 +903,7 @@ def borrow(block: Block[N] @ owned) -> BorrowedBlock[N]:
     effects=[Effect.PANIC],  # Panics if not all borrowed qubits have been returned
 )
 @no_type_check
-def restore(block: BorrowedBlock[N] @ owned) -> Block[N]:
+def restore(block: BorrowedBlock[k] @ owned) -> Block[k]:
     """Convert borrowed block (with all dynamic logical qubits restored) to block."""
 
 
@@ -912,5 +912,5 @@ def restore(block: BorrowedBlock[N] @ owned) -> Block[N]:
     effects=[Effect.PANIC],  # Panics if `qubit` does not belong to block
 )
 @no_type_check
-def put(block: BorrowedBlock[N], qb: Qubit @ owned) -> None:
+def put(block: BorrowedBlock[k], qb: Qubit @ owned) -> None:
     """Return a dynamic logical qubit to its originating block."""
