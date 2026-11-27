@@ -269,7 +269,8 @@ class IcebergBuilder:
 
         Note:
             This option only affects :py:func:`measure_all`. The Z stabilizer
-            is always measured regardless of this option, since it is free to do so.
+            is always measured, regardless of this option. Measuring the X
+            stabilizer introduces additional overhead.
         """
         return replace(
             self, _options=replace(self._options, syndrome_during_measurement=enabled)

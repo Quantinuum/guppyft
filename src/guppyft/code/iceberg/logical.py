@@ -353,9 +353,11 @@ class Block(Generic[k]):  # type: ignore[misc]
             by their index.
 
         Note:
-            This detects single flip errors by measuring the Z stabilizer,
-            obtained with no additional cost. Optionally, the X stabilizer may be
-            measured as well: see
+            This detects single flip errors by measuring the Z stabilizer, and
+            may exit the program upon error detection.
+            The Z stabilizer is always measured, since it can be computed directly
+            from the physical outcomes with no additional overhead.
+            Optionally, the X stabilizer may be measured as well: see
             :py:meth:`~guppyft.code.iceberg.encode.IcebergBuilder.with_syndrome_extraction_during_measurement`.
         """
         measure_all(self)
@@ -875,9 +877,11 @@ def measure_all(block: Block[k] @ owned) -> LogicalMeasurement[k]:
         by their index.
 
     Note:
-        This detects single flip errors by measuring the Z stabilizer,
-        obtained with no additional cost. Optionally, the X stabilizer may be
-        measured as well: see
+        This detects single flip errors by measuring the Z stabilizer, and
+        may exit the program upon error detection.
+        The Z stabilizer is always measured, since it can be computed directly
+        from the physical outcomes with no additional overhead.
+        Optionally, the X stabilizer may be measured as well: see
         :py:meth:`~guppyft.code.iceberg.encode.IcebergBuilder.with_syndrome_extraction_during_measurement`.
     """
 
