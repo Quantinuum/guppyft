@@ -187,7 +187,7 @@ class _IcebergOptions:
 
 @dataclass(frozen=True)
 class IcebergInstance(AnnotatingArchitectureInstance):
-    """An Iceberg architecture instance built by :py:func:`IcebergBuilder.build`."""
+    """An Iceberg architecture instance built by :py:meth:`IcebergBuilder.build`."""
 
     _options: _IcebergOptions
 
@@ -268,7 +268,7 @@ class IcebergBuilder:
         """Set whether the X stabilizer is also measured when measuring a block.
 
         Note:
-            This option only affects :py:func:`measure_all`. The Z stabilizer
+            This option only affects :py:func:`~guppyft.code.iceberg.logical.measure_all`. The Z stabilizer
             is always measured, regardless of this option. Measuring the X
             stabilizer introduces additional overhead.
         """
@@ -307,7 +307,7 @@ class IcebergBuilder:
     @classmethod
     def instance_from_params(cls, params: dict[str, Any]) -> "IcebergInstance":
         """Produces an instance with the builder according to the given parameters. To
-        be used as the 'inverse' of :py:func:`IcebergInstance.annotate`."""
+        be used as the 'inverse' of :py:meth:`IcebergInstance.annotate`."""
         return cls.from_params(params).build()
 
     @classmethod

@@ -339,13 +339,13 @@ class Block(Generic[k]):  # type: ignore[misc]
 
     @guppy
     @no_type_check
-    def discard(self: "Block[k]") -> None:
+    def discard(self: "Block[k]" @ owned) -> None:
         """Free the block."""
         discard(self)
 
     @guppy
     @no_type_check
-    def measure_all(self: "Block[k]") -> None:
+    def measure_all(self: "Block[k]" @ owned) -> LogicalMeasurement[k]:
         """Destructive measurement of all qubits in the block.
 
         Returns:
