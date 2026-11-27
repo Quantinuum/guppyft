@@ -479,6 +479,13 @@ def _compute_clifford_tableaux(
     code_definition: StabilizerCode,
     n_impl_ancillas: int | None = None,
 ) -> tuple[pauli.SignTerms, pauli.SignTerms]: ...
+@overload
+def _compute_clifford_tableaux(
+    semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
+    impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
+    code_definition: StabilizerCode,
+    n_impl_ancillas: int | None = None,
+) -> tuple[pauli.SignTerms, pauli.SignTerms]: ...
 def _compute_clifford_tableaux(
     semantic_function: SemanticCliffordUnitary | SemanticCliffordUnitaryDouble,
     impl_function: ImplementationCliffordUnitary | ImplementationCliffordUnitaryDouble,
@@ -623,8 +630,8 @@ def valid_clifford_implementation(
      assert valid_clifford_implementation(steane_specify_h, steane_impl_h, STEANE_DEF)
     """
     sem_stabilizers, impl_stabilizers = _compute_clifford_tableaux(
-        semantic_function,  # type: ignore[arg-type]
-        impl_function,  # type: ignore[arg-type]
+        semantic_function,
+        impl_function,
         code_definition,
         n_impl_ancillas,
     )
