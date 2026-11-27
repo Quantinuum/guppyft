@@ -278,7 +278,8 @@ class IcebergBuilder:
         )
 
     def with_dynamic_qubit_reuse(self, conf: DynamicQubitReuse) -> Self:
-        """Set whether dynamic qubits should be reused."""
+        """Set the dynamic qubit reuse policy. See
+        :py:class:`~guppyft.code.iceberg.encode.DynamicQubitReuse` for options."""
         return replace(self, _options=replace(self._options, dynamic_qubit_reuse=conf))
 
     def _ensure_required_options_set(self) -> None:
