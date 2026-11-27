@@ -189,7 +189,7 @@ class Block(Generic[k]):  # type: ignore[misc]
     def ry(self: "Block[k]", i: int, phase: float) -> None:
         r"""Ry rotation of ``phase`` radians on logical qubit ``i``.
 
-        This is a shorthand for the following sequence of logical gates:
+        This is implemented as the following product of logical unitaries:
 
         .. math::
             R_y(\theta) = R_x(-\pi/2) R_z(\theta) R_x(\pi/2)
@@ -640,7 +640,7 @@ def rx(block: Block[k], i: int, phase: float) -> None:
 def ry(block: Block[k], i: int, phase: float) -> None:
     r"""Ry rotation of ``phase`` radians on logical qubit ``i``.
 
-    This is a shorthand for the following sequence of logical gates:
+    This is implemented as the following product of logical unitaries:
 
     .. math::
         R_y(\theta) = R_x(-\pi/2) R_z(\theta) R_x(\pi/2)
