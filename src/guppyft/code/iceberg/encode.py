@@ -268,9 +268,10 @@ class IcebergBuilder:
         """Set whether the X stabilizer is also measured when measuring a block.
 
         Note:
-            This option only affects :py:func:`~guppyft.code.iceberg.logical.measure_all`. The Z stabilizer
-            is always measured, regardless of this option. Measuring the X
-            stabilizer introduces additional overhead.
+            This option only affects
+            :py:func:`~guppyft.code.iceberg.logical.measure_all`.
+            The Z stabilizer is always measured, regardless of this option.
+            Measuring the X stabilizer introduces additional overhead.
         """
         return replace(
             self, _options=replace(self._options, syndrome_during_measurement=enabled)
