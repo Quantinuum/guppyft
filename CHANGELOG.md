@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.7.1](https://github.com/Quantinuum/guppyft/compare/v0.7.0...v0.7.1) (2026-11-27)
+
+
+### Features
+
+* Add CudaQ decoder Guppy interface ([#563](https://github.com/Quantinuum/guppyft/issues/563)) ([4f7c288](https://github.com/Quantinuum/guppyft/commit/4f7c28807b4dac0d8cde5cd5bf264865b12fbdc3))
+* Add new constructor to state factory ([#575](https://github.com/Quantinuum/guppyft/issues/575)) ([ae1e538](https://github.com/Quantinuum/guppyft/commit/ae1e53860f7dbda47a4c087e92d5ce3c64cd27e9))
+
+
+### Bug Fixes
+
+* Compile single op replacement functions before fetching their link name ([#579](https://github.com/Quantinuum/guppyft/issues/579)) ([60ff05c](https://github.com/Quantinuum/guppyft/commit/60ff05c1579bc9e616c1a8bf19616bbb557b1bdb))
+
+
+### Documentation
+
+* Clean up Iceberg API docs ([#574](https://github.com/Quantinuum/guppyft/issues/574)) ([b350d0e](https://github.com/Quantinuum/guppyft/commit/b350d0e0f23724db7d36ca110dc4b2f6f4456097))
+* Exclude some automatically derived dunder methods from the docs ([#572](https://github.com/Quantinuum/guppyft/issues/572)) ([d8fa6ed](https://github.com/Quantinuum/guppyft/commit/d8fa6edc138599184189afe28351851139918a0a))
+* Fix incomplete intro paragraph in verifier notebook ([#583](https://github.com/Quantinuum/guppyft/issues/583)) ([fb0fc35](https://github.com/Quantinuum/guppyft/commit/fb0fc35398780c684068229baec6f6f2edf4ca2f))
+* Iceberg autoencoding example ([#547](https://github.com/Quantinuum/guppyft/issues/547)) ([de34b0b](https://github.com/Quantinuum/guppyft/commit/de34b0b5f7388d8f9b3e582c7a3b0d4cdde3327f))
+* Rename Iceberg block size variable from `N` to `k` ([#570](https://github.com/Quantinuum/guppyft/issues/570)) ([f440a7c](https://github.com/Quantinuum/guppyft/commit/f440a7c7d4a1c3b41c720b4bb16a014ba9498858))
+
 ## [0.7.0](https://github.com/Quantinuum/guppyft/compare/v0.6.3...v0.7.0) (2026-11-23)
 
 
