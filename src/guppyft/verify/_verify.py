@@ -150,49 +150,17 @@ def _compute_stabilizers_unitary[**B](
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
     """
-    if n_blocks < 1:
-        raise ValueError(
-            f"Stabilizers can only be computed for at least one block, "
-            f"{n_blocks=} given"
-        )
-
     choi_prep = gen_choi_state(code, clifford_func, n_blocks=n_blocks)  # type: ignore[call-overload]
     n = code.n_physical_qubits
 
-    # Explicit generic arguments in comptime are not yet supported, so we explicitly
-    # monomorphize in a wrapper.
     @guppy
     @no_type_check
-    def choi_monomorphizer() -> array[array[qubit, n], comptime(2 * n_blocks)]:
+    def group_prep_func() -> array[array[qubit, n], comptime(2 * n_blocks)]:
         return choi_prep[n]()
 
-    @guppy.comptime
-    @no_type_check
-    def main() -> None:
-        controls_targets = choi_monomorphizer()
-
-        for i in range(n_blocks):
-            state_output(f"control_{i}", controls_targets[2 * i])
-            state_output(f"target_{i}", controls_targets[2 * i + 1])
-        state_output("total", controls_targets[0])
-
-        for j in range(2 * n_blocks):
-            discard_array(controls_targets[j])
-
-    states_dict = _invoke_selene_stim(main, num_selene_qubits)
-
-    # This is a hack so that we can get a state_output over all blocks
-    total = states_dict["total"]
-    total.specified_qubits = [
-        q
-        for i in range(n_blocks)
-        for group in (f"control_{i}", f"target_{i}")
-        for q in states_dict[group].specified_qubits
-    ]
-    ########
-
-    stab_list = states_dict["total"].get_reduced_stabilizers()
-    return stabilizerlist_to_signterms(stab_list)
+    return _compute_stabilisers(
+        group_prep_func, n_groups=2 * n_blocks, num_selene_qubits=num_selene_qubits
+    )
 
 
 # TODO: can we clean up this nasty signature hacking function?
