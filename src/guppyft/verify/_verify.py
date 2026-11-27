@@ -116,7 +116,6 @@ def _compute_stabilizers_state[B](
     """
     n = code.n_physical_qubits
 
-    # Traced overload resolution deep-copies LogicalBlock objects and recurses in Guppy.
     # Workaround for https://github.com/Quantinuum/guppylang/issues/2597, afterward this
     # can be a single comptime function.
     if n_blocks == 1:
