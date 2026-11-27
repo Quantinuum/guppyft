@@ -1,5 +1,5 @@
 import inspect
-from typing import Literal, get_args, get_origin, overload
+from typing import Literal, get_args, get_origin, no_type_check, overload
 
 from guppylang import guppy
 from guppylang.defs import GuppyFunctionDefinition
@@ -39,8 +39,10 @@ def _invoke_selene_stim(
     return seeded_stim_instance.extract_states_dict(output)
 
 
-def _compute_stabilizers_single_block_state(
-    state_prep_func: ImplementationStabilizerState,
+def _compute_stabilizers_state[B](
+    state_prep_func: GuppyFunctionDefinition[[], B],
+    *,
+    n_blocks: int,
     num_selene_qubits: int,
 ) -> pauli.SignTerms:
     """Compute the stabilizers of a Choi state encoding a Clifford operation.
@@ -48,64 +50,42 @@ def _compute_stabilizers_single_block_state(
     Args:
         state_prep_func: A Guppy function that prepares the stabilizer state on a single
             code block.
+        n_blocks: Number of blocks prepared by the state preparation.
         num_selene_qubits: An upper bound for the number of qubits used in
             `state_prep_func`.
 
     Returns:
         A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
     """
+    if n_blocks < 1:
+        raise ValueError(
+            f"Stabilizers can only be computed for at least one block, "
+            f"{n_blocks=} given"
+        )
 
-    @guppy
+    @guppy.comptime
+    @no_type_check
     def main() -> None:
-        block = _to_array(state_prep_func())
-        state_output("total", block)
-        discard_array(block)
+        ret = state_prep_func()
+        if isinstance(ret, tuple):
+            array_blocks = [_to_array(blk) for blk in ret]
+        else:
+            array_blocks = [_to_array(ret)]
 
-    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
-        main, num_selene_qubits
-    )
+        for i in range(n_blocks):
+            state_output(f"block_{i}", array_blocks[i])
+        state_output("total", array_blocks[0])  # Hack
 
-    stab_list = states_dict["total"].get_reduced_stabilizers()
-    return stabilizerlist_to_signterms(stab_list)
+        for i in range(n_blocks):
+            discard_array(array_blocks[i])
 
+    states_dict = _invoke_selene_stim(main, num_selene_qubits)
 
-def _compute_stabilizers_double_block_state(
-    state_prep_func: ImplementationStabilizerStateDouble,
-    num_selene_qubits: int,
-) -> pauli.SignTerms:
-    """Compute the stabilizers of a Choi state encoding a Clifford operation.
-
-    Args:
-        state_prep_func: A Guppy function that prepares the stabilizer state on two code
-            blocks.
-        num_selene_qubits: An upper bound for the number of qubits used in
-            `state_prep_func`.
-
-    Returns:
-        A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
-    """
-
-    @guppy
-    def main() -> None:
-        block0, block1 = state_prep_func()
-        block0_arr = _to_array(block0)
-        block1_arr = _to_array(block1)
-        state_output("block0", block0_arr)
-        state_output("block1", block1_arr)
-        state_output("total", block0_arr)
-
-        discard_array(block0_arr)
-        discard_array(block1_arr)
-
-    states_dict: dict[str, SeleneStimState] = _invoke_selene_stim(
-        main, num_selene_qubits
-    )
-
-    # This is a hack so that we can get a state_output over both blocks
+    # This is a hack so that we can get a state_output over all blocks
     total = states_dict["total"]
-    b0_qubits = states_dict["block0"].specified_qubits
-    b1_qubits = states_dict["block1"].specified_qubits
-    total.specified_qubits = b0_qubits + b1_qubits
+    total.specified_qubits = [
+        q for i in range(n_blocks) for q in states_dict[f"block_{i}"].specified_qubits
+    ]
     ########
 
     stab_list = states_dict["total"].get_reduced_stabilizers()
@@ -312,25 +292,29 @@ def _compute_state_prep_tableaux(
     match num_blocks:
         case 1:
             # Get the k stabilizers for the k qubit state.
-            semantic_stabilizers = _compute_stabilizers_single_block_state(
-                semantic_function,  # type: ignore[arg-type]
-                code_definition.n_logical_qubits,
+            semantic_stabilizers = _compute_stabilizers_state(
+                semantic_function,
+                n_blocks=1,
+                num_selene_qubits=code_definition.n_logical_qubits,
             )
             # Calculate the n stabilizers of the physical state.
-            implementation_stabilizers = _compute_stabilizers_single_block_state(
-                impl_function,  # type: ignore[arg-type]
-                n_stab_qubits,
+            implementation_stabilizers = _compute_stabilizers_state(
+                impl_function,
+                n_blocks=1,
+                num_selene_qubits=n_stab_qubits,
             )
         case 2:
             # Get the 2k stabilizers for the 2k qubit state.
-            semantic_stabilizers = _compute_stabilizers_double_block_state(
+            semantic_stabilizers = _compute_stabilizers_state(
                 semantic_function,
-                2 * code_definition.n_logical_qubits,
+                n_blocks=2,
+                num_selene_qubits=2 * code_definition.n_logical_qubits,
             )
             # Calculate the 2n stabilizers of the physical state.
-            implementation_stabilizers = _compute_stabilizers_double_block_state(
+            implementation_stabilizers = _compute_stabilizers_state(
                 impl_function,
-                n_stab_qubits,
+                n_blocks=2,
+                num_selene_qubits=n_stab_qubits,
             )
         case _:
             raise TypeError(
