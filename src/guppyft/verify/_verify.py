@@ -117,7 +117,8 @@ def _compute_stabilizers_state[B](
     n = code.n_physical_qubits
 
     # Traced overload resolution deep-copies LogicalBlock objects and recurses in Guppy.
-    # Workaround for https://github.com/Quantinuum/guppylang/issues/2597.
+    # Workaround for https://github.com/Quantinuum/guppylang/issues/2597, afterward this
+    # can be a single comptime function.
     if n_blocks == 1:
 
         @guppy
@@ -130,8 +131,7 @@ def _compute_stabilizers_state[B](
         @guppy
         @no_type_check
         def group_prep_func() -> array[array[qubit, n], n_blocks]:
-            first, second = state_prep_func()
-            return array(_to_array(first), _to_array(second))
+            return array(_to_array(r) for r in state_prep_func())
 
     return _compute_stabilisers(
         group_prep_func, n_groups=n_blocks, num_selene_qubits=num_selene_qubits
