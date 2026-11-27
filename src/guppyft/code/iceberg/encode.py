@@ -47,35 +47,38 @@ class RUSStateFactoryConf:
 
 
 class DynamicQubitReuse(StrEnum):
-    """Configuration for how dynamic qubits are allocated or reused. Fresh qubits are
-    from block allocations and have not yet been allocated. When dynamic qubits are
-    freed, depending on the configuration, future dynamic qubit allocations can reset
-    and reuse these qubits.
+    """Configuration for how dynamic logical qubits are allocated and reused.
 
-    When all dynamic qubits from a logical block have been freed, the block itself is
-    freed and becomes available to be reallocated."""
+    When allocation of a new logical qubit is requested, if it triggers the
+    preparation of a new Iceberg block, we mark all of its logical qubits as 'fresh'.
+    Depending on the configuration, when these qubits are freed, future requests
+    for logical qubit allocations can reuse them.
+
+    When all qubits from a logical block have been freed, the block itself is
+    freed. A new block may be prepared in its place, producing new fresh qubits."""
 
     disabled = auto()
-    """Only allocate fresh qubits from logical block allocations. Do not reset and reuse
-    dynamic qubits."""
+    """Only allocate fresh qubits. Do not reuse logical qubits until their block
+    is freed and reallocated."""
     if_necessary = auto()
-    """Prefer using fresh logical qubits. Only reuse logical qubits if no more blocks
-    are available to be allocated."""
+    """Only reuse logical qubits if it is not possible to generate more fresh
+    qubits (because no more blocks can be prepared)."""
     enabled = auto()
-    """Use available fresh qubits, then freed qubits, before preparing another block."""
+    """Use available fresh qubits, then reuse freed qubits, before preparing
+    another block."""
 
 
 @dataclass
 class IcebergQEDPolicy:
     """Policy to determine when QED cycles are injected.
 
-    Each logical block accumulates a cost based on `costs`. Once a block's accumulated
-    cost reaches `threshold`, a QED cycle is performed on that block and its counter is
-    reset.
+    Each logical block accumulates a cost based on ``costs``. Once a block's
+    accumulated cost reaches ``threshold``, a QED cycle is performed on that block
+    and its counter is reset.
 
     Attributes:
         threshold: Threshold at which a QED cycle is triggered.
-        costs: See `IcebergQEDPolicy.OperationCosts`.
+        costs: See :py:class:`IcebergQEDPolicy.OperationCosts`.
     """
 
     @dataclass
@@ -184,13 +187,14 @@ class _IcebergOptions:
 
 @dataclass(frozen=True)
 class IcebergInstance(AnnotatingArchitectureInstance):
-    """An Iceberg architecture instance built by `IcebergBuilder.build`."""
+    """An Iceberg architecture instance built by :py:meth:`IcebergBuilder.build`."""
 
     _options: _IcebergOptions
 
     def annotate(self, hugr: Package | Hugr[Any]) -> None:
         """Annotate the current parameters of the Iceberg code architecture on the given
-        HUGR's metadata. See `guppyft.encode.annotate_encoding` for more information."""
+        HUGR's metadata. See :py:func:`guppyft.encode.annotate_encoding` for more
+        information."""
         annotate_encoding(
             hugr,
             "iceberg",
@@ -208,7 +212,8 @@ class IcebergInstance(AnnotatingArchitectureInstance):
 
 @dataclass(frozen=True, kw_only=True)
 class IcebergBuilder:
-    """Iceberg architecture builder class for creating `IcebergInstance` objects."""
+    """Iceberg architecture builder class for creating :py:class:`IcebergInstance`
+    objects."""
 
     _options: _IcebergOptions = field(
         default=_IcebergOptions(
@@ -260,13 +265,21 @@ class IcebergBuilder:
         return replace(self, _options=replace(self._options, state_factory_conf=conf))
 
     def with_syndrome_extraction_during_measurement(self, enabled: bool) -> Self:
-        """Set whether syndromes are extracted and checked when measuring a block."""
+        """Set whether the X stabilizer is also measured when measuring a block.
+
+        Note:
+            This option only affects
+            :py:func:`~guppyft.code.iceberg.logical.measure_all`.
+            The Z stabilizer is always measured, regardless of this option.
+            Measuring the X stabilizer introduces additional overhead.
+        """
         return replace(
             self, _options=replace(self._options, syndrome_during_measurement=enabled)
         )
 
     def with_dynamic_qubit_reuse(self, conf: DynamicQubitReuse) -> Self:
-        """Set whether dynamic qubits should be reset and reused."""
+        """Set the dynamic qubit reuse policy. See
+        :py:class:`~guppyft.code.iceberg.encode.DynamicQubitReuse` for options."""
         return replace(self, _options=replace(self._options, dynamic_qubit_reuse=conf))
 
     def _ensure_required_options_set(self) -> None:
@@ -283,7 +296,7 @@ class IcebergBuilder:
             )
 
     def build(self) -> IcebergInstance:
-        """Build an `IcebergInstance`."""
+        """Build an :py:class:`IcebergInstance`."""
         self._ensure_required_options_set()
         return IcebergInstance(_options=deepcopy(self._options))
 
@@ -296,7 +309,7 @@ class IcebergBuilder:
     @classmethod
     def instance_from_params(cls, params: dict[str, Any]) -> "IcebergInstance":
         """Produces an instance with the builder according to the given parameters. To
-        be used as the 'inverse' of `IcebergInstance.annotate`."""
+        be used as the 'inverse' of :py:meth:`IcebergInstance.annotate`."""
         return cls.from_params(params).build()
 
     @classmethod
