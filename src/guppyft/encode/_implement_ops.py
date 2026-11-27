@@ -15,6 +15,7 @@ from tket.extensions import measurement
 
 from guppyft._bindings import RsHugr
 from guppyft._bindings import _implement_ops as _implement_ops_binding
+from guppyft._trace import tracing
 from guppyft._util import get_link_name
 
 from ._util import to_rs_hugr
@@ -214,6 +215,10 @@ def implement_ops(
 def implement_ops(
     hugr_pkg: Package, spec: ImplementOpsSpec, *, as_bytes: Literal[True]
 ) -> bytes: ...
+@overload
+def implement_ops(
+    hugr_pkg: Package, spec: ImplementOpsSpec, *, as_bytes: bool
+) -> Package | bytes: ...
 def implement_ops(
     hugr_pkg: Package, spec: ImplementOpsSpec, *, as_bytes: bool = False
 ) -> Package | bytes:
@@ -245,41 +250,51 @@ def implement_ops(
     hugr.entrypoint = hugr.module_root
     # Run rewrite, replacing ops with function calls to the functions in `spec.ops`
     spec.ops.check_finished()
-    hugr_pkg_bytes = _implement_ops(
-        copy_pkg.to_bytes(),
-        spec.ops,
-        spec.tys.tys,
-        adapt_rotation_inputs=spec.adapt_rotation_inputs,
-    )
+    with tracing("serialise_user_pkg"):
+        copy_pkg_bytes = copy_pkg.to_bytes()
 
-    # Build, compile, and link wrapper program
-    @guppy.declare
-    @link_name(entrypoint_op.f_name)
-    @no_type_check
-    def func_decl() -> None: ...
+    with tracing("implement"):
+        hugr_pkg_bytes = _implement_ops(
+            copy_pkg_bytes,
+            spec.ops,
+            spec.tys.tys,
+            adapt_rotation_inputs=spec.adapt_rotation_inputs,
+        )
 
-    # We have to ensure the build wrapper is a function definition rather than a
-    # declaration, so that the package contains an entrypoint. Guppy compiles
-    # declarations to module-rooted HUGRs.
-    wrapper = spec.build_wrapper(func_decl)
+    with tracing("build_wrapper"):
+        # Build, compile, and link wrapper program
+        @guppy.declare
+        @link_name(entrypoint_op.f_name)
+        @no_type_check
+        def func_decl() -> None: ...
 
-    @guppy
-    def outer_wrapper() -> None:
-        wrapper()
+        # We have to ensure the build wrapper is a function definition rather than a
+        # declaration, so that the package contains an entrypoint. Guppy compiles
+        # declarations to module-rooted HUGRs.
+        wrapper = spec.build_wrapper(func_decl)
 
-    pkg: Package = outer_wrapper.compile()
-    libraries = [lib if isinstance(lib, bytes) else lib.to_bytes() for lib in spec.libs]
-    pkg_bytes = link_packages(pkg.to_bytes(), hugr_pkg_bytes, *libraries)
+        @guppy
+        def outer_wrapper() -> None:
+            wrapper()
+
+        pkg: Package = outer_wrapper.compile()
+    with tracing("serialise_libs"):
+        libraries = [
+            lib if isinstance(lib, bytes) else lib.to_bytes() for lib in spec.libs
+        ]
+    with tracing("link_libs"):
+        pkg_bytes = link_packages(pkg.to_bytes(), hugr_pkg_bytes, *libraries)
 
     if as_bytes:
         return pkg_bytes
 
-    return Package.from_bytes(pkg_bytes)
+    with tracing("deserialise_product"):
+        return Package.from_bytes(pkg_bytes)
 
 
 @dataclass(frozen=True)
 class ImplementOps:
-    _runner: Callable[[Package, bool], Package]
+    _runner: Callable[[Package, bool], Package | bytes]
 
     @overload
     def __call__(
@@ -300,6 +315,10 @@ class ImplementOps:
     def for_spec_generator(
         spec_gen: Callable[[Package], ImplementOpsSpec],
     ) -> "ImplementOps":
-        return ImplementOps(
-            lambda pkg, as_bytes: implement_ops(pkg, spec_gen(pkg), as_bytes=as_bytes)  # type: ignore[call-overload]
-        )
+        def _runner(pkg: Package, as_bytes: bool) -> Package | bytes:
+            with tracing("spec_gen"):
+                spec_gen(pkg)
+            with tracing("implement_ops_invoke"):
+                return implement_ops(pkg, spec_gen(pkg), as_bytes=as_bytes)
+
+        return ImplementOps(_runner)
