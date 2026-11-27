@@ -360,7 +360,7 @@ class Block(Generic[k]):  # type: ignore[misc]
             Optionally, the X stabilizer may be measured as well: see
             :py:meth:`~guppyft.code.iceberg.encode.IcebergBuilder.with_syndrome_extraction_during_measurement`.
         """
-        measure_all(self)
+        return measure_all(self)
 
     @guppy
     @no_type_check
