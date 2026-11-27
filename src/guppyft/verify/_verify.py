@@ -73,15 +73,15 @@ def _compute_stabilizers_state[B](
         ret = state_prep_func()
         if not isinstance(ret, tuple):
             ret = (ret,)
-        array_blocks = [_to_array(blk) for blk in ret]
 
         for i in range(n_blocks):
-            state_output(f"block_{i}", array_blocks[i])
+            blk = _to_array(ret[i])
+            state_output(f"block_{i}", blk)
+            discard_array(blk)
+
+        # Hack
         qb_array = empty_qubit_array()
-        state_output("total", qb_array)  # Hack
-
-        for i in range(n_blocks):
-            discard_array(array_blocks[i])
+        state_output("total", qb_array)
         qb_array.discard_all_taken()
 
     states_dict = _invoke_selene_stim(main, num_selene_qubits)
