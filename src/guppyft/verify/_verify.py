@@ -67,10 +67,9 @@ def _compute_stabilizers_state[B](
     @no_type_check
     def main() -> None:
         ret = state_prep_func()
-        if isinstance(ret, tuple):
-            array_blocks = [_to_array(blk) for blk in ret]
-        else:
-            array_blocks = [_to_array(ret)]
+        if not isinstance(ret, tuple):
+            ret = (ret,)
+        array_blocks = [_to_array(blk) for blk in ret]
 
         for i in range(n_blocks):
             state_output(f"block_{i}", array_blocks[i])
