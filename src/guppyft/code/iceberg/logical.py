@@ -380,7 +380,7 @@ class Block(Generic[k]):  # type: ignore[misc]
 
         Returns:
             The stabilizer measurement outcomes in the order
-            :math:`(Z^{\otimes k}`, :math:`X^{\otimes k})`.
+            :math:`(X^{\otimes k}, Z^{\otimes k})`.
         """
         return measure_syndrome(self)
 
@@ -863,7 +863,7 @@ def measure_syndrome(block: Block[k]) -> tuple[Measurement, Measurement]:
 
     Returns:
         The stabilizer measurement outcomes in the order
-        :math:`(Z^{\otimes k}`, :math:`X^{\otimes k})`.
+        :math:`(X^{\otimes k}, Z^{\otimes k})`.
     """
 
 
