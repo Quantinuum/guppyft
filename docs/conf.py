@@ -1,4 +1,9 @@
-import guppyft  # noqa: INP001
+import sys  # noqa: INP001
+from pathlib import Path
+
+import guppyft
+
+sys.path.insert(0, str(Path(__file__).parent / "_ext"))
 
 html_title = f"Guppy FT v{guppyft.__version__} Documentation"
 
@@ -13,7 +18,15 @@ html_copy_source = False
 templates_path = ["_templates"]
 # Generated sources would otherwise be treated as unlinked documents and fail
 # strict builds.
-exclude_patterns = ["build/**", "jupyter_execute", ".jupyter_cache", "**/README.md"]
+exclude_patterns = [
+    "build/**",
+    "jupyter_execute",
+    ".jupyter_cache",
+    "**/README.md",
+    "_ext/**",
+    "conf.py",
+    "run_docstring_testcode.py",
+]
 
 master_doc = "index"
 author = "Quantinuum"
@@ -35,6 +48,9 @@ extensions = [
 
 # --- MyST-NB config ---
 # https://myst-nb.readthedocs.io/en/latest/configuration.html
+nb_custom_formats: dict[str, tuple[str, dict[str, object], bool]] = {
+    ".py": ("marimo_reader.read", {}, False)
+}
 nb_execution_mode = "cache"
 nb_execution_show_tb = True  # Show traceback if cell execution fails
 nb_execution_raise_on_error = True  # Cell execution failures are errors not warnings
