@@ -54,6 +54,7 @@ docs = [
     "sphinx-tabs>=3.5.0",
     "sphinx-copybutton>=0.5.2",
     "qnexus>=0.51.3",
+    "matplotlib>=3.11.2",
 ]
 examples = [
     "ipykernel>=7.3.0",
