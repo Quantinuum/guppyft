@@ -36,6 +36,7 @@ from hugr.package import Package
 from selene_sim.backends.bundled_simulators import Coinflip
 
 from guppyft.code.steane.encode import (
+    AdaptiveRzConf,
     QECPolicy,
     QECStyle,
     RUSStateFactoryConf,
@@ -179,7 +180,11 @@ def test_encoder_control_flow(
     assert res == [{"q1": [0]}]
 
 
-def test_annotate_steane_encoding() -> None:
+@pytest.mark.parametrize(
+    "adaptive_rz_conf",
+    [None, AdaptiveRzConf(max_rounds=23, abort_on_dephasing=False)],
+)
+def test_annotate_steane_encoding(adaptive_rz_conf: AdaptiveRzConf | None) -> None:
     hugr = Hugr[Any]()
     pkg = Package([hugr])
 
@@ -194,6 +199,7 @@ def test_annotate_steane_encoding() -> None:
         .with_zero_factory_conf(RUSStateFactoryConf(size=1000, max_attempts=1001))
         .with_magic_factory_conf(RUSStateFactoryConf(size=2000, max_attempts=2001))
         .with_qec_policy(qec_policy)
+        .with_adaptive_rz_conf(adaptive_rz_conf)
         .build()
     )
     arch.annotate(pkg)
@@ -203,7 +209,7 @@ def test_annotate_steane_encoding() -> None:
     arch_rec = SteaneBuilder.instance_from_params(metadata["ft_encoding"]["params"])
     assert arch == arch_rec
 
-    assert metadata == {
+    expected: dict[str, Any] = {
         "schema_version": 1,
         "ft_encoding": {
             "name": "steane",
@@ -234,11 +240,22 @@ def test_annotate_steane_encoding() -> None:
                         "inject_tdg": 10.0,
                         "cx": 11.0,
                         "cz": 12.0,
+                        "rz": 13.0,
                     },
+                },
+                "adaptive_rz_conf": {
+                    "tolerance": 1e-10,
+                    "max_rounds": 23,
+                    "dephasing": 0.0,
+                    "max_dephasing": 0.5,
+                    "abort_on_dephasing": False,
                 },
             },
         },
     }
+    if adaptive_rz_conf is None:
+        del expected["ft_encoding"]["params"]["adaptive_rz_conf"]
+    assert metadata == expected
 
 
 def test_from_params_subclassing() -> None:
