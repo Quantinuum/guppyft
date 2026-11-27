@@ -245,48 +245,31 @@ def _compute_state_prep_tableaux(
         A pair of stabilizer tableaux made up of signed Pauli terms.
     """
     num_blocks = _count_blocks_state(semantic_function, impl_function)  # type: ignore[arg-type]
+    if num_blocks not in (1, 2):
+        raise TypeError(
+            "Unsupported number of code block parameters in semantic_function."
+            + f"Got {num_blocks} blocks. Only 1 and 2 are supported."
+        )
 
     n_stab_qubits = num_blocks * code_definition.n_physical_qubits
 
     if n_impl_ancillas is not None:
         n_stab_qubits += n_impl_ancillas
 
-    match num_blocks:
-        case 1:
-            # Get the k stabilizers for the k qubit state.
-            semantic_stabilizers = _compute_stabilizers_state(
-                _identity_code(code_definition.n_logical_qubits),
-                semantic_function,
-                n_blocks=1,
-                num_selene_qubits=code_definition.n_logical_qubits,
-            )
-            # Calculate the n stabilizers of the physical state.
-            implementation_stabilizers = _compute_stabilizers_state(
-                code_definition,
-                impl_function,
-                n_blocks=1,
-                num_selene_qubits=n_stab_qubits,
-            )
-        case 2:
-            # Get the 2k stabilizers for the 2k qubit state.
-            semantic_stabilizers = _compute_stabilizers_state(
-                _identity_code(code_definition.n_logical_qubits),
-                semantic_function,
-                n_blocks=2,
-                num_selene_qubits=2 * code_definition.n_logical_qubits,
-            )
-            # Calculate the 2n stabilizers of the physical state.
-            implementation_stabilizers = _compute_stabilizers_state(
-                code_definition,
-                impl_function,
-                n_blocks=2,
-                num_selene_qubits=n_stab_qubits,
-            )
-        case _:
-            raise TypeError(
-                "Unsupported number of code block parameters in semantic_function."
-                + f"Got {num_blocks} blocks. Only 1 and 2 are supported."
-            )
+    # Get the stabilizers for the logical state.
+    semantic_stabilizers = _compute_stabilizers_state(
+        _identity_code(code_definition.n_logical_qubits),
+        semantic_function,
+        n_blocks=num_blocks,
+        num_selene_qubits=num_blocks * code_definition.n_logical_qubits,
+    )
+    # Calculate the physical stabilizers of the physical state.
+    implementation_stabilizers = _compute_stabilizers_state(
+        code_definition,
+        impl_function,
+        n_blocks=num_blocks,
+        num_selene_qubits=n_stab_qubits,
+    )
 
     # Expand the num_blocks*k logical stabilizers to stabilizers of size num_blocks*n.
     # We also add the num_blocks*(n-k) stabilizer generators of our code.
@@ -463,46 +446,29 @@ def _compute_clifford_tableaux(
     """
     num_blocks = _count_blocks_unitary(semantic_function, impl_function)  # type: ignore[arg-type]
     n_physical_choi_qubits = 2 * num_blocks * code_definition.n_physical_qubits
+    if num_blocks not in (1, 2):
+        raise TypeError(
+            "Unsupported number of code block parameters in semantic_function."
+            + f"Got {num_blocks} blocks. Only 1 and 2 are supported."
+        )
 
     if n_impl_ancillas is not None:
         n_physical_choi_qubits += n_impl_ancillas
 
-    match num_blocks:
-        case 1:
-            # Get the 2k stabilizers for the 2k qubit Choi state encoding the logical.
-            semantic_choi_stabilizers = _compute_stabilizers_unitary(
-                _identity_code(code_definition.n_logical_qubits),
-                semantic_function,
-                n_blocks=1,
-                num_selene_qubits=2 * code_definition.n_logical_qubits,
-            )
-            # Calculate the 2n stabilizers of the Choi state encoding the physical.
-            implementation_stabilizers = _compute_stabilizers_unitary(
-                code_definition,
-                impl_function,
-                n_blocks=1,
-                num_selene_qubits=n_physical_choi_qubits,
-            )
-        case 2:
-            # Get the 4k stabilizers for the 4k qubit Choi state encoding the logical.
-            semantic_choi_stabilizers = _compute_stabilizers_unitary(
-                _identity_code(code_definition.n_logical_qubits),
-                semantic_function,
-                n_blocks=2,
-                num_selene_qubits=4 * code_definition.n_logical_qubits,
-            )
-            # Calculate the 4n stabilizers of the Choi state encoding the physical.
-            implementation_stabilizers = _compute_stabilizers_unitary(
-                code_definition,
-                impl_function,
-                n_blocks=2,
-                num_selene_qubits=n_physical_choi_qubits,
-            )
-        case _:
-            raise TypeError(
-                "Unsupported number of code block parameters in semantic_function."
-                + f"Got {num_blocks} blocks. Only 1 and 2 are supported."
-            )
+    # Get the 2k stabilizers for the 2k qubit Choi state encoding the logical.
+    semantic_choi_stabilizers = _compute_stabilizers_unitary(
+        _identity_code(code_definition.n_logical_qubits),
+        semantic_function,
+        n_blocks=num_blocks,
+        num_selene_qubits=num_blocks * 2 * code_definition.n_logical_qubits,
+    )
+    # Calculate the 2n stabilizers of the Choi state encoding the physical.
+    implementation_stabilizers = _compute_stabilizers_unitary(
+        code_definition,
+        impl_function,
+        n_blocks=num_blocks,
+        num_selene_qubits=n_physical_choi_qubits,
+    )
 
     # Expand 2*num_blocks*k logical stabilizers to stabilizers of size 2*num_blocks*n.
     # We also add the 2*num_blocks(n-k) stabilizer generators of our code.
