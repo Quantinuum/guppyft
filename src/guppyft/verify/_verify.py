@@ -120,7 +120,8 @@ def _compute_stabilizers_state[B](
     @no_type_check
     def group_prep_func() -> array[array[qubit, n], n_blocks]:
         ret = state_prep_func()
-        if not isinstance(ret, tuple):
+        # Ensure the return type is iterable
+        if n_blocks == 1:
             ret = (ret,)
 
         return array(_to_array(r) for r in ret)
