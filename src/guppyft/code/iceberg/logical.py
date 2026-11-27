@@ -355,7 +355,7 @@ class Block(Generic[k]):  # type: ignore[misc]
         Note:
             This detects single flip errors by measuring the Z stabilizer,
             obtained with no additional cost. Optionally, the X stabilizer may be
-            measured as well, see
+            measured as well: see
             :py:meth:`~guppyft.code.iceberg.encode.IcebergBuilder.with_syndrome_extraction_during_measurement`.
         """
         measure_all(self)
@@ -877,7 +877,7 @@ def measure_all(block: Block[k] @ owned) -> LogicalMeasurement[k]:
     Note:
         This detects single flip errors by measuring the Z stabilizer,
         obtained with no additional cost. Optionally, the X stabilizer may be
-        measured as well, see
+        measured as well: see
         :py:meth:`~guppyft.code.iceberg.encode.IcebergBuilder.with_syndrome_extraction_during_measurement`.
     """
 
@@ -926,7 +926,7 @@ def try_alloc_dynq() -> Option[Qubit]:
 @hugr_op(logical_op(iceberg_ops.free_dynq_def), effects=[Effect.ANY])
 @no_type_check
 def free_dynq(qubit: Qubit @ owned) -> None:
-    """Free `qubit`.
+    """Free ``qubit``.
 
     :meta private:
     """
@@ -962,7 +962,7 @@ def z_dynq(qubit: Qubit) -> None:
 @hugr_op(logical_op(iceberg_ops.rx_dynq_def), effects=())
 @no_type_check
 def rx_dynq(qubit: Qubit, phase: float) -> None:
-    """Rx rotation of `phase` radians.
+    """Rx rotation of ``phase`` radians.
 
     :meta private:
     """
@@ -990,7 +990,7 @@ def ry_dynq(qubit: Qubit, phase: float) -> None:
 @hugr_op(logical_op(iceberg_ops.rz_dynq_def), effects=())
 @no_type_check
 def rz_dynq(qubit: Qubit, phase: float) -> None:
-    """Rz rotation of `phase` radians.
+    """Rz rotation of ``phase`` radians.
 
     :meta private:
     """
@@ -1017,7 +1017,7 @@ def try_measure_z_dynq(qubit: Qubit) -> Option[Measurement]:
 @hugr_op(logical_op(iceberg_ops.xx_phase_dynq_def), effects=())
 @no_type_check
 def xx_phase_dynq(qubit0: Qubit, qubit1: Qubit, phase: float) -> None:
-    """XXPhase rotation of `phase` radians on two qubits.
+    """XXPhase rotation of ``phase`` radians on two qubits.
 
     :meta private:
     """
@@ -1026,7 +1026,7 @@ def xx_phase_dynq(qubit0: Qubit, qubit1: Qubit, phase: float) -> None:
 @hugr_op(logical_op(iceberg_ops.yy_phase_dynq_def), effects=())
 @no_type_check
 def yy_phase_dynq(qubit0: Qubit, qubit1: Qubit, phase: float) -> None:
-    """YYPhase rotation of `phase` radians on two qubits.
+    """YYPhase rotation of ``phase`` radians on two qubits.
 
     :meta private:
     """
@@ -1035,7 +1035,7 @@ def yy_phase_dynq(qubit0: Qubit, qubit1: Qubit, phase: float) -> None:
 @hugr_op(logical_op(iceberg_ops.zz_phase_dynq_def), effects=())
 @no_type_check
 def zz_phase_dynq(qubit0: Qubit, qubit1: Qubit, phase: float) -> None:
-    """ZZPhase rotation of `phase` radians on two qubits.
+    """ZZPhase rotation of ``phase`` radians on two qubits.
 
     :meta private:
     """
@@ -1044,7 +1044,7 @@ def zz_phase_dynq(qubit0: Qubit, qubit1: Qubit, phase: float) -> None:
 @hugr_op(logical_op(iceberg_ops.cx_dynq_def), effects=())
 @no_type_check
 def cx_dynq(qubit0: Qubit, qubit1: Qubit) -> None:
-    """CX gate on `qubit0` (control) and `qubit1` (target).
+    """CX gate on ``qubit0`` (control) and ``qubit1`` (target).
 
     :meta private:
     """
