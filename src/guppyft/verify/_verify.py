@@ -101,7 +101,7 @@ def _compute_stabilizers_state[B](
     n_blocks: int,
     num_selene_qubits: int,
 ) -> pauli.SignTerms:
-    """Compute the stabilizers of a Choi state encoding a Clifford operation.
+    """Compute the stabilizers of a prepared state.
 
     Args:
         code: The stabilizer code.
@@ -112,19 +112,26 @@ def _compute_stabilizers_state[B](
             `state_prep_func`.
 
     Returns:
-        A Zixy `SignTerms` instance storing the stabilizers of the Choi state.
+        A Zixy `SignTerms` instance storing the stabilizers of the prepared state.
     """
     n = code.n_physical_qubits
 
-    @guppy.comptime
-    @no_type_check
-    def group_prep_func() -> array[array[qubit, n], n_blocks]:
-        ret = state_prep_func()
-        # Ensure the return type is iterable
-        if n_blocks == 1:
-            ret = (ret,)
+    # Traced overload resolution deep-copies LogicalBlock objects and recurses in Guppy.
+    # Workaround for https://github.com/Quantinuum/guppylang/issues/2597.
+    if n_blocks == 1:
 
-        return array(_to_array(r) for r in ret)
+        @guppy
+        @no_type_check
+        def group_prep_func() -> array[array[qubit, n], n_blocks]:
+            return array(_to_array(state_prep_func()))
+
+    else:
+
+        @guppy
+        @no_type_check
+        def group_prep_func() -> array[array[qubit, n], n_blocks]:
+            first, second = state_prep_func()
+            return array(_to_array(first), _to_array(second))
 
     return _compute_stabilisers(
         group_prep_func, n_groups=n_blocks, num_selene_qubits=num_selene_qubits
